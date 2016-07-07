@@ -13,6 +13,13 @@ class FeedsController < CollectibleController
   def show
     @active_menu = :feeds
     update_and_decorate
+    # This is when we update the feed. When first showing it, we fire off an update job (as appropriate)
+    # When it's time to produce results, we sync up the update process
+    if params[:content_mode] && (params[:content_mode] == 'results')
+      @feed.bkg_sync
+    elsif Time.now < (@feed.updated_at + 600) # Don't bother if the last update came in in the last ten minutes
+      @feed.bkg_requeue # Set a job running to update the feed, unless there's already one pending or processing
+    end
     smartrender
   end
 
@@ -20,13 +27,11 @@ class FeedsController < CollectibleController
     @active_menu = :feeds
     if update_and_decorate
       if params[:last_entry_id] # Only return entries that have been gathered since this one
-        @feed.bkg_sync
         since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?
             (fe.published_at+1.second) :
             Time.new(2000)
         list_entries = @feed.feed_entries.exists?(published_at: since..Time.now)
       else
-        @feed.bkg_requeue if @feed.updated_at < Time.now - 1.minute # Ensure there's an update pending
         list_entries = true
       end
       if resource_errors_to_flash @feed
@@ -59,7 +64,7 @@ class FeedsController < CollectibleController
   # POST /feeds.json
   def create
     if current_user
-      update_and_decorate Feed.where(url: params[:feed][:url]).first # Builds new one if doesn't already exist
+      update_and_decorate Feed.find_by(url: params[:feed][:url]) # Builds new one if doesn't already exist
       # URLs uniquely identify feeds, so we may have clashed with an existing one.
       # If so, simply adopt that one.
       if resource_errors_to_flash @feed
@@ -83,11 +88,13 @@ class FeedsController < CollectibleController
 
   def refresh
     update_and_decorate
-    @feed.bkg_sync
+    n_before = @feed.feed_entries_count
+    @feed.bkg_sync true
     if @feed.good?
       if resource_errors_to_flash(@feed)
         render :errors
       else
+        n_new = @feed.feed_entries_count - n_before
         flash[:popup] = labelled_quantity(n_new, 'New entry')+' found'
         render :refresh, locals: {followup: (n_new > 0)}
       end

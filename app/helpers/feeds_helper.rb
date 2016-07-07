@@ -26,18 +26,27 @@ module FeedsHelper
     link_to_submit 'Update', refresh_feed_path(feed), feed_wait_msg(feed, force).merge(:button_size => 'xs')
   end
 
-  def feed_update_trigger feed, force=false
-    feed.virgin!
-    feed.bkg_enqueue # Set a job running to update the feed, whether there's already one or not
-    last_entry = feed.feed_entries.order('published_at DESC').first
-    last_entry_id = last_entry ? last_entry.id : 0
-    link_to_submit 'Check for Updates', contents_feed_path(feed, last_entry_id: last_entry_id )
 =begin
-    querify_item 'Check for Updates',
-                 { last_entry_id: last_entry_id },
-                 feed_wait_msg(feed, force).merge(:button_size => 'xs')
-=end
+  def feed_update_trigger feed, force=false
+    if (Time.now - feed.updated_at) > 3600
+      feed.bkg_enqueue # Set a job running to update the feed
+      last_entry = feed.feed_entries.order('published_at DESC').first
+      last_entry_id = last_entry ? last_entry.id : 0
+      link_to_submit 'Check for Updates',
+                     contents_feed_path(feed, last_entry_id: last_entry_id ),
+                     class: 'label-button' # :button_size => 'xs'
+    else
+      content_tag :span, 'Feed is up to date...', class: 'label-button'
+    end
+=begin
+
+      querify_item 'Check for Updates',
+                   { last_entry_id: last_entry_id },
+                   feed_wait_msg(feed, force).merge(:button_size => 'xs')
+
+= end
   end
+=end
 
   def feed_entries_report feed
     case nmatches = feed.feed_entries.size
@@ -62,7 +71,7 @@ module FeedsHelper
   def feed_entries_status feed
     result = feed_entries_report feed
     if (feed.feed_entries.size > 0) && feed.last_post_date
-      time_report = (feed.last_post_date.today?) ? 'Today' : "#{time_ago_in_words feed.last_post_date} ago"
+      time_report = (feed.last_post_date.today?) ? 'today' : "#{time_ago_in_words feed.last_post_date} ago"
       result = result + 'latest '.html_safe if feed.feed_entries.size > 1
       result + "posted #{time_report}.".html_safe
     else

@@ -249,10 +249,12 @@ class Feed < ActiveRecord::Base
     # When the feed is updated successfully, re-queue it for one week hence
     feed = YAML::load(job.handler)
     logger.debug "Successfully updated feed ##{feed.id}"
-    if feed = Feed.find_by id: feed.id
+=begin
+    if feed = Feed.find_by(id: feed.id)
       feed.enqueue_update true
       logger.debug "Queued up feed ##{feed.id}"
     end
+=end
   end
 
 end
