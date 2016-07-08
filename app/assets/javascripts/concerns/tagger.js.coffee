@@ -43,6 +43,9 @@ RP.tagger.onload = (event) ->
 RP.tagger.select_type = (event) ->
 	RP.querify.propagate event.target, { tagtype: event.target.value }
 
+RP.tagger.select_batch = (event) ->
+	RP.querify.propagate event.target, { batch: event.target.value }
+
 ###
 RP.tagger.fix_width = ->
 	$('ul.token-input-list-facebook li.token-input-input-token-facebook input').css('width', '185px;')

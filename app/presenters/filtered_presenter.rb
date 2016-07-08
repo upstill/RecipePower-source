@@ -156,7 +156,7 @@ class FilteredPresenter
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype,
+  attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype, :batch,
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
               :org, # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
@@ -255,7 +255,7 @@ class FilteredPresenter
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
     (defined?(super) ? super : []) +
-        [ :tagtype, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ], [ :sort_direction, 'DESC' ] ]
+        [ :tagtype, :batch, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ], [ :sort_direction, 'DESC' ] ]
   end
 
   # Include a (tag) type selector in the query field?
@@ -273,7 +273,9 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
-    h.token_input_query opt_param.merge(tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector).compact
+    query_opts = opt_param.clone.merge tagtype: tagtype, batch: batch, querytags: querytags, type_selector: filter_type_selector
+    query_opts[:batch_select] = (1+ Tag.last.id/100) if response_service.admin_view?
+    h.token_input_query query_opts.compact
   end
 
   def stream_count force=false

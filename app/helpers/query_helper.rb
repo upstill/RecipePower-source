@@ -33,18 +33,24 @@ module QueryHelper
     qt += content_tag(:div,
                       content_tag(:span, '', class: "glyphicon glyphicon-#{options[:glyphicon]}"),
                       class: 'search-glyph'
-                     ) if options[:glyphicon]
+    ) if options[:glyphicon]
 
     if options[:type_selector]
-      content_tag :div,
-                  select_tag(:tagtype,
-                             options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
-                             :include_blank => false,
-                             :onchange => 'RP.tagger.select_type(event);'), # RP.submit.onselect( event );'),
-                  style: 'display:inline-block; vertical-align:bottom; margin:5px 10px'
+      type_select = 'Show tags of type&nbsp;'.html_safe +
+          select_tag(:tagtype,
+                     options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
+                     :include_blank => false,
+                     :onchange => 'RP.tagger.select_type(event);')  # RP.submit.onselect( event );') +
+      batch_select = options[:batch_select] ? ('  ...from batch #&nbsp;'.html_safe +
+          select_tag(:batch, options_for_select((1..(options[:batch_select].to_i)).to_a, options[:batch]),
+                     :include_blank => true,
+                     :onchange => 'RP.tagger.select_batch( event );')) : ''.html_safe
+
+      content_tag :div, type_select+batch_select,
+              style: 'display:inline-block; vertical-align:bottom; margin:5px 10px'
     else
       ''.html_safe
     end +
-      content_tag(:div, qt, class: 'token-input-elmt')
+        content_tag(:div, qt, class: 'token-input-elmt')
   end
 end

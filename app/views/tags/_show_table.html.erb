@@ -29,7 +29,7 @@
         <%= button_to 'Destroy', item,
                       data: { confirm: 'Are you sure?' },
                       method: :delete,
-                      class: 'btn btn-xs btn-danger' %>
+                      class: 'btn btn-xs btn-danger' if response_service.admin_view? %>
       </td>
   <% end %>
 </tr>
