@@ -5,7 +5,7 @@ module ReferencesHelper
   end
   
   # Show a reference, using as text the name of the related site
-  def present_reference reference
-      (site = Site.find_or_create reference.url) ? link_to(site.name, reference.url) : ""
+  def present_reference reference, ref_name=''
+      (site = Site.find_or_create reference.url) ? link_to("#{(ref_name + ' on ') if ref_name.present?}#{site.name}", reference.url) : ""
   end
 end

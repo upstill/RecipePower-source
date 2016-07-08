@@ -109,12 +109,14 @@ class TagPresenter < BasePresenter
           if(rel.id != tagserv.id)
             ts = TagServices.new(rel)
             refs = ts.references
-            refstrs = refs.collect{ |reference| present_reference(reference) }
+            refstrs = refs.collect{ |reference| h.present_reference(reference, ts.name) }
+=begin
             content_tag(:div,
                         tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
                         class: "container").html_safe unless refstrs.empty?
+=end
           end
-        }
+        }.compact.flatten
     end || []).compact
     content = safe_join(itemstrs, ', ') unless itemstrs.empty?
     [label, content]
