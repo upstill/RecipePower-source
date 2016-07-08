@@ -1063,7 +1063,7 @@ class TagsIndexCache < ResultsCache
   end
 
   def self.params_needed
-    super + [:tagtype]
+    super + [:tagtype, :batch]
   end
 
   # Tags don't go through Taggings, so we just use/count them directly
@@ -1073,7 +1073,13 @@ class TagsIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
+    return @itemscope if @itemscope
+    @itemscope = @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
+    if @batch
+      first = (@batch.to_i-1) * 100
+      @itemscope = @itemscope.order(id: :ASC).where("id >= #{first} and id < #{first+100}")
+    end
+    @itemscope
   end
 
 end

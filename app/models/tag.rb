@@ -57,7 +57,8 @@ class Tag < ActiveRecord::Base
 
   # Pre-check to determine whether a tag can absorb another tag
   def can_absorb other
-    other.normalized_name == self.normalized_name && ((other.tagtype==0) || (other.tagtype == self.tagtype))
+    return true if (referent_ids == other.referent_ids)
+    (other.normalized_name == self.normalized_name) && ((other.tagtype==0) || (other.tagtype == self.tagtype))
   end
 
   def self.strscopes matcher
@@ -178,7 +179,7 @@ class Tag < ActiveRecord::Base
   end
 
   def absorb other
-    return true if other.id == id
+    return other if other.id == id
     # Normal procedure:
     TaggingServices.change_tag(other.id, self.id)
     ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us

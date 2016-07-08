@@ -22,7 +22,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
     ownerstrs = owners.collect { |owner| owner.handle }
-    tag_info_section ownerstrs, label: "...private to "
+    tag_info_section ownerstrs, label: '...private to '
   end
   
   # Helper for showing the tags which are potentially redundant wrt. this tag:
@@ -30,8 +30,8 @@ module TagsHelper
   def summarize_tag_similars args={} 
     @tagserv ||= TagServices.new(@tag)
     others = Tag.where(normalized_name: @tagserv.normalized_name).to_a.delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
-    label= args[:label] || "Similar tags: "
-    joiner = args[:joiner] || " " #  ", "
+    label= args[:label] || 'Similar tags: '
+    joiner = args[:joiner] || ' ' #  ', '
     ("<span>#{label}"+
         others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
     "</span>").html_safe
@@ -96,22 +96,27 @@ module TagsHelper
       }.compact.join(', ').html_safe
   end
 
-  def summarize_tag_synonyms label="Synonyms: "
+  def summarize_tag_synonyms label='Synonyms: ', options={}
+    if label.is_a?(Hash)
+      label, options = 'Synonyms: ', label
+    end
     @tagserv ||= TagServices.new(@tag)
     # The synonyms are the other expressions of this tag's referents
     return if (syns = @tagserv.synonyms).empty?
-    synstrs = syns.collect { |tag| tag_homelink tag }
-    tag_info_section synstrs, label: label, joinstr: "<br>"
+    synstrs = syns.collect { |syn| # tag_homelink syn
+      summarize_tag_similar syn, (options[:absorb_btn] && @tagserv.can_absorb(syn))
+    }.join('<br>').html_safe
+    # tag_info_section synstrs, label: label, joinstr: '<br>'
   end
 
   def summarize_tag_reference_count
     @tagserv ||= TagServices.new(@tag)
-    ((ct = @tagserv.reference_count) > 0) ? (pluralize(ct, "Reference").sub(/\s/, "&nbsp;")+"<br>").html_safe : ""
+    ((ct = @tagserv.reference_count) > 0) ? (pluralize(ct, 'Reference').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
 
   def summarize_tag_parents_count
     @tagserv ||= TagServices.new(@tag)
-    ((ct = @tagserv.parents.count) > 0) ? (pluralize(ct, "Parent").sub(/\s/, "&nbsp;")+"<br>").html_safe : ""
+    ((ct = @tagserv.parents.count) > 0) ? (pluralize(ct, 'Parent').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
 
   def summarize_tag_children_count
@@ -242,12 +247,17 @@ BLOCK_END
     end
   end
   
-  def summarize_tag_similar tag, absorb_btn = false
-      tagidstr = tag.id.to_s
+  def summarize_tag_similar other, absorb_btn = false
       content_tag :span,
-        tag_homelink(tag) +
-        (absorb_btn ? link_to_submit("Absorb", "tags/#{tag.id.to_s}/absorb?victim=#{tagidstr}", class: "absorb_button", id: "absorb_button_#{tagidstr}") : ""),
-        class: "absorb_"+tagidstr
+        tag_homelink(other) + "(#{other.typename})".html_safe +
+        (absorb_btn ? button_to_submit('Absorb',
+                                       "tags/#{@tag.id}/absorb?victim=#{other.id}",
+                                       :xs,
+                                       mode: :modal,
+                                       with_form: true,
+                                       class: 'absorb_button',
+                                       id: "absorb_button_#{other.id}") : ''),
+        class: "absorb_#{other.id}"
   end
 
   def tag_filter_header locals={}

@@ -10,28 +10,26 @@
                             valueparam: 'typenum',
                             querydata: {tagid: item.id}} %></td>
   <td>
-    <%= summarize_tag_site_count %>
-    <%= summarize_tag_recipe_count %>
-    <%= summarize_tag_owner_count %>
-    <%= summarize_tag_parents_count %>
-    <%= summarize_tag_children_count %>
-    <%= summarize_tag_reference_count %>
+    <%= [ summarize_tag_site_count, summarize_tag_recipe_count, summarize_tag_owner_count,
+          summarize_tag_parents_count, summarize_tag_children_count, summarize_tag_reference_count ].compact.join('<br>').html_safe %>
   </td>
   <td>
     <%= @tagserv.isGlobal ? 'Y' : 'N' %>
   </td>
   <td>
-    <%= summarize_tag_similars label: "", absorb_btn: true, joiner: "<br>" %>
+    <%= summarize_tag_similars label: '', absorb_btn: true, joiner: '<br>' %>
   </td>
   <td>
-    <%= summarize_tag_synonyms "" %>
+    <%= summarize_tag_synonyms '', absorb_btn: true %>
   </td>
   <% if permitted_to? :edit, item %>
       <td>
-        <%= link_to_submit 'Edit', edit_tag_path(item), mode: "modal" %>
-      </td>
-      <td>
-        <%= link_to 'Destroy', item, data: { confirm: 'Are you sure?'}, method: :delete %>
+        <%= link_to_submit 'Edit', edit_tag_path(item), mode: 'modal' %>
+        <br>
+        <%= button_to 'Destroy', item,
+                      data: { confirm: 'Are you sure?' },
+                      method: :delete,
+                      class: 'btn btn-xs btn-danger' %>
       </td>
   <% end %>
 </tr>

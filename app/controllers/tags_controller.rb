@@ -153,10 +153,10 @@ class TagsController < ApplicationController
       @tag = survivor
       @jsondata = {
           deletions: [
-              "#tagrow_#{victimidstr}", "#tagrow_#{victimidstr}HR"
+              "tr#tag_#{victimidstr}", "tr#tagrow_#{victimidstr}HR"
           ],
           replacements: [
-             [ "#tagrow_#{@tag.id.to_s}", with_format("html") { render_to_string partial: 'tags/show_table_item', locals: { item: @tag } } ]
+             [ "tr#tag_#{@tag.id.to_s}", with_format('html') { render_to_string partial: 'tags/show_table', locals: { item: @tag } } ]
           ]
       }
     else
@@ -202,18 +202,25 @@ class TagsController < ApplicationController
   def update
     @tag = Tag.find(params[:id])
     respond_to do |format|
-puts "Tag controller converting "+params[:tag][:tagtype].to_s
       params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
-puts "...to "+params[:tag][:tagtype].to_s
       if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
         @tag = @tag.disappear
       end
-      if !@tag.errors.any?
-        format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
-        format.xml  { head :ok }
-      else
-        format.html { render :action => "edit" }
+      if @tag.errors.any?
+        format.html { render :action => 'edit' }
         format.xml  { render :xml => @tag.errors, :status => :unprocessable_entity }
+      else
+        format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
+        format.json {
+          render :json => {
+                     popup: 'Tag successfully updated',
+                     done: true,
+                     replacements: [
+                         [ "tr#tag_#{@tag.id.to_s}", with_format('html') { render_to_string partial: 'tags/show_table', locals: { item: @tag } } ]
+                     ]
+                 }
+        }
+        format.xml  { head :ok }
       end
     end
   end
