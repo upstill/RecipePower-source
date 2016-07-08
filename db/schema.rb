@@ -136,6 +136,12 @@ ActiveRecord::Schema.define(version: 20160624225215) do
     t.datetime "updated_at",              null: false
   end
 
+  create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
+    t.text     "response"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "lists", force: :cascade do |t|
     t.integer  "owner_id"
     t.integer  "name_tag_id"

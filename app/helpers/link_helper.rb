@@ -129,7 +129,7 @@ module LinkHelper
         except(:action, :truncate).
         compact
 
-    title = decorator.title
+    title = options[:title] || decorator.title
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end

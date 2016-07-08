@@ -8,7 +8,7 @@ common: &common
 
 development:
   adapter: postgresql
-  database: cookmarks_development # dabpmrobtjc0ei
+  database: dabpmrobtjc0ei
 
 staging:
   adapter: postgresql

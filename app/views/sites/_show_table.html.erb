@@ -8,7 +8,7 @@
       <%= presenter.card_homelink class: 'title-link' %>
       <%= collectible_collect_button decorator, 'lg'  %>
       <%# collectible_destroy_button decorator, 'xs', title: 'The Nuclear Option', style: 'margin-left: 3.8em;' %>
-      <br><%= site.description.html_safe %>
+      <br><%= site.description.html_safe if site.description.present? %>
     </td>
     <td>
       <b>Home</b>: <%= site.home %><br>

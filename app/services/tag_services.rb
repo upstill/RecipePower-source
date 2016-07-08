@@ -9,7 +9,11 @@ class TagServices
     self.tag = tag
     @user = user || User.super_id
   end
-# -----------------------------------------------    
+# -----------------------------------------------
+  def sites
+    tag.typesym == :Source ? Site.where(referent_id: tag.referent_ids) : Site.where(id: tag.site_ids)
+  end
+# -----------------------------------------------
   def recipe_ids with_synonyms=false
     with_synonyms ?
       Tag.where(id: ([id] + synonym_ids) ).collect { |tag| tag.recipe_ids }.flatten.uniq :

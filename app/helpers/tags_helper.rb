@@ -116,20 +116,38 @@ module TagsHelper
 
   def summarize_tag_children_count
     @tagserv ||= TagServices.new(@tag)
-    ((ct = @tagserv.children.count) > 0) ? (pluralize(ct, "Child").sub(/\s/, "&nbsp;")+"<br>").html_safe : ""
+    ((ct = @tagserv.children.count) > 0) ? (pluralize(ct, 'Child').sub(/\s/, '&nbsp;')+'<br>').html_safe : ""
   end
   
   def summarize_tag_recipe_count
     @tagserv ||= TagServices.new(@tag)
     count = @tagserv.recipe_ids(true).size
-    return "" if count == 0
-    (pluralize(count, "Recipe").sub(/\s/, " ")+"<br>").html_safe
+    case count
+      when 0
+      when 1
+        recipe = Recipe.find(@tagserv.recipe_ids.first)
+        homelink recipe.decorate, title: '1 Recipe'
+      else
+        (pluralize(count, 'Recipe').sub(/\s/, ' ')+'<br>').html_safe
+    end
+  end
+
+  def summarize_tag_site_count
+    @tagserv ||= TagServices.new(@tag)
+    sites = @tagserv.sites
+    case sites.count
+      when 0
+      when 1
+        homelink sites.first.decorate, title: '1 Site'
+      else
+        (pluralize(sites.count, 'Site').sub(/\s/, ' ')+'<br>').html_safe
+    end
   end
       
   def summarize_tag_owner_count
     @tagserv ||= TagServices.new(@tag)
       ct = @tagserv.user_ids.size
-      (ct > 0) ? (pluralize(ct, "Owner").sub(/\s/, "&nbsp;")+"<br>").html_safe : ""
+      (ct > 0) ? (pluralize(ct, 'Owner').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
 
 =begin
