@@ -16,7 +16,7 @@ end
 class Referent < ActiveRecord::Base
   include Picable
 
-  picable :picurl, :picture
+  # picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
   # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
   has_many :child_relations, :foreign_key => 'parent_id', :dependent => :destroy, :class_name => 'ReferentRelation'
@@ -57,6 +57,8 @@ class Referent < ActiveRecord::Base
   @@referment_associations.each { |assoc|
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
+  has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
+  has_many :definition_refs, -> { where type: 'DefinitionReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
 
 =begin
     def self.referrable klass

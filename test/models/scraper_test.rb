@@ -25,6 +25,7 @@ class ScraperTest < ActiveSupport::TestCase
     User.delete_all
     UserRelation.delete_all
     Vote.delete_all
+    Delayed::Job.delete_all
     User.super_id = (User.find(User.super_id) rescue User.create(email: 'mesuper@bogus.com')).id
   end
 
@@ -320,13 +321,17 @@ class ScraperTest < ActiveSupport::TestCase
     assert_nil dish_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'langoustine')
 
     assert ingred_tag = Tag.find_by(tagtype: Tag.typenum(:Ingredient), name: 'langoustine')
+    ingred_svcs = TagServices.new ingred_tag
     assert_equal 15, ingred_tag.recipes.count, "Recipe count for ingredient '#{ingred_tag.name}'."
 
+    assert_equal 1, ImageReference.count # Should have a picture
+    assert ingred_svcs.images.present?
+
     assert seafood_tag = Tag.find_by(tagtype: Tag.typenum(:Ingredient), name: 'seafood')
-    assert TagServices.new(ingred_tag).parent_ids.include?(seafood_tag.id)
+    assert ingred_svcs.parent_ids.include?(seafood_tag.id)
 
     assert shellfish_tag = Tag.find_by(tagtype: Tag.typenum(:Ingredient), name: 'shellfish')
-    assert TagServices.new(ingred_tag).parent_ids.include?(shellfish_tag.id)
+    assert ingred_svcs.parent_ids.include?(shellfish_tag.id)
 
     assert_equal 1, Scraper.where(what: 'bbc_keyword_recipes_page').count
     assert_equal 0, Scraper.where(what: 'bbc_dish_recipes_page').count

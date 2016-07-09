@@ -81,7 +81,7 @@ class TagServices
   def make_parent_of child_tag
     Referent.express(tag).make_parent_of Referent.express(child_tag)
   end
-
+# -----------------------------------------------
   def suggests target_tag
     Referent.express(tag).suggests Referent.express(target_tag)
   end
@@ -93,7 +93,17 @@ class TagServices
   def child_referents
     tag.referents.collect { |referent| referent.children.to_a }.flatten.uniq
   end
+# -----------------------------------------------
+  # Look up all the images attached to all the referents of the tag
+  def images
+    tag.referents.collect { |referent| referent.image_refs.to_a }.flatten
+  end
 
+  def has_image image_ref
+    tag.referents.each { |referent|
+      referent.image_refs << image_ref unless referent.image_refs.include?(image_ref)
+    }
+  end
 # Given a name (or the tag thereof), ensure the existence of:
 # -- a tag of the tagtype
 # -- a referent "defining" that kind of entity
@@ -150,12 +160,7 @@ class TagServices
     end
     if image_link
       irf = Reference.assert image_link, tag, :Image
-      tag.referents.each { |rft|
-        unless rft.picture
-          rft.picture = irf
-          rft.save
-        end
-      }
+      TagServices.new(tag).has_image irf
     end
     tag
   end

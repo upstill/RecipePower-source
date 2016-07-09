@@ -78,14 +78,23 @@ module Backgroundable
   # We check for the processing flag b/c the job may have been run before (ie., by bkg_sync)
   def bkg_execute with_save=true, &block
     if processing?
-      begin
+      # In development, let errors fly
+      if Rails.env.development?
         if block.call
           good!
         else
           bad!
         end
-      rescue Exception => e
-        error nil, e
+      else
+        begin
+          if block.call
+            good!
+          else
+            bad!
+          end
+        rescue Exception => e
+          error nil, e
+        end
       end
     end
     save if with_save

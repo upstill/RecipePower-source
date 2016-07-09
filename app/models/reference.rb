@@ -403,7 +403,9 @@ class ImageReference < Reference
   has_many :recipes, :foreign_key => :picture_id, :dependent => :nullify
   has_many :sites, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
-  has_many :referents, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :referments, :as => :referee
+  has_many :referents, :through => :referments
+  # has_many :referments, :foreign_key => :referee_id, :dependent => :nullify
 
 =begin
   # Return the set of objects referring to this image

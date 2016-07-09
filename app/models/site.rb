@@ -87,7 +87,7 @@ public
       # Of all the urls in the extant references, determine the longest subpath of the target
       target_uri.path = existing_urls.inject('') { |memo, ref_url|
         ref_path = URI(ref_url).path
-        memo = ref_path if ((ref_path.length > memo.length) && target_path.match(/^#{ref_path}/))
+        (ref_path.length > memo.length) && target_path.match(/^#{ref_path}/) ? ref_path : memo
       } unless in_full
       # Add the new references to those of the site, eliminating redundant ones
       new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).to_a.keep_if { |candidate|

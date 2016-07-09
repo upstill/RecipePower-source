@@ -81,9 +81,9 @@ module TagsHelper
 
   # Return HTML for the links related to a given tag (i.e., the links for 
   # all tags related to this one)
-  def summarize_tag_relations label = "See Also"
+  def summarize_tag_relations label = 'See Also'
     @tagserv ||= TagServices.new(@tag)
-    content_tag( :h3, label)+
+    links =
       Referent.related(@tagserv, false, true).collect { |rel|
         if(rel.id != @tagserv.id)  
           ts = TagServices.new(rel)
@@ -93,7 +93,8 @@ module TagsHelper
                       tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
                       class: "container").html_safe unless refstrs.empty?
         end
-      }.compact.join(', ').html_safe
+      }.compact.join(' | ')
+    (content_tag(:h3, label)+links.html_safe) if links
   end
 
   def summarize_tag_synonyms label='Synonyms: ', options={}
