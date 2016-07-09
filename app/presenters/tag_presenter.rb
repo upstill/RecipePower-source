@@ -110,16 +110,22 @@ class TagPresenter < BasePresenter
             ts = TagServices.new(rel)
             refs = ts.references
             refstrs = refs.collect{ |reference| h.present_reference(reference, ts.name) }
-=begin
-            content_tag(:div,
-                        tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
-                        class: "container").html_safe unless refstrs.empty?
-=end
           end
         }.compact.flatten
     end || []).compact
     content = safe_join(itemstrs, ', ') unless itemstrs.empty?
     [label, content]
+  end
+
+  # Does this presenter have an avatar to present on cards, etc?
+  def card_avatar?
+    tagserv.images.present?
+  end
+
+  def card_avatar options={}
+    if image_ref = tagserv.images.first
+      image_with_error_recovery image_ref.imgdata || image_ref.url
+    end
   end
 
   def show_or_edit which, val
