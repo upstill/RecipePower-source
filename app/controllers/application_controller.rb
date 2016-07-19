@@ -72,7 +72,7 @@ class ApplicationController < ActionController::Base
       modelname = response_service.controller_model_name # params[:controller].sub(/_controller$/, '').singularize
       objclass = response_service.controller_model_class
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
-      attribute_params = params[modelname.to_sym]
+      attribute_params = params.require modelname
     end
     entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
     if entity.errors.empty? && # No probs. so far

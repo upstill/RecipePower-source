@@ -19,7 +19,7 @@ module RP
       #{config.root}/app/controllers/cmods
     )
     # require class extensions right now
-    Dir[Rails.root.join('app', 'extensions', "*.rb")].each { |l| require l }
+    Dir[Rails.root.join('app', 'extensions', '*.rb')].each { |l| require l }
 
     # Only load the plugins named here, in the order given (default is alphabetical).
     # :all can be used as a placeholder for all plugins not explicitly named.
@@ -38,10 +38,15 @@ module RP
     config.i18n.enforce_available_locales = false
 
     # Configure the default encoding used in templates for Ruby 1.9.
-    config.encoding = "utf-8"
+    config.encoding = 'utf-8'
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
+
+    logger           = ActiveSupport::Logger.new(STDOUT)
+    logger.formatter = config.log_formatter
+    config.log_tags  = [:subdomain, :uuid]
+    config.logger    = ActiveSupport::TaggedLogging.new(logger)
 
     # Enable the asset pipeline (on by default)
     # config.assets.enabled = true

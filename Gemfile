@@ -42,8 +42,9 @@ gem 'ruby_parser'
 gem "rmagick", "~> 2.13.2"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' # 
-gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
-gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+gem 'delayed_job_active_record'
+# gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
+# gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 gem 'daemons'
 gem 'hirefire-resource'
 # gem 'debugger', :group => [:test, :development]
