@@ -149,13 +149,13 @@ class Scraper < ActiveRecord::Base
           when Mechanize::Page::Link
             link_or_path.href
           when Nokogiri::XML::Element
-            link_or_path.attribute attr.to_s
+            link_or_path.attribute(attr.to_s).to_s
           when Nokogiri::XML::Attr
             link_or_path.to_s
           when respond_to?(attr.to_sym)
             link_or_path.send attr.to_sym
         end
-    path.present? ? URI.join(url, path).to_s : url
+    path.present? ? URI.decode(URI.join(url, URI.encode(path)).to_s) : url
   end
 
   # Get the page data via Mechanize
@@ -204,7 +204,7 @@ class Www_bbc_co_uk_Scraper < Scraper
   # Predict what handler will scrape the page
   def self.handler url_or_uri
     uri = url_or_uri.is_a?(String) ? (normalized_uri CGI.unescape(url_or_uri)) : url_or_uri
-    case [uri.path, uri.query].compact.join('?')
+    case URI.decode [uri.path, uri.query].compact.join('?')
       when /\A\/food\z/
         :bbc_food_page
       when /\A\/food\/chefs\/by\/letters\//
@@ -278,6 +278,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     propose_recipe recipe_link, extractions.compact
   end
 
+  # Scrape the definition of a tag, and the link to the tag's page
   def tag_item li, tagtype=nil
     entity_page = absolutize(entity_link = li.search('a').first)
     if img_link = li.search('img').first

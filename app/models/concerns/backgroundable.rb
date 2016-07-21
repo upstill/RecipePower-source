@@ -79,7 +79,7 @@ module Backgroundable
   def bkg_execute with_save=true, &block
     if processing?
       # In development, let errors fly
-      if Rails.env.development?
+      if Rails.env.development? || Rails.env.test?
         if block.call
           good!
         else

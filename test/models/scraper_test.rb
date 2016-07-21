@@ -128,13 +128,7 @@ class ScraperTest < ActiveSupport::TestCase
     }
     searchable_types.each { |key, value|
       search_class = search_class_for_type key
-      url = "http://www.bbc.co.uk/food/recipes/search?#{search_class.pluralize}[]=#{value}&page=2"
-      scraper = Scraper.assert url, true
-      assert_equal scraper.handler, "bbc_#{search_class}_recipes_page".to_sym
-      scraper.save
-      scraper.bkg_sync(true)
 
-      check_recipes_result key, true
       url = "http://www.bbc.co.uk/food/recipes/search?#{search_class.pluralize}[]=#{value}"
       scraper = Scraper.assert url, true
       assert_equal scraper.handler, "bbc_#{search_class}_recipes_page".to_sym
@@ -142,13 +136,21 @@ class ScraperTest < ActiveSupport::TestCase
       scraper.bkg_sync(true)
 
       check_recipes_result key, false
+
+      url = "http://www.bbc.co.uk/food/recipes/search?#{search_class.pluralize}[]=#{value}&page=2"
+      scraper = Scraper.assert url, true
+      assert_equal scraper.handler, "bbc_#{search_class}_recipes_page".to_sym
+      scraper.save
+      scraper.bkg_sync(true)
+
+      check_recipes_result key, true
       setup
     }
   end
 
   def check_recipes_result rp_type, notags=false
     assert (Recipe.count > 10), "Only #{Recipe.count} recipes found on #{rp_type} page"
-    assert Scraper.where('url LIKE ?', '%page=%').exists?, "No link to second page of results"
+    assert Scraper.where('url LIKE ?', '%page=%').exists?, "No scraper for second page of results"
 
     ([ :Dish, :Course, :Genre ] - [ rp_type ]).each { |typesym|
       if notags
@@ -165,6 +167,8 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal scraper.handler, :bbc_programme_recipes_page
     scraper.save
     scraper.bkg_sync(true)
+    assert_equal 1, DefinitionReference.where('url LIKE ?', '%b04gtx26%').count # Should only reference the first page
+    assert_equal 1, DefinitionReference.where(link_text: 'Recipes from A Taste of Britain').count
     check_recipes_result :Source
   end
 
@@ -568,6 +572,9 @@ class ScraperTest < ActiveSupport::TestCase
     dr = DefinitionReference.first
     assert_equal url, dr.url
 
+    assert DefinitionReference.where(link_text: "Antonio Carluccio's homepage").exists?, "Home page link missing"
+    assert DefinitionReference.where(link_text: "Carluccio's").exists?, "Carluccio's link missing"
+
     Rails.logger.info 'Tags gleaned: ' + Tag.all.map(&:name).join(', ')
     assert_equal 6, Tag.count
     ats = Tag.where tagtype: Tag.typenum(:Author)
@@ -907,7 +914,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 23, occ_ref.dish_referents.count
     assert_equal 1, Scraper.where(what: 'bbc_occasion_recipes_page').count
     assert_equal 45, Scraper.where(what: 'bbc_recipe_home_page').count
-    assert_equal 23, Scraper.where(what: 'bbc_food_home_page').count
+    assert_equal 40, Scraper.where(what: 'bbc_food_home_page').count # Dishes plus Ingredients (both go to /food/<name>)
     assert_equal 17, Scraper.where(what: 'bbc_collection_home_page').count
 
     assert_equal 17, show_tags(:List).count

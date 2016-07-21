@@ -157,7 +157,7 @@ class Reference < ActiveRecord::Base
 
   # Assert a reference to the given URL, linking back to a referent
   def self.assert(uri, tag_or_referent, type=:Definition )
-    refs = "#{type}Reference".constantize.find_or_initialize uri, link_text: tag_or_referent.name
+    refs = "#{type}Reference".constantize.find_or_initialize uri
     refs.each { |me| me.assert tag_or_referent, type } if refs.first.errors.empty?
     refs.first
   end
