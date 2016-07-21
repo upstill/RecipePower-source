@@ -249,6 +249,11 @@ class Reference < ActiveRecord::Base
     end
   end
 
+  # Extract the affiliated object, according to the type of reference
+  def affiliate
+    self.affiliate_class && affiliate_id && self.affiliate_class.find(affiliate_id)
+  end
+
   # Point the references affiliated with one entity to another, presumably b/c the old one is going away.
   # It is an error if they aren't of the same type
   def self.redirect old_affiliate, new_affiliate
@@ -256,11 +261,6 @@ class Reference < ActiveRecord::Base
   end
 
   protected
-
-  # Extract the affiliated object, according to the type of reference
-  def affiliate
-    self.affiliate_class && affiliate_id && self.affiliate_class.find(affiliate_id)
-  end
 
   # What's the class of the associated affiliate?
   def affiliate_class

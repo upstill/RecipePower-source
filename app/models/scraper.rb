@@ -303,6 +303,7 @@ class Www_bbc_co_uk_Scraper < Scraper
               :Occasion
           end
     end
+    # These are home pages, so they'll just be given the name of the tag
     TagServices.define(tagname,
                        tagtype: Tag.typenum(tagtype),
                        page_link: entity_page,
@@ -390,7 +391,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     end
     headered_list_items 'div.links-module h2', 'ul' do |hdr_title, li|
       if hdr_title.match( 'Elsewhere') && (link = li.search('a').first)
-        TagServices.define author_tag, page_link: absolutize(link)
+        TagServices.define author_tag, page_link: absolutize(link), link_text: link.content
       end
     end
   end

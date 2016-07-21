@@ -99,7 +99,7 @@ class TagPresenter < BasePresenter
       when :tag_references
         label = 'references'
         # content = h.summarize_tag_references
-        tagserv.references.collect { |reference| h.present_reference(reference, reference.link_text) }
+        tagserv.references.collect { |reference| h.present_reference(reference) }
       when :tag_relations
         label = 'See Also'
         # content = h.summarize_tag_relations
@@ -107,7 +107,7 @@ class TagPresenter < BasePresenter
           if(rel.id != tagserv.id)
             ts = TagServices.new(rel)
             refs = ts.references
-            refstrs = refs.collect{ |reference| h.present_reference(reference, ts.name) }
+            refs.collect{ |reference| h.present_reference(reference) }
           end
         }.compact.flatten
     end || []).compact

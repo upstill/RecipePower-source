@@ -5,7 +5,14 @@ module ReferencesHelper
   end
   
   # Show a reference, using as text the name of the related site
-  def present_reference reference, ref_name=''
-      (site = Site.find_or_create reference.url) ? link_to("#{(ref_name + ' on ') if ref_name.present?}#{site.name}", reference.url) : ""
+  def present_reference reference
+    ref_link = (ref_name = reference.decorate.name).present? ?
+        link_to(ref_name, reference.url, :target => '_blank') :
+        "".html_safe
+    if site = SiteReference.lookup_site(reference.url)
+      ref_link << ' on '.html_safe unless ref_link.blank?
+      ref_link << link_to(site.name, site.home, :target => '_blank')
+    end
+    ref_link
   end
 end
