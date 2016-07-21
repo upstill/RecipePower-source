@@ -42,9 +42,7 @@ class TagPresenter < BasePresenter
     itemstrs =
     (case which
        when :description
-         tn = decorator.typename.capitalize
-         article = %w{ A E I O U }.include?(tn[0]) ? 'An' : 'A'
-         return ['', "#{article} #{decorator.typename} tag"]
+         return ['', "#{decorator.typename.match(/^[aeiou]/i) ? 'An' : 'A'} #{decorator.typename} tag"]
        when :tag_synonyms
         label = 'synonyms'
         tagserv.synonyms.collect { |tag| h.tag_homelink tag }
@@ -101,7 +99,7 @@ class TagPresenter < BasePresenter
       when :tag_references
         label = 'references'
         # content = h.summarize_tag_references
-        tagserv.references.collect { |reference| h.present_reference(reference) }
+        tagserv.references.collect { |reference| h.present_reference(reference, reference.link_text) }
       when :tag_relations
         label = 'See Also'
         # content = h.summarize_tag_relations

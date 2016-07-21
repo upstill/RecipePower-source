@@ -7,6 +7,18 @@ en:
   recipe_status_medium: "Keepers"
   recipe_status_low: "To Try"
   recipe_status_default: "All Recipes"
+  definition_reference:
+    label:
+      tag:
+        Author: "%{entity_type} by %{tagname}"
+        Ingredient: "%{entity_type} using %{tagname}"
+        Process: "%{entity_type} involving %{tagname}"
+        Source: "%{entity_type} from %{tagname}"
+        Occasion: "%{tagname} %{entity_type}"
+        Genre: "%{tagname} %{entity_type}"
+        Diet: "%{tagname} %{entity_type}"
+        Dish: "%{tagname} %{entity_type}"
+        Course: "%{tagname} %{entity_type}"
   errors: &errors
     format: ! '%{attribute} %{message}'
     messages:

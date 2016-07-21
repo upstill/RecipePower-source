@@ -395,21 +395,28 @@ class Www_bbc_co_uk_Scraper < Scraper
     end
   end
 
+  def tidy_name name, typesym
+    name.downcase! if [:Dish, :Course, :Diet].include?(typesym)
+    name.strip.sub /\b\s*recipes$/, ''
+  end
+
+  def tag_def_label result_type, typesym, tagname
+    label = ApplicationController.helpers.t("definition_reference.label.tag.#{typesym}", entity_type: result_type.downcase.pluralize, tagname: tagname)
+    label[0] = label[0].upcase
+    label
+  end
+
   # How to process a recipe page due to a search on a tag (after determining the type of tag)
   def bbc_tag_recipes_page tag_or_tagtype
     tag = tag_or_tagtype.is_a?(Tag) ? tag_or_tagtype :
         if taglink = page.search('div.current-filters li a').first ||
             page.search('div#column-1 h2').first
-          tagname = taglink.content
           typesym = Tag.typesym tag_or_tagtype
-          tagname.downcase! if [:Dish, :Course, :Diet].include?(typesym)
-          case typesym
-            when :Occasion
-              tagname.sub! /\brecipes\b.*/, ''
-          end
-          TagServices.define(tagname.strip,
+          tagname = tidy_name taglink.content, typesym
+          TagServices.define(tidy_name(tagname, typesym),
                              :tagtype => typesym,
-                             :page_link => absolutize(taglink))
+                             :page_link => url,
+                             :link_text => tag_def_label('recipes', typesym, tagname))
         end
     extractions ={tag.typename => (tag.name if tag)}
     page.search('div#article-list li').each { |li|
@@ -523,56 +530,6 @@ class Www_bbc_co_uk_Scraper < Scraper
       define_linked_tag header_name, li
     end
   end
-
-=begin
-
-  def bbc_chef_recipes_page
-    # The id of the chef is embedded in the query
-    unless m = url.match(/chefs(\[[^\]]*\]=|\/)([^&]*)/)
-      errors.add :url, 'doesn\'t match the format of a chefs page'
-      return
-    end
-
-    chef_id = m[2].to_s
-
-    atag =
-        if authlink = page.search('div#queryBox a').first
-          TagServices.define(authlink.content,
-                             :tagtype => :Author,
-                             :page_link => absolutize(authlink))
-        end
-    extractions = { 'Author' => (atag.name if atag) }
-    page.search('div#article-list li').each { |li|
-      recipe_item li, extractions
-    }
-    launch page.links.detect { |link| link.rel?('next') }
-
-    accordions extractions do |header_name, li, extractions|
-      if link = li.search('a').first
-        tagtype =
-            case header_name
-              when 'dishes'
-                :Dish
-              when 'courses'
-                :Course
-              when 'occasions'
-                :Occasion
-              when 'chefs'
-                :Author
-              when 'programmes'
-                :Source
-              when 'special diets'
-                :Diet
-              when 'cuisines'
-                :Genre
-            end
-        tagname = li.text.sub(/^\s*Show\s*/,'').sub(/\s*\(\d*\).*$/,'')
-        tagname.downcase! if tagtype == :Dish
-        TagServices.define tagname, :tagtype => Tag.typenum(tagtype) if tagtype
-      end
-    end
-  end
-=end
 
   def bbc_recipe_home_page
     # e.g., http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080

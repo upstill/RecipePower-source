@@ -368,7 +368,7 @@ class Referent < ActiveRecord::Base
       #   -- If mode is "over", the parent_id gives our new parent
       #   -- If mode is "before" or "after", we attach to that node's parent
       parent = self.class.find actuals[:parent_id].to_i
-      parent = parent.parent if actuals[:mode] != "over"
+      parent = parent.parent if actuals[:mode] != 'over'
       if parent
         if parent.id != self.parent_id # Avoiding redundant move
           parent.add_child self

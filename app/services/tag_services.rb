@@ -121,7 +121,7 @@ class TagServices
         if page_link
           # Asserting the reference ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
           reference = Reference.assert page_link, tag, :Definition
-          if options[:link_text].present?
+          if options[:link_text].present? # Force the link text to something else
             reference.link_text = options[:link_text]
             reference.save
           end

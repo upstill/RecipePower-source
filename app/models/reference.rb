@@ -143,12 +143,12 @@ class Reference < ActiveRecord::Base
           # NB: It's true that we could simply use the redirected URL for looking up a reference, but that would require
           #  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and
           #  the Reference class remembers the mapping.
-          refs = Reference.lookup_by_url(params[:type], redirected).to_a
+           refs = Reference.lookup_by_url(params[:type], redirected).to_a
           # refs = Reference.where(type: params[:type], url: redirected).to_a
-          refs = [ Reference.new(type: params[:type], url: redirected) ] if refs.empty?
+          refs = [ Reference.new(params.merge url: redirected) ] if refs.empty?
           (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
           # Now we create a new reference, aliased to that of the canonical reference by making their affiliate id's the same
-          refs << Reference.new(type: params[:type], :url => normalized, affiliate_id: canonical.affiliate_id ) if normalized != redirected
+          refs << Reference.new(params.merge :url => normalized, affiliate_id: canonical.affiliate_id ) if normalized != redirected
         end
       end
     end
@@ -157,7 +157,7 @@ class Reference < ActiveRecord::Base
 
   # Assert a reference to the given URL, linking back to a referent
   def self.assert(uri, tag_or_referent, type=:Definition )
-    refs = "#{type}Reference".constantize.find_or_initialize uri
+    refs = "#{type}Reference".constantize.find_or_initialize uri, link_text: tag_or_referent.name
     refs.each { |me| me.assert tag_or_referent, type } if refs.first.errors.empty?
     refs.first
   end
