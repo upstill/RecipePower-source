@@ -14,7 +14,7 @@ class Tag < ActiveRecord::Base
            Occasion: ['Occasion', 8],
            Pantrysection: ['Pantry Section', 9],
            Storesection: ['Store Section', 10],
-           Diet: ['Special Diet', 11],
+           Diet: ['Diet', 11],
            Tool: ['Tool', 12],
            Nutrient: ['Nutrient', 13],
            Culinaryterm: ['Culinary Term', 14],

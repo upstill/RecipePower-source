@@ -76,16 +76,20 @@ end
 
 # Fix errant characters without re-escaping '%'
 def sanitize_url url
+  URI.encode(url).gsub(/\%23/, '#' ).gsub(/\%25/, '%' )
+
+=begin
   url.strip.
       gsub(/\{/, '%7B').
       gsub(/\}/, '%7D').
       gsub(/ /, '%20').
       gsub(/\%23/, '#' )
+=end
 end
 
 # Return nil if anything is amiss, including nil or empty url
 def normalized_uri url
-  if url.present? && (uri = safe_parse(sanitize_url url))
+  if url.present? && (sp = sanitize_url url) && (uri = safe_parse(sp))
     uri.normalize!
     uri
   end
