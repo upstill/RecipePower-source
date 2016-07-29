@@ -33,8 +33,13 @@ class RecipeDecorator < CollectibleDecorator
     gleaning.extract1 'URI' do |value| object.url = value end
   end
 
-  def individual_tagtypes
-    ([ :Dish, :Process, :Tool, :Occasion, :Source, :Genre, :Course, :Ingredient, :Diet, :Author ] + super).uniq
+  def eligible_tagtypes
+    ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
   end
+
+  def individual_tagtypes
+    ([ :Ingredient, :Genre, :Occasion ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
+  end
+
 
 end

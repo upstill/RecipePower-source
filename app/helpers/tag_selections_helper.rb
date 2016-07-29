@@ -38,7 +38,7 @@ module TagSelectionsHelper
 =end
   def tagging_fields decorator
     results =
-        decorator.individual_tagtypes.collect do |type|
+        decorator.editable_tagtypes.collect do |type|
           dc = type.to_s.downcase
           locked_tags = decorator.send "locked_#{dc}_tags"
           editable_tags = decorator.send "editable_#{dc}_tags"

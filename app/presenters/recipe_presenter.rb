@@ -27,8 +27,9 @@ class RecipePresenter < CollectiblePresenter
   end
 
   def card_aspects which_column=nil
-    ([ :ingredient, :yield, :tool, :process, :genre, :occasion, :course, :dish, :diet, :times ] + super).compact.uniq
+    ([ :yield, :times ] + super).compact.uniq
   end
+
   def card_aspect which
     label = nil
     contents =

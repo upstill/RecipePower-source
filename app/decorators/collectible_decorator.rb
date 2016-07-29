@@ -222,14 +222,23 @@ class CollectibleDecorator < Draper::Decorator
     User.find_by_id object.toucher_pointers.order('created_at ASC').limit(1).pluck(:user_id).first
   end
 
-  # Specify the types of tag that get their own individual display
-  def individual_tagtypes
-    [ :Misc ]
+  # What types of tag are selectable for tagging the entity, i.e., pertain to the type of collectible we're talking about
+  def eligible_tagtypes
+    [ :Untyped, :Source, :Author, :Culinaryterm ]
   end
 
-  # Specify the types of tag that appear under the 'Misc. Tags' heading
+  # Specify the types of tag that get displayed individually on the card. :Misc is a special "grab bag" type for all eligible types not shown individually
+  def individual_tagtypes
+    [ :Misc, :Source, :Author, :List ]
+  end
+
+  def editable_tagtypes
+    individual_tagtypes - [ :List ]
+  end
+
+  # The types of tag that appear under the 'Misc. Tags' heading are the eligible ones, without those that are expressed individually
   def misc_tagtypes
-    [ :Untyped, :Occasion ]
+    eligible_tagtypes - individual_tagtypes
   end
 
   # Here's where we define misc_tag_types, misc_tags_label, locked_misc_tags and editable_misc_tags
@@ -241,7 +250,7 @@ class CollectibleDecorator < Draper::Decorator
       when /^(\w*)_tags_label$/
         typesym = $1.capitalize.to_sym
         return typesym == :Misc ? 'Misc. Tag' : Tag.typename(typesym)
-      when /^(locked|editable)_misc_tags$/
+      when /^(locked|editable|visible)_misc_tags$/
         # Translate from 'misc' to a sequence of type symbols for the Taggable class
         callname.sub! '_misc_', '_' + misc_tagtypes.map { |type| Tag.typesym(type).to_s.downcase }.join('_') + '_'
     end

@@ -68,22 +68,30 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_aspects which_column=nil
-    (super + [ :source, :author, :description, :tags, :title, :lists, (:found_by if @decorator.first_collector) ]).compact.uniq
+    (super + [ :description, :title, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
   def card_aspect which
     label = nil
+    whichsym = which.to_sym
+    whichstr = which.to_s.downcase
     contents =
-        case which.to_sym
-          when :tool, :process, :dish, :course, :diet, :author, :occasion, :genre, :source, :ingredient
-            tags = decorator.send "visible_#{which}_tags" # visible_tags :tagtype => :Dish
-            label = field_label_counted which.to_s, tags.count
-            entity_links tags, joinstr: ' | '
-          when :tags
+        case whichsym
+          when :Tool, :Process, :Dish, :Course, :Diet, :Author, :Occasion, :Genre, :Source, :Ingredient, :Misc
+            denotation = which.to_s.downcase
+            tags = decorator.send "visible_#{whichstr}_tags" # visible_tags :tagtype => :Dish
+            label = field_label_counted decorator.send("#{whichstr}_tags_label"), tags.count
+            tags_str = entity_links tags, joinstr: ' | '
+            (whichsym == :Misc) ?
+                safe_join( [ tags_str, collectible_tag_button(decorator)], '&nbsp; '.html_safe ) :
+                tags_str
+=begin
+          when :Misc # Column for listing tag types not individually presented
             taglist = decorator.visible_untyped_culinaryterm_tags # visible_tags :tagtype_x => [ :Question, :List, :Author ]
             label = 'MISC. TAGS' # field_label_counted 'Misc. tags', taglist.count
             list_tags_for_collectible taglist, decorator
-          when :lists # Lists it appears under
+=end
+          when :List # Lists it appears under
             lists_with_status = ListServices.associated_lists_with_status decorator
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
