@@ -204,12 +204,12 @@ class Www_bbc_co_uk_Scraper < Scraper
   # Predict what handler will scrape the page
   def self.handler url_or_uri
     uri = url_or_uri.is_a?(String) ? (normalized_uri CGI.unescape(url_or_uri)) : url_or_uri
-    case URI.decode [uri.path, uri.query].compact.join('?')
+    case URI.decode [uri.path.sub(/\/$/,''), uri.query].compact.join('?')
       when /\A\/food\z/
         :bbc_food_page
-      when /\A\/food\/chefs\/by\/letters\//
-        :bbc_chefs_atoz_page
-      when /\A\/food\/(chefs|recipes|seasons|techniques|occasions|cuisines|ingredients)\z/
+      when /\A\/food\/(chefs|dishes)\/by\/letter(s)?\//
+        :"bbc_#{$1}_atoz_page"
+      when /\A\/food\/(dishes|chefs|recipes|seasons|techniques|occasions|cuisines|ingredients|programmes)\z/
         "bbc_#{$1}_page".to_sym
        when /\A\/food\/(courses|occasions|techniques|seasons|cuisines|programmes|collections|diets|chefs|recipes)\/[-\w]+\z/
         "bbc_#{$1.singularize}_home_page".to_sym
@@ -348,11 +348,21 @@ class Www_bbc_co_uk_Scraper < Scraper
         launch diet_url
       end
     end
+    page.search('ol#site-nav a').each do |link|
+      link.attribute('href').to_s.match /.*\/food\/(\w*)\b/
+      if (topic = $1).present?
+        launch absolutize(link) unless %w{ my about ingredients }.include? topic
+      end
+    end
   end
 
   ########## Recipes, by chef #####################
   def bbc_chefs_page # Top level of chef scraping
     launch page.links_with(href: /\/by\/letters\//)
+  end
+
+  def bbc_dishes_page # Top level of dish scraping
+    launch page.links_with(href: /\/by\/letter\//)
   end
 
   def bbc_chefs_atoz_page
@@ -364,6 +374,18 @@ class Www_bbc_co_uk_Scraper < Scraper
            }
     launch chef_ids.collect { |chef_id|
              'http://www.bbc.co.uk/food/recipes/search?chefs[]=' + chef_id
+           }
+  end
+
+  def bbc_dishes_atoz_page
+    dish_ids = page.search('li.resource.food a').collect { |a|
+      a.attribute('href').to_s.sub /\/food\/(\w*)\b.*$/, '\1'
+    }.compact.uniq
+    launch dish_ids.collect { |dish_id|
+             'http://www.bbc.co.uk/food/' + dish_id
+           }
+    launch dish_ids.collect { |dish_id|
+             'http://www.bbc.co.uk/food/recipes/search?dishes[]=' + dish_id
            }
   end
 
@@ -418,15 +440,15 @@ class Www_bbc_co_uk_Scraper < Scraper
       tagname.sub! /\s*\.\s*$/, ''
       case typesym
         when :Ingredient
-          tagname.sub! /Recipes with keyword:/, ''
+          tagname.sub! /Recipes with keyword:/i, ''
         when :Course
-          tagname.sub! /Recipes by course:/, ''
+          tagname.sub! /Recipes by course:/i, ''
         when :Source
-          tagname.sub! /Recipes from/, ''
+          tagname.sub! /Recipes from/i, ''
         when :Author
-          tagname.sub! /Recipes by/, ''
+          tagname.sub! /Recipes by/i, ''
         when :Occasion, :Dish, :Diet, :Genre
-          tagname.sub! /\brecipes\s*(and menus)?\s*$/, ''
+          tagname.sub! /\brecipes\s*(and menus)?\s*$/i, ''
       end
       tagname.strip!
       unless url.match /page=/
@@ -624,6 +646,19 @@ class Www_bbc_co_uk_Scraper < Scraper
                            :page_link => absolutize(link),
                            :image_link => (absolutize(img_link.attribute('src')) if img_link)
         launch link
+      end
+    }
+  end
+
+  def bbc_programmes_page
+    page.search('li#all-programmes li a').each { |a|
+      pid = a.attribute('href').to_s.sub /.*food\/programmes\/(\w*)\b.*$/, '\1'
+      if (pname = a.content).present? && !pname.match(/^Series/)
+        page_link = absolutize(a)
+        TagServices.define pname,
+                           tagtype: Tag.typenum(:Source)
+        launch page_link
+        launch absolutize('/food/recipes/search?programmes[]=' + pid)
       end
     }
   end

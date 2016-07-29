@@ -86,6 +86,9 @@ class ScraperTest < ActiveSupport::TestCase
 
     assert_equal 9, show_tags(:Diet).count
     assert_equal 9, Scraper.where(what: 'bbc_diet_home_page').count
+    %w{ dishes chefs recipes seasons techniques occasions cuisines ingredients programmes }.each { |type|
+      assert_equal 1, Scraper.where(what: "bbc_#{type}_page").count, "No bbc_#{type}_page scraper."
+    }
   end
 
   # Home page for a diet
@@ -491,7 +494,18 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/chefs'
     scraper = Scraper.assert url, true
     scraper.bkg_sync(true)
-    assert_equal 9, Scraper.count
+    assert_equal 8, Scraper.where(what: 'bbc_chefs_atoz_page').count
+    assert_equal 0, ImageReference.count
+  end
+
+  test 'bbc_dishes_page' do
+    url = 'http://www.bbc.co.uk/food/dishes'
+    scraper = Scraper.assert url, true
+    assert_equal 'bbc_dishes_page', scraper.what
+    scraper.bkg_sync(true)
+
+    assert_equal 25, Scraper.where(what: 'bbc_dishes_atoz_page').count
+    assert Scraper.where(url: 'http://www.bbc.co.uk/food/dishes/by/letter/b').exists?
     assert_equal 0, ImageReference.count
   end
 
@@ -508,6 +522,16 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 58, Scraper.where(what: 'bbc_chef_recipes_page').count
   end
 
+  test 'bbc_dishes_atoz_page' do
+    url = 'http://www.bbc.co.uk/food/dishes/by/letter/b'
+    scraper = Scraper.assert url
+    assert_equal scraper.handler, :bbc_dishes_atoz_page
+    scraper.bkg_sync(true)
+
+    assert_equal 36, Scraper.where(what: 'bbc_food_home_page').count
+    assert_equal 36, Scraper.where(what: 'bbc_dish_recipes_page').count
+  end
+
   test 'like_tags_different_pages' do
     tag1 = TagServices.define 'How to knead bread dough',
                               tagtype: 'Process',
@@ -517,6 +541,17 @@ class ScraperTest < ActiveSupport::TestCase
                               page_link: 'http://www.bbc.co.uk/food/techniques/how_to_knead_bread_dough'
     assert_equal 1, Tag.count
     assert_equal 2, DefinitionReference.count
+  end
+
+  test 'bbc_programmes_page' do
+    url = 'http://www.bbc.co.uk/food/programmes'
+    scraper = Scraper.assert url, false
+    assert_equal scraper.handler, :bbc_programmes_page
+    scraper.bkg_sync(true)
+
+    assert_equal 158, Scraper.where(what: 'bbc_programme_home_page').count
+    assert_equal 158, Scraper.where(what: 'bbc_programme_recipes_page').count
+    assert (tag = Tag.where(tagtype: Tag.typenum(:Source), name: 'Two Greedy Italians'))
   end
 
   test 'bbc_techniques_page' do
