@@ -440,13 +440,13 @@ class Www_bbc_co_uk_Scraper < Scraper
       tagname.sub! /\s*\.\s*$/, ''
       case typesym
         when :Ingredient
-          tagname.sub! /Recipes with keyword:/i, ''
+          tagname.sub! /^.*ecipes with keyword:?/i, ''
         when :Course
-          tagname.sub! /Recipes by course:/i, ''
+          tagname.sub! /^.*ecipes by course:?/i, ''
         when :Source
-          tagname.sub! /Recipes from/i, ''
+          tagname.sub! /^.*ecipes from/i, ''
         when :Author
-          tagname.sub! /Recipes by/i, ''
+          tagname.sub! /^.*ecipes by/i, ''
         when :Occasion, :Dish, :Diet, :Genre
           tagname.sub! /\brecipes\s*(and menus)?\s*$/i, ''
       end
@@ -783,14 +783,17 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def bbc_technique_home_page
-    author_link = page.search 'div#chef-details h2 a'
-    author_name = author_link.text.strip
-    author_page = absolutize author_link.attribute('href')
-    author_pic_link = author_link.search('img').first.attribute('src').to_s
-    author_tag = TagServices.define author_name,
-                                    :tagtype => :Author,
-                                    :page_link => author_page,
-                                    :image_link => author_pic_link
+    if (author_link = page.search 'div#chef-details h2 a').present?
+      author_name = author_link.text.strip
+      author_page = absolutize author_link.attribute('href')
+      if author_pic_link = author_link.search('img').first
+        author_pic_link = author_pic_link.attribute('src').to_s
+      end
+      author_tag = TagServices.define author_name,
+                                      :tagtype => :Author,
+                                      :page_link => author_page,
+                                      :image_link => author_pic_link
+    end
 
     technique_name = page.search('div#column-1 h1').text.strip.downcase
     technique_tag = TagServices.define technique_name,
@@ -991,19 +994,28 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   def bbc_programme_home_page
     # The programme_link is the home page of the program on the BBC
-    programme_link = page.search('div#episode-detail a').first
-    programme_name = programme_link.text.strip # page.search('title').text.sub(/BBC - Food - Recipes from Programmes :/, '').strip
-    programme_description = page.search('div#episode-detail p').first.text.strip
+    programme_name =
+        if programme_link = page.search('div#episode-detail a').first
+          programme_link.text.strip # page.search('title').text.sub(/BBC - Food - Recipes from Programmes :/, '').strip
+        elsif banner = page.search('div#programme-episode h1').first
+          banner.text.sub('recipes', '').strip
+        end
+
+    programme_description = page.search('div#episode-detail p').first
     programme_image = find_by_selector('div#programme-brand img', :src)
     programme_tag = TagServices.define(programme_name,
                                        {
                                            :tagtype => :Source,
-                                           :description => programme_description,
+                                           :description => (programme_description.text.strip if programme_description),
                                            :page_link => url,
                                            :image_link => (programme_image if programme_image.present?)
                                        }.compact
     )
-    TagServices.define programme_tag, page_link: absolutize(programme_link.attribute('href'))
+    # Define the reference to the program page
+    TagServices.define programme_tag, page_link:
+                                        (absolutize(programme_link.attribute('href')) if programme_link) ||
+                                            url.sub('/food/programmes/', '/programmes/')
+
 
     headered_list_items 'div.related-resources-module h2', 'ul' do |header_name, li|
       if header_name == 'Related chefs'
@@ -1013,10 +1025,10 @@ class Www_bbc_co_uk_Scraper < Scraper
         chef_img = img.attribute('src').to_s
         chef_link = absolutize link.attribute('href').to_s
         chef_tag = TagServices.define chef_name, {
-          tagtype: :Author,
-          page_link: chef_link,
-          image_link: chef_img
-        }.compact
+                                                   tagtype: :Author,
+                                                   page_link: chef_link,
+                                                   image_link: chef_img
+                                               }.compact
         TagServices.new(programme_tag).suggests chef_tag
       end
     end

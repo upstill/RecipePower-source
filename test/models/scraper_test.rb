@@ -131,7 +131,7 @@ class ScraperTest < ActiveSupport::TestCase
         :Course => %W{ side_dishes Recipes\ by\ course:\ Side\ dishes },
         :Diet => %W{ dairy_free Dairy-free\ recipes },
         :Genre => %W{ british British\ recipes },               # 'cuisines'
-        # :Ingredient => 'candied peel' No need to scrape ingredient recipes page, since ingredients appear in recipes
+        # :Ingredient => %W{ tomato_chutney Recipes\ with\ keyword\ tomato\ chutney }
     }
     searchable_types.each { |key, values|
       search_class = search_class_for_type key
@@ -596,6 +596,20 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 25, Scraper.count
   end
 
+  test 'bbc_technique_home_page_2' do
+    url = 'http://www.bbc.co.uk/food/techniques/how_to_deglaze_a_pan'
+    scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_technique_home_page
+    scraper.bkg_sync(true)
+
+    assert Reference.find_by( url: url, type: 'DefinitionReference')
+
+    tech_tag = Tag.where(tagtype: Tag.typenum(:Process)).first
+    assert_equal 'how to deglaze a pan', tech_tag.name
+    assert_equal url, tech_tag.referents.first.references.first.url
+
+  end
+
   test 'bbc_recipes_page' do
     User.super_id = (User.find(User.super_id) rescue User.create(email: 'mesuper@bogus.com')).id
     url = 'http://www.bbc.co.uk/food/recipes'
@@ -610,6 +624,18 @@ class ScraperTest < ActiveSupport::TestCase
 
   test 'bbc_collection_home_page' do
     url = 'http://www.bbc.co.uk/food/collections/healthy_fish_recipes'
+    scraper = Scraper.assert url, false
+    assert_equal scraper.handler, :bbc_collection_home_page
+    scraper.bkg_sync(true)
+
+    list = List.first
+    assert_equal 'Healthy fish recipes (BBC Food)', list.title
+    assert_equal 'Light, nutritious and delicious fish dishes make a healthy supper in minutes.', list.description
+    assert_equal 16, list.entity_count
+  end
+
+  test 'bbc_collection_home_page_2' do
+    url = 'http://www.bbc.co.uk/food/collections/festival_recipes'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_collection_home_page
     scraper.bkg_sync(true)
@@ -679,6 +705,27 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 'Brian Turner', auth_ref.name
     assert auth_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/chefs/brian_turner').exists?
     assert auth_ref.references.where(type: 'ImageReference', url: 'http://ichef.bbci.co.uk/food/ic/food_1x1_95/chefs/brian_turner_1x1.jpg').exists?
+  end
+
+  test 'bbc_programme_home_page_2' do
+    url = 'http://www.bbc.co.uk/food/programmes/b00p84s9'
+    scraper = Scraper.assert url, true
+    assert_equal scraper.handler, :bbc_programme_home_page
+    scraper.save
+    scraper.bkg_sync(true)
+    source_tags = show_tags(:Source)
+    source_tag = source_tags.first
+    assert_equal 'Delia\'s Classic Christmas', source_tag.name
+
+    # Ensure the existence of both this page and the Programme's home page on the bbc
+    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9')
+    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b00p84s9')
+
+    source_ref = source_tag.referents.first
+    assert_equal 2, source_ref.references.count  # Two definitions, no image
+    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9').exists?
+    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b00p84s9').exists?
+
   end
 
   test 'bbc_nigella_home_page' do
