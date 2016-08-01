@@ -783,28 +783,32 @@ class Www_bbc_co_uk_Scraper < Scraper
   end
 
   def bbc_technique_home_page
-    if (author_link = page.search 'div#chef-details h2 a').present?
-      author_name = author_link.text.strip
-      author_page = absolutize author_link.attribute('href')
-      if author_pic_link = author_link.search('img').first
-        author_pic_link = author_pic_link.attribute('src').to_s
-      end
-      author_tag = TagServices.define author_name,
-                                      :tagtype => :Author,
-                                      :page_link => author_page,
-                                      :image_link => author_pic_link
-    end
+    author_tag =
+        if (author_link = page.search 'div#chef-details h2 a').present?
+          author_name = author_link.text.strip
+          author_page = absolutize author_link.attribute('href')
+          if author_pic_link = author_link.search('img').first
+            author_pic_link = author_pic_link.attribute('src').to_s
+          end
+          TagServices.define author_name, {
+                                            :tagtype => :Author,
+                                            :page_link => author_page,
+                                            :image_link => author_pic_link
+                                        }.compact
+        end
 
     technique_name = page.search('div#column-1 h1').text.strip.downcase
-    technique_tag = TagServices.define technique_name,
-                                       :tagtype => :Process,
-                                       :page_link => url,
-                                       :suggested_by => author_tag
+    technique_tag = TagServices.define technique_name, {
+                                                         :tagtype => :Process,
+                                                         :page_link => url,
+                                                         :suggested_by => author_tag
+                                                     }.compact
 
     headered_list_items 'div#information-box h2', 'ul' do |header_text, tool_li|
-      TagServices.define tool_li.text.strip.downcase,
+      toolname = tool_li.text.strip.downcase
+      TagServices.define toolname,
                          tagtype: 'Tool',
-                         suggests: technique_tag if header_text == 'Equipment you will need for this technique'
+                         suggests: technique_tag if toolname.present? && header_text == 'Equipment you will need for this technique'
     end
     page.search('div#overview h4').each { |h4| recipe_item h4, 'Process' => technique_name }
 
