@@ -250,7 +250,7 @@ class Www_bbc_co_uk_Scraper < Scraper
           when 'Cooking'
             extractions['Cooking Time'] = value
           when 'Serves'
-            extractions['Yield'] = value.to_s + ' Servings'
+            extractions['Yield'] = labelled_quantity value.to_i, 'Serving', ''
         end
       elsif (cl = hdr.attribute('class')) && (cl.text.strip == 'icon')
         if (link = hdr.search('a').first) && link['href'].to_s.match(/\A\/food\/(\w*)\/([-\w]*)\z/)

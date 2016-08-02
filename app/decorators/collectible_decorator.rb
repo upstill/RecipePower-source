@@ -49,11 +49,13 @@ class CollectibleDecorator < Draper::Decorator
   def findings= findings
     self.title = findings.result_for('Title') if findings.result_for('Title').present?
     self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
+    ts = nil # TaggingService object
     if self.is_a? Recipe
       self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
       self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
       if findings.result_for('Total Time').present?
-        Tag.assert (self.total_time = findings.result_for('Total Time')), :tagtype => :Time
+        tt = Tag.assert (self.total_time = findings.result_for('Total Time')), :tagtype => :Time
+        tt && ((ts ||= TaggingServices.new object).tag_with tt, User.super_id)
       end
       self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
     end

@@ -125,15 +125,15 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     ((ct = @tagserv.children.count) > 0) ? (pluralize(ct, 'Child').sub(/\s/, '&nbsp;')+'<br>').html_safe : ""
   end
-  
+
   def summarize_tag_recipe_count
     @tagserv ||= TagServices.new(@tag)
-    count = @tagserv.recipe_ids(true).size
+    set = @tagserv.recipe_ids(true)
+    count = set.size
     case count
       when 0
       when 1
-        recipe = Recipe.find(@tagserv.recipe_ids.first)
-        homelink recipe.decorate, title: '1 Recipe'
+        homelink Recipe.find(set.first).decorate, title: '1 Recipe'
       else
         (pluralize(count, 'Recipe').sub(/\s/, ' ')+'<br>').html_safe
     end
