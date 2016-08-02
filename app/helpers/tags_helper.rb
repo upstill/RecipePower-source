@@ -70,7 +70,7 @@ module TagsHelper
   # Return HTML for the links associated with this tag
   def summarize_tag_references label = "See "
     @tagserv ||= TagServices.new(@tag)
-    unless (refstrs = present_tag_references @tagserv).empty?
+    unless (refstrs = present_tag_definitions @tagserv).empty?
       (content_tag( :h3, "References")+
        content_tag( :div,
                   tag_info_section( refstrs, label: (label + "'#{@tagserv.name}'" + " on ") ).html_safe,
@@ -78,8 +78,8 @@ module TagsHelper
     end
   end
 
-  def present_tag_references tagserv
-    tagserv.references.where(canonical: true).collect{ |reference| present_reference(reference) }.compact
+  def present_tag_definitions tagserv
+    tagserv.references.where(canonical: true, type: 'DefinitionReference').collect{ |reference| present_reference(reference) }.compact
   end
 
   # Return HTML for the links related to a given tag (i.e., the links for 
@@ -89,7 +89,7 @@ module TagsHelper
     links =
       Referent.related(@tagserv, false, true).collect { |rel|
         if(rel.id != @tagserv.id)
-          refstrs = present_tag_references(TagServices.new rel)
+          refstrs = present_tag_definitions(TagServices.new rel)
           content_tag(:div,
                       tag_info_section(refstrs, label: ("'#{rel.synonyms.map(&:name).join('/&#8201')}'" + " on ")).html_safe,
                       class: "container").html_safe unless refstrs.empty?

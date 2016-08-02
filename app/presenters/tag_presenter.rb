@@ -99,12 +99,12 @@ class TagPresenter < BasePresenter
       when :tag_references
         label = 'references'
         # content = h.summarize_tag_references
-        h.present_tag_references(tagserv)
+        h.present_tag_definitions(tagserv)
       when :tag_relations
         label = 'See Also'
         # content = h.summarize_tag_relations
         Referent.related(tagserv, false, true).collect { |rel|
-          h.present_tag_references(TagServices.new rel) if(rel.id != tagserv.id)
+          h.present_tag_definitions(TagServices.new rel) if(rel.id != tagserv.id)
         }.compact.flatten
     end || []).compact
     content = safe_join(itemstrs, ', ') unless itemstrs.empty?
