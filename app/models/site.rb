@@ -18,7 +18,7 @@ class Site < ActiveRecord::Base
   attr_accessible :finders_attributes, :sample, :oldname, :ttlcut, :finders, :approved, :approved_feeds_count, :feeds_count,
                   :description, :reference, :references, :name, :gleaning
 
-  belongs_to :referent # See before_destroy method, :dependent=>:destroy
+  belongs_to :referent, class_name: 'SourceReferent' # See before_destroy method, :dependent=>:destroy
 
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true

@@ -378,7 +378,7 @@ body.logged-in {
   z-index: $header-depth;
   background-color: #f1f1f0;
   padding-top: 0;
-  border-bottom: 1px solid $header-outline-color;
+  border-bottom: 4px solid $header-outline-color;
   // Default layout for the header (not logged-in)
   @include respond-to(phone) {
     padding-left: $logo-clearance-xs;

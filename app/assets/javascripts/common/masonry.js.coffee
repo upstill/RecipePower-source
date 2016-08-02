@@ -14,6 +14,8 @@ RP.masonry.onload = (event) ->
 	options.gutter ||= 10
 	options.itemSelector ||= '.masonry-item'
 	$(elmt).masonry options
+	$('div.grid-item', elmt).resize (event) ->
+		$(elmt).masonry() # Embedded images will trigger a layout when loaded
 	$(elmt).masonry 'on', 'layoutComplete', ( msnryInstance, laidOutItems ) ->
 		$(elmt).removeClass 'layout-pending'
 		dequeue elmt
