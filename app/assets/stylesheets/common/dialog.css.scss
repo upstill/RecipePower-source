@@ -161,9 +161,13 @@ div.new-style {
     margin-left: 7%;
     height: 2em;
     padding: 15px;
-    border-radius: 20px;
     margin-bottom: 25px;
     font-style: oblique;
+  }
+  li.token-input-input-token-facebook {
+    input[type='text'] {
+      border-radius: 20px;
+    }
   }
   label.checkbox {
     margin-bottom: 0;
