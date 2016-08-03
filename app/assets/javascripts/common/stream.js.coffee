@@ -33,8 +33,10 @@ do_item = (item, parent) ->
 	if fcn = RP.named_function item.handler
 		fcn.apply item
 	else if item.elmt
-		# Standard handling: convert text to HTML and append to list
-		RP.appendElmt $(item.elmt), parent
+		# Standard handling: convert text to HTML and append to list, then firing 'load' event
+		dom_elmt = $(item.elmt)
+		RP.appendElmt dom_elmt, parent
+		RP.loadElmt dom_elmt
 	else
 		RP.process_response item
 

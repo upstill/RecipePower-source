@@ -2,7 +2,7 @@
 <% @tagserv = TagServices.new item %>
 <tr id="<%= dom_id item %>">
   <td class="tag_type"><%= item.id.to_s %></td>
-  <td><%= summarize_tag %></td>
+  <td><strong>'</strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>'</td>
   <td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
                      class: 'tag_type_selector',
                      onchange: 'RP.change(event);',

@@ -51,7 +51,7 @@ module LinkHelper
   def linkto_options path_or_options, options={}
     query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
     class_option_names = [ :trigger, :submit, :preload ]
-    attribute_names = [ :id, :class, :style, :data, :onclick, :method, :rel, :title ]
+    attribute_names = [ :id, :class, :style, :data, :onclick, :onload, :method, :rel, :title ]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
     handler_class = options.delete(:handler_class) || 'submit'
