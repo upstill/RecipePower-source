@@ -12,7 +12,13 @@ class PagesController < ApplicationController
   end
 
   def letsencrypt
-    render :text => "FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo"
+    render :text =>
+               case Rails.env
+                 when 'staging'
+                   'FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                 when 'production'
+                   'X-gJdy9DoK_Uvm2f-qK_dtFzQmXATDsZTLlfY_wPyE0.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+               end
   end
 
   def home
