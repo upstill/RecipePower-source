@@ -17,7 +17,7 @@ class PagesController < ApplicationController
                  when 'staging'
                    'FBWtVRVpcUwhQbO6DVsqq9-xeqDr9epgpV90tE-HMUE.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                  when 'production'
-                   'X-gJdy9DoK_Uvm2f-qK_dtFzQmXATDsZTLlfY_wPyE0.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                   'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                end
   end
 
