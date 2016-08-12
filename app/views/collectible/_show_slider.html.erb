@@ -1,5 +1,6 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class='slider-left'>
+      <span class='onlinks' style='display: none'><%= homelink decorator %> </span>
       <div class='slider-pic'>
         <%= image_enclosure decorator,
                             class: 'pic-box',
@@ -12,8 +13,7 @@
         <%= decorator.title %>
       </p>
       <!--A slider fader sits over the right side of a title and fades too-long titles -->
-      <div class="slider-fader">
-      </div>
+      <div class="slider-fader"></div>
     </div>
     <div class="slider-right <%= 'pop-cardlet' if presenter.card_show_avatar %>">
       <%= render_item decorator, :cardlet, comment: (defined?(comment) && comment) %>

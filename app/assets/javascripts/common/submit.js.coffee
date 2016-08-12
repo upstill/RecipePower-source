@@ -38,7 +38,7 @@ RP.submit.enqueue = (request, elmt) ->
 RP.submit.dequeue = ->
 	if next = $('.queued')[0]
 		$(next).removeClass 'queued'
-		fire next
+		RP.submit.fire next
 
 RP.submit.block_on = (elmt) ->
 	$(elmt).addClass 'loading'
@@ -202,7 +202,7 @@ RP.submit.bind = (dlog) ->
 	$('.preload', dlog).each (ix, elmt) ->
 		preload elmt
 	$('.trigger', dlog).each (ix, elmt) ->
-		fire elmt
+		RP.submit.fire elmt
 
 # Respond to a change of selection value by submitting the enclosing form
 RP.submit.onselect = (event) ->
@@ -226,12 +226,12 @@ RP.submit.why = (event) ->
 RP.submit.onClick = (event) ->
 	# We can enclose an <input> element (like a checkbox) in a link that handles the actual click
 	try
-		fire event.currentTarget
+		RP.submit.fire event.currentTarget
 	catch err # Must ensure we return false to prevent handling by others
 	  console.log "Click handling on submit link barfed: "+err
 	false
 
-fire = (elmt) ->
+RP.submit.fire = (elmt) ->
 	if RP.submit.blocking_on elmt # This may already be loading
 		handleEnclosingNavTab elmt
 		$(elmt).addClass('trigger') # Mark for immediate opening

@@ -137,10 +137,14 @@ module LinkHelper
     link = link_to_submit title, linkpath(decorator.object, options[:action]), amended_options
     if decorator.respond_to?(:external_link)
       link << '&nbsp;'.html_safe + link_to('',
-                                          decorator.external_link,
-                                          class: 'glyphicon glyphicon-play-circle',
-                                          style: 'color: #aaa',
-                                          :target => '_blank')
+                                           decorator.external_link,
+                                           {
+                                             data: data.slice(:report),
+                                             class: 'glyphicon glyphicon-play-circle',
+                                             style: 'color: #aaa',
+                                             :target => '_blank'
+                                           }.compact
+      )
     end
     link
   end

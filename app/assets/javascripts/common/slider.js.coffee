@@ -2,14 +2,26 @@ RP.slider ||= {}
 
 jQuery ->
 	$(document).on 'click', 'div.slider-item', (event) ->
-		# console.log "entering item of class " + event.target.attributes.class
 		elmt = $(event.target).closest 'div.slider-item'
-		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
-			if $('div.slider-right', elmt).is ":visible"
-				$('div.slider-right', elmt).fadeOut()
-			else
-				$('div.slider-right', elmt).fadeIn()
-				event.preventDefault()
+		timer = null
+		if $(elmt).hasClass('clicked') || event.altKey
+			clearTimeout timer    # prevent single-click action
+			$('span.onlinks a[target="_blank"]', elmt).click()
+			$(elmt).removeClass 'clicked'
+		else
+			timer = setTimeout ->
+				if $(elmt).hasClass 'clicked'
+					RP.submit.fire $('span.onlinks a.submit', elmt)[0]
+					$(elmt).removeClass 'clicked'
+			, 700
+			$(elmt).addClass 'clicked'
+		event.preventDefault()
+	$(document).on 'click', 'a[target="_blank"]', (event) ->
+		elmt = event.currentTarget
+		RP.reporting.report elmt
+		win = window.open elmt.href, '_blank'
+		win.focus();
+		false
 	$(document).on 'image:empty', 'div.slider-pic img.empty', (event) ->
 		enclosure = $(event.currentTarget).closest 'div.slider-item'
 		$('div.slider-left', enclosure).hide()
