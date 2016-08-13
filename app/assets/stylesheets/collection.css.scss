@@ -149,6 +149,10 @@ div.slider-item {
 img.fixed-width {
   width: 100%;
   height: auto;
+  margin-bottom: 5px;
+  &.empty {
+    margin-bottom: 0;
+  }
 }
 
 .rcp_grid_element_source {

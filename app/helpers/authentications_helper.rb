@@ -14,7 +14,7 @@ module AuthenticationsHelper
     css_class = "auth_provider"
     css_class += " small" # if response_service.injector?
     # css_class += " hide" if @authentications && @authentications.any? { |authentication| authentication.provider.match(/^#{svc_lower}/) }
-    link = content_tag :a, image_tag( (svc_lower+"_32.png"), :alt => service), # +service,
+    link = content_tag :a, image_tag( (svc_lower+"_64.png"), :alt => service), # +service,
       :class => css_class,
       :size => "32x32",
       :href => auth_url, 

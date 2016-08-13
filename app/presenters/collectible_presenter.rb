@@ -119,15 +119,24 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_avatar options={}
-    img = image_from_decorator decorator, options
-    if img && permitted_to?(:update, decorator.object)
-      link_to_submit img,
-                     polymorphic_path([:editpic, decorator.object]),
-                     mode: 'modal',
-                     title: 'Get Picture'
-    else
-      img
+    # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
+    if (img = image_from_decorator(decorator)) && options[:onlinks]
+      img <<
+          link_to('',
+                  decorator.external_link,
+                  {
+                      data: {report: (polymorphic_path([:touch, decorator.object]) rescue nil)}.compact,
+                      target: '_blank',
+                      title: 'Open Original',
+                      class: 'clicker'
+                  }.compact) if decorator.respond_to?(:external_link)
+      img <<
+          link_to_submit('',
+                         polymorphic_path([:editpic, decorator.object]),
+                         mode: 'modal',
+                         class: 'dblclicker') if permitted_to?(:update, decorator.object)
     end
+    img
   end
 
   # By default, show the card if there's an avatar OR a backup avatar

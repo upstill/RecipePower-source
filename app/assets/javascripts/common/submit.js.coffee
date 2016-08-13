@@ -24,6 +24,35 @@ jQuery ->
 	$(document).on "submit", 'form.submit', (event) ->
 		RP.submit.submit_and_process $(this).attr('action'), this
 		false
+	# Handle click/dbl-click/opt-click on an 'onlinks' div item
+	# It expects two following links:
+	# -- one with a target '_blank' to be launched on single-click
+	# -- one with class 'submit' which will get launched on double-click/opt-click
+	$(document).on 'click', 'div.onlinks', (event) ->
+		elmt = event.currentTarget
+		timer = null
+		if $(elmt).hasClass('clicked') || event.altKey
+			clearTimeout timer    # prevent single-click action
+			console.log 'Double-click'
+			if dblcl = $('a.dblclicker', elmt)[0]
+				$(dblcl).click()
+			$(elmt).removeClass 'clicked'
+		else
+			timer = setTimeout ->
+				if $(elmt).hasClass 'clicked'
+					console.log 'Click'
+					if cl = $('a.clicker', elmt)[0]
+						$(cl).click()
+					$(elmt).removeClass 'clicked'
+			, 300
+			$(elmt).addClass 'clicked'
+		event.preventDefault()
+	$(document).on 'click', 'a[target="_blank"]', (event) ->
+		elmt = event.currentTarget
+		RP.reporting.report elmt
+		win = window.open elmt.href, '_blank'
+		win.focus();
+		false
 
 # Make a request from an element, but only if one is not already loading
 RP.submit.enqueue = (request, elmt) ->
@@ -87,6 +116,24 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 
 RP.submit.form_onload = (event) ->
 	RP.submit.form_prep event.target
+
+RP.submit.open_or_launch = (event) ->
+	elmt = event.target
+	timer = null
+	if $(elmt).hasClass('clicked') || event.altKey
+		clearTimeout timer    # prevent single-click action
+		if sib = $(elmt).siblings('a.submit')[0]
+			RP.submit.fire sib
+		$(elmt).removeClass 'clicked'
+	else
+		timer = setTimeout ->
+			if $(elmt).hasClass 'clicked'
+				if (sib = $(elmt).siblings('a[target="_blank"]'))[0]
+					sib.click()
+				$(elmt).removeClass 'clicked'
+		, 700
+		$(elmt).addClass 'clicked'
+	event.preventDefault()
 
 # Make a form ready for our special handling
 RP.submit.form_prep = (context) ->

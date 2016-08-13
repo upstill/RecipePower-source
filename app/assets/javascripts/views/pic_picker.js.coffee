@@ -87,6 +87,9 @@ RP.pic_picker.open = (dlog) ->
 	$('img.pic-pickee').load (evt) ->
 		check_image this
 
+	if uploader = $('input.directUpload', dlog)[0]
+		uploader_init uploader
+
 	$('img.pic-pickee').each (index, img) ->
 		check_image img
 		true

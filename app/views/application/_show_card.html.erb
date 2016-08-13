@@ -8,12 +8,12 @@
             "stamp": ".stamp" }'>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp avatar card-column" <%= 'style=display:none' if !presenter.card_avatar? %>>
-        <%= presenter.card_avatar %>
+      <div class="stamp avatar card-column onlinks" <%= 'style=display:none' if !presenter.card_avatar? %>>
+        <%= presenter.card_avatar onlinks: true %>
       </div>
       <div class="stamp title">
         <%= presenter.vote_buttons %>
-        <%= presenter.card_homelink class: 'title-link' %>
+        <%= presenter.card_homelink link_direct: true, class: 'title-link' %>
         <%= presenter.edit_button %>
         <%= presenter.collect_button %>
         <%= presenter.card_aspect_rendered :description %>
