@@ -104,6 +104,17 @@ class List < ActiveRecord::Base
     }
   end
 
+  def self.excluded_tag_types
+    [ :Unit, :Pantrysection, :Storesection, :Question, :List, :Epitaph, :Time ]
+  end
+
+  def included_tag_tokens=idstring
+    filter_options = { user_id: tagging_user_id, assert: true, tagtype_x: List.excluded_tag_types }
+    self.included_tag_ids = TokenInput.parse_tokens(idstring) { |token| # parse_tokens analyzes each token in the list as either integer or string
+      token.is_a?(Fixnum) ? token : Tag.strmatch(token, filter_options.merge(assert: true))[0].id # Match or assert the string
+    }
+  end
+
   def name
     (name_tag && name_tag.name) || ""
   end

@@ -79,8 +79,16 @@ class CollectibleController < ApplicationController
   # PATCH tag
   def tag
     if current_user
-      params.delete :recipe if request.method == 'GET' # We're not saving anything otherwise
+      modelname = response_service.controller_model_name
+      if request.method == 'GET' # We're not saving anything otherwise
+        params.delete modelname
+      else
+        misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
+      end
       update_and_decorate
+      # The editable tag tokens need to be set through the decorator, since Taggable
+      # doesn't know what tag types pertain
+      @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
       unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
         @decorator.be_collected
         @decorator.save

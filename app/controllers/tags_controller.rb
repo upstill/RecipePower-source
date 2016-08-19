@@ -86,9 +86,12 @@ class TagsController < ApplicationController
                 @taglist.map(&:attributes).map { |match| match['name'] }
             else # assuming "tokenInput" because that js won't send a parameter
                 # for tokenInput: an array of hashes, each with "id" and "name" values
-                @taglist.collect { |match| {
+                # TODO: this disambiguation check is N**2
+                @taglist.collect { |match|
+                  disambiguate = @taglist.count { |tag| tag.normalized_name == match.normalized_name } > 1
+                  {
                     id: match.id,
-                    name: match.typedname( showtype, ([1,3].include? current_user_or_guest_id))
+                    name: match.typedname( disambiguate, ([1,3].include? current_user_or_guest_id))
                 } }
             end
         }

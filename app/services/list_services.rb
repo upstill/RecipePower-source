@@ -203,11 +203,10 @@ class ListServices
       # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
       # BY ITS OWNER
       if @list.pullin
-        @list.taggings.where(user_id: tagger_id_or_ids).each do |tagging|
-          tag_ids << tagging.tag_id
-          tag_ids += TagServices.new(tagging.tag).similar_ids
+        @list.included_tags.each do |it|
+          tag_ids << it.id
+          tag_ids += TagServices.new(it).similar_ids
         end
-        tag_ids.uniq!
         whereclause = "(#{whereclause}) and not (entity_type = 'List' and entity_id = #{@list.id})"
       end
       scope = Tagging.where(tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).where whereclause

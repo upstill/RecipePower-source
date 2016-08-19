@@ -243,6 +243,11 @@ class CollectibleDecorator < Draper::Decorator
     eligible_tagtypes - individual_tagtypes
   end
 
+  def misc_tags_name_expanded misc_name
+    # Translate from 'misc' to a sequence of type symbols for the Taggable class
+    misc_name.sub '_misc_', '_' + misc_tagtypes.map { |type| Tag.typesym(type).to_s.downcase }.join('_') + '_'
+  end
+
   # Here's where we define misc_tag_types, misc_tags_label, locked_misc_tags and editable_misc_tags
   def method_missing namesym, *args
     case (callname = namesym.to_s)
@@ -252,9 +257,8 @@ class CollectibleDecorator < Draper::Decorator
       when /^(\w*)_tags_label$/
         typesym = $1.capitalize.to_sym
         return typesym == :Misc ? 'Misc. Tag' : Tag.typename(typesym)
-      when /^(locked|editable|visible)_misc_tags$/
-        # Translate from 'misc' to a sequence of type symbols for the Taggable class
-        callname.sub! '_misc_', '_' + misc_tagtypes.map { |type| Tag.typesym(type).to_s.downcase }.join('_') + '_'
+      when /^(locked|editable|visible)_misc_tag(_token)?s(=)?$/
+        callname = misc_tags_name_expanded callname
     end
     super callname, *args
   end

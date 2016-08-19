@@ -61,4 +61,14 @@ class ListDecorator < CollectibleDecorator
   #     end
   #   end
 
+  # What types of tag are selectable for tagging the entity, i.e., pertain to the type of collectible we're talking about
+  def eligible_tagtypes
+    [ :Untyped, :Source, :Author, :Occasion, :Diet, :Culinaryterm ]
+  end
+
+  # Specify the types of tag that get displayed individually on the card. :Misc is a special "grab bag" type for all eligible types not shown individually
+  def individual_tagtypes
+    [ :Misc, :Source, :Author, :List ]
+  end
+
 end
