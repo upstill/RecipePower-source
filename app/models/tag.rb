@@ -361,7 +361,7 @@ class Tag < ActiveRecord::Base
         return [] if name.blank?
         tag = nil
         if type.nil? # No type specified
-          tag = Tag.find_or_create_by :name => name # It'll be a free tag, but if you don't care enough to specify...
+          tag = Tag.find_or_create_by :name => name, tagtype: 0 # It'll be a free tag, but if you don't care enough to specify...
         else
           if type.kind_of?(Array) # Look for the tag among the given types
             type.find { |t| break if tag = Tag.find_by_name_and_tagtype(name, t) }
