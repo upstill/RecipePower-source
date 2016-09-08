@@ -17,6 +17,8 @@ class PagesController < ApplicationController
                         '_eMftQJL_Vu4re_QyzdKDpDpngWf5zs9hvNxaA3KxCo.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                       when 'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI'
                         'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                      when '4m8wHPRxHIS0VTHNlfLnbQQsRADL5NIo3tNL7sOer4Y'
+                        '4m8wHPRxHIS0VTHNlfLnbQQsRADL5NIo3tNL7sOer4Y.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                     end
     render :text => response_text
   end
