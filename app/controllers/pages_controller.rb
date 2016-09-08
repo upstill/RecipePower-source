@@ -12,7 +12,13 @@ class PagesController < ApplicationController
   end
 
   def letsencrypt
-    render :text => '_eMftQJL_Vu4re_QyzdKDpDpngWf5zs9hvNxaA3KxCo.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+    response_text = case params[:id]
+                      when '_eMftQJL_Vu4re_QyzdKDpDpngWf5zs9hvNxaA3KxCo'
+                        '_eMftQJL_Vu4re_QyzdKDpDpngWf5zs9hvNxaA3KxCo.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                      when 'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI'
+                        'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                    end
+    render :text => response_text
   end
 
   def home
