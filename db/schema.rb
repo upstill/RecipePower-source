@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160708215808) do
+ActiveRecord::Schema.define(version: 20160913170546) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -88,6 +88,8 @@ ActiveRecord::Schema.define(version: 20160708215808) do
     t.integer  "recipe_id"
     t.integer  "picture_id"
   end
+
+  add_index "feed_entries", ["feed_id", "guid"], name: "index_feed_entries_on_feed_id_and_guid", using: :btree
 
   create_table "feedbacks", force: :cascade do |t|
     t.integer  "user_id"

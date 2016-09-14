@@ -76,6 +76,9 @@ group :development do
   gem "binding_of_caller"
   # gem "json"
   gem 'rack-mini-profiler'
+  gem 'derailed'
+  gem 'stackprof'
+  gem 'flamegraph'
 end
 
 gem "masonry-rails"

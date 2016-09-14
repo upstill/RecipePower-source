@@ -33,11 +33,13 @@ class FeedEntry < ActiveRecord::Base
   end
 
   private
-  
+
   def self.add_entries(entries, feed)
+    # Identify the guids of entries that already exist
+    existing_guids = feed.feed_entries.where(guid: (entries.map &:id)).pluck(:guid)
     last_posted =
     entries.map { |entry|
-      unless exists? :guid => entry.id
+      unless existing_guids.include?(entry.id) # Create a new entry only if its guid doesn't already exist
         entry.published ||= Time.current
         create!(
           :title        => entry.title,

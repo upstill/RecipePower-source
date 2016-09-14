@@ -67,7 +67,7 @@ module NavtabsHelper
 
   def my_lists_navtab menu_only = false
     navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), menu_only do
-      current_user_or_guest.owned_lists[0..16].collect { |l|
+      current_user_or_guest.owned_lists.limit(16).includes(:name_tag).to_a.collect { |l|
         link_to_submit l.name, list_path(l), id: dom_id(l)
       } + [
           '<hr class=\'menu\'>'.html_safe,
@@ -102,7 +102,7 @@ module NavtabsHelper
 
   def feeds_navtab menu_only = false
     navtab :feeds, 'Feeds', feeds_path(access: 'collected'), menu_only do
-      feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).map(&:entity).compact
+      feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
       if feed_set.count < 16
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|

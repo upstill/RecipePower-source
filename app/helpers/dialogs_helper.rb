@@ -12,19 +12,19 @@ module DialogsHelper
     end
     pic =
         content_tag :div,
-                    image_tag(rp_url(image_path 'RPlogo.png' ), class: 'small_logo', :alt => 'RecipePower'),
+                    image_tag(rp_url(image_path 'RP-logo-small-HC.png' ), class: 'small_logo', :alt => 'RecipePower'),
                     class: 'small_logo'
     body_content = with_output_buffer(&block)
     alert = options[:noflash] ? '' : (content_tag(:div, '', class: 'notifications-panel').html_safe+flash_all(false))
 
     content = injector_cancel_button('X') +
         content_tag(:div,
-                    pic + content_tag(:div, hdr_text, class: 'injector-header-content').html_safe,
+                    pic + content_tag(:div, hdr_text, class: 'injector-header-content').html_safe + '<hr>'.html_safe,
                     class: 'injector-header').html_safe
 
     content <<
         content_tag(:div,
-                    ('<hr>'+alert).html_safe+body_content.html_safe,
+                    alert.html_safe+body_content.html_safe,
                     class: 'injector-body').html_safe
 
     if dismiss_label
@@ -129,11 +129,12 @@ module DialogsHelper
   end
 
   def injector_cancel_button name, options={}
-    xlink = link_to 'X',
+    xlink = link_to '&nbsp;X&nbsp;'.html_safe,
                     '#',
-                    id: 'recipePowerCancelBtn',
-                    style: 'text-decoration: none;'
-    content_tag(:div, xlink, class: 'recipePowerCancelDiv')
+                    id: 'recipePowerCancelBtn'
+    content_tag :div,
+                xlink,
+                id: 'recipePowerCancelDiv'
   end
 
   def dialog_submit_button label = nil, options={}

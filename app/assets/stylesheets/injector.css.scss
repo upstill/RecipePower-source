@@ -24,8 +24,9 @@ div.dialog.injector {
   // margin:3px;
   padding-left: 5px;
   padding-bottom: 5px;
-  background-color: #EEE;
-  border: solid 3px #900;
+  background-color: #f9f3ec;
+  border: solid 3px #9C724C;
+  color: #704020;
   z-index: $injector-depth; // in injector.css.scss
   h4 {
     margin-top: 3px;
@@ -186,11 +187,12 @@ div.dialog.injector {
     }
   }
   &.tag_collectible {
-    width: 810px;
+    width: 750px;
     div.left {
       float: left;
-      width: 150px;
+      width: 140px;
       height: auto;
+      margin: 10px;
       // border:1px solid red
       p {
         display: block;
@@ -202,14 +204,17 @@ div.dialog.injector {
     }
     div.middle {
       float: left;
-      width: 530px;
+      width: 500px;
       height: auto;
-      // border:1px solid green
+      padding-bottom: 10px;
     }
     div.right {
       float: left;
       width: 100px;
       height: auto;
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
       // border:1px solid blue
     }
     div.edit_recipe_element {
@@ -222,7 +227,7 @@ div.dialog.injector {
       width: 460px
     }
     div.edit_recipe_field {
-      width: 90%;
+      width: 95%;
       margin-left: auto;
       margin-right: auto;
       label {
@@ -256,7 +261,7 @@ div.dialog.injector {
         }
       }
         div.pic_preview {
-          width: 90px;
+          width: 100%;
           height: 90px;
           margin-left: auto;
           margin-right: auto;
@@ -336,9 +341,13 @@ div.dialog.injector {
   }
   input.btn {
     margin: 10px;
-    font: 16px arial, sans-serif;
+    font: 18px arial, sans-serif;
     color: #FFFFFF;
-    background: #51a351;
+    background: #0044cc;
+    background-image:  linear-gradient(to bottom, #0088cc, #0044cc);
+    border:  1px solid #cccccc;
+    border-radius: 6px;
+    padding: 4px 12px;
     float: right;
   }
   a.btn {
@@ -448,32 +457,51 @@ div.dialog.injector {
       font: 18px arial, sans-serif;
     }
   }
-  .recipePowerCancelDiv {
+  #recipePowerCancelDiv {
     // The close box at upper right
-    float: right;
+    position: absolute;
+    top: 4px;
+    right: 0px;
+    font-weight: 700;
     width: auto;
     height: auto;
-    text-decoration: none;
-    color: #5E4A18;
-    font-size: 14px;
+    // color: #5E4A18;
     padding: 2px;
-    background-color: #E6DAA1;
-    border-radius: 2px;
-    border-color: hsl(0, 0%, 55%);
-    border-width: 2px;
-    border-style: solid
+    // background-color: #E6DAA1;
+    // border-radius: 2px;
+    // border-color: hsl(0, 0%, 55%);
+    // border-width: 2px;
+    // border-style: solid
+    #recipePowerCancelBtn {
+      font-size: 18px;
+      font-weight: bold;
+      line-height: 1;
+      color: #887968;
+      text-shadow: 0 3px 0 #fff;
+      opacity: 0.6;
+      text-decoration:  none;
+      filter: alpha(opacity=20);
+      &:hover {
+        color: black;
+        cursor: pointer;
+        opacity: 0.5;
+        filter: alpha(opacity=50);
+      }
+    }
   }
   .injector-header {
     position: relative;
-    height: 24px;
+    height: 35px;
     width: auto;
     margin: 0.5em;
+    //margin-left: 55px;
     padding: 0;
     .injector-header-content {
-      float: left;
-      position: absolute;
-      bottom: 0;
-      left: 150px;
+      padding-top: 5px;
+      //float: left;
+      //position: absolute;
+      //bottom: 0;
+      //left: 60px;
     }
   }
   .injector-body {
@@ -484,10 +512,11 @@ div.dialog.injector {
   }
   div.small_logo {
     float: left;
-    vertical-align: bottom;
-  }
-  img.small_logo {
-    width: 144px;
-    height: 24px;
+    position: relative;
+    margin-right: 6px;
+    img.small_logo {
+      width: 100px;
+      height: 24px;
+    }
   }
 }

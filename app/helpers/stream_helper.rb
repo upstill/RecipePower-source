@@ -7,7 +7,7 @@ module StreamHelper
             onclick: 'RP.stream.go(event);',
             onload: 'RP.stream.onload(event);',
             class: 'stream-trigger',
-            style: 'display: none;', # for the use of jQuery.show()
+            # style: 'display: none;', for the use of jQuery.show()
             data: data
   end
 
