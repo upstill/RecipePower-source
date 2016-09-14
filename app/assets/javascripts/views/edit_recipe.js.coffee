@@ -48,7 +48,6 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 		replace(/%%authToken%%/g, rcpdata.authtoken) # .replace(statustarget, statusrepl)
 		$(template).html dlgsource # This nukes any lingering children as well as initializing the dialog
 	# The tag data is parsed and added to the tags field directly
-	# rcpdata.rcpmisctagdata.query = "tagtype_x=11,15&showtype=true&verbose=true"
 	RP.tagger.init tagger_selector, rcpdata.rcptagdata # jQuery.parseJSON(rcpdata.rcptagdata)
 	$('textarea').autosize()
 		

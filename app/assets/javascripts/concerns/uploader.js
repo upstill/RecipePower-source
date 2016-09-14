@@ -65,7 +65,7 @@ function uploader_init(elem) {
         var resizeImage = !(/Android(?!.*Chrome)|Opera/
             .test(window.navigator && navigator.userAgent));
         fileInput.after(barContainer);
-        fileInput.fileupload({
+        var fuOptions = {
             fileInput: fileInput,
             url: url,
             type: 'POST',
@@ -110,7 +110,8 @@ function uploader_init(elem) {
                     css("background", "red").
                     text("Failed");
             }
-        });
+        };
+        fileInput.fileupload(fuOptions);
         $('div.bootstrap-filestyle input.form-control').hide()
         $('div.progress').hide();
     }

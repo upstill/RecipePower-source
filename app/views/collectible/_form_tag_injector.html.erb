@@ -31,7 +31,11 @@
         </div>
       </div>
 
-      <%= taggable_div f, :attribute_name => :editable_tags, :label => 'Tag(s)' %>
+      <%= taggable_div f,
+                       :attribute_name => :editable_tags,
+                       :label => 'Tag(s)',
+                       :data => { type: Tag.typenum(@decorator.eligible_tagtypes) }
+      %>
 
       <div class="edit_recipe_field" >
         <%= f.label :comment, 'Notes' -%>

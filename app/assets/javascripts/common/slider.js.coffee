@@ -1,15 +1,6 @@
 RP.slider ||= {}
 
 jQuery ->
-	$(document).on 'click', 'div.slider-item', (event) ->
-		# console.log "entering item of class " + event.target.attributes.class
-		elmt = $(event.target).closest 'div.slider-item'
-		if $('div.slider-right', elmt).hasClass 'pop-cardlet'
-			if $('div.slider-right', elmt).is ":visible"
-				$('div.slider-right', elmt).fadeOut()
-			else
-				$('div.slider-right', elmt).fadeIn()
-				event.preventDefault()
 	$(document).on 'image:empty', 'div.slider-pic img.empty', (event) ->
 		enclosure = $(event.currentTarget).closest 'div.slider-item'
 		$('div.slider-left', enclosure).hide()
@@ -55,8 +46,8 @@ RP.slider.setup = (button_elmt) ->
 						slide_track trackitem, relmove
 			else if phase == 'end'
 				# We check for loading more items
-				if (stream_trigger = $('.stream-trigger', parent)[0]) && (trackrect.right - winrect.right) < 500
-					# Fire if the trigger is closer than 500 pixels to visibility
+				if (stream_trigger = $('.stream-trigger', parent)[0]) && (trackrect.right - winrect.right) < 50
+					# Fire if the trigger is closer than 50 pixels to visibility
 					RP.stream.fire stream_trigger
 		,
 		tap: (event, target) ->
@@ -127,7 +118,7 @@ button_check = (button_elmt) ->
 	if (stream_trigger = $('.stream-trigger', parent)[0]) && (right_button = $('.right', parent)[0])
 		button_rect = right_button.getBoundingClientRect()
 		trigger_rect = stream_trigger.getBoundingClientRect()
-		if trigger_rect.left < (button_rect.right+500)  # Fire if the trigger is closer than 500 pixels to visibility
+		if trigger_rect.left < (button_rect.right+50)  # Fire if the trigger is closer than 50 pixels to visibility
 			RP.stream.fire stream_trigger
 
 RP.slider.trigger_check = (trigger_elmt) ->

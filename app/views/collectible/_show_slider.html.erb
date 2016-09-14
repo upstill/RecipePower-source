@@ -1,19 +1,19 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class='slider-left'>
-      <div class='slider-pic'>
+      <div class='slider-pic onlinks'>
         <%= image_enclosure decorator,
                             class: 'pic-box',
                             fill_mode: 'fixed-height',
                             fallback_img: decorator.object.is_a?(User),
                             nolink: true
         %>
+        <%= homelink decorator %>
       </div>
       <p class="slider-title">
         <%= decorator.title %>
       </p>
       <!--A slider fader sits over the right side of a title and fades too-long titles -->
-      <div class="slider-fader">
-      </div>
+      <div class="slider-fader"></div>
     </div>
     <div class="slider-right <%= 'pop-cardlet' if presenter.card_show_avatar %>">
       <%= render_item decorator, :cardlet, comment: (defined?(comment) && comment) %>

@@ -18,6 +18,10 @@ div.results-card {
   margin-right: 1em;
 }
 
+div.onlinks a {
+  display: none;
+}
+
 div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
@@ -360,7 +364,6 @@ div.card-item {
       // min-height: 3.6em;
       // margin-bottom: 1em;
       padding-right: 35px;
-      margin-top: 0.4em;
       font-size: 2.4em;
       font-family: $archivo;
       font-weight: 700;
@@ -435,8 +438,6 @@ div.card-grid {
     margin-right: 15px;
     height: auto;
     float: left;
-    margin-bottom: 5px;
-    margin-top: 20px;
   }
   div.stamp.title {
     // padding-right: 35px;

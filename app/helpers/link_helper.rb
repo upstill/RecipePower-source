@@ -123,24 +123,46 @@ module LinkHelper
 
     cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
 
-    amended_options = {mode: :partial}.
-        merge(options).
-        merge(data: (data unless data.compact.empty?), class: cssclass).
-        except(:action, :truncate).
-        compact
-
     title = options[:title] || decorator.title
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end
 
-    link = link_to_submit title, linkpath(decorator.object, options[:action]), amended_options
-    if decorator.respond_to?(:external_link)
-      link << '&nbsp;'.html_safe + link_to('',
-                                          decorator.external_link,
-                                          class: 'glyphicon glyphicon-play-circle',
-                                          style: 'color: #aaa',
-                                          :target => '_blank')
+    if options[:link_direct]
+      link =
+          if decorator.respond_to?(:external_link)
+            link_to((title+'&nbsp;').html_safe + content_tag(:span, '', class: 'glyphicon glyphicon-new-window'), # glyphicon-play-circle
+                    decorator.external_link,
+                    {
+                        data: data.slice(:report),
+                        class: cssclass + ' clicker',
+                        title: 'Open Original',
+                        target: '_blank'
+                    }.compact
+            )
+          else
+            content_tag :span, decorator.title, class: cssclass
+          end
+    else
+      link = link_to_submit title,
+                            linkpath(decorator.object, options[:action]),
+                            {mode: :partial}.
+                                merge(options).
+                                merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
+                                except(:action, :truncate).
+                                compact
+      if decorator.respond_to?(:external_link)
+        link << '&nbsp;'.html_safe +
+            link_to('', decorator.external_link,
+                    {
+                        data: data.slice(:report),
+                        title: 'Open Original',
+                        class: 'glyphicon glyphicon-new-window dblclicker', # glyphicon-play-circle
+                        style: 'color: #aaa',
+                        :target => '_blank'
+                    }.compact
+            )
+      end
     end
     link
   end

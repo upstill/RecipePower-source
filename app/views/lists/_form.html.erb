@@ -45,7 +45,11 @@
     </div>
     <div class='row'>
       <div class='col-md-12'>
-        <%= token_input_field f, label: 'Tags', wrapper_html: { style: 'margin-bottom: 0; width: 90%; margin-left: 35px' } %>
+        <%= token_input_field f,
+                              'included_tags',
+                              label: 'Tags',
+                              data: { type_x: List.excluded_tag_types },
+                              wrapper_html: { style: 'margin-bottom: 0; width: 90%; margin-left: 35px' } %>
         <%= f.input :pullin, :as => :boolean, label: 'Use tags to find content' %>
       </div>
     </div>

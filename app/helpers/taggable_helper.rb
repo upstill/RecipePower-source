@@ -32,9 +32,9 @@ module TaggableHelper
     options[:data][:pre] ||= initrs.compact.map(&:attributes).to_json
     options[:data][:token_limit] = 1 unless is_plural
     options[:data][:'min-chars'] ||= 2
-    if type = options[:data][:type]
-      type = [type] unless type.is_a? Array
-      options[:data][:query] = "tagtypes=#{type.map(&:to_s).join(',')}"
+    if type = options[:data][:type] || options[:data][:type_x]
+      type = Tag.typenum type.is_a?(Array) ? type : [type]
+      options[:data][:query] = "#{options[:data][:type] ? 'tagtype' : 'tagtype_x'}=#{type.map(&:to_s).join(',')}"
     end
     options[:class] = "token-input-field-pending #{options[:class]}" # The token-input-field-pending class triggers tokenInput
     options[:onload] = 'RP.tagger.onload(event);'

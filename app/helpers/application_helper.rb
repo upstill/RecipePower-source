@@ -202,8 +202,8 @@ module ApplicationHelper
     action = options[:action] || params[:action]
     options[:body_contents] = with_output_buffer(&block)
     if response_service.dialog?
-      name = :"#{action}_#{params[:controller].singularize}"
-      modal_dialog name, title, options.slice!(:title, :action) # Pass other options through to modal
+      name = "#{action}_#{params[:controller].singularize}"
+      modal_dialog name+' new-style green', title, options.slice!(:title, :action) # Pass other options through to modal
     else
       "<h3>#{title}</h3>".html_safe+options[:body_contents]
     end
