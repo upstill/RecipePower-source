@@ -1,6 +1,11 @@
 RP.scroll ||= {}
 
 jQuery ->
+	$('div.panel-button').on 'click', () ->
+		if $(this).hasClass 'panel-scroller'
+			$('body').panelSnap 'snapTo', 'next'
+		else
+			$('a.select-content.signup').trigger 'click'
 	$(window).scroll () ->
 		if ($(window).scrollTop() >= $(document).height() - $(window).height() - 10)
 			if RP.scroll.selector

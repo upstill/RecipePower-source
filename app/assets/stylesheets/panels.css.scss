@@ -40,6 +40,48 @@ div.slider {
     &.snap-panel {
       padding-top: $header-height - 20px;
     }
+    .panel-one {
+      .panel-button {
+        bottom: 30px;
+      }
+    }
+    .panel-button {
+      width: 175px;
+      height: 60px;
+      border:#649f6b solid 1px;
+      position: absolute;
+      padding-top: 10px;
+      margin-left: -50px;
+      left: 50%;
+      bottom: -5px;
+      z-index: 1001;
+      border-radius: 6px;
+      text-align: center;
+      font-size: 0.9em;
+      color: #e7e1c1;
+      background-color: rgba(68, 117, 75, 0.5);
+      &.panel-scroller {
+        padding-top: 0;
+        width: 100px;
+        height: 55px;
+        color: #eeeeee;
+        font-size: 0.7em;
+        border:#fff solid 1px;
+        background-color: rgba(128, 128, 128, 0.5);
+        &:hover {
+          color: #cccccc;
+        }
+      }
+      span.glyphicon {
+        position: relative;
+        top: -6px;
+      }
+      &:hover {
+        color: rgb(255, 249, 217);
+        background-color: rgba(128, 128, 128, 0.8);
+        // opacity: 0.5;
+      }
+    }
   }
   div.panel-elements {
     width: 100%;
