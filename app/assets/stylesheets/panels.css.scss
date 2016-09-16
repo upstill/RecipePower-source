@@ -51,7 +51,7 @@ div.slider {
       border:#649f6b solid 1px;
       position: absolute;
       padding-top: 10px;
-      margin-left: -50px;
+      margin-left: -87px;
       left: 50%;
       bottom: -5px;
       z-index: 1001;
@@ -59,10 +59,11 @@ div.slider {
       text-align: center;
       font-size: 0.9em;
       color: #e7e1c1;
-      background-color: rgba(68, 117, 75, 0.5);
+      background-color: rgba(68, 117, 75, 0.85);
       &.panel-scroller {
         padding-top: 0;
         width: 100px;
+        margin-left: -50px;
         height: 55px;
         color: #eeeeee;
         font-size: 0.7em;
