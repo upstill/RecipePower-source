@@ -28,8 +28,10 @@ class PagesController < ApplicationController
     @auth_context = :manage
     if current_user
       redirect_to collection_user_path(current_user)
-    else
+    elsif params[:live]
       render
+    else
+      render 'statichome'
     end
   end
 

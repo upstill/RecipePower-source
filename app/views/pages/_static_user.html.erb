@@ -1,0 +1,15 @@
+<div class="slider-item user_<%= id %>">
+  <div class='slider-left'>
+    <div class='slider-pic onlinks'>
+      <div class="pic-box" style="width: auto; height: 100%;">
+        <%= image_tag avatar, alt: "/assets/default-avatar-128-d7d91974ede93b22d3e319eb87bd10f0.png", class: " fixed-height", onError: "onImageError(this);" %>
+      </div>
+      <a class="entity user clicker submit" data-report="/users/<%= id %>/touch" data-href="/users/<%= id %>/collection.json?mode=partial" title="Your Tooltip Here" href="javascript:void(0);">Rob Jensen</a>
+    </div>
+    <p class="slider-title">
+      <%= name %>
+    </p>
+    <!--A slider fader sits over the right side of a title and fades too-long titles -->
+    <div class="slider-fader"></div>
+  </div>
+</div>
