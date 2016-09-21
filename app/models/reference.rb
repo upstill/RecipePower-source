@@ -487,9 +487,9 @@ class ImageReference < Reference
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
-  def perform with_save=false
+  def perform
     logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-    bkg_execute with_save do
+    bkg_execute do
       # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
       (url =~ /^\d\d\d\d-/) ||
       begin

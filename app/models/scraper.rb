@@ -55,9 +55,9 @@ class Scraper < ActiveRecord::Base
   end
 
   # perform with error catching
-  def perform with_save=true
+  def perform 
     self.errcode = 0
-    bkg_execute with_save do
+    bkg_execute do
 
       Rails.logger.info "!!!Scraper Started Performing #{what} on #{url} with status #{status}"
       self.becomes(subclass.constantize).send what.to_sym

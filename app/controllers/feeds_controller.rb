@@ -15,17 +15,17 @@ class FeedsController < CollectibleController
     update_and_decorate
     # This is when we update the feed. When first showing it, we fire off an update job (as appropriate)
     # When it's time to produce results, we sync up the update process
-    if params[:content_mode] && (params[:content_mode] == 'results')
-      @feed.bkg_sync
-    elsif Time.now < (@feed.updated_at + 600) # Don't bother if the last update came in in the last ten minutes
-      @feed.bkg_requeue # Set a job running to update the feed, unless there's already one pending or processing
-    end
     smartrender
   end
 
   def contents
     @active_menu = :feeds
     if update_and_decorate
+      if params[:content_mode] && (params[:content_mode] == 'results')
+        @feed.bkg_sync
+      else # Don't bother if the last update came in in the last ten minutes
+        @feed.launch_update # Set a job running to update the feed, as necessary
+      end
       if params[:last_entry_id] # Only return entries that have been gathered since this one
         since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?
             (fe.published_at+1.second) :

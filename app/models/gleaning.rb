@@ -28,9 +28,9 @@ class Gleaning < ActiveRecord::Base
     gleaning
   end
 
-  def perform with_save=true
+  def perform
     # go entity.decorate.url, (entity.site if entity.respond_to?(:site))
-    bkg_execute with_save do self.results = FinderServices.glean(entity.decorate.url, (entity.site if entity.respond_to?(:site))) end
+    bkg_execute do self.results = FinderServices.glean(entity.decorate.url, (entity.site if entity.respond_to?(:site))) end
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)

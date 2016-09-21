@@ -171,10 +171,23 @@ class Feed < ActiveRecord::Base
     @@feedtypenames[feedtype]
   end
 
-  def discreet_save
-    Feed.record_timestamps = false
-    save
-    Feed.record_timestamps = true
+  # The updated_at timestamp will denote when the feed entries were last updated
+  # Thus, saving will not alter the timestamps by default
+  alias_method :orig_save, :save
+
+  def hard_save
+    self.updated_at = Time.now
+    orig_save
+  end
+
+  def save
+    if updated_at.nil? # Don't violate the non-null constraint on timestamps
+      orig_save
+    else
+      Feed.record_timestamps = false
+      orig_save
+      Feed.record_timestamps = true
+    end
   end
 
   # Ensure that the entries for the feed are up to date
@@ -189,60 +202,28 @@ class Feed < ActiveRecord::Base
     updated_at < 7.days.ago
   end
 
-  # Integration with Backgroundable is made more complicated by the fact that
-  # a feed generally saves without updating its timestamps, so we use discreet_save
-
-  # Fire off worker process to glean results, if needed
   def bkg_enqueue force=false, djopts = {}
-    if force.is_a?(Hash)
-      force, djopts = false, force
-    end
-    # force => do the job even if it was priorly complete
-    if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
-      pending!
-      discreet_save
-      Delayed::Job.enqueue self, djopts
-    end
-    pending?
+    Feed.record_timestamps = false
+    super
+    Feed.record_timestamps = true
   end
 
-  # Wrapper for the #perform method, managing job correctly
-  def bkg_perform with_save=true
-    processing!
-    discreet_save # Necessary, to notify queue handler that the job is in process
-    perform with_save
-  end
-
-  def bkg_execute with_save=true, &block
-    super false, &block
-    discreet_save if with_save
+  def perform 
+    logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
+    Feed.record_timestamps = false
+    bkg_execute do FeedEntry.update_from_feed(self) || true end
+    Feed.record_timestamps = true
+    save if good? # Record the last_updated_at time
     good?
   end
 
-    # Callbacks for DelayedJob
-  def enqueue(job)
-    unless job.run_at && (job.run_at > Time.now)
-      pending!
-      discreet_save
-    end
-  end
-
-  def before(job)
-    if pending?
-      processing!
-      discreet_save
-    else
-      raise 'Executing unqueued job'
-    end
-  end
-
-  def perform with_save=false
-    logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
-    bkg_execute with_save do FeedEntry.update_from_feed(self) || true end
-  end
-
   def enqueue_update later = false
-    bkg_enqueue priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
+    bkg_enqueue true, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
+  end
+
+  # Launch an update as "necessary"
+  def launch_update hard=false
+    enqueue_update if hard || (updated_at < (Time.now - 1.hour))
   end
 
   def success(job)

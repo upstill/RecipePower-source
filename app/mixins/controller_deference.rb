@@ -17,7 +17,7 @@ module ControllerDeference
   def deferred_request specs=nil
     # The input specs denote a default path that CAN help with this one, but may be replaced from deferred requests
     requested = unpack_path path: request.fullpath, format: request.format.symbol
-    if pending = request_matching(requested.slice(:format))
+    if pending = request_matching(requested.slice(:format, :mode))
       defer_request specs if specs
       return pending
     end
@@ -55,12 +55,16 @@ module ControllerDeference
 
   # Get a spec from deferred requests that matches the format and mode, if any
   def specs_matching specs
-    (req = DeferredRequest.pull( response_service.uuid, specs)) && unpack_request(req)
+    req = DeferredRequest.pull response_service.uuid, specs
+    revised_specs = req && unpack_request(req)
+    revised_specs
   end
 
   # If there is a deferred request, fetch it as a spec and return it as a request path
   def request_matching specs
-    (specs = specs_matching specs) && (pack_path specs)
+    specs = specs_matching specs
+    req = specs && pack_path(specs)
+    req
   end
 
   # Restore a deferred request after deserialization

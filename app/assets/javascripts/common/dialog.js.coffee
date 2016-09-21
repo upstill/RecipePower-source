@@ -138,6 +138,10 @@ open_modal = (dlog, omit_button) ->
 		fcn.apply null, onget
 	RP.hide_all_empty()
 	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
+	# Ensure that the dialog is attached to the DOM
+	unless dlog.parentElement
+		$('body')[0].appendChild dlog
+	# Unhide it, as needed
 	if $(dlog).modal
 		$(dlog).modal 'show'
 	RP.dialog.notify "load", dlog
