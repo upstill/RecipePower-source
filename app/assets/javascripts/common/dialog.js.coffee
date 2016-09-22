@@ -82,7 +82,8 @@ RP.dialog.push_modal = (newdlog, odlog) ->
 attach_modal = (newdlog, parentnode) ->
 	parentnode ||= document.getElementsByTagName("body")[0]
 	newdlog = parentnode.appendChild newdlog
-	$(newdlog).modal() # Brand the dialog for bootstrap
+	if $(newdlog).modal
+		$(newdlog).modal() # Brand the dialog for bootstrap
 	newdlog
 
 # Insert a new modal dialog, closing and replacing any predecessor
@@ -176,7 +177,6 @@ open_modal = (dlog, omit_button) ->
 close_modal = (dlog, action, next) ->
 	if dlog
 		RP.state.onCloseDialog dlog
-		notify_injector 'close', dlog
 		action ||= 'close'
 		if action != 'cancel' && parent = $(dlog).data 'parent'
 			next = assert_modal parent, dlog
@@ -186,10 +186,14 @@ close_modal = (dlog, action, next) ->
 				$(dlog).remove()
 				if next
 					open_modal attach_modal(next)
+				else
+					notify_injector 'close', dlog
 		else
 			$(dlog).remove()
 			if next
 				open_modal attach_modal(next)
+			else
+				notify_injector 'close', dlog
 
 manager_of = (dlog) ->
 	# Look for a manager using the dialog's class name

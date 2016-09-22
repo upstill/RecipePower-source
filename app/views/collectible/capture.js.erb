@@ -401,52 +401,19 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.display = 'block';
 	ifr.style.overflow = 'visible';
 	ifr.style.border = "0px";
-	ifr.style.width = "1000px"
+	ifr.style.width = "1000px";
 	ifr.id = "recipePower-iframe";
 	ifr.src = callback;
 	if (ifr.attachEvent){
-    ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
+        ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
 	} else {
-    ifr.onload = window.recipePower_namespace.ifrOnload;
+        ifr.onload = window.recipePower_namespace.ifrOnload;
 	}
   document.body.appendChild(ifr);
 	ifr.style.display = 'block';
   window.recipePower_namespace.iframe = ifr;
 
 })();
-
-/* Encapsulate the body content of the page with a div wrapper.
-  NB: doesn't pertain until we figure out how to do this correctly (doesn't
-	work for htmldog.com) 
-function wrapWithoutCloning(omitted) {
-	var body = document.body;
-	var wrapper = document.createElement('div'); 
-	wrapper.id = "RecipePowerInjectedEncapsulation";
-	// wrapper.style = body.style;
-    wrapper.style.position = "absolute";
-    wrapper.style.width = document.body.clientWidth; // "auto";
-    wrapper.style.height = "auto";
-	body.insertBefore(wrapper, body.firstChild );
-	var child;
-	while ((child = body.childNodes[1]) && (child != omitted)) {
-		body.removeChild(child);
-		wrapper.appendChild(child);
-	}
-	return wrapper;
-}
-
-/* Remove the previously-injected wrapper * /
-function unwrapWithoutCloning() {
-	var body = document.body;
-	var wrapper = document.getElementById('RecipePowerInjectedEncapsulation');
-	var child;
-	while(child = wrapper.childNodes[0]) {
-		wrapper.removeChild(child);
-		body.insertBefore(child, wrapper);
-	}
-	body.removeChild(wrapper);
-}
-*/
 
 // Define receive-message handler from ba-postmessage.js
 (function($){
