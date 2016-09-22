@@ -217,13 +217,10 @@ class Feed < ActiveRecord::Base
     good?
   end
 
-  def enqueue_update later = false
-    bkg_enqueue true, priority: 10, run_at: (later ? (Time.new.beginning_of_week(:sunday)+1.week) : Time.now)
-  end
 
   # Launch an update as "necessary"
   def launch_update hard=false
-    enqueue_update if hard || (updated_at < (Time.now - 1.hour))
+    bkg_enqueue (hard || (updated_at < (Time.now - 1.hour))), priority: 10
   end
 
   def success(job)

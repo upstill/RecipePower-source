@@ -57,7 +57,7 @@ module Backgroundable
         sleep 1
         reload
       end
-    elsif virgin? || pending? || force # Run the process right now
+    elsif pending? || force # Run the process right now
       bkg_perform
     end
     good?
