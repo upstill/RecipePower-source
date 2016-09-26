@@ -146,7 +146,7 @@ module LinkHelper
     else
       link = link_to_submit title,
                             linkpath(decorator.object, options[:action]),
-                            {mode: :partial}.
+                            {mode: :partial, title: 'Open Locally' }.
                                 merge(options).
                                 merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
                                 except(:action, :truncate).

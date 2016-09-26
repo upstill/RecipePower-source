@@ -18,8 +18,13 @@ div.results-card {
   margin-right: 1em;
 }
 
-div.onlinks a {
-  display: none;
+div.onlinks {
+  &:hover {
+    cursor: pointer;
+  }
+  a {
+    display: none;
+  }
 }
 
 div.card-item {

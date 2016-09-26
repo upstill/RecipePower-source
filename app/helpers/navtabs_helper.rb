@@ -25,11 +25,12 @@ module NavtabsHelper
 
     return itemlist if menu_only
 
-    header = link_to menu_label.html_safe,
-                     'javascript:void(0);',
-                     class: "dropdown-toggle #{options[:class]}",
-                     data: { toggle: 'dropdown' },
-                     title: 'Your Tooltip Here'
+    header = link_to_submit menu_label.html_safe,
+                            (go_path.present? ? go_path : 'javascript:void(0);'),
+                            class: "dropdown-toggle #{options[:class]}",
+                            mode: :partial,
+                            data: {toggle: 'dropdown'},
+                            title: "Go To #{menu_label}"
     content_tag :li,
                 "#{header} #{itemlist}".html_safe,
                 id: navtab_id(which),
@@ -102,7 +103,15 @@ module NavtabsHelper
 
   def feeds_navtab menu_only = false
     navtab :feeds, 'Feeds', feeds_path(access: 'collected'), menu_only do
-      feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
+      feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed').
+          joins(:feeds).
+          where('rcprefs.entity_id = feeds.id and feeds.approved = true').
+          order('feeds.last_post_date DESC').
+          limit(16).
+          includes(:entity).
+          map(&:entity).
+          compact
+      # feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
       if feed_set.count < 16
         # Try adding the lists owned by friends
         current_user_or_guest.followees.each { |friend|

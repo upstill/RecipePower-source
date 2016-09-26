@@ -200,7 +200,7 @@ class ListServices
           "(user_id in (#{tagger_id_or_ids.join ','}))" :
           "(user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})"
       whereclause << " or (tag_id != #{@list.name_tag_id})"
-      # If the pullin flag is on, we also include material tagged with the tags applied to the list itself
+      # If the pullin flag is on, we also include material tagged with the list's included_tags
       # BY ITS OWNER
       if @list.pullin
         @list.included_tags.each do |it|
