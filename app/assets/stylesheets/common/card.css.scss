@@ -475,15 +475,27 @@ div.card-grid {
     }
     @include respond-to(medium) {
       width: $col-width-medium;
+      &.found_by {
+        width: $col-width-medium * 0.7;
+      }
     }
     @include respond-to(largish) {
       width: $col-width-largish;
+      &.found_by {
+        width: $col-width-largish * 0.7;
+      }
     }
     @include respond-to(large) {
       width: $col-width-large;
+      &.found_by {
+        width: $col-width-large * 0.7;
+      }
     }
     @include respond-to(wide) {
       width: $col-width-wide;
+      &.found_by {
+        width: $col-width-wide * 0.7;
+      }
     }
     // border: 1px solid blue;
     &.card-column-lg {
