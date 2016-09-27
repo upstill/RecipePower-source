@@ -14,6 +14,7 @@ class RpMailer < ActionMailer::Base
   
   def welcome_email(user)
     @inviter = user.invited_by
+    @invitee = user
     @login_url  = rp_url '/login'
     mail :to => user.email, :from => 'support@recipepower.com', :subject => 'Welcome to RecipePower'
   end

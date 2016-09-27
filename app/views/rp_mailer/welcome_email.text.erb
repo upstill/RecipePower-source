@@ -1,12 +1,12 @@
-Welcome to RecipePower, <%= response_service.user.handle %>! You are now a 
+Welcome to RecipePower, <%= @invitee.handle %>! You are now a 
 member in good standing of the RecipePower community, all 
 signed in and everything. Your collection awaits you 
 at www.recipepower.com.
 
 Right now, your settings go like this:
-  Username: <%= response_service.user.username %>
-  Polite name: <%= response_service.user.polite_name %>
-  Email: <%= response_service.user.email %>
+  Username: <%= @invitee.username %>
+  Polite name: <%= @invitee.polite_name %>
+  Email: <%= @invitee.email %>
   Password: unless you've changed it, same as your email.
 
 If any of this (especially the password) doesn't suit, you can get to
@@ -28,7 +28,7 @@ have to say, especially if something's bugging you. Click
 the red Feedback tab at left and tell us how it's going. 
 Response Guaranteed!
 
-We're glad you've joined us, <%= response_service.user.handle %>. Happy Eating!
+We're glad you've joined us, <%= @invitee.handle %>. Happy Eating!
 
 Best Regards,
 The RecipePower Team

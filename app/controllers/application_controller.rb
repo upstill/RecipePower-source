@@ -418,9 +418,10 @@ class ApplicationController < ActionController::Base
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs
-    defer_request path: "/popup/need_to_know?context=signup", :mode => :modal, :format => :json
-    defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
-    defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
+    defer_request path: "/cookmark", :mode => :modal, :format => :json
+    # defer_request path: "/popup/need_to_know?context=signup", :mode => :modal, :format => :json
+    # defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
+    # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
 
   protected

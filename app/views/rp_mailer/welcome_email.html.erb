@@ -4,22 +4,22 @@
   <meta charset="utf-8" http-equiv="Content-Type" content="text/html"/>
 </head>
 <body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
-<h3>Welcome to RecipePower, <%= response_service.user.handle %></h3>
+<h3>Welcome to RecipePower, <%= @invitee.handle %></h3>
 
 <p>
   You are now a member in good standing (but behave yourself!)
   of the RecipePower community, all signed in and everything.
   Your collection awaits you at <%= link_to root_url, root_url %>. Of
   course, it's fairly empty at the moment--but if you install our
-  <%= link_to "Cookmark Button", page_with_trigger("/popup/starting_step2") %>,
+  <%= link_to "Cookmark Button", page_with_trigger("/cookmark.json?mode=modal") %>,
   you can add to your collection from anywhere on the Web.
 </p>
 
 <p>Right now, your settings go like this:</p>
 <ul>
-  <li><strong>Username: </strong><%= response_service.user.username %></li>
-  <li><strong>Polite name: </strong><%= response_service.user.polite_name %></li>
-  <li><strong>Email: </strong><%= response_service.user.email %></li>
+  <li><strong>Username: </strong><%= @invitee.username %></li>
+  <li><strong>Polite name: </strong><%= @invitee.polite_name %></li>
+  <li><strong>Email: </strong><%= @invitee.email %></li>
   <li><strong>Password: </strong>unless you provided one, same as your email.</li>
 </ul>
 <p>If any of this (especially the password) doesn't suit, you can get to your
@@ -38,7 +38,7 @@
 <p>Just one more thing: we're <strong>always</strong> keen to hear what you have to say, especially if something's
   bugging you. Click the red <strong>Feedback</strong> tab and tell us how it's going. Response Guaranteed!</p>
 
-<p>We're glad you've joined us, <%= response_service.user.handle %>. Happy Eating!</p>
+<p>We're glad you've joined us, <%= @invitee.handle %>. Happy Eating!</p>
 
 <p><br>Warm Regards,</p>
 

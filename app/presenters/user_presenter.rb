@@ -128,7 +128,7 @@ class UserPresenter < CollectiblePresenter
           latest = latestrr.entity
           contents = collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user
-          contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/popup/starting_step2', :mode => :modal} and go get some!".html_safe
+          contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some!".html_safe
         end
       when :latest_list
         label = 'Newest Treasury'
