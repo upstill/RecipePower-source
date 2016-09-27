@@ -478,10 +478,16 @@ div.card-grid {
       &.found_by {
         width: $col-width-medium * 0.7;
       }
+      &.created_by {
+        width: $col-width-medium * 0.7;
+      }
     }
     @include respond-to(largish) {
       width: $col-width-largish;
       &.found_by {
+        width: $col-width-largish * 0.7;
+      }
+      &.created_by {
         width: $col-width-largish * 0.7;
       }
     }
@@ -490,10 +496,16 @@ div.card-grid {
       &.found_by {
         width: $col-width-large * 0.7;
       }
+      &.created_by {
+        width: $col-width-large * 0.7;
+      }
     }
     @include respond-to(wide) {
       width: $col-width-wide;
       &.found_by {
+        width: $col-width-wide * 0.7;
+      }
+      &.created_by {
         width: $col-width-wide * 0.7;
       }
     }
