@@ -125,7 +125,7 @@ class CollectiblePresenter < BasePresenter
           link_to('',
                   decorator.external_link,
                   {
-                      data: {report: (polymorphic_path([:touch, decorator.object]) rescue nil)}.compact,
+                      data: {report: touchpath(decorator)}.compact,
                       target: '_blank',
                       title: 'Open Original',
                       class: 'clicker'

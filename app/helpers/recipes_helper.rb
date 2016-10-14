@@ -13,7 +13,7 @@ module RecipesHelper
     case entity
       when Recipe, Site
         label = ''
-        itemlink = link_to decorator.title, decorator.url, class: 'tablink', data: {report: polymorphic_path([:touch, entity])} # ...to open up a new tab
+        itemlink = link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
       else # Other internal entities get opened up in a new partial
         label = "#{entity.class.to_s}: "
         itemlink = link_to_submit decorator.title, decorator.url, class: 'tablink'
@@ -24,7 +24,7 @@ module RecipesHelper
   def collectible_tablink decorator
     case decorator.object
       when Recipe, Site
-        link_to decorator.title, decorator.url, class: 'tablink', data: {report: polymorphic_path([:touch, decorator.object])} # ...to open up a new tab
+        link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
       else # Internal entities get opened up in a new partial
         link_to_submit decorator.title, decorator.object # , class: 'tablink'
     end

@@ -115,11 +115,15 @@ module LinkHelper
         polymorphic_path(object)
   end
 
+  def touchpath decorator
+    (polymorphic_path([:touch, decorator.object]) rescue nil) if current_user
+  end
+
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
   def homelink decorator, options={}
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
     data = options[:data] || {}
-    data[:report] = (polymorphic_path([:touch, decorator.object]) rescue nil)
+    data[:report] = touchpath decorator
 
     cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
 
