@@ -507,7 +507,7 @@ class ImageReference < Reference
             quality = 80
             self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
           rescue Exception => e
-            logger.debug "Failed to parse image data for ImageReference#{id}: #{url} (#{e})"
+            logger.debug "Failed to parse image data for ImageReference #{id}: #{url} (#{e})"
             self.errcode = -2 # Bad data
           end
         end

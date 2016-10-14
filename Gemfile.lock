@@ -495,3 +495,9 @@ DEPENDENCIES
   webrat (~> 0.7.3)
   will_paginate (~> 3.0)
   youtube_addy
+
+RUBY VERSION
+   ruby 2.2.0p0
+
+BUNDLED WITH
+   1.13.4

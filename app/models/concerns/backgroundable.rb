@@ -49,6 +49,7 @@ module Backgroundable
     end
     if djopts.present? || virgin? || (force && (good? || bad?)) # If never been run, or forcing to run again, enqueue normally
       unless dj
+        save if new_record? # Just in case...
         self.dj = Delayed::Job.enqueue self, djopts
         save
       end
