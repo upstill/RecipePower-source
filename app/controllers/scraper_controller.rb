@@ -17,7 +17,7 @@ class ScraperController < ApplicationController
         render json: { done: true, alert: 'Scraping successful' }
       end
     else
-      if @scraper.pending? || @scraper.processing?
+      if @scraper.queued?
         msg = 'Scraper already launched and waiting'
       else
         msg = @scraper.virgin? ? 'Scraper launched' : 'Scraper relaunched'

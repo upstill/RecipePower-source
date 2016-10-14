@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20160913170546) do
+ActiveRecord::Schema.define(version: 20161013154119) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -117,6 +117,7 @@ ActiveRecord::Schema.define(version: 20160913170546) do
     t.datetime "last_post_date"
     t.integer  "feed_entries_count",             default: 0
     t.integer  "status",                         default: 0
+    t.integer  "dj_id"
   end
 
   create_table "finders", force: :cascade do |t|
@@ -136,6 +137,7 @@ ActiveRecord::Schema.define(version: 20160913170546) do
     t.text     "results"
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
+    t.integer  "dj_id"
   end
 
   create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
@@ -255,6 +257,7 @@ ActiveRecord::Schema.define(version: 20160913170546) do
     t.integer  "status",                  default: 0
     t.string   "filename"
     t.string   "link_text"
+    t.integer  "dj_id"
   end
 
   add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
@@ -333,6 +336,7 @@ ActiveRecord::Schema.define(version: 20160913170546) do
     t.datetime "created_at",                     null: false
     t.datetime "updated_at",                     null: false
     t.integer  "status",     default: 0
+    t.integer  "dj_id"
   end
 
   create_table "sites", force: :cascade do |t|

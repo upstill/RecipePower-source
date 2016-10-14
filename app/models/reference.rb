@@ -530,7 +530,8 @@ class ImageReference < Reference
     elsif url.blank?
       (bad! && save) unless bad?
     else
-      force ? bkg_requeue : bkg_enqueue
+      # force ? bkg_requeue : bkg_enqueue
+	    bkg_enqueue force
     end
   end
 

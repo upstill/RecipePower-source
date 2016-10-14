@@ -87,7 +87,8 @@ module Linkable
           # force => do the job even if it was priorly complete
           define_method 'glean' do |force=false|
             create_gleaning unless gleaning
-            force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
+            # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
+	          gleaning.bkg_enqueue force
           end
 
           # Glean info synchronously, i.e. don't return until it's done

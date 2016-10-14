@@ -14,7 +14,7 @@ module Backgroundable
       attr_accessible status_attribute
       enum status_attribute => [
                :virgin,  # Hasn't been executed or queued
-               :pending, # Queued but not executed
+               :obs_pending, # Queued but not executed (Obsolete with dj attribute)
                :processing, # Set during execution
                :good, # Executed successfully
                :bad   # Executed unsuccessfully
@@ -23,8 +23,18 @@ module Backgroundable
 
   end
 
+  included do
+    belongs_to :dj,
+               :class_name => 'Delayed::Backend::ActiveRecord::Job',
+               :dependent => :destroy
+  end
+
   def self.included(base)
     base.extend(ClassMethods)
+  end
+
+  def pending?
+    dj.present? && !processing?
   end
 
   # Fire off worker process to glean results, if needed
@@ -32,21 +42,34 @@ module Backgroundable
     if force.is_a?(Hash)
       force, djopts = false, force
     end
-    # force => do the job even if it was priorly complete
-    if virgin? || (force && !(pending? || processing?)) # Don't add it to the queue redundantly
-      pending!
-      Delayed::Job.enqueue self, djopts
+    return true if processing?
+    if dj && djopts.present? # Only happens if job already queued, i.e. not virgin, good or bad
+      dj.destroy
+      self.dj = nil
+    end
+    if djopts.present? || virgin? || (force && (good? || bad?)) # If never been run, or forcing to run again, enqueue normally
+      unless dj
+        self.dj = Delayed::Job.enqueue self, djopts
+        save
+      end
     end
     pending?
   end
 
+=begin
   # Place the object's job back in the queue, even if it was previously complete.
   # 'force' will do so even if the job was already queued (good for recovering from crashes)
   def bkg_requeue force=false
-    if force || !(pending? || processing?)
+    if force || !(self.dj || processing?)
       virgin!
       bkg_enqueue
     end
+  end
+=end
+
+  # Does this object have a DelayedJob waiting?
+  def queued?
+    self.dj.present?
   end
 
   # Glean results synchronously, returning only when status is definitive (good or bad)
@@ -57,16 +80,18 @@ module Backgroundable
         sleep 1
         reload
       end
-    elsif pending? || force # Run the process right now
-      bkg_perform
+    elsif force || (self.dj && self.dj.run_at <= Time.now) # Run the process right now
+      self.dj ?
+          Delayed::Worker.new.run(self.dj) : # Job pending => run it now
+          bkg_perform # Run it directly w/o invoking DelayedJob
     end
     good?
   end
 
-  # Wrapper for the #perform method, managing job correctly
+  # Wrapper for the #perform method, managing job correctly outside of DelayedJob
   def bkg_perform
     processing!
-    perform 
+    perform
   end
 
   # Finally execute the block that will update the model (or whatever). This is intended to
@@ -98,15 +123,11 @@ module Backgroundable
     good?
   end
 
-  # Callbacks for DelayedJob: jobs are pending when they are to run ASAP
-=begin
-  def enqueue(job)
-    unless job.run_at && (job.run_at > Time.now)
-      pending!
-      save
-    end
+  # With success, the DelayedJob record is about to go away, so we remove our pointer
+  def success(job)
+    self.dj = nil
+    save
   end
-=end
 
   def error(job, exception)
     bad!
@@ -114,14 +135,8 @@ module Backgroundable
   end
 
   # Before the job is performed, revise its status from pending to processing
-  # NB: if it's not pending, then the job has been executed by other
-  # means (perhaps by bkg_sync) and should be ignored
-  def before(job)
-    if pending?
-      processing!
-    else
-      raise 'Executing unqueued job'
-    end
+  def before job
+    processing!
   end
 
 end

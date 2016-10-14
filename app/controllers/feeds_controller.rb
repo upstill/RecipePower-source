@@ -23,8 +23,8 @@ class FeedsController < CollectibleController
     if update_and_decorate
       if params[:content_mode] && (params[:content_mode] == 'results')
         @feed.bkg_sync
-      else # Don't bother if the last update came in in the last ten minutes
-        @feed.launch_update # Set a job running to update the feed, as necessary
+      else # Don't bother if the last update came in in the last hour
+        @feed.launch_update (updated_at < Time.now - 1.hour) # Set a job running to update the feed, as necessary
       end
       if params[:last_entry_id] # Only return entries that have been gathered since this one
         since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?

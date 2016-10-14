@@ -202,37 +202,26 @@ class Feed < ActiveRecord::Base
     updated_at < 7.days.ago
   end
 
-  def bkg_enqueue force=false, djopts = {}
-    Feed.record_timestamps = false
-    super
-    Feed.record_timestamps = true
-  end
-
   def perform 
     logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
     Feed.record_timestamps = false
     bkg_execute do FeedEntry.update_from_feed(self) || true end
     Feed.record_timestamps = true
-    save if good? # Record the last_updated_at time
+    orig_save if good? # Record the last_updated_at time
     good?
   end
 
-
   # Launch an update as "necessary"
   def launch_update hard=false
-    bkg_enqueue (hard || (updated_at < (Time.now - 1.hour))), priority: 10
+    bkg_enqueue(priority: 10, run_at: Time.now) if hard
   end
 
   def success(job)
     # When the feed is updated successfully, re-queue it for one week hence
-    feed = YAML::load(job.handler)
-    logger.debug "Successfully updated feed ##{feed.id}"
-=begin
-    if feed = Feed.find_by(id: feed.id)
-      feed.enqueue_update true
-      logger.debug "Queued up feed ##{feed.id}"
-    end
-=end
+    super
+    logger.debug "Successfully updated feed ##{id}"
+    bkg_enqueue run_at: (Time.now + 1.day)  # Launch the next update for one day hence
+    logger.debug "Queued up feed ##{id}"
   end
 
 end

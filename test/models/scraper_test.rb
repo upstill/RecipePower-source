@@ -82,13 +82,26 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food'
     scraper = Scraper.assert url
     assert_equal :bbc_food_page, scraper.handler
-    scraper.bkg_sync(true)
+    scraper.bkg_sync true
 
     assert_equal 9, show_tags(:Diet).count
     assert_equal 9, Scraper.where(what: 'bbc_diet_home_page').count
-    %w{ dishes chefs recipes seasons techniques occasions cuisines ingredients programmes }.each { |type|
+    %w{ dishes chefs recipes seasons techniques occasions cuisines programmes }.each { |type|
       assert_equal 1, Scraper.where(what: "bbc_#{type}_page").count, "No bbc_#{type}_page scraper."
     }
+  end
+
+  test 'scrapers do not get requeued unless forced' do
+    url = 'http://www.bbc.co.uk/food'
+    scraper = Scraper.assert url
+    scraper.bkg_enqueue
+    assert scraper.dj.present?
+    scraper.bkg_sync
+    refute scraper.dj.present?
+    scraper.bkg_enqueue
+    refute scraper.dj.present?
+    scraper.bkg_enqueue true # Force the scraper to be requeued
+    assert scraper.dj.present?
   end
 
   # Home page for a diet
