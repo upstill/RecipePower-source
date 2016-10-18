@@ -32,10 +32,8 @@ class AnalyticsServices
     :share_response_conversion_rate => "Share Response Conversion Rate (signups/clickthrough",
   }
 
-  def initialize interval, prior_interval = nil
-    self.name, self.time_range = [
-        interval[:name], interval[:time_range]
-    ]
+  def initialize name, interval, prior_interval = nil
+    self.name, self.time_range = name, interval
     @data = {}
 
     # Calculate # active users and sessions per active user
@@ -128,19 +126,19 @@ class AnalyticsServices
     intervals = []
     prior_interval = nil
     self.gen_intervals(num_cols, start, intvl, beforehand).each do |interval|
-      intervals << (block_given? ? yield(interval, prior_interval) : interval.inspect)
+      intervals << (block_given? ? yield(interval[:name], interval[:time_range], prior_interval) : interval.inspect)
       prior_interval = interval[:time_range]
     end
     # intervals[0].name = "< "+intervals[1].name if beforehand
-    intervals << (block_given? ? yield(all_time, nil) : all_time.inspect)
+    intervals << (block_given? ? yield('All Time', (6.years.ago)..Time.now, nil) : all_time.inspect)
     intervals
   end
 
   # Compile analytics over a series of intervals and return an array of results, one for
   # each interval. Each column is a has of results.
   def self.analyze length=:monthly, num_cols=3, beforehand=true
-    self.generate(length, num_cols, beforehand) do |interval, prior_interval|
-      self.new interval, prior_interval
+    self.generate(length, num_cols, beforehand) do |name, interval, prior_interval|
+      self.new name, interval, prior_interval
     end
   end
 
