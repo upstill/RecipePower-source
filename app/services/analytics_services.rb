@@ -1,5 +1,5 @@
 class AnalyticsServices
-  attr_accessor :name, :begin_time, :end_time, :data
+  attr_accessor :name, :time_range, :data
 
   def divide(a, b)
     (b > 0) ? a.to_f/b : "NaN"
@@ -33,27 +33,28 @@ class AnalyticsServices
   }
 
   def initialize interval, prior_interval = nil
-    self.name, self.begin_time, self.end_time, prior_begin = [
-        interval[:name], interval[:begin_time], interval[:end_time], (prior_interval[:begin_time] if prior_interval)
+    self.name, self.time_range = [
+        interval[:name], interval[:time_range]
     ]
     @data = {}
 
     # Calculate # active users and sessions per active user
-    sessions = RpEvent.events_of_type_during(:session, begin_time, end_time).map(&:subject_id)
+    time_scope = RpEvent.where created_at: time_range
+    sessions = time_scope.session.pluck :subject_id
     active_user_ids = sessions.uniq
     @data[:sessions_per_active_user] = divide sessions.count, (@data[:active_users] = active_user_ids.count)
 
     # Get # of dropouts in prior interval
-    @data[:dropouts] = if prior_begin
-                         prior_active = RpEvent.events_of_type_during(:session, prior_begin, begin_time).map(&:subject_id).uniq
+    @data[:dropouts] = if prior_interval
+                         prior_active = RpEvent.session.where(created_at: (prior_interval.min)..time_range.min).pluck(:subject_id).uniq
                          (prior_active - active_user_ids).count
                        else
                          "n/a"
                        end
 
     # Get new successful invitees (signed up in interval)
-    @data[:accepted_invitations] = RpEvent.events_of_type_during(:invitation_accepted, begin_time, end_time).count
-    @data[:cold_signups] = User.where('invitation_token IS NULL AND created_at > ? AND created_at <= ?', begin_time, end_time).count
+    @data[:accepted_invitations] = time_scope.invitation_accepted.count
+    @data[:cold_signups] = User.where(invitation_token:nil, created_at: time_range).count
 
     # Get new users of all kinds (accepted invitations + uninvited signups)
     @data[:new_users] = @data[:accepted_invitations] + @data[:cold_signups]
@@ -62,20 +63,20 @@ class AnalyticsServices
 
     @data[:viral_coefficient] = @data[:accepted_invitations].to_f / User.all.count
 
-    @data[:invitations_issued] = RpEvent.events_of_type_during(:invitation_sent, begin_time, end_time).count
-    @data[:invitations_clicked] = RpEvent.events_of_type_during(:invitation_responded, begin_time, end_time).count
-    @data[:invitations_converted] = RpEvent.events_of_type_during(:invitation_accepted, begin_time, end_time).count
-    @data[:invitations_diverted] = RpEvent.events_of_type_during(:invitation_diverted, begin_time, end_time).count
+    @data[:invitations_issued] = time_scope.invitation_sent.count
+    @data[:invitations_clicked] = time_scope.invitation_responded.count
+    @data[:invitations_converted] = time_scope.invitation_accepted.count
+    @data[:invitations_diverted] = time_scope.invitation_diverted.count
 
     @data[:invitation_conversion_rate] = divide @data[:invitations_converted], @data[:invitations_issued]
     @data[:invitation_click_rate] = divide @data[:invitations_clicked], @data[:invitations_issued]
     @data[:invitation_response_conversion_rate] = divide @data[:invitations_converted], @data[:invitations_clicked]
 
-    shares_issued_by_id = RpEvent.events_of_type_during(:invitation_sent, begin_time, end_time).where('object_id IS NOT NULL').map(&:id)
+    shares_issued_by_id = time_scope.invitation_sent.where('direct_object_id IS NOT NULL').map(&:id)
     @data[:shares_issued] = shares_issued_by_id.count
-    @data[:shares_clicked] = RpEvent.events_of_type_during(:invitation_responded, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
-    @data[:shares_converted] = RpEvent.events_of_type_during(:invitation_accepted, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
-    @data[:shares_diverted] = RpEvent.events_of_type_during(:invitation_diverted, begin_time, end_time).where(object_type: "RpEvent", object_id: shares_issued_by_id).count
+    @data[:shares_clicked] = time_scope.invitation_responded.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
+    @data[:shares_converted] = time_scope.invitation_accepted.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
+    @data[:shares_diverted] = time_scope.invitation_diverted.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
 
     @data[:share_conversion_rate] = divide @data[:shares_converted], @data[:shares_issued]
     @data[:share_click_rate] = divide @data[:shares_clicked], @data[:shares_issued]
@@ -96,7 +97,7 @@ class AnalyticsServices
     end
     num.times do |i|
       name = (intvl == :months ? "" : this.day.to_s+"/")+this.month.to_s+"/"+this.year.to_s.sub(/^\d\d/, '')
-      out << {name: name, begin_time: this, end_time: that}
+      out << {name: name, time_range: this..that }
       this = that
       that = this.advance intvl => 1
     end
@@ -105,7 +106,7 @@ class AnalyticsServices
   end
 
 # Generate a new instance for each interval as stipulated
-  def self.generate period=:monthly, num_cols=3, beforehand=true, all_time=true
+  def self.generate period=:monthly, num_cols=3, beforehand=true
     # Generate the intervals
     now = Time.now # 2013-11-11 14:12:45 +1300
     case period = period.to_sym
@@ -119,30 +120,32 @@ class AnalyticsServices
         start = start.advance(:days => -daysoff)
         intvl = :weeks
     end
-    all_time = {name: "All Time", begin_time: DateTime.new(2011), end_time: DateTime.new(Time.now.year+1)} if all_time
+    all_time = {
+        name: "All Time",
+        time_range: (6.years.ago)..Time.now,
+    }
     beforehand = false unless num_cols > 0
     intervals = []
-    prior = nil
+    prior_interval = nil
     self.gen_intervals(num_cols, start, intvl, beforehand).each do |interval|
-      intervals << (block_given? ? yield(interval, prior) : interval.inspect)
-      prior = interval
+      intervals << (block_given? ? yield(interval, prior_interval) : interval.inspect)
+      prior_interval = interval[:time_range]
     end
     # intervals[0].name = "< "+intervals[1].name if beforehand
-    intervals << (block_given? ? yield(all_time, nil) : all_time.inspect) if all_time
+    intervals << (block_given? ? yield(all_time, nil) : all_time.inspect)
     intervals
   end
 
   # Compile analytics over a series of intervals and return an array of results, one for
   # each interval. Each column is a has of results.
-  def self.analyze length=:monthly, num_cols=3, beforehand=true, all_time=true
-    prior_begin = nil
-    self.generate(length, num_cols, beforehand, all_time) do |interval, prior|
-      self.new interval, prior
+  def self.analyze length=:monthly, num_cols=3, beforehand=true
+    self.generate(length, num_cols, beforehand) do |interval, prior_interval|
+      self.new interval, prior_interval
     end
   end
 
-  def self.tabulate length=:monthly, num_cols=3, beforehand=true, all_time=true
-    columns = self.analyze length, num_cols, beforehand, all_time
+  def self.tabulate length=:monthly, num_cols=3, beforehand=true
+    columns = self.analyze length, num_cols, beforehand
     rows = @@analysands.collect do |key, value|
       row = {name: value}
       columns.each do |column|

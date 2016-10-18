@@ -1,5 +1,7 @@
 class RpEvent < ActiveRecord::Base
 
+=begin
+
   include Typeable
 
   typeable( :verb,
@@ -10,6 +12,17 @@ class RpEvent < ActiveRecord::Base
             invitation_accepted: ["Accepted Invitation", 4],
             invitation_diverted: ["Invitation Diverted", 5]
   )
+=end
+
+  attr_accessible :verb
+  enum :verb => [
+           :untyped,
+           :session,
+           :invitation_sent,
+           :invitation_responded,
+           :invitation_accepted,
+           :invitation_diverted
+       ]
 
   attr_accessible :on_mobile, :serve_count, :subject_id, :direct_object_id, :indirect_object_id, :data
 
@@ -27,7 +40,7 @@ class RpEvent < ActiveRecord::Base
   # Return a hash of aggregate_user_table for the user
   def self.user_stats user, interval
     if last_visit = self.last(:serve, user)
-      recent_visits = self.where( 'verb = ? AND subject_id = ? AND created_at > ?', typenum(:serve), user.id, interval ).count
+      recent_visits = self.serve.where( 'subject_id = ? AND created_at > ?', user.id, interval ).count
       {last_visit: last_visit.created_at, recent_visits: recent_visits}
     else
       {}
@@ -35,15 +48,13 @@ class RpEvent < ActiveRecord::Base
   end
 
   # Return the last event posted by the given user (if any) of a given type
-  def self.last verb, subject=nil
-    rel = self.where(verb: self.typenum(verb))
-    rel = rel.where(subject_id: subject.id) if subject
-    rel.order( :updated_at ).last
+  def self.last subject=nil
+    (subject ? self.where(subject_id: subject.id) : self.all).order(:updated_at).last
   end
 
 private
   def self.assemble_attributes subject, verb, direct_object, indirect_object
-    h = { verb: typenum(verb) }
+    h = { verb: verb }
     h.merge!(subject_id: subject.id) if subject
     h.merge!(direct_object_type: direct_object.class.to_s, direct_object_id: direct_object.id) if direct_object
     h.merge!(indirect_object_type: indirect_object.class.to_s, indirect_object_id: indirect_object.id) if indirect_object
@@ -78,7 +89,21 @@ private
 
   # Filter for events
   def self.events_of_type_during verb, begin_time, end_time
-    RpEvent.where 'verb = ? AND created_at >= ? AND created_at < ?', typenum(verb), begin_time, end_time
+    scope = case verb
+              when :untyped
+                RpEvent.untyped
+              when :session
+                RpEvent.session
+              when :invitation_sent
+                RpEvent.invitation_sent
+              when :invitation_responded
+                RpEvent.invitation_responded
+              when :invitation_accepted
+                RpEvent.invitation_accepted
+              when :invitation_diverted
+                RpEvent.invitation_diverted
+            end
+    scope.where 'created_at >= ? AND created_at < ?', begin_time, end_time
   end
 
 end
