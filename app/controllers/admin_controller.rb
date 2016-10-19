@@ -12,7 +12,7 @@ class AdminController < ApplicationController
           accepts = user.invitees.where('invitation_accepted_at IS NOT NULL').count
           num_recipes = user.recipes.size
           num_tags = Tagging.where(user_id: user.id).count
-          stats[user.id] = RpEvent.user_stats(user, 1.month.ago).merge(
+          stats[user.id] = RpEvent.user_stats(user, (Time.now - 1.month)..Time.now).merge(
               user: user,
               id: user.id,
               handle: user.handle,
