@@ -1,6 +1,6 @@
 <div class="feed-entry page" id="<%= decorator.dom_id %>">
   <div class="headline">
-    <a href='<%= decorator.object.url %>' class="tablink"><%= decorator.title %></a>
+    <a href='<%= decorator.object.url %>' class="tablink"><%= HTMLEntities.new.decode decorator.title %></a>
     <%# collectible_buttons_panel decorator, :button_size => "xs" %>
     <%= collectible_collect_button decorator %>
     <%# collectible_list_menu decorator, current_user, { } %>
