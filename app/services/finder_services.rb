@@ -20,7 +20,7 @@ class FinderServices
       findings
     elsif url
       findings = FinderServices.glean url
-      findings if findings.present
+      findings if findings.present?
     end
   end
 
