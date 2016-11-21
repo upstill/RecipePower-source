@@ -204,11 +204,11 @@ module EntitiesCache
       counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
     end
     if model.respond_to? :strscopes
-      strscope = model.strscopes "%#{tagname}%" do |joinspec=nil|
+      strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
         joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
       end
       counts.incr_by_scope strscope
-      strscope = model.strscopes tagname do |joinspec=nil|
+      strscope = model.strscopes tag.name do |joinspec=nil|
         joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
       end
       counts.incr_by_scope strscope, 10
