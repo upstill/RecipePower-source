@@ -1,3 +1,5 @@
+# For going from votes to popularity, see 
+# http://www.akitaonrails.com/2016/10/31/ruby-on-rails-implementation-of-a-proper-ranking-popularity-system?utm_source=rubyweekly&utm_medium=email
 class Vote < ActiveRecord::Base
   self.primary_keys = ["user_id", "entity_type", "entity_id"]
 

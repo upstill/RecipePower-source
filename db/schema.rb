@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161013154119) do
+ActiveRecord::Schema.define(version: 20161122005609) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -163,6 +163,22 @@ ActiveRecord::Schema.define(version: 20161013154119) do
     t.integer "tag_id"
     t.integer "list_id"
   end
+
+  create_table "mercury_pages", force: :cascade do |t|
+    t.text     "url"
+    t.text     "title"
+    t.text     "content"
+    t.datetime "date_published"
+    t.text     "lead_image_url"
+    t.string   "domain"
+    t.string   "extraneity",     default: "{}"
+    t.string   "author"
+    t.datetime "created_at",                    null: false
+    t.datetime "updated_at",                    null: false
+    t.text     "aliases",        default: [],                array: true
+  end
+
+  add_index "mercury_pages", ["url"], name: "index_mercury_pages_on_url", unique: true, using: :btree
 
   create_table "notifications", force: :cascade do |t|
     t.integer  "source_id"
