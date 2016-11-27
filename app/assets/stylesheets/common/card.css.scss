@@ -376,10 +376,12 @@ div.card-item {
       line-height: 1.2em;
     }
     div.vote-buttons {
-      font-size: 1.2em;
+      font-size: 0.5em;
+      line-height: initial;
       float: right;
       margin-top: 0.3em;
       margin-right: 0.15em;
+      background-color: inherit;
       a.vote-button {
         font-size: 1.4em;
       }
@@ -455,16 +457,6 @@ div.card-grid {
     margin-bottom: 15px;
     padding-right: 30px; // To allow room for the votes
     background-color: inherit;
-    div.votes {
-      width: auto;
-      height: auto;
-      display: inline-block;
-      float: right;
-      font-size: 0.5em;
-      position: absolute;
-      background-color: inherit;
-      line-height: initial;
-    }
   }
   div.card-column {
     @include respond-to(phone) {
