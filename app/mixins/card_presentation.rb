@@ -171,10 +171,12 @@ module CardPresentation
     nil
   end
 
+=begin
   # Does this presenter have an avatar to present on cards, etc?
   def card_avatar?
     false
   end
+=end
 
   def card_avatar options={}
     nil

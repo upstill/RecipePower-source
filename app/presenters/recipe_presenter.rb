@@ -17,9 +17,11 @@ class RecipePresenter < CollectiblePresenter
     end || ''
   end
 
+=begin
   def card_avatar?
     card_video.present? || super
   end
+=end
 
   # The recipe's avatar can be either a video or a straight image
   def card_avatar options={}

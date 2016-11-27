@@ -41,7 +41,7 @@ module NavtabsHelper
     navtab :collections, 'Collections', collection_user_path(current_user_or_guest), menu_only do
       [
         link_to_submit('My Collection', collection_user_path(current_user_or_guest)),
-        link_to_submit('Recipes', collection_user_path(current_user_or_guest, result_type: 'recipes'), class: 'submenu'),
+        link_to_submit('Cookmarks', collection_user_path(current_user_or_guest, result_type: 'cookmarks'), class: 'submenu'),
         link_to_submit('Treasuries', collection_user_path(current_user_or_guest, result_type: 'lists'), class: 'submenu'),
         link_to_submit('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
         link_to_submit('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),

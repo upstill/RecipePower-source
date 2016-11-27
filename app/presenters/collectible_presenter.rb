@@ -97,10 +97,12 @@ class CollectiblePresenter < BasePresenter
             list_lists_with_status lists_with_status
           when :site
             h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
+=begin
           when :found_by
             if collector = decorator.first_collector
               h.labelled_avatar collector.decorate, onload: 'layoutMasonryOnLoad(event);'
             end
+=end
           when :notes
             decorator.notes if decorator.respond_to? :notes
           else
@@ -114,13 +116,16 @@ class CollectiblePresenter < BasePresenter
   end
 
   # Does this presenter have an avatar to present on cards, etc?
+=begin
   def card_avatar?
     decorator.imgdata.present?
   end
+=end
 
   def card_avatar options={}
     # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
     if (img = image_from_decorator(decorator)) && options[:onlinks]
+      # Include invisible links to open the entity on click and edit the picture on double-click
       img <<
           link_to('',
                   decorator.external_link,
@@ -135,13 +140,28 @@ class CollectiblePresenter < BasePresenter
                          polymorphic_path([:editpic, decorator.object]),
                          mode: 'modal',
                          class: 'dblclicker') if permitted_to?(:update, decorator.object)
+      content_tag :div, img, class: 'onlinks'
+    else
+      img
     end
-    img
   end
 
   # By default, show the card if there's an avatar OR a backup avatar
   def card_show_avatar
     (href = decorator.imgdata).present? ? href : h.image_path(decorator.fallback_imgdata)
+  end
+
+  # Present the card column in which is embedded the avatar for the entity, and that of is first collector, if any
+  def card_avatar_column
+    content = card_avatar(onlinks: true)
+    if (collector = decorator.first_collector)
+      content << card_aspect_enclosure( :found_by,
+                                        h.labelled_avatar(collector.decorate),
+                                        'Found By')
+    end
+    content_tag :div,
+                content,
+                { class: "stamp avatar card-column", style: ('display:none;' if content.empty?) }.compact
   end
 
   # Entities are editable, sharable, votable and collectible from the card by default
