@@ -82,7 +82,7 @@ div.card-item {
     }
   }
   h3 {
-    color: #cccccc;
+    color: #afabab;
     font-size: 1.4em;
     margin-top: 0.5em;
     margin-bottom: 0em;
@@ -111,6 +111,10 @@ div.card-item {
     // color: #8D8F90;
     &.description {
       font-size: 0.6em;
+      color: #949292;
+    }
+    &.notes {
+      font-size: 0.5em;
       color: #aaaaaa;
     }
     span.tagsep {

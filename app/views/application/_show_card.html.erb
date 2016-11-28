@@ -13,10 +13,12 @@
         <%= presenter.vote_buttons %>
         <%= presenter.card_homelink link_direct: true, class: 'title-link' %>
         <%= presenter.edit_button %>
+        <%= presenter.tag_button %>
         <%= presenter.collect_button %>
         <%= presenter.card_aspect_rendered :description %>
+        <%= presenter.card_aspect_rendered :notes %>
       </div>
-      <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
+      <% presenter.rendered_aspects( except: [:title, :description, :notes] ) do |aspect, content | %>
           <div class="grid-item card-column <%= aspect %>">
             <%= content %>
           </div>

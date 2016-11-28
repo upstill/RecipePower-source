@@ -28,6 +28,9 @@ class UserDecorator < CollectibleDecorator
     gleaning.extract1 'Image' do |value| object.image = value end
   end
 
+  def first_collector
+  end
+
   # Filter the user's taggings by entity_type
   def owned_taggings entity_type=nil
     entity_type ? user.owned_taggings.where(entity_type: entity_type.to_s) : user.owned_taggings
