@@ -126,16 +126,14 @@ class User < ActiveRecord::Base
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
     ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
     if ref.created_at # Existed prior
-      if (Time.now - ref.created_at) > 5
+      if collect && !ref.in_collection
+        # We use the created_at time as "time of collection"
         ref.created_at = ref.updated_at = Time.now
-        ref.in_collection ||= collect
+        ref.in_collection = true
         Rcpref.record_timestamps=false
         ref.save
         Rcpref.record_timestamps=true
-      elsif collect && !ref.in_collection # Just touch if previously saved
-        ref.in_collection = true
-        ref.save
-      else
+      else  # Just touch if previously saved
         ref.touch
       end
     else # Just save the reference
