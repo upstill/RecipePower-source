@@ -116,10 +116,7 @@ public
   def contents_scope model_name='Recipe'
     case model_name
       when 'Recipe'
-        urls = references.pluck(:url).collect { |url| url + '%' }
-        q = urls.map { |url| '"references"."url" ILIKE ?' }.join ' OR '
-        q = "\"references\".\"type\" = 'RecipeReference' AND (#{q})"
-        Recipe.joins(:references).where q, *urls
+        RecipeReference.affiliates_scope references.pluck(:url), true
       when 'Feed'
         feeds
     end

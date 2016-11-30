@@ -604,7 +604,7 @@ class Www_bbc_co_uk_Scraper < Scraper
 
         unless File.exist?(fpath)
           # @mechanize.download(hpath, fpath)
-          if ref = Reference.lookup_by_url('RecipeReference', url).first
+          if ref = RecipeReference.lookup(url).first
             ref.filename = fpath
             ref.save
           else

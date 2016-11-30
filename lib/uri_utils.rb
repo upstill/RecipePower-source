@@ -96,9 +96,22 @@ def normalized_uri url
 end
 
 def normalize_url url
-  if uri = normalized_uri(url)
+  if (uri = normalized_uri(url)) && uri.host.present?
     uri.to_s
   end
+end
+
+# Map url or urls into their normalized form, optionally removing the protocol
+# 'http://ganga.com' -> ['http://ganga.com']
+# 'http://ganga.com', true -> ['ganga.com']
+# (see test/unit/uri_utils_test.rb for full test suite)
+def normalize_urls url_or_urls, strip_protocol=false
+  (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url|
+    if (norm = normalize_url(url)) && strip_protocol
+      norm.sub!(/^(http[^\/]*)?\/\//, '')
+    end
+    norm if norm.present?
+  }.compact.uniq
 end
 
 # Parse the url and return the protocol, host and port portion

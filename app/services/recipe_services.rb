@@ -15,8 +15,7 @@ class RecipeServices
     all_ids = Set.new Recipe.all.map(&:id)
     (all_ids - current_ids).each { |id|
       rcp = Recipe.find id
-      old_ref = RecipeReference.lookup rcp.url # Get the competitor
-      old_rcp = old_ref.recipe
+      old_rcp = RecipeReference.lookup_affiliate rcp.url # Get the competitor
       puts "Recipe ##{rcp.id} (url #{rcp.url})..."
       puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
       old_rcp.absorb rcp
@@ -370,8 +369,7 @@ class RecipeServices
           label = "Recipe via Reference"
           index_name = "references_index_by_url_and_type"
           index_table = :references
-          recipe_urls.each { |url|
-            ref = RecipeReference.lookup url
+          RecipeReference.lookup(recipe_urls).each { |ref|
             recipe = ref.recipe
           }
         when 3

@@ -70,7 +70,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_aspects which_column=nil
-    (super + [ :description, :title, (:found_by if @decorator.first_collector) ]).compact.uniq
+    (super + [ :description, :title, :site, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
   def card_aspect which
@@ -89,12 +89,13 @@ class CollectiblePresenter < BasePresenter
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
           when :site
-            h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
+            h.homelink(decorator.object.site) if decorator.object.respond_to? :site
+            # h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
           when :notes
             decorator.notes if decorator.respond_to? :notes
           else
             return super
-        end
+          end
     [ label, contents ]
   end
 

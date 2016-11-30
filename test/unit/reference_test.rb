@@ -4,6 +4,59 @@ class ReferenceTest < ActiveSupport::TestCase
   fixtures :referents
   fixtures :tags
 
+  test "querify skipping protocol" do
+    q, urls = Reference.querify 'http://ganga.com/upchuck', true
+    assert_equal ['http://ganga.com/upchuck%' ], urls
+    assert_equal '"references"."url" ILIKE ?', q
+    q, urls = Reference.querify ['https://ganga.com/upchuck'], true
+    assert_equal ['https://ganga.com/upchuck%' ], urls
+    assert_equal '"references"."url" ILIKE ?', q
+    q, urls = Reference.querify [ 'http://ganga.com/upchuck', 'http://ganga.com' ], true
+    assert_equal ['http://ganga.com/%' ], urls
+    assert_equal '"references"."url" ILIKE ?', q
+    q, urls = Reference.querify [ 'http://ganga.com/upchuck', 'https://ganga.com' ], true
+    assert_equal ['http://ganga.com/upchuck%', 'https://ganga.com/%' ], urls
+    assert_equal '"references"."url" ILIKE ? OR "references"."url" ILIKE ?', q
+  end
+
+  test "querify including protocol" do
+    q, urls = Reference.querify 'http://ganga.com/upchuck'
+    assert_equal ['http://ganga.com/upchuck', 'https://ganga.com/upchuck' ], urls
+    assert_equal "\"references\".\"url\" in (?, ?)", q
+    q, urls = Reference.querify ['https://ganga.com/upchuck']
+    assert_equal ['http://ganga.com/upchuck', 'https://ganga.com/upchuck' ], urls
+    assert_equal "\"references\".\"url\" in (?, ?)", q
+    q, urls = Reference.querify [ 'http://ganga.com/upchuck', 'https://ganga.com' ]
+    assert_equal ['http://ganga.com/upchuck', 'https://ganga.com/upchuck', 'http://ganga.com/', 'https://ganga.com/' ], urls
+    assert_equal "\"references\".\"url\" in (?, ?, ?, ?)", q
+
+    # Minimizes duplicates
+    q, urls = Reference.querify [ 'http://ganga.com/upchuck', 'https://ganga.com/upchuck', 'http://ganga.com/', 'https://ganga.com/' ]
+    assert_equal ['http://ganga.com/upchuck', 'https://ganga.com/upchuck', 'http://ganga.com/', 'https://ganga.com/' ], urls
+    assert_equal "\"references\".\"url\" in (?, ?, ?, ?)", q
+  end
+
+  test "bogus urls" do
+    q, urls = Reference.querify 'bogus url'
+    assert_equal [ ], urls
+    assert_equal '', q
+    q, urls = Reference.querify [ 'bogus url' ]
+    assert_equal [ ], urls
+    assert_equal '', q
+    q, urls = Reference.querify [ 'bogus url', 'another bogus' ]
+    assert_equal [ ], urls
+    assert_equal '', q
+    q, urls = Reference.querify 'bogus url', true
+    assert_equal [ ], urls
+    assert_equal '', q
+    q, urls = Reference.querify [ 'bogus url' ], true
+    assert_equal [ ], urls
+    assert_equal '', q
+    q, urls = Reference.querify [ 'bogus url', 'another bogus' ], true
+    assert_equal [ ], urls
+    assert_equal '', q
+  end
+
   test "Make New Reference" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
