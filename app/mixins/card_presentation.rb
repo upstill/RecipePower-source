@@ -58,9 +58,6 @@ module CardPresentation
     card_aspect_enclosure which, contents, label
   end
 
-  def card_aspect_size which
-  end
-
   # How many columns does the card have (next to the avatar)
   def card_ncolumns
     0
@@ -91,7 +88,7 @@ module CardPresentation
   def rendered_aspects *args
     card_aspects_filtered(*args).each do |aspect|
       contents = card_aspect_rendered aspect
-      yield "#{aspect} #{card_aspect_size aspect}", contents if contents.present?
+      yield aspect.to_s, contents if contents.present?
     end
   end
 
@@ -171,10 +168,12 @@ module CardPresentation
     nil
   end
 
+=begin
   # Does this presenter have an avatar to present on cards, etc?
   def card_avatar?
     false
   end
+=end
 
   def card_avatar options={}
     nil
@@ -187,6 +186,10 @@ module CardPresentation
 
   def edit_button
     collectible_edit_button decorator if editable_from_card?
+  end
+
+  def tag_button
+    collectible_tag_button decorator
   end
 
   def tools_menu

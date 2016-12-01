@@ -34,11 +34,13 @@ class CollectiblePresenter < BasePresenter
     @buttons || h.collectible_buttons_panel(@decorator)
   end
 
+=begin
   def present_field_wrapped what=nil
     h.content_tag :span,
                   present_field(what),
                   class: 'hide-if-empty'
   end
+=end
 
   def field_value what=nil
     return form_authenticity_token if what && (what == 'authToken')
@@ -68,7 +70,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_aspects which_column=nil
-    (super + [ :description, :title, (:found_by if @decorator.first_collector) ]).compact.uniq
+    (super + [ :description, :title, :site, (:found_by if @decorator.first_collector) ]).compact.uniq
   end
 
   def card_aspect which
@@ -81,46 +83,26 @@ class CollectiblePresenter < BasePresenter
             denotation = which.to_s.downcase
             tags = decorator.send "visible_#{whichstr}_tags" # visible_tags :tagtype => :Dish
             label = field_label_counted decorator.send("#{whichstr}_tags_label"), tags.count
-            tags_str = entity_links tags, joinstr: ' | '
-            (whichsym == :Misc) ?
-                safe_join( [ tags_str, collectible_tag_button(decorator)], '&nbsp; '.html_safe ) :
-                tags_str
-=begin
-          when :Misc # Column for listing tag types not individually presented
-            taglist = decorator.visible_untyped_culinaryterm_tags # visible_tags :tagtype_x => [ :Question, :List, :Author ]
-            label = 'MISC. TAGS' # field_label_counted 'Misc. tags', taglist.count
-            list_tags_for_collectible taglist, decorator
-=end
+            entity_links tags, joinstr: ' | '
           when :List # Lists it appears under
             lists_with_status = ListServices.associated_lists_with_status decorator
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
           when :site
-            h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
-          when :found_by
-            if collector = decorator.first_collector
-              h.labelled_avatar collector.decorate, onload: 'layoutMasonryOnLoad(event);'
-            end
+            h.homelink(decorator.object.site) if decorator.object.respond_to? :site
+            # h.link_to decorator.sourcename, decorator.sourcehome, class: 'tablink' if decorator.respond_to? :sourcehome
           when :notes
             decorator.notes if decorator.respond_to? :notes
           else
             return super
-        end
+          end
     [ label, contents ]
-  end
-
-  def card_aspect_size which
-    'card-column-xl' if (which.to_sym == :tags)
-  end
-
-  # Does this presenter have an avatar to present on cards, etc?
-  def card_avatar?
-    decorator.imgdata.present?
   end
 
   def card_avatar options={}
     # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
     if (img = image_from_decorator(decorator)) && options[:onlinks]
+      # Include invisible links to open the entity on click and edit the picture on double-click
       img <<
           link_to('',
                   decorator.external_link,
@@ -135,13 +117,34 @@ class CollectiblePresenter < BasePresenter
                          polymorphic_path([:editpic, decorator.object]),
                          mode: 'modal',
                          class: 'dblclicker') if permitted_to?(:update, decorator.object)
+      content_tag :div, img, class: 'onlinks'
+    else
+      img
     end
-    img
   end
 
   # By default, show the card if there's an avatar OR a backup avatar
   def card_show_avatar
     (href = decorator.imgdata).present? ? href : h.image_path(decorator.fallback_imgdata)
+  end
+
+  def card_avatar_accompaniment
+    if collector = decorator.first_collector
+      card_aspect_enclosure :found_by,
+                            h.labelled_avatar(collector.decorate),
+                            'Found By'
+    end
+  end
+
+  # Present the card column in which is embedded the avatar for the entity, and that of is first collector, if any
+  def card_avatar_column
+    content = card_avatar(onlinks: true)
+    if acc = card_avatar_accompaniment
+      content << acc
+    end
+    content_tag :div,
+                content,
+                { class: 'stamp avatar card-column', style: ('display:none;' if content.empty?) } #.compact
   end
 
   # Entities are editable, sharable, votable and collectible from the card by default

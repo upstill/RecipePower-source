@@ -3,20 +3,25 @@ class ListPresenter < CollectiblePresenter
     "A list by #{@object.owner.handle}."
   end
 
+  def card_avatar_accompaniment
+    if owner = @object.owner
+      card_aspect_enclosure :created_by,
+                            h.labelled_avatar(owner.decorate),
+                            'Compiled By'
+    end
+  end
+
   def card_aspect which
     label = nil
     content =
     case which
-      when :created_by
-        label = 'as compiled by'
-        h.labelled_avatar @object.owner.decorate
       when :description
         label = ''
         @object.description
       when :tags
-        present_field_wrapped 'tags'
+        present_field 'tags'
       when :notes
-        label = 'description'
+        label = ''
         @object.notes
       else
         return super
@@ -26,6 +31,6 @@ class ListPresenter < CollectiblePresenter
 
   # Provide a list of aspects for display in the entity's panel, suitable for passing to card_aspect
   def card_aspects which_column=nil
-    [ :created_by, :description, :tags, :notes ]
+    [ :description, :tags, :notes ]
   end
 end

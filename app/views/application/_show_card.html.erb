@@ -8,17 +8,17 @@
             "stamp": ".stamp" }'>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
-      <div class="stamp avatar card-column onlinks" <%= 'style=display:none' if !presenter.card_avatar? %>>
-        <%= presenter.card_avatar onlinks: true %>
-      </div>
+      <%= presenter.card_avatar_column %>
       <div class="stamp title">
         <%= presenter.vote_buttons %>
         <%= presenter.card_homelink link_direct: true, class: 'title-link' %>
         <%= presenter.edit_button %>
+        <%= presenter.tag_button %>
         <%= presenter.collect_button %>
         <%= presenter.card_aspect_rendered :description %>
+        <%= presenter.card_aspect_rendered :notes %>
       </div>
-      <% presenter.rendered_aspects( except: [:title, :description] ) do |aspect, content | %>
+      <% presenter.rendered_aspects( except: [:title, :description, :notes] ) do |aspect, content | %>
           <div class="grid-item card-column <%= aspect %>">
             <%= content %>
           </div>

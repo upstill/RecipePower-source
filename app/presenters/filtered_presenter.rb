@@ -526,6 +526,10 @@ end
 
 class UsersCollectionPresenter < UserContentPresenter
 
+  def sibling_types
+    %w{ lists cookmarks feeds friends } - [ result_type ]
+  end
+
 end
 
 class UsersRecentPresenter < UserContentPresenter

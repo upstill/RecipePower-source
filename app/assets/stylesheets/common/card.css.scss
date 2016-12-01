@@ -82,7 +82,7 @@ div.card-item {
     }
   }
   h3 {
-    color: #cccccc;
+    color: #afabab;
     font-size: 1.4em;
     margin-top: 0.5em;
     margin-bottom: 0em;
@@ -111,6 +111,10 @@ div.card-item {
     // color: #8D8F90;
     &.description {
       font-size: 0.6em;
+      color: #949292;
+    }
+    &.notes {
+      font-size: 0.5em;
       color: #aaaaaa;
     }
     span.tagsep {
@@ -351,8 +355,7 @@ div.card-item {
       }
     }
     div.owner-pic {
-      width: 100%; // 8em;
-      // margin: 1em;
+      width: 60%;
     }
     td.lower-content {
       padding-bottom: 0.3em;
@@ -376,10 +379,12 @@ div.card-item {
       line-height: 1.2em;
     }
     div.vote-buttons {
-      font-size: 1.2em;
+      font-size: 0.5em;
+      line-height: initial;
       float: right;
       margin-top: 0.3em;
       margin-right: 0.15em;
+      background-color: inherit;
       a.vote-button {
         font-size: 1.4em;
       }
@@ -455,16 +460,6 @@ div.card-grid {
     margin-bottom: 15px;
     padding-right: 30px; // To allow room for the votes
     background-color: inherit;
-    div.votes {
-      width: auto;
-      height: auto;
-      display: inline-block;
-      float: right;
-      font-size: 0.5em;
-      position: absolute;
-      background-color: inherit;
-      line-height: initial;
-    }
   }
   div.card-column {
     @include respond-to(phone) {

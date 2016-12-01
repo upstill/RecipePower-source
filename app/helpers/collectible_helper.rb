@@ -274,7 +274,7 @@ module CollectibleHelper
   end
 
   def vote_buttons_replacement entity
-    [ "div.vote-buttons#"+dom_id(entity), collectible_vote_buttons(entity) ]
+    [ "div.vote-buttons#"+dom_id(entity), collectible_vote_buttons(entity, class: 'stamp votes') ]
   end
 
 end

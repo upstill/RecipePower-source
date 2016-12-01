@@ -7,7 +7,7 @@ class SitePresenter < CollectiblePresenter
   end
 
   def card_aspects
-    super + [ :feeds ]
+    super + [ :feeds ] - [ :site ]
   end
 
   def card_aspect which

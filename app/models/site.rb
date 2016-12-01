@@ -116,10 +116,7 @@ public
   def contents_scope model_name='Recipe'
     case model_name
       when 'Recipe'
-        urls = references.pluck(:url).collect { |url| url + '%' }
-        q = urls.map { |url| '"references"."url" ILIKE ?' }.join ' OR '
-        q = "\"references\".\"type\" = 'RecipeReference' AND (#{q})"
-        Recipe.joins(:references).where q, *urls
+        RecipeReference.affiliates_scope references.pluck(:url), true
       when 'Feed'
         feeds
     end
@@ -180,13 +177,13 @@ public
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )
     else
-      self.referent = Referent.express(str, :Source, :form => :generic )
+      self.referent = Referent.express(str, :Source, :form => :generic)
     end
   end
 
   def recipes
     # The recipes for a site are all those that match the site's references
-    RecipeReference.lookup_recipes references.map(&:url), true
+    RecipeReference.lookup_recipes references.pluck(:url), true
   end
 
 end

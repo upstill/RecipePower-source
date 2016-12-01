@@ -15,6 +15,17 @@ class UserPresenter < CollectiblePresenter
         super
   end
 
+  def card_avatar_accompaniment
+    contents =
+        if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], current_user_or_guest).order(created_at: :desc).first
+          latest = latestrr.entity
+          collectible_show_thumbnail latest.decorate
+        elsif current_user && user == current_user
+          "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some!".html_safe
+        end
+    card_aspect_enclosure :latest_recipe, contents, 'Latest Cookmark'
+  end
+
   def card_homelink options={}
     user_homelink @decorator, options
   end
@@ -40,18 +51,13 @@ class UserPresenter < CollectiblePresenter
   def card_aspects which_column=nil
     @aspects ||= [
         [
-            # :member_since,
             :name_form,
             :owned_lists,
             :desert_island,
             :question,
         ],
         [
-            :latest_recipe,
             :latest_list
-        ],
-        [
-            :about
         ]
 
     ]
@@ -66,9 +72,11 @@ class UserPresenter < CollectiblePresenter
           label = 'Human Name'
           contents = with_format('html') { render 'form_fullname', user: user }
         end
-      when :member_since
-        contents = member_since
-      when :about
+      when :notes
+        label = ''
+        contents = 'Member Since ' + member_since
+      when :description # :about
+        label = ''
         contents = show_or_edit which, user.about
       when :collected_feeds
         label = 'Following the feeds'
@@ -122,14 +130,6 @@ class UserPresenter < CollectiblePresenter
           contents = answer.answer
         end
         label = answer.question.name if answer
-      when :latest_recipe
-        label = 'Latest Cookmark'
-         if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry],current_user_or_guest).order(created_at: :desc).first
-          latest = latestrr.entity
-          contents = collectible_show_thumbnail latest.decorate
-        elsif current_user && user == current_user
-          contents = "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some!".html_safe
-        end
       when :latest_list
         label = 'Newest Treasury'
         if latest = user.decorate.owned_lists(current_user_or_guest).order(updated_at: :desc).first
@@ -144,7 +144,7 @@ class UserPresenter < CollectiblePresenter
   def show_or_edit which, val
     if is_viewer?
       if val.present?
-        (user.about + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs')).html_safe
+        (user.about + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs', :mode => :modal)).html_safe
       else
         card_aspect_editor which
       end
