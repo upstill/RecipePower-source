@@ -123,4 +123,15 @@ class ReferenceTest < ActiveSupport::TestCase
     assert_equal Reference.type_to_class(1024), SiteReference
     assert_equal Reference.type_to_class(2048), EventReference
   end
+
+  test "Site References aren't redundant" do
+    sr1 = SiteReference.find_or_initialize 'http://esquire.com/bijou'
+    sr1.map &:save
+    sr2 = SiteReference.find_or_initialize 'https://esquire.com/bijou'
+    sr2.each { |sr| assert sr1.include?(sr) }
+    sr2 = SiteReference.find_or_initialize 'https://esquire.com'
+    sr2.each { |sr| assert sr1.include?(sr) }
+    sr2 = SiteReference.find_or_initialize 'https://esquire.com/'
+    sr2.each { |sr| assert sr1.include?(sr) }
+  end
 end

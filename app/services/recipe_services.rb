@@ -369,9 +369,12 @@ class RecipeServices
           label = "Recipe via Reference"
           index_name = "references_index_by_url_and_type"
           index_table = :references
+=begin
+          We no longer lookup references in batches
           RecipeReference.lookup(recipe_urls).each { |ref|
             recipe = ref.recipe
           }
+=end
         when 3
           label = "Recipe via ID-no ref"
           index_name = "recipes_index_by_id"

@@ -177,13 +177,13 @@ public
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )
     else
-      self.referent = Referent.express(str, :Source, :form => :generic )
+      self.referent = Referent.express(str, :Source, :form => :generic)
     end
   end
 
   def recipes
     # The recipes for a site are all those that match the site's references
-    RecipeReference.lookup_recipes references.map(&:url), true
+    RecipeReference.lookup_recipes references.pluck(:url), true
   end
 
 end

@@ -2,6 +2,7 @@ require 'RMagick' unless Rails.env.development?
 require 'open-uri'
 require 'mechanize'
 require 'fileutils'
+require 'array_utils'
 
 class Reference < ActiveRecord::Base
 
@@ -49,6 +50,7 @@ class Reference < ActiveRecord::Base
     Reference.typenum typesym
   end
 
+=begin
   # Use a normalized URL to find a matching reference of the given type.
   # The 'partial' flag indicates that it's sufficient for the URL to match a substring of the target record
   def self.lookup_by_url type, normalized_url, partial=false
@@ -62,9 +64,13 @@ class Reference < ActiveRecord::Base
       # Reference.where type: type, url: normalized_url
     end
   end
+=end
 
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
   def self.lookup url_or_urls, partial=false
+    q, urls = self.querify(url_or_urls, partial)
+    urls.present? ? self.where(q, *urls) : self.none
+=begin
     if self.affiliate_class
       (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url|
         normalize_url url
@@ -74,24 +80,58 @@ class Reference < ActiveRecord::Base
         Reference.lookup_by_url(self.to_s, normalized_url, partial).to_a
       }.flatten.compact.uniq
     end
+=end
+  end
+
+  # private
+
+  # Craft a query string and an array of urls, suitable for a #where call
+  # 'http://ganga.com/upchuck' -> [ '"references"."url" ILIKE ?', [ 'http://ganga.com/upchuck%' ]]
+  # [ 'http://ganga.com/upchuck' ] -> [ '"references"."url" ILIKE ?', ['http://ganga.com/upchuck%' ]]
+  # [ 'http://ganga.com/upchuck', 'http://ganga.com' ] -> [ '"references"."url" ILIKE ?', ['http://ganga.com%' ]]
+  # See test/unit/reference_test.rb for full test suite
+  def self.querify url_or_urls, partial=false
+    begin
+      urls = normalize_urls url_or_urls, !partial
+    rescue
+      # If we can't normalize the urls, then use the un-normalized versions and hope for the best
+      urls = (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls])
+      partial = true
+    end
+    if partial
+      urls = condense_strings(urls).map { |url| url + '%' }
+      q = (['"references"."url" ILIKE ?'] * urls.count).join(' OR ')
+    else
+      urls = urls.collect { |part| ['http://'+part, 'https://'+part] }.flatten
+      q = urls.present? ? "\"references\".\"url\" in (#{(['?']*urls.count).join ', '})" : ''
+    end
+    [q, urls]
+  end
+
+  # public
+
+  # Return a scope for fetching affiliates on a url. The class name implies the target affiliate type
+  def self.affiliates_scope url_or_urls, partial=false
+    return nil if !self.affiliate_class
+
+    q, urls = self.querify(url_or_urls, partial)
+    if urls.present?
+      q = "\"references\".\"type\" = '#{self}' AND (#{q})"
+      self.affiliate_class.joins(:references).where(q, *urls).uniq
+    else
+      self.affiliate_class.none
+    end
   end
 
   # Lookup the affiliate(s) that match the given url(s).
-  # 'by_site' stipulates that an initial substring match suffices
+  # 'partial' stipulates that an initial substring match suffices
   def self.lookup_affiliates url_or_urls, partial=false
-    if self.affiliate_class # Referents need not apply (unknown affiliate class)
-      unless (ids = self.lookup(url_or_urls, partial).map(&:affiliate_id).compact.uniq).empty?
-        return self.affiliate_class.find ids
-      end
-    end
-    []
+    (scope = self.affiliates_scope(url_or_urls, partial)) ? scope.to_a : []
   end
 
   def self.lookup_affiliate url_or_urls, partial=false
-    if self.affiliate_class # Referents need not apply (unknown affiliate class)
-      unless (ids = self.lookup(url_or_urls, partial).map(&:affiliate_id).compact.uniq).empty?
-        self.affiliate_class.find ids.first
-      end
+    if scope = self.affiliates_scope(url_or_urls, partial)
+      scope.first
     end
   end
 
@@ -127,7 +167,8 @@ class Reference < ActiveRecord::Base
       ref.errors.add :url, "can't be blank"
       refs = [ref]
     else
-      refs = self.lookup_by_url(params[:type], normalized).order 'canonical DESC'
+      ref_class = params[:type].constantize
+      refs = ref_class.lookup(normalized).order 'canonical DESC'
       if refs.empty?
         # Need to create, if possible
         if !(redirected = test_url normalized) # Purports to be a url, but doesn't work
@@ -143,7 +184,7 @@ class Reference < ActiveRecord::Base
           # NB: It's true that we could simply use the redirected URL for looking up a reference, but that would require
           #  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and
           #  the Reference class remembers the mapping.
-           refs = Reference.lookup_by_url(params[:type], redirected).to_a
+          refs = ref_class.lookup(redirected).to_a
           # refs = Reference.where(type: params[:type], url: redirected).to_a
           refs = [ Reference.new(params.merge url: redirected) ] if refs.empty?
           (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
@@ -314,7 +355,7 @@ class RecipeReference < Reference
   end
 
   def self.lookup_recipes url, by_site=false
-    self.lookup_affiliates url, by_site
+    self.affiliates_scope url, by_site
   end
 
   def self.scrape first=''
@@ -359,7 +400,7 @@ class RecipeReference < Reference
               STDERR.puts "+ #{link.href} => #{path}"
 
               url = normalize_url "http://www.bbc.co.uk#{link.href}"
-              next if File.exist?(path) || Reference.lookup_by_url('RecipeReference', url).exists?
+              next if File.exist?(path) || RecipeReference.lookup(url).exists?
 
               # mechanize.download(link.href, path)
               RecipeReference.create url: url, filename: path
@@ -572,9 +613,8 @@ class SiteReference < Reference
     normalized_link = normalize_url(url).sub(/\/$/,'')
     if host_url = host_url(normalized_link)
       # Candidates are all sites with a matching host
-      matches = Reference.lookup_by_url 'SiteReference', host_url, true
       # matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
-      matches.map(&:url).inject(nil) { |result, this|
+      SiteReference.lookup(host_url, true).pluck(:url).inject(nil) { |result, this|
         # If more than one match, seek the longest
         result = this if normalized_link.start_with?(this) && (!result || (result.length < this.length))
         result
@@ -593,16 +633,20 @@ class SiteReference < Reference
     self.lookup_affiliates self.canonical_url(url)
   end
 
-  # Generelly we reduce the find to the shortest available subpath of a url
+  # Generally we reduce the find to the shortest available subpath of a url
   def self.find_or_initialize url_or_urls, in_full=false
     urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
-    urls = urls.map { |url| canonical_url url }.compact.uniq unless in_full
+    urls.map! { |url| canonical_url url } unless in_full
+    refscope = SiteReference.lookup urls
+    refscope.present? ? refscope.to_a : super(urls.first)
+=begin
     urls.each { |url|
-      siterefs = Reference.lookup_by_url 'SiteReference', url
+      siterefs = SiteReference.lookup url
       # siterefs = self.where url: url # Lookup the site on the exact url
       return siterefs unless siterefs.empty?
     }
     super urls.first unless urls.empty?
+=end
   end
 
   protected
