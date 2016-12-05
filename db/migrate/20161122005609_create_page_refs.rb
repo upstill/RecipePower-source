@@ -1,6 +1,6 @@
-class CreateMercuryPages < ActiveRecord::Migration
+class CreatePageRefs < ActiveRecord::Migration
   def change
-    create_table :mercury_pages do |t|
+    create_table :page_refs do |t|
       t.text :url
       t.text :title
       t.text :content
@@ -12,7 +12,9 @@ class CreateMercuryPages < ActiveRecord::Migration
 
       t.timestamps null: false
     end
-    add_column :mercury_pages, :aliases, :text, array: true, default: []
-    add_index :mercury_pages, :url, :unique => true
+    add_column :page_refs, :aliases, :text, array: true, default: []
+    add_index :page_refs, :url, :unique => true
+
+    add_column :recipes, :page_ref_id, :integer
   end
 end

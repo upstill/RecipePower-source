@@ -8,6 +8,45 @@ class RecipeServices
     # @current_user = current_user
   end
 
+  def self.convert_references
+    Recipe.all.each { |rec| RecipeServices.new(rec).convert_references }
+  end
+
+  def convert_references
+
+    # Is the only difference between the two URLs a trailing slash in the link?
+    def cr url1, url2
+      uri1 = URI.parse url1
+      uri2 = URI.parse url2
+      uri1 && uri1 && (uri2.path.sub /\/$/, '') == (uri1.path.sub /\/$/, '')
+    end
+
+    puts "Converting references for recipe #{recipe.id}:"
+    recipe.references.each { |reference|
+      puts "Making PageReference for reference ##{reference.id} (#{reference.url})"
+      pr = PageRef.fetch reference.url
+      if pr.url
+        if !recipe.page_ref
+          recipe.page_ref = pr
+        elsif recipe.page_ref != pr
+          # There's a prior page_ref and it doesn't match the new one
+          if cr(recipe.page_ref.url, pr.url) # If it's only a difference of the trailing slash...
+            # ...just merge the new pr into the old
+            recipe.page_ref.absorb pr
+          else
+            raise "Reference #{reference.id} (#{reference.url}) fails to merge with PageRef #{pr.id} (#{[[pr.url]+pr.aliases].join(', ')})"
+          end
+        end
+      end
+    }
+=begin
+    if !recipe.page_ref
+      raise "Recipe #{recipe.id} failed to get a page ref"
+    end
+=end
+    recipe.save
+  end
+
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.
   def self.fix_redundant
     redundant = []

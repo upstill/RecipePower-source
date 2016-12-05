@@ -184,6 +184,7 @@ public
   def recipes
     # The recipes for a site are all those that match the site's references
     RecipeReference.lookup_recipes references.pluck(:url), true
+    # TODO RecipePage.recipes_from_site ([url] + aliases)
   end
 
 end

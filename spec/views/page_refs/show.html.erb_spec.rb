@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe "mercury_pages/show" do
   before(:each) do
-    @mercury_page = assign(:mercury_page, stub_model(MercuryPage,
+    page_ref = assign(:page_ref, stub_model(PageRef,
       :url => "MyText",
       :title => "MyText",
       :content => "MyText",

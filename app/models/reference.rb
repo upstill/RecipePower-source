@@ -665,7 +665,3 @@ class SiteReference < Reference
   end
 
 end
-
-class EventReference < Reference
-
-end

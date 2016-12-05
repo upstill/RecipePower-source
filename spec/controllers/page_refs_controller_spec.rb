@@ -18,7 +18,7 @@ require 'spec_helper'
 # Message expectations are only used when there is no simpler way to specify
 # that an instance is receiving a specific message.
 
-describe MercuryPagesController do
+describe PageRefsController do
 
   # This should return the minimal set of attributes required to create a valid
   # MercuryPage. As you add validations to MercuryPage, be sure to
@@ -32,32 +32,32 @@ describe MercuryPagesController do
 
   describe "GET index" do
     it "assigns all mercury_pages as @mercury_pages" do
-      mercury_page = MercuryPage.create! valid_attributes
+      mercury_page = PageRef.create! valid_attributes
       get :index, {}, valid_session
-      assigns(:mercury_pages).should eq([mercury_page])
+      assigns(:page_refs).should eq([mercury_page])
     end
   end
 
   describe "GET show" do
     it "assigns the requested mercury_page as @mercury_page" do
-      mercury_page = MercuryPage.create! valid_attributes
+      mercury_page = PageRef.create! valid_attributes
       get :show, {:id => mercury_page.to_param}, valid_session
-      assigns(:mercury_page).should eq(mercury_page)
+      assigns(:page_ref).should eq(mercury_page)
     end
   end
 
   describe "GET new" do
     it "assigns a new mercury_page as @mercury_page" do
       get :new, {}, valid_session
-      assigns(:mercury_page).should be_a_new(MercuryPage)
+      assigns(:page_ref).should be_a_new(PageRef)
     end
   end
 
   describe "GET edit" do
     it "assigns the requested mercury_page as @mercury_page" do
-      mercury_page = MercuryPage.create! valid_attributes
+      mercury_page = PageRef.create! valid_attributes
       get :edit, {:id => mercury_page.to_param}, valid_session
-      assigns(:mercury_page).should eq(mercury_page)
+      assigns(:page_ref).should eq(mercury_page)
     end
   end
 
@@ -65,34 +65,34 @@ describe MercuryPagesController do
     describe "with valid params" do
       it "creates a new MercuryPage" do
         expect {
-          post :create, {:mercury_page => valid_attributes}, valid_session
-        }.to change(MercuryPage, :count).by(1)
+          post :create, {:page_ref => valid_attributes}, valid_session
+        }.to change(PageRef, :count).by(1)
       end
 
       it "assigns a newly created mercury_page as @mercury_page" do
-        post :create, {:mercury_page => valid_attributes}, valid_session
-        assigns(:mercury_page).should be_a(MercuryPage)
-        assigns(:mercury_page).should be_persisted
+        post :create, {:page_ref => valid_attributes}, valid_session
+        assigns(:page_ref).should be_a(PageRef)
+        assigns(:page_ref).should be_persisted
       end
 
       it "redirects to the created mercury_page" do
-        post :create, {:mercury_page => valid_attributes}, valid_session
-        response.should redirect_to(MercuryPage.last)
+        post :create, {:page_ref => valid_attributes}, valid_session
+        response.should redirect_to(PageRef.last)
       end
     end
 
     describe "with invalid params" do
       it "assigns a newly created but unsaved mercury_page as @mercury_page" do
         # Trigger the behavior that occurs when invalid params are submitted
-        MercuryPage.any_instance.stub(:save).and_return(false)
-        post :create, {:mercury_page => { "url" => "invalid value" }}, valid_session
-        assigns(:mercury_page).should be_a_new(MercuryPage)
+        PageRef.any_instance.stub(:save).and_return(false)
+        post :create, {:page_ref => { "url" => "invalid value" }}, valid_session
+        assigns(:page_ref).should be_a_new(PageRef)
       end
 
       it "re-renders the 'new' template" do
         # Trigger the behavior that occurs when invalid params are submitted
-        MercuryPage.any_instance.stub(:save).and_return(false)
-        post :create, {:mercury_page => { "url" => "invalid value" }}, valid_session
+        PageRef.any_instance.stub(:save).and_return(false)
+        post :create, {:page_ref => { "url" => "invalid value" }}, valid_session
         response.should render_template("new")
       end
     end
@@ -101,42 +101,42 @@ describe MercuryPagesController do
   describe "PUT update" do
     describe "with valid params" do
       it "updates the requested mercury_page" do
-        mercury_page = MercuryPage.create! valid_attributes
+        mercury_page = PageRef.create! valid_attributes
         # Assuming there are no other mercury_pages in the database, this
         # specifies that the MercuryPage created on the previous line
         # receives the :update_attributes message with whatever params are
         # submitted in the request.
-        MercuryPage.any_instance.should_receive(:update).with({ "url" => "MyText" })
-        put :update, {:id => mercury_page.to_param, :mercury_page => { "url" => "MyText" }}, valid_session
+        PageRef.any_instance.should_receive(:update).with({ "url" => "MyText" })
+        put :update, {:id => mercury_page.to_param, :page_ref => { "url" => "MyText" }}, valid_session
       end
 
       it "assigns the requested mercury_page as @mercury_page" do
-        mercury_page = MercuryPage.create! valid_attributes
-        put :update, {:id => mercury_page.to_param, :mercury_page => valid_attributes}, valid_session
-        assigns(:mercury_page).should eq(mercury_page)
+        mercury_page = PageRef.create! valid_attributes
+        put :update, {:id => mercury_page.to_param, :page_ref => valid_attributes}, valid_session
+        assigns(:page_ref).should eq(mercury_page)
       end
 
       it "redirects to the mercury_page" do
-        mercury_page = MercuryPage.create! valid_attributes
-        put :update, {:id => mercury_page.to_param, :mercury_page => valid_attributes}, valid_session
+        mercury_page = PageRef.create! valid_attributes
+        put :update, {:id => mercury_page.to_param, :page_ref => valid_attributes}, valid_session
         response.should redirect_to(mercury_page)
       end
     end
 
     describe "with invalid params" do
       it "assigns the mercury_page as @mercury_page" do
-        mercury_page = MercuryPage.create! valid_attributes
+        mercury_page = PageRef.create! valid_attributes
         # Trigger the behavior that occurs when invalid params are submitted
-        MercuryPage.any_instance.stub(:save).and_return(false)
-        put :update, {:id => mercury_page.to_param, :mercury_page => { "url" => "invalid value" }}, valid_session
-        assigns(:mercury_page).should eq(mercury_page)
+        PageRef.any_instance.stub(:save).and_return(false)
+        put :update, {:id => mercury_page.to_param, :page_ref => { "url" => "invalid value" }}, valid_session
+        assigns(:page_ref).should eq(mercury_page)
       end
 
       it "re-renders the 'edit' template" do
-        mercury_page = MercuryPage.create! valid_attributes
+        mercury_page = PageRef.create! valid_attributes
         # Trigger the behavior that occurs when invalid params are submitted
-        MercuryPage.any_instance.stub(:save).and_return(false)
-        put :update, {:id => mercury_page.to_param, :mercury_page => { "url" => "invalid value" }}, valid_session
+        PageRef.any_instance.stub(:save).and_return(false)
+        put :update, {:id => mercury_page.to_param, :page_ref => { "url" => "invalid value" }}, valid_session
         response.should render_template("edit")
       end
     end
@@ -144,14 +144,14 @@ describe MercuryPagesController do
 
   describe "DELETE destroy" do
     it "destroys the requested mercury_page" do
-      mercury_page = MercuryPage.create! valid_attributes
+      mercury_page = PageRef.create! valid_attributes
       expect {
         delete :destroy, {:id => mercury_page.to_param}, valid_session
-      }.to change(MercuryPage, :count).by(-1)
+      }.to change(PageRef, :count).by(-1)
     end
 
     it "redirects to the mercury_pages list" do
-      mercury_page = MercuryPage.create! valid_attributes
+      mercury_page = PageRef.create! valid_attributes
       delete :destroy, {:id => mercury_page.to_param}, valid_session
       response.should redirect_to(mercury_pages_url)
     end

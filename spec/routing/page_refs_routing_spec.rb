@@ -1,6 +1,6 @@
 require "spec_helper"
 
-describe MercuryPagesController do
+describe PageRefsController do
   describe "routing" do
 
     it "routes to #index" do
