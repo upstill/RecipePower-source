@@ -2,36 +2,36 @@
 
 <p>
   <strong>Url:</strong>
-  <%= @mercury_page.url %>
+  <%= page_ref.url %>
 </p>
 
 <p>
   <strong>Title:</strong>
-  <%= @mercury_page.title %>
+  <%= page_ref.title %>
 </p>
 
 <p>
   <strong>Date published:</strong>
-  <%= @mercury_page.date_published %>
+  <%= page_ref.date_published %>
 </p>
 
 <p>
   <strong>Lead image url:</strong>
-  <%= image_tag @mercury_page.lead_image_url %>
+  <%= image_tag page_ref.lead_image_url %>
 </p>
 
 <p>
   <strong>Domain:</strong>
-  <%= @mercury_page.domain %>
+  <%= page_ref.domain %>
 </p>
 
 <p>
   <strong>Content:</strong>
-  <%= @mercury_page.content.html_safe %>
+  <%= page_ref.content.html_safe %>
 </p>
 
-<%= link_to 'Edit', edit_mercury_page_path(@mercury_page) %> |
-<%= link_to 'Back', mercury_pages_path %>
+<%= link_to 'Edit', edit_page_ref_path(page_ref) %> |
+<%= link_to 'Back', page_refs_path %>
 <div class="entry-content">
 
   <div class="smittenkitchen-print-hide">

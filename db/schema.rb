@@ -164,22 +164,6 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer "list_id"
   end
 
-  create_table "mercury_pages", force: :cascade do |t|
-    t.text     "url"
-    t.text     "title"
-    t.text     "content"
-    t.datetime "date_published"
-    t.text     "lead_image_url"
-    t.string   "domain"
-    t.string   "extraneity",     default: "{}"
-    t.string   "author"
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-    t.text     "aliases",        default: [],                array: true
-  end
-
-  add_index "mercury_pages", ["url"], name: "index_mercury_pages_on_url", unique: true, using: :btree
-
   create_table "notifications", force: :cascade do |t|
     t.integer  "source_id"
     t.integer  "target_id"
@@ -193,6 +177,27 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer  "shared_id"
     t.boolean  "autosave",                       default: false
   end
+
+  create_table "page_refs", force: :cascade do |t|
+    t.text     "url"
+    t.string   "domain"
+    t.string   "link_text"
+    t.string   "type",           limit: 25, default: "PageRef"
+    t.text     "title"
+    t.text     "content"
+    t.datetime "date_published"
+    t.text     "lead_image_url"
+    t.string   "extraneity",                default: "{}"
+    t.string   "author"
+    t.integer  "errcode"
+    t.integer  "status",                    default: 0
+    t.integer  "dj_id"
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
+    t.text     "aliases",                   default: [],                     array: true
+  end
+
+  add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
 
   create_table "products", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -255,6 +260,7 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer  "total_time_low",              default: 0
     t.integer  "total_time_high",             default: 0
     t.string   "yield"
+    t.integer  "page_ref_id"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
@@ -367,6 +373,7 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer  "feeds_count",                      default: 0
     t.integer  "approved_feeds_count",             default: 0
     t.boolean  "approved"
+    t.integer  "page_ref_id"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree

@@ -2,15 +2,15 @@ require 'spec_helper'
 
 describe "mercury_pages/index" do
   before(:each) do
-    assign(:mercury_pages, [
-      stub_model(MercuryPage,
+    assign(:page_refs, [
+      stub_model(PageRef,
         :url => "MyText",
         :title => "MyText",
         :content => "MyText",
         :lead_image_url => "MyText",
         :domain => "Domain"
       ),
-      stub_model(MercuryPage,
+      stub_model(PageRef,
         :url => "MyText",
         :title => "MyText",
         :content => "MyText",

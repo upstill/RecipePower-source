@@ -8,6 +8,20 @@ class RecipeServices
     # @current_user = current_user
   end
 
+  def self.convert_references
+    Recipe.all.each { |rec| RecipeServices.new(rec).convert_references }
+  end
+
+  def convert_references
+
+    puts "Converting references for recipe #{recipe.id}:"
+    RecipeReference.where(affiliate_id: recipe.id).each { |reference|
+      puts "Making PageReference for reference ##{reference.id} (#{reference.url})"
+      recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref
+    }
+    recipe.save
+  end
+
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.
   def self.fix_redundant
     redundant = []

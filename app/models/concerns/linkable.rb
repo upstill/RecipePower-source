@@ -34,7 +34,7 @@ module Linkable
 
     # References may also be without affiliate for things like definitions, whose information is solely
     # external, and images, which are captured from elsewhere but which have thumbnail data cached locally.
-    # The latter type may be referenced by entities, e.g. for the logo of a site, or the profile picture of
+      # The latter type may be referenced by entities, e.g. for the logo of a site, or the profile picture of
     # a user, or the image associated with a recipe.
     # In this case, the type of reference being used is given by the :as option to linkable, viz :as => ImageReference
 

@@ -5,7 +5,7 @@
 
 RP::Application.routes.draw do
 
-  resources :mercury_pages
+  resources :page_refs
   get 'scraper/new'
 
   post 'scraper/create'

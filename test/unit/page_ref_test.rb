@@ -1,6 +1,6 @@
 require 'test_helper'
 
-class MercuryPageTest < ActiveSupport::TestCase
+class PageRefTest < ActiveSupport::TestCase
 
   # Called before every test method runs. Can be used
   # to set up fixture information.
@@ -24,8 +24,8 @@ class MercuryPageTest < ActiveSupport::TestCase
 =end
 
   test "initializes simple page" do
-    url = 'https://smittenkitchen.com/2016/11/brussels-sprouts-apple-and-pomegranate-salad/'
-    mp = MercuryPage.new url
+    url = 'http://smittenkitchen.com/2016/11/brussels-sprouts-apple-and-pomegranate-salad/'
+    mp = PageRef.fetch url
     assert_not_nil mp
     assert !mp.errors.any?
     assert_equal Array, mp.aliases.class
@@ -34,48 +34,48 @@ class MercuryPageTest < ActiveSupport::TestCase
   end
 
   test "record persists in database" do
-    MercuryPage.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
-    mp = MercuryPage.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
+    PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
     assert_equal 0, mp.aliases.count
     assert_equal 'An Ode to the Rosetta Spacecraft as It Flings Itself Into a Comet', mp.title
   end
 
   test "target in URL made irrelevant" do
-    mp = MercuryPage.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
+    mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
     # URL extracted from page
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     # Original URL (minus target) is alias for "official" URL
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet', mp.aliases.first
     # Original URL found both with and without target
-    assert_equal mp.id, MercuryPage.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target').id
-    assert_equal mp.id, MercuryPage.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet').id
+    assert_equal mp.id, PageRef.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target').id
+    assert_equal mp.id, PageRef.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet').id
   end
 
   test "calls initialize only once" do
-    mp = MercuryPage.new 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = PageRef.new 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     mp.content = ''
     mp.save
-    mp2 = MercuryPage.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
-    assert_equal 1, MercuryPage.count
+    mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
+    assert_equal 1, PageRef.count
     assert_equal '', mp.content
   end
 
   test "page record findable by url" do
     url = 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
-    mp = MercuryPage.fetch url
+    mp = PageRef.fetch url
     assert_not_nil mp.id
-    mp2 = MercuryPage.fetch url
+    mp2 = PageRef.fetch url
     assert_equal mp, mp2
   end
 
   test "creation fails with bogus URL" do
-    mp = MercuryPage.fetch 'http://www.mibogus.com/bomb'
+    mp = PageRef.fetch 'http://www.mibogus.com/bomb'
     assert mp.errors.any?
   end
 
   test "fetch simple page" do
-    mp = MercuryPage.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     assert_not_nil mp
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     assert_equal 'An Ode to the Rosetta Spacecraft as It Flings Itself Into a Comet', mp.title
@@ -88,4 +88,10 @@ class MercuryPageTest < ActiveSupport::TestCase
     assert_equal 1, mp.rendered_pages
     assert_equal 'Emma Grey Ellis', mp.author
   end
+
+  test "catch null byte" do
+    mp = PageRef.fetch 'http://www.realsimple.com/food-recipes/ingredients-guide/shrimp-00000000039364/index.html'
+    assert_not_nil mp
+  end
+
 end
