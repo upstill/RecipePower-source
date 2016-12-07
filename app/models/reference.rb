@@ -403,6 +403,7 @@ class RecipeReference < Reference
               next if File.exist?(path) || RecipeReference.lookup(url).exists?
 
               # mechanize.download(link.href, path)
+              # TODO filename hasn't survived the transition to PageRefs
               RecipeReference.create url: url, filename: path
             end
 

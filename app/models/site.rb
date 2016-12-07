@@ -26,6 +26,7 @@ class Site < ActiveRecord::Base
   has_many :feeds, :dependent=>:restrict_with_exception
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
+  belongs_to :page_ref
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent
   
@@ -184,7 +185,7 @@ public
   def recipes
     # The recipes for a site are all those that match the site's references
     RecipeReference.lookup_recipes references.pluck(:url), true
-    # TODO RecipePage.recipes_from_site ([url] + aliases)
+    # TODO RecipePageRef.recipes_from_site ([url] + aliases)
   end
 
 end

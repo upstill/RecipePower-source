@@ -89,4 +89,9 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal 'Emma Grey Ellis', mp.author
   end
 
+  test "catch null byte" do
+    mp = PageRef.fetch 'http://www.realsimple.com/food-recipes/ingredients-guide/shrimp-00000000039364/index.html'
+    assert_not_nil mp
+  end
+
 end

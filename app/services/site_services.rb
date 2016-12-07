@@ -2,6 +2,20 @@
 class SiteServices
   attr_accessor :site
 
+  def self.convert_references
+    Site.all.each { |site| SiteServices.new(site).convert_references if site.page_ref_id.nil? } # Only convert the unconverted
+  end
+
+  def convert_references
+
+    puts "Converting references for site #{site.id}:"
+    SiteReference.where(affiliate_id: site.id).each { |reference|
+      puts "Making SitePageRef for reference ##{reference.id} (#{reference.url})"
+      site.page_ref = PageRefServices.convert_reference reference, site.page_ref
+    }
+    site.save
+  end
+
   def self.test_lookup n=-1
     Site.all[0..n].map(&:id).each { |id| self.test_lookup_by_id id }
     nil

@@ -9,9 +9,9 @@ class PageRef < ActiveRecord::Base
   @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :recipes
+  attr_accessible *@@attribs, :type
 
-  has_many :recipes
+  has_many :referments, :as => :referee
 
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
@@ -25,12 +25,13 @@ class PageRef < ActiveRecord::Base
     http.use_ssl = true
 
     req = Net::HTTP::Get.new uri.to_s
-    req['x-api-key'] = "CCCt8Pvy1dERUwikic1JFuaWnAts9epV11qZIgtZ" # ENV['MERCURY_API_KEY']
+    req['x-api-key'] = ENV['MERCURY_API_KEY'] # "CCCt8Pvy1dERUwikic1JFuaWnAts9epV11qZIgtZ" #
 
     begin
       response = http.request req
 
       data = JSON.parse response.body
+      data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
@@ -46,24 +47,25 @@ class PageRef < ActiveRecord::Base
   def self.fetch url
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
     unless (mp = self.find_by(url: url) || self.find_by("'" + url.gsub("'", "''") + "' = ANY(aliases)"))
-      mp = PageRef.new url
+      mp = self.new url
       unless mp.errors.any?
-        if extant = PageRef.find_by(url: mp.url) # Check for duplicate URL
-          # Fold the extracted page data into the existing page
-          extant.aliases |= mp.aliases - [extant.url]
-          extant.save
-        else
-          mp.save
+        if extant = self.find_by(url: mp.url) # Check for duplicate URL
+          # Found => fold the extracted page data into the existing page
+          extant.aliases |= mp.aliases - [ extant.url ]
+          mp = extant
         end
+        mp.save
       end
     end
-    mp
+    mp unless mp.url.blank? || mp.errors.any?
   end
 
 end
 
-class RecipePage < PageReference
-  has_many :recipes, foreign_key: 'page_ref_id'
+class RecipePageRef < PageRef
+  attr_accessible :recipes
+
+  has_many :recipes, foreign_key: 'page_ref_id', :dependent => :nullify
 
 # The former RecipeReference.lookup_recipe
   def self.recipe url
@@ -133,38 +135,42 @@ class RecipePage < PageReference
   end
 end
 
-class DefinitionPage < PageReference
+class SitePageRef < PageRef
 
 end
 
-class ArticlePage < PageReference
+class DefinitionPageRef < PageRef
 
 end
 
-class NewsitemPage < PageReference
+class ArticlePageRef < PageRef
 
 end
 
-class TipPage < PageReference
+class NewsitemPageRef < PageRef
 
 end
 
-class VideoPage < PageReference
+class TipPageRef < PageRef
 
 end
 
-class HomepagePage < PageReference
+class VideoPageRef < PageRef
 
 end
 
-class ProductPage < PageReference
+class HomepagePageRef < PageRef
 
 end
 
-class OfferingPage < PageReference
+class ProductPageRef < PageRef
 
 end
 
-class EventPage < PageReference
+class OfferingPageRef < PageRef
+
+end
+
+class EventPageRef < PageRef
 
 end

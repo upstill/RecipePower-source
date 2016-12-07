@@ -8,6 +8,14 @@ class ReferenceServices
     self.reference = reference
   end
 
+  def self.convert_references klass=RecipeReference
+      classes = klass ? [klass] : [ RecipeReference ] # DefinitionReference ImageReference SiteReference
+      classes.all.each { |klass|
+          service_class = klass.to_s.sub(/Reference$/, 'Services').constantize
+          service_class.convert_references
+      }
+  end
+
   # Convert ALL references to STI specification
   def self.convert_to_sti n=-1
     set = Reference.where(type: "Reference")[0..n].each do |ref|

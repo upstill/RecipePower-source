@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161204212324) do
+ActiveRecord::Schema.define(version: 20161122005609) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -180,20 +180,24 @@ ActiveRecord::Schema.define(version: 20161204212324) do
 
   create_table "page_refs", force: :cascade do |t|
     t.text     "url"
+    t.string   "domain"
+    t.string   "link_text"
+    t.string   "type",           limit: 25, default: "PageRef"
     t.text     "title"
     t.text     "content"
     t.datetime "date_published"
     t.text     "lead_image_url"
-    t.string   "domain"
-    t.string   "extraneity",     default: "{}"
+    t.string   "extraneity",                default: "{}"
     t.string   "author"
-    t.datetime "created_at",                    null: false
-    t.datetime "updated_at",                    null: false
-    t.text     "aliases",        default: [],                array: true
+    t.integer  "errcode"
+    t.integer  "status",                    default: 0
+    t.integer  "dj_id"
+    t.datetime "created_at",                                    null: false
+    t.datetime "updated_at",                                    null: false
+    t.text     "aliases",                   default: [],                     array: true
   end
 
-  add_index "page_refs", ["aliases"], name: "index_page_refs_on_aliases", using: :gin
-  add_index "page_refs", ["url"], name: "index_page_refs_on_url", unique: true, using: :btree
+  add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
 
   create_table "products", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -369,6 +373,7 @@ ActiveRecord::Schema.define(version: 20161204212324) do
     t.integer  "feeds_count",                      default: 0
     t.integer  "approved_feeds_count",             default: 0
     t.boolean  "approved"
+    t.integer  "page_ref_id"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
