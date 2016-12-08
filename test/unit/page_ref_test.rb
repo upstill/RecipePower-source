@@ -94,4 +94,9 @@ class PageRefTest < ActiveSupport::TestCase
     assert_not_nil mp
   end
 
+  test "try this one" do
+    mp = PageRef.fetch "http://www.bbc.co.uk/food/recipes/mac_and_cheese_81649"
+    assert_not_nil mp
+  end
+
 end

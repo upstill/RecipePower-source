@@ -9,7 +9,20 @@ class RecipeServices
   end
 
   def self.convert_references
-    Recipe.all.each { |rec| RecipeServices.new(rec).convert_references }
+    Recipe.where(page_ref_id: nil).collect { |rec|
+      rs = RecipeServices.new(rec)
+      rs.convert_references
+      unless rec.page_ref
+        # Converting the reference failed
+        case URI(rec.url).host
+          when 'www.tasteofbeirut.com'
+            rec.url = rec.url.sub /www.tasteofbeirut.com\/\d\d\d\d\/\d\d/, ''
+            rs.convert_references # Try again with this url
+        end
+      end
+      "#{rec.id}: #{rec.url}" unless rec.page_ref
+    }.compact.map &:puts
+    nil
   end
 
   def convert_references
@@ -35,13 +48,6 @@ class RecipeServices
       old_rcp.absorb rcp
       self.new(old_rcp).test_conversion
     }
-  end
-
-  def self.fix_references which=nil
-    # Examine each recipe for every reference mapping to the same site
-    eqclasses = {}
-    rcps = Set.new()
-    (which || Recipe.all).each { |rcp| rcp.references_qa }
   end
 
   def scrape
