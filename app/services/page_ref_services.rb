@@ -60,6 +60,16 @@ class PageRefServices
 
   # Run this after convert_references has run to completion
   def self.fix_references
+    RecipeReference.where('url LIKE ?', "http://www.bbc.co.uk/food/recipes/%").each { |rr|
+      if !rr.affiliate.page_ref_id
+        rec = rr.affiliate
+        rec.glean! true
+        if rec.gleaning.bad?
+          rec.destroy # puts "Would be destroying recipe ##{rec.id} '#{rec.title}'" # rec.destroy
+        end
+      end
+    }
+
     RecipeReference.where('url LIKE ?', "%www.tasteofbeirut.com%").each { |rr|
       if !rr.affiliate.page_ref_id
         rr.url.sub! /\/\d\d\d\d\/\d\d/, ''
