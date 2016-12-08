@@ -4,6 +4,7 @@ class SiteServices
 
   def self.convert_references
     Site.all.each { |site| SiteServices.new(site).convert_references if site.page_ref_id.nil? } # Only convert the unconverted
+    nil
   end
 
   def convert_references

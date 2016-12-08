@@ -24,17 +24,46 @@ class RefermentServices
 
   end
 
+  def self.show_definitions attribute=nil
+    rms = Referment.
+        where(referee_type: "Reference").
+        includes(:referee).
+        to_a.
+        keep_if { |rm| rm.referee.class == DefinitionReference }
+    puts "#{rms.count} DefinitionReferences found"
+    rms.collect { |rm|
+      ref = rm.referee
+      puts "Referment ##{rm.id} to DefinitionReference ##{ref.id}:"
+      if block_given?
+        yield rm
+      elsif attribute
+        puts "    #{attribute}: #{ref.method(attribute.to_sym).call}"
+        nil
+      else
+        RefermentServices.new(rm).convert_reference
+      end
+    }
+    nil
+  end
+
   def self.convert_references
     Referment.where(referee_type: "Reference").each { |rm|
       RefermentServices.new(rm).convert_reference if rm.referee.class == DefinitionReference
     }
+    nil
   end
 
   def convert_reference
-    url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
-    if (referment.referee.class == DefinitionReference) && (pr = DefinitionPageRef.fetch(url))
-      referment.referee = pr
-      referment.save
+    if referment.referee.class == DefinitionReference
+      url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
+      puts "    Converting Reference #{referment.referee_id} by fetching url '#{url}'"
+      if pr = DefinitionPageRef.fetch(url)
+        referment.referee = pr
+        result = referment.save ? 'successfully' : 'unsuccessfully'
+        puts("    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}")
+        puts("    PageRef #{pr.id} says #{pr.errors.messages}") if pr.errors.any?
+        puts("    Referment #{referment.id} says #{referment.errors.messages}") if referment.errors.any?
+      end
     end
   end
 end
