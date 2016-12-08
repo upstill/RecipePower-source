@@ -9,9 +9,12 @@ class PageRef < ActiveRecord::Base
   @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :type
+  attr_accessible *@@attribs, :type, :error_message
 
   has_many :referments, :as => :referee
+
+  # The site for a page_ref is the Site object with the longest root matching the canonical URL
+  belongs_to :site
 
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
@@ -31,10 +34,15 @@ class PageRef < ActiveRecord::Base
       response = http.request req
 
       data = JSON.parse response.body
+      if (self.error_message = data['errorMessage']).present?
+        self.errors.add :url, "Error on fetch of #{url}: #{data['errorMessage']}"
+        self.url = url
+      else
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
+      end
     rescue Exception => e
       self.errors.add :url, message: 'Bad URL'
     end
@@ -57,7 +65,7 @@ class PageRef < ActiveRecord::Base
         mp.save
       end
     end
-    mp unless mp.url.blank? || mp.errors.any?
+    mp
   end
 
 end

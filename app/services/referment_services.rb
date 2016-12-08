@@ -57,13 +57,12 @@ class RefermentServices
     if referment.referee.class == DefinitionReference
       url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
       puts "    Converting Reference #{referment.referee_id} by fetching url '#{url}'"
-      if pr = DefinitionPageRef.fetch(url)
-        referment.referee = pr
-        result = referment.save ? 'successfully' : 'unsuccessfully'
-        puts("    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}")
-        puts("    PageRef #{pr.id} says #{pr.errors.messages}") if pr.errors.any?
-        puts("    Referment #{referment.id} says #{referment.errors.messages}") if referment.errors.any?
-      end
+      pr = DefinitionPageRef.fetch(url)
+      referment.referee = pr
+      result = referment.save ? 'successfully' : 'unsuccessfully'
+      puts("    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}")
+      puts("    PageRef #{pr.id} says #{pr.errors.messages}") if pr.errors.any?
+      puts("    Referment #{referment.id} says #{referment.errors.messages}") if referment.errors.any?
     end
   end
 end
