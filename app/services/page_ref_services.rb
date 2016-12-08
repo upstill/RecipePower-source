@@ -57,4 +57,16 @@ class PageRefServices
       end
     end
   end
+
+  # Run this after convert_references has run to completion
+  def self.fix_references
+    RecipeReference.where('url LIKE ?', "%www.tasteofbeirut.com%").each { |rr|
+      if !rr.affiliate.page_ref_id
+        rr.url.sub! /\/\d\d\d\d\/\d\d/, ''
+        rr.save
+        RecipeServices.new(rr.affiliate).convert_references
+      end
+    }
+  end
+
 end
