@@ -5,6 +5,8 @@ class CreatePageRefs < ActiveRecord::Migration
       t.text :url
       t.string :domain
       t.string :link_text # For labeling links
+      t.integer :site_id
+      t.text :error_message
 
       # Polymorphic
       t.string :type, :limit => 25, :default => "PageRef"
@@ -34,5 +36,6 @@ class CreatePageRefs < ActiveRecord::Migration
 
     add_column :recipes, :page_ref_id, :integer
     add_column :sites, :page_ref_id, :integer
+    add_column :sites, :root, :string
   end
 end

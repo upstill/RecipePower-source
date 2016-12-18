@@ -39,22 +39,22 @@ class PageRefServices
     end
 
     klass = reference.class.to_s.sub(/Reference$/, 'PageRef').constantize
-    if (pr = klass.fetch reference.url) && pr.url
-      case extant_pr
-        when nil # No PageRef existed prior
-          pr.save if !pr.id
-          pr
-        when pr
+    pr = klass.fetch reference.url
+    return pr if pr.errors.any?
+    case extant_pr
+      when nil # No PageRef existed prior
+        pr.save if !pr.id
+        pr
+      when pr
+        extant_pr
+      else # There's an existing page_ref and it doesn't match the new one
+        if functionally_equivalent(extant_pr, pr) # If it's only a difference of the trailing slash...
+          # ...just merge the new pr into the old
+          PageRefServices.new(extant_pr).absorb pr
           extant_pr
-        else # There's an existing page_ref and it doesn't match the new one
-          if functionally_equivalent(extant_pr, pr) # If it's only a difference of the trailing slash...
-            # ...just merge the new pr into the old
-            PageRefServices.new(extant_pr).absorb pr
-            extant_pr
-          else
-            raise %Q{Reference #{reference.id} (#{reference.url}) fails to merge its PageRef (url=#{pr.url}) with existing PageRef #{extant_pr.id} (#{[[extant_pr.url]+extant_pr.aliases].join(', ')})}
-          end
-      end
+        else
+          raise %Q{Reference #{reference.id} (#{reference.url}) fails to merge its PageRef (url=#{pr.url}) with existing PageRef #{extant_pr.id} (#{[[extant_pr.url]+extant_pr.aliases].join(', ')})}
+        end
     end
   end
 
