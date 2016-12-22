@@ -51,7 +51,7 @@ class PageRef < ActiveRecord::Base
   # String => MercuryPage
   # Return a (possibly newly-created) MercuryPage on the given URL
   # NB Since the derived canonical URL may differ from the given url,
-  # the returned record will not have the same url as the request
+  # the returned record may not have the same url as the request
   def self.fetch url
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
     unless (mp = self.find_by(url: url) || self.find_by("'" + url.gsub("'", "''") + "' = ANY(aliases)"))
