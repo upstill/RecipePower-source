@@ -53,6 +53,10 @@ module CardPresentation
     end
   end
 
+  def card_avatar_column
+    # nil by default
+  end
+
   def card_aspect_rendered which
     label, contents = card_aspect which
     card_aspect_enclosure which, contents, label
@@ -189,7 +193,7 @@ module CardPresentation
   end
 
   def tag_button
-    collectible_tag_button decorator
+    collectible_tag_button(decorator) if decorator.object.is_a?(Taggable)
   end
 
   def tools_menu
