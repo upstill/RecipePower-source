@@ -28,7 +28,7 @@ class PageRef < ActiveRecord::Base
     http.use_ssl = true
 
     req = Net::HTTP::Get.new uri.to_s
-    req['x-api-key'] = "CCCt8Pvy1dERUwikic1JFuaWnAts9epV11qZIgtZ" # ENV['MERCURY_API_KEY'] #
+    req['x-api-key'] = ENV['MERCURY_API_KEY']
 
     begin
       response = http.request req
