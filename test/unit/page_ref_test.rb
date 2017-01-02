@@ -99,4 +99,13 @@ class PageRefTest < ActiveSupport::TestCase
     assert_not_nil mp
   end
 
+  test "correctly handles HTTP 404 (missing URL)" do
+    url = "http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
+    pr = PageRef.fetch url
+    assert pr.error_message.present?
+    assert_equal url, pr.url
+    assert pr.errors.any?
+    assert pr.bad?
+  end
+
 end

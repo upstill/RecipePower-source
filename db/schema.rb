@@ -182,6 +182,8 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.text     "url"
     t.string   "domain"
     t.string   "link_text"
+    t.integer  "site_id"
+    t.text     "error_message"
     t.string   "type",           limit: 25, default: "PageRef"
     t.text     "title"
     t.text     "content"
@@ -374,6 +376,7 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer  "approved_feeds_count",             default: 0
     t.boolean  "approved"
     t.integer  "page_ref_id"
+    t.string   "root"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree

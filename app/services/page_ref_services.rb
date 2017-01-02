@@ -60,23 +60,37 @@ class PageRefServices
 
   # Run this after convert_references has run to completion
   def self.fix_references
-    RecipeReference.where('url LIKE ?', "http://www.bbc.co.uk/food/recipes/%").each { |rr|
-      if !rr.affiliate.page_ref_id
-        rec = rr.affiliate
+    msgs =
+    RecipeReference.where('url LIKE ?', "http://www.bbc.co.uk/food/recipes/%").collect { |rr|
+      rec = rr.affiliate
+      if rec.page_ref.url.blank?
         rec.glean! true
         if rec.gleaning.bad?
-          rec.destroy # puts "Would be destroying recipe ##{rec.id} '#{rec.title}'" # rec.destroy
+          "Would be destroying recipe ##{rec.id} '#{rec.title}'" # rec.destroy
+        end
+      end
+    }.compact
+
+    RecipeReference.where('url LIKE ?', "%www.tasteofbeirut.com%").each { |rr|
+      if rr.url.match(/\/\d\d\d\d\/\d\d/)
+        rec = rr.affiliate
+        pr = rec.page_ref
+        if !pr || pr.url.blank?
+          rr.url.sub! /\/\d\d\d\d\/\d\d/, ''
+          rr.save
+
+          # Redo the page_ref
+          if pr
+            pr.destroy
+            rec.page_ref = nil
+            rec.save
+          end
+          RecipeServices.new(rec).convert_references
         end
       end
     }
-
-    RecipeReference.where('url LIKE ?', "%www.tasteofbeirut.com%").each { |rr|
-      if !rr.affiliate.page_ref_id
-        rr.url.sub! /\/\d\d\d\d\/\d\d/, ''
-        rr.save
-        RecipeServices.new(rr.affiliate).convert_references
-      end
-    }
+    puts msgs
+    nil
   end
 
 end

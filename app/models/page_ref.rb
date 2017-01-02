@@ -33,16 +33,14 @@ class PageRef < ActiveRecord::Base
     begin
       response = http.request req
 
-      data = JSON.parse response.body
+      data = JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
       if (self.error_message = data['errorMessage']).present?
-        self.errors.add :url, "Error on fetch of #{url}: #{data['errorMessage']}"
-        self.url = url
-      else
+        self.errors.add( :url, "Error on fetch of #{url}: #{data['errorMessage']}")
+      end
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
-      end
     rescue Exception => e
       self.errors.add :url, message: 'Bad URL'
     end
