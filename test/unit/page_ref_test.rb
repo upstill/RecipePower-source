@@ -1,5 +1,5 @@
 require 'test_helper'
-
+require 'page_ref.rb'
 class PageRefTest < ActiveSupport::TestCase
 
   # Called before every test method runs. Can be used
@@ -22,6 +22,32 @@ class PageRefTest < ActiveSupport::TestCase
     fail('Not implemented')
   end
 =end
+
+  test "try substitute" do
+    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
+    mp = PageRef.fetch url
+    assert mp.bad?
+    new_mp = PageRefServices.new(mp).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
+    assert_equal mp, new_mp
+    assert_equal [url], new_mp.aliases
+    assert_equal 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+  end
+
+  test "try substitute absorbs" do
+    mpgood = PageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
+    assert mpgood.good?
+
+    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
+    mpbad = PageRef.fetch url
+    assert mpbad.bad?
+    badid = mpbad.id
+
+    new_mp = PageRefServices.new(mpbad).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
+    assert_equal mpgood, new_mp
+    assert_equal [url], new_mp.aliases
+    assert_nil PageRef.find_by(id: badid)
+    assert_equal 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+  end
 
   test "initializes simple page" do
     url = 'http://smittenkitchen.com/2016/11/brussels-sprouts-apple-and-pomegranate-salad/'
@@ -53,7 +79,8 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "calls initialize only once" do
-    mp = PageRef.new 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp.sync
     mp.content = ''
     mp.save
     mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
@@ -71,7 +98,7 @@ class PageRefTest < ActiveSupport::TestCase
 
   test "creation fails with bogus URL" do
     mp = PageRef.fetch 'http://www.mibogus.com/bomb'
-    assert mp.errors.any?
+    assert mp.bad?
   end
 
   test "fetch simple page" do
@@ -102,10 +129,29 @@ class PageRefTest < ActiveSupport::TestCase
   test "correctly handles HTTP 404 (missing URL)" do
     url = "http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
     pr = PageRef.fetch url
+    assert pr.bad?
     assert pr.error_message.present?
     assert_equal url, pr.url
-    assert pr.errors.any?
+  end
+
+  test "gets URL that can be opened" do
+    url = "http://abcnews.go.com/GMA/recipe/mario-batalis-marinated-olives-15088486"
+    pr = PageRef.fetch url
     assert pr.bad?
+    assert pr.error_message.present?
+    assert_equal url, pr.url
+  end
+
+  test "creating Site pageref" do
+    url = "http://blog.umamimart.com/2011/12/happy-hour-tom-jerry-the-original-winter-cocktail/"
+    pr = SitePageRef.fetch url
+    assert !pr.errors.any?
+    assert pr.good?
+
+    pr.status = 0
+    pr.bkg_perform
+    assert !pr.errors.any?
+    assert pr.good?
   end
 
 end

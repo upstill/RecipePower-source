@@ -12,16 +12,7 @@ class RecipeServices
     Recipe.where(page_ref_id: nil).collect { |rec|
       rs = RecipeServices.new(rec)
       rs.convert_references
-      unless rec.page_ref
-        # Converting the reference failed
-        case URI(rec.url).host
-          when 'www.tasteofbeirut.com'
-            rec.url = rec.url.sub /www.tasteofbeirut.com\/\d\d\d\d\/\d\d/, ''
-            rs.convert_references # Try again with this url
-        end
-      end
-      "#{rec.id}: #{rec.url}" unless rec.page_ref
-    }.compact.map &:puts
+    }
     nil
   end
 
@@ -33,6 +24,87 @@ class RecipeServices
       recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref
     }
     recipe.save
+  end
+
+  # Check to see that a recipe can be reached.
+  # Three possibilities:
+  # good: carry on (return nil)
+  # bad and consequently destroyed: all is well (return nil)
+  # bad but collected by non-super-users: return the recipe for further processing
+  def correct_url_or_destroy
+    pr = recipe.page_ref
+    if !pr || pr.url.blank?
+      pr.destroy if pr
+      pr = (recipe.page_ref = PageRefServices.convert_reference(recipe.reference))
+      recipe.save
+    else
+      pr.perform unless pr.good? # Take another chance on a response
+    end
+    if pr.bad?
+      # Try correcting the url via regexp
+      prs = PageRefServices.new(pr)
+      old_url = pr.url
+      new_page_ref = nil
+      [
+          ['saveur.com/article/Recipe', 'saveur.com/article/Recipes'],
+          [/www.tasteofbeirut.com\/\d\d\d\d\/\d\d/, 'www.tasteofbeirut.com'],
+          ['http://patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html',
+           'https://patijinich.com/recipe/you_know_you_want_it_green_pozole/'],
+          ['http://patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html',
+           'https://patijinich.com/recipe/lamb_barbacoa_in_adobo'],
+          ['http://patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html',
+           'https://patijinich.com/recipe/apple_radish_watercress_salad_pistachio_chile_de_arbol/'],
+          ['http://patismexicantable.com/2012/05/creamy-poblano-soup.html',
+           'https://patijinich.com/recipe/creamy-poblano-soup/'],
+          ['http://patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html',
+           'https://patijinich.com/recipe/cleaning_cactus_paddles_or_nopales/'],
+          ['http://patismexicantable.com/2012/07/blissful-corn-torte.html',
+           'https://patijinich.com/recipe/blissful-corn-torte/'],
+          ['http://patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html',
+           'https://patijinich.com/recipe/cajeta-crepes-with-toasted-pecans/'],
+          ['http://patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html',
+           'https://patijinich.com/recipe/snapper-in-a-poblano-chile-sauce/'],
+          ['http://patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html',
+           'https://patijinich.com/recipe/cucumber_soup_with_pomegranate/'],
+          ['http://patismexicantable.com/2012/08/mexican-wedding-cookies-1.html',
+           'https://patijinich.com/recipe/mexican-wedding-cookies/'],
+          ['http://patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html',
+           'https://patijinich.com/recipe/chayote-squash-and-pickled-onion-salad/'],
+          ['http://patismexicantable.com/2012/10/purslane-or-verdolagas.html',
+           'https://patijinich.com/2012/10/purslane_or_verdolagas/'],
+          ['http://patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html',
+           'https://patijinich.com/recipe/fluffy-plantain-and-pecan-bread/'],
+          ['http://patismexicantable.com/2012/11/cactus-paddle-tostadas.html',
+           'https://patijinich.com/recipe/cactus-paddle-tostada/'],
+          ['http://patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html',
+           'https://patijinich.com/recipe/sweet_potato_rounds_with_a_punch/'],
+          ['http://patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html',
+           'https://patijinich.com/recipe/zucchini-soup-with-tortilla-crisps/'],
+          ['http://patismexicantable.com/2011/06/dumplings/',
+           'https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/']
+      ].each { |args|
+        if new_page_ref = prs.try_substitute(*args)
+          if new_page_ref != pr
+            recipe.page_ref = new_page_ref
+            recipe.save
+          end
+          return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status})"
+        end
+      }
+    end
+    return nil unless pr.bad?
+    # Still bad, after all that
+    recipe.glean! true
+    if recipe.gleaning.good? # recipe.destroy
+      "Wouldn't destroy Recipe ##{recipe.id} (#{pr.url}): can be reached via gleaning"
+    elsif ![400, 404, 410].include? recipe.gleaning.http_status
+      "Wouldn't destroy Recipe ##{recipe.id} (#{pr.url}): gleaning HTTP isn't 400, 404 or 410 (is #{recipe.gleaning.http_status})"
+    elsif (recipe.user_ids - [1, 3, 5]).present?
+      "Can't destroy Recipe ##{recipe.id} (#{pr.url}) because of existing users"
+    else
+      recipe.destroy if recipe.url.match(/^http:\/\/www\.bbc\.co\.uk\/food\/recipes/)
+      "Would have destroyed recipe ##{recipe.id} (#{pr.url}): couldn't reach via gleaning (404 Not Found)"
+    end
   end
 
   # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.

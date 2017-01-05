@@ -36,6 +36,7 @@ class FinderServices
     pagehome = "#{uri.scheme}://#{uri.host}"
 
     normu = normalize_url url
+    errstr = "Couldn't open '#{url}"
     begin
       pagefile = open normu
     rescue Exception => e
@@ -52,7 +53,11 @@ class FinderServices
         end
       end
     end
-    return unless pagefile
+    unless pagefile
+      yield(errstr) if block_given?
+      return
+    end
+
 
     # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
     nkdoc = Nokogiri::HTML pagefile

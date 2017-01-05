@@ -67,7 +67,7 @@ module Linkable
         # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
         # peg successful hits on finders. (Sites have an associated set of finders, on which they
         # remember successful hits)
-        has_one :gleaning, :as => :entity
+        has_one :gleaning, :as => :entity, :dependent => :destroy
         accepts_nested_attributes_for :gleaning
       end
 

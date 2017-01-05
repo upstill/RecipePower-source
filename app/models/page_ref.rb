@@ -4,12 +4,14 @@ require 'net/http'
 # the class deals with multiple URLs leading to the same page. That is, since Mercury extracts a
 # canonical URL, many URLs could lead to that single referent.
 class PageRef < ActiveRecord::Base
+  include Backgroundable
+  backgroundable
   # after_initialize :fetch
 
   @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :type, :error_message
+  attr_accessible *@@attribs, :type, :error_message, :http_status
 
   has_many :referments, :as => :referee
 
@@ -19,10 +21,11 @@ class PageRef < ActiveRecord::Base
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
 
-  def initialize url
+  def perform
+    bkg_execute { sync; !errors.any? }
+  end
 
-    super()
-
+  def sync
     uri = URI.parse 'https://mercury.postlight.com/parser?url=' + url
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
@@ -34,13 +37,25 @@ class PageRef < ActiveRecord::Base
       response = http.request req
 
       data = JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
-      if (self.error_message = data['errorMessage']).present?
-        self.errors.add( :url, "Error on fetch of #{url}: #{data['errorMessage']}")
-      end
+      self.http_status =
+          if (self.error_message = data['errorMessage']).blank?
+            200
+          else
+            hr = header_result(url)
+            if hr.is_a?(String)
+              # Redirection: hr is the new url
+              hr = header_result(data['url'] = hr)
+              self.errors.add(:url, "Error on redirect to #{url}") unless hr == 200
+              hr
+            else
+              self.errors.add(:url, "Error on fetch of #{url}: #{data['errorMessage']}") unless hr == 200
+              hr
+            end
+          end
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
+      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
     rescue Exception => e
       self.errors.add :url, message: 'Bad URL'
     end
@@ -50,17 +65,20 @@ class PageRef < ActiveRecord::Base
   # Return a (possibly newly-created) MercuryPage on the given URL
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
-  def self.fetch url
+  def self.fetch url, do_persist=true
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
     unless (mp = self.find_by(url: url) || self.find_by("'" + url.gsub("'", "''") + "' = ANY(aliases)"))
-      mp = self.new url
-      unless mp.errors.any?
+      mp = self.new url: url
+      mp.sync
+      if mp.errors.any?
+        do_persist ? mp.bad! : (mp.status = :bad)
+      else
         if extant = self.find_by(url: mp.url) # Check for duplicate URL
           # Found => fold the extracted page data into the existing page
           extant.aliases |= mp.aliases - [ extant.url ]
           mp = extant
         end
-        mp.save
+        do_persist ? mp.good! : (mp.status = :good)
       end
     end
     mp
