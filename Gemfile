@@ -5,6 +5,7 @@ ruby '2.2.0'
 gem 'rails', '~> 4.2.5' # '3.2.11' #
 gem 'composite_primary_keys', '~> 8.0'
 gem 'arel', '~> 6.0'
+gem 'postgres_ext'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
@@ -71,10 +72,10 @@ group :development do
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
-  gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
   # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
+  # gem 'rails-perftest' # http://ccaloha.cc/blog/2015/07/14/howto-performance-test-in-rails-4/
   gem 'rack-mini-profiler'
   gem 'derailed'
   gem 'stackprof'
@@ -84,15 +85,19 @@ end
 gem "masonry-rails"
 
 group :test do
-  # gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
-  # gem "minitest-rails-capybara" # ...for simulating user interaction
-  # Pretty printed test output
-  gem 'turn', :require => false
-  gem 'webrat', '~> 0.7.3'
-  ## gem "guard-rspec" # ...for auto-running tests on file save
-  gem 'factory_girl_rails', "~> 4.0"
-  gem "mocha"
-  gem 'poltergeist'
+  # # gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
+  # # gem "minitest-rails-capybara" # ...for simulating user interaction
+  # # Pretty printed test output
+  # gem 'turn', :require => false
+  # gem 'webrat', '~> 0.7.3'
+  # ## gem "guard-rspec" # ...for auto-running tests on file save
+  # gem 'factory_girl_rails', "~> 4.0"
+  # gem "mocha"
+  # gem 'poltergeist'
+ gem 'rails-perftest' # http://ccaloha.cc/blog/2015/07/14/howto-performance-test-in-rails-4/
+#  gem 'ruby-prof'
+#  # gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+#  gem 'test-unit'
 end
 
 gem 'coffee-rails', "~> 4.0.0"

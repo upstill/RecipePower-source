@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20161122005609) do
+ActiveRecord::Schema.define(version: 20170104221648) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,11 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.string   "uid",        limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "channels_referents", id: false, force: :cascade do |t|
+    t.integer "channel_id"
+    t.integer "referent_id"
   end
 
   create_table "deferred_requests", id: false, force: :cascade do |t|
@@ -138,6 +143,8 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.datetime "created_at",              null: false
     t.datetime "updated_at",              null: false
     t.integer  "dj_id"
+    t.integer  "http_status"
+    t.text     "err_msg"
   end
 
   create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
@@ -182,6 +189,8 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.text     "url"
     t.string   "domain"
     t.string   "link_text"
+    t.integer  "site_id"
+    t.text     "error_message"
     t.string   "type",           limit: 25, default: "PageRef"
     t.text     "title"
     t.text     "content"
@@ -195,9 +204,18 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.datetime "created_at",                                    null: false
     t.datetime "updated_at",                                    null: false
     t.text     "aliases",                   default: [],                     array: true
+    t.integer  "http_status"
   end
 
   add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
+
+  create_table "private_subscriptions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "tag_id"
+    t.integer  "priority",   default: 10
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "products", force: :cascade do |t|
     t.datetime "created_at", null: false
@@ -374,6 +392,7 @@ ActiveRecord::Schema.define(version: 20161122005609) do
     t.integer  "approved_feeds_count",             default: 0
     t.boolean  "approved"
     t.integer  "page_ref_id"
+    t.string   "root"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree

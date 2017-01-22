@@ -8,7 +8,7 @@ class Gleaning < ActiveRecord::Base
   require 'finder_services.rb'
   belongs_to :entity, :polymorphic => true
 
-  attr_accessible :entity, :results
+  attr_accessible :entity, :results, :http_status, :err_msg
 
   attr_accessor :decorator # Decorator corresponding to entity
 
@@ -29,13 +29,20 @@ class Gleaning < ActiveRecord::Base
   end
 
   def perform
-    # go entity.decorate.url, (entity.site if entity.respond_to?(:site))
-    bkg_execute do self.results = FinderServices.glean(entity.decorate.url, (entity.site if entity.respond_to?(:site))) end
+    go entity.decorate.url, (entity.site if entity.respond_to?(:site))
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
   def go url, site=nil
-    bkg_execute do self.results = FinderServices.glean(url, site) end
+    bkg_execute do
+      self.err_msg = ''
+      self.http_status = 200
+      self.results = FinderServices.glean(url, site)  { |msg|
+        self.err_msg = msg
+        # We assume the first three-digit number is the HTTP status code
+        self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
+      }
+    end
   end
 
   def error(job, exception)

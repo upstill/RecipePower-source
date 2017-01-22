@@ -67,7 +67,7 @@ module Linkable
         # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
         # peg successful hits on finders. (Sites have an associated set of finders, on which they
         # remember successful hits)
-        has_one :gleaning, :as => :entity
+        has_one :gleaning, :as => :entity, :dependent => :destroy
         accepts_nested_attributes_for :gleaning
       end
 
@@ -105,7 +105,7 @@ module Linkable
             if URI(reference.url).host == URI(site.home).host
               site.include_url reference.url
             else # The entity is getting redirected to another site
-              Site.find_or_create url
+              Site.find_or_create_for url
               @site = nil # Bust the memo to trigger a re-find of the site
             end
           end
@@ -175,7 +175,7 @@ module Linkable
         unless options[:as]
           # The site for a referenced object
           define_method :site do
-            @site ||= Site.find_or_create self.method(reference_association_pl).call.map(&:url)
+            @site ||= Site.find_or_create_for self.method(reference_association_pl).call.map(&:url)
           end
         end
 

@@ -1,3 +1,4 @@
+
 class ReferentValidator < ActiveModel::Validator
   def validate(record)
     # Test that record has non-generic type
@@ -34,7 +35,7 @@ class Referent < ActiveRecord::Base
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
-      Reference
+      DefinitionPageRef
       Recipe
       Referent
       SourceReferent
@@ -96,7 +97,7 @@ class Referent < ActiveRecord::Base
     other.expressions.each { |expr| self.express expr.tag }
     # Whatever entities can be reached through referments, copy those
     @@referment_associations.each { |assoc|
-      collection_method = assoc.to_s.pluralize.to_sym
+      collection_method = assoc.to_s.underscore.pluralize.to_sym
       collection = self.method(collection_method).call
       other.method(collection_method).call.each { |entity| collection << entity }
     }
@@ -478,6 +479,9 @@ class SourceReferent < Referent
   def associate
     self.site
   end
+end
+
+class InterestReferent < Referent
 end
 
 class GenreReferent < Referent

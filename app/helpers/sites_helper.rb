@@ -22,7 +22,7 @@ module SitesHelper
   end
 
   def site_recipes_summary site
-    scope = site.contents_scope 'Recipe'
+    scope = site.recipes_scope
     p = labelled_quantity(scope.count, 'cookmark')
     p += ': ' + homelink(scope.first) if scope.count == 1
     content_tag :p, p.html_safe

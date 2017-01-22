@@ -290,7 +290,7 @@ class CollectibleController < ApplicationController
         begin
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
-          elsif !(@site = Site.find_or_create(url))
+          elsif !(@site = Site.find_or_create_for(url))
             # If we couldn't even get the site from the domain, we just bail entirely
             render js: %Q{alert(#{msg});}
           else

@@ -4,65 +4,175 @@ require 'net/http'
 # the class deals with multiple URLs leading to the same page. That is, since Mercury extracts a
 # canonical URL, many URLs could lead to that single referent.
 class PageRef < ActiveRecord::Base
-  # after_initialize :fetch
+
+  validates_each :url do |pr, attr, value|
+    pr.errors.add :url, "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL" unless pr.good? || validate_link(pr.url, %w{ http https }) # Is it a valid URL?
+  end
+
+  include Backgroundable
+  backgroundable
 
   @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :type, :error_message
+  attr_accessible *@@attribs, :type, :error_message, :http_status
 
-  has_many :referments, :as => :referee
+  attr_accessor :extant_prid
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
 
+  before_save do |pr|
+    if (pr.class != SitePageRef) && (pr.url_changed? || !pr.site) && pr.url.present?
+      puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
+      pr.site = Site.find_or_create_for(pr.url)
+    end
+  end
+
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
 
-  def initialize url
+  def perform
+    bkg_execute {
+      begin
+        sync
+      rescue Exception => err
+        # Failed to complete properly
+        err = ([err] + errors.full_messages).join "\n\t"
+        self.error_message = "Fatal error in PageRef#sync: #{err}"
+        self.http_status = 666
+        self.status = :bad
+        false
+      end
+    }
+  end
 
-    super()
+  # Consult Mercury on a url and report the results in the model
+  # status: :good iff Mercury could get through to the resource, :bad otherwise
+  # http_status: 200 if Mercury could get through to the resource OR the HTTP code (from the header) for a direct fetch
+  # errors: set a URL error iff the URL can't be parsed by URI, in which case the PageRef shouldn't be saved and will
+  #     likely throw a validation error
+  # Note that even if Mercury can crack the page, that's no guarantee that any metadata except the URL and domain are valid
+  # The purpose of status is to indicate whether Mercury might be tried again later (:bad)
+  # The purpose of http_status is a positive indication that the page can be reached
+  # The purpose of errors are to show that the URL is ill-formed and the record should not (probably cannot) be saved.
+  def sync
+    extant_prid = nil
+    begin
+      data = try_mercury url
+      self.http_status =
+          if (self.error_message = data['errorMessage']).blank?
+            200
+          else
+            # Check the header for the url from the server.
+            # If it's a string, the header returned a redirect
+            # otherwise, it's an HTTP code
+            puts "Checking direct access of PageRef ##{id} at '#{url}'"
+            redirected_from = nil
+            while hr = header_result(data['url'])
+              if hr.is_a?(Fixnum)
+                data['url'] = self.aliases.delete(redirected_from) if (hr == 404) && redirected_from
+                break;
+              end
+              hr = URI.join(data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
+              break if aliases.include?(hr)
+              puts "Redirecting from #{data['url']} to #{hr}"
+              begin
+                self.aliases += [redirected_from = data['url']] # Stash the redirection source in the aliases
+                data = try_mercury hr
+                if (self.error_message = data['errorMessage']).blank? # Success on redirect
+                  hr = 200
+                  break;
+                end
+              rescue Exception => e
+                # Bad URL => Restore the last alias
+                data['url'] = self.aliases.delete(redirected_from) if redirected_from
+                hr = 400
+              end
+            end
+            hr.is_a?(String) ? 666 : hr
+          end
+      # Did the url change to a collision with an existing PageRef of the same type?
+      if (data['url'] != url) && (extant_prid = self.class.where(url: data['url']).pluck(:id).first)
+        self.error_message = "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
+        puts error_message
+        self.http_status = 666
+        data['url'] = url
+        errors.add :url, "has already been taken by #{self.class} #{extant_prid}"
+      end
+      data['content'] ||= ''
+      data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
+      self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
+      self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
+      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
+    rescue Exception => e
+      self.errors.add :url, "Bad URL '#{url}': #{e}"
+      self.http_status = 400
+    end
+    # We record the status here, in case we're being called outside the background mechanism
+    self.status = (errors.any? || error_message.present?) ? :bad : :good
+    good?
+  end
 
+  def try_mercury url
     uri = URI.parse 'https://mercury.postlight.com/parser?url=' + url
     http = Net::HTTP.new(uri.host, uri.port)
     http.use_ssl = true
 
     req = Net::HTTP::Get.new uri.to_s
-    req['x-api-key'] = "CCCt8Pvy1dERUwikic1JFuaWnAts9epV11qZIgtZ" # ENV['MERCURY_API_KEY'] #
+    req['x-api-key'] = ENV['MERCURY_API_KEY']
 
-    begin
-      response = http.request req
+    response = http.request req
 
-      data = JSON.parse response.body
-      if (self.error_message = data['errorMessage']).present?
-        self.errors.add :url, "Error on fetch of #{url}: #{data['errorMessage']}"
-        self.url = url
-      else
-      data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
-      self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
-      self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
-      end
-    rescue Exception => e
-      self.errors.add :url, message: 'Bad URL'
-    end
+    data = JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+
+    # Do QA on the reported URL
+    uri = data['url'].present? ? URI.join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
+    data['url'] = uri.to_s
+    data['domain'] ||= uri.host
+    data
   end
 
-  # String => MercuryPage
-  # Return a (possibly newly-created) MercuryPage on the given URL
+  def table
+    self.arel_table
+  end
+
+  # Use arel to generate a query (suitable for #where or #find_by) to match the url
+  def self.url_query url
+    url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
+    url_node = self.arel_table[:url]
+    url_query = url_node.eq(url)
+    aliases_node = self.arel_table[:aliases]
+    aliases_query = aliases_node.overlap [url]
+    url_query.or(aliases_query)
+  end
+
+  # Use arel to generate a query (suitable for #where or #find_by) to match the url path
+  def self.url_path_query(urlpath)
+    urls = [ "http://#{urlpath}%", "https://#{urlpath}%" ]
+    url_node = self.arel_table[:url]
+    url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
+  end
+
+  def self.find_by_url url
+    self.find_by(url_query url)
+  end
+
+  # String => PageRef
+  # Return a (possibly newly-created) PageRef on the given URL
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
   def self.fetch url
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
-    unless (mp = self.find_by(url: url) || self.find_by("'" + url.gsub("'", "''") + "' = ANY(aliases)"))
-      mp = self.new url
-      unless mp.errors.any?
-        if extant = self.find_by(url: mp.url) # Check for duplicate URL
+    unless mp = self.find_by(self.url_query url)
+      mp = self.new url: url
+      mp.sync
+      if !mp.errors.any? || mp.extant_prid
+        if extant = mp.extant_prid ? self.find(extant_prid) : self.find_by(url: mp.url) # Check for duplicate URL
           # Found => fold the extracted page data into the existing page
-          extant.aliases |= mp.aliases - [ extant.url ]
+          extant.aliases |= mp.aliases - [extant.url]
           mp = extant
         end
-        mp.save
       end
     end
     mp
@@ -74,15 +184,6 @@ class RecipePageRef < PageRef
   attr_accessible :recipes
 
   has_many :recipes, foreign_key: 'page_ref_id', :dependent => :nullify
-
-# The former RecipeReference.lookup_recipe
-  def self.recipe url
-    self.lookup_affiliate url
-  end
-
-  def self.recipes_from_site url
-    self.affiliates_scope url
-  end
 
   def self.scrape first=''
     mechanize = Mechanize.new
@@ -144,41 +245,57 @@ class RecipePageRef < PageRef
 end
 
 class SitePageRef < PageRef
+  attr_accessible :sites
+
+  has_many :sites, foreign_key: 'page_ref_id', :dependent => :nullify
+  # belongs_to :site, foreign_key: 'affiliate_id'
+  # before_save :fix_host
+
+  # alias_method :host, :domain
+  def host
+    domain
+  end
 
 end
 
-class DefinitionPageRef < PageRef
+class ReferrablePageRef < PageRef
+# Referrable page refs are referred to by, e.g., a glossary entry for a given concept
+  include Referrable
 
 end
 
-class ArticlePageRef < PageRef
+class DefinitionPageRef < ReferrablePageRef
 
 end
 
-class NewsitemPageRef < PageRef
+class ArticlePageRef < ReferrablePageRef
 
 end
 
-class TipPageRef < PageRef
+class NewsitemPageRef < ReferrablePageRef
 
 end
 
-class VideoPageRef < PageRef
+class TipPageRef < ReferrablePageRef
 
 end
 
-class HomepagePageRef < PageRef
+class VideoPageRef < ReferrablePageRef
 
 end
 
-class ProductPageRef < PageRef
+class HomepagePageRef < ReferrablePageRef
 
 end
 
-class OfferingPageRef < PageRef
+class ProductPageRef < ReferrablePageRef
 
 end
 
-class EventPageRef < PageRef
+class OfferingPageRef < ReferrablePageRef
+
+end
+
+class EventPageRef < ReferrablePageRef
 
 end

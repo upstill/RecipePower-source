@@ -8,12 +8,11 @@ class ReferenceServices
     self.reference = reference
   end
 
-  def self.convert_references klass=RecipeReference
-      classes = klass ? [klass] : [ RecipeReference ] # DefinitionReference ImageReference SiteReference
-      classes.all.each { |klass|
-          service_class = klass.to_s.sub(/Reference$/, 'Services').constantize
-          service_class.convert_references
-      }
+  def self.convert_references klass=nil
+    puts DefinitionReference.all.collect { |ref|
+           pr = DefinitionPageRef.fetch ref.url
+           pr.url if pr.bad?
+         }
   end
 
   # Convert ALL references to STI specification

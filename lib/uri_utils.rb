@@ -2,8 +2,11 @@ require 'uri'
 require 'open-uri'
 require 'nokogiri'
 
-def validate_link link
-  link =~ URI::regexp(%w{ http https data })
+def validate_link link, protocols=nil
+  if link.present?
+    protocols ||= %w{ http https data }
+    link =~ /\A#{URI::regexp(protocols)}\z/
+  end
 end
 
 # Try to make sense out of a given path in the context of another url.
@@ -31,10 +34,13 @@ def header_result(link, resource=nil)
     return 400 unless url.host && url.port
 
     req = Net::HTTP.new(url.host, url.port)
+    req.use_ssl = (url.scheme == "https")
     partial = url.path + ((query = url.query) ? "?#{query}" : "")
-    code = req.request_head(partial).code.to_i
+    head = req.request_head(partial)
+    code = head.code.to_i rescue 400
     # Redirection codes
-    [301, 302].include?(code) ? req.request_head(partial).header["location"] : code
+    redirect = head.header["location"] if [301, 302, 303].include?(code)
+    redirect.present? ? redirect : code
   rescue Exception => e
     # If the server doesn't want to talk, we assume that the URL is okay, at least
     return 401 if e.kind_of?(Errno::ECONNRESET) || url
@@ -59,7 +65,7 @@ def safe_parse(url)
       end
     end
   end
-  uri.scheme = 'http' unless uri.scheme.present?
+  uri.scheme = 'http' if uri && uri.scheme.present?
   uri
 end
 
@@ -120,6 +126,36 @@ def host_url url
     uri.path = ''
     uri.query = uri.fragment = nil
     uri.normalize.to_s.sub(/\/$/,'') # Remove trailing slash from normalized form
+  end
+end
+
+# string -> string
+# If the URL is valid, return only its path, including domain
+# Examples:
+# http://jibit.com => jibit.com
+# http://jibit.com/ => jibit.com
+# http://jibit.com/a?x=2#anchor => jibit.com/a
+def cleanpath url
+  if (uri = safe_parse(sanitize_url url)) && uri.host.present?
+    path = uri.path.sub(/\/$/,'').sub(/^\//, '') # Remove trailing slash from normalized form
+    base = uri.host.sub(/\/$/,'')
+    path.present? ? "#{base}/#{path}" : base
+  end
+end
+
+# string -> Array of strings
+# Turn a url into a set of strings, each beginning with the host domain, with one
+# string for every subpath of the original url. The purpose is to enable searching
+# sites by subpath
+# Examples: (see also test/uri_utils_test.rb)
+def subpaths url
+  return [] if url.blank?
+  if path = cleanpath(url)
+    dirs = path.split '/'
+    base = dirs.shift # Get the host
+    dirs.inject([base]) { |result, dir|
+      result << result.last + '/' + dir
+    }
   end
 end
 

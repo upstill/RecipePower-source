@@ -89,6 +89,16 @@ module Backgroundable
     good?
   end
 
+  # Just hang out until the process completes
+  # NB: MUST HAVE A WORKER PROCESS DOING JOBS!
+  # ALSO, CAN TAKE A VERY LONG TIME
+  def bkg_wait
+    until !queued?
+      sleep 1
+      reload
+    end
+  end
+
   # Wrapper for the #perform method, managing job correctly outside of DelayedJob
   def bkg_perform
     processing!

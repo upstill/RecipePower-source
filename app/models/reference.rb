@@ -9,6 +9,10 @@ class Reference < ActiveRecord::Base
   include Referrable
   include Typeable
 
+  include Backgroundable
+
+  backgroundable :status
+
   attr_accessible :reference_type, :type, :url, :affiliate_id, :filename, :link_text
 
   validates_uniqueness_of :url, :scope => :type
@@ -48,6 +52,29 @@ class Reference < ActiveRecord::Base
   def typenum
     return 0 if self.class == Reference
     Reference.typenum typesym
+  end
+
+=begin
+  def perform
+    bkg_execute {
+      true
+    }
+  end
+=end
+
+  # Perform a DelayedJob action to convert the reference to a PageRef
+  def perform
+    bkg_execute {
+      if affiliate
+        entity = affiliate
+        pr = PageRefServices.convert_reference self, entity.page_ref
+        entity.page_ref = pr
+        entity.save
+        !entity.errors.any?
+      else
+        true
+      end
+    }
   end
 
 =begin
@@ -333,6 +360,32 @@ end
 
 class  DefinitionReference < Reference
 
+  has_many :referments, as: :referee, class_name: 'Reference'
+
+  # A DefinitionReference serves a referment linking it to a referent.
+  # This task replaces the DefinitionReference with a PageRef
+  def perform
+    bkg_execute {
+      url_fixed = url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
+      puts "    Converting Reference #{id} by fetching url '#{url_fixed}'\n"
+      Referment.where(referee_type: 'Reference', referee_id: id).each { |referment|
+        # For each Referment referencing me. (Should be just one, but you never know...)
+        pr = PageRef::DefinitionPageRef.fetch(url_fixed)
+        result =
+            if pr.errors.any?
+              'unsuccessfully'
+            else
+              pr.save
+              referment.referee = pr
+              referment.save ? 'successfully' : 'unsuccessfully'
+            end
+        puts "    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}\n"
+        puts "    PageRef #{pr.id} says #{pr.errors.messages}\n" if pr.errors.any?
+        puts "    Referment #{referment.id} says #{referment.errors.messages}\n" if referment.errors.any?
+      }
+    }
+  end
+
 end
 
 class HomepageReference < Reference
@@ -419,9 +472,6 @@ class RecipeReference < Reference
 end
 
 class ImageReference < Reference
-  include Backgroundable
-
-  backgroundable :status
 
 =begin
   # This SHOULD be a better way to ensure that an ImageReference knows about all entities that could be pointing to it.
@@ -495,7 +545,7 @@ class ImageReference < Reference
 
   # Since the URL is never written once established, this method uniquely handles both
   # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)
-  # NB: Implicit in here is the strategy for maintainng the data: since we only fetch refrence
+  # NB: Implicit in here is the strategy for maintainng the data: since we only fetch reference
   # records by URL when assigning a URL to an entity, we only go off to update the data when
   # the URL is assigned
   def self.find_or_initialize url, params={}
@@ -626,12 +676,9 @@ class SiteReference < Reference
     end
   end
 
+  # Not used in PageRef (no more _qa)
   def self.lookup_site url
     self.lookup_affiliate self.canonical_url(url)
-  end
-
-  def self.lookup_sites url
-    self.lookup_affiliates self.canonical_url(url)
   end
 
   # Generally we reduce the find to the shortest available subpath of a url
