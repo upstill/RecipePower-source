@@ -72,7 +72,7 @@ group :development do
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
-  gem 'ruby-prof', '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
   # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
@@ -94,6 +94,9 @@ group :test do
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
+  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+  gem 'test-unit'
+#   gem 'rails-perftest'
 end
 
 gem 'coffee-rails', "~> 4.0.0"
