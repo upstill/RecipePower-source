@@ -6,6 +6,6 @@ class HomepageTest < ActionDispatch::PerformanceTest
   # self.profile_options = { :runs => 5, :metrics => [:wall_time, :memory]
   #                          :output => 'tmp/performance', :formats => [:flat] }
   def test_homepage
-    get '/'
+    get '/home'
   end
 end

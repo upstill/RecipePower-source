@@ -95,8 +95,8 @@ group :test do
   gem "mocha"
   gem 'poltergeist'
   gem 'rails-perftest'
-  # gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
-  # gem 'test-unit'
+  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+  gem 'test-unit'
 end
 
 gem 'coffee-rails', "~> 4.0.0"
