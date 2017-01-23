@@ -5,6 +5,7 @@ ruby '2.2.0'
 gem 'rails', '~> 4.2.5' # '3.2.11' #
 gem 'composite_primary_keys', '~> 8.0'
 gem 'arel', '~> 6.0'
+gem 'postgres_ext'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
