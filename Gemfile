@@ -85,7 +85,7 @@ end
 gem "masonry-rails"
 
 group :test do
-  # gem 'minitest-rails', "~> 1.0" # gem 'minitest', '~> 4.2'
+  gem 'minitest-rails' # , "~> 1.0" # gem 'minitest', '~> 4.2'
   # gem "minitest-rails-capybara" # ...for simulating user interaction
   # Pretty printed test output
   gem 'turn', :require => false
@@ -94,9 +94,9 @@ group :test do
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
-  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
-  gem 'test-unit'
-#   gem 'rails-perftest'
+  gem 'rails-perftest'
+  # gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+  # gem 'test-unit'
 end
 
 gem 'coffee-rails', "~> 4.0.0"
