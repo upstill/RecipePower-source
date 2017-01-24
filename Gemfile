@@ -46,8 +46,13 @@ group :development do
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 end
-#
-# ruby '2.2.0'
+
+# Re-added gems, in order:
+ruby '2.2.0'
+gem 'aws-sdk', '~> 1'
+# gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
+# gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+
 # gem 'rails', '~> 4.2.5' # '3.2.11' #
 # gem 'composite_primary_keys', '~> 8.0'
 # gem 'arel', '~> 6.0'
@@ -87,15 +92,12 @@ end
 # gem "rmagick", "~> 2.13.2"
 # gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 # gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' #
-# gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
-# gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
 # gem 'daemons'
 # gem 'hirefire-resource'
 # gem 'awesome_nested_set'
 # gem 'redcarpet'
 # gem 'content_for_in_controllers'
 # gem 'youtube_addy'
-# gem 'aws-sdk', '~> 1'
 # gem 'counter_culture', '~> 0.1.23'
 # gem 'letter_opener', :group => [ :development, :staging ]
 # gem 'letter_opener_web', '~> 1.2.0', :group => :staging
