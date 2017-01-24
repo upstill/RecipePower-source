@@ -9,6 +9,8 @@ gem 'postgres_ext'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
 # gem 'rails4_upgrade'
 gem 'rails_12factor', :group => [ :production, :staging ]
+gem 'rails-perftest'
+gem 'ruby-prof'
 
 gem 'thin'
 
@@ -72,7 +74,7 @@ group :development do
   gem 'annotate', '2.5.0'
   gem "nifty-generators"
   gem 'log_buddy'
-  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
+#  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
   # gem "better_errors" '~> 1.1'
   gem "binding_of_caller"
   # gem "json"
@@ -85,7 +87,7 @@ end
 gem "masonry-rails"
 
 group :test do
-  gem 'minitest-rails' # , "~> 1.0" # gem 'minitest', '~> 4.2'
+  # gem 'minitest-rails' # , "~> 1.0" # gem 'minitest', '~> 4.2'
   # gem "minitest-rails-capybara" # ...for simulating user interaction
   # Pretty printed test output
   gem 'turn', :require => false
@@ -94,9 +96,6 @@ group :test do
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
-  gem 'rails-perftest'
-  gem 'ruby-prof' # , '~> 0.13.0' # , :git => 'git://github.com/wycats/ruby-prof.git'
-  gem 'test-unit'
 end
 
 gem 'coffee-rails', "~> 4.0.0"
