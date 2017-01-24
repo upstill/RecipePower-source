@@ -50,11 +50,52 @@ end
 # Re-added gems, in order:
 ruby '2.2.0'
 gem 'aws-sdk', '~> 1'
-# gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
-# gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
+gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
+
+gem 'pg'
+
+gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
+
+gem 'hirefire-resource'
+
+gem 'ruby-openid'
+gem 'omniauth-twitter'
+gem 'omniauth-facebook' # , '~> 1.4.0'
+gem 'omniauth-google-oauth2'
+gem 'omniauth-openid'
+gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
+
+gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' #
+
+gem 'redcarpet'
+
+gem 'counter_culture', '~> 0.1.23'
+
+gem 'protected_attributes'
+
+gem 'composite_primary_keys', '~> 8.0'
+
+gem 'htmlentities'
+
+gem "rmagick", "~> 2.13.2"
+
+gem 'mechanize', :group => [ :development, :staging ]
+
+gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
+
+gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed
+
+gem 'jquery-ui-rails', '~> 3.0'
+
+gem 'bourbon'
+
+gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
+
+# gem 'nokogiri', '~> 1.7.0' # "~> 1.6.6" # "~> 1.5.3"
 
 # gem 'rails', '~> 4.2.5' # '3.2.11' #
-# gem 'composite_primary_keys', '~> 8.0'
 # gem 'arel', '~> 6.0'
 # gem 'postgres_ext'
 # gem 'rails_12factor', :group => [ :production, :staging ]
@@ -64,48 +105,27 @@ gem 'aws-sdk', '~> 1'
 # gem 'thin'
 #
 # # add these gems to help with the transition:
-# gem 'protected_attributes'
 # gem 'rails-observers'
 #
 # # Bundle edge Rails instead:
 #
-# gem 'pg'
 #
 # gem 'builder', '~> 3.1.0'
 # gem 'draper', '~> 1.3'
 # gem 'closure_tree'
-# gem 'htmlentities'
-# gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 # gem 'will_paginate', '~> 3.0'
 # gem 'newrelic_rpm'
 # # Sugg. on StackOverflow to use master right-aws: gem 'right_aws', :git => 'git://github.com/rightscale/right_aws.git'
-# gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-# gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
-# gem 'ruby-openid'
-# gem 'omniauth-twitter'
-# gem 'omniauth-facebook' # , '~> 1.4.0'
-# gem 'omniauth-google-oauth2'
-# gem 'omniauth-openid'
-# gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 # gem 'eventmachine', '~> 1.0.3'
 # gem 'ruby_parser'
-# gem "rmagick", "~> 2.13.2"
-# gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
-# gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' #
 # gem 'daemons'
-# gem 'hirefire-resource'
 # gem 'awesome_nested_set'
-# gem 'redcarpet'
 # gem 'content_for_in_controllers'
 # gem 'youtube_addy'
-# gem 'counter_culture', '~> 0.1.23'
 # gem 'letter_opener', :group => [ :development, :staging ]
 # gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 # gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
-# gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed
-# gem 'bourbon'
 # gem 'premailer-rails'
-# gem 'mechanize', :group => [ :development, :staging ]
 #
 # gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 #
@@ -114,11 +134,9 @@ gem 'aws-sdk', '~> 1'
 # gem 'coffee-rails', "~> 4.0.0"
 # gem 'uglifier', '>= 1.3.0'
 # gem 'sass-rails', " ~> 4.0"
-# gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 # gem 'autoprefixer-rails'
 #
-# gem 'jquery-rails', '~> 4.0.3' # '2.2.1' to get jQuery 1.9.1
-# gem 'jquery-ui-rails', '~> 3.0'
+# gem 'jquery-rails', '~> 4.0.3'
 #
 # # Use unicorn as the web server
 # gem 'unicorn'

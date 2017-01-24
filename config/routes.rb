@@ -72,8 +72,8 @@ RP::Application.routes.draw do
     post '/votes/site/:id' => 'votes#create'
     post '/votes/user/:id' => 'votes#create'
 
-  get "redirect/go", :as => "goto"
-  put "redirect/go"
+  # get "redirect/go", :as => "goto"
+  # put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
