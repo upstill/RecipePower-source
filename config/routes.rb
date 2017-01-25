@@ -2,8 +2,10 @@
 # is querying collections via the index action. POSTing to #index modifies query parameters,
 # whereas GETting from #index starts afresh. This overloading was necessitated by problems using
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
-
+puts (["!!!! Loading #{__FILE__} from #{caller.first} !!!!"] + caller).join("\n  >> ")
+puts
 RP::Application.routes.draw do
+  root 'pages#root'
 
   resources :page_refs
   get 'scraper/new'
@@ -78,15 +80,18 @@ RP::Application.routes.draw do
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
+=begin
   devise_for :users, :skip => [:registrations], :controllers => {
       :sessions => 'sessions',
       :passwords => 'passwords',
       :invitations => 'invitations',
       # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
   }
+=end
 
   match 'users', :controller => 'users', :action => 'index', :via => [:get, :post]
 
+=begin
   devise_scope :user do
     put "/users/password/new" => 'passwords#new' # To handle redirects from edit
     post "/users/register" => "registrations#create", :as => "user_registration"
@@ -101,6 +106,7 @@ RP::Application.routes.draw do
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
 
   end
+=end
 
   get '/auth/:provider/callback' => 'authentications#create'
   post '/auth/:provider/callback' => 'authentications#create'
@@ -238,7 +244,6 @@ RP::Application.routes.draw do
   get '/cookmark', :to => "pages#cookmark"
   # Challenge response for Lets Encrypt
   get '/.well-known/acme-challenge/:id' => 'pages#letsencrypt'
-  root :to => 'pages#root'
 
   # The priority is based upon order of creation:
   # first created -> highest priority.
@@ -297,3 +302,4 @@ RP::Application.routes.draw do
   # Note: This route will make all actions in every controller accessible via GET requests.
   # get ':controller(/:action(/:id(.:format)))'
 end
+puts "!!!! Leaving #{__FILE__} from #{caller.first} !!!!"

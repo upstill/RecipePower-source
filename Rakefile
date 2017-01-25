@@ -2,7 +2,11 @@
 # Add your own tasks in files placed in lib/tasks ending in .rake,
 # for example lib/tasks/capistrano.rake, and they will automatically be available to Rake.
 
-require File.expand_path('../config/application', __FILE__)
+# file = File.expand_path('../config/environment', __FILE__)
+file = File.expand_path('../config/application', __FILE__)
+puts "Loading #{file} from Rakefile"
+require file
+puts "Rails #{defined?(Rails) ? 'is' : 'is not'} defined"
 
 module TempFixForRakeLastComment
   def last_comment

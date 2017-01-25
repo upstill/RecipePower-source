@@ -2,7 +2,10 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 
+puts (["Loading Bundler in #{__FILE__}. Backtrace:"] + caller).join("\n  >> ")
 Bundler.require(:default, Rails.env)
+puts "Finished loading Bundler in #{__FILE__}."
+puts
 
 module RP
   class Application < Rails::Application

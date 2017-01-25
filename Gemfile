@@ -55,8 +55,8 @@ gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_j
 
 gem 'pg'
 
-gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise', '~> 4.0'# , '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.7.0' # , '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'
 
 gem 'hirefire-resource'
 
@@ -93,6 +93,10 @@ gem 'bourbon'
 
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 
+gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
+
+gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
+
 # gem 'nokogiri', '~> 1.7.0' # "~> 1.6.6" # "~> 1.5.3"
 
 # gem 'rails', '~> 4.2.5' # '3.2.11' #
@@ -124,10 +128,7 @@ gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 # gem 'youtube_addy'
 # gem 'letter_opener', :group => [ :development, :staging ]
 # gem 'letter_opener_web', '~> 1.2.0', :group => :staging
-# gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
 # gem 'premailer-rails'
-#
-# gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
 #
 # gem "masonry-rails"
 #
