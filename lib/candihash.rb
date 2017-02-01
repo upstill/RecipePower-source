@@ -4,7 +4,6 @@ class Candihash < Hash
     # Initialize the candihash to a set of keys
     def initialize(startset) # , mode)
        startset.each { |rid| self[rid.to_s] = 0.0 }
-       # @mode = mode
     end
 
     def reset keys
@@ -12,17 +11,9 @@ class Candihash < Hash
        keys.each { |key| self[key.to_s] = 0.0 }
     end
 
-    # Apply a new set of keys to the existing set, either
-    # by bumping the presence counts (:rcpquery_loose)
-    # or by intersecting the sets (:rcpquery_strict)
+    # Apply a new set of keys to the existing set
     def apply(newset, weight=1.0)
-        # case @mode 
-    	# when :rcpquery_strict
-    	    # newset.select { |id| self[id.to_s] }
-    	    # self.reset newset
-    	# when :rcpquery_loose 
-    	    newset.each { |id| self[id.to_s] += weight if self[id.to_s] }
-    	# end
+      newset.each { |id| self[id.to_s] += weight if self[id.to_s] }
     end
 
     # Return the keys as an integer array, sorted by number of hits

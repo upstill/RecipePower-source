@@ -14,7 +14,7 @@ rver = '4.2.6'
 gem 'rails', rver
 # !!! See https://github.com/composite-primary-keys/composite_primary_keys
 # for mapping Rails versions to CPK versions
-gem 'composite_primary_keys', '=8.1.5'
+gem 'composite_primary_keys', '=8.1.5' # https://github.com/composite-primary-keys/composite_primary_keys
 gem 'arel', '~> 6.0'
 gem 'postgres_ext'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
