@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170104221648) do
+ActiveRecord::Schema.define(version: 20170201022921) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -32,6 +32,11 @@ ActiveRecord::Schema.define(version: 20170104221648) do
     t.string   "uid",        limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "channels_referents", id: false, force: :cascade do |t|
+    t.integer "channel_id"
+    t.integer "referent_id"
   end
 
   create_table "deferred_requests", id: false, force: :cascade do |t|
@@ -204,6 +209,14 @@ ActiveRecord::Schema.define(version: 20170104221648) do
 
   add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
 
+  create_table "private_subscriptions", force: :cascade do |t|
+    t.integer  "user_id"
+    t.integer  "tag_id"
+    t.integer  "priority",   default: 10
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "products", force: :cascade do |t|
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -217,23 +230,6 @@ ActiveRecord::Schema.define(version: 20170104221648) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "user_id"
-    t.integer  "rcpquery_id"
-  end
-
-  create_table "rcpqueries", force: :cascade do |t|
-    t.integer  "session_id"
-    t.integer  "user_id"
-    t.integer  "owner_id"
-    t.text     "tagstxt"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "listmode",    limit: 255
-    t.integer  "status"
-    t.text     "specialtags"
-    t.integer  "cur_page",                default: 1
-    t.integer  "friend_id",               default: 0
-    t.integer  "channel_id",              default: 0
-    t.string   "which_list",  limit: 255, default: "mine"
   end
 
   create_table "rcprefs", force: :cascade do |t|
