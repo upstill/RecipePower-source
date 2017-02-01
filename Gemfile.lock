@@ -120,7 +120,7 @@ GEM
       coffee-script-source
       execjs
     coffee-script-source (1.9.1.1)
-    composite_primary_keys (8.1.0)
+    composite_primary_keys (8.1.5)
       activerecord (~> 4.2.0)
     content_for_in_controllers (0.0.2)
     counter_culture (0.1.33)
@@ -441,7 +441,7 @@ DEPENDENCIES
   capistrano-rbenv (~> 2.0.3)
   closure_tree
   coffee-rails (~> 4.0.0)
-  composite_primary_keys (~> 8.0)
+  composite_primary_keys (= 8.1.5)
   content_for_in_controllers
   counter_culture (~> 0.1.23)
   daemons
@@ -481,7 +481,7 @@ DEPENDENCIES
   premailer-rails
   protected_attributes
   rack-mini-profiler
-  rails (~> 4.2.5)
+  rails (= 4.2.6)
   rails-observers
   rails-perftest
   rails_12factor

@@ -2,8 +2,19 @@ source 'http://rubygems.org'
 
 ruby '2.2.0'
 # gem 'bundler', '~> 1.4'
-gem 'rails', '~> 4.2.5' # '3.2.11' #
-gem 'composite_primary_keys', '~> 8.0'
+def rails_to_CPK rails_version
+  release = rails_version.split('.')[0..1].join('.')
+  release_map = {
+    '4.2' => '8',
+    '5.0' => '9'
+  }
+  '='+rails_version.sub(release, release_map[release])
+end
+rver = '4.2.6'
+gem 'rails', rver
+# !!! See https://github.com/composite-primary-keys/composite_primary_keys
+# for mapping Rails versions to CPK versions
+gem 'composite_primary_keys', '=8.1.5'
 gem 'arel', '~> 6.0'
 gem 'postgres_ext'
 # gem 'rails',     :git => 'git://github.com/rails/rails.git'
