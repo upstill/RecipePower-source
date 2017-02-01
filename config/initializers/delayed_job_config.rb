@@ -1,1 +1,1 @@
-Delayed::Worker.sleep_delay = 10
+Delayed::Worker.sleep_delay = 1
