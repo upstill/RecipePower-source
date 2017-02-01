@@ -26,8 +26,7 @@ class CollectibleServices
     if params[:id]
       # Recipe (or whatever) exists and we're just touching it for the user
       entity = klass.find params[:id]
-    elsif !(entity = RecipeReference.lookup_recipe params[:url])
-    # TODO elsif !(entity = RecipePageRef.recipe params[:url])
+    elsif !(entity = Recipe.find_by_url params[:url]) # RecipeReference.lookup_recipe params[:url])
       # Get findings, either from the extractions, or by looking at the page
       unless findings = FinderServices.findings(extractions, params[:url])
         entity = klass.new params
@@ -46,8 +45,7 @@ class CollectibleServices
           entity = klass.new
           entity.errors.add :id, "There is no #{klass.to_s.downcase} number #{params[:id]}"
         end
-      elsif !(entity = RecipeReference.lookup_recipe url) # Try again to find based on the extracted url
-      # TODO elsif !(entity = RecipePageRef.recipe url) # Try again to find based on the extracted url
+      elsif !(entity = Recipe.find_by_url url) # Try again to find based on the extracted url
         # No id: create based on url
         params.delete :rcpref
         # Assigning title and picurl must wait until the url (and hence the reference) is set

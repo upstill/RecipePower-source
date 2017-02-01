@@ -5,14 +5,14 @@ module Bootstrap
   def self.load!
     if compass? && asset_pipeline?
       register_compass_extension
-      register_rails_engine
+      register_rails_engine unless Rails.env.test? # Engine fails under test env.
     elsif compass?
       # Only require compass extension if a standalone project
       require 'bootstrap-sass/compass_functions'
       register_compass_extension
     elsif asset_pipeline?
       require 'sass-rails' # See: https://github.com/thomas-mcdonald/bootstrap-sass/pull/4
-      register_rails_engine
+      register_rails_engine unless Rails.env.test? # Engine fails under test env.
       require 'bootstrap-sass/rails_functions'
     else
       raise Bootstrap::FrameworkNotFound, "bootstrap-sass requires either Rails > 3.1 or Compass, neither of which are loaded"

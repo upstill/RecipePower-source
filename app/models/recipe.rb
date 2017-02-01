@@ -7,9 +7,12 @@ require 'htmlentities'
 
 class Recipe < ActiveRecord::Base
   include Collectible
-  include Referrable
+  # TODO: pull the switch by making recipes pagerefable rather than linkable
   # The url attribute is handled by a reference of type RecipeReference
+  include Referrable
   linkable :url, :reference, gleanable: true
+  include Pagerefable
+  belongs_to :page_ref # pagerefable :url, gleanable: true
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -42,6 +45,20 @@ class Recipe < ActiveRecord::Base
       joinspec = inward ? {:reference => inward} : :reference
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
+  end
+
+  # These HTTP response codes lead us to conclude that the URL is not valid
+  @@BadResponseCodes = [400, 404, 410]
+
+  # -> true, false, nil
+  # Report on the reachability of a Gleanable.
+  # return true if EITHER the pageref or the gleaning succeed (definitely reachable)
+  # return false if one of them got a 404 error (definitely not reachable)
+  # return nil if inconclusive (maybe an authorization error, whatever)
+  def reachable?
+    return true if (page_ref && (page_ref.good? || (page_ref.http_status == 200))) || (gleaning && gleaning.good?)
+    return false if (page_ref && @@BadResponseCodes.include?(page_ref.http_status)) &&
+        (gleaning && @@BadResponseCodes.include?(gleaning.http_status))
   end
 
   # Write the title attribute only after trimming and resolving HTML entities

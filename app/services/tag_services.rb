@@ -23,22 +23,40 @@ class TagServices
   def recipes with_synonyms=false
     Recipe.where(id: recipe_ids(with_synonyms) )
   end
-# -----------------------------------------------    
-  # Return the references associated with the tag. This includes all the references from synonyms of the tag
+# -----------------------------------------------
+  # TODO: remove all these
+# Return the references associated with the tag. This includes all the references from synonyms of the tag
+=begin
   def reference_ids
     tag.referents(true).collect { |referent| referent.reference_ids }.flatten.uniq
   end
-  
-  # Return the references associated with the tag. This includes all the references from synonyms of the tag
+
+# Return the references associated with the tag. This includes all the references from synonyms of the tag
   def references
     Reference.where id: reference_ids
   end
-  
-  # Just return the count of references
+
+# Just return the count of references
   def reference_count
     reference_ids.count
   end
-# -----------------------------------------------  
+=end
+
+# Return the definitions associated with the tag. This includes all the definitions from synonyms of the tag
+  def definition_page_ref_ids
+    tag.referents(true).collect { |referent| referent.definition_page_ref_ids }.flatten.uniq
+  end
+
+# Return the references associated with the tag. This includes all the references from synonyms of the tag
+  def definition_page_refs
+    DefinitionPageRef.where id: definition_page_ref_ids
+  end
+
+# Just return the count of references
+  def definition_page_ref_count
+    definition_page_ref_ids.count
+  end
+# -----------------------------------------------
   def synonym_ids
     ExpressionServices.synonym_ids_of_tags(id) - [id]
   end

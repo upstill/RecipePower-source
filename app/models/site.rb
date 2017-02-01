@@ -1,11 +1,18 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
 require 'referent.rb'
+# require 'page_ref.rb'
 
 class Site < ActiveRecord::Base
   include Collectible
-  picable :logo, :thumbnail, 'MissingLogo.png'
+  # TODO: pull the switch by making recipes pagerefable rather than linkable
+  include Referrable
   linkable :home, :reference, gleanable: true
+  # include Pagerefable
+  picable :logo, :thumbnail, 'MissingLogo.png'
+  belongs_to :page_ref # pagerefable :home, gleanable: true
+
+  has_many :page_refs # Each PageRef refers back to some site based on its path
 
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
@@ -28,13 +35,43 @@ class Site < ActiveRecord::Base
   has_many :feeds, :dependent=>:restrict_with_exception
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
-  belongs_to :page_ref
   # When creating a site, also create a corresponding site referent
   # before_create :ensure_referent
-  
-  after_initialize :post_init
 
-protected
+  before_validation do |site|
+    if site.root.blank? && site.page_ref
+      site.root =
+          (subpaths(site.home).last if site.home.present? && subpaths(site.home)) ||
+              (subpaths(site.sample).first if site.sample.present? && subpaths(site.sample))
+    end
+  end
+
+  # after_initialize :post_init
+  validates_uniqueness_of :root
+
+  after_save do |site|
+    # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
+    # Reassign all of our pagerefs as necessary
+    if root_changed? # Root has changed
+      page_refs.each { |pr|
+        if (newsite = Site.find_for pr.url) != pr.site
+          pr.site = newsite
+          pr.save
+        end
+      }
+      # Steal any references from a site that has a shorter path
+      if shorter_site = Site.with_subroot_of(root)
+        shorter_site.page_refs.where(PageRef.url_path_query root).each { |pr|
+          # Reassign all PageRefs of the parent which apply here
+          pr.site = self
+          pr.save
+        }
+      end
+      reload
+    end
+  end
+
+  protected
 
   # If this is the last site associated with its referent, destroy the referent
   before_destroy do |site|
@@ -42,16 +79,18 @@ protected
     site.referent.destroy if site.referent && (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
   end
 
+=begin
   # When a site is first created, it needs to have a SiteReference built from its sample attribute
   def post_init
     unless id
       self.sample = normalize_url sample # Normalize the sample
       # Attach relevant references if they haven't been mass-assigned
-      self.home = sample if self.references.empty?
+      self.home = page_ref.url # sample if self.references.empty?
       # Give the site a provisional name, the host name minus 'www.', if any
       self.name = domain.sub(/www\./, '') if domain # Creates a corresponding referent
     end
   end
+=end
 
 public
 
@@ -73,6 +112,7 @@ public
     finder.save
   end
 
+=begin
   # Make sure that a url(s) map(s) to this site, returning true if any references were added
   def include_url url_or_urls, in_full=false
     (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
@@ -101,33 +141,25 @@ public
       end
     end
   end
+=end
 
   def self.strscopes matcher
     onscope = block_given? ? yield() : self.unscoped
     [
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
-    ] + Reference.strscopes(matcher) { |inward=nil|
-      joinspec = inward ? {:reference => inward} : :reference
-      block_given? ? yield(joinspec) : self.joins(joinspec)
-    } + Referent.strscopes(matcher) { |inward=nil|
+    ] # + Reference.strscopes(matcher) { |inward=nil|
+      # joinspec = inward ? {:reference => inward} : :reference
+      # block_given? ? yield(joinspec) : self.joins(joinspec)
+    # }
+    + Referent.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:referent => inward} : :referent
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
   end
 
   # Return a scope for finding references of a given type
-  def contents_scope model_name='Recipe'
-    case model_name
-      when 'Recipe'
-        RecipeReference.affiliates_scope references.pluck(:url), true
-      when 'Feed'
-        feeds
-    end
-  end
-
-  def self.joinings assoc_name, matcher, &block
-    # block.call(assoc_name).where 'sites.description ILIKE ?', matcher
-    block.call(assoc_name => {referent: :tags}).where 'tags.name ILIKE ?', matcher
+  def contents_scope model_class
+    model_class == Feed ? feeds : model_class.query_on_path(root)
   end
 
   # Merge another site into this one, optionally destroying the other
@@ -135,6 +167,7 @@ public
     # Merge corresponding referents
     return true if other.id == id
     self.description = other.description if description.blank?
+    self.sample = other.sample unless safe_parse(sample)
     if other.referent
       if referent
         referent.absorb other.referent
@@ -144,27 +177,113 @@ public
       other.referent = nil
     end
     # Steal feeds
-    other.feeds.each { |other_feed|
-      other_feed.site = self
-      other_feed.save
-    }
-    super other if defined? super # Let the taggable, collectible, etc. modules do their work
-    other.reload # Refreshes, e.g., feeds list prior to deletion
+    self.feeds += other.feeds
+    other.feeds = []
+    self.page_refs += other.page_refs
+    other.page_refs = []
+    super other if defined?(super) # Let the taggable, collectible, etc. modules do their work
     other.destroy if destroy
     save
   end
 
-
-  # Produce a Site for a given url whether one already exists or not
-  def self.find_or_create link_or_links
-    links = link_or_links.is_a?(String) ? [link_or_links] : link_or_links
-    refs = SiteReference.find_or_initialize links
-    if refs && (ref = refs.first)
-      unless ref.site
-        ref.site = self.create(sample: links.first, references: refs, reference: refs.first )
-        ref.save
+  def self.with_subroot_of(root)
+    dirs = root.sub(/\/$/,'').split('/')
+    base = dirs.shift # Get the host
+    found = Site.where('root LIKE ?', base + '%').inject(nil) { |result, site|
+      if (site.root.length < root.length) && (!result || (site.root.length > result.root.length))
+        site
+      else
+        result
       end
-      ref.site
+    }
+    found
+  end
+
+  # do qa when reassigning root
+  def root= new_root
+    new_root.sub!(/\/$/, '')
+    return if new_root == root
+
+    # Find all the existing sites that match this path
+    if Site.where(root: new_root).exists?
+      errors.add :root, 'must be unique'
+      return
+    end
+    # We need to ensure that PageRefs currently pointing to this site have a good home
+    dirs = new_root.split('/')
+    base = dirs.shift # Get the host
+
+    # Find a site to which we can reassign associated pagerefs
+    # i.e., the one with the longest root that is a substring of the current root
+    if root
+      # All page refs will still be valid if the new root is a substring of the current one
+      # ...but the shorter version may still attract others
+      unless Site.with_subroot_of(root) # A site that <could> take all pagerefs as needed
+        orphans = page_refs.where.not(PageRef.url_path_query new_root).pluck :url
+        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id)  }.empty?
+          # The new root is neither a substring nor a superstring of the existing root.
+          # Since we've already established that there's no Site to catch the existing entities, we fail
+          errors.add(:root, "would abandon #{orphans.count} out of #{page_refs.count} existing entities")
+          return
+        end
+      end
+    end
+    super
+  end
+
+  # Return a scope for sites that could apply to the given link
+  def self.applies_to_url link
+    return nil unless links = subpaths(link) # URL doesn't parse
+    # Find a site, if any, based on the longest subpath of the URL
+    Site.where root: links # Scope for all sites whose root matches a subpath of the url...
+  end
+
+  def self.find_for link
+    # Find a site, if any, based on the longest subpath of the URL
+    if (matches = applies_to_url(link)).present? # Of all sites whose root matches a subpath of the url...
+      # ...return the one with the longest root
+      matches.inject(matches.first) { |result, site|
+        site.root.length > result.root.length ? site : result
+      }
+    end
+  end
+
+  # Produce a Site that maps to a given url(s) whether one already exists or not
+  def self.find_or_create_for link_or_links
+    links = link_or_links.is_a?(Array) ? link_or_links : [link_or_links]
+
+    # Look first for existing sites on any of the links
+    links.each { |link|
+      if site = self.find_for(link)
+        return site
+      end
+    }
+    links.each { |link|
+      if inlinks = subpaths(link)
+        # return self.create(home: host_url(link), root: inlinks.first, sample: link)
+        return self.find_or_create host_url(link), root: inlinks.first, sample: link
+      end
+    }
+    link = links.first
+    self.find_or_create host_url(link), sample: link
+  end
+
+  # Produce a Site for a given url(s) whether one already exists or not
+  def self.find_or_create homelink, options={}
+    if uri = options[:root] || cleanpath(homelink) # URL parses
+      # Find a site, if any, based on the longest subpath of the URL
+      if site = Site.find_by(root: uri)
+        return site
+      else
+        site = Site.new root: uri, sample: (options[:sample] || homelink), home: homelink
+        # TODO: Should be eliminable with switchover to pagerefable
+        unless site.page_ref
+          spr = PageRef::SitePageRef.fetch homelink
+          site.page_ref = spr unless spr.errors.any?
+        end
+        site.save
+        return site
+      end
     end
   end
 
@@ -173,7 +292,7 @@ public
   end
 
   def name
-    referent && referent.name
+    referent.name if referent
   end
 
   def name=(str)
@@ -184,10 +303,9 @@ public
     end
   end
 
-  def recipes
-    # The recipes for a site are all those that match the site's references
-    RecipeReference.lookup_recipes references.pluck(:url), true
-    # TODO RecipePageRef.recipes_from_site ([url] + aliases)
+  def recipes_scope
+    # The recipes for a site are all those that match the site's root
+    contents_scope Recipe
   end
 
 end

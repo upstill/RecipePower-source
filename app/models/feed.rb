@@ -47,7 +47,7 @@ class Feed < ActiveRecord::Base
     if fetch
       self.title = (@fetched.title || '').truncate(255)
       self.description = (@fetched.description || '').truncate(255)
-      self.site ||= Site.find_or_create url
+      self.site ||= Site.find_or_create_for url
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
         self.url = @fetched.feed_url
@@ -143,7 +143,7 @@ class Feed < ActiveRecord::Base
         feedurl = fields[0]
         pageurl = fields[2].sub(/\)$/, '')
         if(pageurl != prevurl)
-          feedcount = (site = Site.find_or_create pageurl) ? site.feeds.count : 0
+          feedcount = (site = Site.find_or_create_for pageurl) ? site.feeds.count : 0
           prevurl = pageurl
         end
         outfile.puts line unless feedcount > 0
@@ -180,12 +180,12 @@ class Feed < ActiveRecord::Base
     orig_save
   end
 
-  def save
+  def save options={}
     if updated_at.nil? # Don't violate the non-null constraint on timestamps
-      orig_save
+      orig_save options
     else
       Feed.record_timestamps = false
-      orig_save
+      orig_save options
       Feed.record_timestamps = true
     end
   end

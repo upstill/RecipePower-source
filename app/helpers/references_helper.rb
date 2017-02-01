@@ -4,6 +4,7 @@ module ReferencesHelper
     reference.referents.collect { |rft| "<br>"+rft.expression.typename+": "+link_to(rft.expression.name, rft.expression) }.join.html_safe
   end
   
+=begin
   # Show a reference, using as text the name of the related site
   def present_reference reference
     ref_link = (ref_name = reference.decorate.name).present? ?
@@ -15,4 +16,5 @@ module ReferencesHelper
     end
     ref_link
   end
+=end
 end

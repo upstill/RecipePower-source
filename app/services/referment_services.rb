@@ -47,7 +47,7 @@ class RefermentServices
   end
 
   def self.convert_references
-    reports = []
+    reports = [ '***** RefermentServices.convert_references ********']
     # Re-establish connection to old references if they didn't convert
     mappings = []
     File.open('references.txt', 'r') { |file|
@@ -68,26 +68,35 @@ class RefermentServices
         "Replaced DefinitionPageRef##{old_referee.id} '#{old_referee.url}' with DefinitionReference #{refid} to #{new_referee.url}"
       }
     }
+    # Convert any references that have come in since the initial conversion
+    # ...thus ensuring that we have NO DefinitionReferences hanging around
     Referment.where(referee_type: "Reference").each { |rm|
       if rm.referee.class == DefinitionReference
         reports << RefermentServices.new(rm).convert_reference
       end
     }
-    puts reports.flatten.compact.sort
-    nil
+    reports.flatten.compact.sort
   end
 
+  # Convert a DefintionReference for this referment to a DefinitionPageRef
+  # ...but do it through DelayedJob
   def convert_reference
     line = ''
-    if referment.referee.class == DefinitionReference
+    if (referee = referment.referee).class == DefinitionReference
+      referee.bkg_enqueue
+      referee.bkg_wait
+      referee.reload
+=begin
       url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
       line << "    Converting Reference #{referment.referee_id} by fetching url '#{url}'\n"
       pr = DefinitionPageRef.fetch(url)
+      pr.save
       referment.referee = pr
       result = referment.save ? 'successfully' : 'unsuccessfully'
       line << "    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}\n"
       line << "    PageRef #{pr.id} says #{pr.errors.messages}\n" if pr.errors.any?
       line << "    Referment #{referment.id} says #{referment.errors.messages}\n" if referment.errors.any?
+=end
     end
     line
   end

@@ -1,22 +1,167 @@
-
+require 'page_ref.rb'
 class SiteServices
   attr_accessor :site
 
   def self.convert_references
-    Site.all.each { |site| SiteServices.new(site).convert_references if site.page_ref_id.nil? } # Only convert the unconverted
-    nil
+    reports = [ '***** SiteServices.convert_references ********']
+    (s = Site.find_by(id: 3463)) && s.destroy
+    Site.where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references } # Only convert the unconverted
+    # Clean up the PageRefs with nil URLs
+    SitePageRef.where(url: nil).collect { |spr|
+      site = Site.find_by(page_ref_id: spr.id)
+      spr.destroy
+      if site
+        site.page_ref = nil
+        site.save
+        reports << SiteServices.new(site).convert_references
+      end
+    }
+    SiteServices.fix_sites
+    SiteServices.fix_roots
+    SiteServices.fix_page_refs
+    SitePageRef.all.each { |pr| PageRefServices.new(pr).ensure_status }
+    reports
   end
 
   def convert_references
-
-    puts "Converting references for site #{site.id}:"
+    report = "Converting references for site #{site.id}:"
     SiteReference.where(affiliate_id: site.id).each { |reference|
-      puts "Making SitePageRef for reference ##{reference.id} (#{reference.url})"
-      site.page_ref = PageRefServices.convert_reference reference, site.page_ref
+      report += "\n\tMaking SitePageRef for reference ##{reference.id} (#{reference.url})"
+      puts "Enqueuing making of SitePageRef for Site ##{site.id} on Reference ##{reference.id} (#{reference.url})"
+      reference.bkg_enqueue true, priority: 10
+      reference.bkg_wait
+      puts "...done"
+      # site.page_ref = PageRefServices.convert_reference reference, site.page_ref
     }
-    site.save
+    site.reload
+    report
   end
 
+  # Ensure that each PageRef (except SitePageRefs) has a corresponding site
+  def self.fix_sites
+    # Define new sites as needed
+    [
+        { name: 'NYTimes Diners Journal', root: 'dinersjournal.blogs.nytimes.com', sample: 'http://www.nytimes.com/pages/dining/index.html'},
+        { name: 'PBS Food', root: 'www.pbs.org/food', home: 'http://www.pbs.org/food'},
+        { name: 'UK TV Good Food', root: 'goodfood.uktv.co.uk', home: 'http://goodfood.uktv.co.uk/'},
+        { root: 'goodfood.uktv.co.uk', home: 'http://goodfood.uktv.co.uk' },
+        { root: 'ricette.giallozafferano.it', home: 'http://ricette.giallozafferano.it' },
+        { root: 'www.dailymail.co.uk', home: 'http://www.dailymail.co.uk' },
+        { root: 'www.eatingwell.com', home: 'http://www.eatingwell.com' },
+        { root: 'www.theguardian.com', home: 'https://www.theguardian.com' },
+        { root: 'ww2.kqed.org/bayareabites', home: 'https://ww2.kqed.org/bayareabites' },
+        { root: 'www.yummly.co', home: 'http://www.yummly.com/' },
+        { root: 'www.shutterbean.com', home: 'http://www.shutterbean.com' },
+        { root: 'www.annies-eats.com', home: 'http://www.annies-eats.com' },
+        { root: 'www.bite.co.nz', home: 'http://www.bite.co.nz' },
+        { root: 'www.brm-icecream.com', home: 'http://www.brm-icecream.com' },
+        { root: 'www.cdkitchen.com', home: 'http://www.cdkitchen.com' },
+        { root: 'www.gourmetsleuth.com', home: 'http://www.gourmetsleuth.com' },
+        { root: 'www.hogarmania.com', home: 'http://www.hogarmania.com' },
+        { root: 'www.lespetitsmacarons.com', home: 'http://www.lespetitsmacarons.com' },
+        { root: 'www.tastebook.com', home: 'http://www.tastebook.com' },
+        { root: 'www.thepauperedchef.com', home: 'http://www.thepauperedchef.com' },
+        { root: 'www.washingtonpost.com', home: 'http://www.washingtonpost.com' },
+        { root: 'bestbyfarr.wordpress.com', home: 'https://bestbyfarr.wordpress.com' },
+        { root: 'en.wikipedia.org', home: 'https://en.wikipedia.org' },
+        { root: 'patijinich.com', home: 'https://patijinich.com' },
+        { root: 'www.evernote.com', home: 'https://www.evernote.com' },
+        { root: 'saltandwind.com', home: 'http://saltandwind.com' },
+        { root: 'www.washingtonpost.com/lifestyle/food', home: 'https://www.washingtonpost.com/lifestyle/food' },
+        { name: 'playing with fire and water', root: 'www.playingwithfireandwater.com', home: 'http://www.playingwithfireandwater.com' },
+        { name: 'Mexico Cooks', root: 'mexicocooks.typepad.com/mexico_cooks', home: 'http://mexicocooks.typepad.com/mexico_cooks/'},
+        { name: 'The Guardian UK Food&Drink', root: 'www.theguardian.com/lifeandstyle', sample: 'https://www.theguardian.com/lifeandstyle/food-and-drink'}
+    ].each { |initializer|
+      unless Site.where(root: initializer[:root]).exists?
+        s = Site.create(initializer)
+        if s.page_ref && s.page_ref.title.present?
+          s.name = s.page_ref.title
+          s.save
+        end
+      end
+    }
+    [ RecipePageRef, DefinitionPageRef ].each { |refclass|
+      refclass.where(site_id: nil).collect { |pageref|
+        puts "Fixing site for #{pageref.type} ##{pageref.id}: #{pageref.url}"
+        if pageref.site = Site.find_for(pageref.url)
+          pageref.save
+          pageref
+        end
+      }.compact
+    }
+  end
+
+  def self.fix_page_refs
+    # Ensure that every site with a viable home link has a page_ref
+    Site.where(page_ref_id: nil).collect { |site| SiteServices.new(site).fix_page_ref }
+  end
+
+  def fix_page_ref
+    # Ensure that every site with a viable home link has a page_ref
+    puts "Fixing PageRef for Site ##{site.id} ('#{site.home}')"
+    if site.home.present?
+      site.page_ref = SitePageRef.fetch site.home
+      site.save
+      if site.errors.any?
+        puts "...fails to get PageRef: #{site.errors.messages}"
+      else
+        puts "...gets PageRef ##{site.page_ref_id}"
+      end
+      puts fix_root if site.root.blank?
+    else
+      puts "...couldn't create PageRef for empty home (!!)"
+    end
+  end
+
+=begin
+  def self.fix_referents
+    Site.includes(:page_ref).where(referent_id: nil).collect { |site|
+      if (title = site.page_ref && site.page_ref.title)
+        site.name =
+      end
+      }
+  end
+=end
+
+  def self.fix_roots
+    # Site.find_by(sample: '/').destroy
+    if site = Site.find_by(id: 3332)
+      site.home.sub! '[node-path]', ''
+      site.save
+    end
+
+    Site.includes(:page_ref).where(root: nil).collect { |site|
+      ss = SiteServices.new(site)
+      ss.fix_root if site.page_ref
+    }.compact # Only convert the unconverted
+  end
+
+  def fix_root
+    new_root =
+        (subpaths(site.home).last if site.home.present? && subpaths(site.home)) ||
+            (subpaths(site.sample).first if site.sample.present? && subpaths(site.sample))
+    return if new_root.blank? || (new_root == site.root)
+    begin
+      report = ["Site ##{site.id} '#{site.name}' w. home '#{site.home}', sample '#{site.sample}', root '#{site.root}'",
+                "    to get root '#{new_root}':"]
+      if other = Site.find_by(root: new_root)
+        # There's already a site with this root => merge with that one
+        report << "    Site ##{other.id} '#{other.name}' w. home '#{other.home}', sample '#{other.sample}' already has root '#{other.root}'"
+        other.absorb site
+        report << "    #{other.errors.messages}"
+      else
+        # Should be good to go
+        site.root = new_root
+        site.save
+        report << "    Success!"
+      end
+    rescue Exception => e
+      report << e.to_s
+    end
+    return report
+  end
+
+=begin
   def self.test_lookup n=-1
     Site.all[0..n].map(&:id).each { |id| self.test_lookup_by_id id }
     nil
@@ -36,6 +181,7 @@ class SiteServices
       end
     }
   end
+=end
 
   def initialize site=nil
     @site = site
@@ -213,7 +359,7 @@ class SiteServices
     summ = {'link' => {}, 'meta' => {}}
     nsites = 0
     Site.all.each { |site|
-      next if site.recipes.count < 1
+      next if site.recipes_scope.count < 1
       self.new(site).stab_at_sample summ
       nsites += 1
       limit = limit - 1
@@ -238,7 +384,7 @@ class SiteServices
       @nkdoc = Nokogiri::HTML(open @site.sample)
     rescue
       puts "Error: couldn't open page '#{@site.sample}' for analysis."
-      recipe = @site.recipes.first
+      recipe = @site.recipes_scope.first
       puts "Processing Recipe #{recipe.url}"
       begin
         @nkdoc = Nokogiri::HTML(open recipe.url)

@@ -1141,7 +1141,7 @@ class SitesShowCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= site.contents_scope result_type.model_name
+    @itemscope ||= site.contents_scope result_type.model_class
   end
 end
 

@@ -40,7 +40,7 @@ class Gleaning < ActiveRecord::Base
       self.results = FinderServices.glean(url, site)  { |msg|
         self.err_msg = msg
         # We assume the first three-digit number is the HTTP status code
-        self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : nil
+        self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
       }
     end
   end

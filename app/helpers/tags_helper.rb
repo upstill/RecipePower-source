@@ -79,7 +79,8 @@ module TagsHelper
   end
 
   def present_tag_definitions tagserv
-    tagserv.references.where(canonical: true, type: 'DefinitionReference').collect{ |reference| present_reference(reference) }.compact
+    # tagserv.references.where(canonical: true, type: 'DefinitionReference').collect{ |reference| present_reference(reference) }.compact
+    tagserv.definition_page_refs.collect { |definition| present_definition(definition) }.compact
   end
 
   # Return HTML for the links related to a given tag (i.e., the links for 

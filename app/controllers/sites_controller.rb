@@ -56,7 +56,7 @@ class SitesController < CollectibleController
   # PUT /sites/1.json
   def update
     if update_and_decorate
-      @site.include_url(params[:site][:home], true) if params[:site][:home].present?
+      # @site.include_url(params[:site][:home], true) if params[:site][:home].present?
       unless @site.errors.any?
         @site.gleaning.attributes = params[:site][:gleaning_attributes]
         # @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
