@@ -226,9 +226,9 @@ class PageRefServices
         break
       end
     end
-    if page_ref.url_changed? && (other = page_ref.class.find_by(url: page_ref.url)) && (other.id != page_ref.id)
+    if page_ref.url_changed? && (extant = page_ref.class.find_by_url page_ref.url) && (extant.id != page_ref.id)
       # Replacement URL is already being serviced by another PageRef
-      PageRefServices.new(other).absorb page_ref
+      PageRefServices.new(extant).absorb page_ref
       return "Destroyed redundant #{page_ref.class} ##{page_ref.id}"
     end
     if page_ref.title.present? # We assume that Mercury has done its job
@@ -250,11 +250,10 @@ class PageRefServices
     if (page_ref.http_status == 666) &&
         (match = page_ref.error_message.match(/tried to assert existing url '(.*)'$/)) &&
         match[1] &&
-        (other = page_ref.class.find_by(url: match[1])) &&
-        (path1 = (uri = URI.parse(page_ref.url)) && uri.path).present? &&
-        (path2 = (uri = URI.parse(other.url)) && uri.path).present?
-      sentences << "Found match PageRef ##{other.id}"
-      absorb other
+        (extant = page_ref.class.find_by_url match[1]) &&
+        (extant.id != page_ref.id)
+      sentences << "Found match PageRef ##{extant.id}"
+      absorb extant
       page_ref.good!
     end
     sentences.join "\n\t"
@@ -281,7 +280,7 @@ class PageRefServices
             new_page_ref.aliases += [new_url] unless new_page_ref.url == new_url
             PageRefServices.new(new_page_ref).absorb page_ref
             return new_page_ref
-          elsif extant = klass.find_by(klass.url_query new_page_ref.url) # new_page_ref.url already exists
+          elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
             # Save the old url as an alias. (Presumably not violating uniqueness)
             page_ref.aliases += [page_ref.url]
             # Adopt the new_url (which may have been redirected from new_url)
@@ -291,7 +290,7 @@ class PageRefServices
             return page_ref
           else
             # Save the old url as an alias. (Presumably not violating uniqueness)
-            page_ref.aliases += [page_ref.url]
+            page_ref.aliases |= [page_ref.url]
             # Adopt the new_url (which may have been redirected from new_url)
             page_ref.url = new_page_ref.url
             absorb new_page_ref
