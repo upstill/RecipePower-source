@@ -5,7 +5,7 @@ class SiteServices
   def self.convert_references
     reports = [ '***** SiteServices.convert_references ********']
     (s = Site.find_by(id: 3463)) && s.destroy
-    Site.where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references } # Only convert the unconverted
+    Site.includes(:references).where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references if site.references.present? } # Only convert the unconverted
     # Clean up the PageRefs with nil URLs
     SitePageRef.where(url: nil).collect { |spr|
       site = Site.find_by(page_ref_id: spr.id)

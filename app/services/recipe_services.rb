@@ -31,15 +31,6 @@ class RecipeServices
     # Ensure all RecipePageRefs have valid status and http_status
     RecipePageRef.where(id: procids).each { |pr| PageRefServices.new(pr).ensure_status }
 
-    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
-    reports << "**** Rechecking #{unreachables.count} recipes..."
-    reports += unreachables.collect { |unreachable|
-      # Take another crack at the unreachable recipes
-      PageRefServices.new(unreachable.page_ref).ensure_status true
-    }.compact
-    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
-    reports << "**** #{unreachables.count} recipes unreachable after checking"
-
     # Clean up the PageRefs with nil URLs
     reports += RecipePageRef.includes(:recipes).where(url: nil).collect { |pr|
            pr.recipes.collect { |recipe|
@@ -60,7 +51,6 @@ class RecipeServices
   end
 
   def convert_references
-
     puts "Converting references for recipe #{recipe.id}:"
     RecipeReference.where(affiliate_id: recipe.id).each { |reference|
       reference.bkg_enqueue # recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref
@@ -69,6 +59,24 @@ class RecipeServices
       puts "...returned"
     }
     recipe.reload
+  end
+
+  # Take another look at the recipes' links which haven't been validated
+  def self.probe_uris
+    reports = []
+    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
+    reports << "**** Rechecking #{unreachables.count} recipes..."
+    reports += unreachables.collect { |unreachable|
+      # Take another crack at the unreachable recipes
+      RecipeServices.new(unreachable).probe_uri
+    }.compact
+    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
+    reports << "**** #{unreachables.count} recipes unreachable after checking"
+  end
+
+  # Take another crack at the recipe's URI
+  def probe_uri
+    PageRefServices.new(recipe.page_ref).ensure_status true
   end
 
   # Check to see that a recipe can be reached.
@@ -96,40 +104,41 @@ class RecipeServices
       [
           ['saveur.com/article/Recipe', 'saveur.com/article/Recipes'],
           [/www.tasteofbeirut.com\/\d\d\d\d\/\d\d/, 'www.tasteofbeirut.com'],
-          ['patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html',
+          ['http://patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html',
            'https://patijinich.com/recipe/you_know_you_want_it_green_pozole/'],
-          ['patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html',
+          ['http://patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html',
            'https://patijinich.com/recipe/lamb_barbacoa_in_adobo'],
-          ['patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html',
+          ['http://patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html',
            'https://patijinich.com/recipe/apple_radish_watercress_salad_pistachio_chile_de_arbol/'],
-          ['patismexicantable.com/2012/05/creamy-poblano-soup.html',
+          ['http://patismexicantable.com/2012/05/creamy-poblano-soup.html',
            'https://patijinich.com/recipe/creamy-poblano-soup/'],
-          ['patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html',
+          ['http://patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html',
            'https://patijinich.com/recipe/cleaning_cactus_paddles_or_nopales/'],
-          ['patismexicantable.com/2012/07/blissful-corn-torte.html',
+          ['http://patismexicantable.com/2012/07/blissful-corn-torte.html',
            'https://patijinich.com/recipe/blissful-corn-torte/'],
-          ['patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html',
+          ['http://patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html',
            'https://patijinich.com/recipe/cajeta-crepes-with-toasted-pecans/'],
-          ['patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html',
+          ['http://patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html',
            'https://patijinich.com/recipe/snapper-in-a-poblano-chile-sauce/'],
-          ['patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html',
+          ['http://patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html',
            'https://patijinich.com/recipe/cucumber_soup_with_pomegranate/'],
-          ['patismexicantable.com/2012/08/mexican-wedding-cookies-1.html',
+          ['http://patismexicantable.com/2012/08/mexican-wedding-cookies-1.html',
            'https://patijinich.com/recipe/mexican-wedding-cookies/'],
-          ['patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html',
+          ['http://patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html',
            'https://patijinich.com/recipe/chayote-squash-and-pickled-onion-salad/'],
-          ['patismexicantable.com/2012/10/purslane-or-verdolagas.html',
+          ['http://patismexicantable.com/2012/10/purslane-or-verdolagas.html',
            'https://patijinich.com/2012/10/purslane_or_verdolagas/'],
-          ['patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html',
+          ['http://patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html',
            'https://patijinich.com/recipe/fluffy-plantain-and-pecan-bread/'],
-          ['patismexicantable.com/2012/11/cactus-paddle-tostadas.html',
+          ['http://patismexicantable.com/2012/11/cactus-paddle-tostadas.html',
            'https://patijinich.com/recipe/cactus-paddle-tostada/'],
-          ['patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html',
+          ['http://patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html',
            'https://patijinich.com/recipe/sweet_potato_rounds_with_a_punch/'],
-          ['patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html',
+          ['http://patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html',
            'https://patijinich.com/recipe/zucchini-soup-with-tortilla-crisps/'],
-          ['patismexicantable.com/2011/06/dumplings/',
-           'https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/']
+          ['http://patismexicantable.com/2011/06/dumplings/',
+           'https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/'],
+          ['http://https//patijinich.com', 'https://patijinich.com']
       ].each { |args|
         if new_page_ref = prs.try_substitute(*args)
           if new_page_ref != pr
@@ -137,7 +146,7 @@ class RecipeServices
             recipe.save
             recipe.glean! if new_page_ref.bad?
           end
-          return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status})"
+          return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status}) http_status #{new_page_ref.http_status}"
         end
       }
     end

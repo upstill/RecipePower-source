@@ -78,7 +78,7 @@ class PageRef < ActiveRecord::Base
               break if aliases.include?(hr)
               puts "Redirecting from #{data['url']} to #{hr}"
               begin
-                self.aliases += [redirected_from = data['url']] # Stash the redirection source in the aliases
+                self.aliases |= [redirected_from = data['url']] # Stash the redirection source in the aliases
                 data = try_mercury hr
                 if (self.error_message = data['errorMessage']).blank? # Success on redirect
                   hr = 200
