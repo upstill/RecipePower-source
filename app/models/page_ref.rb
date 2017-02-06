@@ -12,10 +12,10 @@ class PageRef < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
-  @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
+  @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :type, :error_message, :http_status
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status
 
   attr_accessor :extant_prid
 
@@ -31,6 +31,11 @@ class PageRef < ActiveRecord::Base
 
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
+
+  # What attributes are obtained from Mercury?
+  def self.mercury_attributes
+    @@mercury_attributes + [ :extraneity ]
+  end
 
   def perform
     bkg_execute {
@@ -104,7 +109,7 @@ class PageRef < ActiveRecord::Base
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
-      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
+      self.assign_attributes data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
       self.errors.add :url, "Bad URL '#{url}': #{e}"
       self.http_status = 400
