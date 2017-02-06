@@ -44,7 +44,7 @@ class PageRefServices
     end
     page_ref.aliases = aliases - [page_ref.url]
 
-    other.destroy
+    other.destroy if other.id # May not have been saved
     page_ref.save
   end
 
@@ -277,23 +277,16 @@ class PageRefServices
         unless new_page_ref.errors.any?
           if new_page_ref.id # Existed prior =>
             # Make the old page_ref represent the new URL
-            new_page_ref.aliases += [new_url] unless new_page_ref.url == new_url
             PageRefServices.new(new_page_ref).absorb page_ref
             return new_page_ref
           elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
-            # Save the old url as an alias. (Presumably not violating uniqueness)
-            page_ref.aliases += [page_ref.url]
-            # Adopt the new_url (which may have been redirected from new_url)
-            page_ref.url = extant.url
-            absorb extant
             puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-            return page_ref
+            epr = PageRefServices.new extant
+            epr.absorb page_ref
+            epr.absorb new_page_ref
+            return extant
           else
-            # Save the old url as an alias. (Presumably not violating uniqueness)
-            page_ref.aliases |= [page_ref.url]
-            # Adopt the new_url (which may have been redirected from new_url)
-            page_ref.url = new_page_ref.url
-            absorb new_page_ref
+            absorb new_page_ref, true
             puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
             return page_ref
           end
