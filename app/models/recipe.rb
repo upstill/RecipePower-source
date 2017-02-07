@@ -10,9 +10,9 @@ class Recipe < ActiveRecord::Base
   # TODO: pull the switch by making recipes pagerefable rather than linkable
   # The url attribute is handled by a reference of type RecipeReference
   include Referrable
-  linkable :url, :reference, gleanable: true
+  # linkable :url, :reference, gleanable: true
   include Pagerefable
-  belongs_to :page_ref # pagerefable :url, gleanable: true
+  pagerefable :url, gleanable: true # belongs_to :page_ref #
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 

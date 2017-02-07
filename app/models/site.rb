@@ -5,12 +5,12 @@ require 'referent.rb'
 
 class Site < ActiveRecord::Base
   include Collectible
-  # TODO: pull the switch by making recipes pagerefable rather than linkable
+  # TODO: pull the switch by making sites pagerefable rather than linkable
   include Referrable
-  linkable :home, :reference, gleanable: true
-  # include Pagerefable
+  # linkable :home, :reference, gleanable: true
+  include Pagerefable
   picable :logo, :thumbnail, 'MissingLogo.png'
-  belongs_to :page_ref # pagerefable :home, gleanable: true
+  pagerefable :home, gleanable: true # belongs_to :page_ref #
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
