@@ -220,7 +220,7 @@ RP::Application.routes.draw do
     end
   end
   get '/revise', :to => 'recipes#revise'
-  get '/scrape', :to => 'references#scrape'
+  get '/scrape', :to => 'page_refs#scrape'
 
   # get "pages/home"
   # get "pages/contact"

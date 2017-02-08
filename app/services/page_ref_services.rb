@@ -48,6 +48,29 @@ class PageRefServices
     page_ref.save
   end
 
+  # Assert a reference to the given URL, linking back to a referent
+  def self.assert_for_referent(uri, tag_or_referent, type=:Definition )
+    pr = "#{type}PageRef".constantize.fetch uri
+    self.new(pr).assert tag_or_referent if pr.errors.empty?
+    pr
+  end
+
+  # Associate this page_ref with the given referent.
+  # NB: had better be a ReferrableReferent or subclass thereof
+  def assert_referent tag_or_referent
+    rft =
+        case tag_or_referent
+          when Tag
+            Referent.express tag_or_referent
+          else
+            tag_or_referent
+        end
+    if rft && !page_ref.referent_ids.include?(rft.id)
+      page_ref.referents << rft
+      page_ref.save
+    end
+  end
+
   # Convert a reference, either creating a new PageRef or merging it with another
   def self.convert_reference reference, extant_pr=nil
 

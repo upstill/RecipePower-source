@@ -243,14 +243,6 @@ class SiteServices
     results
   end
 
-  def self.purge do_it=false
-    used_sites = Set.new(
-      Recipe.all.collect { |r| r.site.id } +
-      Reference.all.collect { |r| r.site.id } +
-      Feed.all.collect { |f| f.site_id })
-    Site.all.each { |site| site.destroy unless used_sites.include? site.id } if do_it
-  end
-
   def self.scrape_for_feeds(n=-1)
     Site.all[0..n].each { |site| Delayed::Job.enqueue site, priority:5 }
   end
@@ -496,9 +488,9 @@ class SiteServices
 
   # Find sites that are candidates for merging, i.e. those with the same domain
   def similars
-    uri = URI(site.home)
-    Site.joins(:reference).
-        where('type = \'SiteReference\' and url ILIKE ? and affiliate_id != ?', "%#{uri.host}%", site.id).
+    Site.includes(:page_ref).
+        joins(:page_ref).
+        where("page_refs.domain = '#{site.page_ref.domain}'").
         uniq.
         to_a
   end

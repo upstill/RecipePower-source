@@ -35,7 +35,8 @@ class Referent < ActiveRecord::Base
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
-      DefinitionPageRef
+      PageRef
+      Reference
       Recipe
       Referent
       SourceReferent

@@ -45,6 +45,14 @@ class PageRefsController < ApplicationController
     redirect_to page_refs_url, notice: 'Mercury page was successfully destroyed.'
   end
 
+  def scrape
+    begin
+      render json: { popup: 'Scraped through ' + RecipePageRef.scrape(params[:first]) + '. Hit reload for next batch.' }
+    rescue Exception => e
+      render json: { alert: 'Scrape died: ' + e.to_s }
+    end
+  end
+
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page_ref

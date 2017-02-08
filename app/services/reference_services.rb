@@ -8,6 +8,29 @@ class ReferenceServices
     self.reference = reference
   end
 
+
+  # Assert an image, linking back to a referent
+  def self.assert_image_for_referent(uri, tag_or_referent)
+      refs = Reference::ImageReference.find_or_initialize uri
+      if refs.first.errors.empty?
+          rft =
+              case tag_or_referent
+                  when Tag
+                      Referent.express tag_or_referent
+                  else
+                      tag_or_referent
+              end
+          if rft
+              refs.each { |ref|
+                  # ref.assert tag_or_referent
+                  ref.referents << rft unless ref.referents.exists?(id: rft.id)
+                  ref.save
+              }
+          end
+      end
+      refs.first
+  end
+
   def self.convert_references klass=nil
     puts DefinitionReference.all.collect { |ref|
            pr = DefinitionPageRef.fetch ref.url
@@ -22,6 +45,8 @@ class ReferenceServices
       ref.save # ref.ping
     end
   end
+
+  # Run benchmarks on Reference and PageRef activities
   def self.time_lookup ix=1
     urls = [
         'http://www.bento.com/rf_ok.html',
