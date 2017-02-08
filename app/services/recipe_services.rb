@@ -560,6 +560,20 @@ class RecipeServices
           Recipe.where(id: recipe_ids).to_a.each { |recipe|
             recipe.site
           }
+        when 8
+          label = "RecipePageRef by url (single query)"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            PageRef::RecipePageRef.find_by_url url, true
+          }
+        when 9
+          label = "RecipePageRef by url (two queries)"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            PageRef::RecipePageRef.find_by_url url, false
+          }
         else
           return false
       end
@@ -568,11 +582,13 @@ class RecipeServices
     index_status = "unindexed"
     index_status.sub('un','') if (index_name.present? &&
         ActiveRecord::Base.connection.index_name_exists?( index_table, index_name, false))
-    report = "#{ix}: #{label} at #{Time.new} (#{index_status}) #{note}: "+"\r\n\t"+time_report
+    line1 = "#{ix}: #{label} at #{Time.new} (#{index_status}) #{note}:"
+    line2 = "\t"+time_report
     File.open("db_timings", 'a') { |file|
-      file.write report
+      file.write line1+"\n"
+      file.write line2+"\n"
     }
-    report
+    "#{line1}\n#{line2}"
   end
 
 end

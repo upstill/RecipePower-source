@@ -143,18 +143,14 @@ class PageRef < ActiveRecord::Base
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url
-  def self.url_query url, with_url=true
+  def self.url_query url
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
     url_node = self.arel_table[:url]
     aliases_node = self.arel_table[:aliases]
     aliases_query = aliases_node.overlap [url]
-    if with_url
-      url_query = url_node.eq(url)
-      aliases_query = aliases_node.overlap [url]
-      url_query.or(aliases_query)
-    else
-      aliases_query
-    end
+    url_query = url_node.eq(url)
+    aliases_query = aliases_node.overlap [url]
+    url_query.or aliases_query
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url path
@@ -165,9 +161,10 @@ class PageRef < ActiveRecord::Base
   end
 
   # Lookup a PageRef. We undergo two queries, on the theory that a direct lookup is faster
-  def self.find_by_url url
-    # self.find_by(url: url) || self.find_by(url_query url, false)
-    self.find_by(url_query url)
+  def self.find_by_url url, single_query=true
+    single_query ?
+        self.find_by(url_query url) :
+        (self.find_by(url: url) || self.find_by(self.arel_table[:aliases].overlap [url]))
   end
 
   # String => PageRef
