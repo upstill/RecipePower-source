@@ -15,7 +15,7 @@ class PageRef < ActiveRecord::Base
   @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text
 
   attr_accessor :extant_prid
 
@@ -189,7 +189,8 @@ class RecipePageRef < PageRef
   attr_accessible :recipes
 
   has_many :recipes, foreign_key: 'page_ref_id', :dependent => :nullify
-
+=begin
+# This needs to be adapted from RecipeReference to RecipePageRef (or does it??)
   def self.scrape first=''
     mechanize = Mechanize.new
 
@@ -247,6 +248,7 @@ class RecipePageRef < PageRef
       end
     end
   end
+=end
 end
 
 class SitePageRef < PageRef
@@ -264,8 +266,12 @@ class SitePageRef < PageRef
 end
 
 class ReferrablePageRef < PageRef
-# Referrable page refs are referred to by, e.g., a glossary entry for a given concept
+  # Referrable page refs are referred to by, e.g., a glossary entry for a given concept
   include Referrable
+
+  def typesym
+    type.sub('PageRef','').to_sym
+  end
 
 end
 

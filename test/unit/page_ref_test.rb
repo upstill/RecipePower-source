@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'page_ref.rb'
 class PageRefTest < ActiveSupport::TestCase
 
   # Called before every test method runs. Can be used
@@ -92,12 +93,12 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "calls initialize only once" do
-    mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = RecipePageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     mp.sync
     mp.content = ''
     mp.save
-    mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
-    assert_equal 1, PageRef.count
+    mp2 = RecipePageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
+    assert_equal 1, RecipePageRef.count
     assert_equal '', mp.content
   end
 
@@ -141,7 +142,7 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "correctly handles HTTP 404 (missing URL)" do
-    url = "http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
+    url = "http://honest-food.net/vejjie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
     pr = PageRef.fetch url
     assert pr.bad?
     assert_nil pr.id
@@ -176,4 +177,37 @@ class PageRefTest < ActiveSupport::TestCase
     pr.bkg_perform
     x=2
   end
+
+  test "Make New DefinitionPageRef" do
+    jal = tags(:jal)
+    uri = "http://www.foodandwine.com/chefs/adam-erace"
+    ref = ReferrablePageRef.assert uri, jal
+    ref.reload
+    rft = jal.primary_meaning
+    refid = rft.id
+    assert ref.referents.exists?(id: refid), "Referent wasn't added properly"
+  end
+
+  test "Assert Redundant Reference Properly" do
+    jal = tags(:jal)
+    uri = "http://www.foodandwine.com/chefs/adam-erace"
+    ref = ReferrablePageRef.assert uri, jal, :Tip
+    assert_equal :Tip, ref.typesym, "Reference didn't get type"
+    ref2 = ReferrablePageRef.assert uri, jal, :Video
+    assert_equal :Video, ref2.typesym, "New reference on same url didn't get new type"
+    assert_equal 1, ref2.referents.size, "Reference should have one referent"
+  end
+
+  test "Referent gets proper reference" do
+    jal = tags(:jal)
+    rft = Referent.express jal
+    uri = "http://www.foodandwine.com/chefs/adam-erace"
+    ref = ReferrablePageRef.assert uri, rft, :Definition
+    assert_equal :Definition, ref.typesym, "Definition typesym not :Definition"
+    assert (ref2 = rft.page_refs.first), "Referent didn't get reference"
+    assert_equal ref.id, ref2.id, "Referent's reference not ours"
+    assert ref.referents.first, "New ref didn't get referent"
+    assert_equal ref.referents.first.id, rft.id, "Reference's referent doesn't match"
+  end
+
 end

@@ -26,7 +26,7 @@ class CollectibleServices
     if params[:id]
       # Recipe (or whatever) exists and we're just touching it for the user
       entity = klass.find params[:id]
-    elsif !(entity = Recipe.find_by_url params[:url]) # RecipeReference.lookup_recipe params[:url])
+    elsif !(entity = Recipe.find_by_url params[:url]) 
       # Get findings, either from the extractions, or by looking at the page
       unless findings = FinderServices.findings(extractions, params[:url])
         entity = klass.new params

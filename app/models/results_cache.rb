@@ -1165,7 +1165,7 @@ class ReferencesIndexCache < ResultsCache
   end
 
   def typeclass
-    Reference.type_to_class(type).to_s
+    'ImageReference' # Reference.type_to_class(type).to_s
   end
 
   def itemscope
