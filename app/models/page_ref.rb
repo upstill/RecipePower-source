@@ -17,7 +17,7 @@ class PageRef < ActiveRecord::Base
 
   attr_accessible *@@mercury_attributes, :type, :error_message, :http_status
 
-  attr_accessor :extant_prid
+  attr_accessor :extant_pr
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
@@ -62,7 +62,7 @@ class PageRef < ActiveRecord::Base
   # The purpose of http_status is a positive indication that the page can be reached
   # The purpose of errors are to show that the URL is ill-formed and the record should not (probably cannot) be saved.
   def sync
-    extant_prid = nil
+    extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
       self.http_status =
@@ -98,12 +98,12 @@ class PageRef < ActiveRecord::Base
             hr.is_a?(String) ? 666 : hr
           end
       # Did the url change to a collision with an existing PageRef of the same type?
-      if (data['url'] != url) && (extant_prid = self.class.where(url: data['url']).pluck(:id).first)
+      if (data['url'] != url) && (extant_pr = self.class.find_by_url(data['url']))
         self.error_message = "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
         puts error_message
         self.http_status = 666
         data['url'] = url
-        errors.add :url, "has already been taken by #{self.class} #{extant_prid}"
+        errors.add :url, "has already been taken by #{self.class} ##{extant_pr.id}"
       end
       data['content'] ||= ''
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
@@ -143,13 +143,18 @@ class PageRef < ActiveRecord::Base
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url
-  def self.url_query url
+  def self.url_query url, with_url=true
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
     url_node = self.arel_table[:url]
-    url_query = url_node.eq(url)
     aliases_node = self.arel_table[:aliases]
     aliases_query = aliases_node.overlap [url]
-    url_query.or(aliases_query)
+    if with_url
+      url_query = url_node.eq(url)
+      aliases_query = aliases_node.overlap [url]
+      url_query.or(aliases_query)
+    else
+      aliases_query
+    end
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url path
@@ -159,7 +164,9 @@ class PageRef < ActiveRecord::Base
     url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
   end
 
+  # Lookup a PageRef. We undergo two queries, on the theory that a direct lookup is faster
   def self.find_by_url url
+    # self.find_by(url: url) || self.find_by(url_query url, false)
     self.find_by(url_query url)
   end
 
@@ -169,11 +176,11 @@ class PageRef < ActiveRecord::Base
   # the returned record may not have the same url as the request
   def self.fetch url
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
-    unless mp = self.find_by(self.url_query url)
+    unless mp = self.find_by_url(url)
       mp = self.new url: url
       mp.sync
-      if !mp.errors.any? || mp.extant_prid
-        if extant = mp.extant_prid ? self.find(extant_prid) : self.find_by(url: mp.url) # Check for duplicate URL
+      if !mp.errors.any? || mp.extant_pr
+        if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
           # Found => fold the extracted page data into the existing page
           extant.aliases |= mp.aliases - [extant.url]
           mp = extant

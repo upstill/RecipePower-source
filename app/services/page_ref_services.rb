@@ -295,4 +295,23 @@ class PageRefServices
     }
     nil
   end
+
+  # Check for url collisions between pagerefs of a given type.
+  # This applies to aliases as well as urls, i.e. any given url must map uniquely to one pageref, whether through
+  # the url attribute or via aliases.
+  # This method repairs the trivial case in which a pageref's url also appears in its aliases
+  def self.report_urls type=:recipe
+    klass = "#{type.to_s.capitalize}PageRef".constantize
+    map = {}
+    klass.all.pluck(:id, :url, :aliases).each { |arr|
+      id, url, aliases = *arr
+      if aliases.include? url
+        pr = PageRef.find(id)
+        pr.aliases.delete url
+        pr.save
+      end
+      (aliases + [url]).each { |url| (map[url] ||= []) << id }
+    }
+    map.keep_if { |url, set| set.count > 1 }
+  end
 end
