@@ -218,9 +218,9 @@ class SiteTest < ActiveSupport::TestCase
     test "differentiate between different paths" do
       short = Site.find_or_create_for "http://www.esquire.com/food-drink/index.html"
       # Should now have two references, the canonical one without the slash, and a second one with
-      assert_equal "http://www.esquire.com/", short.home
+      assert_equal "http://www.esquire.com", short.home
       assert short.page_ref
-      if short.reference
+      if short.respond_to?( :reference) && short.reference
         assert_equal short.page_ref.url.sub(/\/$/,''), short.reference.url.sub(/\/$/,'') # Elide the trailing slash for testing
       end
       assert_equal "www.esquire.com", short.root
@@ -246,7 +246,7 @@ class SiteTest < ActiveSupport::TestCase
       site.home = "http://www.esquire.com/food-drink"
       # Should now have two references, the canonical one without the slash, and a second one with
       unless site.respond_to? :reference
-        assert_equal "http://www.esquire.com/food-drink/", site.home.sub(/\/$/,'')
+        assert_equal "http://www.esquire.com/food-drink", site.home.sub(/\/$/,'')
       end
       assert_equal "www.esquire.com/food-drink", site.root.sub(/\/$/,'')
     end

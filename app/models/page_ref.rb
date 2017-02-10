@@ -65,8 +65,13 @@ class PageRef < ActiveRecord::Base
     extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
+      if data['error']
+        self.errors.add :url, (self.error_message = data['messages'])
+      else
+        self.error_message = data['errorMessage']
+      end
       self.http_status =
-          if (self.error_message = data['errorMessage']).blank?
+          if self.error_message.blank?
             200
           else
             # Check the header for the url from the server.
@@ -76,7 +81,11 @@ class PageRef < ActiveRecord::Base
             redirected_from = nil
             while hr = header_result(data['url'])
               if hr.is_a?(Fixnum)
-                data['url'] = self.aliases.delete(redirected_from) if (hr == 404) && redirected_from
+                if (hr == 404) && redirected_from
+                  # Got a redirect via Mercury, but the target failed
+                  data['url'] = self.aliases.delete(redirected_from)
+                  hr = 303
+                end
                 break;
               end
               hr = URI.join(data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path

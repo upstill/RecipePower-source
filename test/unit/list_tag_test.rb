@@ -76,8 +76,8 @@ class ListTagTest < ActiveSupport::TestCase
   end
 
   test "a list's entities are collected by its owner" do
-    refute @tagged.collected?(@owner.id)
-    assert @included.collected?(@owner.id)
+    refute @tagged.collectible_collected?(@owner.id)
+    assert @included.collectible_collected?(@owner.id)
   end
 
 end

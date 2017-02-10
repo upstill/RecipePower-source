@@ -69,12 +69,12 @@ class Recipe < ActiveRecord::Base
 
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
-    pu = site_service.resolve(pu) if site
+    pu = site_service.resolve(pu) if site_service
     self.picture = ImageReference.find_or_initialize(pu).first
   end
 
   def site_service
-    @ss ||= SiteServices.new site
+    @ss ||= (SiteServices.new(ensure_site) if ensure_site)
   end
 
   # Absorb another recipe

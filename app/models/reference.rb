@@ -261,8 +261,6 @@ class ImageReference < Reference
     end
   end
 
-  private
-
   def thumbdata
     self[:thumbdata]
   end

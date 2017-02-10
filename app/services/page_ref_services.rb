@@ -35,7 +35,10 @@ class PageRefServices
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
       puts "...taking #{hard_attribs} from other"
       page_ref.assign_attributes hard_attribs
-      (page_ref.class.mercury_attributes).each { |attrname|
+
+      # Soft attributes are copied only if not already set
+      soft_attribs = page_ref.class.mercury_attributes + %w{ link_text }
+      soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
           puts "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
           page_ref.write_attribute attrname, other.read_attribute(attrname)
@@ -51,7 +54,7 @@ class PageRefServices
   # Assert a reference to the given URL, linking back to a referent
   def self.assert_for_referent(uri, tag_or_referent, type=:Definition )
     pr = "#{type}PageRef".constantize.fetch uri
-    self.new(pr).assert tag_or_referent if pr.errors.empty?
+    self.new(pr).assert_referent tag_or_referent if pr.errors.empty?
     pr
   end
 

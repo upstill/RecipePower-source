@@ -166,7 +166,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "follow redirects" do
     url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
     pr = PageRef::RecipePageRef.fetch url
-    assert_equal 404, pr.http_status
+    assert_equal 303, pr.http_status # The last redirect here is bad
     assert pr.bad?
     x=2
   end
@@ -181,7 +181,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "Make New DefinitionPageRef" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = ReferrablePageRef.assert uri, jal
+    ref = PageRefServices.assert_for_referent uri, jal
     ref.reload
     rft = jal.primary_meaning
     refid = rft.id
@@ -191,9 +191,9 @@ class PageRefTest < ActiveSupport::TestCase
   test "Assert Redundant Reference Properly" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = ReferrablePageRef.assert uri, jal, :Tip
+    ref = PageRefServices.assert_for_referent uri, jal, :Tip
     assert_equal :Tip, ref.typesym, "Reference didn't get type"
-    ref2 = ReferrablePageRef.assert uri, jal, :Video
+    ref2 = PageRefServices.assert_for_referent uri, jal, :Video
     assert_equal :Video, ref2.typesym, "New reference on same url didn't get new type"
     assert_equal 1, ref2.referents.size, "Reference should have one referent"
   end
@@ -202,7 +202,7 @@ class PageRefTest < ActiveSupport::TestCase
     jal = tags(:jal)
     rft = Referent.express jal
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = ReferrablePageRef.assert uri, rft, :Definition
+    ref = PageRefServices.assert_for_referent uri, rft, :Definition
     assert_equal :Definition, ref.typesym, "Definition typesym not :Definition"
     assert (ref2 = rft.page_refs.first), "Referent didn't get reference"
     assert_equal ref.id, ref2.id, "Referent's reference not ours"

@@ -49,12 +49,17 @@ class Referent < ActiveRecord::Base
       IngredientReferent
       AuthorReferent
       OccasionReferent
-      PantrysectionReferent
-      StoresectionReferent
+      PantrySectionReferent
+      StoreSectionReferent
       DietReferent
       ToolReferent
       NutrientReferent
       CulinaryTermReferent
+      QuestionReferent
+      ListReferent
+      EpitaphReferent
+      CourseReferent
+      TimeReferent
   }
   @@referment_associations.each { |assoc|
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
@@ -512,13 +517,7 @@ end
 class OccasionReferent < Referent
 end
 
-class PantrysectionReferent < Referent
-end
-
 class PantrySectionReferent < Referent
-end
-
-class StoresectionReferent < Referent
 end
 
 class StoreSectionReferent < Referent
@@ -536,5 +535,17 @@ end
 class CulinaryTermReferent < Referent
 end
 
-class CulinarytermReferent < Referent
+class QuestionReferent < Referent
+end
+
+class ListReferent < Referent
+end
+
+class EpitaphReferent < Referent
+end
+
+class CourseReferent < Referent
+end
+
+class TimeReferent < Referent
 end

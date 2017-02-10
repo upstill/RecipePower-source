@@ -105,6 +105,10 @@ module Pagerefable
 
   public
 
+  def ensure_site
+    (page_ref.site ||= Site.find_or_create_for(page_ref.url)) if page_ref
+  end
+
   def url_attribute
     self.class.url_attribute if self.class.respond_to? :url_attribute
   end

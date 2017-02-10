@@ -105,7 +105,7 @@ class List < ActiveRecord::Base
   end
 
   def self.excluded_tag_types
-    [ :Unit, :Pantrysection, :Storesection, :Question, :List, :Epitaph, :Time ]
+    [ :Unit, :PantrySection, :StoreSection, :Question, :List, :Epitaph, :Time ]
   end
 
   def included_tag_tokens=idstring
@@ -169,6 +169,7 @@ class List < ActiveRecord::Base
   # Make sure the list's tag obeys the privacy constraint of the list itself,
   # The tag is visible only if one of the lists that use it is not private
   def propagate_privacy
+    return unless name_tag
     name_tag.isGlobal = List.exists? name_tag_id: name_tag_id, availability: [0,1]
     name_tag.save if name_tag.changed?
   end

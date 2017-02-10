@@ -56,7 +56,11 @@ class CollectibleServices
           entity.url = url
           # If this url is to the home of a site, return a Site object instead
           # Ignore leading and trailing slashes in comparing paths
-          if uri.path.sub(/^\//, '').sub(/\/$/,'') == URI(entity.site.home).path.sub(/^\//, '').sub(/\/$/,'')
+          site = entity.page_ref.site || Site.find_or_create_for(url)
+          site_uri = URI(site.home)
+          mypath = uri.path.sub(/^\//, '').sub(/\/$/,'')
+          sitepath = site_uri.path.sub(/^\//, '').sub(/\/$/,'')
+          if site && uri.host == site_uri.host && mypath == sitepath
             entity.site.decorate.findings = findings
             return entity.site
           else
