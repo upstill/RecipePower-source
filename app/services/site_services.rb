@@ -1,4 +1,4 @@
-require 'page_ref.rb'
+# require 'page_ref.rb'
 class SiteServices
   attr_accessor :site
 
@@ -7,7 +7,7 @@ class SiteServices
     (s = Site.find_by(id: 3463)) && s.destroy
     Site.includes(:references).where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references if site.references.present? } # Only convert the unconverted
     # Clean up the PageRefs with nil URLs
-    SitePageRef.where(url: nil).collect { |spr|
+    PageRef::SitePageRef.where(url: nil).collect { |spr|
       site = Site.find_by(page_ref_id: spr.id)
       spr.destroy
       if site
@@ -19,7 +19,7 @@ class SiteServices
     SiteServices.fix_sites
     SiteServices.fix_roots
     SiteServices.fix_page_refs
-    SitePageRef.all.each { |pr| PageRefServices.new(pr).ensure_status }
+    PageRef::SitePageRef.all.each { |pr| PageRefServices.new(pr).ensure_status }
     reports
   end
 
@@ -80,7 +80,7 @@ class SiteServices
         end
       end
     }
-    [ RecipePageRef, DefinitionPageRef ].each { |refclass|
+    [ PageRef::RecipePageRef, PageRef::DefinitionPageRef ].each { |refclass|
       refclass.where(site_id: nil).collect { |pageref|
         puts "Fixing site for #{pageref.type} ##{pageref.id}: #{pageref.url}"
         if pageref.site = Site.find_for(pageref.url)
@@ -100,7 +100,7 @@ class SiteServices
     # Ensure that every site with a viable home link has a page_ref
     puts "Fixing PageRef for Site ##{site.id} ('#{site.home}')"
     if site.home.present?
-      site.page_ref = SitePageRef.fetch site.home
+      site.page_ref = PageRef::SitePageRef.fetch site.home
       site.save
       if site.errors.any?
         puts "...fails to get PageRef: #{site.errors.messages}"

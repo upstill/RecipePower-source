@@ -1,5 +1,5 @@
 require './lib/uri_utils.rb'
-# require 'reference.rb'
+require 'page_ref.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
 
