@@ -4,6 +4,7 @@ class RedirectController < ApplicationController
   # into an HTML request by sending a response that redirects to a page
   def go
     flash.keep # Hold flash for the redirect
+    session[:goto] = params[:to]
     respond_to { |format|
       # Decode the URL embedded in the :to parameter, removing enclosing quotes
       format.json {
