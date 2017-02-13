@@ -351,7 +351,7 @@ class SiteServices
     summ = {'link' => {}, 'meta' => {}}
     nsites = 0
     Site.all.each { |site|
-      next if site.recipes_scope.count < 1
+      next if site.recipes.count < 1
       self.new(site).stab_at_sample summ
       nsites += 1
       limit = limit - 1

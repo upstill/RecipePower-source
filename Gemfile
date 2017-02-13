@@ -103,7 +103,7 @@ group :test do
   # Pretty printed test output
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
-  ## gem "guard-rspec" # ...for auto-running tests on file save
+  ## gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'

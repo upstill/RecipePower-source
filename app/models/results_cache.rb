@@ -849,7 +849,7 @@ class SitesRecipesCache < ResultsCache
 
   def itemscope
     sitepath = site.home.sub /^https?:\/\//, ''
-    Recipe.joins(:references).where('"references"."url" LIKE ?', "%#{sitepath}%")
+    Recipe.joins(:page_refs).where('"page_refs"."domain" LIKE ?', "%#{sitepath}%")
   end
 end
 

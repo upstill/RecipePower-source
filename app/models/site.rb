@@ -35,8 +35,11 @@ class Site < ActiveRecord::Base
   has_many :feeds, :dependent=>:restrict_with_exception
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
-  # When creating a site, also create a corresponding site referent
-  # before_create :ensure_referent
+  # Make an association with each type of PageRef that references this site
+  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym }
+
+  #...and associate with recipes via the recipe_page_refs that refer back here
+  has_many :recipes, :through => :recipe_page_refs
 
   before_validation do |site|
     if site.root.blank? && site.page_ref
@@ -145,16 +148,17 @@ public
 
   def self.strscopes matcher
     onscope = block_given? ? yield() : self.unscoped
-    [
+    a1 = [
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
     ] # + Reference.strscopes(matcher) { |inward=nil|
       # joinspec = inward ? {:reference => inward} : :reference
       # block_given? ? yield(joinspec) : self.joins(joinspec)
     # }
-    + Referent.strscopes(matcher) { |inward=nil|
+    a2 = Referent.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:referent => inward} : :referent
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
+    a1 + a2
   end
 
   # Return a scope for finding references of a given type
@@ -301,11 +305,6 @@ public
     else
       self.referent = Referent.express(str, :Source, :form => :generic)
     end
-  end
-
-  def recipes_scope
-    # The recipes for a site are all those that match the site's root
-    contents_scope Recipe
   end
 
 end

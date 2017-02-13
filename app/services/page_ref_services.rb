@@ -222,7 +222,11 @@ class PageRefServices
   def self.site_reports
     reports = []
     # Every site needs to have a name (referent) and home (page_ref)
-    reports << Site.includes(:referent).to_a.collect { |site| "Site ##{site.id} ('#{site.home}' has no referent (ERROR)" unless site.referent }.compact.sort
+    reports << Site.includes(:referent).to_a.collect { |site|
+      next if site.referent
+      "Site ##{site.id} ('#{site.home}' has no referent (ERROR) #{('but title is '+site.page_ref.title.to_s) if site.page_ref}" +
+      "\n\t...with #{site.definition_page_refs.count} DefinitionPageRef(s) and #{site.recipe_page_refs.count} RecipePageRef(s)"
+    }.compact.sort
     reports << Site.includes(:page_ref).to_a.collect { |site| "Site ##{site.id} ('#{site.home}' has no page_ref (ERROR)" unless site.page_ref }.compact.sort
 
     # Every PageRef should have at least tried to go out
@@ -231,7 +235,9 @@ class PageRefServices
         (SitePageRef.where(url: nil).count.to_s + ' nil site urls'),
         ((SitePageRef.virgin.count+SitePageRef.processing.count).to_s + ' Site Page Refs need processing'),
         (SitePageRef.where(http_status: nil).count.to_s + ' Site Page Refs have no HTTP status'),
-        (badrefids.count.to_s + " bad SitePageRefs: \n\t" + SitePageRef.where(id: badrefids).collect { |spr| "#{spr.id}: '#{spr.url}' -> #{spr.http_status}"}.join("\n\t"))
+        (badrefids.count.to_s + " bad SitePageRefs: \n\t" + SitePageRef.where(id: badrefids).collect { |spr|
+          "#{spr.id}: '#{spr.url}' (for site ##{spr.site_id}) -> #{spr.http_status}"
+        }.join("\n\t"))
     ]
     reports
   end

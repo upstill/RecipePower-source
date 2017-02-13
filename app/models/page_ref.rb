@@ -37,6 +37,10 @@ class PageRef < ActiveRecord::Base
     @@mercury_attributes + [ :extraneity ]
   end
 
+  def self.types
+    @@prtypes ||= %w{ recipe definition article newsitem tip video homepage product offering event }
+  end
+
   def perform
     bkg_execute {
       begin
@@ -194,6 +198,13 @@ class PageRef < ActiveRecord::Base
       end
     end
     mp
+  end
+
+  # Provide a relation for entities that match a string
+  def self.strscopes matcher
+    [
+        (block_given? ? yield() : self).where('"page_refs"."domain" ILIKE ?', matcher)
+    ]
   end
 
 end
