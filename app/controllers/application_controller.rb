@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
-  protect_from_forgery with: :exception
+#  protect_from_forgery with: :exception
 
   before_filter :check_flash
   before_filter :report_cookie_string
@@ -386,7 +386,7 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  protect_from_forgery
+#  protect_from_forgery
 
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
