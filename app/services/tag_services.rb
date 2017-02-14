@@ -49,7 +49,7 @@ class TagServices
 
 # Return the references associated with the tag. This includes all the references from synonyms of the tag
   def definition_page_refs
-    DefinitionPageRef.where id: definition_page_ref_ids
+    PageRef::DefinitionPageRef.where id: definition_page_ref_ids
   end
 
 # Just return the count of references

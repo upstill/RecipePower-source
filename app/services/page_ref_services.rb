@@ -1,4 +1,3 @@
-# require 'page_ref.rb'
 class PageRefServices
   attr_accessor :page_ref
 

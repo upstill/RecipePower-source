@@ -1,7 +1,6 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
 require 'referent.rb'
-# require 'page_ref.rb'
 
 class Site < ActiveRecord::Base
   include Collectible

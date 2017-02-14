@@ -65,7 +65,7 @@ class Referent < ActiveRecord::Base
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
   has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
-  has_many :definition_refs, -> { where type: 'DefinitionReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
+  has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
 
 =begin
     def self.referrable klass

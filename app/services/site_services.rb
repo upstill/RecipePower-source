@@ -1,4 +1,3 @@
-# require 'page_ref.rb'
 class SiteServices
   attr_accessor :site
 

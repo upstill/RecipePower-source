@@ -180,8 +180,10 @@ class ApplicationController < ActionController::Base
       end
       logger.info "SESSION id: #{sessid}"
     rescue Exception => e
-      x=1
+      logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
+    logger.info "SESSON Contents:"
+    env['rack.session'].keys.each { |key| logger.info "\t#{key}: '#{env['rack.session'][key]}'"}
     logger.info "UUID: #{response_service.uuid}"
   end
 

@@ -12,12 +12,20 @@ module Backgroundable
 
     def backgroundable status_attribute=:status
       attr_accessible status_attribute
+      # Since enums are defined at the Module level, we need to detect when an enum has been
+      # defined in multiple classes. detect_enum_conflict! throws an error, so we assume
+      # that the enum has been priorly defined.
+      begin
+        detect_enum_conflict!(status_attribute, status_attribute.to_s.pluralize, true)
+      rescue
+        return
+      end
       enum status_attribute => [
-               :virgin,  # Hasn't been executed or queued
+               :virgin, # Hasn't been executed or queued
                :obs_pending, # Queued but not executed (Obsolete with dj attribute)
                :processing, # Set during execution
                :good, # Executed successfully
-               :bad   # Executed unsuccessfully
+               :bad # Executed unsuccessfully
            ]
     end
 
