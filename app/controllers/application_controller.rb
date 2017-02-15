@@ -182,7 +182,7 @@ class ApplicationController < ActionController::Base
     rescue Exception => e
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
-    logger.info "SESSON Contents:"
+    logger.info "SESSION Contents:"
     env['rack.session'].keys.each { |key| logger.info "\t#{key}: '#{env['rack.session'][key]}'"}
     logger.info "UUID: #{response_service.uuid}"
   end
