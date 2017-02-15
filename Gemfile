@@ -41,7 +41,7 @@ gem 'closure_tree'
 gem 'htmlentities'
 gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 gem 'will_paginate', '~> 3.0'
-gem 'newrelic_rpm'
+# gem 'newrelic_rpm'
 # Sugg. on StackOverflow to use master right-aws: gem 'right_aws', :git => 'git://github.com/rightscale/right_aws.git'
 gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.3.0' # git: 'git://github.com/scambra/devise_invitable.git'

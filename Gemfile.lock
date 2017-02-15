@@ -234,7 +234,6 @@ GEM
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (2.9.2)
-    newrelic_rpm (3.12.0.288)
     nifty-generators (0.4.6)
     nokogiri (1.6.7.2)
       mini_portile2 (~> 2.0.0.rc2)
@@ -468,7 +467,6 @@ DEPENDENCIES
   masonry-rails
   mechanize
   mocha
-  newrelic_rpm
   nifty-generators
   nokogiri (~> 1.6.6)
   omniauth-facebook
