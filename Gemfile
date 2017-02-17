@@ -162,7 +162,10 @@ gem 'rails-observers' # https://github.com/rails/rails-observers
 # Builder provides a number of builder objects that make creating structured data simple to do.
 gem 'builder', '~> 3.1.0' # https://rubygems.org/gems/builder/versions/3.2.2
 
-gem 'htmlentities'
-gem 'will_paginate', '~> 3.0'
+# A module for encoding and decoding (X)HTML entities.
+gem 'htmlentities'  # https://rubygems.org/gems/htmlentities/versions/4.3.4
+
+# Pagination library (TODO: almost certainly defunct)
+gem 'will_paginate', '~> 3.0'  # https://github.com/mislav/will_paginate
 # gem 'actionpack-page_caching'
 # gem 'actionpack-action_caching'
