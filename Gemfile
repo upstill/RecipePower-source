@@ -148,9 +148,17 @@ gem 'eventmachine', '~> 1.0.3' # https://github.com/eventmachine/eventmachine
 gem 'ruby_parser' # https://github.com/seattlerb/ruby_parser
 
 # add these gems to help with the transition:
-gem 'protected_attributes'
-gem 'rails-observers'
-gem 'builder', '~> 3.1.0'
+# Protect attributes from mass-assignment in ActiveRecord models.
+gem 'protected_attributes' # https://github.com/rails/protected_attributes
+
+# Observer classes respond to life cycle callbacks to implement trigger-like behavior outside the original class.
+# Alternatives? Concerns. http://stackoverflow.com/questions/15165260/rails-observer-alternatives-for-4-0
+gem 'rails-observers' # https://github.com/rails/rails-observers
+
+# Builder provides a number of builder objects that make creating structured data simple to do.
+gem 'builder', '~> 3.1.0' # https://rubygems.org/gems/builder/versions/3.2.2
+
+# Decorators/View-Models for Rails Applications
 gem 'draper', '~> 1.3'
 gem 'closure_tree'
 gem 'htmlentities'
