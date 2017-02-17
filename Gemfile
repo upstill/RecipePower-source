@@ -14,6 +14,8 @@ gem 'composite_primary_keys', '~> 8.1.5' # https://github.com/composite-primary-
 gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 # Forms made easy for Rails!
 gem "simple_form", '~> 3.1' # https://github.com/plataformatec/simple_form
+# Decorators/View-Models for Rails Applications
+gem 'draper', '~> 1.3'
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 gem 'arel', '~> 6.0' # https://github.com/rails/arel
@@ -158,8 +160,6 @@ gem 'rails-observers' # https://github.com/rails/rails-observers
 # Builder provides a number of builder objects that make creating structured data simple to do.
 gem 'builder', '~> 3.1.0' # https://rubygems.org/gems/builder/versions/3.2.2
 
-# Decorators/View-Models for Rails Applications
-gem 'draper', '~> 1.3'
 gem 'closure_tree'
 gem 'htmlentities'
 gem 'will_paginate', '~> 3.0'

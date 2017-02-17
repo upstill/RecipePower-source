@@ -328,7 +328,7 @@ GEM
     raindrops (0.13.0)
     rake (11.1.2)
     redcarpet (3.3.0)
-    request_store (1.1.0)
+    request_store (1.3.2)
     responders (2.1.0)
       railties (>= 4.2.0, < 5)
     rmagick (2.13.4)
