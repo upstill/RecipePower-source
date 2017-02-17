@@ -12,6 +12,8 @@ gem 'composite_primary_keys', '~> 8.1.5' # https://github.com/composite-primary-
 # gem 'composite_primary_keys', '~> 9.0.6' # Rails 5
 # TODO: implement categorization via Awesome Nested Set
 gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
+# Forms made easy for Rails!
+gem "simple_form", '~> 3.1' # https://github.com/plataformatec/simple_form
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 gem 'arel', '~> 6.0' # https://github.com/rails/arel
@@ -125,17 +127,26 @@ group :test do
   gem 'poltergeist'
 end
 
-gem 'redcarpet'
-gem 'content_for_in_controllers'
+###### TODO are these even being used?
 
-gem 'bourbon'
-gem 'premailer-rails'
+# Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
+gem 'redcarpet' # https://github.com/vmg/redcarpet
 
-gem 'eventmachine', '~> 1.0.3'
-gem 'ruby_parser'
-gem "simple_form", '~> 3.1' # , :git => 'git://github.com/plataformatec/simple_form.git' #
+# Enables use of content_for in your controllers
+gem 'content_for_in_controllers' # https://github.com/clm-a/content_for_in_controllers
 
-###### TODO are these necessary?
+# Bourbon is a library of Sass mixins and functions that are designed to make you a more efficient style sheet author.
+gem 'bourbon' # https://github.com/thoughtbot/bourbon
+
+# CSS styled emails without the hassle.
+gem 'premailer-rails' # https://github.com/fphilipe/premailer-rails
+
+# EventMachine is an event-driven I/O and lightweight concurrency library for Ruby
+gem 'eventmachine', '~> 1.0.3' # https://github.com/eventmachine/eventmachine
+
+# ruby_parser (RP) is a ruby parser written in pure ruby
+gem 'ruby_parser' # https://github.com/seattlerb/ruby_parser
+
 # add these gems to help with the transition:
 gem 'protected_attributes'
 gem 'rails-observers'
