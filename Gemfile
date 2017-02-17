@@ -10,6 +10,8 @@ gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
 # Composite Primary Keys (NB: VERSION NUMBER DEPENDS VERY CLOSELY ON RAILS VERSION)
 gem 'composite_primary_keys', '~> 8.1.5' # https://github.com/composite-primary-keys/composite_primary_keys
 # gem 'composite_primary_keys', '~> 9.0.6' # Rails 5
+# TODO: implement categorization via Awesome Nested Set
+gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 gem 'arel', '~> 6.0' # https://github.com/rails/arel
@@ -81,9 +83,6 @@ gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
 
 # gem 'letsencrypt_plugin'
 
-gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
-# gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git'
-
 group :development do
   # gem 'minitest', '~> 4.2'
   gem 'annotate', '2.5.0'
@@ -99,6 +98,10 @@ group :development do
   gem 'flamegraph'
 end
 
+# Stack trace on errors
+gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notification.git'
+# gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git'
+
 # Report errors via email
 gem 'letter_opener', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.2.0', :group => :staging
@@ -107,6 +110,7 @@ gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 gem 'rails-perftest' # https://github.com/rails/rails-perftest
 gem 'ruby-prof' # https://github.com/ruby-prof/ruby-prof
 
+# TODO: Used in Development?
 gem 'rspec-rails', '2.99', :group => [ :development, :test ]
 
 group :test do
@@ -121,8 +125,6 @@ group :test do
   gem 'poltergeist'
 end
 
-# TODO: implement categorization via Awesome Nested Set
-gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 gem 'redcarpet'
 gem 'content_for_in_controllers'
 

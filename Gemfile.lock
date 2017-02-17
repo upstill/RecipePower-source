@@ -70,8 +70,8 @@ GEM
     autoprefixer-rails (5.2.0)
       execjs
       json
-    awesome_nested_set (3.0.2)
-      activerecord (>= 4.0.0, < 5)
+    awesome_nested_set (3.1.1)
+      activerecord (>= 4.0.0, < 5.1)
     aws-sdk (1.64.0)
       aws-sdk-v1 (= 1.64.0)
     aws-sdk-v1 (1.64.0)
