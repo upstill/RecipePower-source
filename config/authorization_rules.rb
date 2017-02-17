@@ -2,7 +2,6 @@ authorization do
   role :guest do
     has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ]
     has_permission_on [:visitors], :to => [:create]
-    has_permission_on [:rcpqueries], :to => [:create, :read, :update, :tablist, :relist]
     has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :associated]
     has_permission_on [:tags], :to => [:show, :match, :query, :associated ]
   end
@@ -37,7 +36,7 @@ authorization do
     has_permission_on [:pages, :lists, :recipes, :feeds, :sites, :users, :finders ], :to => [:admin]
     has_permission_on [:tags, :lists, :recipes, :feeds, :sites, :finders ], :to => [:destroy]
     has_permission_on [:feeds, :sites, :finders], :to => [:approve]
-    has_permission_on [:users, :expressions, :links, :pages, :ratings, :rcpqueries, :recipes, :referents, :scales, :sites], :to => :manage
+    has_permission_on [:users, :expressions, :links, :pages, :ratings, :recipes, :referents, :scales, :sites], :to => :manage
   end
 end
 

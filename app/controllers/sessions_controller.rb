@@ -73,6 +73,7 @@ class SessionsController < Devise::SessionsController
       session.delete(:omniauth)
     else
       notice = "Welcome back, #{resource.handle}! You are logged in to RecipePower."
+      session[:foo] = "bar"
     end
     logger.debug "sign_in_and_redirect: Signed in #{resource.handle}; redirecting with..."
     response_service.invitation_token = nil # Clear the pending invitation

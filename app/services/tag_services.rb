@@ -49,7 +49,7 @@ class TagServices
 
 # Return the references associated with the tag. This includes all the references from synonyms of the tag
   def definition_page_refs
-    DefinitionPageRef.where id: definition_page_ref_ids
+    PageRef::DefinitionPageRef.where id: definition_page_ref_ids
   end
 
 # Just return the count of references
@@ -125,8 +125,8 @@ class TagServices
 # Given a name (or the tag thereof), ensure the existence of:
 # -- a tag of the tagtype
 # -- a referent "defining" that kind of entity
-# -- a reference to the page for such a definition
-# -- optionally, a picture link for that entity
+# -- a page_ref to the page for such a definition
+# -- optionally, an ImageReference for that entity
   def self.define tag_or_tagname, options={}
     return nil unless tag_or_tagname
     page_link = options[:page_link]
@@ -137,16 +137,16 @@ class TagServices
         Tag.assert(tag_or_tagname.to_s, tagtype: tagtype)
     location =
         if page_link
-          # Asserting the reference ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
-          reference = Reference.assert page_link, tag, :Definition
+          # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
+          page_ref = PageRefServices.assert_for_referent page_link, tag, :Definition
           if options[:link_text].present? # Force the link text to something else
-            reference.link_text = options[:link_text].strip
-            reference.save
+            page_ref.link_text = options[:link_text].strip
+            page_ref.save
           end
           page_link
         else
           Referent.express tag
-          '(no reference)'
+          '(no page_ref)'
         end
     unless tag_or_tagname.is_a?(Tag)
       msg = "!!!Scraper Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}"
@@ -177,7 +177,7 @@ class TagServices
       }
     end
     if image_link
-      irf = Reference.assert image_link, tag, :Image
+      irf = ReferenceServices.assert_image_for_referent image_link, tag
       TagServices.new(tag).has_image irf
     end
     tag

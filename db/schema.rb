@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170104221648) do
+ActiveRecord::Schema.define(version: 20170207015431) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -230,23 +230,6 @@ ActiveRecord::Schema.define(version: 20170104221648) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "user_id"
-    t.integer  "rcpquery_id"
-  end
-
-  create_table "rcpqueries", force: :cascade do |t|
-    t.integer  "session_id"
-    t.integer  "user_id"
-    t.integer  "owner_id"
-    t.text     "tagstxt"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.string   "listmode",    limit: 255
-    t.integer  "status"
-    t.text     "specialtags"
-    t.integer  "cur_page",                default: 1
-    t.integer  "friend_id",               default: 0
-    t.integer  "channel_id",              default: 0
-    t.string   "which_list",  limit: 255, default: "mine"
   end
 
   create_table "rcprefs", force: :cascade do |t|
@@ -285,22 +268,20 @@ ActiveRecord::Schema.define(version: 20170104221648) do
   add_index "recipes", ["title"], name: "recipes_index_by_title", using: :btree
 
   create_table "references", force: :cascade do |t|
-    t.datetime "created_at",                                    null: false
-    t.datetime "updated_at",                                    null: false
+    t.datetime "created_at",                                  null: false
+    t.datetime "updated_at",                                  null: false
     t.text     "url"
-    t.integer  "affiliate_id"
-    t.string   "type",         limit: 25, default: "Reference"
+    t.string   "type",       limit: 25, default: "Reference"
     t.text     "thumbdata"
     t.integer  "errcode"
-    t.boolean  "canonical",               default: false
+    t.boolean  "canonical",             default: false
     t.string   "host"
-    t.integer  "status",                  default: 0
+    t.integer  "status",                default: 0
     t.string   "filename"
     t.string   "link_text"
     t.integer  "dj_id"
   end
 
-  add_index "references", ["affiliate_id", "type"], name: "references_index_by_affil_and_type", using: :btree
   add_index "references", ["id"], name: "references_index_by_id", unique: true, using: :btree
   add_index "references", ["url", "type"], name: "references_index_by_url_and_type", unique: true, using: :btree
 

@@ -68,6 +68,8 @@ class RefermentServices
         "Replaced DefinitionPageRef##{old_referee.id} '#{old_referee.url}' with DefinitionReference #{refid} to #{new_referee.url}"
       }
     }
+    # Convert any references that have come in since the initial conversion
+    # ...thus ensuring that we have NO DefinitionReferences hanging around
     Referment.where(referee_type: "Reference").each { |rm|
       if rm.referee.class == DefinitionReference
         reports << RefermentServices.new(rm).convert_reference
@@ -76,6 +78,8 @@ class RefermentServices
     reports.flatten.compact.sort
   end
 
+  # Convert a DefintionReference for this referment to a DefinitionPageRef
+  # ...but do it through DelayedJob
   def convert_reference
     line = ''
     if (referee = referment.referee).class == DefinitionReference

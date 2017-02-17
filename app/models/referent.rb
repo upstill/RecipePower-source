@@ -35,7 +35,8 @@ class Referent < ActiveRecord::Base
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
-      DefinitionPageRef
+      PageRef
+      Reference
       Recipe
       Referent
       SourceReferent
@@ -48,18 +49,23 @@ class Referent < ActiveRecord::Base
       IngredientReferent
       AuthorReferent
       OccasionReferent
-      PantrysectionReferent
-      StoresectionReferent
+      PantrySectionReferent
+      StoreSectionReferent
       DietReferent
       ToolReferent
       NutrientReferent
       CulinaryTermReferent
+      QuestionReferent
+      ListReferent
+      EpitaphReferent
+      CourseReferent
+      TimeReferent
   }
   @@referment_associations.each { |assoc|
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
   has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
-  has_many :definition_refs, -> { where type: 'DefinitionReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
+  has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
 
 =begin
     def self.referrable klass
@@ -511,13 +517,7 @@ end
 class OccasionReferent < Referent
 end
 
-class PantrysectionReferent < Referent
-end
-
 class PantrySectionReferent < Referent
-end
-
-class StoresectionReferent < Referent
 end
 
 class StoreSectionReferent < Referent
@@ -535,5 +535,17 @@ end
 class CulinaryTermReferent < Referent
 end
 
-class CulinarytermReferent < Referent
+class QuestionReferent < Referent
+end
+
+class ListReferent < Referent
+end
+
+class EpitaphReferent < Referent
+end
+
+class CourseReferent < Referent
+end
+
+class TimeReferent < Referent
 end

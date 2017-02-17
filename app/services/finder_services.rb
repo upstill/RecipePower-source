@@ -32,7 +32,12 @@ class FinderServices
     end
     finders = finders_or_labels.first.is_a?(Finder) ? finders_or_labels : self.applicable_finders(site, *finders_or_labels)
 
-    uri = URI url
+    begin
+      uri = URI url
+    rescue Exception => e
+      return nil
+    end
+
     pagehome = "#{uri.scheme}://#{uri.host}"
 
     normu = normalize_url url

@@ -1,6 +1,5 @@
 class Rating < ActiveRecord::Base
     belongs_to :recipe
-    belongs_to :rcpquery
     belongs_to :scale
     before_save :ensure_unique
     attr_reader :rating_name

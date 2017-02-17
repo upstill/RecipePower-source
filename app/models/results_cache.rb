@@ -849,7 +849,7 @@ class SitesRecipesCache < ResultsCache
 
   def itemscope
     sitepath = site.home.sub /^https?:\/\//, ''
-    Recipe.joins(:references).where('"references"."url" LIKE ?', "%#{sitepath}%")
+    Recipe.joins(:page_refs).where('"page_refs"."domain" LIKE ?', "%#{sitepath}%")
   end
 end
 
@@ -1165,7 +1165,7 @@ class ReferencesIndexCache < ResultsCache
   end
 
   def typeclass
-    Reference.type_to_class(type).to_s
+    'ImageReference' # Reference.type_to_class(type).to_s
   end
 
   def itemscope

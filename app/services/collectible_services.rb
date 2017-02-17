@@ -26,7 +26,7 @@ class CollectibleServices
     if params[:id]
       # Recipe (or whatever) exists and we're just touching it for the user
       entity = klass.find params[:id]
-    elsif !(entity = Recipe.find_by_url params[:url]) # RecipeReference.lookup_recipe params[:url])
+    elsif !(entity = Recipe.find_by_url params[:url]) 
       # Get findings, either from the extractions, or by looking at the page
       unless findings = FinderServices.findings(extractions, params[:url])
         entity = klass.new params
@@ -56,7 +56,11 @@ class CollectibleServices
           entity.url = url
           # If this url is to the home of a site, return a Site object instead
           # Ignore leading and trailing slashes in comparing paths
-          if uri.path.sub(/^\//, '').sub(/\/$/,'') == URI(entity.site.home).path.sub(/^\//, '').sub(/\/$/,'')
+          site = entity.page_ref.site || Site.find_or_create_for(url)
+          site_uri = URI(site.home)
+          mypath = uri.path.sub(/^\//, '').sub(/\/$/,'')
+          sitepath = site_uri.path.sub(/^\//, '').sub(/\/$/,'')
+          if site && uri.host == site_uri.host && mypath == sitepath
             entity.site.decorate.findings = findings
             return entity.site
           else

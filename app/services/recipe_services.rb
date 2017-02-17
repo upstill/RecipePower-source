@@ -31,15 +31,6 @@ class RecipeServices
     # Ensure all RecipePageRefs have valid status and http_status
     RecipePageRef.where(id: procids).each { |pr| PageRefServices.new(pr).ensure_status }
 
-    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
-    reports << "**** Rechecking #{unreachables.count} recipes..."
-    reports += unreachables.collect { |unreachable|
-      # Take another crack at the unreachable recipes
-      PageRefServices.new(unreachable.page_ref).ensure_status true
-    }.compact
-    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
-    reports << "**** #{unreachables.count} recipes unreachable after checking"
-
     # Clean up the PageRefs with nil URLs
     reports += RecipePageRef.includes(:recipes).where(url: nil).collect { |pr|
            pr.recipes.collect { |recipe|
@@ -60,7 +51,6 @@ class RecipeServices
   end
 
   def convert_references
-
     puts "Converting references for recipe #{recipe.id}:"
     RecipeReference.where(affiliate_id: recipe.id).each { |reference|
       reference.bkg_enqueue # recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref
@@ -69,6 +59,24 @@ class RecipeServices
       puts "...returned"
     }
     recipe.reload
+  end
+
+  # Take another look at the recipes' links which haven't been validated
+  def self.probe_uris
+    reports = []
+    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
+    reports << "**** Rechecking #{unreachables.count} recipes..."
+    reports += unreachables.collect { |unreachable|
+      # Take another crack at the unreachable recipes
+      RecipeServices.new(unreachable).probe_uri
+    }.compact
+    unreachables = Recipe.includes(:page_ref, :gleaning).all.collect { |recipe| recipe if recipe.reachable? == false }.compact
+    reports << "**** #{unreachables.count} recipes unreachable after checking"
+  end
+
+  # Take another crack at the recipe's URI
+  def probe_uri
+    PageRefServices.new(recipe.page_ref).ensure_status true
   end
 
   # Check to see that a recipe can be reached.
@@ -96,40 +104,41 @@ class RecipeServices
       [
           ['saveur.com/article/Recipe', 'saveur.com/article/Recipes'],
           [/www.tasteofbeirut.com\/\d\d\d\d\/\d\d/, 'www.tasteofbeirut.com'],
-          ['patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html',
+          ['http://patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html',
            'https://patijinich.com/recipe/you_know_you_want_it_green_pozole/'],
-          ['patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html',
+          ['http://patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html',
            'https://patijinich.com/recipe/lamb_barbacoa_in_adobo'],
-          ['patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html',
+          ['http://patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html',
            'https://patijinich.com/recipe/apple_radish_watercress_salad_pistachio_chile_de_arbol/'],
-          ['patismexicantable.com/2012/05/creamy-poblano-soup.html',
+          ['http://patismexicantable.com/2012/05/creamy-poblano-soup.html',
            'https://patijinich.com/recipe/creamy-poblano-soup/'],
-          ['patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html',
+          ['http://patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html',
            'https://patijinich.com/recipe/cleaning_cactus_paddles_or_nopales/'],
-          ['patismexicantable.com/2012/07/blissful-corn-torte.html',
+          ['http://patismexicantable.com/2012/07/blissful-corn-torte.html',
            'https://patijinich.com/recipe/blissful-corn-torte/'],
-          ['patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html',
+          ['http://patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html',
            'https://patijinich.com/recipe/cajeta-crepes-with-toasted-pecans/'],
-          ['patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html',
+          ['http://patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html',
            'https://patijinich.com/recipe/snapper-in-a-poblano-chile-sauce/'],
-          ['patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html',
+          ['http://patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html',
            'https://patijinich.com/recipe/cucumber_soup_with_pomegranate/'],
-          ['patismexicantable.com/2012/08/mexican-wedding-cookies-1.html',
+          ['http://patismexicantable.com/2012/08/mexican-wedding-cookies-1.html',
            'https://patijinich.com/recipe/mexican-wedding-cookies/'],
-          ['patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html',
+          ['http://patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html',
            'https://patijinich.com/recipe/chayote-squash-and-pickled-onion-salad/'],
-          ['patismexicantable.com/2012/10/purslane-or-verdolagas.html',
+          ['http://patismexicantable.com/2012/10/purslane-or-verdolagas.html',
            'https://patijinich.com/2012/10/purslane_or_verdolagas/'],
-          ['patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html',
+          ['http://patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html',
            'https://patijinich.com/recipe/fluffy-plantain-and-pecan-bread/'],
-          ['patismexicantable.com/2012/11/cactus-paddle-tostadas.html',
+          ['http://patismexicantable.com/2012/11/cactus-paddle-tostadas.html',
            'https://patijinich.com/recipe/cactus-paddle-tostada/'],
-          ['patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html',
+          ['http://patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html',
            'https://patijinich.com/recipe/sweet_potato_rounds_with_a_punch/'],
-          ['patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html',
+          ['http://patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html',
            'https://patijinich.com/recipe/zucchini-soup-with-tortilla-crisps/'],
-          ['patismexicantable.com/2011/06/dumplings/',
-           'https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/']
+          ['http://patismexicantable.com/2011/06/dumplings/',
+           'https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/'],
+          ['http://https//patijinich.com', 'https://patijinich.com']
       ].each { |args|
         if new_page_ref = prs.try_substitute(*args)
           if new_page_ref != pr
@@ -137,7 +146,7 @@ class RecipeServices
             recipe.save
             recipe.glean! if new_page_ref.bad?
           end
-          return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status})"
+          return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status}) http_status #{new_page_ref.http_status}"
         end
       }
     end
@@ -193,7 +202,8 @@ class RecipeServices
     file.puts tags.sort { |t1, t2| t1.id <=> t2.id }.collect { |tag| "#{tag.id.to_s}: #{tag.name}" }.join "\n"
   end
 
-  def self.time_lookup ix=1
+  def self.time_lookup ix=0, note=''
+    ix, note = 0, ix if ix.is_a?(String)
     recipe_urls = [
         'http://www.bento.com/rf_ok.html',
         'http://www.bento.com/rf_temp.html',
@@ -256,7 +266,6 @@ class RecipeServices
         'http://ohmyveggies.com/recipe-sriracha-snap-peas-with-red-pepper/',
         'http://www.foodandwine.com/recipes/cheesy-farro-and-tomato-risotto',
         'http://www.taste.com.au/recipes/26063/rich+almond+ricotta+cake',
-        'http://honest-food.net/foraging-recipes/unusual-garden-veggies/cicerchia-bean-salad/',
         'http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/',
         'http://food52.com/recipes/9949-carrot-gnocchi-with-butter-and-sage-sauce',
         'http://food52.com/recipes/9949_carrot_gnocchi_with_butter_and_sage_sauce',
@@ -275,19 +284,15 @@ class RecipeServices
         'http://honest-food.net/2011/10/11/acorn-spaetzle/',
         'http://honest-food.net/foraging-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/',
         'http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/',
-        'http://honest-food.net/foraging-recipes/unusual-garden-veggies/ancient-roman-fava-bean-dip/',
         'http://honest-food.net/veggie-recipes/unusual-garden-veggies/ancient-roman-fava-bean-dip/',
         'http://honest-food.net/2011/03/25/cardoon-gratin/',
-        'http://honest-food.net/foraging-recipes/unusual-garden-veggies/cicerchia-bean-agnolotti/',
         'http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-agnolotti/',
-        'http://honest-food.net/foraging-recipes/mushroom-recipes/wild-mushroom-pasta-with-a-gin-cream-sauce/',
         'http://honest-food.net/veggie-recipes/mushroom-recipes/wild-mushroom-pasta-with-a-gin-cream-sauce/',
         'http://honest-food.net/foraging-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/',
         'http://honest-food.net/veggie-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/',
         'http://honest-food.net/foraging-recipes/pumpkin-or-squash-spaetzle/',
         'http://honest-food.net/veggie-recipes/regular-garden-veggies/pumpkin-or-squash-spaetzle/',
         'http://honest-food.net/foraging-recipes/calabrian-hot-pepper-pasta/',
-        'http://honest-food.net/veggie-recipes/regular-garden-veggies/calabrian-hot-pepper-pasta/',
         'http://honest-food.net/veggie-recipes/greens-and-herbs/strettine-an-italian-nettle-pasta/',
         'http://honest-food.net/2013/05/23/ramp-pasta-morels-recipe/',
         'http://honest-food.net/veggie-recipes/greens-and-herbs/ramp-pasta/',
@@ -303,7 +308,6 @@ class RecipeServices
         'http://honest-food.net/veggie-recipes/greens-and-herbs/borage-and-ricotta-ravioli/',
         'http://honest-food.net/veggie-recipes/greens-and-herbs/nettle-ravioli-northern-italian-style/',
         'http://honest-food.net/2010/11/19/pelmeni-and-the-eating-of-bears/',
-        'http://honest-food.net/foraging-recipes/mushroom-recipes/honey-mushroom-pierogi/',
         'http://honest-food.net/veggie-recipes/mushroom-recipes/honey-mushroom-pierogi/',
         'http://www.theguardian.com/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce',
         'http://www.guardian.co.uk/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce',
@@ -502,24 +506,27 @@ class RecipeServices
     index_name = index_table = nil
     time = Benchmark.measure do
       case ix
+        when 0 # Preflight: ensure that all the pagerefs exist
+          label = "RecipePageRef"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            ref = PageRef::RecipePageRef.fetch url
+          }
         when 1
           label = "Reference via Recipe"
           index_name = "references_index_by_url_and_type"
           index_table = :references
           recipe_urls.each { |url|
-            recipe = Recipe.find_or_initialize url: url
-            ref = recipe.reference
+            ref = RecipeReference.find_or_initialize url: url
           }
         when 2
           label = "Recipe via Reference"
           index_name = "references_index_by_url_and_type"
           index_table = :references
-=begin
-          We no longer lookup references in batches
           RecipeReference.lookup(recipe_urls).each { |ref|
             recipe = ref.recipe
           }
-=end
         when 3
           label = "Recipe via ID-no ref"
           index_name = "recipes_index_by_id"
@@ -534,15 +541,54 @@ class RecipeServices
           %w{morels quinoa avocado grilled chicken trout chilli cauliflower mushroom batali smitten yotam Mexican tofu parmesan tofu ginger peanuts figs salmon}.each { |str|
             Recipe.where('title ILIKE ?', "%#{str}%").each { |rcp| ttl = rcp.title }
           }
+        when 5
+          label = "RecipePageRef"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            ref = PageRef::RecipePageRef.fetch url
+          }
+        when 6
+          label = "Site (PageRef)"
+          index_name = nil
+          Recipe.where(id: recipe_ids).to_a.each { |recipe|
+            recipe.page_ref.site
+          }
+        when 7
+          label = "Site (Reference)"
+          index_name = nil
+          Recipe.where(id: recipe_ids).to_a.each { |recipe|
+            recipe.site
+          }
+        when 8
+          label = "RecipePageRef by url (single query)"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            PageRef::RecipePageRef.find_by_url url, true
+          }
+        when 9
+          label = "RecipePageRef by url (two queries)"
+          index_name = "page_refs_index_by_url_and_type"
+          index_table = :page_refs
+          recipe_urls.each { |url|
+            PageRef::RecipePageRef.find_by_url url, false
+          }
         else
           return false
       end
     end
-    index_status = ActiveRecord::Base.connection.index_name_exists?( index_table, index_name, false) ? "indexed" : "unindexed"
+    time_report = "usertime: #{time.utime.round(4)}, systemtime: #{time.stime.round(4)}, CPU time: #{time.cutime.round(4)}, system CPU time: #{time.cstime.round(4)} = #{time.total.round(4)}; real #{time.real.round(4)}"
+    index_status = "unindexed"
+    index_status.sub('un','') if (index_name.present? &&
+        ActiveRecord::Base.connection.index_name_exists?( index_table, index_name, false))
+    line1 = "#{ix}: #{label} at #{Time.new} (#{index_status}) #{note}:"
+    line2 = "\t"+time_report
     File.open("db_timings", 'a') { |file|
-      file.write(label+" (#{Time.new} #{index_status}): "+time.to_s+"\n")
+      file.write line1+"\n"
+      file.write line2+"\n"
     }
-    true
+    "#{line1}\n#{line2}"
   end
 
 end

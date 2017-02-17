@@ -1,5 +1,5 @@
 require './lib/uri_utils.rb'
-# require 'reference.rb'
+require 'page_ref.rb'
 
 # Manage a URL associated with a model such that the URL is unique across the model's class
 
@@ -104,6 +104,10 @@ module Pagerefable
   end
 
   public
+
+  def ensure_site
+    (page_ref.site ||= Site.find_or_create_for(page_ref.url)) if page_ref
+  end
 
   def url_attribute
     self.class.url_attribute if self.class.respond_to? :url_attribute

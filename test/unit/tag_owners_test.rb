@@ -127,8 +127,9 @@ class TagOwnershipTest < ActiveSupport::TestCase
         assert t, "Can't find #{tagstr} on creator"
         
         superid = users(:super).id
+        User.super_id = superid
         t = Tag.strmatch(tagstr, userid: superid).first
-        assert t, "Can't find #{tagstr} on super"
+        assert t, "Can't find tag '#{tagstr}' visible to super"
         assert_nil t.isGlobal, "Super reading #{tagstr} turned it global"
         t.admit_user
         assert_equal t, Tag.strmatch(tagstr, userid: superid).first, "Admitting nil as user changed tag"

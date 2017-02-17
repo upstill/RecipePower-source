@@ -1,5 +1,6 @@
 # encoding: UTF-8
 require 'test_helper'
+require 'page_ref.rb'
 class ReferentStructureTest < ActiveSupport::TestCase
 
   test "Successfully creating tags" do
@@ -91,23 +92,15 @@ class ReferentStructureTest < ActiveSupport::TestCase
     r2.recipes << rcp2
     assert_equal r2.recipes.first, rcp2, "Recipe not added to referent"
 
-    rfc1 = create :reference
-    rfc1.assert r1
-    assert_equal r1.references.first, rfc1, "Reference not added to referent"
-    assert_equal rfc1.referents.first, r1, "Referent not added to reference"
+    rfc1 = create :page_ref
+    PageRefServices.new(rfc1).assert_referent r1
+    assert_equal r1.page_refs.first, rfc1, "Reference not added to referent"
+    assert_equal rfc1.referents.first, r1, "Referent not added to page_ref"
 
-    rfc2 = create :reference, url: "http://www.foodandwine.com/chefs/adam-frace"
-    rfc2.assert r2
-    assert_equal r2.references.first, rfc2, "Reference not added to referent"
-    assert_equal rfc2.referents.first, r2, "Referent not added to reference"
-
-    crf1 = create :channel_referent, tag_token: "crf1"
-    crf2 = create :channel_referent, tag_token: "crf2"
-    crf3 = create :channel_referent, tag_token: "crf3"
-    r1.channels << crf1
-    r1.channels << crf2
-    r2.channels << crf2
-    r2.channels << crf3
+    rfc2 = create :page_ref, url: "http://www.foodandwine.com/chefs/adam-frace"
+    PageRefServices.new(rfc2).assert_referent r2
+    assert_equal r2.page_refs.first, rfc2, "Reference not added to referent"
+    assert_equal rfc2.referents.first, r2, "Referent not added to page_ref"
 
     ######### Okay, we're all set up. Ready to make changes
 
@@ -120,24 +113,9 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_equal "It's me, Cow Cheese!", r1.description, "Description failed to be merged"
     assert_equal r1.recipes.first, rcp1, "Recipe didn't survive merge"
     assert_equal r1.recipes.last, rcp2, "Recipe didn't make it across merge"
-    assert_equal r1.references.first, rfc1, "Reference didn't survive merge"
-    assert_equal r1.references.last, rfc2, "Reference didn't make it across merge"
-    assert_equal 3, r1.channels.count, "Channels not copied correctly"
-    assert_equal crf3, r1.channels.last, "crf3 didn't make it over merge."
+    assert_equal r1.page_refs.first, rfc1, "Reference didn't survive merge"
+    assert_equal r1.page_refs.last, rfc2, "Reference didn't make it across merge"
 
-  end
-
-  test "Merge happens correctly with channels" do
-    crf1 = create :channel_referent, tag_token: "crf1"
-    crf2 = create :channel_referent, tag_token: "crf2"
-    crf3 = create :channel_referent, tag_token: "crf3"
-
-    crf1.absorb crf2, false
-    crf1.absorb crf3, false
-    assert_equal 3, crf1.channels.count, "Merging channels didn't update channels"
-    crf2.destroy
-    crf3.destroy
-    assert_equal 1, crf1.channels.count, "Destroyed channels survive in merger channel"
   end
 
   test "Destroying a referent leaves components untouched" do
@@ -168,16 +146,16 @@ class ReferentStructureTest < ActiveSupport::TestCase
     r1.recipes << rcp2
     assert_equal r1.recipes.last, rcp2, "Recipe not added to referent"
 
-    # Set up references
-    rfc1 = create :reference
-    rfc1.assert r1
-    assert_equal r1.references.first, rfc1, "Reference not added to referent"
-    assert_equal rfc1.referents.first, r1, "Referent not added to reference"
+    # Set up page_refs
+    rfc1 = create :page_ref
+    PageRefServices.new(rfc1).assert_referent r1
+    assert_equal r1.page_refs.first, rfc1, "Reference not added to referent"
+    assert_equal rfc1.referents.first, r1, "Referent not added to page_ref"
 
-    rfc2 = create :reference, url: "http://www.foodandwine.com/chefs/adam-frace"
-    rfc2.assert r1
-    assert_equal r1.references.last, rfc2, "Reference not added to referent"
-    assert_equal rfc2.referents.first, r1, "Referent not added to reference"
+    rfc2 = create :page_ref, url: "http://www.foodandwine.com/chefs/adam-frace"
+    PageRefServices.new(rfc2).assert_referent r1
+    assert_equal r1.page_refs.last, rfc2, "Reference not added to referent"
+    assert_equal rfc2.referents.first, r1, "Referent not added to page_ref"
 
     ########## So much for setup. Now to test results of destruction
     r1.destroy
@@ -199,7 +177,7 @@ class ReferentStructureTest < ActiveSupport::TestCase
     # Check that user's recipes get copied over for channel referent
   end
 
-  test "Merge of referents has the right reference(s)" do
+  test "Merge of referents has the right page_ref(s)" do
 
   end
 

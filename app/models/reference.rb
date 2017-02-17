@@ -7,30 +7,15 @@ require 'array_utils'
 class Reference < ActiveRecord::Base
 
   include Referrable
-  include Typeable
+  # include Typeable
 
   include Backgroundable
 
   backgroundable :status
 
-  attr_accessible :reference_type, :type, :url, :affiliate_id, :filename, :link_text
+  attr_accessible :type, :url, :filename, :link_text
 
   validates_uniqueness_of :url, :scope => :type
-
-  typeable( :reference_type,
-    Article: ['Article', 1],
-    Newsitem: ['News Item', 2],
-    Tip: ['Tip', 4],
-    Video: ['Video', 8],
-    Definition: ['Glossary Entry', 16],
-    Homepage: ['Home Page', 32],
-    Product: ['Product', 64],
-    Offering: ['Offering', 128],
-    Recipe: ['Recipe', 256],
-    Image: ['Image', 512],
-    Site: ['Site', 1024],
-    Event: ['Event', 2048]
-  )
 
   public
 
@@ -39,75 +24,10 @@ class Reference < ActiveRecord::Base
     url
   end
 
-  # Convert back and forth between class and typenum (for heeding type selections)
-  def self.type_to_class typenum=0
-    return Reference if !typenum || typenum == 0
-    ((self.typesym(typenum) || "").to_s+"Reference").constantize
-  end
-
-  def typesym
-    self.class.to_s.sub( 'Reference', '' ).to_sym
-  end
-
-  def typenum
-    return 0 if self.class == Reference
-    Reference.typenum typesym
-  end
-
-=begin
-  def perform
-    bkg_execute {
-      true
-    }
-  end
-=end
-
-  # Perform a DelayedJob action to convert the reference to a PageRef
-  def perform
-    bkg_execute {
-      if affiliate
-        entity = affiliate
-        pr = PageRefServices.convert_reference self, entity.page_ref
-        entity.page_ref = pr
-        entity.save
-        !entity.errors.any?
-      else
-        true
-      end
-    }
-  end
-
-=begin
-  # Use a normalized URL to find a matching reference of the given type.
-  # The 'partial' flag indicates that it's sufficient for the URL to match a substring of the target record
-  def self.lookup_by_url type, normalized_url, partial=false
-    typescope = Reference.where type: type
-    sans_protocol = normalized_url.sub /^(http[^\/]*)?\/\//, '' # Remove the protocol from consideration
-    if partial
-      typescope.where 'url ILIKE ?', '%://' + sans_protocol + '%'
-      # Reference.where "type = '#{type}' and url ILIKE ?", normalized_url+"%"
-    else
-      typescope.where url: ['http://'+sans_protocol, 'https://'+sans_protocol]
-      # Reference.where type: type, url: normalized_url
-    end
-  end
-=end
-
   # Index a Reference by URL or URLs, assuming it exists (i.e., no initialization or creation)
   def self.lookup url_or_urls, partial=false
     q, urls = self.querify(url_or_urls, partial)
     urls.present? ? self.where(q, *urls) : self.none
-=begin
-    if self.affiliate_class
-      (url_or_urls.is_a?(Array) ? url_or_urls : [url_or_urls]).map { |url|
-        normalize_url url
-      }.keep_if { |normalized_url|
-        normalized_url.present?
-      }.uniq.collect { |normalized_url|
-        Reference.lookup_by_url(self.to_s, normalized_url, partial).to_a
-      }.flatten.compact.uniq
-    end
-=end
   end
 
   # private
@@ -135,33 +55,6 @@ class Reference < ActiveRecord::Base
     [q, urls]
   end
 
-  # public
-
-  # Return a scope for fetching affiliates on a url. The class name implies the target affiliate type
-  def self.affiliates_scope url_or_urls, partial=false
-    return nil if !self.affiliate_class
-
-    q, urls = self.querify(url_or_urls, partial)
-    if urls.present?
-      q = "\"references\".\"type\" = '#{self}' AND (#{q})"
-      self.affiliate_class.joins(:references).where(q, *urls).uniq
-    else
-      self.affiliate_class.none
-    end
-  end
-
-  # Lookup the affiliate(s) that match the given url(s).
-  # 'partial' stipulates that an initial substring match suffices
-  def self.lookup_affiliates url_or_urls, partial=false
-    (scope = self.affiliates_scope(url_or_urls, partial)) ? scope.to_a : []
-  end
-
-  def self.lookup_affiliate url_or_urls, partial=false
-    if scope = self.affiliates_scope(url_or_urls, partial)
-      scope.first
-    end
-  end
-
   # Provide a relation for entities that match a string
   def self.strscopes matcher
     [
@@ -171,7 +64,6 @@ class Reference < ActiveRecord::Base
 
   # Return a (perhaps unsaved) reference for the given url
   # params contains name-value pairs for initializing the reference
-  # AND ALSO an :affiliate, the object the reference is about (e.g., Site, Recipe...)
   def self.find_or_initialize url, params = {}
 
     # URL may be passed as a parameter or in the params hash
@@ -223,42 +115,6 @@ class Reference < ActiveRecord::Base
     refs
   end
 
-  # Assert a reference to the given URL, linking back to a referent
-  def self.assert(uri, tag_or_referent, type=:Definition )
-    refs = "#{type}Reference".constantize.find_or_initialize uri
-    refs.each { |me| me.assert tag_or_referent, type } if refs.first.errors.empty?
-    refs.first
-  end
-
-  def assert tag_or_referent, type=:Definition
-    rft =
-        case tag_or_referent
-          when Tag
-            Referent.express tag_or_referent
-          else
-            tag_or_referent
-        end
-    if rft
-      self.referents << rft unless referents.exists?(id: rft.id)
-      save
-    end
-  end
-
-  # Ping the reference's URL, setting its canonical bit appropriately
-  def ping
-    self.url = normalize_url(url) unless self.canonical # We keep the canonical url exactly as redirected (no normalization)
-    if redirected = test_url(url)
-      unless self.canonical = (redirected == url)
-        # We need a separate canonical record
-        can = self.dup
-        can.canonical = true
-        can.url = redirected
-        can.save
-      end
-    end
-    self.save
-  end
-
   # Get data from the reference via HTTP
   def fetch
     def get_response url
@@ -304,188 +160,9 @@ class Reference < ActiveRecord::Base
     end
   end
 
-  # Give a reference an affiliate object (if any), raising an exception if one already exists, or types don't match
-  def affiliate= affiliate
-    if affiliate
-      if affiliate.class != affiliate_class # self.class.to_s != "#{affiliate.class.to_s}Reference"
-        raise "Attempt to affiliate #{self.class.to_s} reference with #{affiliate.class} object."
-      elsif affiliate_id && (affiliate_id != affiliate.id)
-        raise 'Attempt to create ambiguous reference by asserting new affiliate'
-      else
-        self.affiliate_id = affiliate.id
-      end
-    end
-  end
-
-  # Extract the affiliated object, according to the type of reference
-  def affiliate
-    self.affiliate_class && affiliate_id && self.affiliate_class.find(affiliate_id)
-  end
-
-  # Point the references affiliated with one entity to another, presumably b/c the old one is going away.
-  # It is an error if they aren't of the same type
-  def self.redirect old_affiliate, new_affiliate
-
-  end
-
-  protected
-
-  # What's the class of the associated affiliate?
-  def affiliate_class
-    self.class.affiliate_class
-  end
-
-  # What's the class of the associated affiliate (subclasses of Reference only)
-  def self.affiliate_class
-    self.to_s.sub(/Reference$/, '').constantize unless (self == Reference)
-  end
-
-end
-
-class ArticleReference < Reference
-
-end
-
-class NewsitemReference < Reference
-
-end
-
-class TipReference < Reference
-
-end
-
-class VideoReference < Reference
-
-end
-
-class  DefinitionReference < Reference
-
-  has_many :referments, as: :referee, class_name: 'Reference'
-
-  # A DefinitionReference serves a referment linking it to a referent.
-  # This task replaces the DefinitionReference with a PageRef
-  def perform
-    bkg_execute {
-      url_fixed = url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'
-      puts "    Converting Reference #{id} by fetching url '#{url_fixed}'\n"
-      Referment.where(referee_type: 'Reference', referee_id: id).each { |referment|
-        # For each Referment referencing me. (Should be just one, but you never know...)
-        pr = PageRef::DefinitionPageRef.fetch(url_fixed)
-        result =
-            if pr.errors.any?
-              'unsuccessfully'
-            else
-              pr.save
-              referment.referee = pr
-              referment.save ? 'successfully' : 'unsuccessfully'
-            end
-        puts "    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}\n"
-        puts "    PageRef #{pr.id} says #{pr.errors.messages}\n" if pr.errors.any?
-        puts "    Referment #{referment.id} says #{referment.errors.messages}\n" if referment.errors.any?
-      }
-    }
-  end
-
-end
-
-class HomepageReference < Reference
-
-end
-
-class ProductReference < Reference
-
-end
-
-class OfferingReference < Reference
-
-end
-
-class RecipeReference < Reference
-  belongs_to :recipe, foreign_key: 'affiliate_id'
-
-  def self.lookup_recipe url_or_urls, by_site=false
-    self.lookup_affiliate url_or_urls, by_site
-  end
-
-  def self.lookup_recipes url, by_site=false
-    self.affiliates_scope url, by_site
-  end
-
-  def self.scrape first=''
-    mechanize = Mechanize.new
-
-    mechanize.user_agent_alias = 'Mac Safari'
-
-    chefs_url = 'http://www.bbc.co.uk/food/chefs'
-
-    STDERR.puts "** Getting #{chefs_url}"
-    chefs_page = mechanize.get(chefs_url)
-
-    chefs_page.links_with(href: /\/by\/letters\//).each do |link|
-      link_ref = link.to_s
-      if link_ref.last.downcase >= first.first
-        chefs = []
-        STDERR.puts "-> Clicking #{link}"
-        atoz_page = mechanize.click(link)
-        atoz_page.links_with(href: /\A\/food\/chefs\/\w+\z/).each do |link|
-          chef_id = link.href.split('/').last
-          chefs << chef_id unless chef_id <= first
-        end
-
-        search_url = 'http://www.bbc.co.uk/food/recipes/search?chefs[]='
-
-        chefs.each do |chef_id|
-          results_pages = []
-
-          STDERR.puts "** Getting #{search_url + chef_id}"
-          results_pages << mechanize.get(search_url + chef_id)
-
-          dirname = File.join('/var/www/RP/files/chefs', chef_id)
-
-          FileUtils.mkdir_p(dirname)
-
-          while results_page = results_pages.shift
-            links = results_page.links_with(href: /\A\/food\/recipes\/\w+\z/)
-
-            links.each do |link|
-              path = File.join(dirname, File.basename(link.href) + '.html')
-
-              STDERR.puts "+ #{link.href} => #{path}"
-
-              url = normalize_url "http://www.bbc.co.uk#{link.href}"
-              next if File.exist?(path) || RecipeReference.lookup(url).exists?
-
-              # mechanize.download(link.href, path)
-              # TODO filename hasn't survived the transition to PageRefs
-              RecipeReference.create url: url, filename: path
-            end
-
-            if next_link = results_page.links.detect { |link| link.rel?('next') }
-              results_pages << mechanize.click(next_link)
-            end
-          end
-        end
-        chefs.last
-      end
-    end
-  end
 end
 
 class ImageReference < Reference
-
-=begin
-  # This SHOULD be a better way to ensure that an ImageReference knows about all entities that could be pointing to it.
-  # However, until we can ensure that all such entities are loaded before querying the relations, we'll have to live
-  # with explicitly declaring the relations below
-  def self.register_client klass, attribute_name
-    unless (@@Clients ||= {})[klass]
-      attribute_name = attribute_name.to_s + '_id'
-      @@Clients[klass] = attribute_name
-      assoc_sym = klass.to_s.underscore.pluralize.to_sym
-      has_many assoc_sym, :foreign_key => attribute_name.to_sym
-    end
-  end
-=end
 
   # An Image Reference maintains a local thumbnail of the image
   has_many :feeds, :foreign_key => :picture_id, :dependent => :nullify
@@ -499,49 +176,6 @@ class ImageReference < Reference
   has_many :referents, :through => :referments
   # has_many :referments, :foreign_key => :referee_id, :dependent => :nullify
 
-=begin
-  # Return the set of objects referring to this image
-  def clients
-    feeds.to_a +
-        feed_entries.to_a +
-        lists.to_a +
-        products.to_a +
-        recipes.to_a +
-        sites.to_a +
-        users.to_a +
-        referents.to_a
-    @@Clients.collect { |klass, attribute|
-      klass.where(attribute => id).to_a
-    }.flatten
-  end
-
-  def clients?
-    !(feeds.empty? &&
-        feed_entries.empty? &&
-        lists.empty? &&
-        products.empty? &&
-        recipes.empty? &&
-        sites.empty? &&
-        users.empty? &&
-        referents.empty?)
-    @@Clients.each { |klass, attribute|
-      puts "Testing for existence of #{klass} #{attribute}:"
-      ct = klass.where(attribute => id).count
-      puts  "#{ct} #{klass.to_s.pluralize}."
-      x = ct > 0
-      return true if x
-    }
-    false
-  end
-=end
-
-  def self.lookup_image url
-    self.lookup_affiliate url
-  end
-
-  def self.lookup_images url, by_site=false
-    self.lookup_affiliates url, by_site
-  end
 
   # Since the URL is never written once established, this method uniquely handles both
   # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)
@@ -627,89 +261,12 @@ class ImageReference < Reference
     end
   end
 
-  private
-
   def thumbdata
     self[:thumbdata]
   end
 
   def thumbdata=(val)
     write_attribute :thumbdata, val
-  end
-
-=begin
-  # Return the URL if it passes a sanity check. NB: a url with a date denotes a record that's all imagedata
-  def usable_url ignore_status=false
-    unless url.blank? || (url =~ /^\d\d\d\d-/)
-      if ignore_status
-        url
-      else
-        fetch if !errcode # Not previously tested
-        url if errcode==200
-      end
-    end
-  end
-=end
-
-end
-
-# Site references are indexed by the initial substring of a url
-# (specifically, the protocol, domain and host, plus any path used to distinguish different sites with the same host).
-class SiteReference < Reference
-  belongs_to :site, foreign_key: 'affiliate_id'
-  before_save :fix_host
-
-  # Return the definitive url for a given url. NB: This will only be the site portion of the URL
-  def self.canonical_url url
-    normalized_link = normalize_url(url).sub(/\/$/,'')
-    if host_url = host_url(normalized_link)
-      # Candidates are all sites with a matching host
-      # matches = Reference.where(type: "SiteReference").where('url ILIKE ?', "#{host_url}%")
-      SiteReference.lookup(host_url, true).pluck(:url).inject(nil) { |result, this|
-        # If more than one match, seek the longest
-        result = this if normalized_link.start_with?(this) && (!result || (result.length < this.length))
-        result
-      } || host_url
-    else
-      puts "Ill-formed url: '#{url}'"
-      nil
-    end
-  end
-
-  # Not used in PageRef (no more _qa)
-  def self.lookup_site url
-    self.lookup_affiliate self.canonical_url(url)
-  end
-
-  # Generally we reduce the find to the shortest available subpath of a url
-  def self.find_or_initialize url_or_urls, in_full=false
-    urls = (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls)
-    urls.map! { |url| canonical_url url } unless in_full
-    refscope = SiteReference.lookup urls
-    refscope.present? ? refscope.to_a : super(urls.first)
-=begin
-    urls.each { |url|
-      siterefs = SiteReference.lookup url
-      # siterefs = self.where url: url # Lookup the site on the exact url
-      return siterefs unless siterefs.empty?
-    }
-    super urls.first unless urls.empty?
-=end
-  end
-
-  protected
-
-  # Before saving, save the host from the url
-  def fix_host
-    if host.blank?
-      begin
-        uri = URI(url)
-        logger.debug (self.host = uri.host)
-      rescue
-        return false
-      end
-    end
-    true
   end
 
 end

@@ -22,10 +22,19 @@ module SitesHelper
   end
 
   def site_recipes_summary site
-    scope = site.recipes_scope
+    scope = site.recipes
     p = labelled_quantity(scope.count, 'cookmark')
     p += ': ' + homelink(scope.first) if scope.count == 1
     content_tag :p, p.html_safe
+  end
+
+  def site_pagerefs_summary site
+    (PageRef.types - ['recipe']).collect { |prtype|
+      scope = site.method("#{prtype.to_s}_page_refs").call
+      next unless scope.exists?
+      p = labelled_quantity scope.count, prtype
+      content_tag :p, p.html_safe
+    }.compact.join
   end
 
 end

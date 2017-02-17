@@ -1,13 +1,12 @@
-require 'page_ref.rb'
 class SiteServices
   attr_accessor :site
 
   def self.convert_references
     reports = [ '***** SiteServices.convert_references ********']
     (s = Site.find_by(id: 3463)) && s.destroy
-    Site.where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references } # Only convert the unconverted
+    Site.includes(:references).where(page_ref_id: nil).each { |site| SiteServices.new(site).convert_references if site.references.present? } # Only convert the unconverted
     # Clean up the PageRefs with nil URLs
-    SitePageRef.where(url: nil).collect { |spr|
+    PageRef::SitePageRef.where(url: nil).collect { |spr|
       site = Site.find_by(page_ref_id: spr.id)
       spr.destroy
       if site
@@ -19,7 +18,7 @@ class SiteServices
     SiteServices.fix_sites
     SiteServices.fix_roots
     SiteServices.fix_page_refs
-    SitePageRef.all.each { |pr| PageRefServices.new(pr).ensure_status }
+    PageRef::SitePageRef.all.each { |pr| PageRefServices.new(pr).ensure_status }
     reports
   end
 
@@ -80,7 +79,7 @@ class SiteServices
         end
       end
     }
-    [ RecipePageRef, DefinitionPageRef ].each { |refclass|
+    [ PageRef::RecipePageRef, PageRef::DefinitionPageRef ].each { |refclass|
       refclass.where(site_id: nil).collect { |pageref|
         puts "Fixing site for #{pageref.type} ##{pageref.id}: #{pageref.url}"
         if pageref.site = Site.find_for(pageref.url)
@@ -100,7 +99,7 @@ class SiteServices
     # Ensure that every site with a viable home link has a page_ref
     puts "Fixing PageRef for Site ##{site.id} ('#{site.home}')"
     if site.home.present?
-      site.page_ref = SitePageRef.fetch site.home
+      site.page_ref = PageRef::SitePageRef.fetch site.home
       site.save
       if site.errors.any?
         puts "...fails to get PageRef: #{site.errors.messages}"
@@ -243,14 +242,6 @@ class SiteServices
     results
   end
 
-  def self.purge do_it=false
-    used_sites = Set.new(
-      Recipe.all.collect { |r| r.site.id } +
-      Reference.all.collect { |r| r.site.id } +
-      Feed.all.collect { |f| f.site_id })
-    Site.all.each { |site| site.destroy unless used_sites.include? site.id } if do_it
-  end
-
   def self.scrape_for_feeds(n=-1)
     Site.all[0..n].each { |site| Delayed::Job.enqueue site, priority:5 }
   end
@@ -359,7 +350,7 @@ class SiteServices
     summ = {'link' => {}, 'meta' => {}}
     nsites = 0
     Site.all.each { |site|
-      next if site.recipes_scope.count < 1
+      next if site.recipes.count < 1
       self.new(site).stab_at_sample summ
       nsites += 1
       limit = limit - 1
@@ -496,9 +487,9 @@ class SiteServices
 
   # Find sites that are candidates for merging, i.e. those with the same domain
   def similars
-    uri = URI(site.home)
-    Site.joins(:reference).
-        where('type = \'SiteReference\' and url ILIKE ? and affiliate_id != ?', "%#{uri.host}%", site.id).
+    Site.includes(:page_ref).
+        joins(:page_ref).
+        where("page_refs.domain = '#{site.page_ref.domain}'").
         uniq.
         to_a
   end

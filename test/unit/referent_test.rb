@@ -172,7 +172,7 @@ class ReferentTest < ActiveSupport::TestCase
   test "Names, Numbers and Symbols for Types" do
     assert_equal "Referent", Referent.referent_class_for_tagtype(0), "Wrong class for tagtype 0"
     assert_equal "GenreReferent", Referent.referent_class_for_tagtype(1), "Wrong class for tagtype 1"
-    assert_equal "RoleReferent", Referent.referent_class_for_tagtype(2), "Wrong class for tagtype 2"
+    assert_equal "DishReferent", Referent.referent_class_for_tagtype(2), "Wrong class for tagtype 2"
     assert_equal "ProcessReferent", Referent.referent_class_for_tagtype(3), "Wrong class for tagtype 3"
     assert_equal "IngredientReferent", Referent.referent_class_for_tagtype(4), "Wrong class for tagtype 4"
     assert_equal "UnitReferent", Referent.referent_class_for_tagtype(5), "Wrong class for tagtype 5"
@@ -181,20 +181,25 @@ class ReferentTest < ActiveSupport::TestCase
     assert_equal "OccasionReferent", Referent.referent_class_for_tagtype(8), "Wrong class for tagtype 8"
     assert_equal "PantrySectionReferent", Referent.referent_class_for_tagtype(9), "Wrong class for tagtype 9"
     assert_equal "StoreSectionReferent", Referent.referent_class_for_tagtype(10), "Wrong class for tagtype 10"
-    assert_equal "ChannelReferent", Referent.referent_class_for_tagtype(11), "Wrong class for tagtype 11"
+    assert_equal "DietReferent", Referent.referent_class_for_tagtype(11), "Wrong class for tagtype 11"
     assert_equal "ToolReferent", Referent.referent_class_for_tagtype(12), "Wrong class for tagtype 12"
     assert_equal "NutrientReferent", Referent.referent_class_for_tagtype(13), "Wrong class for tagtype 13"
     assert_equal "CulinaryTermReferent", Referent.referent_class_for_tagtype(14), "Wrong class for tagtype 14"
+    assert_equal "QuestionReferent", Referent.referent_class_for_tagtype(15), "Wrong class for tagtype 15"
+    assert_equal "ListReferent", Referent.referent_class_for_tagtype(16), "Wrong class for tagtype 16"
+    assert_equal "EpitaphReferent", Referent.referent_class_for_tagtype(17), "Wrong class for tagtype 17"
+    assert_equal "CourseReferent", Referent.referent_class_for_tagtype(18), "Wrong class for tagtype 18"
+    assert_equal "TimeReferent", Referent.referent_class_for_tagtype(19), "Wrong class for tagtype 19"
 
     ref = GenreReferent.new
     assert_equal "Genre", ref.typename, "Bad Type Name"
     assert_equal :Genre, ref.typesym, "Bad Type Symbol"
     assert_equal 1, ref.typenum, "Bad Type Number"
 
-    ref = RoleReferent.new
-    assert_equal "Role", ref.typename, "Bad Type Name"
-    assert_equal :Role, ref.typesym, "Bad Type Symbol"
-    assert_equal 2, ref.typenum, "Bad Type Number"
+    ref = CourseReferent.new
+    assert_equal "Course", ref.typename, "Bad Type Name"
+    assert_equal :Course, ref.typesym, "Bad Type Symbol"
+    assert_equal 18, ref.typenum, "Bad Type Number"
 
     ref = ProcessReferent.new
     assert_equal "Process", ref.typename, "Bad Type Name"
@@ -250,6 +255,31 @@ class ReferentTest < ActiveSupport::TestCase
     assert_equal "Culinary Term", ref.typename, "Bad Type Name"
     assert_equal :CulinaryTerm, ref.typesym, "Bad Type Symbol"
     assert_equal 14, ref.typenum, "Bad Type Number"
+
+    ref = QuestionReferent.new
+    assert_equal "Question", ref.typename, "Bad Type Name"
+    assert_equal :Question, ref.typesym, "Bad Type Symbol"
+    assert_equal 15, ref.typenum, "Bad Type Number"
+
+    ref = ListReferent.new
+    assert_equal "List", ref.typename, "Bad Type Name"
+    assert_equal :List, ref.typesym, "Bad Type Symbol"
+    assert_equal 16, ref.typenum, "Bad Type Number"
+
+    ref = EpitaphReferent.new
+    assert_equal "Epitaph", ref.typename, "Bad Type Name"
+    assert_equal :Epitaph, ref.typesym, "Bad Type Symbol"
+    assert_equal 17, ref.typenum, "Bad Type Number"
+
+    ref = CourseReferent.new
+    assert_equal "Course", ref.typename, "Bad Type Name"
+    assert_equal :Course, ref.typesym, "Bad Type Symbol"
+    assert_equal 18, ref.typenum, "Bad Type Number"
+
+    ref = TimeReferent.new
+    assert_equal "Time", ref.typename, "Bad Type Name"
+    assert_equal :Time, ref.typesym, "Bad Type Symbol"
+    assert_equal 19, ref.typenum, "Bad Type Number"
 
   end
 

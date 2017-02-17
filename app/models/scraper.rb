@@ -594,25 +594,6 @@ class Www_bbc_co_uk_Scraper < Scraper
                                                         page_link: absolutize(link.href)).name
       end
 
-      if false # We're not saving recipes to disk anymore
-        # Ensure the output directory exists
-        dirname = File.join '/var/www/RP/files/chefs', chef_id
-        FileUtils.mkdir_p dirname
-
-        hpath = uri.path
-        fpath = File.join(dirname, File.basename(hpath) + '.html')
-
-        unless File.exist?(fpath)
-          # @mechanize.download(hpath, fpath)
-          if ref = RecipeReference.lookup(url).first
-            ref.filename = fpath
-            ref.save
-          else
-            RecipeReference.create url: url, filename: fpath
-          end
-        end
-      end
-
       # Glean ingredient links from the page, meanwhile ensuring the tag is defined
       extractions[:Ingredients] = page.links_with(dom_class: 'recipe-ingredients__link').collect { |link|
         TagServices.define(link.to_s,

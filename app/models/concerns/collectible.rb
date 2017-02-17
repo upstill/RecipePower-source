@@ -43,13 +43,16 @@ module Collectible
   def collectible_private
     cached_ref(false) ? @cached_ref.private : false
   end
+  alias_method :'private', :'collectible_private'
 
   # Gatekeeper for the privacy value to interpret strings from checkbox fields
   def collectible_private= newval
     # Boolean may be coming in as string or integer
-    cached_ref(true).private = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
+    unless newval==true || newval==false
+      newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
+    end
+    cached_ref(true).private = newval
   end
-
   alias_method :'private=', :'collectible_private='
 
   def collectible_comment
@@ -61,8 +64,12 @@ module Collectible
   end
 
   def be_collected newval=true
-    cached_ref.in_collection = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
+    unless newval==true || newval==false
+      newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
+    end
+    cached_ref.in_collection = newval
   end
+  alias_method :'collect', :'be_collected'
 
   # Present the time-since-touched in a text format
   def touch_date uid=nil
@@ -74,10 +81,6 @@ module Collectible
   # Get THIS USER's comment on an entity
   def comment uid=nil
     (ref = ref_if_any uid) ? ref.comment : ""
-  end
-
-  def private uid=nil
-    (ref = ref_if_any uid) && ref.private
   end
 
   # Does the entity appear in the user's collection?

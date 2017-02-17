@@ -21,10 +21,9 @@ class EventTest < # Test::Unit::TestCase
   end
 
   test "event is typeable" do
-    evt = RpEvent.create typenum: 1
-    assert_equal evt.typename, "Session"
-    assert_equal evt.typenum, 1
-    assert_equal evt.typesym, :session
+    evt = RpEvent.create verb: 'session'
+    assert_equal "session", evt.verb
+    assert evt.session?
   end
 
 end

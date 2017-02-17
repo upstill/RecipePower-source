@@ -12,12 +12,12 @@ class PageRef < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
-  @@attribs = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
+  @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@attribs, :type, :error_message, :http_status
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text
 
-  attr_accessor :extant_prid
+  attr_accessor :extant_pr
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
@@ -31,6 +31,15 @@ class PageRef < ActiveRecord::Base
 
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
+
+  # What attributes are obtained from Mercury?
+  def self.mercury_attributes
+    @@mercury_attributes + [ :extraneity ]
+  end
+
+  def self.types
+    @@prtypes ||= %w{ recipe definition article newsitem tip video homepage product offering event }
+  end
 
   def perform
     bkg_execute {
@@ -57,11 +66,16 @@ class PageRef < ActiveRecord::Base
   # The purpose of http_status is a positive indication that the page can be reached
   # The purpose of errors are to show that the URL is ill-formed and the record should not (probably cannot) be saved.
   def sync
-    extant_prid = nil
+    extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
+      if data['error']
+        self.errors.add :url, (self.error_message = data['messages'])
+      else
+        self.error_message = data['errorMessage']
+      end
       self.http_status =
-          if (self.error_message = data['errorMessage']).blank?
+          if self.error_message.blank?
             200
           else
             # Check the header for the url from the server.
@@ -71,14 +85,18 @@ class PageRef < ActiveRecord::Base
             redirected_from = nil
             while hr = header_result(data['url'])
               if hr.is_a?(Fixnum)
-                data['url'] = self.aliases.delete(redirected_from) if (hr == 404) && redirected_from
+                if (hr == 404) && redirected_from
+                  # Got a redirect via Mercury, but the target failed
+                  data['url'] = self.aliases.delete(redirected_from)
+                  hr = 303
+                end
                 break;
               end
               hr = URI.join(data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
               break if aliases.include?(hr)
               puts "Redirecting from #{data['url']} to #{hr}"
               begin
-                self.aliases += [redirected_from = data['url']] # Stash the redirection source in the aliases
+                self.aliases |= [redirected_from = data['url']] # Stash the redirection source in the aliases
                 data = try_mercury hr
                 if (self.error_message = data['errorMessage']).blank? # Success on redirect
                   hr = 200
@@ -93,18 +111,18 @@ class PageRef < ActiveRecord::Base
             hr.is_a?(String) ? 666 : hr
           end
       # Did the url change to a collision with an existing PageRef of the same type?
-      if (data['url'] != url) && (extant_prid = self.class.where(url: data['url']).pluck(:id).first)
+      if (data['url'] != url) && (extant_pr = self.class.find_by_url(data['url']))
         self.error_message = "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
         puts error_message
         self.http_status = 666
         data['url'] = url
-        errors.add :url, "has already been taken by #{self.class} #{extant_prid}"
+        errors.add :url, "has already been taken by #{self.class} ##{extant_pr.id}"
       end
       data['content'] ||= ''
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
-      self.assign_attributes data.slice(*(@@attribs.map(&:to_s)))
+      self.assign_attributes data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
       self.errors.add :url, "Bad URL '#{url}': #{e}"
       self.http_status = 400
@@ -141,10 +159,11 @@ class PageRef < ActiveRecord::Base
   def self.url_query url
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
     url_node = self.arel_table[:url]
-    url_query = url_node.eq(url)
     aliases_node = self.arel_table[:aliases]
     aliases_query = aliases_node.overlap [url]
-    url_query.or(aliases_query)
+    url_query = url_node.eq(url)
+    aliases_query = aliases_node.overlap [url]
+    url_query.or aliases_query
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url path
@@ -154,8 +173,11 @@ class PageRef < ActiveRecord::Base
     url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
   end
 
-  def self.find_by_url url
-    self.find_by(url_query url)
+  # Lookup a PageRef. We undergo two queries, on the theory that a direct lookup is faster
+  def self.find_by_url url, single_query=true
+    single_query ?
+        self.find_by(url_query url) :
+        (self.find_by(url: url) || self.find_by(self.arel_table[:aliases].overlap [url]))
   end
 
   # String => PageRef
@@ -164,11 +186,11 @@ class PageRef < ActiveRecord::Base
   # the returned record may not have the same url as the request
   def self.fetch url
     url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
-    unless mp = self.find_by(self.url_query url)
+    unless mp = self.find_by_url(url)
       mp = self.new url: url
       mp.sync
-      if !mp.errors.any? || mp.extant_prid
-        if extant = mp.extant_prid ? self.find(extant_prid) : self.find_by(url: mp.url) # Check for duplicate URL
+      if !mp.errors.any? || mp.extant_pr
+        if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
           # Found => fold the extracted page data into the existing page
           extant.aliases |= mp.aliases - [extant.url]
           mp = extant
@@ -178,13 +200,21 @@ class PageRef < ActiveRecord::Base
     mp
   end
 
+  # Provide a relation for entities that match a string
+  def self.strscopes matcher
+    [
+        (block_given? ? yield() : self).where('"page_refs"."domain" ILIKE ?', matcher)
+    ]
+  end
+
 end
 
 class RecipePageRef < PageRef
   attr_accessible :recipes
 
   has_many :recipes, foreign_key: 'page_ref_id', :dependent => :nullify
-
+=begin
+# This needs to be adapted from RecipeReference to RecipePageRef (or does it??)
   def self.scrape first=''
     mechanize = Mechanize.new
 
@@ -242,6 +272,7 @@ class RecipePageRef < PageRef
       end
     end
   end
+=end
 end
 
 class SitePageRef < PageRef
@@ -259,8 +290,12 @@ class SitePageRef < PageRef
 end
 
 class ReferrablePageRef < PageRef
-# Referrable page refs are referred to by, e.g., a glossary entry for a given concept
+  # Referrable page refs are referred to by, e.g., a glossary entry for a given concept
   include Referrable
+
+  def typesym
+    type.sub('PageRef','').to_sym
+  end
 
 end
 

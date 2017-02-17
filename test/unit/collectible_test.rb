@@ -7,33 +7,34 @@ class CollectibleTest < ActiveSupport::TestCase
     recipe = recipes(:rcp)
     user = users(:thing1)
     # Before preparing the params with a user id, privacy should be off
-    refute recipe.private
+    refute recipe.collectible_private
     recipe.uid = user.id
-    refute recipe.private
-    recipe.private = true
-    assert_equal true, recipe.private
+    refute recipe.collectible_private
+    recipe.collectible_private = true
+    assert_equal true, recipe.collectible_private
 
     recipe.save
     recipe.reload
     recipe.uid = user.id
-    assert_equal true, recipe.private
+    assert_equal true, recipe.collectible_private
 
-    recipe.private = false
+    recipe.collectible_private = false
+    assert_equal false, recipe.collectible_private
     recipe.save
     recipe.reload
     recipe.uid = user.id
-    assert_equal false, recipe.private
+    assert_equal false, recipe.collectible_private
   end
 
   test "Recipe cookmarking" do
     recipe = recipes(:rcp)
     user = users(:thing1)
     recipe.uid = user.id
-    refute recipe.collected?(user.id)
+    refute recipe.collectible_collected?(user.id)
     assert_equal 0, recipe.num_cookmarks
     recipe.collect
-    assert recipe.collected?
-    refute recipe.collected?(users(:thing2).id)
+    assert recipe.collectible_collected?
+    refute recipe.collectible_collected?(users(:thing2).id)
     recipe.save
     assert_equal 1, recipe.num_cookmarks # Should have been remembered as viewed, but not cookmarked
     recipe.collect false
@@ -48,10 +49,10 @@ class CollectibleTest < ActiveSupport::TestCase
     recipe = recipes(:rcp)
     user = users(:thing1)
     assert_equal 0, recipe.num_cookmarks
-    refute recipe.collected?(user.id)
+    refute recipe.collectible_collected?(user.id)
     recipe.uid = user.id
     user.touch recipe, false  # Touch but don't collect
-    refute recipe.collected?(user.id)
+    refute recipe.collectible_collected?(user.id)
     recipe.reload
     assert_equal 0, recipe.num_cookmarks # Should have been remembered as viewed, but not cookmarked
   end

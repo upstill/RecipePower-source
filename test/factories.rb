@@ -39,7 +39,7 @@ FactoryGirl.define do
     # title "#{description}"
   end
 
-  factory :reference do
+  factory :page_ref, class: PageRef::ReferrablePageRef do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end
 

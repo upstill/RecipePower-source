@@ -10,9 +10,9 @@ class Recipe < ActiveRecord::Base
   # TODO: pull the switch by making recipes pagerefable rather than linkable
   # The url attribute is handled by a reference of type RecipeReference
   include Referrable
-  linkable :url, :reference, gleanable: true
+  # linkable :url, :reference, gleanable: true
   include Pagerefable
-  belongs_to :page_ref # pagerefable :url, gleanable: true
+  pagerefable :url, gleanable: true # belongs_to :page_ref #
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -41,8 +41,8 @@ class Recipe < ActiveRecord::Base
     [
         scope.where('"recipes"."title" ILIKE ?', matcher),
         scope.where('"recipes"."description" ILIKE ?', matcher)
-    ] + Reference.strscopes(matcher) { |inward=nil|
-      joinspec = inward ? {:reference => inward} : :reference
+    ] + PageRef.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:page_ref => inward} : :page_ref
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
   end
@@ -69,12 +69,12 @@ class Recipe < ActiveRecord::Base
 
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
-    pu = site_service.resolve(pu) if site
+    pu = site_service.resolve(pu) if site_service
     self.picture = ImageReference.find_or_initialize(pu).first
   end
 
   def site_service
-    @ss ||= SiteServices.new site
+    @ss ||= (SiteServices.new(ensure_site) if ensure_site)
   end
 
   # Absorb another recipe
