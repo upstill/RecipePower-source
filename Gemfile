@@ -2,23 +2,19 @@ source 'http://rubygems.org'
 
 ruby '2.2.0'
 # gem 'bundler', '~> 1.4'
-def rails_to_CPK rails_version
-  release = rails_version.split('.')[0..1].join('.')
-  release_map = {
-    '4.2' => '8',
-    '5.0' => '9'
-  }
-  '='+rails_version.sub(release, release_map[release])
-end
-rver = '4.2.6'
-gem 'rails', rver
-# !!! See https://github.com/composite-primary-keys/composite_primary_keys
-# for mapping Rails versions to CPK versions
-gem 'composite_primary_keys', '=8.1.5' # https://github.com/composite-primary-keys/composite_primary_keys
+gem 'rails', '4.2.6'
+
+###### Rails Extensions
+# Counter caches
+gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
+# Composite Primary Keys (NB: VERSION NUMBER DEPENDS VERY CLOSELY ON RAILS VERSION)
+gem 'composite_primary_keys', '~> 8.1.5' # https://github.com/composite-primary-keys/composite_primary_keys
+# gem 'composite_primary_keys', '~> 9.0.6' # Rails 5
+
 gem 'arel', '~> 6.0'
-gem 'postgres_ext'
-# gem 'rails',     :git => 'git://github.com/rails/rails.git'
-# gem 'rails4_upgrade'
+# Adds support for missing PostgreSQL data types to ActiveRecord.
+gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
+
 gem 'rails_12factor', :group => [ :production, :staging ]
 gem 'rails-perftest'
 gem 'ruby-prof'
@@ -68,7 +64,6 @@ gem 'content_for_in_controllers'
 gem 'youtube_addy'
 # gem 'active_model_serializers'
 gem 'aws-sdk', '~> 1'
-gem 'counter_culture', '~> 0.1.23'
 gem 'letter_opener', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 gem 'rspec-rails', '2.99', :group => [ :development, :test ] # ~> 3.1'
