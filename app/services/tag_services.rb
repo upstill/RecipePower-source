@@ -3,7 +3,7 @@ class TagServices
   attr_accessor :tag
   
   delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
-    :users, :user_ids, :owners, :owner_ids, :reference_count, :referents, :can_absorb, :to => :tag
+    :users, :user_ids, :owners, :owner_ids, :referents, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
     self.tag = tag
@@ -24,23 +24,6 @@ class TagServices
     Recipe.where(id: recipe_ids(with_synonyms) )
   end
 # -----------------------------------------------
-  # TODO: remove all these
-# Return the references associated with the tag. This includes all the references from synonyms of the tag
-=begin
-  def reference_ids
-    tag.referents(true).collect { |referent| referent.reference_ids }.flatten.uniq
-  end
-
-# Return the references associated with the tag. This includes all the references from synonyms of the tag
-  def references
-    Reference.where id: reference_ids
-  end
-
-# Just return the count of references
-  def reference_count
-    reference_ids.count
-  end
-=end
 
 # Return the definitions associated with the tag. This includes all the definitions from synonyms of the tag
   def definition_page_ref_ids

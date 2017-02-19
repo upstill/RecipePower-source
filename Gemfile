@@ -5,6 +5,8 @@ ruby '2.2.0'
 gem 'rails', '4.2.6'
 
 ###### Rails Extensions
+# Protect attributes from mass-assignment in ActiveRecord models.
+gem 'protected_attributes' # https://github.com/rails/protected_attributes
 # Counter caches
 gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
 # Composite Primary Keys (NB: VERSION NUMBER DEPENDS VERY CLOSELY ON RAILS VERSION)
@@ -150,10 +152,6 @@ gem 'eventmachine', '~> 1.0.3' # https://github.com/eventmachine/eventmachine
 
 # ruby_parser (RP) is a ruby parser written in pure ruby
 gem 'ruby_parser' # https://github.com/seattlerb/ruby_parser
-
-# add these gems to help with the transition:
-# Protect attributes from mass-assignment in ActiveRecord models.
-gem 'protected_attributes' # https://github.com/rails/protected_attributes
 
 # Observer classes respond to life cycle callbacks to implement trigger-like behavior outside the original class.
 # Alternatives? Concerns. http://stackoverflow.com/questions/15165260/rails-observer-alternatives-for-4-0
