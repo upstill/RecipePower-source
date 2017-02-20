@@ -37,29 +37,38 @@ module ReferentsHelper
 	def summarize_ref_name referent, long=false
     extra = long ? "going by the name of " : ""
     "<i>#{referent.typename}</i> #{extra}<strong>'#{referent.name}'</strong> ".html_safe
-	end
-	
-	def summarize_referent ref, label="...Meaning"
-    ("<br>#{label}: ''#{referent_homelink ref}':"+
-    summarize_ref_parents(ref)+
-    summarize_ref_children(ref)).html_safe
   end
-    
-	def summarize_ref_parents ref, label = "...Categorized under"
-    if ref.parents.size > 0
-      ("<br>#{label}: "+
-      (ref.parents.collect { |parent| referent_homelink parent.becomes(Referent) }.join ', ')).html_safe
+
+  def summarize_ref_expressions referent
+    summarize_set 'Expressions', referent.expressions.collect { |expr| tag_homelink(expr.tag) }
+  end
+
+  def summarize_referent ref, label="Meaning"
+    summarize_set '',
+                  [
+                      safe_join([label, referent_homelink(ref)], ': '.html_safe),
+                      summarize_ref_parents(ref),
+                      summarize_ref_children(ref)
+                  ],
+                  tag(:br)
+  end
+
+  def summarize_ref_parents ref, label = "Categorized under"
+    summarize_set label, ref.parents.collect { |parent| referent_homelink parent.becomes(Referent) }
+  end
+
+  def summarize_ref_children ref, label = "Category includes"
+    summarize_set label, ref.children.collect { |child| referent.homelink child.becomes(Referent) }
+  end
+
+  # Present a collection of strings as a label followed by an indented list
+  def summarize_set label, set, separator=tag(:br)+'&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe
+    purged = set.keep_if { |line_item| line_item.present? }
+    if purged.size > 0
+      purged.unshift label.html_safe if label.present?
+      safe_join purged, separator
     else
-      ''
+      ''.html_safe
     end
-	end
-	
-	def summarize_ref_children ref, label = "...Examples"
-    if ref.children.size > 0
-      ("<br>#{label}: "+
-      (ref.children.collect { |child| referent.homelink child.becomes(Referent) }.join ', ')).html_safe
-    else
-      ''
-    end
-	end
+  end
 end

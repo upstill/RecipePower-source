@@ -15,6 +15,7 @@ def splitstr(str, ncols=80)
 end
 
 def labelled_quantity count, label, empty_msg = nil
+  qstr =
   case count
     when 0
       empty_msg || "No #{label.pluralize}"
@@ -23,6 +24,7 @@ def labelled_quantity count, label, empty_msg = nil
     else
       "#{count} #{label.pluralize}"
   end
+  qstr.html_safe
 end
 
 # Return an enumeration of a series of strings, separated by ',' except for the last two separated by 'and'

@@ -24,17 +24,34 @@ module SitesHelper
   def site_recipes_summary site
     scope = site.recipes
     p = labelled_quantity(scope.count, 'cookmark')
-    p += ': ' + homelink(scope.first) if scope.count == 1
-    content_tag :p, p.html_safe
+    p = safe_join [p, homelink(scope.first)], ': '.html_safe if scope.count == 1
+    tag(:br) + p
   end
 
   def site_pagerefs_summary site
-    (PageRef.types - ['recipe']).collect { |prtype|
+    summ =
+    safe_join (PageRef.types - ['recipe']).collect { |prtype|
       scope = site.method("#{prtype.to_s}_page_refs").call
-      next unless scope.exists?
-      p = labelled_quantity scope.count, prtype
-      content_tag :p, p.html_safe
-    }.compact.join
+      labelled_quantity(scope.count, prtype) if scope.exists?
+    }.compact, tag(:br)
+    (tag(:br) + summ) if summ.present?
   end
 
+  def site_finders_summary site
+    tag(:br) + "#{site.finders.present? ? 'Has' : 'Does not have'} scraping finders".html_safe
+  end
+
+  def site_referent_summary site
+    tag(:br) +
+        if site.referent
+          safe_join [summarize_referent(site.referent), summarize_ref_expressions(site.referent)], tag(:br)
+        else
+          '...site has no referent (!!?!)'.html_safe
+        end
+  end
+
+  def site_tags_summary site
+    ts = summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }
+    (tag(:br) + ts) if ts.present?
+  end
 end
