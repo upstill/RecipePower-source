@@ -31,14 +31,14 @@ class Site < ActiveRecord::Base
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
   
-  has_many :feeds, :dependent=>:restrict_with_exception
+  has_many :feeds, :dependent=>:restrict_with_error
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
   # Make an association with each type of PageRef that references this site
-  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym }
+  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym, :dependent=>:restrict_with_error }
 
   #...and associate with recipes via the recipe_page_refs that refer back here
-  has_many :recipes, :through => :recipe_page_refs
+  has_many :recipes, :through => :recipe_page_refs, :dependent=>:restrict_with_error
 
   before_validation do |site|
     if site.root.blank? && site.page_ref

@@ -131,6 +131,7 @@ module LinkHelper
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end
+    title = '<Untitled>' if title.blank?
 
     if options[:link_direct]
       link =
@@ -145,7 +146,7 @@ module LinkHelper
                     }.compact
             )
           else
-            content_tag :span, decorator.title, class: cssclass
+            content_tag :span, title, class: cssclass
           end
     else
       link = link_to_submit title,

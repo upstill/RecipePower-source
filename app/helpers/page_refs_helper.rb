@@ -1,4 +1,9 @@
 module PageRefsHelper
+
+  def page_ref_homelink pr
+    link_to (pr.title.present? ? pr.title : pr.url), pr.url
+  end
+
   # Show a reference, using as text the name of the related site
   def present_definition def_page_ref
     ref_link = (ref_name = def_page_ref.decorate.name).present? ?

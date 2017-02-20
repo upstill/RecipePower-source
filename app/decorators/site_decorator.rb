@@ -62,6 +62,19 @@ class SiteDecorator < CollectibleDecorator
     super + %w{ Image URI RSS\ Feed }
   end
 
+  # Managed deletion of site
+  def destroy
+    site = object
+    assocs = PageRef.types.collect { |prt| "#{prt}_page_refs".to_sym } << :feeds
+    assocs.each { |assoc|
+      site.errors.add(assoc, 'not empty') if site.method(assoc).call.exists?
+    }
+    # Allow the site to be deleted if the definition page ref matches the site url
+    dpr_urls = site.definition_page_refs.pluck(:url).uniq
+    site.errors.delete(:definition_page_refs) if (dpr_urls.count == 1) && (cleanpath(site.home) == cleanpath(dpr_urls.first))
+    site.destroy unless site.errors.any?
+  end
+
   def assert_gleaning gleaning
     gleaning.extract1 'Image' do |value| object.logo = value end
     gleaning.extract1 'URI' do |value| object.home = value end

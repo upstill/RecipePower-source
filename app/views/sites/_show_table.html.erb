@@ -11,21 +11,26 @@
       <br><%= site.description.html_safe if site.description.present? %>
     </td>
     <td>
-      <b>Home</b>: <%= site.home %><br>
-      <!--<b><%# show_sample site %></b><br>-->
-      <%= site_feeds_summary site %>
-      <%= site_recipes_summary site %>
-      <%= site_pagerefs_summary site %>
-      <%= site_finders_summary site %>
-      <%= site_referent_summary site %>
-      <%= site_tags_summary site %>
+      <!--<b>Home</b>: <%# site.home %><br>-->
+      <%= summarize_set '', [
+          site_referent_summary(site),
+          site_feeds_summary(site),
+          site_recipes_summary(site),
+          site_finders_summary(site),
+          site_pagerefs_summary(site),
+          site_tags_summary(site)
+        ], tag(:br) %>
     </td>
     <td class="actions-column">
       <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
           <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
       <% end %>
-      <%= entity_approval site if response_service.admin_view? %>
-      <br>
-      <%= site_similars site if response_service.admin_view? %><br>
+      <% if response_service.admin_view? %>
+          <%= entity_approval site %>
+          <br>
+          <%= site_similars site %>
+          <br>
+          <%= site_nuke_button site %>
+      <% end %>
     </td>
 <% end %>

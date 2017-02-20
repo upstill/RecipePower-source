@@ -13,45 +13,59 @@ module SitesHelper
   def site_feeds_summary site
     napproved = site.approved_feeds.count
     nothers = site.feeds.count - napproved
-    q = labelled_quantity( napproved, 'feed').capitalize
+    q = labelled_quantity(napproved, 'feed').capitalize
     link = (napproved == 1) ?
         feed_path(site.approved_feeds.first) :
-        feeds_site_path(site, response_service.admin_view? ? { :item_mode => :table } : {} )
-    summ = content_tag :b, link_to_submit( q, link)
-    summ += " approved (#{labelled_quantity( nothers, 'other').downcase})".html_safe
+        feeds_site_path(site, response_service.admin_view? ? {:item_mode => :table} : {})
+    content_tag(:b, link_to_submit(q, link)) +
+        " approved (#{labelled_quantity(nothers, 'other').downcase})".html_safe
   end
 
   def site_recipes_summary site
     scope = site.recipes
     p = labelled_quantity(scope.count, 'cookmark')
     p = safe_join [p, homelink(scope.first)], ': '.html_safe if scope.count == 1
-    tag(:br) + p
+    p
   end
 
   def site_pagerefs_summary site
-    summ =
-    safe_join (PageRef.types - ['recipe']).collect { |prtype|
+    (PageRef.types - ['recipe']).collect { |prtype|
       scope = site.method("#{prtype.to_s}_page_refs").call
-      labelled_quantity(scope.count, prtype) if scope.exists?
-    }.compact, tag(:br)
-    (tag(:br) + summ) if summ.present?
+      str = labelled_quantity(scope.count, prtype) if scope.exists?
+      if scope.count == 1
+        str = safe_join [str, page_ref_homelink(scope.first)], ': '.html_safe
+        summarize_set '', [str] +
+                  scope.first.referents.collect { |referent|
+                    summarize_referent referent, "#{referent.class} ##{referent.id}"
+                  }, tag(:br)+'&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe
+      else
+        str
+      end
+    }
   end
 
   def site_finders_summary site
-    tag(:br) + "#{site.finders.present? ? 'Has' : 'Does not have'} scraping finders".html_safe
+    "#{site.finders.present? ? 'Has' : 'No'} scraping finders".html_safe
   end
 
   def site_referent_summary site
-    tag(:br) +
-        if site.referent
-          safe_join [summarize_referent(site.referent), summarize_ref_expressions(site.referent)], tag(:br)
-        else
-          '...site has no referent (!!?!)'.html_safe
-        end
+    if site.referent
+      safe_join [summarize_referent(site.referent), summarize_ref_expressions(site.referent)], tag(:br)
+    else
+      'No Referent (!!?!)'.html_safe
+    end
   end
 
   def site_tags_summary site
-    ts = summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }
-    (tag(:br) + ts) if ts.present?
+    summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }
+  end
+
+  def site_nuke_button site, options={}
+    options = {
+        button_style: 'danger',
+        button_size: 'xs',
+        method: 'DELETE'
+    }.merge options
+    SiteServices.new(site).nuke_message link_to_submit('DESTROY', site, options)
   end
 end
