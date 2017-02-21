@@ -68,4 +68,16 @@ module SitesHelper
     }.merge options
     SiteServices.new(site).nuke_message link_to_submit('DESTROY', site, options)
   end
+
+  def site_summaries site, admin_view
+    set = [site_feeds_summary(site),
+           site_recipes_summary(site)]
+    set += [
+        site_referent_summary(site),
+        site_finders_summary(site),
+        site_pagerefs_summary(site),
+        site_tags_summary(site)
+    ] if admin_view
+    summarize_set '', set, tag(:br)
+  end
 end

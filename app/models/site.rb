@@ -73,6 +73,11 @@ class Site < ActiveRecord::Base
     end
   end
 
+  # Most collectibles refer back to their host site; not necessary here
+  def site
+    self
+  end
+
   protected
 
   # If this is the last site associated with its referent, destroy the referent

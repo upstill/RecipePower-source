@@ -12,25 +12,18 @@
     </td>
     <td>
       <!--<b>Home</b>: <%# site.home %><br>-->
-      <%= summarize_set '', [
-          site_referent_summary(site),
-          site_feeds_summary(site),
-          site_recipes_summary(site),
-          site_finders_summary(site),
-          site_pagerefs_summary(site),
-          site_tags_summary(site)
-        ], tag(:br) %>
+      <%= site_summaries site, response_service.admin_view? %>
     </td>
     <td class="actions-column">
       <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
           <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
       <% end %>
       <% if response_service.admin_view? %>
-          <%= entity_approval site %>
-          <br>
-          <%= site_similars site %>
-          <br>
-          <%= site_nuke_button site %>
+          <%= summarize_set '', [
+                                      entity_approval(site),
+                                      site_similars(site),
+                                      site_nuke_button(site)
+                              ], tag(:br) %>
       <% end %>
     </td>
 <% end %>

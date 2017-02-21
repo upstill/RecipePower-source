@@ -26,6 +26,9 @@ module GleaningsHelper
           when 'Title', 'Description'
             options = decorator.gleaning.options_for label
             target = "#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]"
+            if label == 'Title' && decorator.respond_to?(:page_ref) && decorator.page_ref.title.present?
+              options << decorator.page_ref.title
+            end
             if options.empty?
               content_tag :span, "No #{label.pluralize} Gleaned"
             else
