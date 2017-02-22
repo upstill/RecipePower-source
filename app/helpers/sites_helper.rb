@@ -23,41 +23,39 @@ module SitesHelper
 
   def site_recipes_summary site
     scope = site.recipes
-    p = labelled_quantity(scope.count, 'cookmark')
+    p = labelled_quantity scope.count, 'cookmark'
     p = safe_join [p, homelink(scope.first)], ': '.html_safe if scope.count == 1
     p
   end
 
-  def site_pagerefs_summary site
-    (PageRef.types - ['recipe']).collect { |prtype|
+  def site_pagerefs_summary site, options={}
+    separator = summary_separator options[:separator]
+    reflines = (PageRef.types - ['recipe']).collect { |prtype|
       scope = site.method("#{prtype.to_s}_page_refs").call
-      str = labelled_quantity(scope.count, prtype) if scope.exists?
+      str = labelled_quantity(scope.count, "#{prtype} page") if scope.exists?
       if scope.count == 1
         str = safe_join [str, page_ref_homelink(scope.first)], ': '.html_safe
         summarize_set '', [str] +
                   scope.first.referents.collect { |referent|
-                    summarize_referent referent, "#{referent.class} ##{referent.id}"
-                  }, tag(:br)+'&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe
+                    summarize_referent referent, label: "#{referent.class} ##{referent.id}", separator: separator
+                  }, separator
       else
         str
       end
     }
+    safe_join reflines, separator
   end
 
   def site_finders_summary site
     "#{site.finders.present? ? 'Has' : 'No'} scraping finders".html_safe
   end
 
-  def site_referent_summary site
-    if site.referent
-      safe_join [summarize_referent(site.referent), summarize_ref_expressions(site.referent)], tag(:br)
-    else
-      'No Referent (!!?!)'.html_safe
-    end
+  def site_referent_summary site, options={}
+    site.referent ? summarize_referent(site.referent, header: true) : 'No Referent (!!?!)'.html_safe
   end
 
-  def site_tags_summary site
-    summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }
+  def site_tags_summary site, options={}
+    summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }, summary_separator
   end
 
   def site_nuke_button site, options={}
@@ -78,6 +76,6 @@ module SitesHelper
         site_pagerefs_summary(site),
         site_tags_summary(site)
     ] if admin_view
-    summarize_set '', set, tag(:br)
+    summarize_set '', set
   end
 end

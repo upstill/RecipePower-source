@@ -13,6 +13,7 @@
     <td>
       <!--<b>Home</b>: <%# site.home %><br>-->
       <%= site_summaries site, response_service.admin_view? %>
+      <%# site_pagerefs_summary site, separator: tag(:br) %>
     </td>
     <td class="actions-column">
       <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
@@ -23,7 +24,7 @@
                                       entity_approval(site),
                                       site_similars(site),
                                       site_nuke_button(site)
-                              ], tag(:br) %>
+                              ] %>
       <% end %>
     </td>
 <% end %>

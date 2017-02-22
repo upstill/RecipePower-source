@@ -52,7 +52,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     tag_info_section(
       @tagserv.referents.to_a.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
-      	summarize_referent ref, "Other Meaning(s)"
+      	summarize_referent ref, label: "Other Meaning(s)"
       }, label: "Referents: ")
   end
   

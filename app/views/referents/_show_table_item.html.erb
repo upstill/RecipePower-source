@@ -10,8 +10,6 @@
   <td><%= item.isCountable ? "C" : "NC" %><td>
   <td>
     <hr>
-    <%= list_expressions item %><br>
-    <%= list_parents item %><br>
-    <%= list_children item %>
+    <%= summarize_referent item %>
   </td>
 </tr>
