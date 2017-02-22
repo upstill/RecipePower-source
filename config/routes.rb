@@ -139,6 +139,7 @@ RP::Application.routes.draw do
   resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'absorb'
+      post 'glean'
       get 'feeds'
       post 'approve' # (Admin only) approve the site for presentation
     end

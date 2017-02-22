@@ -56,7 +56,7 @@ module Pagerefable
           # Glean info from the page in background as a DelayedJob job
           # force => do the job even if it was priorly complete
           define_method 'glean' do |force=false|
-            create_gleaning unless gleaning
+            create_gleaning entity: self unless gleaning
             # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
             gleaning.bkg_enqueue force
           end
@@ -64,7 +64,7 @@ module Pagerefable
           # Glean info synchronously, i.e. don't return until it's done
           # force => do the job even if it was priorly complete
           define_method 'glean!' do |force=false|
-            create_gleaning unless gleaning
+            create_gleaning entity: self unless gleaning
             gleaning.bkg_sync force
           end
         end
