@@ -8,6 +8,8 @@ class PageRefsController < ApplicationController
 
   # GET /page_refs/1
   def show
+    update_and_decorate
+    smartrender
   end
 
   # GET /page_refs/new

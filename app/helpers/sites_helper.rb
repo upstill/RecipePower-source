@@ -5,9 +5,12 @@ module SitesHelper
   end
 
   def site_similars site
-    SiteServices.new(site).similars.collect { |other|
-      button_to_submit "Absorb #{other.home}", absorb_site_path(site, other_id: other.id), :method => :post, :button_size => "sm" unless other.id == site.id
-    }.compact.join.html_safe
+    safe_join SiteServices.new(site).similars.collect { |other|
+      [
+          button_to_submit( "Merge into ##{other.id} '#{other.home}'", absorb_site_path(other, other_id: site.id), :method => :post, :button_size => "sm"),
+          button_to_submit( "Absorb ##{other.id} '#{other.home}'", absorb_site_path(site, other_id: other.id), :method => :post, :button_size => "sm")
+      ] if site.id != other.id
+    }.compact.flatten
   end
 
   def site_feeds_summary site
@@ -32,15 +35,11 @@ module SitesHelper
     separator = summary_separator options[:separator]
     reflines = (PageRef.types - ['recipe']).collect { |prtype|
       scope = site.method("#{prtype.to_s}_page_refs").call
-      str = labelled_quantity(scope.count, "#{prtype} page") if scope.exists?
+      label = labelled_quantity(scope.count, "#{prtype} page") if scope.exists?
       if scope.count == 1
-        str = safe_join [str, page_ref_homelink(scope.first)], ': '.html_safe
-        summarize_set '', [str] +
-                  scope.first.referents.collect { |referent|
-                    summarize_referent referent, label: "#{referent.class} ##{referent.id}", separator: separator
-                  }, separator
+        summarize_page_ref scope.first, label: label
       else
-        str
+        label
       end
     }
     safe_join reflines, separator
@@ -73,6 +72,7 @@ module SitesHelper
     set += [
         site_referent_summary(site),
         site_finders_summary(site),
+        (summarize_page_ref(site.page_ref, label: "site page ref") if site.page_ref),
         site_pagerefs_summary(site),
         site_tags_summary(site)
     ] if admin_view

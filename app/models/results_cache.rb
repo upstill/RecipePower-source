@@ -1130,6 +1130,18 @@ class SitesIndexCache < ResultsCache
     @itemscope ||= Site.where(approved: approved)
   end
 
+  def ordereditemscope
+    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    case org
+      when :referent_id
+      when :recipe_count
+      when :feed_count
+      when :definition_count
+      else
+        uniqueitemscope.order('referent_id DESC')
+    end || super
+  end
+
 end
 
 class SitesShowCache < ResultsCache

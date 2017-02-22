@@ -131,7 +131,7 @@ module LinkHelper
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end
-    title = '<Untitled>' if title.blank?
+    title = "<Untitled #{decorator.object.class} ##{decorator.id}>" if title.blank?
 
     if options[:link_direct]
       link =
