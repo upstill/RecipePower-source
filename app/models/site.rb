@@ -154,15 +154,16 @@ public
     onscope = block_given? ? yield() : self.unscoped
     a1 = [
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
-    ] # + Reference.strscopes(matcher) { |inward=nil|
-      # joinspec = inward ? {:reference => inward} : :reference
-      # block_given? ? yield(joinspec) : self.joins(joinspec)
-    # }
-    a2 = Referent.strscopes(matcher) { |inward=nil|
+    ]
+    a2 = SitePageRef.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:page_ref => inward} : :page_ref
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
+    a3 = Referent.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:referent => inward} : :referent
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
-    a1 + a2
+    a1 + a2 + a3
   end
 
   # Return a scope for finding references of a given type

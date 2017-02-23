@@ -199,10 +199,14 @@ module EntitiesCache
   def count_tag tag, counts
     tagname = tag.normalized_name || Tag.normalizeName(tag.name)
     model = itemscope.model
+
+    # We index using tags, for taggable models
     if model.reflect_on_association :tags
       counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" ILIKE ?', "%#{tagname}%") # One extra point for matching in one field
       counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
     end
+
+    # Models can apply strings to a search using a self-declared strategy
     if model.respond_to? :strscopes
       strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
         joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
@@ -1138,7 +1142,7 @@ class SitesIndexCache < ResultsCache
       when :feed_count
       when :definition_count
       else
-        uniqueitemscope.order('referent_id DESC')
+        uniqueitemscope.order(%q{"sites"."referent_id" DESC})
     end || super
   end
 

@@ -63,7 +63,6 @@ class FinderServices
       return
     end
 
-
     # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
     nkdoc = Nokogiri::HTML pagefile
 

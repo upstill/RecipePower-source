@@ -66,6 +66,14 @@ module SitesHelper
     SiteServices.new(site).nuke_message link_to_submit('DESTROY', site, options)
   end
 
+  def site_glean_button site, options={}
+    options = {
+        button_size: 'xs',
+        method: 'POST'
+    }.merge options
+    link_to_submit('GLEAN', glean_site_path(site), options)
+  end
+
   def site_summaries site, admin_view
     set = [site_feeds_summary(site),
            site_recipes_summary(site)]
