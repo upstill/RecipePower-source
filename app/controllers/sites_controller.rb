@@ -23,6 +23,13 @@ class SitesController < CollectibleController
     smartrender
   end
 
+  # POST site/:id/glean
+  def glean
+    update_and_decorate
+    @site.glean! true
+    render 'collectible/update' # redirect_to :action => 'update'
+  end
+
   # GET /sites/new
   # GET /sites/new.json
   def new

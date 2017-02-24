@@ -52,7 +52,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     tag_info_section(
       @tagserv.referents.to_a.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
-      	summarize_referent ref, "Other Meaning(s)"
+      	summarize_referent ref, label: "Other Meaning(s)"
       }, label: "Referents: ")
   end
   
@@ -112,9 +112,9 @@ module TagsHelper
     # tag_info_section synstrs, label: label, joinstr: '<br>'
   end
 
-  def summarize_tag_reference_count
+  def summarize_tag_definition_count
     @tagserv ||= TagServices.new(@tag)
-    ((ct = @tagserv.reference_count) > 0) ? (pluralize(ct, 'Reference').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
+    ((ct = @tagserv.definition_page_ref_count) > 0) ? (pluralize(ct, 'Reference').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
 
   def summarize_tag_parents_count

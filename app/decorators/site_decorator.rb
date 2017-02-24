@@ -62,6 +62,40 @@ class SiteDecorator < CollectibleDecorator
     super + %w{ Image URI RSS\ Feed }
   end
 
+  # Managed deletion of site
+  def destroy
+    site = object
+
+    # Clear all recipe page refs without associated (i.e., priorly destroyed) recipes
+    site.recipe_page_refs.destroy_all if site.recipes.empty?
+
+    assocs = PageRef.types.collect { |prt| "#{prt}_page_refs".to_sym } << :feeds
+    assocs.each { |assoc|
+      site.errors.add(assoc, 'not empty') if site.method(assoc).call.exists?
+    }
+
+    # Normally we can't destroy a site if there are any dependent definition page refs.
+    # We make an exception for cases where the site home is the same as the page ref.
+    dpr_urls = site.definition_page_refs.pluck(:url).uniq
+    if (dpr_urls.count == 1) && (cleanpath(site.home) == cleanpath(dpr_urls.first))
+      site.errors.delete(:definition_page_refs)
+      site.definition_page_refs.destroy_all
+    end
+
+    site.destroy unless site.errors.any?
+  end
+
+  def after_gleaning gleaning=object.gleaning
+    gleaning.extract1 'Title' do |value|
+      object.name = value
+    end unless object.referent
+
+    gleaning.extract1 'Description' do |value|
+      object.description = value
+    end unless object.description.present?
+    object.save if object.changed?
+  end
+
   def assert_gleaning gleaning
     gleaning.extract1 'Image' do |value| object.logo = value end
     gleaning.extract1 'URI' do |value| object.home = value end

@@ -38,10 +38,13 @@ class Gleaning < ActiveRecord::Base
       self.err_msg = ''
       self.http_status = 200
       self.results = FinderServices.glean(url, site)  { |msg|
+        # Handle errors
         self.err_msg = msg
         # We assume the first three-digit number is the HTTP status code
         self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
       }
+      entity.decorate.after_gleaning(self) if entity.decorate.respond_to?(:after_gleaning)
+      self.results # Returning success indicator
     end
   end
 
@@ -114,9 +117,9 @@ class Gleaning < ActiveRecord::Base
   end
 
   def extract1 label
-    (results[label] || []).map(&:out).flatten.first do |str|
-      yield(str)
-    end if results
+    if results && result = (results[label] || []).map(&:out).flatten.first
+      yield(result)
+    end
   end
 
   private

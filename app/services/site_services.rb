@@ -1,6 +1,18 @@
 class SiteServices
   attr_accessor :site
 
+  # Evaluate the site's suitability for deletion
+  def nuke_message button
+    if site.recipes.exists? || site.feeds.exists?
+      # No go: can't delete if there are feeds or recipes associated
+      'NO DELETION: site contains recipes and/or feeds'
+    elsif site.definition_page_refs.exists?
+      button + "CAUTION: site has #{labelled_quantity site.definition_page_refs.count, 'definition page ref'} pointing to it, which will also be destroyed".html_safe
+    else
+      button
+    end
+  end
+
   def self.convert_references
     reports = [ '***** SiteServices.convert_references ********']
     (s = Site.find_by(id: 3463)) && s.destroy

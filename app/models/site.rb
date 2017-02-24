@@ -31,14 +31,14 @@ class Site < ActiveRecord::Base
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
   
-  has_many :feeds, :dependent=>:restrict_with_exception
+  has_many :feeds, :dependent=>:restrict_with_error
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
   # Make an association with each type of PageRef that references this site
-  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym }
+  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym, :dependent=>:restrict_with_error }
 
   #...and associate with recipes via the recipe_page_refs that refer back here
-  has_many :recipes, :through => :recipe_page_refs
+  has_many :recipes, :through => :recipe_page_refs, :dependent=>:restrict_with_error
 
   before_validation do |site|
     if site.root.blank? && site.page_ref
@@ -71,6 +71,11 @@ class Site < ActiveRecord::Base
       end
       reload
     end
+  end
+
+  # Most collectibles refer back to their host site; not necessary here
+  def site
+    self
   end
 
   protected
@@ -149,15 +154,16 @@ public
     onscope = block_given? ? yield() : self.unscoped
     a1 = [
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
-    ] # + Reference.strscopes(matcher) { |inward=nil|
-      # joinspec = inward ? {:reference => inward} : :reference
-      # block_given? ? yield(joinspec) : self.joins(joinspec)
-    # }
-    a2 = Referent.strscopes(matcher) { |inward=nil|
+    ]
+    a2 = SitePageRef.strscopes(matcher) { |inward=nil|
+      joinspec = inward ? {:page_ref => inward} : :page_ref
+      block_given? ? yield(joinspec) : self.joins(joinspec)
+    }
+    a3 = Referent.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:referent => inward} : :referent
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
-    a1 + a2
+    a1 + a2 + a3
   end
 
   # Return a scope for finding references of a given type
@@ -180,9 +186,9 @@ public
       other.referent = nil
     end
     # Steal feeds
-    self.feeds += other.feeds
+    self.feed_ids = feed_ids | other.feed_ids
     other.feeds = []
-    self.page_refs += other.page_refs
+    self.page_ref_ids = page_ref_ids | other.page_ref_ids
     other.page_refs = []
     super other if defined?(super) # Let the taggable, collectible, etc. modules do their work
     other.destroy if destroy
@@ -278,12 +284,19 @@ public
       if site = Site.find_by(root: uri)
         return site
       else
-        site = Site.new root: uri, sample: (options[:sample] || homelink), home: homelink
+        site = Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
         # TODO: Should be eliminable with switchover to pagerefable
         unless site.page_ref
           spr = PageRef::SitePageRef.fetch homelink
           site.page_ref = spr unless spr.errors.any?
         end
+        unless site.referent # Could have been generated with the :name option
+          # Need to give it a name
+          if (spr = site.page_ref) && spr.title.present?
+            site.name = spr.title
+          end
+        end
+        site.glean # Grab page in background
         site.save
         return site
       end
@@ -299,6 +312,7 @@ public
   end
 
   def name=(str)
+    return unless str.present?
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )
     else

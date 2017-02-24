@@ -231,11 +231,12 @@ class TagsController < ApplicationController
   # DELETE /tags/1
   # DELETE /tags/1.xml
   def destroy
-    @tag = Tag.find(params[:id])
+    update_and_decorate
     @tag.destroy
 
     respond_to do |format|
       format.html { redirect_to(tags_url) }
+      format.json { render action: 'update' }
       format.xml  { head :ok }
     end
   end

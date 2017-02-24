@@ -108,7 +108,7 @@ class Reference < ActiveRecord::Base
           refs = [ Reference.new(params.merge url: redirected) ] if refs.empty?
           (canonical = refs.first).canonical = true # Make the redirected reference be canonical, and first
           # Now we create a new reference, aliased to that of the canonical reference by making their affiliate id's the same
-          refs << Reference.new(params.merge :url => normalized, affiliate_id: canonical.affiliate_id ) if normalized != redirected
+          refs << Reference.new(params.merge :url => normalized ) if normalized != redirected
         end
       end
     end

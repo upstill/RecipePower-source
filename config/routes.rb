@@ -64,13 +64,13 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-    post '/votes/recipe/:id' => 'votes#create'
-    post '/votes/feed/:id' => 'votes#create'
-    post '/votes/feed_entry/:id' => 'votes#create'
-    post '/votes/list/:id' => 'votes#create'
-    post '/votes/product/:id' => 'votes#create'
-    post '/votes/site/:id' => 'votes#create'
-    post '/votes/user/:id' => 'votes#create'
+  post '/votes/recipe/:id' => 'votes#create'
+  post '/votes/feed/:id' => 'votes#create'
+  post '/votes/feed_entry/:id' => 'votes#create'
+  post '/votes/list/:id' => 'votes#create'
+  post '/votes/product/:id' => 'votes#create'
+  post '/votes/site/:id' => 'votes#create'
+  post '/votes/user/:id' => 'votes#create'
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
@@ -79,11 +79,11 @@ RP::Application.routes.draw do
   resources :authentications
 
   devise_for :users, :skip => [:registrations], :controllers => {
-      :sessions => 'sessions',
-      :passwords => 'passwords',
-      :invitations => 'invitations',
-      # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
-  }
+                       :sessions => 'sessions',
+                       :passwords => 'passwords',
+                       :invitations => 'invitations',
+                       # :registrations => 'registrations' # Had to elide this and use devise_scope to define /users/register instead of /users to create
+                   }
 
   match 'users', :controller => 'users', :action => 'index', :via => [:get, :post]
 
@@ -136,9 +136,10 @@ RP::Application.routes.draw do
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create, :destroy], :concerns => [:picable, :collectible, :taggable] do
+  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'absorb'
+      post 'glean'
       get 'feeds'
       post 'approve' # (Admin only) approve the site for presentation
     end

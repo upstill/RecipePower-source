@@ -98,14 +98,15 @@ class Referent < ActiveRecord::Base
     return false if type != other.type
     return true if other.id == id
     puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
-    other.children.each { |child| children << child }
-    other.parents.each { |parent| parents << parent }
+    other.children.each { |child| children << child unless (child_ids.include? child.id) }
+    other.parents.each { |parent| parents << parent unless (parent_ids.include? parent.id) }
     other.expressions.each { |expr| self.express expr.tag }
     # Whatever entities can be reached through referments, copy those
     @@referment_associations.each { |assoc|
       collection_method = assoc.to_s.underscore.pluralize.to_sym
       collection = self.method(collection_method).call
-      other.method(collection_method).call.each { |entity| collection << entity }
+      ids = collection.pluck :id
+      other.method(collection_method).call.each { |entity| collection << entity unless (ids.include? entity.id) }
     }
     self.description = other.description if description.blank?
     self.save

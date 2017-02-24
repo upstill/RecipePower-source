@@ -127,7 +127,7 @@ class CollectibleController < ApplicationController
   def destroy
     if update_and_decorate
       @decorator.destroy
-      if resource_errors_to_flash(@decorator)
+      if resource_errors_to_flash(@decorator.object)
         render :errors
       else
         flash[:popup] = "#{@decorator.human_name} is no more."
