@@ -16,16 +16,23 @@ module ItemHelper
     [ item, item_mode ]
   end
 
-  def item_partial_class item_mode
+  def item_partial_class item_mode, decorator=@decorator
     itemclass = "#{item_mode}-item" if item_mode
-    domid = "#{@decorator.dom_id}" if @decorator
+    domid = "#{decorator.dom_id}" if decorator
     "#{itemclass} #{domid}"
   end
 
   def item_partial_selector item_or_decorator_or_specs=nil, item_mode=nil, context=nil
     item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
-    tag = (item_mode == :table) ? 'tr' : 'div'
-    "#{tag}." + item_partial_class(item_mode).gsub(' ','.')
+    tag = case item_mode
+            when :table
+              'tr'
+            when :homelink
+              'span'
+            else
+              'div'
+          end
+    "#{tag}." + item_partial_class(item_mode).gsub(' ', '.')
   end
 
   # container_selector and wrapper_selector are adopted from masonry_helper.rb and are currently only for masonry lists
@@ -85,7 +92,7 @@ module ItemHelper
 
   # Generate deleters for all versions of an item, and, if we're on its page, a pagelet replacement returning to the user's home page
   def item_deleters item_or_decorator_or_specs, context=nil
-    [:table, :modal, :masonry, :slider].collect { |item_mode|
+    [:table, :modal, :masonry, :slider, :homelink].collect { |item_mode|
       item_deleter item_or_decorator_or_specs, item_mode, context
     }.compact << pagelet_body_replacement(item_or_decorator_or_specs, true)
   end

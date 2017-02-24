@@ -24,23 +24,26 @@ module SitesHelper
         " approved (#{labelled_quantity(nothers, 'other').downcase})".html_safe
   end
 
-  def site_recipes_summary site
+  def site_recipes_summary site, options={}
+    separator = summary_separator options[:separator]
+    inward_separator = summary_separator separator
     scope = site.recipes
-    p = labelled_quantity scope.count, 'cookmark'
-    p = safe_join [p, homelink(scope.first)], ': '.html_safe if scope.count == 1
-    p
+    safe_join ([labelled_quantity(scope.count, 'cookmark')] +
+                  scope.limit(5).collect { |rcp| homelink rcp, nuke_button: true }
+              ), inward_separator
   end
 
   def site_pagerefs_summary site, options={}
     separator = summary_separator options[:separator]
+    inward_separator = summary_separator separator
     reflines = (PageRef.types - ['recipe']).collect { |prtype|
       scope = site.method("#{prtype.to_s}_page_refs").call
       label = labelled_quantity(scope.count, "#{prtype} page") if scope.exists?
-      if scope.count == 1
-        summarize_page_ref scope.first, label: label
-      else
-        label
-      end
+      safe_join ([label] +
+                    scope.limit(5).collect { |pr|
+                      summarize_page_ref pr, label: prtype, separator: separator
+                    }
+                ), inward_separator
     }
     safe_join reflines, separator
   end

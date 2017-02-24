@@ -1,4 +1,5 @@
 class ReferentDecorator < Draper::Decorator
+  include Templateer
   delegate_all
 
   def title

@@ -186,9 +186,9 @@ public
       other.referent = nil
     end
     # Steal feeds
-    self.feeds += other.feeds
+    self.feed_ids = feed_ids | other.feed_ids
     other.feeds = []
-    self.page_refs += other.page_refs
+    self.page_ref_ids = page_ref_ids | other.page_ref_ids
     other.page_refs = []
     super other if defined?(super) # Let the taggable, collectible, etc. modules do their work
     other.destroy if destroy
@@ -312,6 +312,7 @@ public
   end
 
   def name=(str)
+    return unless str.present?
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )
     else

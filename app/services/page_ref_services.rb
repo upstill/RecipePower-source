@@ -21,10 +21,11 @@ class PageRefServices
       other_site.save
     } if other.respond_to? :sites
 
-    other.referments.each { |rfm|
-      rfm.referee = page_ref
-      rfm.save
-    } if other.respond_to? :referments
+    # Absorb referments, taking care to elide redundancy
+
+    other.referent_ids.each { |ref_id|
+      page_ref.referent_ids << ref_id unless page_ref.referent_ids.include?(ref_id)
+    } if other.respond_to? :referent_ids
 
     # An important question is: which url (and associated status attributes) gets used in the product?
     # The default is to keep the absorber's attributes unless the other is shown to be good. The 'force'

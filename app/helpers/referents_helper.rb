@@ -33,7 +33,7 @@ module ReferentsHelper
   def summarize_ref_expressions referent, options={}
     summarize_set labelled_quantity(referent.expressions.count, 'Expression'),
                   referent.expressions.collect { |expr|
-                    tag_homelink(expr.tag)
+                    tag_homelink(expr.tag, nuke_button: referent.expressions.count > 1)
                   },
                   options[:separator]
   end

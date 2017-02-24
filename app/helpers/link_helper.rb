@@ -124,8 +124,9 @@ module LinkHelper
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
     data = options[:data] || {}
     data[:report] = touchpath decorator
+    classname = decorator.object.class.to_s.underscore
 
-    cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
+    cssclass = "#{options[:class]} entity #{classname}"
 
     title = options[:title] || decorator.title
     if options[:truncate]
@@ -169,6 +170,18 @@ module LinkHelper
             )
       end
     end
-    link
+    if options[:nuke_button] && response_service.admin_view?
+      link << link_to_submit('',
+                             decorator.object,
+                             class: 'glyphicon glyphicon-remove',
+                             with_form: true,
+                             wait_msg: "Deleting \"#{decorator.title}\"...",
+                             confirm_msg: "This will permanently remove ths #{decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?",
+                             style: 'color: #c00',
+                             method: 'DELETE')
+    end
+    content_tag :span,
+                link,
+                class: "#{item_partial_class :homelink, decorator}"
   end
 end
