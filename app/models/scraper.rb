@@ -119,10 +119,7 @@ class Scraper < ActiveRecord::Base
 
   # Pitch the scraper into the DelayedJob queue
   def queue_up
-    return unless virgin?
     bkg_enqueue priority: 20, run_at: run_at
-    Rails.logger.info "!!!Scraper Queued: ##{id} for #{what} on #{url} (status #{status})"
-    Rails.logger.info "!!!Scraper Queued:        ....will run after #{waittime} at #{run_at}"
   end
 
   protected

@@ -78,6 +78,7 @@ class Gleaning < ActiveRecord::Base
     namestr = namestr.singularize if is_plural = (namestr == namestr.pluralize)
     namestr.sub! /Rss/, 'RSS'
     puts namestr + ' results.'
+    bkg_sync true # Ensure that gleaning has occurred, whether synch. or asynch.
     if results && results[namestr]
       list = results[namestr].collect(&:out).flatten.uniq || []
       is_plural ? list : list.first

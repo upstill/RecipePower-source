@@ -84,7 +84,7 @@ class RefermentServices
     line = ''
     if (referee = referment.referee).class == DefinitionReference
       referee.bkg_enqueue
-      referee.bkg_wait
+      referee.bkg_asynch # Wait for the worker to return
       referee.reload
 =begin
       url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, 'www.foodandwine.com/contributors/'

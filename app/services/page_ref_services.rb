@@ -169,7 +169,7 @@ class PageRefServices
       report = "Rationalizing bad url '#{page_ref.url}' (PageRef ##{page_ref.id}) using '#{page_ref.aliases.first}'"
       page_ref.url = URI.join(page_ref.aliases.shift, uri || page_ref.url)
       report << "\n\t...to #{page_ref.url}"
-      page_ref.bkg_perform
+      page_ref.bkg_go true
     elsif page_ref.domain.blank?
       page_ref.domain = uri.host
       page_ref.save
@@ -273,7 +273,7 @@ class PageRefServices
     if (page_ref.http_status != 200) || !(page_ref.bad? || page_ref.good?) || page_ref.url_changed? || force
       page_ref.becomes(PageRef).bkg_enqueue priority: 10 # Must be enqueued as a PageRef b/c subclasses aren't recognized by DJ
       puts "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
-      page_ref.bkg_wait
+      page_ref.bkg_asynch
       puts "...returned"
       sentences << "Ran #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' err_msg #{page_ref.error_message} to get status: now #{page_ref.http_status}"
     else

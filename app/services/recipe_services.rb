@@ -55,7 +55,7 @@ class RecipeServices
     RecipeReference.where(affiliate_id: recipe.id).each { |reference|
       reference.bkg_enqueue # recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref
       puts "Enqueued RecipePageReference ##{reference.id} (#{reference.url})"
-      reference.bkg_wait
+      reference.bkg_asynch
       puts "...returned"
     }
     recipe.reload
@@ -95,7 +95,7 @@ class RecipeServices
       pr.perform unless pr.good? # Take another chance on a response
     end
 =end
-    pr.bkg_perform unless pr.good? # Take another chance on a response
+    pr.bkg_go(pr.bad?) # Take another chance on a response
     if pr.bad?
       # Try correcting the url via regexp
       prs = PageRefServices.new(pr)

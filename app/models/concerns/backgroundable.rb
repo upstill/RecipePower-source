@@ -1,10 +1,61 @@
 # The Backgroundable module supplies an object with the ability to manage execution using DelayedJob
-# It keeps a status variable as below.
+#
 # Execution may be either synchronous or asynchronous, and a queued job may be recalled from the
 # queue and executed synchronously.
+#
 # Backgroundable jobs are also tidy: a job will only be queued once, and once executed, it will not
-# be queued again until reset to virgin state.
-
+# be queued again until reset to virgin state. (This behavior can be overridden by the management methods)
+#
+# A Backgroundable record keeps a status variable, an enum with three states:
+# 1. :virgin => this record has never been processed
+# 2. :good => this record has been processed with a good outcome
+# 3. :bad => this record has been processed with a bad outcome. Whether it gets reprocessed is up to the application.
+#
+# There are four primary public methods: bkg_enqueue gets a job running; bkg_sync ensures that the job has run if it's
+# due (in-process as necessary); bkg_go runs the job NOW, even if it's not due and (optionally) even if it's run before;
+# bkg_asynch() hangs until the worker process has completed, if any.
+#
+# Canonically, <b>bkg_enqueue() starts the job, bkg_sync() picks it up later, bkg_go() forces it to run, and bkg_asynch()
+# waits for the worker to finish with it. Only bkg_asynch() requires that it be previously enqueued.</b>
+#
+#   bkg_enqueue(refresh, djopts={}) fires off a DelayedJob job.
+#
+# +refresh+ is a Boolean flag indicating that
+# the job should be rerun if was already run.
+#
+# +djopts+ are options (run_time, etc.,) passed to Delayed::Job
+#
+#   bkg_sync(run_early=false) checks on the status of a job, returning only when it's complete (if it isn't early).
+#
+# If the job is due (+run_at+ <= +Time.now+), it forces the
+# job to run (+run_early+ being a flag that forces it to run anyway), and if the job is not queued, it
+# forces it to run synchronously.
+#
+# In all cases except a future job (when +run_early+ is not set) bkg_sync() doesn't return
+# until the job is complete.
+#
+#   bkg_go() => Boolean runs the job synchronously (unless previously complete)
+#   bkg_go(true) => Boolean runs the job synchronously regardless of whether it was previously complete
+#
+# In both cases, the DelayedJob is run appropriately if the job has been queued.
+#
+#   bkg_asynch() sleeps until the worker process has completed the job asynchronously
+#
+# The only other modification required to run Backgroundable is in the +perform+ record method.
+#
+# Instead of straightforwardly running the requisite code, +perform+ should enclose that code in a block
+# passed to bkg_execute(). That code should return true or false, indicating success or failure (which will set
+# the record's status to :good or :bad)
+#
+# The status of a job may be queried using:
+# 1. queued?() indicates that a DelayedJob job is attached
+# 2. pending?() indicates that it's queued but not processing
+# 3. processing?() is true while the job is actually executing
+#
+# NB: the #success, #error and #before DelayedJob hooks are defined. Thus, any Backgroundable entity should
+# invoke super from any of those hooks that it defines.
+#
+# :title:Backgroundable
 module Backgroundable
   extend ActiveSupport::Concern
 
@@ -41,76 +92,88 @@ module Backgroundable
     base.extend(ClassMethods)
   end
 
-  def pending?
-    dj.present? && !processing?
+  # Does this object have a DelayedJob waiting?
+  def queued?
+    dj.present?
   end
 
-  # Fire off worker process to glean results, if needed
-  def bkg_enqueue force=false, djopts = {}
-    if force.is_a?(Hash)
-      force, djopts = false, force
+  # Awaiting execution
+  def pending?
+    queued? && !processing?
+  end
+
+  # bkg_enqueue(refresh, djopts={}) fires off a DelayedJob job. 'refresh' is a Boolean flag indicating that
+  # the job should be rerun if was already run. 'djopts' are options (run_time, etc.,) passed to Delayed::Job
+  def bkg_enqueue refresh=false, djopts = {}
+    if refresh.is_a?(Hash)
+      refresh, djopts = false, refresh
     end
     return true if processing?
-    if dj && djopts.present? # Only happens if job already queued, i.e. not virgin, good or bad
-      dj.destroy
-      self.dj = nil
-    end
-    if djopts.present? || virgin? || (force && (good? || bad?)) # If never been run, or forcing to run again, enqueue normally
-      unless dj
-        save if new_record? # Just in case...
-        self.dj = Delayed::Job.enqueue self, djopts
-        save
+    if dj # Job is already queued
+      if refresh && djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
+        dj.with_lock do
+          dj.update_attributes djopts
+          dj.save if dj.changed?
+        end
       end
+      return pending?
+    elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
+      save if new_record? # Just in case (so DJ gets a retrievable record)
+      self.dj = Delayed::Job.enqueue self, djopts
+      save
     end
     pending?
   end
 
-=begin
-  # Place the object's job back in the queue, even if it was previously complete.
-  # 'force' will do so even if the job was already queued (good for recovering from crashes)
-  def bkg_requeue force=false
-    if force || !(self.dj || processing?)
-      virgin!
-      bkg_enqueue
-    end
-  end
-=end
-
-  # Does this object have a DelayedJob waiting?
-  def queued?
-    self.dj.present?
-  end
-
   # Glean results synchronously, returning only when status is definitive (good or bad)
-  # force => do the job even if it was priorly complete
-  def bkg_sync force=false
+  # run_early => do the job even if it's not due
+  # bkg_sync(run_early=false) checks on the status of a job. If the job is due (run_at <= Time.now), it forces the
+  # job to run ('run_early' being a flag that forces it to run anyway), and if the job is not queued, it
+  # forces it to run synchronously. In all cases except a future job (when run_early is not set) bkg_sync doesn't return
+  # until the job is complete.
+  def bkg_sync run_early=false
     if processing? # Wait for worker to return
       until !processing?
         sleep 1
         reload
       end
-    elsif force || (self.dj && self.dj.run_at <= Time.now) # Run the process right now
-      self.dj ?
-          Delayed::Worker.new.run(self.dj) : # Job pending => run it now
-          bkg_perform # Run it directly w/o invoking DelayedJob
+    elsif dj # Job pending => run it now, as necessary
+      # Force execution if it's never been completed, or it's due, or we force the issue
+      if virgin? || (dj.run_at <= Time.now) || run_early
+        Delayed::Worker.new.run(dj)
+        reload
+      end
+    elsif virgin?
+      processing!
+      perform
     end
     good?
   end
 
-  # Just hang out until the process completes
+  # bkg_go(refresh=false) runs the job synchronously, using DelayedJob appropriately if the job is queued.
+  #
+  # 'refresh' flag overrides the status attribute so that the job runs even if previously complete.
+  def bkg_go refresh=false
+    if processing? || dj # Wait for worker to return
+      bkg_sync true
+    elsif virgin? || refresh
+      processing!
+      perform
+    end
+  end
+
+  # bkg_asynch() waits for the worker process to complete the job
+  #
   # NB: MUST HAVE A WORKER PROCESS DOING JOBS!
   # ALSO, CAN TAKE A VERY LONG TIME
-  def bkg_wait
+  # Only call this if you REALLY want the job to be performed in the worker, and you're
+  # willing to wait for it.
+  #
+  def bkg_asynch
     until !queued?
       sleep 1
       reload
     end
-  end
-
-  # Wrapper for the #perform method, managing job correctly outside of DelayedJob
-  def bkg_perform
-    processing!
-    perform
   end
 
   # Finally execute the block that will update the model (or whatever). This is intended to

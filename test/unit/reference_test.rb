@@ -3,6 +3,16 @@ require 'test_helper'
 class ReferenceTest < ActiveSupport::TestCase 
   fixtures :referents
   fixtures :tags
+
+  test 'image reference gets joined properly' do
+    site = Site.new home: 'http://www.dailybitesblog.com/'
+    site.glean
+    gl = site.gleaning
+    # assert gl.good?, 'Gleaning isn\'t born good'
+    gl.images.each { |img|
+      assert img.match(/^http/), "relative image path #{img}"
+    }
+  end
 =begin
   test "querify skipping protocol" do
     q, urls = Reference.querify 'http://ganga.com/upchuck', true

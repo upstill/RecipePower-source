@@ -40,7 +40,7 @@ class SiteServices
       report += "\n\tMaking SitePageRef for reference ##{reference.id} (#{reference.url})"
       puts "Enqueuing making of SitePageRef for Site ##{site.id} on Reference ##{reference.id} (#{reference.url})"
       reference.bkg_enqueue true, priority: 10
-      reference.bkg_wait
+      reference.bkg_asynch # Wait for the worker to return
       puts "...done"
       # site.page_ref = PageRefServices.convert_reference reference, site.page_ref
     }

@@ -192,6 +192,7 @@ class ImageReference < Reference
                 begin
                   ref = self.new(url: self.fake_url)
                   ref.write_attribute :thumbdata, url
+                  ref.status = :good
                   ref
                 end
           when nil
@@ -209,7 +210,8 @@ class ImageReference < Reference
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata force=false
     # Provide good thumbdata if possible
-    bkg_sync(force) ? thumbdata : url
+    bkg_sync true # Doesn't return until the job is done
+    thumbdata.present? ? thumbdata : url
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch

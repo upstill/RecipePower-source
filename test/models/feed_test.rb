@@ -49,7 +49,14 @@ class FeedTest < ActiveSupport::TestCase
     test_feed.launch_update
     ua = test_feed.updated_at
     test_feed.bkg_sync
-    assert_equal ua, test_feed.updated_at # Should have been updated
+    assert_equal ua, test_feed.updated_at # Should not have been updated
+
+    # Launch_update should bring the update time back to the present
+    test_feed.launch_update true
+    assert (test_feed.dj.run_at <= Time.now)
+    ua = test_feed.updated_at
+    test_feed.bkg_sync
+    assert_not_equal ua, test_feed.updated_at # Should have been updated
   end
 
   test 'feed job gets deleted when feed does' do
@@ -59,14 +66,16 @@ class FeedTest < ActiveSupport::TestCase
     test_feed.bkg_enqueue
     assert_equal ua, test_feed.updated_at
     assert test_feed.pending?
-    assert 1, Delayed::Job.count
+    assert_equal test_feed.dj, Delayed::Job.last
+    dj_id = test_feed.dj.id
     test_feed.bkg_sync
     # test_feed.reload
-    assert 1, Delayed::Job.count
-    assert_equal test_feed.dj, Delayed::Job.first
-
+    assert_equal test_feed.dj, Delayed::Job.last
     # When the job is executed, the feed should come back queued to a different job
+    assert_not_equal dj_id, test_feed.dj.id, "feed update job not requeued"
+
     oj = test_feed.dj
+    assert (oj.run_at > Time.now)
     # We're not forcing the sync so it doesn't actually execute
     test_feed.bkg_sync
     # test_feed.reload
@@ -77,9 +86,9 @@ class FeedTest < ActiveSupport::TestCase
     # test_feed.reload
     assert_not_equal test_feed.dj, oj
 
-    assert 1, Delayed::Job.count
+    ct = Delayed::Job.count
     test_feed.destroy
-    assert 0, Delayed::Job.count
+    assert (ct-1), Delayed::Job.count
   end
 
 end

@@ -15,7 +15,7 @@ class PageRef < ActiveRecord::Base
   @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode
 
   attr_accessor :extant_pr
 
