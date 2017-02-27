@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module TagSelectionsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-tag_selection_form">#tag_selection_form</a>
+    
+    <li ><a href="#method-i-tag_selection_form_replacement">#tag_selection_form_replacement</a>
+    
+    <li ><a href="#method-i-tagging_fields">#tagging_fields</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-TagSelectionsHelper">
+  <h1 id="module-TagSelectionsHelper" class="module">
+    module TagSelectionsHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-tag_selection_form" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_selection_form</span><span
+            class="method-args">(tag_selection)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_selection_form-source">
+            <pre><span class="ruby-comment"># File app/helpers/tag_selections_helper.rb, line 3</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_selection_form</span> <span class="ruby-identifier">tag_selection</span>
+  <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-string">&quot;form&quot;</span>, <span class="ruby-identifier">tag_selection</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_selection</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_selection_form_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_selection_form_replacement</span><span
+            class="method-args">(tag_selection)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_selection_form_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/tag_selections_helper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_selection_form_replacement</span> <span class="ruby-identifier">tag_selection</span>
+  [ <span class="ruby-string">&#39;form.new_tag_selection&#39;</span>, <span class="ruby-identifier">tag_selection_form</span>(<span class="ruby-identifier">tag_selection</span>)]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tagging_fields" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tagging_fields</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>&lt;div class=“control-group”&gt;</p>
+
+<pre>&lt;label class=&quot;string optional&quot;&gt;Tag(s)&lt;br&gt;&lt;span class=&quot;locked-tags&quot;&gt;&lt;%= decorator.locked_untyped_culinaryterm_tags.map(&amp;:name).join &#39; | &#39; %&gt;&lt;/span&gt;&lt;/label&gt;
+&lt;input id=&quot;&lt;%= decorator.element_id :tagging_user_id %&gt;&quot; name=&quot;&lt;%= decorator.field_name :tagging_user_id %&gt;&quot; type=&quot;hidden&quot; value=&quot;&lt;%= decorator.tagging_user_id %&gt;&quot;&gt;
+&lt;input type=&quot;text&quot;
+       class=&quot;token-input-field-pending&quot;
+       id=&quot;editable_untyped_culinaryterm_tag_tokens&quot;
+       name=&quot;&lt;%= decorator.field_name :editable_untyped_culinaryterm_tag_tokens %&gt;&quot;
+       rows=&quot;2&quot;
+       size=&quot;30&quot;
+       placeholder=&quot;Tags&quot;
+       data-tagtype_x=&quot;7&quot;
+       data-pre=&quot;&lt;%= decorator.editable_untyped_culinaryterm_tags.map(&amp;:attributes).to_json %&gt;&quot;/&gt;</pre>
+
+<p>&lt;/div&gt; &lt;div class=“control-group”&gt;</p>
+
+<pre>&lt;label class=&quot;string optional&quot;&gt;&lt;%= label %&gt;(s)&lt;br&gt;&lt;span class=&quot;locked-tags&quot;&gt;&lt;%= locked_tags %&gt;&lt;/span&gt;&lt;/label&gt;
+&lt;input id=&quot;&lt;%= decorator.element_id :tagging_user_id %&gt;&quot; name=&quot;&lt;%= decorator.field_name :tagging_user_id %&gt;&quot; type=&quot;hidden&quot; value=&quot;&lt;%= decorator.tagging_user_id %&gt;&quot;&gt;
+&lt;input type=&quot;text&quot;
+       class=&quot;token-input-field-pending&quot;
+       id=&quot;&lt;%= tokens_id %&gt;&quot;
+       name=&quot;&lt;%= decorator.field_name tokens_id %&gt;&quot;
+       rows=&quot;2&quot;
+       size=&quot;30&quot;
+       placeholder=&quot;&lt;%= label.pluralize %&gt;&quot;
+       data-tagtype=&quot;7&quot;
+       data-pre=&quot;&lt;%= data_pre %&gt;&quot;/&gt;</pre>
+
+<p>&lt;/div&gt;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tagging_fields-source">
+            <pre><span class="ruby-comment"># File app/helpers/tag_selections_helper.rb, line 39</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_fields</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">results</span> =
+      <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">editable_tagtypes</span>.<span class="ruby-identifier">collect</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">type</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">dc</span> = <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span>
+        <span class="ruby-identifier">locked_tags</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">send</span> <span class="ruby-node">&quot;locked_#{dc}_tags&quot;</span>
+        <span class="ruby-identifier">editable_tags</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">send</span> <span class="ruby-node">&quot;editable_#{dc}_tags&quot;</span>
+        <span class="ruby-identifier">select_menu</span> =
+            <span class="ruby-keyword">if</span> [<span class="ruby-value">:Course</span>, <span class="ruby-value">:Diet</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">type</span>) <span class="ruby-comment"># These types include a Select menu</span>
+              <span class="ruby-comment"># Define a dropdown menu</span>
+              <span class="ruby-identifier">menu_items</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">type</span>)).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+                <span class="ruby-comment"># js = j %Q{RP.tagger.add(&quot;input#editable_#{dc}_tag_tokens&quot;, #{tag.id}, &quot;#{tag.name}&quot;);}</span>
+                <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>,
+                        <span class="ruby-string">&#39;#&#39;</span>,
+                        <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;token-adder&#39;</span>,
+                        <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">selector</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;input#editable_#{dc}_tag_tokens&quot;</span>, <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> }
+              }
+              <span class="ruby-identifier">link_to</span>(<span class="ruby-string">&#39;Select&#39;</span>.<span class="ruby-identifier">html_safe</span><span class="ruby-operator">+</span><span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;caret&#39;</span>),
+                      <span class="ruby-string">&#39;javascript:void(0);&#39;</span>,
+                      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;dropdown-toggle&#39;</span>,
+                      <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;font-size: 0.7em;&#39;</span>,
+                      <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">toggle</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;dropdown&#39;</span>},
+                      <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Your Tooltip Here&#39;</span>) <span class="ruby-operator">+</span>
+                  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:ul</span>,
+                              <span class="ruby-identifier">menu_items</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span> <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:li</span>, <span class="ruby-identifier">item</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n&quot;</span>).<span class="ruby-identifier">html_safe</span>,
+                              <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;position: static&#39;</span>,
+                              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;dropdown-menu pull-right scrollable-menu&#39;</span>)
+            <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">render</span>(<span class="ruby-string">&#39;tags/tag_controls&#39;</span>,
+               <span class="ruby-identifier">decorator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>,
+               <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">send</span>(<span class="ruby-node">&quot;#{dc}_tags_label&quot;</span>),
+               <span class="ruby-identifier">tokens_id</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;editable_#{dc}_tag_tokens&quot;</span>,
+               <span class="ruby-identifier">tagtypes</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">send</span>(<span class="ruby-node">&quot;#{dc}_tag_types&quot;</span>),
+               <span class="ruby-identifier">locked_tags</span><span class="ruby-operator">:</span> <span class="ruby-identifier">locked_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:name</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; | &#39;</span>),
+               <span class="ruby-identifier">data_pre</span><span class="ruby-operator">:</span> <span class="ruby-identifier">editable_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>,
+               <span class="ruby-identifier">extras</span><span class="ruby-operator">:</span> <span class="ruby-identifier">select_menu</span>)
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">results</span>[<span class="ruby-value">0</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">results</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span>
+  <span class="ruby-identifier">col1</span> = <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-identifier">col2</span> = <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-comment"># If more than one, divide it into two columns</span>
+  <span class="ruby-keyword">while</span> <span class="ruby-identifier">result</span> = <span class="ruby-identifier">results</span>.<span class="ruby-identifier">shift</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">col1</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">result</span>
+    <span class="ruby-identifier">col2</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">results</span>.<span class="ruby-identifier">shift</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+              <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">col1</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;col-md-6&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">col2</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;col-md-6&#39;</span>),
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;row&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

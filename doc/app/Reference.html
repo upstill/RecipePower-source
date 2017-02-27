@@ -1,0 +1,529 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class Reference - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">ActiveRecord::Base
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="Referrable.html">Referrable</a>
+  
+  
+  
+    <li><a class="include" href="Backgroundable.html">Backgroundable</a>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-find_or_initialize">::find_or_initialize</a>
+    
+    <li ><a href="#method-c-lookup">::lookup</a>
+    
+    <li ><a href="#method-c-querify">::querify</a>
+    
+    <li ><a href="#method-c-strscopes">::strscopes</a>
+    
+    <li ><a href="#method-i-digested_reference">#digested_reference</a>
+    
+    <li ><a href="#method-i-fetch">#fetch</a>
+    
+    <li ><a href="#method-i-get_response">#get_response</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Reference">
+  <h1 id="class-Reference" class="class">
+    class Reference
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-find_or_initialize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">find_or_initialize</span><span
+            class="method-args">(url, params = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a (perhaps unsaved) reference for the given url params contains
+name-value pairs for initializing the reference</p>
+          
+          
+
+          
+          <div class="method-source-code" id="find_or_initialize-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">params</span> = {}
+
+  <span class="ruby-comment"># URL may be passed as a parameter or in the params hash</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">params</span> = <span class="ruby-identifier">url</span>
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>] = <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># IMPORTANT! the type of reference is determined from the invoked class if not given specifically</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^data:/</span>)
+    <span class="ruby-keyword">return</span> [ <span class="ruby-keyword">self</span>.<span class="ruby-identifier">create_with</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">canonical</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">find_or_create_by</span>( <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;ImageReference&#39;</span>, <span class="ruby-identifier">thumbdata</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>) ]
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">params</span>[<span class="ruby-value">:type</span>] <span class="ruby-operator">||=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">to_s</span>
+
+  <span class="ruby-comment"># Normalize the url for lookup</span>
+  <span class="ruby-identifier">normalized</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">normalized</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-comment"># Check for non-empty URL</span>
+    <span class="ruby-identifier">ref</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">params</span> <span class="ruby-comment"># Initialize a record just to report the error</span>
+    <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-string">&quot;can&#39;t be blank&quot;</span>
+    <span class="ruby-identifier">refs</span> = [<span class="ruby-identifier">ref</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">ref_class</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:type</span>].<span class="ruby-identifier">constantize</span>
+    <span class="ruby-identifier">refs</span> = <span class="ruby-identifier">ref_class</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">normalized</span>).<span class="ruby-identifier">order</span> <span class="ruby-string">&#39;canonical DESC&#39;</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">empty?</span>
+      <span class="ruby-comment"># Need to create, if possible</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">redirected</span> = <span class="ruby-identifier">test_url</span> <span class="ruby-identifier">normalized</span>) <span class="ruby-comment"># Purports to be a url, but doesn&#39;t work</span>
+        <span class="ruby-identifier">refs</span> = [<span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>)] <span class="ruby-comment"># Initialize a record just to report the error</span>
+        <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-node">&quot;\&#39;#{url}\&#39; doesn&#39;t seem to be a working URL. Can you use it as an address in your browser?&quot;</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-comment"># No reference to be found under the given (normalized) URL -&gt; create one, and possibly its canonical reference as well</span>
+        <span class="ruby-comment"># The goal is to ensure access through any given link that resolves to the same URL after normalization and any redirection.</span>
+        <span class="ruby-comment"># We achieve this by creating references, each pointing to the same affiliate, on at most two URLS:</span>
+        <span class="ruby-comment">#  1) the original URL (after normalization), so identical references wind up with the identical affiliate; and</span>
+        <span class="ruby-comment">#  2) the URL as redirected by the site in question (and again normalized), so that future URLS that redirect</span>
+        <span class="ruby-comment">#   to the same place get to the same affiliate.</span>
+        <span class="ruby-comment"># NB: It&#39;s true that we could simply use the redirected URL for looking up a reference, but that would require</span>
+        <span class="ruby-comment">#  hitting the site every time that URL was referenced. This way, we only have to take the redirection once, and</span>
+        <span class="ruby-comment">#  the Reference class remembers the mapping.</span>
+        <span class="ruby-identifier">refs</span> = <span class="ruby-identifier">ref_class</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">redirected</span>).<span class="ruby-identifier">to_a</span>
+        <span class="ruby-comment"># refs = Reference.where(type: params[:type], url: redirected).to_a</span>
+        <span class="ruby-identifier">refs</span> = [ <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>.<span class="ruby-identifier">merge</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">redirected</span>) ] <span class="ruby-keyword">if</span> <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">empty?</span>
+        (<span class="ruby-identifier">canonical</span> = <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">first</span>).<span class="ruby-identifier">canonical</span> = <span class="ruby-keyword">true</span> <span class="ruby-comment"># Make the redirected reference be canonical, and first</span>
+        <span class="ruby-comment"># Now we create a new reference, aliased to that of the canonical reference by making their affiliate id&#39;s the same</span>
+        <span class="ruby-identifier">refs</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>.<span class="ruby-identifier">merge</span> <span class="ruby-value">:url</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">normalized</span> ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">normalized</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">redirected</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">refs</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">lookup</span><span
+            class="method-args">(url_or_urls, partial=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Index a <a href="Reference.html">Reference</a> by URL or URLs, assuming it
+exists (i.e., no initialization or creation)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="lookup-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 28</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">lookup</span> <span class="ruby-identifier">url_or_urls</span>, <span class="ruby-identifier">partial</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">q</span>, <span class="ruby-identifier">urls</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">querify</span>(<span class="ruby-identifier">url_or_urls</span>, <span class="ruby-identifier">partial</span>)
+  <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">q</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">urls</span>) <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">none</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-querify" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify</span><span
+            class="method-args">(url_or_urls, partial=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Craft a query string and an array of urls, suitable for a where call
+&#39;<a href="http://ganga.com/upchuck">ganga.com/upchuck</a>&#39; -&gt; [
+&#39;“references”.“url” ILIKE ?&#39;, [ &#39;<a
+href="http://ganga.com/upchuck">ganga.com/upchuck</a>%&#39; ]]</p>
+<dl class="rdoc-list label-list"><dt> &#39;<a href="http://ganga.com/upchuck">ganga.com/upchuck</a>&#39; 
+<dd>
+<p>-&gt; [ &#39;“references”.“url” ILIKE ?&#39;, [&#39;<a
+href="http://ganga.com/upchuck">ganga.com/upchuck</a>%&#39; ]]</p>
+</dd><dt> &#39;<a href="http://ganga.com/upchuck">ganga.com/upchuck</a>&#39;, &#39;<a href="http://ganga.com">ganga.com</a>&#39; 
+<dd>
+<p>-&gt; [ &#39;“references”.“url” ILIKE ?&#39;, [&#39;<a
+href="http://ganga.com">ganga.com</a>%&#39; ]]</p>
+</dd></dl>
+
+<p>See test/unit/reference_test.rb for full test suite</p>
+          
+          
+
+          
+          <div class="method-source-code" id="querify-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">querify</span> <span class="ruby-identifier">url_or_urls</span>, <span class="ruby-identifier">partial</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">urls</span> = <span class="ruby-identifier">normalize_urls</span> <span class="ruby-identifier">url_or_urls</span>, <span class="ruby-operator">!</span><span class="ruby-identifier">partial</span>
+  <span class="ruby-keyword">rescue</span>
+    <span class="ruby-comment"># If we can&#39;t normalize the urls, then use the un-normalized versions and hope for the best</span>
+    <span class="ruby-identifier">urls</span> = (<span class="ruby-identifier">url_or_urls</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">url_or_urls</span> <span class="ruby-operator">:</span> [<span class="ruby-identifier">url_or_urls</span>])
+    <span class="ruby-identifier">partial</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">partial</span>
+    <span class="ruby-identifier">urls</span> = <span class="ruby-identifier">condense_strings</span>(<span class="ruby-identifier">urls</span>).<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;%&#39;</span> }
+    <span class="ruby-identifier">q</span> = ([<span class="ruby-string">&#39;&quot;references&quot;.&quot;url&quot; ILIKE ?&#39;</span>] <span class="ruby-operator">*</span> <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">count</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; OR &#39;</span>)
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">urls</span> = <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">part</span><span class="ruby-operator">|</span> [<span class="ruby-string">&#39;http://&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">part</span>, <span class="ruby-string">&#39;https://&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">part</span>] }.<span class="ruby-identifier">flatten</span>
+    <span class="ruby-identifier">q</span> = <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;\&quot;references\&quot;.\&quot;url\&quot; in (#{([&#39;?&#39;]*urls.count).join &#39;, &#39;})&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-keyword">end</span>
+  [<span class="ruby-identifier">q</span>, <span class="ruby-identifier">urls</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-strscopes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">strscopes</span><span
+            class="method-args">(matcher) { || ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a relation for entities that match a string</p>
+          
+          
+
+          
+          <div class="method-source-code" id="strscopes-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 59</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
+  [
+      (<span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>).<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;references&quot;.&quot;host&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>)
+  ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-digested_reference" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">digested_reference</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>By default, the reference gives up its url, but may want to use something
+else, like image data</p>
+          
+          
+
+          
+          <div class="method-source-code" id="digested_reference-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 23</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">digested_reference</span>
+  <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-fetch" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fetch</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get data from the reference via HTTP</p>
+          
+          
+
+          
+          <div class="method-source-code" id="fetch-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 119</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">fetch</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">get_response</span> <span class="ruby-identifier">url</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">response</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">begin</span>
+      <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span> <span class="ruby-identifier">url</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span> <span class="ruby-operator">&amp;&amp;</span>
+          <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span> <span class="ruby-operator">&amp;&amp;</span>
+          (<span class="ruby-identifier">http</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>, <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span>)) <span class="ruby-operator">&amp;&amp;</span>
+          (<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">scheme</span> <span class="ruby-operator">!=</span> <span class="ruby-string">&#39;https&#39;</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">http</span>.<span class="ruby-identifier">use_ssl</span> = <span class="ruby-keyword">true</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">http</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>)) <span class="ruby-comment"># read into this</span>
+          (<span class="ruby-identifier">request</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span><span class="ruby-operator">::</span><span class="ruby-constant">Get</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">request_uri</span>, <span class="ruby-string">&#39;upgrade-insecure-requests&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;1&#39;</span>))
+        <span class="ruby-identifier">response</span> = <span class="ruby-identifier">http</span>.<span class="ruby-identifier">request</span> <span class="ruby-identifier">request</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">code</span>.<span class="ruby-identifier">to_i</span>
+      <span class="ruby-keyword">else</span> <span class="ruby-comment"># Invalid URL</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">400</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-comment"># If the server doesn&#39;t want to talk, we assume that the URL is okay, at least</span>
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">e</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNRESET</span>
+          <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">401</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">-1</span>  <span class="ruby-comment"># Undifferentiated error during fetch, possibly a parsing problem</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">response</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># get_response records the errcode of the last HTTP access in self.errcode</span>
+  <span class="ruby-identifier">tried</span> = {}
+  <span class="ruby-identifier">next_try</span> = <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">until</span> <span class="ruby-identifier">tried</span>[<span class="ruby-identifier">next_try</span>]
+    <span class="ruby-identifier">tried</span>[<span class="ruby-identifier">next_try</span>] = <span class="ruby-keyword">true</span>
+    <span class="ruby-identifier">response</span> = <span class="ruby-identifier">get_response</span> <span class="ruby-identifier">next_try</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">errcode</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">200</span>
+        <span class="ruby-keyword">return</span> <span class="ruby-identifier">response</span>.<span class="ruby-identifier">body</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">301</span>, <span class="ruby-value">302</span> <span class="ruby-comment"># Redirection</span>
+        <span class="ruby-identifier">next_try</span> = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">header</span>[<span class="ruby-string">&#39;location&#39;</span>]
+      <span class="ruby-keyword">when</span> <span class="ruby-value">401</span> <span class="ruby-comment"># Unauthorized</span>
+        <span class="ruby-identifier">next_try</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/^https/</span>, <span class="ruby-string">&#39;http&#39;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-get_response" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">get_response</span><span
+            class="method-args">(url)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="get_response-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 120</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">get_response</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">response</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span> <span class="ruby-identifier">url</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span> <span class="ruby-operator">&amp;&amp;</span>
+        <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span> <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">http</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>, <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span>)) <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">scheme</span> <span class="ruby-operator">!=</span> <span class="ruby-string">&#39;https&#39;</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">http</span>.<span class="ruby-identifier">use_ssl</span> = <span class="ruby-keyword">true</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">http</span>.<span class="ruby-identifier">verify_mode</span> = <span class="ruby-constant">OpenSSL</span><span class="ruby-operator">::</span><span class="ruby-constant">SSL</span><span class="ruby-operator">::</span><span class="ruby-constant">VERIFY_NONE</span>)) <span class="ruby-comment"># read into this</span>
+        (<span class="ruby-identifier">request</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span><span class="ruby-operator">::</span><span class="ruby-constant">Get</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">request_uri</span>, <span class="ruby-string">&#39;upgrade-insecure-requests&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;1&#39;</span>))
+      <span class="ruby-identifier">response</span> = <span class="ruby-identifier">http</span>.<span class="ruby-identifier">request</span> <span class="ruby-identifier">request</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">code</span>.<span class="ruby-identifier">to_i</span>
+    <span class="ruby-keyword">else</span> <span class="ruby-comment"># Invalid URL</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">400</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+    <span class="ruby-comment"># If the server doesn&#39;t want to talk, we assume that the URL is okay, at least</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-constant">Errno</span><span class="ruby-operator">::</span><span class="ruby-constant">ECONNRESET</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">401</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">-1</span>  <span class="ruby-comment"># Undifferentiated error during fetch, possibly a parsing problem</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">response</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

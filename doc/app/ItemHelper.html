@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module ItemHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-item_container_selector">#item_container_selector</a>
+    
+    <li ><a href="#method-i-item_deleter">#item_deleter</a>
+    
+    <li ><a href="#method-i-item_deleters">#item_deleters</a>
+    
+    <li ><a href="#method-i-item_insertion">#item_insertion</a>
+    
+    <li ><a href="#method-i-item_insertions">#item_insertions</a>
+    
+    <li ><a href="#method-i-item_partial_class">#item_partial_class</a>
+    
+    <li ><a href="#method-i-item_partial_name">#item_partial_name</a>
+    
+    <li ><a href="#method-i-item_partial_selector">#item_partial_selector</a>
+    
+    <li ><a href="#method-i-item_preflight">#item_preflight</a>
+    
+    <li ><a href="#method-i-item_replacement">#item_replacement</a>
+    
+    <li ><a href="#method-i-item_replacements">#item_replacements</a>
+    
+    <li ><a href="#method-i-item_to_render">#item_to_render</a>
+    
+    <li ><a href="#method-i-item_wrapper_selector">#item_wrapper_selector</a>
+    
+    <li ><a href="#method-i-render_item">#render_item</a>
+    
+    <li ><a href="#method-i-render_item_unwrapped">#render_item_unwrapped</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-ItemHelper">
+  <h1 id="module-ItemHelper" class="module">
+    module ItemHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-item_container_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_container_selector</span><span
+            class="method-args">(entity_or_string=nil, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>container_selector and wrapper_selector are adopted from masonry_helper.rb
+and are currently only for masonry lists TODO: generalize these for all
+items</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_container_selector-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_container_selector</span> <span class="ruby-identifier">entity_or_string</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">entity_or_string</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">current_user_or_guest</span>
+  <span class="ruby-identifier">masonry_id</span> = <span class="ruby-identifier">entity_or_string</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">entity_or_string</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{dom_id entity_or_string}_contents&quot;</span>
+  <span class="ruby-identifier">masonry_id</span> = <span class="ruby-node">&quot;div#&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">masonry_id</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">masonry_id</span>.<span class="ruby-identifier">blank?</span>  <span class="ruby-comment"># Prepend the id selector</span>
+  <span class="ruby-node">&quot;#{masonry_id} div.js-masonry&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_deleter" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_deleter</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define a :replacements item to delete the item node for @decorator</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_deleter-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 88</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_deleter</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  [ <span class="ruby-identifier">item_partial_selector</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">context</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_deleters" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_deleters</span><span
+            class="method-args">(item_or_decorator_or_specs, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generate deleters for all versions of an item, and, if we&#39;re on its
+page, a pagelet replacement returning to the user&#39;s home page</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_deleters-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 94</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_deleters</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  [<span class="ruby-value">:table</span>, <span class="ruby-value">:modal</span>, <span class="ruby-value">:masonry</span>, <span class="ruby-value">:slider</span>, <span class="ruby-value">:homelink</span>].<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item_mode</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">item_deleter</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">context</span>
+  }.<span class="ruby-identifier">compact</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">pagelet_body_replacement</span>(<span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-keyword">true</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_insertion" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_insertion</span><span
+            class="method-args">(decorator, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="item_insertion-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 100</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_insertion</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  [ <span class="ruby-identifier">item_wrapper_selector</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>),
+    <span class="ruby-identifier">render_item</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-value">:masonry</span>),
+    <span class="ruby-identifier">item_container_selector</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_insertions" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_insertions</span><span
+            class="method-args">(decorator, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>TODO: should apply to other aggregates, not just :masonry (i.e., :table and
+:slider)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_insertions-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_insertions</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  [ <span class="ruby-identifier">item_insertion</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_partial_class" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_partial_class</span><span
+            class="method-args">(item_mode, decorator=@decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="item_partial_class-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_partial_class</span> <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">decorator</span>=<span class="ruby-ivar">@decorator</span>
+  <span class="ruby-identifier">itemclass</span> = <span class="ruby-node">&quot;#{item_mode}-item&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-identifier">domid</span> = <span class="ruby-node">&quot;#{decorator.dom_id}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-node">&quot;#{itemclass} #{domid}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_partial_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_partial_name</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The item partial depends on the item mode (:table, :modal, :masonry,
+:slider), defaulting to just “_show”</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_partial_name-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 54</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_partial_name</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:comments</span>
+    <span class="ruby-string">&quot;show_comments&quot;</span> <span class="ruby-keyword">if</span> [<span class="ruby-constant">Recipe</span>, <span class="ruby-constant">List</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">item</span>.<span class="ruby-identifier">class</span>)
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">tail</span> = <span class="ruby-identifier">item_or_decorator_or_specs</span> <span class="ruby-operator">?</span> <span class="ruby-string">&quot;show&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;index&quot;</span>
+    <span class="ruby-identifier">tail</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;_#{item_mode}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_mode</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>
+      <span class="ruby-identifier">item_class</span> = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">pluralize</span>
+      <span class="ruby-identifier">ctrl_class</span> = (<span class="ruby-identifier">item_class</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;Controller&quot;</span>).<span class="ruby-identifier">constantize</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
+      <span class="ruby-identifier">view</span> = <span class="ruby-identifier">ctrl_class</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">find_view</span>(<span class="ruby-identifier">ctrl_class</span>, <span class="ruby-string">&#39;_&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">tail</span>) <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{item_class.underscore}/_#{tail}&quot;</span>
+      <span class="ruby-identifier">view</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-string">&#39;/_&#39;</span>, <span class="ruby-string">&#39;/&#39;</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">tail</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_partial_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_partial_selector</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="item_partial_selector-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_partial_selector</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-identifier">tag</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">item_mode</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-value">:table</span>
+            <span class="ruby-string">&#39;tr&#39;</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-value">:homelink</span>
+            <span class="ruby-string">&#39;span&#39;</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-string">&#39;div&#39;</span>
+        <span class="ruby-keyword">end</span>
+  <span class="ruby-node">&quot;#{tag}.&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item_partial_class</span>(<span class="ruby-identifier">item_mode</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&#39; &#39;</span>, <span class="ruby-string">&#39;.&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_preflight" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_preflight</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Prep for rendering an item in a particular mode: sort out the parameters
+and initialize @decorator</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_preflight-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Symbol</span>
+    <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_or_decorator_or_specs</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">item_mode</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">item_mode</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span> = (<span class="ruby-identifier">item_or_decorator_or_specs</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>.<span class="ruby-identifier">object</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>) <span class="ruby-operator">||</span> (<span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">object</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@decorator</span>)
+    <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">object</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">item</span>
+      <span class="ruby-identifier">controller</span>.<span class="ruby-identifier">update_and_decorate</span> <span class="ruby-identifier">item</span>
+      <span class="ruby-ivar">@decorator</span> = <span class="ruby-identifier">controller</span>.<span class="ruby-identifier">instance_variable_get</span> <span class="ruby-value">:&quot;@decorator&quot;</span>
+      <span class="ruby-identifier">instance_variable_set</span> <span class="ruby-value">:&quot;@#{item.class.to_s.underscore}&quot;</span>, <span class="ruby-identifier">item</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  [ <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_replacement</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil, locals={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define a :replacements item to replace a particular item under an item mode
+(defaulting to the item_mode parameter)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_replacement</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">locals</span>={}
+  <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-comment"># Ensure viewparams</span>
+  <span class="ruby-identifier">viewparams</span> = <span class="ruby-constant">FilteredPresenter</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>, <span class="ruby-identifier">response_service</span>, { <span class="ruby-identifier">item_mode</span><span class="ruby-operator">:</span> <span class="ruby-identifier">item_mode</span> }, <span class="ruby-ivar">@decorator</span>).<span class="ruby-identifier">viewparams</span>
+  [ <span class="ruby-identifier">item_partial_selector</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span>), <span class="ruby-identifier">render_item</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewparams</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_replacements" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_replacements</span><span
+            class="method-args">(item_or_decorator_or_specs)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generate replacements for all versions of the item</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_replacements-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 81</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_replacements</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>
+  [<span class="ruby-value">:table</span>, <span class="ruby-value">:masonry</span>, <span class="ruby-value">:slider</span>, <span class="ruby-value">:card</span>].<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item_mode</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">item_replacement</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  }.<span class="ruby-identifier">compact</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_to_render" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_to_render</span><span
+            class="method-args">(*args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Syntactic sugar to package up the parameters to <a
+href="ItemHelper.html#method-i-render_item">#render_item</a> for recursive
+description</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_to_render-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 162</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_to_render</span> <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
+  <span class="ruby-identifier">args</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-item_wrapper_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">item_wrapper_selector</span><span
+            class="method-args">(decorator, context=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a selector that finds the wrapper for a specific masonry item
+(given by entity_or_string)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="item_wrapper_selector-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">item_wrapper_selector</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">context</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-node">&quot;#{item_container_selector decorator, context} div.masonry-item.#{decorator.dom_id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-render_item" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">render_item</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil, locals={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="render_item-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 121</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render_item</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">locals</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_mode</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">locals</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># item_or_decorator_or_specs is defined recursively: if it&#39;s an array, we recur on each member of the array, joining the</span>
+  <span class="ruby-comment"># results</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Array</span>
+    <span class="ruby-identifier">rendering</span> = <span class="ruby-identifier">item_or_decorator_or_specs</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">spec</span><span class="ruby-operator">|</span> 
+      <span class="ruby-identifier">render_item</span> <span class="ruby-operator">*</span><span class="ruby-identifier">spec</span> 
+    }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">rendering</span> = <span class="ruby-identifier">render_item_unwrapped</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">locals</span> <span class="ruby-comment"># locals are the local bindings for the item</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-string">&quot;&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">rendering</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">container_class</span> = <span class="ruby-identifier">item_partial_class</span> <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-comment"># Encapsulate the rendering in the standard shell for the item mode</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">item_mode</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:querify</span>
+      <span class="ruby-identifier">querify_block</span> <span class="ruby-identifier">locals</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:url</span>), <span class="ruby-identifier">rendering</span>, <span class="ruby-identifier">locals</span> <span class="ruby-comment"># Locals are the options for querify_block</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:partial</span>
+      <span class="ruby-comment"># Enclose the rendering in a partial named by locals[:partial_name] or implied by :partial and the controller action</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">partial_name</span> = <span class="ruby-identifier">locals</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:partial_name</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">item_partial_name</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span>)
+        <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial_name</span>, <span class="ruby-identifier">locals</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">content</span><span class="ruby-operator">:</span> <span class="ruby-identifier">rendering</span>) }
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:masonry</span>
+      <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">rendering</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">container_class</span><span class="ruby-operator">+</span><span class="ruby-string">&quot; stream-item&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:modal</span>
+      <span class="ruby-identifier">modal_dialog</span> <span class="ruby-value">:&quot;#{response_service.action}_#{response_service.controller.singularize}&quot;</span>,
+                   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span>,
+                   <span class="ruby-value">:body_contents</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">rendering</span>.<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:slider</span>
+      <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">rendering</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">container_class</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:table</span>
+      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:tr</span>,
+                  <span class="ruby-identifier">rendering</span>,
+                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">container_class</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">rendering</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-render_item_unwrapped" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">render_item_unwrapped</span><span
+            class="method-args">(item_or_decorator_or_specs=nil, item_mode=nil, locals={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="render_item_unwrapped-source">
+            <pre><span class="ruby-comment"># File app/helpers/item_helper.rb, line 111</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render_item_unwrapped</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">locals</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">item_mode</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">locals</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">item_mode</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span> = <span class="ruby-identifier">item_preflight</span> <span class="ruby-identifier">item_or_decorator_or_specs</span>, (<span class="ruby-identifier">item_mode</span> <span class="ruby-operator">||</span> <span class="ruby-value">:card</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">partial</span> = <span class="ruby-identifier">item_partial_name</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">item_mode</span>)
+    <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span>, <span class="ruby-identifier">locals</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">decorator</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@decorator</span>) }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

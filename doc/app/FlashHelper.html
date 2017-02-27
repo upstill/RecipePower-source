@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module FlashHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-base_errors_helper">#base_errors_helper</a>
+    
+    <li ><a href="#method-i-flash_all">#flash_all</a>
+    
+    <li ><a href="#method-i-flash_hash">#flash_hash</a>
+    
+    <li ><a href="#method-i-flash_notifications_div">#flash_notifications_div</a>
+    
+    <li ><a href="#method-i-flash_notifications_replacement">#flash_notifications_replacement</a>
+    
+    <li ><a href="#method-i-flash_notify">#flash_notify</a>
+    
+    <li ><a href="#method-i-flash_one">#flash_one</a>
+    
+    <li ><a href="#method-i-flash_param">#flash_param</a>
+    
+    <li ><a href="#method-i-flash_usurp">#flash_usurp</a>
+    
+    <li ><a href="#method-i-form_errors_helper">#form_errors_helper</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-FlashHelper">
+  <h1 id="module-FlashHelper" class="module">
+    module FlashHelper
+  </h1>
+
+  <section class="description">
+    
+<p>Provide the capability of displaying closeable flash messages. In general
+it is better to  wrap all such messages in a notifications div (provideed
+by flash_notifications) because 1) such messages are removed when the
+close-box is clicked and 2) the content may need to be replaced</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-base_errors_helper" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">base_errors_helper</span><span
+            class="method-args">(resource, for_bootstrap = true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Augments error display for record attributes (a la simple_form) with
+base-level errors</p>
+          
+          
+
+          
+          <div class="method-source-code" id="base_errors_helper-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 31</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">base_errors_helper</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">for_bootstrap</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">flash_one</span> <span class="ruby-value">:error</span>, <span class="ruby-identifier">express_base_errors</span>(<span class="ruby-identifier">resource</span>), <span class="ruby-identifier">for_bootstrap</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_all" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_all</span><span
+            class="method-args">(for_bootstrap=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="flash_all-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 69</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_all</span> <span class="ruby-identifier">for_bootstrap</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">type</span>
+    <span class="ruby-identifier">flash_one</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_sym</span>, <span class="ruby-identifier">message</span>, <span class="ruby-identifier">for_bootstrap</span>
+  }.<span class="ruby-identifier">join</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_hash" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_hash</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Collect the flash messages in a hash</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_hash-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 84</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_hash</span>
+  <span class="ruby-identifier">fh</span> = {}
+  <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span> <span class="ruby-identifier">fh</span>[<span class="ruby-identifier">type</span>] = <span class="ruby-identifier">message</span> }
+  <span class="ruby-identifier">fh</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_notifications_div" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_notifications_div</span><span
+            class="method-args">(cssclass = 'flash_notifications', for_bootstrap = true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Emit the flash_notifications for the page in a div.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_notifications_div-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_notifications_div</span> <span class="ruby-identifier">cssclass</span> = <span class="ruby-string">&#39;flash_notifications&#39;</span>, <span class="ruby-identifier">for_bootstrap</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">flash_all</span>(<span class="ruby-identifier">for_bootstrap</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">cssclass</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_notifications_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_notifications_replacement</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns a selector-value pair for replacing the notifications panel due to
+an update event</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_notifications_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_notifications_replacement</span>
+  [ <span class="ruby-string">&quot;div.flash_notifications&quot;</span>, <span class="ruby-identifier">flash_notifications_div</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_notify" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_notify</span><span
+            class="method-args">(resource=nil, popup_only=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a hash suitable for including in a JSON response for driving a
+flash notification &#39;all&#39; true incorporates all extant messages in
+the popup</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_notify-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_notify</span> <span class="ruby-identifier">resource</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">popup_only</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-comment"># Collect any errors from the resource</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span><span class="ruby-operator">==</span><span class="ruby-keyword">true</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">resource</span><span class="ruby-operator">==</span><span class="ruby-keyword">false</span>
+    <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">popup_only</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">resource</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">respond_to?</span>( <span class="ruby-value">:errors</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+    <span class="ruby-identifier">resource_errors_to_flash</span> <span class="ruby-identifier">resource</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-keyword">return</span> { <span class="ruby-string">&quot;clear-flash&quot;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span> }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">result</span> = {}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">msg</span> = <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>]
+    <span class="ruby-identifier">result</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-identifier">msg</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:alert</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">popup_only</span>
+    <span class="ruby-identifier">result</span>[<span class="ruby-value">:popup</span>] = <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">collect</span>  { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">type</span>
+      <span class="ruby-identifier">message</span>
+    }.<span class="ruby-identifier">join</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">else</span> <span class="ruby-comment"># Keep all flashes in their intended form</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">msg</span> = <span class="ruby-identifier">flash</span>[<span class="ruby-value">:popup</span>]
+      <span class="ruby-identifier">result</span>[<span class="ruby-value">:popup</span>] = <span class="ruby-identifier">msg</span>
+      <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:popup</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-comment"># Others get passed through for the flash panel</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">each</span>  { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">result</span>[<span class="ruby-node">&quot;flash-#{type}&quot;</span>] = <span class="ruby-identifier">message</span>
+      <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">type</span>
+      <span class="ruby-identifier">message</span>
+    }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">result</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_one" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_one</span><span
+            class="method-args">(level, message, for_bootstrap=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Emit a single error panel, returning an empty string if the message is
+empty</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_one-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_one</span> <span class="ruby-identifier">level</span>, <span class="ruby-identifier">message</span>, <span class="ruby-identifier">for_bootstrap</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-string">&quot;&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">message</span>.<span class="ruby-identifier">blank?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">message</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">hide</span> = <span class="ruby-string">&quot;hide&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">hide</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">for_bootstrap</span>
+    <span class="ruby-identifier">bootstrap_class</span> =
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">level</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:success</span>
+      <span class="ruby-string">&quot;alert-success&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:error</span>
+      <span class="ruby-string">&quot;alert-danger&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:alert</span>
+      <span class="ruby-string">&quot;alert-warning&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:notice</span>
+      <span class="ruby-string">&quot;alert-info&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:guide</span>
+      <span class="ruby-string">&quot;alert-guide&quot;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">level</span>.<span class="ruby-identifier">to_s</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">message</span> = <span class="ruby-node">&quot;&lt;span&gt;#{message.html_safe}&lt;/span&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-identifier">button</span> = <span class="ruby-node">&quot;&lt;button class=\&quot;close\&quot; data-dismiss=\&quot;alert\&quot;&gt;&amp;#215;&lt;/button&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+     <span class="ruby-comment"># This message may have been cleared earlier...</span>
+    <span class="ruby-identifier">html</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">button</span><span class="ruby-operator">+</span><span class="ruby-identifier">message</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;alert #{bootstrap_class} alert_block fade in #{hide}&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">html</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">message</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;alert #{hide}&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">html</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_param" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_param</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>For passing through a redirect, enclose the collected flash messages in a
+hash</p>
+          
+          
+
+          
+          <div class="method-source-code" id="flash_param-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_param</span>
+  <span class="ruby-identifier">fh</span> = <span class="ruby-identifier">flash_hash</span>
+  <span class="ruby-identifier">fh</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span> <span class="ruby-operator">?</span> { <span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fh</span> } <span class="ruby-operator">:</span> {}
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-flash_usurp" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">flash_usurp</span><span
+            class="method-args">(separator='<br\>')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="flash_usurp-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 76</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">flash_usurp</span> <span class="ruby-identifier">separator</span>=<span class="ruby-string">&#39;&lt;br\&gt;&#39;</span>
+  <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">type</span>
+    <span class="ruby-identifier">message</span>
+  }.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">separator</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-form_errors_helper" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">form_errors_helper</span><span
+            class="method-args">(f, object=nil, for_bootstrap=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Incorporate error reporting for a resource within a form, preferring any
+base error from the resource to the standard notification</p>
+          
+          
+
+          
+          <div class="method-source-code" id="form_errors_helper-source">
+            <pre><span class="ruby-comment"># File app/helpers/flash_helper.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">form_errors_helper</span> <span class="ruby-identifier">f</span>, <span class="ruby-identifier">object</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">for_bootstrap</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">resource</span> = <span class="ruby-identifier">object</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:base</span>].<span class="ruby-identifier">empty?</span>
+      <span class="ruby-comment"># We accept both ActionView form builders and simple_form builders, but only the latter has error notification</span>
+      (<span class="ruby-identifier">f</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:error_notification</span>)) <span class="ruby-operator">?</span> <span class="ruby-identifier">f</span>.<span class="ruby-identifier">error_notification</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">resource_errors_to_flash</span>(<span class="ruby-identifier">resource</span>)
+    <span class="ruby-keyword">else</span> 
+      <span class="ruby-identifier">base_errors_helper</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">for_bootstrap</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

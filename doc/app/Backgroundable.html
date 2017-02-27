@@ -1,0 +1,700 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module Backgroundable - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    <div id="extends-section" class="nav-section">
+  <h3>Extended With Modules</h3>
+
+  <ul class="link-list">
+    
+  
+    <li><span class="extend">ActiveSupport::Concern</span>
+  
+  
+  
+    <li><a class="extend" href="Backgroundable/ClassMethods.html">Backgroundable::ClassMethods</a>
+  
+  
+  </ul>
+</div>
+
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-included">::included</a>
+    
+    <li ><a href="#method-i-before">#before</a>
+    
+    <li ><a href="#method-i-bkg_asynch">#bkg_asynch</a>
+    
+    <li ><a href="#method-i-bkg_enqueue">#bkg_enqueue</a>
+    
+    <li ><a href="#method-i-bkg_execute">#bkg_execute</a>
+    
+    <li ><a href="#method-i-bkg_go">#bkg_go</a>
+    
+    <li ><a href="#method-i-bkg_sync">#bkg_sync</a>
+    
+    <li ><a href="#method-i-error">#error</a>
+    
+    <li ><a href="#method-i-pending-3F">#pending?</a>
+    
+    <li ><a href="#method-i-queued-3F">#queued?</a>
+    
+    <li ><a href="#method-i-success">#success</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-Backgroundable">
+  <h1 id="module-Backgroundable" class="module">
+    module Backgroundable
+  </h1>
+
+  <section class="description">
+    
+<p>The <a href="Backgroundable.html">Backgroundable</a> module supplies an
+object with the ability to manage execution using DelayedJob</p>
+
+<p>Execution may be either synchronous or asynchronous, and a queued job may
+be recalled from the queue and executed synchronously.</p>
+
+<p><a href="Backgroundable.html">Backgroundable</a> jobs are also tidy: a job
+will only be queued once, and once executed, it will not be queued again
+until reset to virgin state. (This behavior can be overridden by the
+management methods)</p>
+
+<p>A <a href="Backgroundable.html">Backgroundable</a> record keeps a status
+variable, an enum with three states:</p>
+<ol><li>
+<p>:virgin =&gt; this record has never been processed</p>
+</li><li>
+<p>:good =&gt; this record has been processed with a good outcome</p>
+</li><li>
+<p>:bad =&gt; this record has been processed with a bad outcome. Whether it
+gets reprocessed is up to the application.</p>
+</li></ol>
+
+<p>There are four primary public methods: <a
+href="Backgroundable.html#method-i-bkg_enqueue">#bkg_enqueue</a> gets a job
+running; <a href="Backgroundable.html#method-i-bkg_sync">#bkg_sync</a>
+ensures that the job has run if it&#39;s due (in-process as necessary); <a
+href="Backgroundable.html#method-i-bkg_go">#bkg_go</a> runs the job NOW,
+even if it&#39;s not due and (optionally) even if it&#39;s run before; <a
+href="Backgroundable.html#method-i-bkg_asynch">#bkg_asynch</a>() hangs
+until the worker process has completed, if any.</p>
+
+<p>Canonically, <strong>bkg_enqueue() starts the job, <a
+href="Backgroundable.html#method-i-bkg_sync">#bkg_sync</a>() picks it up
+later, <a href="Backgroundable.html#method-i-bkg_go">#bkg_go</a>() forces
+it to run, and <a
+href="Backgroundable.html#method-i-bkg_asynch">#bkg_asynch</a>() waits for
+the worker to finish with it. Only <a
+href="Backgroundable.html#method-i-bkg_asynch">#bkg_asynch</a>() requires
+that it be previously enqueued.</strong></p>
+
+<pre>bkg_enqueue(refresh, djopts={}) fires off a DelayedJob job.</pre>
+
+<p><code>refresh</code> is a Boolean flag indicating that the job should be
+rerun if was already run.</p>
+
+<p><code>djopts</code> are options (run_time, etc.,) passed to Delayed::Job</p>
+
+<pre>bkg_sync(run_early=false) checks on the status of a job.</pre>
+
+<p>If the job is due (run_at &lt;= Time.now), it forces the job to run
+(<code>run_early</code> being a flag that forces it to run anyway), and if
+the job is not queued, it forces it to run synchronously.</p>
+
+<p>In all cases except a future job (when run_early is not set) <a
+href="Backgroundable.html#method-i-bkg_sync">bkg_sync</a> doesn&#39;t
+return until the job is complete.</p>
+
+<pre>bkg_go =&gt; Boolean runs the job synchronously (unless previously complete)
+bkg_go(true) =&gt; Boolean runs the job synchronously regardless of whether it was previously complete</pre>
+
+<p>In both cases, the DelayedJob is run appropriately if the job has been
+queued.</p>
+
+<pre>bkg_asynch() sleeps until the worker process has completed the job asynchronously</pre>
+
+<p>The only other modification required to run <a
+href="Backgroundable.html">Backgroundable</a> is in the
+<code>perform</code> record method.</p>
+
+<p>Instead of straightforwardly running the requisite code,
+<code>perform</code> should enclose that code in a block passed to <a
+href="Backgroundable.html#method-i-bkg_execute">#bkg_execute</a>(). That
+code should return true or false, indicating success or failure (which will
+set the record&#39;s status to :good or :bad)</p>
+
+<p>The status of a job may be queried using:</p>
+<ol><li>
+<p>queued?() indicates that a DelayedJob job is attached</p>
+</li><li>
+<p>pending?() indicates that it&#39;s queued but not processing</p>
+</li><li>
+<p>processing?() is true while the job is actually executing</p>
+</li></ol>
+
+<p>NB: the <a href="Backgroundable.html#method-i-success">success</a>, <a
+href="Backgroundable.html#method-i-error">error</a> and <a
+href="Backgroundable.html#method-i-before">before</a> DelayedJob hooks are
+defined. Thus, any <a href="Backgroundable.html">Backgroundable</a> entity
+should invoke super from any of those hooks that it defines.</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-included" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">included</span><span
+            class="method-args">(base)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="included-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 91</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">included</span>(<span class="ruby-identifier">base</span>)
+  <span class="ruby-identifier">base</span>.<span class="ruby-identifier">extend</span>(<span class="ruby-constant">ClassMethods</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-before" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">before</span><span
+            class="method-args">(job)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Before the job is performed, revise its status from pending to processing</p>
+          
+          
+
+          
+          <div class="method-source-code" id="before-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 220</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">before</span> <span class="ruby-identifier">job</span>
+  <span class="ruby-identifier">processing!</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_asynch" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_asynch</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Backgroundable.html#method-i-bkg_asynch">#bkg_asynch</a>() waits
+for the worker process to complete the job</p>
+
+<p>NB: MUST HAVE A WORKER PROCESS DOING JOBS! ALSO, CAN TAKE A VERY LONG TIME
+Only call this if you REALLY want the job to be performed in the worker,
+and you&#39;re willing to wait for it.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bkg_asynch-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 172</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_asynch</span>
+  <span class="ruby-keyword">until</span> <span class="ruby-operator">!</span><span class="ruby-identifier">queued?</span>
+    <span class="ruby-identifier">sleep</span> <span class="ruby-value">1</span>
+    <span class="ruby-identifier">reload</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_enqueue" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_enqueue</span><span
+            class="method-args">(refresh=false, djopts = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a
+href="Backgroundable.html#method-i-bkg_enqueue">#bkg_enqueue</a>(refresh,
+djopts={}) fires off a DelayedJob job. &#39;refresh&#39; is a Boolean flag
+indicating that the job should be rerun if was already run.
+&#39;djopts&#39; are options (run_time, etc.,) passed to Delayed::Job</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bkg_enqueue-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-identifier">refresh</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">djopts</span> = {}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">refresh</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">refresh</span>, <span class="ruby-identifier">djopts</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">refresh</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">processing?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">dj</span> <span class="ruby-comment"># Job is already queued</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">refresh</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">djopts</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">locked_by</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-comment"># If necessary and possible, modify parameters</span>
+      <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">with_lock</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">update_attributes</span> <span class="ruby-identifier">djopts</span>
+        <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">changed?</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">pending?</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">virgin?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">refresh</span> <span class="ruby-comment"># If never been run, or forcing to run again, enqueue normally</span>
+    <span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_record?</span> <span class="ruby-comment"># Just in case (so DJ gets a retrievable record)</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">dj</span> = <span class="ruby-constant">Delayed</span><span class="ruby-operator">::</span><span class="ruby-constant">Job</span>.<span class="ruby-identifier">enqueue</span> <span class="ruby-keyword">self</span>, <span class="ruby-identifier">djopts</span>
+    <span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">pending?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_execute" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_execute</span><span
+            class="method-args">(&block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Finally execute the block that will update the model (or whatever). This is
+intended to be called within the perform method, with a block that does the
+real work and returns either true (for successful execution) or false (for
+failure). The instance will get status of &#39;good&#39; or &#39;bad&#39;
+thereby We check for the processing flag b/c the job may have been run
+before (ie., by <a
+href="Backgroundable.html#method-i-bkg_sync">#bkg_sync</a>)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bkg_execute-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 184</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_execute</span> <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">processing?</span>
+    <span class="ruby-comment"># In development, let errors fly</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">env</span>.<span class="ruby-identifier">development?</span> <span class="ruby-operator">||</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">env</span>.<span class="ruby-identifier">test?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>
+        <span class="ruby-identifier">good!</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">bad!</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">begin</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span>
+          <span class="ruby-identifier">good!</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">bad!</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+        <span class="ruby-identifier">error</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">e</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">good?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_go" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_go</span><span
+            class="method-args">(refresh=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Backgroundable.html#method-i-bkg_go">#bkg_go</a>(refresh=false)
+runs the job synchronously, using DelayedJob appropriately if the job is
+queued.</p>
+
+<p>&#39;refresh&#39; flag overrides the status attribute so that the job runs
+even if previously complete.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bkg_go-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 156</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_go</span> <span class="ruby-identifier">refresh</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">processing?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">dj</span> <span class="ruby-comment"># Wait for worker to return</span>
+    <span class="ruby-identifier">bkg_sync</span> <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">virgin?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">refresh</span>
+    <span class="ruby-identifier">processing!</span>
+    <span class="ruby-identifier">perform</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_sync" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_sync</span><span
+            class="method-args">(run_early=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Glean results synchronously, returning only when status is definitive (good
+or bad) run_early =&gt; do the job even if it&#39;s not due <a
+href="Backgroundable.html#method-i-bkg_sync">#bkg_sync</a>(run_early=false)
+checks on the status of a job. If the job is due (run_at &lt;= Time.now),
+it forces the job to run (&#39;run_early&#39; being a flag that forces it
+to run anyway), and if the job is not queued, it forces it to run
+synchronously. In all cases except a future job (when run_early is not set)
+<a href="Backgroundable.html#method-i-bkg_sync">#bkg_sync</a> doesn&#39;t
+return until the job is complete.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="bkg_sync-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 134</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_sync</span> <span class="ruby-identifier">run_early</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">processing?</span> <span class="ruby-comment"># Wait for worker to return</span>
+    <span class="ruby-keyword">until</span> <span class="ruby-operator">!</span><span class="ruby-identifier">processing?</span>
+      <span class="ruby-identifier">sleep</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">reload</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">dj</span> <span class="ruby-comment"># Job pending =&gt; run it now, as necessary</span>
+    <span class="ruby-comment"># Force execution if it&#39;s never been completed, or it&#39;s due, or we force the issue</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">virgin?</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">dj</span>.<span class="ruby-identifier">run_at</span> <span class="ruby-operator">&lt;=</span> <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">run_early</span>
+      <span class="ruby-constant">Delayed</span><span class="ruby-operator">::</span><span class="ruby-constant">Worker</span>.<span class="ruby-identifier">new</span>.<span class="ruby-identifier">run</span>(<span class="ruby-identifier">dj</span>)
+      <span class="ruby-identifier">reload</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">virgin?</span>
+    <span class="ruby-identifier">processing!</span>
+    <span class="ruby-identifier">perform</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">good?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">error</span><span
+            class="method-args">(job, exception)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="error-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 214</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">error</span>(<span class="ruby-identifier">job</span>, <span class="ruby-identifier">exception</span>)
+  <span class="ruby-identifier">bad!</span>
+  <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-identifier">exception</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pending-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pending?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Awaiting execution</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pending-3F-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 101</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pending?</span>
+  <span class="ruby-identifier">queued?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">processing?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-queued-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">queued?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Does this object have a DelayedJob waiting?</p>
+          
+          
+
+          
+          <div class="method-source-code" id="queued-3F-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 96</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">queued?</span>
+  <span class="ruby-identifier">dj</span>.<span class="ruby-identifier">present?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-success" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">success</span><span
+            class="method-args">(job)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>With success, the DelayedJob record is about to go away, so we remove our
+pointer</p>
+          
+          
+
+          
+          <div class="method-source-code" id="success-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/backgroundable.rb, line 209</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">success</span>(<span class="ruby-identifier">job</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">dj</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">save</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

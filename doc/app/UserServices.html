@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class UserServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-convert_all_to_references">::convert_all_to_references</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-analyze_invitees">#analyze_invitees</a>
+    
+    <li ><a href="#method-i-sign_up">#sign_up</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-UserServices">
+  <h1 id="class-UserServices" class="class">
+    class UserServices
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-user" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">user</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-convert_all_to_references" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">convert_all_to_references</span><span
+            class="method-args">(n=-1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="convert_all_to_references-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_all_to_references</span> <span class="ruby-identifier">n</span>=<span class="ruby-value">-1</span>
+  <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&quot;image &lt;&gt; &#39;&#39;&quot;</span>)[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-identifier">n</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">image</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-identifier">u</span>.<span class="ruby-identifier">image</span> = <span class="ruby-identifier">u</span>.<span class="ruby-identifier">image</span>  <span class="ruby-comment"># Creates the reference</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">u</span>.<span class="ruby-identifier">thumbnail</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">thumbnail</span>.<span class="ruby-identifier">perform</span>
+    <span class="ruby-identifier">u</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-string">&#39;Users Converted&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(user)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">user</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">user</span> = <span class="ruby-identifier">user</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-analyze_invitees" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">analyze_invitees</span><span
+            class="method-args">(sender)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="analyze_invitees-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">analyze_invitees</span>(<span class="ruby-identifier">sender</span>)
+  <span class="ruby-identifier">result</span> = {
+    <span class="ruby-identifier">redundancies</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Current friends (member&#39;s share notice sent)</span>
+    <span class="ruby-identifier">pending</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Invited but not yet confirmed</span>
+    <span class="ruby-identifier">new_friends</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Newly-added friends (member&#39;s share notice sent)</span>
+    <span class="ruby-identifier">to_invite</span><span class="ruby-operator">:</span>  []
+  }
+  <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">invitee</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">u</span> = 
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Fixnum</span> <span class="ruby-comment"># ID of existing friend</span>
+      <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span> <span class="ruby-comment"># email address which may or may not be external</span>
+      <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">downcase</span>).<span class="ruby-identifier">first</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-comment"># Existing user, whether signed up or not, friend or not</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">sender</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Existing friend: redundant</span>
+        <span class="ruby-identifier">result</span>[<span class="ruby-value">:redundancies</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">last_sign_in_at</span> <span class="ruby-comment"># The user has ever signed in (not a pending invitation)</span>
+        <span class="ruby-identifier">result</span>[<span class="ruby-value">:new_friends</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">else</span> <span class="ruby-comment"># User never signed in -&gt; invitation is pending</span>
+        <span class="ruby-identifier">result</span>[<span class="ruby-value">:pending</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">result</span>[<span class="ruby-value">:to_invite</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-comment"># Define a singleton method on the hash for reporting out the results</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">result</span>.<span class="ruby-identifier">report</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">selector</span> = <span class="ruby-keyword">nil</span>) 
+    <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">items</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">which</span>]).<span class="ruby-identifier">empty?</span>
+      <span class="ruby-identifier">count</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">size</span>
+      <span class="ruby-identifier">items</span> = <span class="ruby-identifier">liststrs</span>(<span class="ruby-identifier">items</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">selector</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">selector</span>
+      <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">items</span>, <span class="ruby-identifier">count</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  
+  <span class="ruby-identifier">result</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sign_up" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">sign_up</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Called on signup to initialize the user</p>
+          
+          
+
+          
+          <div class="method-source-code" id="sign_up-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">sign_up</span>
+  <span class="ruby-comment"># Give the user a starting set of collections and friends</span>
+  <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-string">&#39;Now Cooking&#39;</span>, <span class="ruby-identifier">user</span>
+  <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-string">&#39;To Try&#39;</span>, <span class="ruby-identifier">user</span>
+  <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-string">&#39;Keepers&#39;</span>, <span class="ruby-identifier">user</span>
+  <span class="ruby-identifier">add_followee</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-value">1</span>)
+  <span class="ruby-identifier">add_followee</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-value">3</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

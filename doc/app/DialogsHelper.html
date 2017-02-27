@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module DialogsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-dialogFooter">#dialogFooter</a>
+    
+    <li ><a href="#method-i-dialogHeader">#dialogHeader</a>
+    
+    <li ><a href="#method-i-dialog_cancel_button">#dialog_cancel_button</a>
+    
+    <li ><a href="#method-i-dialog_submit_button">#dialog_submit_button</a>
+    
+    <li ><a href="#method-i-injector_cancel_button">#injector_cancel_button</a>
+    
+    <li ><a href="#method-i-injector_dialog">#injector_dialog</a>
+    
+    <li ><a href="#method-i-modal_body">#modal_body</a>
+    
+    <li ><a href="#method-i-modal_dialog">#modal_dialog</a>
+    
+    <li ><a href="#method-i-modal_footer">#modal_footer</a>
+    
+    <li ><a href="#method-i-modal_header">#modal_header</a>
+    
+    <li ><a href="#method-i-simple_modal">#simple_modal</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-DialogsHelper">
+  <h1 id="module-DialogsHelper" class="module">
+    module DialogsHelper
+  </h1>
+
+  <section class="description">
+    
+<p>Helpers for building dialogs</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-dialogFooter" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialogFooter</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialogFooter-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialogFooter</span>()
+  <span class="ruby-string">&quot;&lt;/div&gt;&lt;br class=&#39;clear&#39;&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialogHeader" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialogHeader</span><span
+            class="method-args">(which, ttl=nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Place the header for a dialog, including setting its Onload function.
+Currently handled this way (e.g., symbols that have been supported)</p>
+
+<pre>:edit_recipe
+:captureRecipe
+:new_recipe (nee newRecipe)
+:sign_in</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="dialogHeader-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 109</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialogHeader</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={})
+  <span class="ruby-identifier">classes</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;dialogHeader for #{globstring({dialog: which, format: response_service.format_class, ttl: ttl})}&quot;</span>
+  <span class="ruby-comment"># Assert a page title if given</span>
+  <span class="ruby-identifier">ttlspec</span> = <span class="ruby-identifier">ttl</span> <span class="ruby-operator">?</span> <span class="ruby-node">%Q{ title=&quot;#{ttl}&quot;}</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">bs_classes</span> = <span class="ruby-operator">!</span><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-pending hide fade&#39;</span>
+  <span class="ruby-identifier">hdr</span> =
+      <span class="ruby-node">%Q{&lt;div class=&quot;#{bs_classes} dialog #{which.to_s} #{response_service.format_class} #{classes}&quot; #{ttlspec}&gt;}</span><span class="ruby-operator">+</span>
+          (<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">?</span>
+              <span class="ruby-identifier">injector_cancel_button</span>(<span class="ruby-string">&#39;X&#39;</span>) <span class="ruby-operator">:</span>
+              <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                          (<span class="ruby-identifier">dialog_cancel_button</span>(<span class="ruby-string">&#39;&amp;times;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">ttl</span>)),
+                          <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-header&#39;</span>)
+          )
+  <span class="ruby-identifier">hdr</span> <span class="ruby-operator">&lt;&lt;=</span> (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">flash_all</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:noflash</span>]
+  <span class="ruby-identifier">hdr</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_cancel_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_cancel_button</span><span
+            class="method-args">(label = nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_cancel_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 156</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_cancel_button</span> <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">options</span>, <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">bootstrap_button_options</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(
+                                         <span class="ruby-identifier">button_style</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:button_style</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;info&#39;</span>),
+                                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} #{options[:style] || &#39;form-button&#39;}&quot;</span>
+                                     )
+  <span class="ruby-identifier">tag</span> <span class="ruby-value">:input</span>,
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} cancel dialog-cancel-button&quot;</span>,
+      <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">dismiss</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal&#39;</span>},
+      <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;commit&#39;</span>,
+      <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;submit&#39;</span>,
+      <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span><span class="ruby-operator">||</span><span class="ruby-string">&#39;Cancel&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_submit_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_submit_button</span><span
+            class="method-args">(label = nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_submit_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 140</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_submit_button</span> <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">options</span>, <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">bootstrap_button_options</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(
+                                         <span class="ruby-identifier">button_style</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:button_style</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;success&#39;</span>),
+                                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} #{options[:style] || &#39;form-button&#39;}&quot;</span>
+                                     )
+  <span class="ruby-identifier">tag</span> <span class="ruby-value">:input</span>,
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} dialog-submit-button&quot;</span>,
+      <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;commit&#39;</span>,
+      <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;submit&#39;</span>,
+      <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span><span class="ruby-operator">||</span><span class="ruby-string">&#39;Save&#39;</span>,
+      <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:method</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;post&#39;</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-injector_cancel_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">injector_cancel_button</span><span
+            class="method-args">(name, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="injector_cancel_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 131</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">injector_cancel_button</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">xlink</span> = <span class="ruby-identifier">link_to</span> <span class="ruby-string">&#39;&amp;nbsp;X&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span>,
+                  <span class="ruby-string">&#39;#&#39;</span>,
+                  <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;recipePowerCancelBtn&#39;</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+              <span class="ruby-identifier">xlink</span>,
+              <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;recipePowerCancelDiv&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-injector_dialog" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">injector_dialog</span><span
+            class="method-args">(which=:generic, hdr_text='', options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="injector_dialog-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 5</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">injector_dialog</span> <span class="ruby-identifier">which</span>=<span class="ruby-value">:generic</span>, <span class="ruby-identifier">hdr_text</span>=<span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">dismiss_label</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:dismiss_button</span>]
+    <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>
+      <span class="ruby-identifier">dismiss_label</span> = <span class="ruby-string">&#39;Okay&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-keyword">false</span>
+      <span class="ruby-identifier">dismiss_label</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">pic</span> =
+      <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+                  <span class="ruby-identifier">image_tag</span>(<span class="ruby-identifier">rp_url</span>(<span class="ruby-identifier">image_path</span> <span class="ruby-string">&#39;RP-logo-small-HC.png&#39;</span> ), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;small_logo&#39;</span>, <span class="ruby-value">:alt</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RecipePower&#39;</span>),
+                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;small_logo&#39;</span>
+  <span class="ruby-identifier">body_content</span> = <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">alert</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:noflash</span>] <span class="ruby-operator">?</span> <span class="ruby-string">&#39;&#39;</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>).<span class="ruby-identifier">html_safe</span><span class="ruby-operator">+</span><span class="ruby-identifier">flash_all</span>(<span class="ruby-keyword">false</span>))
+
+  <span class="ruby-identifier">content</span> = <span class="ruby-identifier">injector_cancel_button</span>(<span class="ruby-string">&#39;X&#39;</span>) <span class="ruby-operator">+</span>
+      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                  <span class="ruby-identifier">pic</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">hdr_text</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;injector-header-content&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;&lt;hr&gt;&#39;</span>.<span class="ruby-identifier">html_safe</span>,
+                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;injector-header&#39;</span>).<span class="ruby-identifier">html_safe</span>
+
+  <span class="ruby-identifier">content</span> <span class="ruby-operator">&lt;&lt;</span>
+      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                  <span class="ruby-identifier">alert</span>.<span class="ruby-identifier">html_safe</span><span class="ruby-operator">+</span><span class="ruby-identifier">body_content</span>.<span class="ruby-identifier">html_safe</span>,
+                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;injector-body&#39;</span>).<span class="ruby-identifier">html_safe</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">dismiss_label</span>
+    <span class="ruby-identifier">content</span> <span class="ruby-operator">&lt;&lt;</span>
+        <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                    <span class="ruby-identifier">dialog_cancel_button</span>(<span class="ruby-identifier">dismiss_label</span>),
+                    <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;injector-footer&#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+              <span class="ruby-identifier">content</span>.<span class="ruby-identifier">html_safe</span>,
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;dialog injector #{which} &quot;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-modal_body" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">modal_body</span><span
+            class="method-args">(options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="modal_body-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 87</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_body</span> <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">contents</span> = <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">contents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">flash_notifications_div</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:noflash</span>)
+  <span class="ruby-identifier">contents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">prompt</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;prompt&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">prompt</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:prompt</span>)
+  <span class="ruby-identifier">contents</span> <span class="ruby-operator">&lt;&lt;</span> (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:body_contents</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">capture</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>))
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] = <span class="ruby-node">&quot;modal-body #{options.delete :body_class}&quot;</span>
+  <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;col-md-12&#39;</span>)
+  <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;row&#39;</span>)
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">options</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-modal_dialog" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">modal_dialog</span><span
+            class="method-args">(which, ttl=nil, options={}, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="modal_dialog-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_dialog</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ttl</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">ttl</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">dialog_class</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:dialog_class</span>]
+  <span class="ruby-identifier">header</span> = <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">body</span> = <span class="ruby-identifier">modal_body</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:prompt</span>, <span class="ruby-value">:body_contents</span>, <span class="ruby-value">:noflash</span>, <span class="ruby-value">:body_class</span>)
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] =
+      [<span class="ruby-string">&#39;dialog&#39;</span>,
+       <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_s</span>,
+       <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">format_class</span>,
+       (<span class="ruby-string">&#39;hide&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:show</span>]),
+       (<span class="ruby-string">&#39;modal-pending fade&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:show</span>]),
+       <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>]
+      ].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; &#39;</span>)
+  <span class="ruby-comment"># The :requires option specifies JS modules that this dialog uses</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] = {<span class="ruby-value">:&#39;dialog-requires&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:requires</span>]} <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:requires</span>]
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice!</span> <span class="ruby-value">:show</span>, <span class="ruby-value">:noflash</span>, <span class="ruby-value">:body_contents</span>, <span class="ruby-value">:body_class</span>, <span class="ruby-value">:requires</span>, <span class="ruby-value">:dialog_class</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">ttl</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ttl</span>
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-comment"># Outer block: dialog</span>
+              <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-comment"># modal-dialog</span>
+                          <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">header</span><span class="ruby-operator">+</span><span class="ruby-identifier">body</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-content&#39;</span>),
+                          <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;modal-dialog #{dialog_class}&quot;</span>),
+              <span class="ruby-identifier">options</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-modal_footer" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">modal_footer</span><span
+            class="method-args">(options={}, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="modal_footer-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_footer</span>(<span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">ft</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">ft</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;modal-footer row #{options[:class]}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-modal_header" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">modal_header</span><span
+            class="method-args">(ttl)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="modal_header-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 79</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">?</span>
+      <span class="ruby-identifier">injector_cancel_button</span>(<span class="ruby-string">&#39;X&#39;</span>) <span class="ruby-operator">:</span>
+      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                  <span class="ruby-identifier">ttl</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">ttl</span>) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>,
+                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-header&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-simple_modal" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">simple_modal</span><span
+            class="method-args">(which, ttl, options={}, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="simple_modal-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 42</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">simple_modal</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] = <span class="ruby-identifier">dialog_cancel_button</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:close_label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Done&#39;</span>)
+  <span class="ruby-identifier">mf</span> = <span class="ruby-identifier">modal_footer</span> <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:body_contents</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] =
+      <span class="ruby-identifier">modal_body</span>(<span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:style</span>), <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">mf</span>
+  [<span class="ruby-value">:style</span>, <span class="ruby-value">:close_label</span>].<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">k</span> }
+  <span class="ruby-identifier">modal_dialog</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">options</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

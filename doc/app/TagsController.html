@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class TagsController - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="ApplicationController.html">ApplicationController</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-absorb">#absorb</a>
+    
+    <li ><a href="#method-i-associated">#associated</a>
+    
+    <li ><a href="#method-i-create">#create</a>
+    
+    <li ><a href="#method-i-destroy">#destroy</a>
+    
+    <li ><a href="#method-i-edit">#edit</a>
+    
+    <li ><a href="#method-i-editor">#editor</a>
+    
+    <li ><a href="#method-i-index">#index</a>
+    
+    <li ><a href="#method-i-match">#match</a>
+    
+    <li ><a href="#method-i-new">#new</a>
+    
+    <li ><a href="#method-i-show">#show</a>
+    
+    <li ><a href="#method-i-typify">#typify</a>
+    
+    <li ><a href="#method-i-update">#update</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-TagsController">
+  <h1 id="class-TagsController" class="class">
+    class TagsController
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-absorb" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">absorb</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /id/absorb Merge two tags together, returning a list of DOM elements to
+nuke as a result</p>
+          
+          
+
+          
+          <div class="method-source-code" id="absorb-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 150</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span>
+  <span class="ruby-identifier">absorber</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>].<span class="ruby-identifier">to_i</span>
+  <span class="ruby-identifier">victim</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:victim</span>].<span class="ruby-identifier">to_i</span>
+  <span class="ruby-identifier">survivor</span> = <span class="ruby-identifier">absorber</span>.<span class="ruby-identifier">absorb</span> <span class="ruby-identifier">victim</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">survivor</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">victimidstr</span> = ((<span class="ruby-identifier">survivor</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">victim</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">absorber</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">victim</span>).<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>
+    <span class="ruby-ivar">@tag</span> = <span class="ruby-identifier">survivor</span>
+    <span class="ruby-ivar">@jsondata</span> = {
+        <span class="ruby-identifier">deletions</span><span class="ruby-operator">:</span> [
+            <span class="ruby-node">&quot;tr#tag_#{victimidstr}&quot;</span>, <span class="ruby-node">&quot;tr#tagrow_#{victimidstr}HR&quot;</span>
+        ],
+        <span class="ruby-identifier">replacements</span><span class="ruby-operator">:</span> [
+           [ <span class="ruby-node">&quot;tr#tag_#{@tag.id.to_s}&quot;</span>, <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tags/show_table&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">item</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@tag</span> } } ]
+        ]
+    }
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-ivar">@jsondata</span> = { <span class="ruby-identifier">errors</span><span class="ruby-operator">:</span> <span class="ruby-identifier">survivor</span>.<span class="ruby-identifier">errors</span> }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> <span class="ruby-comment"># absorb.html.erb</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span>  {
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@jsondata</span>
+    }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">js</span> { <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;shared/get_content&#39;</span> }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-associated" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">associated</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="associated-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 131</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">associated</span>
+  <span class="ruby-identifier">update_and_decorate</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">name</span>
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-create" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>POST /tags POST /tags.xml Since we don&#39;t actually create tags using the
+form, this action is used by the tags lister to gather parameters for
+filtering the list. Thus, we collect the form data and redirect</p>
+          
+          
+
+          
+          <div class="method-source-code" id="create-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
+  <span class="ruby-comment"># We get the create action in two circumstances: </span>
+  <span class="ruby-comment">#  1) we actually are creating a new tag;</span>
+  <span class="ruby-comment">#  2) we get called from the index page with a tag filter</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:commit</span>] <span class="ruby-operator">=~</span> <span class="ruby-regexp">/Filter/</span>
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">controller</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;tags&quot;</span>, <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;index&quot;</span>, <span class="ruby-identifier">tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>])
+    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">save</span>
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">controller</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;tags&quot;</span>, 
+                          <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;index&quot;</span>, 
+                          <span class="ruby-identifier">tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>],
+                          <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Tag was successfully created.&#39;</span> }
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:created</span>, <span class="ruby-value">:location</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span> }
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;new&quot;</span> }
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">errors</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:unprocessable_entity</span> }
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-destroy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">destroy</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>DELETE /tags/1 DELETE /tags/1.xml</p>
+          
+          
+
+          
+          <div class="method-source-code" id="destroy-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 233</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
+  <span class="ruby-identifier">update_and_decorate</span>
+  <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">destroy</span>
+
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span>(<span class="ruby-identifier">tags_url</span>) }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;update&#39;</span> }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">head</span> <span class="ruby-value">:ok</span> }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-edit" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">edit</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags/1/edit</p>
+          
+          
+
+          
+          <div class="method-source-code" id="edit-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 111</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
+  <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-editor" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">editor</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags/editor?tabindex=index Return HTML for the editor for classifying
+tags</p>
+          
+          
+
+          
+          <div class="method-source-code" id="editor-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 139</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">editor</span>
+  <span class="ruby-comment"># return if need_login true, true</span>
+  <span class="ruby-ivar">@tabindex</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">?</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">session</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">||</span> <span class="ruby-value">0</span>)
+  <span class="ruby-comment"># The list of orphan tags gets all tags of this type which aren&#39;t linked to a table</span>
+  <span class="ruby-ivar">@taglist</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">current_user_id</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">index_to_type</span>(<span class="ruby-ivar">@tabindex</span>) )
+  <span class="ruby-identifier">session</span>[<span class="ruby-value">:tabindex</span>] = <span class="ruby-ivar">@tabindex</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;editor&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-index" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">index</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags GET /tags.xml</p>
+          
+          
+
+          
+          <div class="method-source-code" id="index-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-string">&quot;Tags&quot;</span>
+  <span class="ruby-comment"># seeker_result Tag, &#39;div.tag_list&#39; # , clear_tags: true</span>
+  <span class="ruby-comment"># -1 stands for any type</span>
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:tagtype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&quot;-1&quot;</span>
+  <span class="ruby-identifier">smartrender</span> 
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-match" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">match</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags/match This action is for remotely querying the tags that match a
+given string. It gets used in:</p>
+
+<pre>-- the tag editor, for filtering for unbound tags
+-- the recipe tagger, for applying tags to recipes
+-- recipe searching, for picking tags to search on</pre>
+
+<p>Expected returns are:</p>
+
+<pre>-- JSON, for the client to create dynatree lists of tags for the tag editor
+-- html, for the resulting list of tags</pre>
+
+<p>The match action provides a list of tags that match a given string.  Query
+parameters:</p>
+
+<pre>:tagtype - type of tag to look for (if any; otherwise, unconstrained)
+:tabindex - index of tabs in the tags editor; convertible to tag type
+         NB: tabindex may be omitted for other contexts; all types will be searched
+:unbound_only - if true, we&#39;re addressing a list of unbound tags, so 
+                 eliminate all tags that already have a referent
+:q, :term - string to match within a tag
+:user_id - id of user who is viewing the list
+:makeormatch - Boolean indicating that this tag should be created if 
+       it can&#39;t be found, modulo normalization</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="match-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">match</span>
+    <span class="ruby-identifier">matchstr</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:q</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:term</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&quot;&quot;</span>
+    <span class="ruby-identifier">matchopts</span> = {
+        <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:user_id</span>] <span class="ruby-operator">||</span> (<span class="ruby-identifier">current_user</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">||</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">guest_id</span>,
+        <span class="ruby-identifier">assert</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">params</span>[<span class="ruby-value">:makeormatch</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&quot;true&quot;</span>),
+        <span class="ruby-identifier">partition</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+        <span class="ruby-identifier">fold</span><span class="ruby-operator">:</span> <span class="ruby-operator">!</span><span class="ruby-identifier">params</span>[<span class="ruby-value">:verbose</span>]
+    }
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype</span>]
+      <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;,0&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:untypedOK</span>]
+      <span class="ruby-identifier">matchopts</span>[<span class="ruby-value">:tagtype</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype</span>].<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_i</span>)
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype_x</span>]
+      <span class="ruby-identifier">matchopts</span>[<span class="ruby-value">:tagtype_x</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagtype_x</span>].<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_i</span>)
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-ivar">@taglist</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">matchstr</span>, <span class="ruby-identifier">matchopts</span>)
+    <span class="ruby-comment"># When searching over more than one type, we can disambiguate by showing the type of the resulting tag</span>
+    <span class="ruby-identifier">showtype</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:showtype</span>] <span class="ruby-comment"># tagtype.nil? || (tagtype.is_a?(Array) &amp;&amp; (tagtype.size&gt;1))</span>
+    <span class="ruby-ivar">@taglist</span>.<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">t</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">empty?</span> } <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:unbound_only</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;true&#39;</span>
+    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> 
+          <span class="ruby-keyword">case</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:response_format</span>]
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;dynatree&#39;</span>
+              <span class="ruby-comment"># for a dynatree list: an array of hashes with title, isLazy, key and isFolder fields</span>
+              <span class="ruby-ivar">@taglist</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> { <span class="ruby-value">:title=</span><span class="ruby-operator">&gt;</span><span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, <span class="ruby-value">:isLazy=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">false</span>, <span class="ruby-value">:key=</span><span class="ruby-operator">&gt;</span><span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>, <span class="ruby-value">:isFolder=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">false</span> } }
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;strings&#39;</span>
+              <span class="ruby-comment"># Just a list of strings...</span>
+              <span class="ruby-ivar">@taglist</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">match</span><span class="ruby-operator">|</span> <span class="ruby-identifier">match</span>[<span class="ruby-string">&#39;name&#39;</span>] }
+          <span class="ruby-keyword">else</span> <span class="ruby-comment"># assuming &quot;tokenInput&quot; because that js won&#39;t send a parameter</span>
+              <span class="ruby-comment"># for tokenInput: an array of hashes, each with &quot;id&quot; and &quot;name&quot; values</span>
+              <span class="ruby-comment"># TODO: this disambiguation check is N**2</span>
+              <span class="ruby-ivar">@taglist</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">match</span><span class="ruby-operator">|</span>
+                <span class="ruby-identifier">disambiguate</span> = <span class="ruby-ivar">@taglist</span>.<span class="ruby-identifier">count</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">normalized_name</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">match</span>.<span class="ruby-identifier">normalized_name</span> } <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+                {
+                  <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">match</span>.<span class="ruby-identifier">id</span>,
+                  <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">match</span>.<span class="ruby-identifier">typedname</span>( <span class="ruby-identifier">disambiguate</span>, ([<span class="ruby-value">1</span>,<span class="ruby-value">3</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">current_user_or_guest_id</span>))
+              } }
+          <span class="ruby-keyword">end</span>
+      }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tags/taglist&#39;</span> }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@taglist</span> }
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags/new GET /tags/new.xml</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 105</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-show" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">show</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /tags/1 GET /tags/1.xml</p>
+          
+          
+
+          
+          <div class="method-source-code" id="show-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 118</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
+  <span class="ruby-comment"># return if need_login true, true</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">update_and_decorate</span>
+  <span class="ruby-keyword">rescue</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-identifier">text</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;There is no tag #{params[:id]}. Where did you get that idea?&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tag</span>
+    <span class="ruby-identifier">session</span>[<span class="ruby-value">:tabindex</span>] = <span class="ruby-ivar">@tabindex</span>
+    <span class="ruby-identifier">smartrender</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-typify" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">typify</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>GET /typify move the listed keys from one type to another</p>
+          
+          
+
+          
+          <div class="method-source-code" id="typify-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 179</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">typify</span>
+    <span class="ruby-comment"># Return array of ids of tags successfully converted</span>
+    <span class="ruby-comment"># We can take an array of tagids or a single tagid together with a new type spec</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;tagids&#39;</span>]
+        <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;Typify&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;tagids&#39;</span>].<span class="ruby-identifier">inspect</span>
+        <span class="ruby-identifier">idsChanged</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">convertTypesByIndex</span>(<span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;tagids&#39;</span>].<span class="ruby-identifier">map</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">p</span><span class="ruby-operator">|</span> <span class="ruby-identifier">p</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&#39;orphantag_&#39;</span>).<span class="ruby-identifier">to_i</span>}, <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;fromtabindex&#39;</span>].<span class="ruby-identifier">to_i</span>, <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;totabindex&#39;</span>].<span class="ruby-identifier">to_i</span>, <span class="ruby-keyword">true</span>)
+        <span class="ruby-comment"># Go back to the client with a list of ids that were changed</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Success on &#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">idsChanged</span>.<span class="ruby-identifier">inspect</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;tagid&#39;</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;typenum&#39;</span>]
+        <span class="ruby-comment"># Change the type of a single tag</span>
+        <span class="ruby-comment"># We ask and allow for the possibility that the tag will be absorbed into another </span>
+        <span class="ruby-comment"># tag of the target type</span>
+        <span class="ruby-identifier">tag</span> = (<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;tagid&#39;</span>].<span class="ruby-identifier">to_i</span>).<span class="ruby-identifier">project</span> <span class="ruby-identifier">params</span>[<span class="ruby-string">&#39;typenum&#39;</span>]
+        <span class="ruby-identifier">idsChanged</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> [<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>]
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">idsChanged</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:json=</span><span class="ruby-operator">&gt;</span>{ <span class="ruby-identifier">deletions</span><span class="ruby-operator">:</span> <span class="ruby-identifier">idsChanged</span>.<span class="ruby-identifier">map</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span> [<span class="ruby-node">&quot;#tagrow_#{id.to_s}&quot;</span>, <span class="ruby-node">&quot;#tagrow_#{id.to_s}HR&quot;</span>, <span class="ruby-node">&quot;.absorb_#{id.to_s}&quot;</span>] }.<span class="ruby-identifier">flatten</span> ,
+                      <span class="ruby-identifier">popup</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">tag</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;&#39;#{tag.name}&#39; now typed as &#39;#{tag.typename}&#39;&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;Tags changed successfully&#39;</span>)
+      }
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> { }
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-update" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">update</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>PUT /tags/1 PUT /tags/1.xml</p>
+          
+          
+
+          
+          <div class="method-source-code" id="update-source">
+            <pre><span class="ruby-comment"># File app/controllers/tags_controller.rb, line 205</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
+  <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>][<span class="ruby-value">:tagtype</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>][<span class="ruby-value">:tagtype</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>][<span class="ruby-value">:tagtype</span>].<span class="ruby-identifier">nil?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">success</span> = <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:tag</span>])) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:key</span>]
+      <span class="ruby-ivar">@tag</span> = <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">disappear</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;edit&#39;</span> }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> <span class="ruby-value">:xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">errors</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:unprocessable_entity</span> }
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span>(<span class="ruby-ivar">@tag</span>, <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-node">&quot;Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.&quot;</span>) }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
+        <span class="ruby-identifier">render</span> <span class="ruby-value">:json</span> =<span class="ruby-operator">&gt;</span> {
+                   <span class="ruby-identifier">popup</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Tag successfully updated&#39;</span>,
+                   <span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+                   <span class="ruby-identifier">replacements</span><span class="ruby-operator">:</span> [
+                       [ <span class="ruby-node">&quot;tr#tag_#{@tag.id.to_s}&quot;</span>, <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tags/show_table&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">item</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@tag</span> } } ]
+                   ]
+               }
+      }
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">head</span> <span class="ruby-value">:ok</span> }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

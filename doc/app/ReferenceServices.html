@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ReferenceServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-assert_image_for_referent">::assert_image_for_referent</a>
+    
+    <li ><a href="#method-c-convert_references">::convert_references</a>
+    
+    <li ><a href="#method-c-convert_to_sti">::convert_to_sti</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-time_lookup">::time_lookup</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ReferenceServices">
+  <h1 id="class-ReferenceServices" class="class">
+    class ReferenceServices
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-reference" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">reference</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-assert_image_for_referent" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert_image_for_referent</span><span
+            class="method-args">(uri, tag_or_referent)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Assert an image, linking back to a referent</p>
+          
+          
+
+          
+          <div class="method-source-code" id="assert_image_for_referent-source">
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 13</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert_image_for_referent</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">tag_or_referent</span>)
+    <span class="ruby-identifier">refs</span> = <span class="ruby-constant">Reference</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageReference</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">uri</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
+        <span class="ruby-identifier">rft</span> =
+            <span class="ruby-keyword">case</span> <span class="ruby-identifier">tag_or_referent</span>
+                <span class="ruby-keyword">when</span> <span class="ruby-constant">Tag</span>
+                    <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">tag_or_referent</span>
+                <span class="ruby-keyword">else</span>
+                    <span class="ruby-identifier">tag_or_referent</span>
+            <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">rft</span>
+            <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+                <span class="ruby-comment"># ref.assert tag_or_referent</span>
+                <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">referents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">rft</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">rft</span>.<span class="ruby-identifier">id</span>)
+                <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">save</span>
+            }
+        <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-convert_references" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">convert_references</span><span
+            class="method-args">(klass=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="convert_references-source">
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 34</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_references</span> <span class="ruby-identifier">klass</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-constant">DefinitionReference</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+         <span class="ruby-identifier">pr</span> = <span class="ruby-constant">DefinitionPageRef</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">url</span>
+         <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
+       }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-convert_to_sti" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">convert_to_sti</span><span
+            class="method-args">(n=-1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Convert ALL references to STI specification</p>
+          
+          
+
+          
+          <div class="method-source-code" id="convert_to_sti-source">
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 42</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_to_sti</span> <span class="ruby-identifier">n</span>=<span class="ruby-value">-1</span>
+  <span class="ruby-identifier">set</span> = <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Reference&quot;</span>)[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-identifier">n</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">type</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typesym</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;Reference&quot;</span>
+    <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">save</span> <span class="ruby-comment"># ref.ping</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(reference)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">reference</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">reference</span> = <span class="ruby-identifier">reference</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-time_lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">time_lookup</span><span
+            class="method-args">(ix=1)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Run benchmarks on <a href="Reference.html">Reference</a> and <a
+href="PageRef.html">PageRef</a> activities</p>
+          
+          
+
+          
+          <div class="method-source-code" id="time_lookup-source">
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 50</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">time_lookup</span> <span class="ruby-identifier">ix</span>=<span class="ruby-value">1</span>
+  <span class="ruby-identifier">urls</span> = [
+      <span class="ruby-string">&#39;http://www.bento.com/rf_ok.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_temp.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_yaki.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_unagi.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_nabe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/fexp-labels.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/trt-shabu.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/trt-tonkatsu.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2009/05/20/dining/203frex.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/tr-mich.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cavolettodibruxelles.it/2008/07/la-torta-di-ciliege&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2013/jun/13/how-to-make-perfect-cucumber-sandwiches&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/1015851/spanish-tortilla-with-tomato-pepper-salad.html&#39;</span>,
+      <span class="ruby-string">&#39;http://zoebakes.com/2013/05/01/cherry-chocolate-cake/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/07/sardine-pate/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bbcgoodfood.com/recipes/420616/rhubarb-crumble&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/mario-batali/pollo-alla-romana-roman-style-chicken-recipe.html?soc=sharingfb&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/mario-batali/pollo-alla-romana-roman-style-chicken-recipe/index.html?soc=sharingfb&#39;</span>,
+      <span class="ruby-string">&#39;http://www.haydenflourmills.com/blog/2013/9/26/tangy-miso-farro-salad&#39;</span>,
+      <span class="ruby-string">&#39;http://haydenflourmills.com/blog/2013/9/26/tangy-miso-farro-salad&#39;</span>,
+      <span class="ruby-string">&#39;http://spoonful.com/recipes/persimmon-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/whole-wild-salmon-fillet-with-mustard-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/flaugnarde-with-pears&#39;</span>,
+      <span class="ruby-string">&#39;http://www.seriouseats.com/recipes/2011/11/mock-apple-pie-ritz-cracker-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/10/persian-cheese-panir/&#39;</span>,
+      <span class="ruby-string">&#39;http://oggi-icandothat.blogspot.com/2008/02/robert-rodriguezs-puerco-pibil.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/wordofmouth/2011/oct/20/how-to-cook-perfect-tarte-tatin&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/wordofmouth/2011/oct/20/how-to-cook-perfect-tarte-tatin&#39;</span>,
+      <span class="ruby-string">&#39;http://ricette.giallozafferano.it/Involtini-di-tacchino-ripieni-con-funghi-Champignon.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Roasted+pumpkin+wedges+with+chestnut%2C+cinnamon+%26+fresh+bay+leaves+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Roasted+pumpkin+wedges+with+chestnut%2C+cinnamon+%26+fresh+bay+leaves+&#39;</span>,
+      <span class="ruby-string">&#39;http://ricette.giallozafferano.it/Mostarda-di-Cremona.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/uk/2006/nov/19/christmas.foodanddrink1?recipetitle=Turkey+breast+joint+with+sloe+gin+cranberry+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/uk/2006/nov/19/christmas.foodanddrink1?recipetitle=Turkey+breast+joint+with+sloe+gin+cranberry+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/apr/27/recipes.foodanddrink4?recipetitle=Ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/apr/27/recipes.foodanddrink4?recipetitle=Ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/blog/2011/10/apple-pie-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/2011/10/apple-pie-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10680-chicken-chile-verde&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/11/06/black-walnut-ice-cream/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/29311-chocolate-lava-cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/14327-mocha-pudding-cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10821-upside-down-banana-coffee-tart&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/29553-bacon-apple-and-blue-cheese-omelet&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/10/31/pickled-cauliflower/&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/13098-diana-kennedy-s-carnitas&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/13098_diana_kennedys_carnitas&#39;</span>,
+      <span class="ruby-string">&#39;http://huntergathercook.typepad.com/huntergathering_wild_fres/2011/10/espelette-chillis-perfect-peppers-and-basque-soup.html&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/shaved-fennel-red-onion-and--celery-salad-with-salami&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec1-20111110,0,5063589.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec2-20111110,0,5718950.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec4-20111110,0,7029672.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec3-20111110,0,6374311.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/flaky-blood-orange-tart&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/australia-food-blog/2013/dec/20/kylie-kwongs-crispy-pork-belly-recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/australia-food-blog/2013/dec/22/australian-christmas-feasts-guy-grossi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/05/tart-au-citron-french-lemon-tart/&#39;</span>,
+      <span class="ruby-string">&#39;http://frenchfood.about.com/od/desserts/r/lemontart.htm&#39;</span>,
+      <span class="ruby-string">&#39;http://ohmyveggies.com/recipe-sriracha-snap-peas-with-red-pepper/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/cheesy-farro-and-tomato-risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.taste.com.au/recipes/26063/rich+almond+ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/unusual-garden-veggies/cicerchia-bean-salad/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/9949-carrot-gnocchi-with-butter-and-sage-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/9949_carrot_gnocchi_with_butter_and_sage_sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/07/swiss-chard-and-tahini-beoreg/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10883-croissant-and-armagnac-bread-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/aug/19/courgette-recipes-yotam-ottolenghi?INTCMP=SRCH&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/aug/19/courgette-recipes-yotam-ottolenghi?INTCMP=SRCH&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/oct/23/aubergine-with-herbs-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/oct/23/aubergine-with-herbs-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/moroccan-pancakes/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/ricotta-lebanese-style-areesheh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/farmers-cheese-homemade-jeben-baladi/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/01/14/acorn-pasta-and-the-mechanics-of-eating-acorns/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/acorns-nuts-and-other-wild-starches/acorn-soup/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/acorn-soup/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/10/11/acorn-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/unusual-garden-veggies/ancient-roman-fava-bean-dip/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/ancient-roman-fava-bean-dip/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/03/25/cardoon-gratin/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/unusual-garden-veggies/cicerchia-bean-agnolotti/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-agnolotti/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/mushroom-recipes/wild-mushroom-pasta-with-a-gin-cream-sauce/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/wild-mushroom-pasta-with-a-gin-cream-sauce/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/pumpkin-or-squash-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/regular-garden-veggies/pumpkin-or-squash-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/calabrian-hot-pepper-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/regular-garden-veggies/calabrian-hot-pepper-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/strettine-an-italian-nettle-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2013/05/23/ramp-pasta-morels-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/ramp-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2012/12/12/snowball-cookies-recipe-walnut/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/black-walnut-snowball-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/blog/2013/08/kale-salad-with-pecorino-and-walnuts/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/the-ultimate-southern-fried-chicken&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.countrytrading.co.nz/2014/01/01/how-to-make-nitrate-free-bacon-in-3-days/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/venison-recipes/venison-stews/spring-lamb-sugo/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/duck-and-goose-recipes-the-nasty-bits/duck-liver-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/01/08/making-wild-game-tortelli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/greens-and-herbs/borage-and-ricotta-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/borage-and-ricotta-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/nettle-ravioli-northern-italian-style/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/11/19/pelmeni-and-the-eating-of-bears/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/mushroom-recipes/honey-mushroom-pierogi/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/honey-mushroom-pierogi/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+with+pistachio+and+apricot+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+with+pistachio+and+apricot+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+breast+steaks+with+prune+gravy&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+breast+steaks+with+prune+gravy&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/foodanddrink.recipes?recipetitle=Roast+turkey%2C+apricot+and+ginger+stuffing+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/foodanddrink.recipes?recipetitle=Roast+turkey%2C+apricot+and+ginger+stuffing+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+fricassee+with+porcini&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+fricassee+with+porcini&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+brussels+sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+brussels+sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/uk/2005/dec/24/christmas.foodanddrink?recipetitle=Devilled+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/uk/2005/dec/24/christmas.foodanddrink?recipetitle=Devilled+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/dec/09/foodanddrink.recipes1?recipetitle=Traditional+roast+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/dec/09/foodanddrink.recipes1?recipetitle=Traditional+roast+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/may/13/foodanddrink.recipes1?recipetitle=Turkey+meatloaf&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/may/13/foodanddrink.recipes1?recipetitle=Turkey+meatloaf&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/18/christmas-starters-stuffing-recipes?recipetitle=Pear+and+celeriac+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/18/christmas-starters-stuffing-recipes?recipetitle=Pear+and+celeriac+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/dec/27/nigel-slater-chestnut-mincemeat-recipes?recipetitle=PARSNIP%2C+CHESTNUT+AND+MUSHROOM+CASSEROLE&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/dec/27/nigel-slater-chestnut-mincemeat-recipes?recipetitle=PARSNIP%2C+CHESTNUT+AND+MUSHROOM+CASSEROLE&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/jun/10/foodanddrink.recipes3?recipetitle=Thai+chicken+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/jun/10/foodanddrink.recipes3?recipetitle=Thai+chicken+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/feb/15/foodanddrink.recipes?recipetitle=Grilled+pork+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/feb/15/foodanddrink.recipes?recipetitle=Grilled+pork+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/feb/22/foodanddrink.shopping?recipetitle=Roast+pork+belly+with+five-spice+rub&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/feb/22/foodanddrink.shopping?recipetitle=Roast+pork+belly+with+five-spice+rub&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/may/16/foodanddrink.recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/may/16/foodanddrink.recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/wordofmouth/2008/nov/25/recipe-fish?recipetitle=Smoked+haddock+and+leek+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/wordofmouth/2008/nov/25/recipe-fish?recipetitle=Smoked+haddock+and+leek+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/13580-braised-brussels-sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/soups-stews-and-broths/sugo-danatra-wild-duck-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/soups-stews-and-broths/ducky-tomato-sauce-for-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cookinglight.com/food/recipe-finder/myplate-inspired-beef-recipes-00412000081047/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/brussels-sprouts-kimchi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cookinglight.com/food/recipe-finder/myplate-inspired-quick-easy-00412000081022/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/milk-and-bread-pudding-ashtaliyeh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.myrecipes.com/recipe/chicken-breasts-with-tomatoes-olives-10000001918514/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/spicy-pork-and-mustard-green-soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.dailymail.co.uk/home/you/article-2086191/Recipe-Whole-lemon-almond-cake.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/ina-garten/perfect-roast-chicken-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.buzzfeed.com/christinebyrne/roast-chicken-rules&#39;</span>,
+      <span class="ruby-string">&#39;http://vegetarian.about.com/od/soupssalads/r/MisoSoup.htm&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/apr/26/nigel-slater-salads?recipetitle=Sheep%27s+cheese%2C+sprouting+leaves+and+orange+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/apr/26/nigel-slater-salads?recipetitle=Sheep%27s+cheese%2C+sprouting+leaves+and+orange+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/may/10/spring-onions-recipes?recipetitle=Crystal+noodle+salad+with+pickled+ginger+and+lime&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/may/10/spring-onions-recipes?recipetitle=Crystal+noodle+salad+with+pickled+ginger+and+lime&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/18/hot-sour-mushroom-soup-recipe?recipetitle=Yotam+Ottolenghi%27s+hot+and+sour+mushroom+soup+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/18/hot-sour-mushroom-soup-recipe?recipetitle=Yotam+Ottolenghi%27s+hot+and+sour+mushroom+soup+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/15/chicken-lemongrass-broth-recipe?recipetitle=Hot+and+sour+chicken+and+lemongrass+broth&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/15/chicken-lemongrass-broth-recipe?recipetitle=Hot+and+sour+chicken+and+lemongrass+broth&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/mar/13/curry-laksa-recipe-yotam-ottolenghi?recipetitle=Yotam+Ottolenghi%27s+curry+laksa+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/mar/13/curry-laksa-recipe-yotam-ottolenghi?recipetitle=Yotam+Ottolenghi%27s+curry+laksa+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/jan/10/nigel-slater-greens-recipes?recipetitle=CAULIFLOWER+GRATIN+WITH+OAT+AND+SUNFLOWER+SEED+CRUST&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/jan/10/nigel-slater-greens-recipes?recipetitle=CAULIFLOWER+GRATIN+WITH+OAT+AND+SUNFLOWER+SEED+CRUST&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/dec/04/foodanddrink.shopping3?recipetitle=Brussels+sprouts+with+ginger+and+tomato&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/dec/04/foodanddrink.shopping3?recipetitle=Brussels+sprouts+with+ginger+and+tomato&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2005/dec/10/foodanddrink.recipes?recipetitle=Mashed+Brussels+sprouts+with+parmesan+and+cream&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2005/dec/10/foodanddrink.recipes?recipetitle=Mashed+Brussels+sprouts+with+parmesan+and+cream&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/sep/23/foodanddrink.features5?recipetitle=Brussels+sprouts+with+pancetta+and+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/sep/23/foodanddrink.features5?recipetitle=Brussels+sprouts+with+pancetta+and+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/theguardian/2007/nov/24/weekend7.weekend3?recipetitle=Brussels+sprouts+and+tofu&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/theguardian/2007/nov/24/weekend7.weekend3?recipetitle=Brussels+sprouts+and+tofu&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/bread-and-prune-gnocchi-with-plum-brandy-and-pork-&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Pan-fried+brussels+sprouts+and+shallots+with+pomegranate+%26+purple+basil+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Pan-fried+brussels+sprouts+and+shallots+with+pomegranate+%26+purple+basil+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/nov/08/christmas-recipe-top-chefs-tips?recipetitle=Jason+Atherton%3A+Brussels+sprout+and+chestnut+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/nov/08/christmas-recipe-top-chefs-tips?recipetitle=Jason+Atherton%3A+Brussels+sprout+and+chestnut+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/04/christmas-standby-recipes-angela-hartnett?recipetitle=Brussels+sprout+and+potato+bubble+and+squeak&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/04/christmas-standby-recipes-angela-hartnett?recipetitle=Brussels+sprout+and+potato+bubble+and+squeak&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Creamed+brussels+sprouts+with+bacon&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Creamed+brussels+sprouts+with+bacon&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Roasted+brussels+sprouts+with+shallots+and+caraway+seeds&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Roasted+brussels+sprouts+with+shallots+and+caraway+seeds&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/mar/29/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Poached+baby+vegetables+with+caper+mayonnaise&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/mar/29/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Poached+baby+vegetables+with+caper+mayonnaise&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/jun/28/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Gado+gado&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/jun/28/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Gado+gado&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/03/weekly-recipe-soup?recipetitle=White+bean+and+winter+greens+soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/03/weekly-recipe-soup?recipetitle=White+bean+and+winter+greens+soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/brown-butter-polenta-cake-with-maple-caramel&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/stuffed-kale-with-bulgur-tabbouleh-and-lime-yogurt-dip&#39;</span>,
+      <span class="ruby-string">&#39;http://www.epicurious.com/recipes/food/views/Lentil-Salad-with-Balsamic-Vinaigrette-101018&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/feb/19/recipes-from-nopi-yotam-ottolenghi?recipetitle=Raw+Brussels+sprouts+with+oyster+mushrooms+and+quail+eggs&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/feb/19/recipes-from-nopi-yotam-ottolenghi?recipetitle=Raw+Brussels+sprouts+with+oyster+mushrooms+and+quail+eggs&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/nov/11/spiced-lamb-shanks-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/nov/11/spiced-lamb-shanks-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/11552/puntarella-with-green-anchoiade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/11552/Puntarella-With-Green-Ancho239ade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.thechefproject.com//Assets/recipes/SriLanka.pdf&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/banoffee-pie/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/swiss-chard-olive-oil/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/artichoke-smash/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/roasted-vegetables/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/balsamic-glazed-duck/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/salad-greens-butternut-squash/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/devils-on-horseback/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/sweet-potato-meringue-pie/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/cauliflower-pears/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/collard-greens/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/cornbread-andouille-stuffing/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/slow-cooked-roast-turkey/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/oyster-chowder/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2011/11/16/dining/cauliflower-with-curry-butter-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://readynutrition.com/resources/survival-food-series-3-ways-to-naturally-make-yeast_02032011/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.sfgate.com/cgi-bin/article.cgi?f=/c/a/2011/11/20/FDM41M0ORE.DTL&amp;ao=2&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/mafaldine-with-rabbit-ragu&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/salmon-with-vodka--sauce-and-caviar&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/malloreddus-with-mixed-vegetables&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/cheese-fondue-with-grappa--and-walnut-bread&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/sea-bream-with-clams&#39;</span>,
+      <span class="ruby-string">&#39;http://www.mariquita.com/recipes/agretti.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.localforage.com/local_forage/2006/10/on_sunday_i_got.html&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.junbelen.com/2010/06/25/how-to-make-the-best-brioche-bread-pudding-tartine-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Brussels+sprout+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Brussels+sprout+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/tartine-bakerys-panettone&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/sweet-roll-kaak-alleeta/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/kibbeh-with-arnabiyeh-sauce-kibbeh-arnabiyeh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/zaatar-flatbread-with-jreesh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/date-sandwich-cake/&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/roman-style-salt-cod-in-a-seed-and-nut-crust--&#39;</span>,
+      <span class="ruby-string">&#39;http://www.streetgourmetla.com/2011/11/cabrito-al-pastor-at-gran-san-carlos.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/kibbeh-mortar-jurn/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/nov/25/prawn-okra-gumbo-potatocake-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/nov/25/prawn-okra-gumbo-potatocake-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/dec/02/christmas-party-food-yotam-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/dec/02/christmas-party-food-yotam-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/sweet-torte-of-cannellini-beans-ricotta-and-cocoa-powder&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/creamy-sweet-polenta--with-cold-milk&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/rice-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/beets-2011-12/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/dried-fruit-salad-khoshaf-2/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/sunchokes-2011-12/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/brussels-sprouts-2011-11/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/empire-apples-2011-11/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/fennel-2011-10/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/albacore-tuna-2011-10/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/dec/16/roasted-squash-stuffed-quince-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/dec/16/roasted-squash-stuffed-quince-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/pirotecnica_2&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/11/23/wild-turkey-risotto/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.britishlarder.co.uk/festive-christmas-pudding/#axzz1h0SM1ry4&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/iraqi-taffy-mann-al-sama/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/bulgur-and-cumin-pate-kammounieh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/eggplant-dip-mtabbal/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/01/sichuan-stir-fry-puffballs/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/04/braised-duck-legs-with-leeks/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/14/roast-snipe-and-slow-days/&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/panettone&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/iraqi-cuisine-al-tabekh-al-3iraki-a-giveaway/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/11/areesheh-turnovers/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/11/areesheh-cheese/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cooks.com/recipe/4m3l00w3/very-moist-chocolate-cake.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.hungrycravings.com/2010/01/bergamot-orange-dreams.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2009/05/20/dining/202frex.html&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.umamimart.com/2011/12/japanified-arancini/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2006/12/moroccan-preser-1/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/02/04/preserving-lemons/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2008/11/rosy-poached-quince/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2010/11/10/dining/10chefrex1.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipes/2011/05/rainbow-cookies&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/grilled-lamb-shoulder-chops-with-manischewitz-glaze&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/oysters-rocafella&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/chicken-with-candied-cashews&#39;</span>,
+      <span class="ruby-string">&#39;http://chocolateandzucchini.com/recipes/salads/oyster-mushroom-salad-with-apple-and-bergamot-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://chocolateandzucchini.com/archives/2005/03/oyster_mushroom_salad_with_apple_and_bergamot.php&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/roast-pork-loin-with-armagnac-prune-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bbc.co.uk/food/recipes/panfriedporkfilletwi_88500&#39;</span>,
+      <span class="ruby-string">&#39;http://seidhr.blogspot.com/2009/01/bergamot-marmalade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2010/03/bergamot-marmalade-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.thegardenofeating.org/2008/03/meyer-lemon-and-bergamot-orange-citrus.html&#39;</span>,
+      <span class="ruby-string">&#39;http://gardenofeatingblog.blogspot.com/2008/03/meyer-lemon-and-bergamot-orange-citrus.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.hungrycravings.com/2010/01/single-bergamot-orange.html&#39;</span>,
+      <span class="ruby-string">&#39;http://sourplum.wordpress.com/2011/01/08/bergamot-sablee-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2007/07/planet-of-the-c-1/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/06/socca-enfin/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/10/crepes-dentelles/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2010/09/plum-and-rhubarb-crisp/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Baccala-Salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Pasta-Con-Le-Sarde-Sardines&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Whole-Roasted-Branzino-with-Fennel-and-Onions&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Lobster-Fra-Diavolo-Lobster-Spicy-Tomato-Sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Feast-of-Seven-Fishes-Shrimp-Scampi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Salt-Cod-Cake-on-Grilled-Toast&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.umamimart.com/2011/12/happy-hour-tom-jerry-the-original-winter-cocktail/&#39;</span>,
+      <span class="ruby-string">&#39;http://umamimart.com/2011/12/happy-hour-tom-jerry-the-original-winter-cocktail/&#39;</span>
+  ]
+  <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">index_name</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:references</span>
+  <span class="ruby-identifier">time</span> = <span class="ruby-constant">Benchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">ix</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Reference via URL&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;RecipeReference&quot;</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">2</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Reference via affiliate_id&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_affil_and_type&quot;</span>
+        <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;RecipeReference&quot;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:affiliate_id</span>).<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">affiliate_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">id</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;RecipeReference&quot;</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">3</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Reference via ID&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_id&quot;</span>
+        <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">all</span>[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-value">1000</span>].<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">id</span>
+        }
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">index_status</span> = <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>.<span class="ruby-identifier">connection</span>.<span class="ruby-identifier">index_name_exists?</span>( <span class="ruby-identifier">index_table</span>, <span class="ruby-identifier">index_name</span>, <span class="ruby-keyword">false</span>) <span class="ruby-operator">?</span> <span class="ruby-string">&quot;indexed&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;unindexed&quot;</span>
+  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;db_timings&quot;</span>, <span class="ruby-string">&#39;a&#39;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">file</span>.<span class="ruby-identifier">write</span>(<span class="ruby-identifier">label</span><span class="ruby-operator">+</span><span class="ruby-node">&quot; (#{Time.new} #{index_status}): &quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">time</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;\n&quot;</span>)
+  }
+  <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

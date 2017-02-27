@@ -1,0 +1,893 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ListServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-accept_if">::accept_if</a>
+    
+    <li ><a href="#method-c-associate">::associate</a>
+    
+    <li ><a href="#method-c-associated_lists">::associated_lists</a>
+    
+    <li ><a href="#method-c-associated_lists_with_status">::associated_lists_with_status</a>
+    
+    <li ><a href="#method-c-availability_query">::availability_query</a>
+    
+    <li ><a href="#method-c-friend_lists_on_tag">::friend_lists_on_tag</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-study_users">::study_users</a>
+    
+    <li ><a href="#method-c-visible_lists">::visible_lists</a>
+    
+    <li ><a href="#method-i-exclude">#exclude</a>
+    
+    <li ><a href="#method-i-exclude_by">#exclude_by</a>
+    
+    <li ><a href="#method-i-include">#include</a>
+    
+    <li ><a href="#method-i-include-3F">#include?</a>
+    
+    <li ><a href="#method-i-include_by">#include_by</a>
+    
+    <li ><a href="#method-i-pulled_tag_ids">#pulled_tag_ids</a>
+    
+    <li ><a href="#method-i-pulled_tags">#pulled_tags</a>
+    
+    <li ><a href="#method-i-tagging_scope">#tagging_scope</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ListServices">
+  <h1 id="class-ListServices" class="class">
+    class ListServices
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-list" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">list</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-accept_if" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">accept_if</span><span
+            class="method-args">(list, status)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="accept_if-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 13</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">accept_if</span> <span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span>
+  [<span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-associate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">associate</span><span
+            class="method-args">(entity_or_decorator, ntags, uid)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="List.html">List</a> tags are handled specially, due to ownership
+of lists</p>
+          
+          
+
+          
+          <div class="method-source-code" id="associate-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 119</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">associate</span> <span class="ruby-identifier">entity_or_decorator</span>, <span class="ruby-identifier">ntags</span>, <span class="ruby-identifier">uid</span>
+  <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">entity_or_decorator</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">decorate</span>
+  <span class="ruby-identifier">otags</span> = <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">associated_lists</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">uid</span>).<span class="ruby-identifier">map</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:name_tag</span>
+  (<span class="ruby-identifier">ntags</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">otags</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list_tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">assert_tagging</span> <span class="ruby-identifier">list_tag</span>, <span class="ruby-identifier">uid</span> }
+  (<span class="ruby-identifier">otags</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">ntags</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">list_tag</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">owned_list</span> = <span class="ruby-identifier">list_tag</span>.<span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>).<span class="ruby-identifier">first</span>
+      <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owned_list</span>).<span class="ruby-identifier">exclude</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">uid</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">refute_tagging</span> <span class="ruby-identifier">list_tag</span>, <span class="ruby-identifier">uid</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">ntags</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list_tag</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">list_tag</span>.<span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">list</span>.<span class="ruby-identifier">store</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+    }
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-associated_lists" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">associated_lists</span><span
+            class="method-args">(entity_or_decorator, user_or_user_id=nil) { |*arr| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Compile the set of lists, leaving the status intact but optionally
+uniquifying the lists</p>
+          
+          
+
+          
+          <div class="method-source-code" id="associated_lists-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">associated_lists</span> <span class="ruby-identifier">entity_or_decorator</span>, <span class="ruby-identifier">user_or_user_id</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">lws</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">associated_lists_with_status</span>(<span class="ruby-identifier">entity_or_decorator</span>, <span class="ruby-identifier">user_or_user_id</span>)
+  <span class="ruby-comment"># Execute the optional block on each, returning the lists only</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+    <span class="ruby-identifier">lws</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">arr</span><span class="ruby-operator">|</span> <span class="ruby-keyword">yield</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">arr</span>); <span class="ruby-identifier">arr</span>.<span class="ruby-identifier">first</span> }.<span class="ruby-identifier">uniq</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">lws</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:first</span>).<span class="ruby-identifier">uniq</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-associated_lists_with_status" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">associated_lists_with_status</span><span
+            class="method-args">(entity_or_decorator, user_or_user_id=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the lists on which the entity appears, as visible to the user</p>
+          
+          
+
+          
+          <div class="method-source-code" id="associated_lists_with_status-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">associated_lists_with_status</span> <span class="ruby-identifier">entity_or_decorator</span>, <span class="ruby-identifier">user_or_user_id</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">accept_if</span> <span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span>
+    [<span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">user</span>, <span class="ruby-identifier">user_id</span> =
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">user_or_user_id</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">User</span>
+          [<span class="ruby-identifier">user_or_user_id</span>, <span class="ruby-identifier">user_or_user_id</span>.<span class="ruby-identifier">id</span>]
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Fixnum</span>
+          [<span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">user_or_user_id</span>), <span class="ruby-identifier">user_or_user_id</span>]
+        <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>
+          [<span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">tagging_user_id</span>), <span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">tagging_user_id</span>]
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">entity_or_decorator</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">entity_or_decorator</span>.<span class="ruby-identifier">decorate</span>
+  <span class="ruby-identifier">ts</span> = <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-comment"># The lists that the given object appear on FOR THIS USER are those that</span>
+  <span class="ruby-comment"># are tagged either by the user or by the list owner</span>
+
+  <span class="ruby-comment"># The tags the user has applied map back to a list.</span>
+  <span class="ruby-comment"># If the user owns the list (possibly by creating it from the tag), it gets the status :owned</span>
+  <span class="ruby-comment"># If it already exists, it gets the status :contributed</span>
+  <span class="ruby-identifier">user_tags</span> = <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">filtered_tags</span>(<span class="ruby-value">:user</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">user</span>, <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:List</span>) <span class="ruby-comment"># ts.tags provides all the list taggings BY THIS USER</span>
+  (<span class="ruby-identifier">user_tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">user_tag</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">list_scope</span> = <span class="ruby-identifier">user_tag</span>.<span class="ruby-identifier">dependent_lists</span>
+    <span class="ruby-identifier">accept_if</span>(<span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">owner</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>).<span class="ruby-identifier">first</span>, <span class="ruby-value">:owned</span>) <span class="ruby-operator">||</span>
+        <span class="ruby-identifier">accept_if</span>(<span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">availability_query</span>(<span class="ruby-identifier">user</span>)).<span class="ruby-identifier">first</span>, <span class="ruby-value">:contributed</span>) <span class="ruby-operator">||</span>
+        <span class="ruby-comment"># List tag but no list! Assert the list as owned by the user UNLESS there&#39;s already an invisible list by that name</span>
+        (<span class="ruby-identifier">accept_if</span>(<span class="ruby-constant">List</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">name_tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user_tag</span>, <span class="ruby-identifier">owner</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>), <span class="ruby-value">:owned</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">exists?</span>)
+  } <span class="ruby-operator">+</span>
+  <span class="ruby-comment"># The item may also be included in the list by</span>
+  <span class="ruby-comment"># -- its owner (if they allow it to be seen) =&gt; :friends</span>
+  <span class="ruby-comment"># -- or publicly =&gt; :public</span>
+  (<span class="ruby-identifier">ts</span>.<span class="ruby-identifier">tags</span>(<span class="ruby-value">:List</span>) <span class="ruby-operator">-</span> <span class="ruby-identifier">user_tags</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other_tag</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">accept_if</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">friend_lists_on_tag</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">other_tag</span>, <span class="ruby-identifier">user</span>).<span class="ruby-identifier">first</span>, <span class="ruby-value">:friends</span>) <span class="ruby-operator">||</span>
+        <span class="ruby-identifier">accept_if</span>(<span class="ruby-identifier">other_tag</span>.<span class="ruby-identifier">public_lists</span>.<span class="ruby-identifier">first</span>, <span class="ruby-value">:public</span>) <span class="ruby-comment"># There&#39;s at least one publicly available list using this tag as title</span>
+  }).<span class="ruby-identifier">compact</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-availability_query" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">availability_query</span><span
+            class="method-args">(user, with_owned=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <pre class="ruby"><span class="ruby-comment"># Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user</span>
+<span class="ruby-comment"># NB: Supplanted by associated_lists</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_listee</span> <span class="ruby-identifier">taggable_entity</span>
+  <span class="ruby-identifier">viewer</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">taggable_entity</span>.<span class="ruby-identifier">tagging_user_id</span> <span class="ruby-operator">||</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>)
+  <span class="ruby-identifier">list_scope</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">lists_visible_to</span> <span class="ruby-identifier">viewer</span>, <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">friend_ids</span> = <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">followee_ids</span> <span class="ruby-operator">+</span> [<span class="ruby-identifier">taggable_entity</span>.<span class="ruby-identifier">tagging_user_id</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>]
+  <span class="ruby-identifier">tag_ids</span> = <span class="ruby-identifier">taggable_entity</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">friend_ids</span>).<span class="ruby-identifier">pluck</span>(:<span class="ruby-identifier">tag_id</span>)
+  <span class="ruby-identifier">list_tag_ids</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">16</span>).<span class="ruby-identifier">pluck</span> :<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">tag_id_str</span> = <span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span>:<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">join</span> <span class="ruby-string">&#39;,&#39;</span>
+
+  <span class="ruby-identifier">indirect</span> = <span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">?</span> [] <span class="ruby-operator">:</span> <span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">pullin</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">joins</span>(:<span class="ruby-identifier">taggings</span>).<span class="ruby-identifier">where</span>(<span class="ruby-node">&quot;taggings.tag_id in (#{tag_id_str})&quot;</span>).<span class="ruby-identifier">to_a</span>
+  <span class="ruby-comment"># Collect all the lists whose owners included the entity in the list directly</span>
+  <span class="ruby-identifier">direct</span> = <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">friend_ids</span>, <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-identifier">taggable_entity</span>, <span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">list_tag_ids</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tagging</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagging</span>.<span class="ruby-identifier">user_id</span>, <span class="ruby-identifier">name_tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagging</span>.<span class="ruby-identifier">tag_id</span>
+  }.<span class="ruby-identifier">compact</span>
+  (<span class="ruby-identifier">direct</span><span class="ruby-operator">+</span><span class="ruby-identifier">indirect</span>).<span class="ruby-identifier">uniq</span>(<span class="ruby-operator">&amp;</span>:<span class="ruby-identifier">id</span>)
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p># Provide a scope for the lists visible to the given user</p>
+          
+          
+
+          
+          <div class="method-source-code" id="availability_query-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 84</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">availability_query</span> <span class="ruby-identifier">user</span>, <span class="ruby-identifier">with_owned</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">friend_ids</span> = (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">followee_ids</span> <span class="ruby-operator">+</span> [<span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>]).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">with_owned</span>
+    <span class="ruby-identifier">owner_clause</span> = <span class="ruby-node">&quot;(owner_id = #{user.id}) or &quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">owner_clause</span> = <span class="ruby-node">&quot;(owner_id != #{user.id}) and &quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-node">&quot;#{owner_clause}(availability = 0 or (availability = 1 and owner_id in (#{friend_ids})))&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-friend_lists_on_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">friend_lists_on_tag</span><span
+            class="method-args">(decorator, tag, user)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Tagging.html">Tagging</a> by a friend on a list they own</p>
+          
+          
+
+          
+          <div class="method-source-code" id="friend_lists_on_tag-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 99</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">friend_lists_on_tag</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">user</span>
+  <span class="ruby-comment"># What lists are visible:</span>
+  <span class="ruby-comment"># 1) All public lists owned by friends</span>
+  <span class="ruby-comment"># 2) All friends-only lists owned by friends who also follow the user (thus allowing access to friends-only lists)</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">none</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">query</span> = <span class="ruby-node">&quot;(lists.availability = 0 AND lists.owner_id in (#{user.followee_ids.join(&#39;, &#39;)}))&quot;</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">extras</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">followee_ids</span> <span class="ruby-operator">&amp;</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">follower_ids</span>).<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">query</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; OR (lists.availability = 1 AND lists.owner_id in (#{extras.join(&#39;, &#39;)}))&quot;</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;extras: &#39;</span>, <span class="ruby-identifier">extras</span>.<span class="ruby-identifier">sort</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># HOWEVER: since many people may use the list&#39;s tag, we only present</span>
+  <span class="ruby-comment"># lists for an entity when the owner of the list has tagged the entity with the list&#39;s name tag</span>
+  <span class="ruby-identifier">tag</span>.
+      <span class="ruby-identifier">dependent_lists</span>.
+      <span class="ruby-identifier">where</span>(<span class="ruby-identifier">query</span>).
+      <span class="ruby-identifier">joins</span>(<span class="ruby-node">&quot;INNER JOIN taggings ON taggings.user_id = lists.owner_id and taggings.entity_id = #{decorator.id} and taggings.entity_type = &#39;#{decorator.object.class}&#39;&quot;</span>).
+      <span class="ruby-identifier">uniq</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(list)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">list</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">list</span> = <span class="ruby-identifier">list</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-study_users" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">study_users</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="study_users-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 216</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">study_users</span>
+  <span class="ruby-constant">User</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">user</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">user</span>.<span class="ruby-identifier">collection_tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">ct</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">recipes</span>(<span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+        <span class="ruby-node">&quot;User ##{user.id} has #{ct} recipes in #{tag.name} collection.&quot;</span>
+      <span class="ruby-keyword">end</span>
+    }<span class="ruby-operator">+</span>
+        <span class="ruby-identifier">user</span>.<span class="ruby-identifier">lists</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list</span><span class="ruby-operator">|</span>
+          <span class="ruby-keyword">if</span> (<span class="ruby-identifier">ct</span> = <span class="ruby-identifier">list</span>.<span class="ruby-identifier">entity_count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+            <span class="ruby-node">&quot;User ##{user.id} has #{ct} recipes in #{list.name} list.&quot;</span>
+          <span class="ruby-keyword">end</span>
+        }
+  }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">str</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-identifier">str</span> }
+  <span class="ruby-string">&quot;&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-visible_lists" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">visible_lists</span><span
+            class="method-args">(viewer, with_owned=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="visible_lists-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 94</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">visible_lists</span> <span class="ruby-identifier">viewer</span>, <span class="ruby-identifier">with_owned</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-constant">List</span>.<span class="ruby-identifier">where</span> <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">availability_query</span>(<span class="ruby-identifier">viewer</span>, <span class="ruby-identifier">with_owned</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-exclude" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">exclude</span><span
+            class="method-args">(entity, user_or_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="exclude-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 171</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">exclude</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_or_id</span>
+  <span class="ruby-identifier">uid</span> = (<span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">user_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">id</span>)
+  <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">remove</span> <span class="ruby-identifier">entity</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">owner_id</span>
+  <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">entity</span>).<span class="ruby-identifier">refute</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag</span>, <span class="ruby-identifier">uid</span> <span class="ruby-comment"># Remove tagging (from this user&#39;s perspective)</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-exclude_by" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">exclude_by</span><span
+            class="method-args">(entity_type, entity_id, user_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Remove an entity from the list based on parameters</p>
+          
+          
+
+          
+          <div class="method-source-code" id="exclude_by-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 178</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">exclude_by</span> <span class="ruby-identifier">entity_type</span>, <span class="ruby-identifier">entity_id</span>, <span class="ruby-identifier">user_id</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_id</span>)
+    <span class="ruby-identifier">exclude</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_id</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-include" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">include</span><span
+            class="method-args">(entity, user_or_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Append an entity to the list, which involves: 1) ensuring that the entity
+appears in the ordering, appending it to the end if not (list owner only)
+2) tagging the entity with the list&#39;s tag as the given user 3) adding
+the entity to the owner&#39;s collection</p>
+          
+          
+
+          
+          <div class="method-source-code" id="include-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 157</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">include</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_or_id</span>
+  <span class="ruby-identifier">uid</span> = (<span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">user_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">id</span>)
+  <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">store</span> <span class="ruby-identifier">entity</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uid</span><span class="ruby-operator">==</span><span class="ruby-identifier">owner_id</span>
+  <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">entity</span>).<span class="ruby-identifier">assert</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag</span>, <span class="ruby-identifier">uid</span> <span class="ruby-comment"># Tag with the list&#39;s name tag anyway</span>
+  <span class="ruby-comment"># owner.touch entity</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-include-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">include?</span><span
+            class="method-args">(entity, user_or_id, with_pullins=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>A list “includes” an item if 1) it is stored directly in the list, or 2) it
+is tagged by the list&#39;s tag 3) the list “pulls in” entities using its
+tags AND the entity is tagged by the list&#39;s tags</p>
+          
+          
+
+          
+          <div class="method-source-code" id="include-3F-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 141</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">include?</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_or_id</span>, <span class="ruby-identifier">with_pullins</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-comment"># Trivial accept if the entity is physically in among the list items</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">stores?</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-identifier">uid</span> = <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">user_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">ts</span> = <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-comment"># It&#39;s included if the owner or this user has tagged it with the name tag</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag_id</span>, (<span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">:</span> [ <span class="ruby-identifier">uid</span>, <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span> ])
+  <span class="ruby-comment"># If not directly tagged, it&#39;s included if it&#39;s tagged with any of the list&#39;s tags, BY ANYONE (?)</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">with_pullins</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span>
+  <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">pulled_tag_ids</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-include_by" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">include_by</span><span
+            class="method-args">(entity_type, entity_id, user_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Add an entity to the list based on parameters</p>
+          
+          
+
+          
+          <div class="method-source-code" id="include_by-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">include_by</span> <span class="ruby-identifier">entity_type</span>, <span class="ruby-identifier">entity_id</span>, <span class="ruby-identifier">user_id</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_id</span>)
+    <span class="ruby-identifier">include</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_id</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pulled_tag_ids" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pulled_tag_ids</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pulled_tag_ids-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 189</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pulled_tag_ids</span>
+  <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span> <span class="ruby-operator">?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag_id</span>) <span class="ruby-operator">:</span> []
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pulled_tags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pulled_tags</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the official list of tags that pull in entities: those which were
+applied by the list owner</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pulled_tags-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 185</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pulled_tags</span>
+  <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span> <span class="ruby-operator">?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>).<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag</span>) <span class="ruby-operator">:</span> []
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tagging_scope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tagging_scope</span><span
+            class="method-args">(viewerid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a scope on the <a href="Tagging.html">Tagging</a> table for the
+unfiltered contents of the list</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tagging_scope-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 194</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_scope</span> <span class="ruby-identifier">viewerid</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># We get everything tagged either directly by the list tag, or indirectly via</span>
+  <span class="ruby-comment"># the included tags, EXCEPT for other users&#39; tags using the list&#39;s tag</span>
+  <span class="ruby-identifier">tag_ids</span> = [<span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag_id</span>]
+  <span class="ruby-identifier">tagger_id_or_ids</span> = [<span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>, <span class="ruby-identifier">viewerid</span>].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>
+  <span class="ruby-identifier">whereclause</span> = <span class="ruby-identifier">tagger_id_or_ids</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span>
+      <span class="ruby-node">&quot;(user_id in (#{tagger_id_or_ids.join &#39;,&#39;}))&quot;</span> <span class="ruby-operator">:</span>
+      <span class="ruby-node">&quot;(user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})&quot;</span>
+  <span class="ruby-identifier">whereclause</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; or (tag_id != #{@list.name_tag_id})&quot;</span>
+  <span class="ruby-comment"># If the pullin flag is on, we also include material tagged with the list&#39;s included_tags</span>
+  <span class="ruby-comment"># BY ITS OWNER</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span>
+    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">included_tags</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">it</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">it</span>.<span class="ruby-identifier">id</span>
+      <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">it</span>).<span class="ruby-identifier">similar_ids</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">whereclause</span> = <span class="ruby-node">&quot;(#{whereclause}) and not (entity_type = &#39;List&#39; and entity_id = #{@list.id})&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">scope</span> = <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">count</span><span class="ruby-operator">&gt;</span><span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">first</span>)).<span class="ruby-identifier">where</span> <span class="ruby-identifier">whereclause</span>
+  <span class="ruby-identifier">scope</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

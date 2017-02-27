@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module StringsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-summarize_set">#summarize_set</a>
+    
+    <li ><a href="#method-i-summary_separator">#summary_separator</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-StringsHelper">
+  <h1 id="module-StringsHelper" class="module">
+    module StringsHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-summarize_set" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_set</span><span
+            class="method-args">(label, set, separator=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present a collection of strings as a label followed by an indented list–all
+html safe</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_set-source">
+            <pre><span class="ruby-comment"># File app/helpers/strings_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_set</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">set</span>, <span class="ruby-identifier">separator</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">separator</span> = <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">separator</span>
+  <span class="ruby-identifier">purged</span> = <span class="ruby-identifier">set</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">keep_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">line_item</span><span class="ruby-operator">|</span> <span class="ruby-identifier">line_item</span>.<span class="ruby-identifier">present?</span> }
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">purged</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+    <span class="ruby-identifier">purged</span>.<span class="ruby-identifier">unshift</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">purged</span>, <span class="ruby-identifier">separator</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summary_separator" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summary_separator</span><span
+            class="method-args">(insep=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summary_separator-source">
+            <pre><span class="ruby-comment"># File app/helpers/strings_helper.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">insep</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">insep</span> <span class="ruby-operator">?</span> (<span class="ruby-identifier">insep</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>(<span class="ruby-value">:br</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class Scraper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">ActiveRecord::Base
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="Backgroundable.html">Backgroundable</a>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-assert">::assert</a>
+    
+    <li ><a href="#method-c-clear_all">::clear_all</a>
+    
+    <li ><a href="#method-i-absolutize">#absolutize</a>
+    
+    <li ><a href="#method-i-bump_time">#bump_time</a>
+    
+    <li ><a href="#method-i-error">#error</a>
+    
+    <li ><a href="#method-i-find_by_selector">#find_by_selector</a>
+    
+    <li ><a href="#method-i-handler">#handler</a>
+    
+    <li ><a href="#method-i-launch">#launch</a>
+    
+    <li ><a href="#method-i-page">#page</a>
+    
+    <li ><a href="#method-i-perform">#perform</a>
+    
+    <li ><a href="#method-i-ping">#ping</a>
+    
+    <li ><a href="#method-i-propose_recipe">#propose_recipe</a>
+    
+    <li ><a href="#method-i-queue_up">#queue_up</a>
+    
+    <li ><a href="#method-i-uri">#uri</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Scraper">
+  <h1 id="class-Scraper" class="class">
+    class Scraper
+  </h1>
+
+  <section class="description">
+    
+<p>require &#39;active_support/hash_with_indifferent_access.rb&#39; The
+scraper class exists to scrape pages: one per scraper. The scraper either:
+1) generates more scrapers based on the contents of the page, or 2) finds
+data and adds that to the RecipePower database Attributes: url: the url of
+the page to be examined site: the site being examined, expressed as the
+name of a method of the scraper model what: the contents that are being
+sought (a section of the method that scrapes this kind of page)</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-immediate" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">immediate</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-mechanize" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">mechanize</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-assert" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert</span><span
+            class="method-args">(url, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="assert-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">url</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span> <span class="ruby-comment"># what, recur=true</span>
+  <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">normalized_uri</span> <span class="ruby-constant">CGI</span>.<span class="ruby-identifier">unescape</span>(<span class="ruby-identifier">url</span>)
+  <span class="ruby-identifier">subclass</span> = (<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>.<span class="ruby-identifier">capitalize</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;.&#39;</span>) <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Scraper&#39;</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;_&#39;</span>)
+
+  <span class="ruby-identifier">recur</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">what</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">args</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">arg</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">arg</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>, <span class="ruby-constant">Symbol</span>
+        <span class="ruby-identifier">what</span> = <span class="ruby-identifier">arg</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-constant">TrueClass</span>, <span class="ruby-constant">FalseClass</span>, <span class="ruby-keyword">nil</span>
+        <span class="ruby-identifier">recur</span> = <span class="ruby-identifier">arg</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">what</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">subclass</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">handler</span> <span class="ruby-identifier">uri</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">scraper</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">what</span><span class="ruby-operator">:</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">subclass</span><span class="ruby-operator">:</span> <span class="ruby-identifier">subclass</span>)
+    <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Already Defined for &#39;#{scraper.what}&#39; on #{uri} (status #{scraper.status})&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">scraper</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">what</span><span class="ruby-operator">:</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">subclass</span><span class="ruby-operator">:</span> <span class="ruby-identifier">subclass</span>
+    <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined for &#39;#{scraper.what}&#39; on #{uri} (status #{scraper.status})&quot;</span>
+    <span class="ruby-identifier">scraper</span>.<span class="ruby-identifier">bump_time</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">scraper</span>.<span class="ruby-identifier">recur</span> = <span class="ruby-identifier">recur</span>
+  <span class="ruby-identifier">scraper</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-identifier">scraper</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-clear_all" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">clear_all</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>@@LaunchedScrapers = {}</p>
+          
+          
+
+          
+          <div class="method-source-code" id="clear_all-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">clear_all</span>
+  <span class="ruby-constant">Scraper</span>.<span class="ruby-identifier">delete_all</span>
+  <span class="ruby-comment"># @@LaunchedScrapers = {}</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-bump_time" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bump_time</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="bump_time-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bump_time</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">waittime</span> =
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">run_at</span>
+      <span class="ruby-identifier">maxwait</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">maximum</span>(<span class="ruby-string">&#39;waittime&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-value">1</span>
+      <span class="ruby-comment"># The strategy here: double the wait time as jobs fail</span>
+      (<span class="ruby-identifier">waittime</span> <span class="ruby-operator">&lt;</span> <span class="ruby-identifier">maxwait</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">maxwait</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">maxwait</span><span class="ruby-operator">*</span><span class="ruby-value">2</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-value">1</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">run_at</span> = ((<span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">maximum</span>(<span class="ruby-string">&#39;run_at&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">waittime</span>.<span class="ruby-identifier">seconds</span>)
+  <span class="ruby-identifier">save</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-error" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">error</span><span
+            class="method-args">(job, exception)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Handle performance errors</p>
+          
+          
+
+          
+          <div class="method-source-code" id="error-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">error</span> <span class="ruby-identifier">job</span>, <span class="ruby-identifier">exception</span>
+  <span class="ruby-identifier">rcode</span> = <span class="ruby-identifier">exception</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:response_code</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">exception</span>.<span class="ruby-identifier">response_code</span>.<span class="ruby-identifier">to_i</span> <span class="ruby-operator">:</span> <span class="ruby-value">-1</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">rcode</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">503</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">id</span>
+        <span class="ruby-identifier">virgin!</span>
+        <span class="ruby-identifier">bump_time</span> <span class="ruby-comment"># Increment the execution target time</span>
+        <span class="ruby-identifier">queue_up</span>
+        <span class="ruby-keyword">return</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">exception</span> = <span class="ruby-string">&#39;Host isn\t talking at the moment&#39;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">404</span>
+      <span class="ruby-identifier">exception</span> = <span class="ruby-string">&#39;doesn\t point to anything!&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">rcode</span>
+  <span class="ruby-identifier">bad!</span>
+  <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-identifier">exception</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-handler" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">handler</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>def perform_naked</p>
+
+<pre class="ruby"><span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Performing #{what} on #{url}&quot;</span>
+
+<span class="ruby-keyword">self</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-identifier">subclass</span>.<span class="ruby-identifier">constantize</span>).<span class="ruby-identifier">send</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_sym</span>
+<span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">?</span> <span class="ruby-value">-1</span> <span class="ruby-operator">:</span> <span class="ruby-value">0</span> <span class="ruby-comment"># Successful</span>
+<span class="ruby-identifier">save</span>
+</pre>
+
+<p>end</p>
+          
+          
+
+          
+          <div class="method-source-code" id="handler-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 103</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">handler</span>
+  <span class="ruby-identifier">subclass</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">handler</span> <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-perform" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">perform</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>perform with error catching</p>
+          
+          
+
+          
+          <div class="method-source-code" id="perform-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 58</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">perform</span> 
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">0</span>
+  <span class="ruby-identifier">bkg_execute</span> <span class="ruby-keyword">do</span>
+
+    <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Started Performing #{what} on #{url} with status #{status}&quot;</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-identifier">subclass</span>.<span class="ruby-identifier">constantize</span>).<span class="ruby-identifier">send</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Finished Performing #{what} on #{url} with status #{status}&quot;</span>
+
+    <span class="ruby-comment"># Remember the fact that there was an error, allowing for the possibility that the errcode was set in the course of executtion</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">-1</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">errcode</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>)
+    <span class="ruby-operator">!</span><span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ping" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ping</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="ping-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ping</span>
+  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;title&#39;</span>).<span class="ruby-identifier">present?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-queue_up" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">queue_up</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Pitch the scraper into the DelayedJob queue</p>
+          
+          
+
+          
+          <div class="method-source-code" id="queue_up-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 121</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">queue_up</span>
+  <span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-identifier">priority</span><span class="ruby-operator">:</span> <span class="ruby-value">20</span>, <span class="ruby-identifier">run_at</span><span class="ruby-operator">:</span> <span class="ruby-identifier">run_at</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-absolutize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">absolutize</span><span
+            class="method-args">(link_or_path, attr=:href)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure that a given link (or Nokogiri spec or Mechanize node)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="absolutize-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 141</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">link_or_path</span>, <span class="ruby-identifier">attr</span>=<span class="ruby-value">:href</span>
+  <span class="ruby-identifier">path</span> =
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">link_or_path</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>
+          <span class="ruby-identifier">link_or_path</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Mechanize</span><span class="ruby-operator">::</span><span class="ruby-constant">Page</span><span class="ruby-operator">::</span><span class="ruby-constant">Link</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">href</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Element</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Attr</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-identifier">respond_to?</span>(<span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_sym</span>)
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">send</span> <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">path</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">url</span>, <span class="ruby-constant">URI</span>.<span class="ruby-identifier">encode</span>(<span class="ruby-identifier">path</span>)).<span class="ruby-identifier">to_s</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-find_by_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">find_by_selector</span><span
+            class="method-args">(selector, attribute_name=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="find_by_selector-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 180</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">find_by_selector</span> <span class="ruby-identifier">selector</span>, <span class="ruby-identifier">attribute_name</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">s</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-identifier">selector</span>).<span class="ruby-identifier">first</span>
+    <span class="ruby-identifier">found</span> = <span class="ruby-identifier">attribute_name</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">s</span>.<span class="ruby-identifier">attributes</span>[<span class="ruby-identifier">attribute_name</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">s</span>.<span class="ruby-identifier">text</span>
+    <span class="ruby-identifier">found</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-launch" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">launch</span><span
+            class="method-args">(link_or_links, what = nil, imm=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define a scraper to follow a link or links and return it, for whatever
+purpose</p>
+          
+          
+
+          
+          <div class="method-source-code" id="launch-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 128</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">launch</span> <span class="ruby-identifier">link_or_links</span>, <span class="ruby-identifier">what</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">imm</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Symbol</span>)
+    <span class="ruby-identifier">what</span>, <span class="ruby-identifier">imm</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">what</span>
+  <span class="ruby-keyword">end</span>
+  [<span class="ruby-identifier">link_or_links</span>].<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">link</span> <span class="ruby-comment"># A Mechanize object for a link</span>
+    <span class="ruby-identifier">scraper</span> = <span class="ruby-constant">Scraper</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">link</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">recur</span>
+    (<span class="ruby-identifier">imm</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">scraper</span>.<span class="ruby-identifier">bkg_sync</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">scraper</span>.<span class="ruby-identifier">queue_up</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">recur</span> <span class="ruby-comment"># Don&#39;t rerun redundantly</span>
+    <span class="ruby-identifier">scraper</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-page" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">page</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the page data via Mechanize</p>
+          
+          
+
+          
+          <div class="method-source-code" id="page-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 159</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-ivar">@page</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@page</span>
+
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Getting page #{url}&quot;</span>
+  <span class="ruby-identifier">mechanize</span> = <span class="ruby-constant">Mechanize</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-identifier">mechanize</span>.<span class="ruby-identifier">user_agent_alias</span> = <span class="ruby-string">&#39;Mac Safari&#39;</span>
+  <span class="ruby-identifier">mechanize</span>
+  <span class="ruby-ivar">@page</span> = <span class="ruby-identifier">mechanize</span>.<span class="ruby-identifier">get</span> <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-propose_recipe" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">propose_recipe</span><span
+            class="method-args">(recipe_link, extractions)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure that a recipe has been filed, and launch it for scraping if new</p>
+          
+          
+
+          
+          <div class="method-source-code" id="propose_recipe-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 188</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">propose_recipe</span> <span class="ruby-identifier">recipe_link</span>, <span class="ruby-identifier">extractions</span>
+  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">recipe_link</span>
+  <span class="ruby-identifier">recipe</span> = <span class="ruby-constant">CollectibleServices</span>.<span class="ruby-identifier">find_or_create</span>({<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">recipe_link</span>)}, <span class="ruby-identifier">extractions</span>, <span class="ruby-constant">Recipe</span>)
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Recipe at #{absolutize recipe_link}:&quot;</span>
+  <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Recipe        #{key}: &#39;#{value}&#39;&quot;</span> }
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">findings</span>(<span class="ruby-identifier">extractions</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>
+  <span class="ruby-identifier">recipe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-uri" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">uri</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="uri-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 169</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">uri</span>
+  <span class="ruby-comment"># Sanitized, for your protection</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-ivar">@uri</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@uri</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@uri</span> = <span class="ruby-identifier">normalized_uri</span>(<span class="ruby-identifier">url</span>)
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">url</span> = <span class="ruby-ivar">@uri</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-string">&#39;cannot be understood (is not a valid URL)&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@uri</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

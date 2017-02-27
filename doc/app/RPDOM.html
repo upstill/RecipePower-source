@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class RPDOM - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-DOMstrip">::DOMstrip</a>
+    
+    <li ><a href="#method-c-allowable">::allowable</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-RPDOM">
+  <h1 id="class-RPDOM" class="class">
+    class RPDOM
+  </h1>
+
+  <section class="description">
+    
+<p>Class <a href="RPDOM.html">RPDOM</a> supports manipulation of the DOM tree
+in pursuit of parsing.</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-DOMstrip" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">DOMstrip</span><span
+            class="method-args">(noko, level)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Turn a Nokogiri document into a minimal HTML stream for parsing “Minimal”
+means that the HTML consists only of &lt;span&gt; nodes with  classes
+pertaining to parsing. This is a recursive method</p>
+          
+          
+
+          
+          <div class="method-source-code" id="DOMstrip-source">
+            <pre><span class="ruby-comment"># File lib/RPDOM.rb, line 26</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">DOMstrip</span>(<span class="ruby-identifier">noko</span>, <span class="ruby-identifier">level</span>)
+   <span class="ruby-identifier">result</span> = <span class="ruby-string">&quot;&quot;</span>
+   <span class="ruby-keyword">if</span> <span class="ruby-identifier">@@dbmode</span>  <span class="ruby-comment"># Reporting on contents</span>
+       <span class="ruby-identifier">result</span> = <span class="ruby-string">&quot;\n&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;  &quot;</span> <span class="ruby-operator">*</span> <span class="ruby-identifier">level</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;: &quot;</span>
+       <span class="ruby-keyword">if</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">public_methods</span>.<span class="ruby-identifier">include?</span> <span class="ruby-value">:attributes</span>
+          <span class="ruby-identifier">attribs</span> = <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">attributes</span>
+          <span class="ruby-identifier">strs</span> = [<span class="ruby-identifier">noko</span>.<span class="ruby-identifier">name</span>, (<span class="ruby-identifier">attribs</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> 
+             <span class="ruby-identifier">attribs</span>.<span class="ruby-identifier">values</span>.<span class="ruby-identifier">map</span> {<span class="ruby-operator">|</span><span class="ruby-identifier">attr</span><span class="ruby-operator">|</span> <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">name</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;=\&quot;&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">attr</span>.<span class="ruby-identifier">value</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;\&quot;&quot;</span> }<span class="ruby-operator">:</span>[]]
+          <span class="ruby-identifier">elmt</span> = <span class="ruby-identifier">strs</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; &#39;</span>)
+       <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">elmt</span> = <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">name</span> 
+       <span class="ruby-keyword">end</span>
+       <span class="ruby-identifier">result</span> <span class="ruby-operator">+=</span> <span class="ruby-string">&quot;&lt;&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">elmt</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot;&gt;\n&quot;</span>
+   <span class="ruby-keyword">end</span>
+   <span class="ruby-identifier">result</span> <span class="ruby-operator">+=</span> <span class="ruby-string">&quot;\n&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">@@NewlineTriggers</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_sym</span>
+   <span class="ruby-keyword">if</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">public_methods</span>.<span class="ruby-identifier">include?</span> <span class="ruby-value">:attributes</span>
+      <span class="ruby-identifier">attribs</span> = <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">attributes</span>
+      <span class="ruby-comment"># We only care if the element has a careworthy class</span>
+      <span class="ruby-identifier">attrib</span> = <span class="ruby-identifier">attribs</span>[<span class="ruby-string">&quot;class&quot;</span>]
+      <span class="ruby-keyword">unless</span> <span class="ruby-identifier">attrib</span>.<span class="ruby-identifier">blank?</span>
+         <span class="ruby-identifier">classes</span> = 
+           <span class="ruby-identifier">attrib</span>.<span class="ruby-identifier">value</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;\w&#39;</span>).<span class="ruby-identifier">keep_if</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">str</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">allowable</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">to_sym</span> }
+         <span class="ruby-keyword">unless</span> <span class="ruby-identifier">classes</span>.<span class="ruby-identifier">blank?</span>
+            <span class="ruby-identifier">newclasses</span> = <span class="ruby-identifier">classes</span>.<span class="ruby-identifier">join</span> <span class="ruby-string">&#39; &#39;</span> 
+            <span class="ruby-keyword">return</span> <span class="ruby-identifier">result</span> <span class="ruby-operator">+</span> 
+                <span class="ruby-node">&quot;&lt;span class=\&quot;#{newclasses}\&quot;&gt;&quot;</span> <span class="ruby-operator">+</span>
+                <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">map</span>{<span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">DOMstrip</span> <span class="ruby-identifier">child</span>,<span class="ruby-identifier">level</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>}.<span class="ruby-identifier">join</span> <span class="ruby-operator">+</span>
+                <span class="ruby-string">&quot;&lt;/span&gt;&quot;</span>
+            <span class="ruby-comment">#otherwise, ignore the element</span>
+         <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+   <span class="ruby-keyword">end</span>
+   <span class="ruby-keyword">if</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_sym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:text</span>
+      <span class="ruby-identifier">result</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">to_s</span>
+   <span class="ruby-keyword">end</span>
+   <span class="ruby-identifier">result</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">noko</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-constant">DOMstrip</span>(<span class="ruby-identifier">child</span>, <span class="ruby-identifier">level</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>) }.<span class="ruby-identifier">join</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-allowable" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">allowable</span><span
+            class="method-args">(name)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="allowable-source">
+            <pre><span class="ruby-comment"># File lib/RPDOM.rb, line 16</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">allowable</span>(<span class="ruby-identifier">name</span>)
+     <span class="ruby-identifier">@@AllowableSymbols</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">to_sym</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

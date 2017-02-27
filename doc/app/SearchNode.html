@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module SearchNode - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-child_attenuation">#child_attenuation</a>
+    
+    <li ><a href="#method-i-emplace_leader">#emplace_leader</a>
+    
+    <li ><a href="#method-i-first_member">#first_member</a>
+    
+    <li ><a href="#method-i-init_child_search">#init_child_search</a>
+    
+    <li ><a href="#method-i-init_search">#init_search</a>
+    
+    <li ><a href="#method-i-new_child">#new_child</a>
+    
+    <li ><a href="#method-i-push_new_associate">#push_new_associate</a>
+    
+    <li ><a href="#method-i-search_result-3D">#search_result=</a>
+    
+    <li ><a href="#method-i-set_children">#set_children</a>
+    
+    <li ><a href="#method-i-to_s">#to_s</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-SearchNode">
+  <h1 id="module-SearchNode" class="module">
+    module SearchNode
+  </h1>
+
+  <section class="description">
+    
+<p>This class implements a tree that searches for relevance-weighted items in
+order. Each node in the tree has a weight, and a sorted list of other such
+nodes (its ASSOCIATES).</p>
+
+<p>The associates are an open-ended queue, where only those relevant to the
+search are present at any one time, because they are generated in value
+order and a queue of only the most important ones is maintained, where
+“important” means “able to meet a threshold”. The threshold that no
+non-resident associate will exceed is @threshold.</p>
+
+<p>Each associate is responsible for generating a list of MEMBERS, each of
+which has its own  value. The members also appear in order of value.</p>
+
+<p>The current value of an associate is the value of its last generated
+member, adjusted by the associate&#39;s weight.</p>
+
+<p>External interface:</p>
+
+<pre class="ruby"><span class="ruby-identifier">new_child</span> <span class="ruby-identifier">is</span> <span class="ruby-identifier">a</span> <span class="ruby-identifier">method</span> <span class="ruby-identifier">that</span> <span class="ruby-identifier">including</span> <span class="ruby-identifier">classes</span> <span class="ruby-identifier">may</span> <span class="ruby-identifier">define</span> <span class="ruby-identifier">to</span> <span class="ruby-identifier">create</span> <span class="ruby-identifier">new</span> <span class="ruby-identifier">associates</span>
+
+<span class="ruby-identifier">init_search</span> <span class="ruby-identifier">weight</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">cutoff</span> = <span class="ruby-keyword">nil</span>   <span class="ruby-comment"># Initialize an associate</span>
+<span class="ruby-identifier">init_child_search</span> <span class="ruby-identifier">child</span>, <span class="ruby-identifier">weight</span> <span class="ruby-comment"># Hook a child into a parent</span>
+<span class="ruby-identifier">first_member</span> <span class="ruby-identifier">clear</span>=<span class="ruby-keyword">true</span> <span class="ruby-comment"># Get the next result from the (sub)tree, destructively if clear is true</span>
+<span class="ruby-identifier">child_attenuation</span> <span class="ruby-comment"># The prospective attenuation that will be assigned to any children (before their weight)</span>
+<span class="ruby-identifier">set_children</span> <span class="ruby-identifier">associates</span> <span class="ruby-comment"># Set the children of the node via array (which will get sorted)</span>
+<span class="ruby-identifier">sort_children</span> <span class="ruby-comment"># Make sure the children are sorted, e.g. after inserting a number of them.</span>
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-search_node_value" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">search_node_value</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-search_node_weight" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">search_node_weight</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-search_result" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">search_result</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-sn_cutoff" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">sn_cutoff</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-sn_local_to_global" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">sn_local_to_global</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-child_attenuation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">child_attenuation</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The attenuation at a child is the product of this node&#39;s attenuation
+and its weight</p>
+          
+          
+
+          
+          <div class="method-source-code" id="child_attenuation-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 112</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">child_attenuation</span>
+  <span class="ruby-ivar">@child_attenuation</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@sn_local_to_global</span><span class="ruby-operator">*</span><span class="ruby-ivar">@search_node_weight</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-first_member" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">first_member</span><span
+            class="method-args">(clear=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the next result from the tree, if any</p>
+          
+          
+
+          
+          <div class="method-source-code" id="first_member-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">first_member</span> <span class="ruby-identifier">clear</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@search_result</span> <span class="ruby-comment"># Member is already cached</span>
+    <span class="ruby-identifier">m</span> = <span class="ruby-ivar">@search_result</span>
+    <span class="ruby-ivar">@search_result</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">clear</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">m</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">while</span> <span class="ruby-identifier">first_assoc</span> = <span class="ruby-ivar">@sn_associates</span>[<span class="ruby-value">0</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">push_new_associate</span>
+    <span class="ruby-comment"># The first associate meets the threshold, which only means that it&#39;s worth</span>
+    <span class="ruby-comment"># checking further: it may not have a current member, and generating the actual member</span>
+    <span class="ruby-comment"># may reduce the associate&#39;s value, which may invalidate the sort order of the associates.</span>
+    <span class="ruby-identifier">pv</span> = <span class="ruby-identifier">first_assoc</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-comment"># Save for comparison</span>
+    <span class="ruby-identifier">first_assoc</span>.<span class="ruby-identifier">first_member</span> <span class="ruby-keyword">false</span> <span class="ruby-comment"># Force the appearance of member but don&#39;t consume it</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">first_assoc</span>.<span class="ruby-identifier">search_node_value</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">0.0</span>  <span class="ruby-comment"># The foremost associate did NOT produce a member and CANNOT produce more</span>
+        <span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">shift</span> <span class="ruby-comment"># Dispose of it and carry on</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-identifier">pv</span>
+        <span class="ruby-comment"># If the value of the first associate doesn&#39;t change--either b/c no member was generated or</span>
+        <span class="ruby-comment"># the value of the new associate is the same as the old--then everything is secure</span>
+        <span class="ruby-keyword">break</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-comment"># If the value of the first associate HAS declined as a result of getting its next member</span>
+        <span class="ruby-comment"># (it should NEVER increase), then sort order of associates may need to change.</span>
+        <span class="ruby-comment"># We may even need to bring in more associates to find a place for the current leader.</span>
+        <span class="ruby-identifier">emplace_leader</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-comment"># Loop back to check up on the new leader</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Now we have a member IFF the first associate produced one of the stipulated value</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">first_assoc</span>
+    <span class="ruby-identifier">mem</span> = <span class="ruby-identifier">first_assoc</span>.<span class="ruby-identifier">first_member</span> <span class="ruby-comment"># Bubble the member up the tree</span>
+    <span class="ruby-ivar">@search_result</span>, <span class="ruby-ivar">@search_node_value</span> = (<span class="ruby-identifier">mem</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">clear</span>), (<span class="ruby-identifier">first_assoc</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-operator">*</span> <span class="ruby-ivar">@search_node_weight</span>)
+    <span class="ruby-identifier">mem</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-ivar">@search_node_value</span> = <span class="ruby-value">0.0</span>
+    <span class="ruby-ivar">@search_result</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-init_child_search" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">init_child_search</span><span
+            class="method-args">(child, weight=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Accept a child of a given weight</p>
+          
+          
+
+          
+          <div class="method-source-code" id="init_child_search-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">init_child_search</span> <span class="ruby-identifier">child</span>, <span class="ruby-identifier">weight</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">child</span>.<span class="ruby-identifier">init_search</span> <span class="ruby-identifier">weight</span>, <span class="ruby-ivar">@sn_cutoff</span>
+  <span class="ruby-comment"># The attenuation for a child is the attenuation of the parent times the weight of the parent</span>
+  <span class="ruby-identifier">child</span>.<span class="ruby-identifier">sn_local_to_global</span> = <span class="ruby-identifier">child_attenuation</span>
+  <span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">child</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-init_search" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">init_search</span><span
+            class="method-args">(weight=nil, cutoff = nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Initialize a search associate of a specific weight. There is no
+local-to-global scale factor at this juncture; if adding nodes to the tree,
+the parent uses its <a
+href="SearchNode.html#method-i-init_child_search">#init_child_search</a>
+method</p>
+          
+          
+
+          
+          <div class="method-source-code" id="init_search-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">init_search</span> <span class="ruby-identifier">weight</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">cutoff</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># Attenuation is the compounded weights in descending to this associate (The global-to-local xform)</span>
+  <span class="ruby-comment"># Weight is the weighting of THIS node. Thus, attenuation*weight is 1) the attenuation of any children,</span>
+  <span class="ruby-comment"># and thus 2) the greatest value that any child can achieve</span>
+  <span class="ruby-ivar">@sn_cutoff</span> = <span class="ruby-identifier">cutoff</span> <span class="ruby-operator">||</span> <span class="ruby-value">0.0</span>
+  <span class="ruby-ivar">@sn_associates</span> = []
+  <span class="ruby-ivar">@sn_local_to_global</span> = <span class="ruby-value">1.0</span>
+  <span class="ruby-ivar">@search_result</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-ivar">@search_node_weight</span> = <span class="ruby-identifier">weight</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">weight</span>
+  <span class="ruby-ivar">@search_node_weight</span> <span class="ruby-operator">||=</span> <span class="ruby-value">1.0</span> <span class="ruby-comment"># Assert default if weight hasn&#39;t been set by other means</span>
+  <span class="ruby-ivar">@search_node_value</span> = <span class="ruby-ivar">@search_node_weight</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-new_child" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new_child</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="SearchNode.html#method-i-new_child">#new_child</a> is a hook that
+allows an associate to dynamically add child associates on demand</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new_child-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 121</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">new_child</span>
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-set_children" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">set_children</span><span
+            class="method-args">(child_associates=[])</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="set_children-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 116</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">set_children</span> <span class="ruby-identifier">child_associates</span>=[]
+  <span class="ruby-ivar">@sn_associates</span> = <span class="ruby-identifier">child_associates</span>.<span class="ruby-identifier">sort</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a1</span>, <span class="ruby-identifier">a2</span><span class="ruby-operator">|</span> <span class="ruby-identifier">a1</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-operator">&lt;=&gt;</span> <span class="ruby-identifier">a2</span>.<span class="ruby-identifier">search_node_value</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-to_s" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">to_s</span><span
+            class="method-args">(level=0)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="to_s-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 106</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span> <span class="ruby-identifier">level</span>=<span class="ruby-value">0</span>
+  <span class="ruby-identifier">indent</span> = <span class="ruby-string">&quot;\n&quot;</span><span class="ruby-operator">+</span>(<span class="ruby-string">&#39;   &#39;</span><span class="ruby-operator">*</span><span class="ruby-identifier">level</span>)
+  <span class="ruby-node">&quot;#{indent}Attenuation: #{@sn_local_to_global}#{indent}Weight: #{@search_node_weight}#{indent}Value: #{@search_node_value}#{indent}Member:#{@search_result}&quot;</span><span class="ruby-operator">+</span><span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">collect</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">as</span><span class="ruby-operator">|</span> <span class="ruby-identifier">as</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-identifier">level</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>}.<span class="ruby-identifier">join</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-emplace_leader" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">emplace_leader</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="emplace_leader-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 135</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">emplace_leader</span>
+  <span class="ruby-identifier">leader</span> = <span class="ruby-ivar">@sn_associates</span>[<span class="ruby-identifier">newplace</span> = <span class="ruby-value">0</span>]
+  <span class="ruby-keyword">if</span> (<span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span>) <span class="ruby-operator">||</span> (<span class="ruby-identifier">leader</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-operator">&lt;</span> <span class="ruby-ivar">@sn_associates</span>[<span class="ruby-value">-1</span>].<span class="ruby-identifier">search_node_value</span>)
+    <span class="ruby-comment"># The leader belongs beyond the current end of the array. But where?</span>
+    <span class="ruby-keyword">while</span> <span class="ruby-identifier">na</span> = <span class="ruby-identifier">push_new_associate</span>
+      <span class="ruby-comment"># Keep going until there are no more associates OR one appears that will be before the current leader</span>
+      <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">leader</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-identifier">na</span>.<span class="ruby-identifier">search_node_value</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">newplace</span> = <span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">-</span> (<span class="ruby-identifier">na</span> <span class="ruby-operator">?</span> <span class="ruby-value">2</span> <span class="ruby-operator">:</span> <span class="ruby-value">1</span>)
+  <span class="ruby-keyword">else</span> <span class="ruby-comment"># There&#39;s &gt; 1 associate AND the leader&#39;s value is &gt;= the last associate&#39;s value</span>
+    <span class="ruby-identifier">newplace</span> = <span class="ruby-value">0</span>
+    <span class="ruby-identifier">newplace</span> <span class="ruby-operator">+=</span> <span class="ruby-value">1</span> <span class="ruby-keyword">while</span> <span class="ruby-identifier">leader</span>.<span class="ruby-identifier">search_node_value</span> <span class="ruby-operator">&lt;</span> <span class="ruby-ivar">@sn_associates</span>[<span class="ruby-identifier">newplace</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>].<span class="ruby-identifier">search_node_value</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">newplace</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>
+    <span class="ruby-identifier">ass</span> = <span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">shift</span>
+    <span class="ruby-ivar">@sn_associates</span>.<span class="ruby-identifier">insert</span> <span class="ruby-identifier">newplace</span>, <span class="ruby-identifier">ass</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-push_new_associate" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push_new_associate</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a
+href="SearchNode.html#method-i-push_new_associate">#push_new_associate</a>
+uses the <a href="SearchNode.html#method-i-new_child">#new_child</a> method
+to push a new associate onto the queue</p>
+          
+          
+
+          
+          <div class="method-source-code" id="push_new_associate-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 130</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">push_new_associate</span>
+  <span class="ruby-comment"># We short-circuit any nodes whose global value would be less than the cutoff</span>
+  <span class="ruby-identifier">new_child</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">child_attenuation</span> <span class="ruby-operator">&lt;</span> <span class="ruby-ivar">@sn_cutoff</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-search_result-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">search_result=</span><span
+            class="method-args">(memval)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="search_result-3D-source">
+            <pre><span class="ruby-comment"># File lib/search_node.rb, line 154</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">search_result=</span> <span class="ruby-identifier">memval</span>
+  <span class="ruby-ivar">@search_result</span> = <span class="ruby-identifier">memval</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

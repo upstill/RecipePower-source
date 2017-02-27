@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module Querytags - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-querytags">#querytags</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-Querytags">
+  <h1 id="module-Querytags" class="module">
+    module Querytags
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-querytags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querytags</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the set of tags in the current query, as supplied by <a
+href=":querytags">params</a> We also stash the last set of strings</p>
+          
+          
+
+          
+          <div class="method-source-code" id="querytags-source">
+            <pre><span class="ruby-comment"># File lib/querytags.rb, line 5</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querytags</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-ivar">@querytags</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@querytags</span> <span class="ruby-comment"># Memoize</span>
+  <span class="ruby-identifier">newspecial</span> = {}
+  <span class="ruby-comment"># Accumulate resulting tags here:</span>
+  <span class="ruby-ivar">@querytags</span> = []
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">querytext</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:querytags</span>]
+    <span class="ruby-identifier">oldspecial</span> = <span class="ruby-identifier">session</span>[<span class="ruby-value">:querytags</span>] <span class="ruby-operator">||</span> {}
+    <span class="ruby-identifier">querytext</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&quot;,&quot;</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">e</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">e</span>.<span class="ruby-identifier">strip!</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">e</span><span class="ruby-operator">=~</span><span class="ruby-regexp">/^\d*$/</span>) <span class="ruby-comment"># numbers (sans quotes) represent existing tags that the user selected</span>
+        <span class="ruby-ivar">@querytags</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_i</span>)
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">e</span><span class="ruby-operator">=~</span><span class="ruby-regexp">/^-\d*$/</span> <span class="ruby-comment"># negative numbers (sans quotes) represent special tags from before</span>
+        <span class="ruby-comment"># Re-save this one</span>
+        <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">newspecial</span>[<span class="ruby-identifier">e</span>] = <span class="ruby-identifier">oldspecial</span>[<span class="ruby-identifier">e</span>]))
+        <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_i</span>
+        <span class="ruby-ivar">@querytags</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">tag</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-comment"># This is a new special tag. Convert to an internal tag and add it to the cache</span>
+        <span class="ruby-identifier">name</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">strip</span>
+        <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">name</span>, {<span class="ruby-identifier">matchall</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">uid</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@userid</span>}).<span class="ruby-identifier">first</span>
+          <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">name</span>)
+          <span class="ruby-keyword">unless</span> <span class="ruby-identifier">oldspecial</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">newspecial</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">v</span> <span class="ruby-keyword">and</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> = <span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_i</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">v</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">name</span> }
+            <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> = <span class="ruby-value">-1</span>
+            <span class="ruby-comment"># Search for an unused id</span>
+            <span class="ruby-keyword">while</span> (<span class="ruby-identifier">newspecial</span>[<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">oldspecial</span>[<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>]) <span class="ruby-keyword">do</span>
+              <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">-</span> <span class="ruby-value">1</span>
+            <span class="ruby-keyword">end</span>
+            <span class="ruby-identifier">newspecial</span>[<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>] = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-ivar">@querytags</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">tag</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Have to revise querytags to reflect special tags because otherwise, IDs will get</span>
+  <span class="ruby-comment"># revised on the next read from DB</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">newspecial</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+    <span class="ruby-identifier">session</span>[<span class="ruby-value">:querytags</span>] = <span class="ruby-identifier">newspecial</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">session</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:querytags</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@querytags</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

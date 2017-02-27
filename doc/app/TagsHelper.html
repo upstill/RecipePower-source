@@ -1,0 +1,1287 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module TagsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-grabtag">#grabtag</a>
+    
+    <li ><a href="#method-i-list_tags_for_collectible">#list_tags_for_collectible</a>
+    
+    <li ><a href="#method-i-present_tag_definitions">#present_tag_definitions</a>
+    
+    <li ><a href="#method-i-summarize_meaning">#summarize_meaning</a>
+    
+    <li ><a href="#method-i-summarize_tag">#summarize_tag</a>
+    
+    <li ><a href="#method-i-summarize_tag_children">#summarize_tag_children</a>
+    
+    <li ><a href="#method-i-summarize_tag_children_count">#summarize_tag_children_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_definition_count">#summarize_tag_definition_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_owner_count">#summarize_tag_owner_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_owners">#summarize_tag_owners</a>
+    
+    <li ><a href="#method-i-summarize_tag_parents">#summarize_tag_parents</a>
+    
+    <li ><a href="#method-i-summarize_tag_parents_count">#summarize_tag_parents_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_recipe_count">#summarize_tag_recipe_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_recipes">#summarize_tag_recipes</a>
+    
+    <li ><a href="#method-i-summarize_tag_references">#summarize_tag_references</a>
+    
+    <li ><a href="#method-i-summarize_tag_referents">#summarize_tag_referents</a>
+    
+    <li ><a href="#method-i-summarize_tag_relations">#summarize_tag_relations</a>
+    
+    <li ><a href="#method-i-summarize_tag_similar">#summarize_tag_similar</a>
+    
+    <li ><a href="#method-i-summarize_tag_similars">#summarize_tag_similars</a>
+    
+    <li ><a href="#method-i-summarize_tag_site_count">#summarize_tag_site_count</a>
+    
+    <li ><a href="#method-i-summarize_tag_synonyms">#summarize_tag_synonyms</a>
+    
+    <li ><a href="#method-i-tag_filter_header">#tag_filter_header</a>
+    
+    <li ><a href="#method-i-tag_homelink">#tag_homelink</a>
+    
+    <li ><a href="#method-i-tag_info_section">#tag_info_section</a>
+    
+    <li ><a href="#method-i-tag_list">#tag_list</a>
+    
+    <li ><a href="#method-i-tag_select">#tag_select</a>
+    
+    <li ><a href="#method-i-taglist">#taglist</a>
+    
+    <li ><a href="#method-i-tags_tabset">#tags_tabset</a>
+    
+    <li ><a href="#method-i-type_selections">#type_selections</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-TagsHelper">
+  <h1 id="module-TagsHelper" class="module">
+    module TagsHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-grabtag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">grabtag</span><span
+            class="method-args">(tag)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="grabtag-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 174</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">grabtag</span>(<span class="ruby-identifier">tag</span>)
+    <span class="ruby-comment"># orphantagid() is a helper method in application_controller.rb (so tags_controller can use it)</span>
+    (<span class="ruby-node">&quot;&lt;div class=\&quot;orphantag\&quot; id=\&quot;#{orphantagid(tag.id)}\&quot;&gt;#{tag.name}&lt;/div&gt;&quot;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-list_tags_for_collectible" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">list_tags_for_collectible</span><span
+            class="method-args">(taglist, collectible_decorator=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="list_tags_for_collectible-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 287</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">list_tags_for_collectible</span> <span class="ruby-identifier">taglist</span>, <span class="ruby-identifier">collectible_decorator</span>=<span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">tags_str</span> = <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">taglist</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">tag</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:partial</span>, <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;taglink&#39;</span>
+    }, <span class="ruby-string">&#39;&amp;nbsp;&lt;span class=&quot;tagsep&quot;&gt;|&lt;/span&gt; &#39;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-comment">    collectible_decorator ?
+        safe_join( [ tags_str, collectible_tag_button(collectible_decorator)], &#39;&amp;nbsp; &#39;.html_safe ) :
+        tags_str
+</span>  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-present_tag_definitions" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">present_tag_definitions</span><span
+            class="method-args">(tagserv)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="present_tag_definitions-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 81</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_tag_definitions</span> <span class="ruby-identifier">tagserv</span>
+  <span class="ruby-comment"># tagserv.references.where(canonical: true, type: &#39;DefinitionReference&#39;).collect{ |reference| present_reference(reference) }.compact</span>
+  <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">definition_page_refs</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">definition</span><span class="ruby-operator">|</span> <span class="ruby-identifier">present_definition</span>(<span class="ruby-identifier">definition</span>) }.<span class="ruby-identifier">compact</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_meaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_meaning</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_meaning-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_meaning</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">meaning</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">primary_meaning</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">meaning</span>.<span class="ruby-identifier">description</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-node">&quot;&lt;p class=\&quot;airy\&quot;&gt;&lt;strong&gt;...described as&lt;/strong&gt; &#39;#{@tagserv.primary_meaning.description}&#39;&lt;/p&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag</span><span
+            class="method-args">(withtype = false, do_link = true, with_id=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>TODO: These should be part of the tag presenter</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 8</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag</span> <span class="ruby-identifier">withtype</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">do_link</span> = <span class="ruby-keyword">true</span>, <span class="ruby-identifier">with_id</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  ((<span class="ruby-identifier">withtype</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;&lt;i&gt;#{@tagserv.typename}&lt;/i&gt; &quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span> )<span class="ruby-operator">+</span>
+    <span class="ruby-node">&quot;&#39;&lt;strong&gt;#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}&lt;/strong&gt;&#39;&quot;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_children" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_children</span><span
+            class="method-args">(label = "Examples: ")</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_children-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_children</span> <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Examples: &quot;</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">tag_info_section</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">child</span> }, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_children_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_children_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_children_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 125</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_children_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  ((<span class="ruby-identifier">ct</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">ct</span>, <span class="ruby-string">&#39;Child&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;&amp;nbsp;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_definition_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_definition_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_definition_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 115</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_definition_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  ((<span class="ruby-identifier">ct</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">definition_page_ref_count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">ct</span>, <span class="ruby-string">&#39;Reference&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;&amp;nbsp;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_owner_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_owner_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_owner_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 155</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_owner_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+    <span class="ruby-identifier">ct</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">user_ids</span>.<span class="ruby-identifier">size</span>
+    (<span class="ruby-identifier">ct</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">ct</span>, <span class="ruby-string">&#39;Owner&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;&amp;nbsp;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_owners" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_owners</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_owners-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_owners</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">isGlobal</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">owners</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">owners</span>).<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">ownerstrs</span> = <span class="ruby-identifier">owners</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">owner</span><span class="ruby-operator">|</span> <span class="ruby-identifier">owner</span>.<span class="ruby-identifier">handle</span> }
+  <span class="ruby-identifier">tag_info_section</span> <span class="ruby-identifier">ownerstrs</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;...private to &#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_parents" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_parents</span><span
+            class="method-args">(label = "Categorized Under: ")</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_parents-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 41</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_parents</span> <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Categorized Under: &quot;</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">tag_info_section</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">parent</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">parent</span> }, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_parents_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_parents_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_parents_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 120</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_parents_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  ((<span class="ruby-identifier">ct</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">ct</span>, <span class="ruby-string">&#39;Parent&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;&amp;nbsp;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_recipe_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_recipe_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_recipe_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 130</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_recipe_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">set</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">recipe_ids</span>(<span class="ruby-keyword">true</span>)
+  <span class="ruby-identifier">count</span> = <span class="ruby-identifier">set</span>.<span class="ruby-identifier">size</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">count</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">homelink</span> <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">first</span>).<span class="ruby-identifier">decorate</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;1 Recipe&#39;</span>
+    <span class="ruby-keyword">else</span>
+      (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">count</span>, <span class="ruby-string">&#39;Recipe&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39; &#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_recipes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_recipes</span><span
+            class="method-args">(header="<h4>Used as Tag on Recipe(s)</h4>")</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_recipes-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 59</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_recipes</span> <span class="ruby-identifier">header</span>=<span class="ruby-string">&quot;&lt;h4&gt;Used as Tag on Recipe(s)&lt;/h4&gt;&quot;</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">recipes</span> =
+    <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">recipes</span>(<span class="ruby-keyword">true</span>).<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rcp</span><span class="ruby-operator">|</span> 
+      <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:li</span>, <span class="ruby-node">&quot;#{link_to rcp.title, rcp.url} #{collectible_info_icon rcp.decorate}&quot;</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;tog_info_rcp_title&quot;</span>
+    }
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">empty?</span>
+    (<span class="ruby-node">&quot;#{header}&lt;ul&gt;&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&quot;&lt;/ul&gt;&quot;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_references" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_references</span><span
+            class="method-args">(label = "See ")</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return HTML for the links associated with this tag</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_references-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 71</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_references</span> <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;See &quot;</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">refstrs</span> = <span class="ruby-identifier">present_tag_definitions</span> <span class="ruby-ivar">@tagserv</span>).<span class="ruby-identifier">empty?</span>
+    (<span class="ruby-identifier">content_tag</span>( <span class="ruby-value">:h3</span>, <span class="ruby-string">&quot;References&quot;</span>)<span class="ruby-operator">+</span>
+     <span class="ruby-identifier">content_tag</span>( <span class="ruby-value">:div</span>,
+                <span class="ruby-identifier">tag_info_section</span>( <span class="ruby-identifier">refstrs</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">label</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;&#39;#{@tagserv.name}&#39;&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot; on &quot;</span>) ).<span class="ruby-identifier">html_safe</span>,
+                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;container&quot;</span>)).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_referents" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_referents</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_referents-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 51</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_referents</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">tag_info_section</span>(
+    <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">keep_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ref</span> <span class="ruby-operator">!=</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">primary_meaning</span> }.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">summarize_referent</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Other Meaning(s)&quot;</span>
+    }, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Referents: &quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_relations" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_relations</span><span
+            class="method-args">(label = 'See Also')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return HTML for the links related to a given tag (i.e., the links for  all
+tags related to this one)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_relations-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 88</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_relations</span> <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;See Also&#39;</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">links</span> =
+    <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">related</span>(<span class="ruby-ivar">@tagserv</span>, <span class="ruby-keyword">false</span>, <span class="ruby-keyword">true</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span>(<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">id</span>)
+        <span class="ruby-identifier">refstrs</span> = <span class="ruby-identifier">present_tag_definitions</span>(<span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">rel</span>)
+        <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                    <span class="ruby-identifier">tag_info_section</span>(<span class="ruby-identifier">refstrs</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> (<span class="ruby-node">&quot;&#39;#{rel.synonyms.map(&amp;:name).join(&#39;/&amp;#8201&#39;)}&#39;&quot;</span> <span class="ruby-operator">+</span> <span class="ruby-string">&quot; on &quot;</span>)).<span class="ruby-identifier">html_safe</span>,
+                    <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;container&quot;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">refstrs</span>.<span class="ruby-identifier">empty?</span>
+      <span class="ruby-keyword">end</span>
+    }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; | &#39;</span>)
+  (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">label</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">links</span>.<span class="ruby-identifier">html_safe</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">links</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_similar" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_similar</span><span
+            class="method-args">(other, absorb_btn = false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_similar-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 253</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_similar</span> <span class="ruby-identifier">other</span>, <span class="ruby-identifier">absorb_btn</span> = <span class="ruby-keyword">false</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>,
+      <span class="ruby-identifier">tag_homelink</span>(<span class="ruby-identifier">other</span>) <span class="ruby-operator">+</span> <span class="ruby-node">&quot;(#{other.typename})&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+      (<span class="ruby-identifier">absorb_btn</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">button_to_submit</span>(<span class="ruby-string">&#39;Absorb&#39;</span>,
+                                     <span class="ruby-node">&quot;tags/#{@tag.id}/absorb?victim=#{other.id}&quot;</span>,
+                                     <span class="ruby-value">:xs</span>,
+                                     <span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-value">:modal</span>,
+                                     <span class="ruby-identifier">with_form</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+                                     <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;absorb_button&#39;</span>,
+                                     <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;absorb_button_#{other.id}&quot;</span>) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>),
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;absorb_#{other.id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_similars" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_similars</span><span
+            class="method-args">(args={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Helper for showing the tags which are potentially redundant wrt. this tag:
+They match in the normalized_name field</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_similars-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 30</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_similars</span> <span class="ruby-identifier">args</span>={} 
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">others</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">normalized_name</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other</span><span class="ruby-operator">|</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">id</span> } <span class="ruby-comment">#  @tagserv.lexical_similars</span>
+  <span class="ruby-identifier">label</span>= <span class="ruby-identifier">args</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Similar tags: &#39;</span>
+  <span class="ruby-identifier">joiner</span> = <span class="ruby-identifier">args</span>[<span class="ruby-value">:joiner</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39; &#39;</span> <span class="ruby-comment">#  &#39;, &#39;</span>
+  (<span class="ruby-node">&quot;&lt;span&gt;#{label}&quot;</span><span class="ruby-operator">+</span>
+      <span class="ruby-identifier">others</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other</span><span class="ruby-operator">|</span> <span class="ruby-identifier">summarize_tag_similar</span> <span class="ruby-identifier">other</span>, (<span class="ruby-identifier">args</span>[<span class="ruby-value">:absorb_btn</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">can_absorb</span>(<span class="ruby-identifier">other</span>)) }.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">joiner</span>)<span class="ruby-operator">+</span>
+  <span class="ruby-string">&quot;&lt;/span&gt;&quot;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-comment"># tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] &amp;&amp; @tagserv.can_absorb(other)) }, label: label, joinstr: joiner</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_site_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_site_count</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_site_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 143</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_site_count</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-identifier">sites</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">sites</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">sites</span>.<span class="ruby-identifier">count</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">sites</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">decorate</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;1 Site&#39;</span>
+    <span class="ruby-keyword">else</span>
+      (<span class="ruby-identifier">pluralize</span>(<span class="ruby-identifier">sites</span>.<span class="ruby-identifier">count</span>, <span class="ruby-string">&#39;Site&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39; &#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_tag_synonyms" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_tag_synonyms</span><span
+            class="method-args">(label='Synonyms: ', options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_tag_synonyms-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 102</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_tag_synonyms</span> <span class="ruby-identifier">label</span>=<span class="ruby-string">&#39;Synonyms: &#39;</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">label</span>, <span class="ruby-identifier">options</span> = <span class="ruby-string">&#39;Synonyms: &#39;</span>, <span class="ruby-identifier">label</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@tag</span>)
+  <span class="ruby-comment"># The synonyms are the other expressions of this tag&#39;s referents</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">syns</span> = <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">synonyms</span>).<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">synstrs</span> = <span class="ruby-identifier">syns</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">syn</span><span class="ruby-operator">|</span> <span class="ruby-comment"># tag_homelink syn</span>
+    <span class="ruby-identifier">summarize_tag_similar</span> <span class="ruby-identifier">syn</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-value">:absorb_btn</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@tagserv</span>.<span class="ruby-identifier">can_absorb</span>(<span class="ruby-identifier">syn</span>))
+  }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-comment"># tag_info_section synstrs, label: label, joinstr: &#39;&lt;br&gt;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_filter_header" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_filter_header</span><span
+            class="method-args">(locals={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_filter_header-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 266</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_filter_header</span> <span class="ruby-identifier">locals</span>={}
+  <span class="ruby-identifier">locals</span>[<span class="ruby-value">:type_selector</span>] <span class="ruby-operator">||=</span> <span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-string">&quot;tags/tag_filter_header&quot;</span>, <span class="ruby-identifier">locals</span> <span class="ruby-comment"># ttl: label, type_selector: type_selector</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_homelink" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_homelink</span><span
+            class="method-args">(tag, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_homelink-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 3</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_info_section" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_info_section</span><span
+            class="method-args">(contentstrs, options)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present one section of the tag info using a label, a (possibly empty)
+collection of descriptive strings, and a classname for a span summarizing
+the section (presumably because the individual entries are meant to show on
+a line).  If the collection is empty, we return nil; if the contentclass is
+blank we don&#39;t wrap it in a span</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tag_info_section-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 228</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_info_section</span> <span class="ruby-identifier">contentstrs</span>, <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">contentclass</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:contentclass</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&quot;tag_info_section_content&quot;</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">joinstr</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:joinstr</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&quot;, &quot;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">contentstrs</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">contentstrs</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">contentstr</span> = <span class="ruby-identifier">contentclass</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">?</span>
+                 <span class="ruby-identifier">contentstrs</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">:</span>
+                 <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-identifier">contentstrs</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">joinstr</span>).<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">contentclass</span>)
+    <span class="ruby-comment"># content_tag( :div,</span>
+    <span class="ruby-comment">#   (label+contentstr).html_safe,</span>
+    <span class="ruby-comment">#  class: &quot;tag_info_section&quot;</span>
+    <span class="ruby-comment"># )</span>
+    <span class="ruby-identifier">result</span> =
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+      <span class="ruby-identifier">content_tag</span>( <span class="ruby-value">:div</span>,
+                   <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:p</span>, <span class="ruby-node">&quot;&lt;strong&gt;#{label}&lt;/strong&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;pull-right&quot;</span>),
+                   <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;col-md-4&quot;</span>)<span class="ruby-operator">+</span>
+      <span class="ruby-identifier">content_tag</span>( <span class="ruby-value">:div</span>,
+                   <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:p</span>, <span class="ruby-identifier">contentstr</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;pull-left&quot;</span>),
+                   <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;col-md-8&quot;</span>),
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;row&quot;</span>
+    <span class="ruby-identifier">result</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_list" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_list</span><span
+            class="method-args">(tags)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_list-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 271</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_list</span> <span class="ruby-identifier">tags</span>
+<span class="ruby-comment">    names = tags.collect { |tag|
+      link_to_submit tag.name, tag_path(tag), :mode =&gt; :modal
+    }
+    if names.count &gt; 1
+      (names[0..-3] &lt;&lt; &quot;#{names[-2]} and #{names[-1]}&quot;).join(&#39;, &#39;).html_safe
+    else
+      names[0]
+    end
+</span>    <span class="ruby-identifier">strjoin</span>( <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">tag_path</span>(<span class="ruby-identifier">tag</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>
+    }).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_select" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_select</span><span
+            class="method-args">(alltags, curtags)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a <a href="Bootstrap.html">Bootstrap</a> selection menu of a set of
+tags</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tag_select-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 213</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_select</span> <span class="ruby-identifier">alltags</span>, <span class="ruby-identifier">curtags</span>
+  <span class="ruby-identifier">menu_options</span> = { <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;question-selector&quot;</span> }
+  <span class="ruby-identifier">menu_options</span>[<span class="ruby-value">:style</span>] = <span class="ruby-string">&quot;display: none;&quot;</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">alltags</span><span class="ruby-operator">-</span><span class="ruby-identifier">curtags</span>).<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">alltags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:option</span>, <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, { <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> (<span class="ruby-string">&quot;display: none;&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">curtags</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">tag</span>)) }.<span class="ruby-identifier">compact</span>
+  }.<span class="ruby-identifier">unshift</span>(
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:option</span>, <span class="ruby-node">&quot;Pick #{curtags.empty? ? &#39;a&#39; : &#39;Another&#39;} Question&quot;</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-value">0</span>
+  ).<span class="ruby-identifier">join</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:select</span>, <span class="ruby-identifier">options</span>, <span class="ruby-identifier">menu_options</span> <span class="ruby-comment"># , class: &quot;selectpicker&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-taglist" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">taglist</span><span
+            class="method-args">(taglist)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return HTML for each tag of the given type</p>
+          
+          
+
+          
+          <div class="method-source-code" id="taglist-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 170</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">taglist</span>(<span class="ruby-identifier">taglist</span>)
+    <span class="ruby-identifier">taglist</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">grabtag</span> <span class="ruby-identifier">tag</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tags_tabset" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tags_tabset</span><span
+            class="method-args">(tabindex)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Build a set of tabs for use by jQuery UI, with the current tab given as a
+parameter</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tags_tabset-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 180</span>
+    <span class="ruby-keyword">def</span> <span class="ruby-identifier">tags_tabset</span>(<span class="ruby-identifier">tabindex</span>)
+            <span class="ruby-identifier">tabstrs</span> = <span class="ruby-string">&quot;&quot;</span>
+            <span class="ruby-identifier">ix</span> = <span class="ruby-value">0</span>
+            <span class="ruby-identifier">type</span> = <span class="ruby-value">0</span> <span class="ruby-comment"># Index 0 yields type nil</span>
+            <span class="ruby-keyword">while</span> <span class="ruby-identifier">type</span>
+                <span class="ruby-identifier">label</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typename</span>(<span class="ruby-identifier">type</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">pluralize</span>
+                <span class="ruby-identifier">tabstrs</span> <span class="ruby-operator">+=</span> <span class="ruby-value">&lt;&lt;BLOCK_END
+                    &lt;li class=&quot;tag_tab&quot;&gt;&lt;a href=&quot;tags/list?tabindex=#{ix.to_s}&quot; title=&quot;#{label}&quot;&gt;#{label}&lt;/a&gt;&lt;/li&gt; 
+BLOCK_END</span>
+                <span class="ruby-identifier">type</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">index_to_type</span>(<span class="ruby-identifier">ix</span><span class="ruby-operator">+=</span><span class="ruby-value">1</span>) <span class="ruby-comment"># we get nil when we&#39;ve run off the end of the table</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">s</span> = <span class="ruby-value">&lt;&lt;BLOCK_END
+&lt;div id=&quot;tags_tabset&quot; value=#{tabindex.to_s} &gt; 
+  &lt;ul&gt;
+    #{tabstrs}
+  &lt;/ul&gt; 
+&lt;/div&gt;
+BLOCK_END</span>
+         <span class="ruby-identifier">s</span>.<span class="ruby-identifier">html_safe</span>
+       <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-type_selections" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">type_selections</span><span
+            class="method-args">(val=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Helper to define a selection menu for tag type</p>
+          
+          
+
+          
+          <div class="method-source-code" id="type_selections-source">
+            <pre><span class="ruby-comment"># File app/helpers/tags_helper.rb, line 202</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">type_selections</span> <span class="ruby-identifier">val</span>=<span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">Tag</span>
+        <span class="ruby-identifier">options_for_select</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>, <span class="ruby-identifier">val</span>.<span class="ruby-identifier">typenum</span> )
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">nil?</span>
+        <span class="ruby-identifier">options_for_select</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span> )
+    <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">options_for_select</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>, <span class="ruby-identifier">val</span> )
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

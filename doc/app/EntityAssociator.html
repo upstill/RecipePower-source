@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class EntityAssociator - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="SearchNode.html">SearchNode</a>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-autobuild">::autobuild</a>
+    
+    <li ><a href="#method-c-build">::build</a>
+    
+    <li ><a href="#method-c-build_root">::build_root</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-build_child">#build_child</a>
+    
+    <li ><a href="#method-i-build_child_of_class">#build_child_of_class</a>
+    
+    <li ><a href="#method-i-init_children">#init_children</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-EntityAssociator">
+  <h1 id="class-EntityAssociator" class="class">
+    class EntityAssociator
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-autobuild" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">autobuild</span><span
+            class="method-args">(source_entity, target_entity_type, viewer, weight = 1.0, parent = nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="autobuild-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">autobuild</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>, <span class="ruby-identifier">weight</span> = <span class="ruby-value">1.0</span>, <span class="ruby-identifier">parent</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># What class are we building?</span>
+  <span class="ruby-identifier">klass</span> = (<span class="ruby-identifier">source_entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;Associator&quot;</span>).<span class="ruby-identifier">constantize</span>
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">build</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>, <span class="ruby-identifier">weight</span>, <span class="ruby-identifier">parent</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-build" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build</span><span
+            class="method-args">(source_entity, target_entity_type, viewer, weight = 1.0, parent = nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="build-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">build</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>, <span class="ruby-identifier">weight</span> = <span class="ruby-value">1.0</span>, <span class="ruby-identifier">parent</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">associate</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>
+  <span class="ruby-identifier">parent</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">init_child_search</span>(<span class="ruby-identifier">associate</span>, <span class="ruby-identifier">weight</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">init_search</span>
+  <span class="ruby-identifier">init_children</span>
+  <span class="ruby-identifier">sort_children</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-build_root" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build_root</span><span
+            class="method-args">(target_entity_type, viewer)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="build_root-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 34</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">build_root</span> <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>
+  <span class="ruby-constant">EntityAssociator</span>.<span class="ruby-identifier">build</span> <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(source_entity, target_entity_type, viewer)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">target_entity_type</span>, <span class="ruby-identifier">viewer</span>
+  <span class="ruby-ivar">@source_entity</span> = <span class="ruby-identifier">source_entity</span>
+  <span class="ruby-ivar">@target_entity_type</span> = <span class="ruby-identifier">target_entity_type</span>
+  <span class="ruby-ivar">@viewer</span> = <span class="ruby-identifier">viewer</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-build_child" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build_child</span><span
+            class="method-args">(source_entity, weight = 1.0)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="build_child-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">build_child</span> <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">weight</span> = <span class="ruby-value">1.0</span>
+  <span class="ruby-constant">EntityAssociator</span>.<span class="ruby-identifier">autobuild</span>(<span class="ruby-identifier">source_entity</span>, <span class="ruby-ivar">@target_entity_type</span>, <span class="ruby-ivar">@viewer</span>, <span class="ruby-identifier">weight</span>, <span class="ruby-keyword">self</span>) <span class="ruby-keyword">if</span> (<span class="ruby-identifier">weight</span><span class="ruby-operator">*</span><span class="ruby-identifier">child_attenuation</span>) <span class="ruby-operator">&gt;=</span> <span class="ruby-identifier">sn_cutoff</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-build_child_of_class" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build_child_of_class</span><span
+            class="method-args">(klass, source_entity, weight = 1.0)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="build_child_of_class-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">build_child_of_class</span> <span class="ruby-identifier">klass</span>, <span class="ruby-identifier">source_entity</span>, <span class="ruby-identifier">weight</span> = <span class="ruby-value">1.0</span>
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">build</span>(<span class="ruby-identifier">source_entity</span>, <span class="ruby-ivar">@target_entity_type</span>, <span class="ruby-ivar">@viewer</span>, <span class="ruby-identifier">weight</span>, <span class="ruby-keyword">self</span>) <span class="ruby-keyword">if</span> (<span class="ruby-identifier">weight</span><span class="ruby-operator">*</span><span class="ruby-identifier">child_attenuation</span>) <span class="ruby-operator">&gt;=</span> <span class="ruby-identifier">sn_cutoff</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-init_children" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">init_children</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>This is a stub for any associators that want to pre-build their results</p>
+          
+          
+
+          
+          <div class="method-source-code" id="init_children-source">
+            <pre><span class="ruby-comment"># File app/services/suggestion_services.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">init_children</span>
+
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
