@@ -74,6 +74,10 @@ class PageRef < ActiveRecord::Base
       else
         self.error_message = data['errorMessage']
       end
+      if data['domain'] == 'www.answers.com'
+        # We can't trust answers.com to provide a straight url, so we have to special-case it
+        data['url'] = url
+      end
       self.http_status =
           if self.error_message.blank?
             200

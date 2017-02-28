@@ -210,4 +210,13 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal ref.referents.first.id, rft.id, "Reference's referent doesn't match"
   end
 
+  test "answers.com behaves correctly" do
+    # Unfortunately, Mercury gets fooled by answers.com pages, thinking the url is the home page
+    # PageRef.fetch special-cases that (smell!), and here we test it.
+    url = "http://www.answers.com/topic/pinch"
+    dpr = DefinitionPageRef.fetch url
+    assert dpr
+    assert_equal url, dpr.url
+  end
+
 end

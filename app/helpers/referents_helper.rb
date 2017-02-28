@@ -18,8 +18,8 @@ module ReferentsHelper
                              referent_homelink(ref)
                          ], ': '.html_safe,
       )
-      inward_separator = summary_separator separator
     end
+    return header if separator.length > 15
     summarize_set '',
                   [
                       header,
@@ -32,7 +32,7 @@ module ReferentsHelper
 
   def summarize_ref_expressions referent, options={}
     summarize_set labelled_quantity(referent.expressions.count, 'Expression'),
-                  referent.expressions.collect { |expr|
+                  referent.expressions.limit(8).collect { |expr|
                     tag_homelink(expr.tag, nuke_button: referent.expressions.count > 1)
                   },
                   options[:separator]
@@ -40,13 +40,13 @@ module ReferentsHelper
 
   def summarize_ref_parents ref, options={}
     summarize_set (options[:label] || 'Categorized under'),
-                  ref.parents.collect { |parent| referent_homelink parent.becomes(Referent) },
+                  ref.parents.limit(8).collect { |parent| referent_homelink parent.becomes(Referent) },
                   options[:separator]
   end
 
   def summarize_ref_children ref, options={}
     summarize_set (options[:label] || 'Category includes'),
-                  ref.children.collect { |child| referent_homelink child.becomes(Referent) },
+                  ref.children.limit(8).collect { |child| referent_homelink child.becomes(Referent) },
                   options[:separator]
   end
 

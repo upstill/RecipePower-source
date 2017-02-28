@@ -31,7 +31,7 @@ module PageRefsHelper
       )
       inward_separator = summary_separator separator
     end
-    referent_summaries = (pr.is_a?(Referrable) ? pr.referents : []).collect { |referent|
+    referent_summaries = (pr.is_a?(Referrable) ? pr.referents.limit(8) : []).collect { |referent|
       summarize_referent referent, label: "#{referent.class} ##{referent.id}", separator: separator
     }
     summarize_set '', [header] + referent_summaries, separator
