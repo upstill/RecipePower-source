@@ -16,7 +16,7 @@
       <%# site_pagerefs_summary site, separator: tag(:br) %>
     </td>
     <td class="actions-column">
-      <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true do %>
+      <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true, :tag_button => true do %>
           <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
       <% end %>
       <% if response_service.admin_view? %>
