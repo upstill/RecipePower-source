@@ -158,7 +158,8 @@ $salmon-field-background-color: #F3DFDE;
 $salmon-link-color: #E0A09E;
 
 $green-background-color: #4B815B;
-$green-text-color: #9AB3A0;
+$green-text-color: #ECE6CD;
+$green-link-color: #9AB3A0;
 $green-field-background-color: #C1D3C7;
 $green-field-text-color: #227133;
 
@@ -177,7 +178,7 @@ $green-field-text-color: #227133;
     border-color: #385E44;
   }
   a {
-    color: #9AB3A0;
+    color: $green-link-color;
     &.btn-info {
       color: lightyellow;
     }

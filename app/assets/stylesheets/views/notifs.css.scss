@@ -88,20 +88,44 @@ div.notifs {
   div.modal-header {
     text-align: center;
     border: none;
-    color: #ECE6CD;
-    a.signup {
-      font-size: 2em;
-      color: #ECE6CD;
-    }
-    a.signin {
-      font-size: 1.2em;
-      color: #ECE6CD
+    div.header-links {
+      span {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 2em;
+      }
+      &.signup,&.signin {
+        a {
+          text-decoration: underline;
+          position: absolute;
+          right: 3em;
+          top: 1.5em;
+          &.rollup {
+            text-decoration: none;
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            font-size: 1.2em;
+            color: $green-link-color;
+          }
+          &:hover {
+            color: $green-text-color;
+          }
+        }
+      }
+      &.waiting {
+        a.signup {
+          color: $green-text-color;
+          font-size: 2em;
+        }
+        a.signin {
+          color: $green-text-color;
+          font-size: 1.2em;
+        }
+      }
     }
     a.rollup {
       display: none;
-      float: right;
-      font-size: 1.2em;
-      color: #ECE6CD;
     }
   }
   div.selectable {
