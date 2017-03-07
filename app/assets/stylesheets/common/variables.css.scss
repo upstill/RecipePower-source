@@ -160,6 +160,7 @@ $salmon-link-color: #E0A09E;
 $green-background-color: #4B815B;
 $green-text-color: #9AB3A0;
 $green-field-background-color: #C1D3C7;
+$green-field-text-color: #227133;
 
 @mixin div-green {
   background-color: $green-background-color;
@@ -167,7 +168,7 @@ $green-field-background-color: #C1D3C7;
   // input[type='text'], input[type='password'], input[type='email'] {
   input.string, textarea, input[type='text'], input[type='password'], input[type='email'], ul.token-input-list-facebook {
     background-color: $green-field-background-color;
-    color: #849688;
+    color: $green-field-text-color;
   }
   input.center-button {
     background-color: #D8E5DC;

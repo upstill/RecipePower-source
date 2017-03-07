@@ -462,6 +462,10 @@ body.logged-in {
         }
         div.search-glyph {
           height: 100%; // top: 0.6em;
+          span.glyphicon {
+            top: -1px;
+            right: 2px;
+          }
         }
       }
     }

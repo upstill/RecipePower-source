@@ -16,10 +16,10 @@ jQuery ->
 		if !$(dlog).hasClass 'keeparound'
 			$(dlog).remove()
 	$('.select-content', document).click (event) ->
-		enclosure_selector = 'div.modal-body'
+		enclosure_selector = 'div.modal-body,div.header-links'
 		$(enclosure_selector).hide().find('div.flash_notifications').removeClass 'flash-target'
 		if targetClass = $(event.target).data 'activate'
-			$(enclosure_selector+'.'+targetClass).show().find('div.flash_notifications').addClass 'flash-target'
+			$(enclosure_selector).filter('.'+targetClass).show().find('div.flash_notifications').addClass 'flash-target'
 			$('a.select-content.none').show()
 			window.scrollTo 0, 0
 			$(enclosure_selector).closest('div.notifs').removeClass 'collapsed'
