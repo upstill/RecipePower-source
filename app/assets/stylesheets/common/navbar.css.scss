@@ -414,13 +414,22 @@ body.logged-in {
       height: $header-height;
       padding: 4px;
       // left: -$logo-clearance-sm;
-      content: image-url('RP-logo-small.png');
+      content: image-url('rp-logo-small.png');
     }
     @include respond-to(large-up) {
       // left: -20px;
       height: 200px;
       left: 15px;
       content: image-url('rp-logo.png');
+    }
+    &.compact {
+      @include respond-to(large-up) {
+        // left: -20px;
+        height: 53px;
+        left: 4px;
+        top: 7px;
+        content: image-url('rp-logo-small.png');
+      }
     }
   }
   div.form-group {

@@ -28,6 +28,7 @@ class PagesController < ApplicationController
   def home
     response_service.title = 'Home'
     @auth_context = :manage
+    @home_page = true
     if current_user
       redirect_to collection_user_path(current_user)
     elsif params[:live]

@@ -55,7 +55,7 @@ div.notifs {
         line-height: 2em;
       }
       @include respond-to(large-up) {
-        padding: 12px;
+        padding: 8px 11px;
         font-size: 1em;
         line-height: 2em;
       }
