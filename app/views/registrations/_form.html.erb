@@ -21,10 +21,17 @@
         <%# devise_error_messages! %>
         <%# form_errors_helper f, resource %>
         <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-        <%= f.input :email, label: false, placeholder: 'email', autofocus: true %>
+        <%= f.input :email,
+                    placeholder: 'email',
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    autofocus: true %>
         <%# f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-        <%= f.input :password, label: false, placeholder: 'password' %>
-        <%= f.input :password_confirmation, label: false, placeholder: 'confirm password' %>
+        <%= f.input :password,
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    placeholder: 'password' %>
+        <%= f.input :password_confirmation,
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    placeholder: 'confirm password' %>
         <%= f.submit 'SIGN ME UP!', class: 'dialog-submit-button btn btn-xl center-button free' %>
     <% end %>
 <% end %>

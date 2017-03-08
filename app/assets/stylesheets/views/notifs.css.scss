@@ -145,3 +145,9 @@ div.notifs {
     }
   }
 }
+.placeholder {
+  // Labels on form items are hidden if placeholders are available
+  div.form-group label.placetaker {
+    display: none;
+  }
+}
