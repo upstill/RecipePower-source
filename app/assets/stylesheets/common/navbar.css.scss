@@ -414,7 +414,7 @@ body.logged-in {
       height: $header-height;
       padding: 4px;
       // left: -$logo-clearance-sm;
-      content: image-url('rp-logo-small.png');
+      content: image-url('rp-logo-sm.png');
     }
     @include respond-to(large-up) {
       // left: -20px;
@@ -428,7 +428,7 @@ body.logged-in {
         height: 53px;
         left: 4px;
         top: 7px;
-        content: image-url('rp-logo-small.png');
+        content: image-url('rp-logo-sm.png');
       }
     }
   }
