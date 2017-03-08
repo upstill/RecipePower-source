@@ -161,7 +161,8 @@ RP.tagger.setup = (elmt) ->
 
 		$(elmt).tokenInput request, options
 		$(elmt).removeClass "token-input-field-pending"
-		$(elmt).addClass "token-input-field"
+		tokenInputId = '#token-input-' + $(elmt).attr 'id'
+		$(tokenInputId).addClass "token-input-field" # So that placeholder management doesn't muck it up
 		# Attract entry focus to the appropriate item, after a delay to allow things to settle down
 		if elmt.autofocus
 			setTimeout (selector) ->
