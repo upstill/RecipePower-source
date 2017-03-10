@@ -9,26 +9,26 @@ $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
 
 $generic-card-background-color: #f9f8f4;
-$generic-card-text-color: #aaaaaa;
+$generic-card-color: #aaaaaa;
 $generic-card-title-color: darkgrey;
 $generic-card-label-color: darkgrey;
-$generic-panels-label-text-color: #bbbbbb;
+$generic-panels-label-color: #bbbbbb;
 $generic-panels-label-button-color: lightgray;
 $generic-panels-button-color: #fafafa;
 
 // For material relating to the current user
 $viewer-card-background-color: #ecdad7;
-$viewer-panels-label-text-color: #e6ccc8;
+$viewer-panels-label-color: #e6ccc8;
 $viewer-panels-label-button-color: #efc5bd;
 $viewer-card-link-color: mix($viewer-panels-label-button-color, black, 70%);
 
 // For material relating to lists of the current user
 
 $friends-navtab-background-color: #e4e0cf;
-$friends-navtab-text-color: #dbc046;
+$friends-navtab-color: #dbc046;
 
 $friends-card-background-color: #e9e4ca;
-$friends-panels-label-text-color: #e9e4ca;
+$friends-panels-label-color: #e9e4ca;
 $friends-panels-label-button-color: #dbd3ab;
 $friends-panel-background-color: #e9e4ca;
 $friends-panel-background-transparent: rgba(233, 228, 202, 0);
@@ -37,40 +37,40 @@ $friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
 
   // For displaying other users
 $user-card-background-color: #ecedef;
-$user-card-text-color: #aaaaaa;
+$user-card-color: #aaaaaa;
 $user-card-title-color: darkgrey;
 $user-card-label-color: darkgrey;
-$user-panels-label-text-color: #bbbbbb;
+$user-panels-label-color: #bbbbbb;
 $user-panels-label-button-color: #ffffff;
 $user-panels-button-color: #999999;
 
 $recipes-navtab-background-color: #d8dde0;
-$recipes-navtab-text-color: #4c7c99;
+$recipes-navtab-color: #4c7c99;
 $recipes-card-background-color: #f9f8f4;
-$recipes-panels-label-text-color: #dfdfdf;
+$recipes-panels-label-color: #dfdfdf;
 $recipes-panels-label-button-color: #afafaf;
 $recipes-panel-background-color: #d8dde0;
 $recipes-panel-background-transparent: rgba(216, 221, 224, 0);
 $recipes-panel-label-color: #e5ebef;
 
 $lists-navtab-background-color: #dbe0dd;
-$lists-navtab-text-color: #1d6a2b;
+$lists-navtab-color: #1d6a2b;
 $lists-card-background-color: #d0dbd2;
-$lists-panels-label-text-color: #e9e4ca;
+$lists-panels-label-color: #e9e4ca;
 $lists-panels-label-button-color: #94b79a;
 $lists-panel-background-color: #dbe0dd;
 $lists-panel-background-transparent: rgba(219, 224, 221, 0);
 $lists-panel-label-color: #e9eeea;
 
 $feeds-navtab-background-color: #e7dfd6;
-$feeds-navtab-text-color: #de8822;
+$feeds-navtab-color: #de8822;
 $feeds-card-background-color: #f3e3cf;
 $feeds-panel-background-color: #e7dfd6;
 $feeds-panel-background-transparent: rgba(247, 223, 214, 0);
 $feeds-panel-label-color: #f5f2ee;
 
 $utensils-navtab-background-color: #dcdbdc;
-$utensils-navtab-text-color: #816887;
+$utensils-navtab-color: #816887;
 
 // Color for the user card and panels
 $user-color: #EDDAD7;
@@ -151,31 +151,46 @@ $slider-title-depth: 1001; // from slider.css.scss
 $slider-fader-depth: 1002; // from slider.css.scss
 $slider-right-depth: 1003; // from slider.css.scss
 
-$salmon-background-color: #CF6361;
-$salmon-text-color: #E8d6d6;
-$salmon-button-color: #CF2F27;
-$salmon-field-background-color: #F3DFDE;
-$salmon-link-color: #E0A09E;
-
 $green-background-color: #4B815B;
-$green-text-color: #ECE6CD;
+$green-color: #ECE6CD;
 $green-link-color: #9AB3A0;
-$green-field-background-color: #C1D3C7;
-$green-field-text-color: #227133;
+
+$green-field-background-color: #dfebe2;
+$green-field-color: #227133;
+
+$green-select-background-color: $green-field-background-color;
+$green-select-color: $green-field-color;
+
+$green-button-background-color: #D8E5DC;
+$green-button-color: #385E44;
+$green-button-border-color: #385E44;
+
+$green-flash-background-color: $green-button-background-color;
+$green-flash-color: $green-button-color;
+$green-flash-border-color: $green-button-border-color;
 
 @mixin div-green {
   background-color: $green-background-color;
-  color: $green-text-color;
+  color: $green-color;
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix($green-color, white, 70%);
+    background-color: mix($green-background-color, $green-field-background-color, 70%);
+    border-color: $green-background-color;
+  }
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], ul.token-input-list-facebook {
+  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
     background-color: $green-field-background-color;
-    color: $green-field-text-color;
+    color: $green-field-color;
+  }
+  select, div.token-input-dropdown-facebook {
+    background-color: $green-select-background-color;
+    color: $green-select-color;
   }
   input.center-button {
-    background-color: #D8E5DC;
+    background-color: $green-button-background-color;
     background-image: unset;
-    color: #385E44;
-    border-color: #385E44;
+    color: $green-button-color;
+    border-color: $green-button-border-color;
   }
   a {
     color: $green-link-color;
@@ -184,16 +199,34 @@ $green-field-text-color: #227133;
     }
   }
   span.help-block.has-error {
-    color: #6ba942;
+    background-color: $green-flash-background-color;
+    color: $green-flash-color;
+    border-color: $green-flash-border-color;
   }
 }
 
+$salmon-background-color: #CF6361;
+$salmon-color: #E8d6d6;
+$salmon-button-color: #CF2F27;
+$salmon-field-background-color: #F3DFDE;
+$salmon-field-color: #CF6361;
+$salmon-link-color: #E0A09E;
+
 @mixin div-salmon {
   background-color: $salmon-background-color;
-  color: $salmon-text-color;
+  color: $salmon-color;
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix($salmon-color, white, 70%);
+    background-color: mix($salmon-background-color, $salmon-field-background-color, 70%);
+    border-color: $salmon-background-color;
+  }
+  div.token-input-dropdown-facebook { // The dropdown menu
+    background-color: $salmon-field-background-color;
+    color: $salmon-field-color;
+  }
   input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: $salmon-field-background-color;
-    color: $salmon-button-color;
+    color: $salmon-field-color;
   }
   .center-button {
     background-color: $salmon-field-background-color;
@@ -209,42 +242,78 @@ $green-field-text-color: #227133;
   }
 }
 
+$blue-background-color: #5090A9;
+$blue-color: #E6D7A3;
+$blue-button-color: #C2D9E1;
+$blue-field-background-color: #C2D9E1;
+$blue-field-color: #7E9796;
+$blue-link-color: #A0B6C2;
+
 @mixin div-blue {
-  background-color: #5090A9;
-  color: #E6D7A3;
+  background-color: $blue-background-color;
+  color: $blue-color;
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix($blue-color, white, 70%);
+    background-color: mix($blue-background-color, $blue-field-background-color, 70%);
+    border-color: $blue-background-color;
+  }
+  div.token-input-dropdown-facebook { // The dropdown menu
+    background-color: $blue-field-background-color;
+    color: $blue-field-color;
+  }
   input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: #C2D9E1;
-    color: #7E9796;
+    background-color: $blue-field-background-color;
+    color: $blue-field-color;
   }
   .center-button {
-    background-color: #C2D9E1;
+    background-color: $blue-button-color;
     background-image: unset;
     color: #205D72;
     border-color: #205D72;
   }
   a {
-    color: #A0B6C2;
+    color: $blue-link-color;
     &.btn-info {
       color: lightgray;
     }
   }
 }
 
+$purple-color: #E8D6D6;
+$purple-background-color: #7D6D89;
+$purple-field-color: #8F9092;
+$purple-field-background-color: #D2CCD6;
+
+$purple-button-background-color: #E1E0E4;
+$purple-button-color: #541D78;
+$purple-button-border-color: #541D78;
+
+$purple-link-color: #E8D6D6;
+
 @mixin div-purple {
-  background-color: #7D6D89;
-  color: #E8D6D6;
+  background-color: $purple-background-color;
+  color: $purple-color;
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix($purple-color, white, 70%);
+    background-color: mix($purple-background-color, $purple-field-background-color, 70%);
+    border-color: $purple-background-color;
+  }
+  div.token-input-dropdown-facebook { // The dropdown menu
+    background-color: $purple-field-background-color;
+    color: $purple-field-color;
+  }
   input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: #D2CCD6;
-    color: #8F9092;
+    background-color: $purple-field-background-color;
+    color: $purple-field-color;
   }
   .center-button {
-    background-color: #E1E0E4;
+    background-color: $purple-button-background-color;
     background-image: unset;
-    color: #541D78;
-    border-color: #541D78;
+    color: $purple-button-color;
+    border-color: $purple-button-border-color;
   }
   form div a {
-    color: #E8D6D6;
+    color: $purple-link-color;
     &.btn-info {
       color: lightgray;
     }
@@ -253,7 +322,7 @@ $green-field-text-color: #227133;
 
 /*
 $feeds-navtab-background-color: #e7dfd6;
-$feeds-navtab-text-color: #de8822;
+$feeds-navtab-color: #de8822;
 $feeds-card-background-color: #f3e3cf;
 $feeds-panel-background-color: #e7dfd6;
 $feeds-panel-background-transparent: rgba(247, 223, 214, 0);
@@ -261,17 +330,27 @@ $feeds-panel-label-color: #f5f2ee;
 */
 
 $feeds-background-color: $feeds-card-background-color;
-$feeds-text-color: $feeds-navtab-text-color;
+$feeds-color: $feeds-navtab-color;
 $feeds-button-color: $feeds-panel-label-color;
 $feeds-field-background-color: $feeds-navtab-background-color;
-$feeds-link-color: $feeds-navtab-text-color;
+$feeds-field-color: $feeds-color;
+$feeds-link-color: $feeds-navtab-color;
 
 @mixin div-feeds {
   background-color: $feeds-background-color;
-  color: $feeds-text-color;
+  color: $feeds-color;
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix($feeds-color, white, 70%);
+    background-color: mix($feeds-background-color, $feeds-field-background-color, 70%);
+    border-color: $feeds-background-color;
+  }
+  div.token-input-dropdown-facebook { // The dropdown menu
+    background-color: $feeds-field-background-color;
+    color: $feeds-field-color;
+  }
   input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
     background-color: $feeds-field-background-color;
-    color: $feeds-text-color;
+    color: $feeds-field-color;
   }
   .center-button {
     background-color: $feeds-field-background-color;

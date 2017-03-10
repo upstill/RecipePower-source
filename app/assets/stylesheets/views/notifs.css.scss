@@ -109,17 +109,17 @@ div.notifs {
             color: $green-link-color;
           }
           &:hover {
-            color: $green-text-color;
+            color: $green-color;
           }
         }
       }
       &.waiting {
         a.signup {
-          color: $green-text-color;
+          color: $green-color;
           font-size: 2em;
         }
         a.signin {
-          color: $green-text-color;
+          color: $green-color;
           font-size: 1.2em;
         }
       }

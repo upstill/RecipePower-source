@@ -1,21 +1,21 @@
 @mixin list-item-backgrounds {
   background-color: $green-field-background-color;
-  color: $lists-navtab-text-color;
+  color: $lists-navtab-color;
   &.owned {
     background-color: $lists-navtab-background-color;
-    color: $lists-navtab-text-color;
+    color: $lists-navtab-color;
   }
   &.contributed {
     background-color: $recipes-navtab-background-color;
-    color: $recipes-navtab-text-color;
+    color: $recipes-navtab-color;
   }
   &.friends {
     background-color: $friends-navtab-background-color;
-    color: $friends-navtab-text-color;
+    color: $friends-navtab-color;
   }
   &.public {
     background-color: $green-field-background-color;
-    color: $green-text-color;
+    color: $green-color;
   }
 }
 

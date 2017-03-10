@@ -5,25 +5,25 @@ div.collection-header {
     &.cookmarks {
       background: $recipes-panel-background-color;
       div.navlink a {
-        color: $recipes-navtab-text-color;
+        color: $recipes-navtab-color;
       }
     }
     &.friends {
       background: #e9e3c9; // $friends-panel-background-color;
       div.navlink a {
-        color: #dfc96a; // $friends-navtab-text-color; // #dfca6a;
+        color: #dfc96a; // $friends-navtab-color; // #dfca6a;
       }
     }
     &.lists {
       background: #D0DbD2; // $lists-panel-background-color;
       div.navlink a {
-        color: #1d6a2b; // $lists-navtab-text-color;
+        color: #1d6a2b; // $lists-navtab-color;
       }
     }
     &.feeds {
       background: $feeds-panel-background-color;
       div.navlink a {
-        color: $feeds-navtab-text-color;
+        color: $feeds-navtab-color;
       }
     }
     div.navlink {
@@ -62,7 +62,7 @@ div.collection-header {
       margin-bottom: 0.5em;
       margin-left: 0.3em;
       font-size: 2em;
-      color: $friends-navtab-text-color; // #dfca6a;
+      color: $friends-navtab-color; // #dfca6a;
       // border: 1px solid red;
       span.follower-count {
         font-size: 0.9em;
@@ -83,16 +83,16 @@ div.collection-header {
           color: #d0d0d0;
         }
         &.cookmarks {
-          color: $recipes-navtab-text-color;
+          color: $recipes-navtab-color;
         }
         &.lists {
-          color: $lists-navtab-text-color;
+          color: $lists-navtab-color;
         }
         &.friends {
-          color: $friends-navtab-text-color; // #dfca6a;
+          color: $friends-navtab-color; // #dfca6a;
         }
         &.feeds {
-          color: $feeds-navtab-text-color;
+          color: $feeds-navtab-color;
         }
       }
       div.ul {

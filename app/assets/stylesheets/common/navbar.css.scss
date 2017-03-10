@@ -61,7 +61,7 @@ li.master-navtab {
   &#collections-navtab {
     background-color: $recipes-navtab-background-color;
     a {
-      color: $recipes-navtab-text-color;
+      color: $recipes-navtab-color;
     }
   }
   &#friends-navtab {
@@ -70,7 +70,7 @@ li.master-navtab {
     //padding:80px 8px 0;
     //text-shadow: none;
     a {
-      color: $friends-navtab-text-color;
+      color: $friends-navtab-color;
     }
   }
 
@@ -80,7 +80,7 @@ li.master-navtab {
     //padding: 80px 18px 0;
     //text-shadow: none;
     a {
-      color: $lists-navtab-text-color;
+      color: $lists-navtab-color;
     }
   }
 
@@ -90,7 +90,7 @@ li.master-navtab {
     //padding: 80px 34px 0;
     //text-shadow: none;
     a {
-      color: $feeds-navtab-text-color;
+      color: $feeds-navtab-color;
     }
   }
 
@@ -183,7 +183,7 @@ body.logged-in {
         &#collections-navtab {
           background-color: $recipes-navtab-background-color;
             a {
-            color: $recipes-navtab-text-color;
+            color: $recipes-navtab-color;
           }
         }
         &#friends-navtab {
@@ -192,7 +192,7 @@ body.logged-in {
           //padding:80px 8px 0;
           //text-shadow: none;
             a {
-            color: $friends-navtab-text-color;
+            color: $friends-navtab-color;
           }
         }
         &#my_lists-navtab {
@@ -201,7 +201,7 @@ body.logged-in {
           //padding: 80px 18px 0;
           //text-shadow: none;
             a {
-            color: $lists-navtab-text-color;
+            color: $lists-navtab-color;
           }
         }
         &#feeds-navtab {
@@ -215,7 +215,7 @@ body.logged-in {
             padding-right: 34px;
           }
           a {
-            color: $feeds-navtab-text-color;
+            color: $feeds-navtab-color;
           }
         }
         &#home-navtab {

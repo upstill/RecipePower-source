@@ -10,7 +10,7 @@ div.edit_site.dialog {
     // background-color: mix($green-background-color, white, 20%);
     // color: mix($green-text-color, black, 5%);
     font-size: .75em;
-    border-bottom: 2px solid $green-text-color;
+    border-bottom: 2px solid $green-color; // text color for green color scheme
     div.finder-fields {
       div.form-group.string {
         font-size: 1em;

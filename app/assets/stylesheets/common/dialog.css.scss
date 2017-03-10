@@ -12,9 +12,11 @@ div.dialog {
   line-height: 130%;
   font-weight: normal;
   ul.token-input-list-facebook {
-    font: 14px arial, sans-serif;
+    font: 15px arial, sans-serif;
+    padding-top: 3px;
+    padding-bottom: 3px;
     li.token-input-input-token-facebook input[type='text'] {
-      padding: 0;
+      padding: 0 0 0 4px;
       margin: 0;
     }
   }
@@ -66,6 +68,18 @@ div.dialog {
 
 // In development: new geometry for dialogs. See also color schemes following
 div.dialog.new-style {
+  font: 16px arial, sans-serif;
+  line-height: 130%;
+  font-weight: normal;
+  ul.token-input-list-facebook {
+    font: 15px arial, sans-serif;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    li.token-input-input-token-facebook input[type='text'] {
+      padding: 0 0 0 4px;
+      margin: 0;
+    }
+  }
   &.injector {
     font: 16px arial, sans-serif;
     font-weight: bold;
@@ -108,8 +122,8 @@ div.dialog.new-style {
     input.password,
     textarea {
       line-height: 1.5em;
-      width: 86%;
-      margin-left: 7%;
+      width: 94%;
+      margin-left: 6%;
       margin-bottom: 5px;
       &.full-width {
         width: 100%;
@@ -120,7 +134,7 @@ div.dialog.new-style {
       div.modal-header {
         text-align: center;
         padding-bottom: 5px;
-        min-height: 40px; // Leave room for the close-box
+        min-height: 3em; // Leave room for the close box
         border-bottom: unset;
         button.dialog-x-box {
           position: absolute;
@@ -157,17 +171,37 @@ div.dialog.new-style {
 div.new-style {
   line-height: 1.5em;
   input[type='text'], input[type='password'], input[type='email'], input[type='url'] {
-    width: 86%;
+    width: 93%;
     margin-left: 7%;
+    margin-top: 5px;
     height: 2.5em;
     padding: 0 15px 0 10px;
     margin-bottom: 25px;
     font-style: oblique;
     font-size: 1.2em;
+    &.token-input-field {
+      height: 1.5em;
+    }
   }
   li.token-input-input-token-facebook {
     input[type='text'] {
       border-radius: 20px;
+    }
+  }
+  div.item-enclosure {
+    width: 97%;
+    margin: auto;
+  }
+  div.label-enclosure {
+    width: 100%;
+    height: auto;
+    .label-right {
+      display: inline-block;
+      float: right;
+      max-width: 100%;
+      span {
+        font-size: 16px;
+      }
     }
   }
   label.checkbox {

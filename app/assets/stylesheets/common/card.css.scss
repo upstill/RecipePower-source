@@ -35,7 +35,7 @@ div.card-item {
   position: relative;
   top: 15px;
   margin-bottom: 2em;
-  color: $generic-card-text-color;
+  color: $generic-card-color;
   background-color: $generic-card-background-color;
   div.title > a.title-link {
     color: $generic-card-title-color;
@@ -301,7 +301,7 @@ div.card-item {
   &.feed-card {
     background-color: $feeds-card-background-color;
     div.title > a.title-link {
-      color: $feeds-navtab-text-color;
+      color: $feeds-navtab-color;
     }
     a {
       color: $feeds-link-color;
@@ -316,7 +316,7 @@ div.card-item {
     }
   }
   &.user-card {
-    color: $user-card-text-color;
+    color: $user-card-color;
     background-color: $user-card-background-color;
     div.title > a.title-link {
       color: $user-card-title-color;
@@ -331,7 +331,7 @@ div.card-item {
   &.list-card {
     background-color: $lists-card-background-color;
     div.title > a.title-link {
-      color: rgba($lists-navtab-text-color, 0.6);
+      color: rgba($lists-navtab-color, 0.6);
     }
     a {
       color: $lists-panels-label-button-color;

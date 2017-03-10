@@ -30,7 +30,7 @@ module GleaningsHelper
               options << decorator.page_ref.title
             end
             if options.empty?
-              content_tag :span, "No #{label.pluralize} Gleaned"
+              content_tag :span, "(no #{label.pluralize.downcase} gleaned)"
             else
               select_tag attribute_name,
                          options_for_select(options),
@@ -83,8 +83,7 @@ module GleaningsHelper
   def gleaning_field_enclosure label, content, target=nil
     content_tag :div,
                 content,
-                style: 'display: inline-block; width: 100%',
-                class: 'gleaning-field-enclosure ' + gleaning_field_class(label),
+                class: 'gleaning-field-enclosure label-right ' + gleaning_field_class(label),
                 data: { target: target }.compact
   end
 end

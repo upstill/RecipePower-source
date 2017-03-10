@@ -52,24 +52,24 @@ div.card {
 table.results {
   &.lists {
     th {
-      color: $lists-navtab-text-color;
+      color: $lists-navtab-color;
     }
   }
 }
 
 a.entity {
   &.list {
-    color: $lists-navtab-text-color;
+    color: $lists-navtab-color;
   }
   &.user {
     &.viewer {
-      color: $viewer-panels-label-text-color;
+      color: $viewer-panels-label-color;
     }
     &.friend {
-      color: $friends-navtab-text-color;
+      color: $friends-navtab-color;
     }
     &.other {
-      color: $user-panels-label-text-color;
+      color: $user-panels-label-color;
     }
   }
 }

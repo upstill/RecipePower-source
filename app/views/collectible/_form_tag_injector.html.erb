@@ -23,12 +23,10 @@
       <div class="edit_recipe_field" >
         <%= f.label @decorator.attribute_for(:title), 'Title' -%>
         <% @decorator.title %>
-        <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
             <%= f.text_area @decorator.attribute_for(:title), rows: '1' -%>
           </div>
-        </div>
       </div>
 
       <%= taggable_div f,
@@ -39,12 +37,10 @@
 
       <div class="edit_recipe_field" >
         <%= f.label :comment, 'Notes' -%>
-        <div class="edit_recipe_field_textarea">
           <div class="expandingArea">
             <pre><span></span><br></pre>
             <%= f.text_area :collectible_comment, rows: '1', placeholder: 'What are your thoughts about this recipe?' -%>
           </div>
-        </div>
       </div>
     </div>
 
