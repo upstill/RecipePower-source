@@ -138,7 +138,7 @@ div.notifs {
     }
   }
   div.modal-content {
-    @include div-green;
+    @include dialog-color-scheme(green);
     div.flash_notifications {
       padding-left: 1em;
       padding-right: 1em;

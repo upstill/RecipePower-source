@@ -24,8 +24,8 @@
 //= require jquery_addons/jquery.tokeninput
 //= require jquery_addons/jquery.ba-resize
 //= require jquery_ujs
-//= require ../../../vendor/assets/javascripts/bootbox
-//= require ../../../vendor/assets/javascripts/imagesloaded.pkgd.min
+//= require bootbox
+//= require imagesloaded.pkgd.min
 
 window.RP = window.RP || {}
 

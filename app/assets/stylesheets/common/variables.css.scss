@@ -169,199 +169,192 @@ $green-flash-background-color: $green-button-background-color;
 $green-flash-color: $green-button-color;
 $green-flash-border-color: $green-button-border-color;
 
-@mixin div-green {
-  background-color: $green-background-color;
-  color: $green-color;
-  li.token-input-token-facebook { // The collected token(s)
-    color: mix($green-color, white, 70%);
-    background-color: mix($green-background-color, $green-field-background-color, 70%);
-    border-color: $green-background-color;
-  }
-  // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
-    background-color: $green-field-background-color;
-    color: $green-field-color;
-  }
-  select, div.token-input-dropdown-facebook {
-    background-color: $green-select-background-color;
-    color: $green-select-color;
-  }
-  input.center-button {
-    background-color: $green-button-background-color;
-    background-image: unset;
-    color: $green-button-color;
-    border-color: $green-button-border-color;
-  }
-  a {
-    color: $green-link-color;
-    &.btn-info {
-      color: lightyellow;
-    }
-  }
-  span.help-block.has-error {
-    background-color: $green-flash-background-color;
-    color: $green-flash-color;
-    border-color: $green-flash-border-color;
-  }
-}
-
 $salmon-background-color: #CF6361;
 $salmon-color: #E8d6d6;
-$salmon-button-color: #CF2F27;
+
 $salmon-field-background-color: #F3DFDE;
 $salmon-field-color: #CF6361;
+
 $salmon-link-color: #E0A09E;
 
-@mixin div-salmon {
-  background-color: $salmon-background-color;
-  color: $salmon-color;
-  li.token-input-token-facebook { // The collected token(s)
-    color: mix($salmon-color, white, 70%);
-    background-color: mix($salmon-background-color, $salmon-field-background-color, 70%);
-    border-color: $salmon-background-color;
-  }
-  div.token-input-dropdown-facebook { // The dropdown menu
-    background-color: $salmon-field-background-color;
-    color: $salmon-field-color;
-  }
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $salmon-field-background-color;
-    color: $salmon-field-color;
-  }
-  .center-button {
-    background-color: $salmon-field-background-color;
-    background-image: unset;
-    color: $salmon-button-color;
-    border-color: $salmon-button-color;
-  }
-  a {
-    color: $salmon-link-color;
-    &.btn-info {
-      color: lightgray;
-    }
-  }
-}
+$salmon-button-background-color: #D8E5DC; // Not correct, but TBD when used
+$salmon-button-color: #CF2F27;
+$salmon-button-border-color: #385E44;
 
 $blue-background-color: #5090A9;
 $blue-color: #E6D7A3;
-$blue-button-color: #C2D9E1;
+
 $blue-field-background-color: #C2D9E1;
 $blue-field-color: #7E9796;
+
 $blue-link-color: #A0B6C2;
 
-@mixin div-blue {
-  background-color: $blue-background-color;
-  color: $blue-color;
-  li.token-input-token-facebook { // The collected token(s)
-    color: mix($blue-color, white, 70%);
-    background-color: mix($blue-background-color, $blue-field-background-color, 70%);
-    border-color: $blue-background-color;
-  }
-  div.token-input-dropdown-facebook { // The dropdown menu
-    background-color: $blue-field-background-color;
-    color: $blue-field-color;
-  }
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $blue-field-background-color;
-    color: $blue-field-color;
-  }
-  .center-button {
-    background-color: $blue-button-color;
-    background-image: unset;
-    color: #205D72;
-    border-color: #205D72;
-  }
-  a {
-    color: $blue-link-color;
-    &.btn-info {
-      color: lightgray;
-    }
-  }
-}
+$blue-button-background-color: #C2D9E1;
+$blue-button-color: #205D72;
+$blue-button-border-color: #205D72;
 
 $purple-color: #E8D6D6;
 $purple-background-color: #7D6D89;
+
 $purple-field-color: #8F9092;
 $purple-field-background-color: #D2CCD6;
+
+$purple-link-color: #E8D6D6;
 
 $purple-button-background-color: #E1E0E4;
 $purple-button-color: #541D78;
 $purple-button-border-color: #541D78;
 
-$purple-link-color: #E8D6D6;
+$feeds-background-color: $feeds-card-background-color;
+$feeds-color: $feeds-navtab-color;
 
-@mixin div-purple {
-  background-color: $purple-background-color;
-  color: $purple-color;
+$feeds-field-background-color: $feeds-navtab-background-color;
+$feeds-field-color: $feeds-color;
+
+$feeds-link-color: $feeds-navtab-color;
+
+// TBD if/when a feeds dialog actually has a button
+$feeds-button-color: $feeds-panel-label-color;
+$feeds-button-background-color: $feeds-panel-label-color;
+$feeds-button-border-color: $feeds-panel-label-color;
+
+// Various color schemes for dialogs
+$dialog-colors: (
+        green-background-color: $green-background-color,
+        green-color: $green-color,
+        green-link-color: $green-link-color,
+        green-field-background-color: $green-field-background-color,
+        green-field-color: $green-field-color,
+        green-select-background-color: $green-field-background-color,
+        green-select-color: $green-field-color,
+        green-button-background-color: $green-button-background-color,
+        green-button-color: $green-button-color,
+        green-button-border-color: $green-button-border-color,
+        green-flash-background-color: $green-button-background-color,
+        green-flash-color: $green-button-color,
+        green-flash-border-color: $green-button-border-color,
+
+        salmon-background-color: $salmon-background-color,
+        salmon-color: $salmon-color,
+        salmon-link-color: $salmon-link-color,
+        salmon-field-background-color: $salmon-field-background-color,
+        salmon-field-color: $salmon-field-color,
+        salmon-select-background-color: $salmon-field-background-color,
+        salmon-select-color: $salmon-field-color,
+        salmon-button-background-color: $salmon-button-background-color,
+        salmon-button-color: $salmon-button-color,
+        salmon-button-border-color: $salmon-button-border-color,
+        salmon-flash-background-color: $salmon-button-background-color,
+        salmon-flash-color: $salmon-button-color,
+        salmon-flash-border-color: $salmon-button-border-color,
+
+        blue-background-color: $blue-background-color,
+        blue-color: $blue-color,
+        blue-link-color: $blue-link-color,
+        blue-field-background-color: $blue-field-background-color,
+        blue-field-color: $blue-field-color,
+        blue-select-background-color: $blue-field-background-color,
+        blue-select-color: $blue-field-color,
+        blue-button-background-color: $blue-button-background-color,
+        blue-button-color: $blue-button-color,
+        blue-button-border-color: $blue-button-border-color,
+        blue-flash-background-color: $blue-button-background-color,
+        blue-flash-color: $blue-button-color,
+        blue-flash-border-color: $blue-button-border-color,
+
+        purple-background-color: $purple-background-color,
+        purple-color: $purple-color,
+        purple-link-color: $purple-link-color,
+        purple-field-background-color: $purple-field-background-color,
+        purple-field-color: $purple-field-color,
+        purple-select-background-color: $purple-field-background-color,
+        purple-select-color: $purple-field-color,
+        purple-button-background-color: $purple-button-background-color,
+        purple-button-color: $purple-button-color,
+        purple-button-border-color: $purple-button-border-color,
+        purple-flash-background-color: $purple-button-background-color,
+        purple-flash-color: $purple-button-color,
+        purple-flash-border-color: $purple-button-border-color,
+
+        feeds-background-color: $feeds-background-color,
+        feeds-color: $feeds-color,
+        feeds-link-color: $feeds-link-color,
+        feeds-field-background-color: $feeds-field-background-color,
+        feeds-field-color: $feeds-field-color,
+        feeds-select-background-color: $feeds-field-background-color,
+        feeds-select-color: $feeds-field-color,
+        feeds-button-background-color: $feeds-button-background-color,
+        feeds-button-color: $feeds-button-color,
+        feeds-button-border-color: $feeds-button-border-color,
+        feeds-flash-background-color: $feeds-button-background-color,
+        feeds-flash-color: $feeds-button-color,
+        feeds-flash-border-color: $feeds-button-border-color
+
+);
+
+// This mixin applies the color scheme to a dialog using the colors declared above
+@mixin dialog-color-scheme($colorName) {
+  background-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
+  color: map-get($dialog-colors, unquote("#{$colorName}-color"));
   li.token-input-token-facebook { // The collected token(s)
-    color: mix($purple-color, white, 70%);
-    background-color: mix($purple-background-color, $purple-field-background-color, 70%);
-    border-color: $purple-background-color;
+    color: mix(map-get($dialog-colors, unquote("#{$colorName}-color")), white, 70%);
+    background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-background-color")), map-get($dialog-colors, unquote("#{$colorName}-field-background-color")), 70%);
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
   }
-  div.token-input-dropdown-facebook { // The dropdown menu
-    background-color: $purple-field-background-color;
-    color: $purple-field-color;
+  // input[type='text'], input[type='password'], input[type='email'] {
+  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-field-color"));
   }
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $purple-field-background-color;
-    color: $purple-field-color;
+  select, div.token-input-dropdown-facebook {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
-  .center-button {
-    background-color: $purple-button-background-color;
+  input.center-button {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
     background-image: unset;
-    color: $purple-button-color;
-    border-color: $purple-button-border-color;
+    color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
   }
-  form div a {
-    color: $purple-link-color;
+  a {
+    color: map-get($dialog-colors, unquote("#{$colorName}-link-color"));
     &.btn-info {
-      color: lightgray;
+      color: lightyellow;
     }
+  }
+  span.help-block.has-error {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-flash-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-flash-border-color"));
   }
 }
 
-/*
-$feeds-navtab-background-color: #e7dfd6;
-$feeds-navtab-color: #de8822;
-$feeds-card-background-color: #f3e3cf;
-$feeds-panel-background-color: #e7dfd6;
-$feeds-panel-background-transparent: rgba(247, 223, 214, 0);
-$feeds-panel-label-color: #f5f2ee;
-*/
+// Background and text colors for navtab menus
+$menu-colors: (
+        recipes-navtab-background-color: $recipes-navtab-background-color,
+        recipes-navtab-color: $recipes-navtab-color,
+        friends-navtab-background-color: $friends-navtab-background-color,
+        friends-navtab-color: $friends-navtab-color,
+        lists-navtab-background-color: $lists-navtab-background-color,
+        lists-navtab-color: $lists-navtab-color,
+        feeds-navtab-background-color: $feeds-navtab-background-color,
+        feeds-navtab-color: $feeds-navtab-color,
+        home-navtab-background-color: $header-outline-color, // #ecdad7
+        home-navtab-color: inherit // #ecdad7
+);
 
-$feeds-background-color: $feeds-card-background-color;
-$feeds-color: $feeds-navtab-color;
-$feeds-button-color: $feeds-panel-label-color;
-$feeds-field-background-color: $feeds-navtab-background-color;
-$feeds-field-color: $feeds-color;
-$feeds-link-color: $feeds-navtab-color;
-
-@mixin div-feeds {
-  background-color: $feeds-background-color;
-  color: $feeds-color;
-  li.token-input-token-facebook { // The collected token(s)
-    color: mix($feeds-color, white, 70%);
-    background-color: mix($feeds-background-color, $feeds-field-background-color, 70%);
-    border-color: $feeds-background-color;
-  }
-  div.token-input-dropdown-facebook { // The dropdown menu
-    background-color: $feeds-field-background-color;
-    color: $feeds-field-color;
-  }
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $feeds-field-background-color;
-    color: $feeds-field-color;
-  }
-  .center-button {
-    background-color: $feeds-field-background-color;
-    background-image: unset;
-    color: $feeds-button-color;
-    border-color: $feeds-button-color;
-  }
+@mixin menu-color-scheme($menuName) {
+  background-color: map-get($menu-colors, unquote("#{$menuName}-navtab-background-color"));
   a {
-    color: $feeds-link-color;
-    &.btn-info {
-      color: lightgray;
-    }
+    color: map-get($menu-colors, unquote("#{$menuName}-navtab-color"));
   }
+}
+
+// Color scheme for cards (the element that comes first in a #show request
+$card-colors: (
+
+);
+
+@mixin card-color-scheme($cardType) {
+
 }

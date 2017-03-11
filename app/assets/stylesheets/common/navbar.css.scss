@@ -181,46 +181,30 @@ body.logged-in {
         text-shadow: none;
         text-align: center;
         &#collections-navtab {
+          @include menu-color-scheme(recipes);
+          /*
           background-color: $recipes-navtab-background-color;
             a {
             color: $recipes-navtab-color;
           }
+          */
         }
         &#friends-navtab {
-          background-color: $friends-navtab-background-color;
-          //margin: 0 7px;
-          //padding:80px 8px 0;
-          //text-shadow: none;
-            a {
-            color: $friends-navtab-color;
-          }
+          @include menu-color-scheme(friends);
         }
         &#my_lists-navtab {
-          background-color: $lists-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 18px 0;
-          //text-shadow: none;
-            a {
-            color: $lists-navtab-color;
-          }
+          @include menu-color-scheme(lists);
         }
         &#feeds-navtab {
-          background-color: $feeds-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 34px 0;
-          //text-shadow: none;
+          @include menu-color-scheme(feeds);
           @include respond-to(large-up) {
             // Mobile menu: stacks up and fills the screen
             padding-left: 34px;
             padding-right: 34px;
           }
-          a {
-            color: $feeds-navtab-color;
-          }
         }
         &#home-navtab {
-          background-color: $header-outline-color; // #ecdad7
-          //margin: 0 7px;
+          @include menu-color-scheme(home);
           @include respond-to(large-up) {
             padding: 0;
           }

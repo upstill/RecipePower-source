@@ -209,23 +209,23 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
 }
 
 div.dialog.new-style.purple div.modal-dialog div.modal-content {
-  @include div-purple;
+  @include dialog-color-scheme(purple);
 }
 
 div.dialog.new-style.green div.modal-dialog div.modal-content {
-  @include div-green;
+  @include dialog-color-scheme(green);
 }
 
 div.dialog.new-style.salmon div.modal-dialog div.modal-content {
-  @include div-salmon;
+  @include dialog-color-scheme(salmon);
 }
 
 div.dialog.new-style.blue div.modal-dialog div.modal-content {
-  @include div-blue;
+  @include dialog-color-scheme(blue);
 }
 
 div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
-  @include div-feeds;
+  @include dialog-color-scheme(feeds);
 }
 
 div.form-group.user_remember_me {
