@@ -352,9 +352,217 @@ $menu-colors: (
 
 // Color scheme for cards (the element that comes first in a #show request
 $card-colors: (
+        /* Default card color characteristics */
+        generic-card-color: $generic-card-color,
+        generic-card-background-color: $generic-card-background-color,
+        generic-card-header-color: $generic-card-title-color,
+        generic-card-title-color: #909090,
+        generic-card-link-color: inherit,
+  // generic-card-source-color: #cdcdcd,
+  // generic-card-source-link-color: #909090,
+  // generic-card-description-color: inherit,
+        generic-card-label-color: #cdcdcd,
+  // generic-card-aspect-contents-color: #cdcdcd,
+  // generic-card-notes-color: #cdcdcd,
+  // generic-card-tagsep-color: #cdcdcd,
 
+        recipe-card-color: $recipes-panels-label-button-color,
+        recipe-card-background-color: $recipes-card-background-color,
+        recipe-card-header-color: #cdcdcd,
+        recipe-card-title-color: #909090,
+        recipe-card-link-color: inherit,
+  // recipe-card-source-color: #cdcdcd,
+  // recipe-card-source-link-color: #909090,
+  // recipe-card-description-color: inherit,
+        recipe-card-label-color: #cdcdcd,
+  // recipe-card-aspect-contents-color: #cdcdcd,
+  // recipe-card-notes-color: #cdcdcd,
+  // recipe-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $viewer-card-background-color;
+  div.title > a.title-link {
+    color: white;
+  }
+  a {
+    color: $viewer-card-link-color;
+  }
+  */
+        viewer-card-color: $viewer-panels-label-button-color,
+        viewer-card-background-color: $viewer-card-background-color,
+        viewer-card-header-color: white,
+        viewer-card-link-color: $viewer-card-link-color,
+        viewer-card-title-color: #909090,
+  // viewer-card-source-color: #cdcdcd,
+  // viewer-card-source-link-color: #909090,
+  // viewer-card-description-color: inherit,
+        viewer-card-label-color: #cdcdcd,
+  // viewer-card-aspect-contents-color: #cdcdcd,
+  // viewer-card-notes-color: #cdcdcd,
+  // viewer-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $friends-card-background-color;
+  div.title > a.title-link {
+    color: white;
+  }
+  a {
+    color: $friends-card-link-color;
+  }
+$friends-navtab-background-color: #e4e0cf;
+$friends-navtab-color: #dbc046;
+
+$friends-card-background-color: #e9e4ca;
+$friends-panels-label-color: #e9e4ca;
+$friends-panels-label-button-color: #dbd3ab;
+$friends-panel-background-color: #e9e4ca;
+$friends-panel-background-transparent: rgba(233, 228, 202, 0);
+$friends-panel-label-color: #f3f2ea;
+$friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
+  */
+        friend-card-color: $friends-navtab-color,
+        friend-card-background-color: $friends-card-background-color,
+        friend-card-header-color: white,
+        friend-card-link-color: $friends-card-link-color,
+        friend-card-title-color: #909090,
+  // friend-card-source-color: #cdcdcd,
+  // friend-card-source-link-color: #909090,
+  // friend-card-description-color: inherit,
+        friend-card-label-color: #cdcdcd,
+  // friend-card-aspect-contents-color: #cdcdcd,
+  // friend-card-notes-color: #cdcdcd,
+  // friend-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $feeds-card-background-color;
+  div.title > a.title-link {
+    color: $feeds-navtab-color;
+  }
+  a {
+    color: $feeds-link-color;
+  }
+$feeds-navtab-background-color: #e7dfd6;
+$feeds-navtab-color: #de8822;
+$feeds-card-background-color: #f3e3cf;
+$feeds-panel-background-color: #e7dfd6;
+$feeds-panel-background-transparent: rgba(247, 223, 214, 0);
+$feeds-panel-label-color: #f5f2ee;
+  */
+        feed-card-color: inherit,
+        feed-card-background-color: $feeds-card-background-color,
+        feed-card-header-color: $feeds-navtab-color,
+        feed-card-link-color: $feeds-link-color,
+        feed-card-title-color: $feeds-navtab-color,
+  // feed-card-source-color: #cdcdcd,
+  // feed-card-source-link-color: #909090,
+  // feed-card-description-color: inherit,
+        feed-card-label-color: mix($feeds-navtab-color, white, 75%),
+  // feed-card-aspect-contents-color: #cdcdcd,
+  // feed-card-notes-color: #cdcdcd,
+  // feed-card-tagsep-color: #cdcdcd,
+
+  /*
+  color: $user-card-color;
+  background-color: $user-card-background-color;
+  div.title > a.title-link {
+    color: $user-card-title-color;
+  }
+  .card-aspect-label {
+    color: $user-card-label-color;
+  }
+  a {
+    color: #888888;
+  }
+  */
+        user-card-color: $user-card-color,
+        user-card-background-color: $user-card-background-color,
+        user-card-header-color: $user-card-title-color,
+        user-card-label-color: $user-card-label-color,
+        user-card-link-color: #888888,
+        user-card-title-color: #909090,
+  // user-card-source-color: #cdcdcd,
+  // user-card-source-link-color: #909090,
+  // user-card-description-color: inherit,
+  // user-card-aspect-contents-color: #cdcdcd,
+  // user-card-notes-color: #cdcdcd,
+  // user-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $lists-card-background-color;
+  div.title > a.title-link {
+    color: rgba($lists-navtab-color, 0.6);
+  }
+  a {
+    color: $lists-panels-label-button-color;
+  }
+$lists-navtab-background-color: #dbe0dd;
+$lists-navtab-color: #1d6a2b;
+$lists-card-background-color: #d0dbd2;
+$lists-panels-label-color: #e9e4ca;
+$lists-panels-label-button-color: #94b79a;
+$lists-panel-background-color: #dbe0dd;
+$lists-panel-background-transparent: rgba(219, 224, 221, 0);
+$lists-panel-label-color: #e9eeea;
+  */
+        list-card-color: inherit,
+        list-card-background-color: $lists-card-background-color,
+        list-card-header-color: rgba($lists-navtab-color, 0.6),
+        list-card-link-color: $lists-panels-label-button-color,
+        list-card-title-color: $lists-navtab-color,
+  // list-card-source-color: #cdcdcd,
+  // list-card-source-link-color: #909090,
+  // list-card-description-color: inherit,
+        list-card-label-color: #cdcdcd,
+  // list-card-aspect-contents-color: #cdcdcd,
+  // list-card-notes-color: #cdcdcd,
+  // list-card-tagsep-color: #cdcdcd,
+
+        /* Sites: the former entity-card  */
+        site-card-color: #909090,
+        site-card-background-color: inherit,
+        site-card-title-color: #909090,
+        site-card-link-color: inherit,
+        site-card-header-color: #cdcdcd,
+        // site-card-source-color: #cdcdcd,
+        // site-card-source-link-color: #909090,
+        // site-card-description-color: inherit,
+        site-card-label-color: #cdcdcd,
+        // site-card-aspect-contents-color: #cdcdcd,
+        // site-card-notes-color: #cdcdcd,
+        // site-card-tagsep-color: #cdcdcd,
 );
 
 @mixin card-color-scheme($cardType) {
-
+  color: map-get($card-colors, unquote("#{$cardType}-card-color"));
+  background-color: map-get($card-colors, unquote("#{$cardType}-card-background-color"));
+  a.title-link, span.title-link {
+    color: map-get($card-colors, unquote("#{$cardType}-card-title-color"));
+  }
+  a {
+    color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+  }
+  h3 { // Section header
+    color: map-get($card-colors, unquote("#{$cardType}-card-header-color"));
+  }
+  div.source {
+    color: #999; // map-get($card-colors, unquote("#{$cardType}-card-source-color"));
+    a.source-link {
+      color: #77a2be; // map-get($card-colors, unquote("#{$cardType}-card-source-link-color"));
+    }
+  }
+  .description {
+    color: #949292;  // map-get($card-colors, unquote("#{$cardType}-card-description-color"));
+  }
+  .card-aspect-label {
+    color: map-get($card-colors, unquote("#{$cardType}-card-label-color"));
+  }
+  div.card-aspect-contents {
+    color: #909090; // map-get($card-colors, unquote("#{$cardType}-card-aspect-contents-color"));
+    &.notes {
+      color: #aaaaaa; // map-get($card-colors, unquote("#{$cardType}-card-notes-color"));
+    }
+    span.tagsep {
+      color: #8ac5d2; // map-get($card-colors, unquote("#{$cardType}-card-tagsep-color"));
+    }
+  }
 }
