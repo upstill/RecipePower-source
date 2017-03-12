@@ -1,0 +1,757 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module Collectible - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="Taggable.html">Taggable</a>
+  
+  
+  
+    <li><a class="include" href="Voteable.html">Voteable</a>
+  
+  
+  
+    <li><a class="include" href="Picable.html">Picable</a>
+  
+  
+  
+    <li><a class="include" href="Sharable.html">Sharable</a>
+  
+  
+  </ul>
+</div>
+
+    <div id="extends-section" class="nav-section">
+  <h3>Extended With Modules</h3>
+
+  <ul class="link-list">
+    
+  
+    <li><span class="extend">ActiveSupport::Concern</span>
+  
+  
+  </ul>
+</div>
+
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-i-absorb">#absorb</a>
+    
+    <li ><a href="#method-i-be_collected">#be_collected</a>
+    
+    <li ><a href="#method-i-cached_ref">#cached_ref</a>
+    
+    <li ><a href="#method-i-cached_ref_valid-3F">#cached_ref_valid?</a>
+    
+    <li ><a href="#method-i-collectible_collected-3F">#collectible_collected?</a>
+    
+    <li ><a href="#method-i-collectible_comment">#collectible_comment</a>
+    
+    <li ><a href="#method-i-collectible_comment-3D">#collectible_comment=</a>
+    
+    <li ><a href="#method-i-collectible_private">#collectible_private</a>
+    
+    <li ><a href="#method-i-collectible_private-3D">#collectible_private=</a>
+    
+    <li ><a href="#method-i-collectible_user_id">#collectible_user_id</a>
+    
+    <li ><a href="#method-i-collectible_user_id-3D">#collectible_user_id=</a>
+    
+    <li ><a href="#method-i-comment">#comment</a>
+    
+    <li ><a href="#method-i-num_cookmarks">#num_cookmarks</a>
+    
+    <li ><a href="#method-i-ref_if_any">#ref_if_any</a>
+    
+    <li ><a href="#method-i-touch_date">#touch_date</a>
+    
+    <li class="calls-super" ><a href="#method-i-uid-3D">#uid=</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-Collectible">
+  <h1 id="module-Collectible" class="module">
+    module Collectible
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-absorb" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">absorb</span><span
+            class="method-args">(other)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>One collectible is being merged into another, so add the new one to the
+collectors of the old one</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Picable.html#method-i-absorb">Picable#absorb</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="absorb-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>
+  <span class="ruby-identifier">other</span>.<span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other_ref</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">other_ref</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">touch</span> <span class="ruby-keyword">self</span>, <span class="ruby-identifier">other_ref</span>.<span class="ruby-identifier">in_collection</span> <span class="ruby-comment"># Ensure there&#39;s a ref</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">other_ref</span>.<span class="ruby-identifier">comment</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">myref</span> = <span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user</span><span class="ruby-operator">:</span> <span class="ruby-identifier">other_ref</span>.<span class="ruby-identifier">user</span>).<span class="ruby-identifier">first</span>) <span class="ruby-operator">&amp;&amp;</span>
+        <span class="ruby-identifier">myref</span>.<span class="ruby-identifier">comment</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-identifier">myref</span>.<span class="ruby-identifier">comment</span> = <span class="ruby-identifier">other_ref</span>.<span class="ruby-identifier">comment</span>
+      <span class="ruby-identifier">myref</span>.<span class="ruby-identifier">save</span>
+    <span class="ruby-keyword">end</span>
+  }
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-be_collected" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">be_collected</span><span
+            class="method-args">(newval=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="be_collected-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 66</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">be_collected</span> <span class="ruby-identifier">newval</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">newval</span><span class="ruby-operator">==</span><span class="ruby-keyword">true</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">newval</span><span class="ruby-operator">==</span><span class="ruby-keyword">false</span>
+    <span class="ruby-identifier">newval</span> = <span class="ruby-identifier">newval</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:to_boolean</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">newval</span>.<span class="ruby-identifier">to_boolean</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">newval</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">cached_ref</span>.<span class="ruby-identifier">in_collection</span> = <span class="ruby-identifier">newval</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_collected-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_collected?</span><span
+            class="method-args">(uid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Does the entity appear in the user&#39;s collection?</p>
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_collected-3F-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 87</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_collected?</span> <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
+  (<span class="ruby-identifier">ref</span> = <span class="ruby-identifier">ref_if_any</span> <span class="ruby-identifier">uid</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">in_collection</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_comment" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_comment</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_comment-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 58</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_comment</span>
+  <span class="ruby-identifier">cached_ref</span>(<span class="ruby-keyword">false</span>) <span class="ruby-operator">?</span> <span class="ruby-ivar">@cached_ref</span>.<span class="ruby-identifier">comment</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_comment-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_comment=</span><span
+            class="method-args">(str)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_comment-3D-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_comment=</span> <span class="ruby-identifier">str</span>
+  <span class="ruby-identifier">cached_ref</span>.<span class="ruby-identifier">comment</span> = <span class="ruby-identifier">str</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_private" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_private</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_private-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_private</span>
+  <span class="ruby-identifier">cached_ref</span>(<span class="ruby-keyword">false</span>) <span class="ruby-operator">?</span> <span class="ruby-ivar">@cached_ref</span>.<span class="ruby-identifier">private</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_private-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_private=</span><span
+            class="method-args">(newval)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Gatekeeper for the privacy value to interpret strings from checkbox fields</p>
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_private-3D-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 49</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_private=</span> <span class="ruby-identifier">newval</span>
+  <span class="ruby-comment"># Boolean may be coming in as string or integer</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">newval</span><span class="ruby-operator">==</span><span class="ruby-keyword">true</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">newval</span><span class="ruby-operator">==</span><span class="ruby-keyword">false</span>
+    <span class="ruby-identifier">newval</span> = <span class="ruby-identifier">newval</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:to_boolean</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">newval</span>.<span class="ruby-identifier">to_boolean</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">newval</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">nil</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">cached_ref</span>(<span class="ruby-keyword">true</span>).<span class="ruby-identifier">private</span> = <span class="ruby-identifier">newval</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_user_id" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_user_id</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_user_id-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 35</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_user_id</span>
+  <span class="ruby-ivar">@collectible_user_id</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_user_id-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_user_id=</span><span
+            class="method-args">(id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_user_id-3D-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 39</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_user_id=</span> <span class="ruby-identifier">id</span>
+  <span class="ruby-ivar">@collectible_user_id</span>=<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_i</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-comment" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">comment</span><span
+            class="method-args">(uid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get THIS USER&#39;s comment on an entity</p>
+          
+          
+
+          
+          <div class="method-source-code" id="comment-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 82</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">comment</span> <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
+  (<span class="ruby-identifier">ref</span> = <span class="ruby-identifier">ref_if_any</span> <span class="ruby-identifier">uid</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">comment</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-num_cookmarks" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">num_cookmarks</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the number of times a recipe&#39;s been marked</p>
+          
+          
+
+          
+          <div class="method-source-code" id="num_cookmarks-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 92</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">num_cookmarks</span>
+  <span class="ruby-identifier">user_pointers</span>.<span class="ruby-identifier">count</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-touch_date" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">touch_date</span><span
+            class="method-args">(uid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present the time-since-touched in a text format</p>
+          
+          
+
+          
+          <div class="method-source-code" id="touch_date-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 75</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">touch_date</span> <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ref</span> = <span class="ruby-identifier">ref_if_any</span>(<span class="ruby-identifier">uid</span>)
+    <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">updated_at</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-uid-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">uid=</span><span
+            class="method-args">(uid)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Prepare for editing the model by setting the collectible attributes</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Taggable.html#method-i-uid-3D">Taggable#uid=</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="uid-3D-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 28</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">uid=</span> <span class="ruby-identifier">uid</span>
+  <span class="ruby-ivar">@collectible_user_id</span> = <span class="ruby-identifier">uid</span>.<span class="ruby-identifier">to_i</span>
+  <span class="ruby-comment"># cached_ref  # Bust the cache but update the collectible attributes to reflect the ref assoc&#39;d with this id</span>
+  <span class="ruby-comment"># Work back up the hierarchy</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-cached_ref" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">cached_ref</span><span
+            class="method-args">(force=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the reference for the given user and this entity, creating a new one
+as necessary If &#39;force&#39; is set, and there is no reference to the
+entity for the user, create one</p>
+          
+          
+
+          
+          <div class="method-source-code" id="cached_ref-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 126</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">cached_ref</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">cached_ref_valid?</span>
+    <span class="ruby-comment"># A user is specified, but the currently-cached ref doesn&#39;t match</span>
+    <span class="ruby-ivar">@cached_ref</span> = (<span class="ruby-identifier">force</span> <span class="ruby-operator">?</span>
+        <span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">find_or_initialize_by</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@collectible_user_id</span>) <span class="ruby-operator">:</span>
+        <span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@collectible_user_id</span>).<span class="ruby-identifier">first</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@cached_ref</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-cached_ref_valid-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">cached_ref_valid?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="cached_ref_valid-3F-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 120</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">cached_ref_valid?</span>
+  <span class="ruby-ivar">@collectible_user_id</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@cached_ref</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-ivar">@cached_ref</span>.<span class="ruby-identifier">user_id</span> <span class="ruby-operator">==</span> <span class="ruby-ivar">@collectible_user_id</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ref_if_any" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ref_if_any</span><span
+            class="method-args">(uid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Check for the existence of a reference and return it, but don&#39;t create
+one</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ref_if_any-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/collectible.rb, line 113</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ref_if_any</span> <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">uid</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@collectible_user_id</span>
+  (<span class="ruby-identifier">uid</span><span class="ruby-operator">==</span><span class="ruby-ivar">@collectible_user_id</span>) <span class="ruby-operator">?</span> <span class="ruby-comment"># If it&#39;s the current id, we capture the ref</span>
+      <span class="ruby-identifier">cached_ref</span>(<span class="ruby-keyword">false</span>) <span class="ruby-operator">:</span>
+      <span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>).<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

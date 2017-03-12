@@ -9,26 +9,26 @@ $page-background-color: #F1F1F0;
 $content-background-color: #F2F1F0;
 
 $generic-card-background-color: #f9f8f4;
-$generic-card-text-color: #aaaaaa;
+$generic-card-color: #aaaaaa;
 $generic-card-title-color: darkgrey;
 $generic-card-label-color: darkgrey;
-$generic-panels-label-text-color: #bbbbbb;
+$generic-panels-label-color: #bbbbbb;
 $generic-panels-label-button-color: lightgray;
 $generic-panels-button-color: #fafafa;
 
 // For material relating to the current user
 $viewer-card-background-color: #ecdad7;
-$viewer-panels-label-text-color: #e6ccc8;
+$viewer-panels-label-color: #e6ccc8;
 $viewer-panels-label-button-color: #efc5bd;
 $viewer-card-link-color: mix($viewer-panels-label-button-color, black, 70%);
 
 // For material relating to lists of the current user
 
 $friends-navtab-background-color: #e4e0cf;
-$friends-navtab-text-color: #dbc046;
+$friends-navtab-color: #dbc046;
 
 $friends-card-background-color: #e9e4ca;
-$friends-panels-label-text-color: #e9e4ca;
+$friends-panels-label-color: #e9e4ca;
 $friends-panels-label-button-color: #dbd3ab;
 $friends-panel-background-color: #e9e4ca;
 $friends-panel-background-transparent: rgba(233, 228, 202, 0);
@@ -37,40 +37,40 @@ $friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
 
   // For displaying other users
 $user-card-background-color: #ecedef;
-$user-card-text-color: #aaaaaa;
+$user-card-color: #aaaaaa;
 $user-card-title-color: darkgrey;
 $user-card-label-color: darkgrey;
-$user-panels-label-text-color: #bbbbbb;
+$user-panels-label-color: #bbbbbb;
 $user-panels-label-button-color: #ffffff;
 $user-panels-button-color: #999999;
 
 $recipes-navtab-background-color: #d8dde0;
-$recipes-navtab-text-color: #4c7c99;
+$recipes-navtab-color: #4c7c99;
 $recipes-card-background-color: #f9f8f4;
-$recipes-panels-label-text-color: #dfdfdf;
+$recipes-panels-label-color: #dfdfdf;
 $recipes-panels-label-button-color: #afafaf;
 $recipes-panel-background-color: #d8dde0;
 $recipes-panel-background-transparent: rgba(216, 221, 224, 0);
 $recipes-panel-label-color: #e5ebef;
 
 $lists-navtab-background-color: #dbe0dd;
-$lists-navtab-text-color: #1d6a2b;
+$lists-navtab-color: #1d6a2b;
 $lists-card-background-color: #d0dbd2;
-$lists-panels-label-text-color: #e9e4ca;
+$lists-panels-label-color: #e9e4ca;
 $lists-panels-label-button-color: #94b79a;
 $lists-panel-background-color: #dbe0dd;
 $lists-panel-background-transparent: rgba(219, 224, 221, 0);
 $lists-panel-label-color: #e9eeea;
 
 $feeds-navtab-background-color: #e7dfd6;
-$feeds-navtab-text-color: #de8822;
+$feeds-navtab-color: #de8822;
 $feeds-card-background-color: #f3e3cf;
 $feeds-panel-background-color: #e7dfd6;
 $feeds-panel-background-transparent: rgba(247, 223, 214, 0);
 $feeds-panel-label-color: #f5f2ee;
 
 $utensils-navtab-background-color: #dcdbdc;
-$utensils-navtab-text-color: #816887;
+$utensils-navtab-color: #816887;
 
 // Color for the user card and panels
 $user-color: #EDDAD7;
@@ -151,136 +151,418 @@ $slider-title-depth: 1001; // from slider.css.scss
 $slider-fader-depth: 1002; // from slider.css.scss
 $slider-right-depth: 1003; // from slider.css.scss
 
+$green-background-color: #4B815B;
+$green-color: #ECE6CD;
+$green-link-color: #9AB3A0;
+
+$green-field-background-color: #dfebe2;
+$green-field-color: #227133;
+
+$green-select-background-color: $green-field-background-color;
+$green-select-color: $green-field-color;
+
+$green-button-background-color: #D8E5DC;
+$green-button-color: #385E44;
+$green-button-border-color: #385E44;
+
+$green-flash-background-color: $green-button-background-color;
+$green-flash-color: $green-button-color;
+$green-flash-border-color: $green-button-border-color;
+
 $salmon-background-color: #CF6361;
-$salmon-text-color: #E8d6d6;
-$salmon-button-color: #CF2F27;
+$salmon-color: #E8d6d6;
+
 $salmon-field-background-color: #F3DFDE;
+$salmon-field-color: #CF6361;
+
 $salmon-link-color: #E0A09E;
 
-$green-background-color: #4B815B;
-$green-text-color: #9AB3A0;
-$green-field-background-color: #C1D3C7;
+$salmon-button-background-color: #D8E5DC; // Not correct, but TBD when used
+$salmon-button-color: #CF2F27;
+$salmon-button-border-color: #385E44;
 
-@mixin div-green {
-  background-color: $green-background-color;
-  color: $green-text-color;
+$blue-background-color: #5090A9;
+$blue-color: #E6D7A3;
+
+$blue-field-background-color: #C2D9E1;
+$blue-field-color: #7E9796;
+
+$blue-link-color: #A0B6C2;
+
+$blue-button-background-color: #C2D9E1;
+$blue-button-color: #205D72;
+$blue-button-border-color: #205D72;
+
+$purple-color: #E8D6D6;
+$purple-background-color: #7D6D89;
+
+$purple-field-color: #8F9092;
+$purple-field-background-color: #D2CCD6;
+
+$purple-link-color: #E8D6D6;
+
+$purple-button-background-color: #E1E0E4;
+$purple-button-color: #541D78;
+$purple-button-border-color: #541D78;
+
+$feeds-background-color: $feeds-card-background-color;
+$feeds-color: $feeds-navtab-color;
+
+$feeds-field-background-color: $feeds-navtab-background-color;
+$feeds-field-color: $feeds-color;
+
+$feeds-link-color: $feeds-navtab-color;
+
+// TBD if/when a feeds dialog actually has a button
+$feeds-button-color: $feeds-panel-label-color;
+$feeds-button-background-color: $feeds-panel-label-color;
+$feeds-button-border-color: $feeds-panel-label-color;
+
+// Various color schemes for dialogs
+$dialog-colors: (
+        green-background-color: $green-background-color,
+        green-color: $green-color,
+        green-link-color: $green-link-color,
+        green-field-background-color: $green-field-background-color,
+        green-field-color: $green-field-color,
+        green-select-background-color: $green-field-background-color,
+        green-select-color: $green-field-color,
+        green-button-background-color: $green-button-background-color,
+        green-button-color: $green-button-color,
+        green-button-border-color: $green-button-border-color,
+        green-flash-background-color: $green-button-background-color,
+        green-flash-color: $green-button-color,
+        green-flash-border-color: $green-button-border-color,
+
+        salmon-background-color: $salmon-background-color,
+        salmon-color: $salmon-color,
+        salmon-link-color: $salmon-link-color,
+        salmon-field-background-color: $salmon-field-background-color,
+        salmon-field-color: $salmon-field-color,
+        salmon-select-background-color: $salmon-field-background-color,
+        salmon-select-color: $salmon-field-color,
+        salmon-button-background-color: $salmon-button-background-color,
+        salmon-button-color: $salmon-button-color,
+        salmon-button-border-color: $salmon-button-border-color,
+        salmon-flash-background-color: $salmon-button-background-color,
+        salmon-flash-color: $salmon-button-color,
+        salmon-flash-border-color: $salmon-button-border-color,
+
+        blue-background-color: $blue-background-color,
+        blue-color: $blue-color,
+        blue-link-color: $blue-link-color,
+        blue-field-background-color: $blue-field-background-color,
+        blue-field-color: $blue-field-color,
+        blue-select-background-color: $blue-field-background-color,
+        blue-select-color: $blue-field-color,
+        blue-button-background-color: $blue-button-background-color,
+        blue-button-color: $blue-button-color,
+        blue-button-border-color: $blue-button-border-color,
+        blue-flash-background-color: $blue-button-background-color,
+        blue-flash-color: $blue-button-color,
+        blue-flash-border-color: $blue-button-border-color,
+
+        purple-background-color: $purple-background-color,
+        purple-color: $purple-color,
+        purple-link-color: $purple-link-color,
+        purple-field-background-color: $purple-field-background-color,
+        purple-field-color: $purple-field-color,
+        purple-select-background-color: $purple-field-background-color,
+        purple-select-color: $purple-field-color,
+        purple-button-background-color: $purple-button-background-color,
+        purple-button-color: $purple-button-color,
+        purple-button-border-color: $purple-button-border-color,
+        purple-flash-background-color: $purple-button-background-color,
+        purple-flash-color: $purple-button-color,
+        purple-flash-border-color: $purple-button-border-color,
+
+        feeds-background-color: $feeds-background-color,
+        feeds-color: $feeds-color,
+        feeds-link-color: $feeds-link-color,
+        feeds-field-background-color: $feeds-field-background-color,
+        feeds-field-color: $feeds-field-color,
+        feeds-select-background-color: $feeds-field-background-color,
+        feeds-select-color: $feeds-field-color,
+        feeds-button-background-color: $feeds-button-background-color,
+        feeds-button-color: $feeds-button-color,
+        feeds-button-border-color: $feeds-button-border-color,
+        feeds-flash-background-color: $feeds-button-background-color,
+        feeds-flash-color: $feeds-button-color,
+        feeds-flash-border-color: $feeds-button-border-color
+
+);
+
+// This mixin applies the color scheme to a dialog using the colors declared above
+@mixin dialog-color-scheme($colorName) {
+  background-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
+  color: map-get($dialog-colors, unquote("#{$colorName}-color"));
+  li.token-input-token-facebook { // The collected token(s)
+    color: mix(map-get($dialog-colors, unquote("#{$colorName}-color")), white, 70%);
+    background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-background-color")), map-get($dialog-colors, unquote("#{$colorName}-field-background-color")), 70%);
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
+  }
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], ul.token-input-list-facebook {
-    background-color: $green-field-background-color;
-    color: #849688;
+  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-field-color"));
+  }
+  select, div.token-input-dropdown-facebook {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
   input.center-button {
-    background-color: #D8E5DC;
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
     background-image: unset;
-    color: #385E44;
-    border-color: #385E44;
+    color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
   }
   a {
-    color: #9AB3A0;
+    color: map-get($dialog-colors, unquote("#{$colorName}-link-color"));
     &.btn-info {
       color: lightyellow;
     }
   }
   span.help-block.has-error {
-    color: #6ba942;
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));
+    color: map-get($dialog-colors, unquote("#{$colorName}-flash-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-flash-border-color"));
   }
 }
 
-@mixin div-salmon {
-  background-color: $salmon-background-color;
-  color: $salmon-text-color;
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $salmon-field-background-color;
-    color: $salmon-button-color;
+// Background and text colors for navtab menus
+$menu-colors: (
+        recipes-navtab-background-color: $recipes-navtab-background-color,
+        recipes-navtab-color: $recipes-navtab-color,
+        friends-navtab-background-color: $friends-navtab-background-color,
+        friends-navtab-color: $friends-navtab-color,
+        lists-navtab-background-color: $lists-navtab-background-color,
+        lists-navtab-color: $lists-navtab-color,
+        feeds-navtab-background-color: $feeds-navtab-background-color,
+        feeds-navtab-color: $feeds-navtab-color,
+        home-navtab-background-color: $header-outline-color, // #ecdad7
+        home-navtab-color: inherit // #ecdad7
+);
+
+@mixin menu-color-scheme($menuName) {
+  background-color: map-get($menu-colors, unquote("#{$menuName}-navtab-background-color"));
+  a {
+    color: map-get($menu-colors, unquote("#{$menuName}-navtab-color"));
   }
-  .center-button {
-    background-color: $salmon-field-background-color;
-    background-image: unset;
-    color: $salmon-button-color;
-    border-color: $salmon-button-color;
+}
+
+// Color scheme for cards (the element that comes first in a #show request
+$card-colors: (
+        /* Default card color characteristics */
+        generic-card-color: $generic-card-color,
+        generic-card-background-color: $generic-card-background-color,
+        generic-card-header-color: $generic-card-title-color,
+        generic-card-title-color: #909090,
+        generic-card-link-color: inherit,
+  // generic-card-source-color: #cdcdcd,
+  // generic-card-source-link-color: #909090,
+  // generic-card-description-color: inherit,
+        generic-card-label-color: #cdcdcd,
+  // generic-card-aspect-contents-color: #cdcdcd,
+  // generic-card-notes-color: #cdcdcd,
+  // generic-card-tagsep-color: #cdcdcd,
+
+        recipe-card-color: $recipes-panels-label-button-color,
+        recipe-card-background-color: $recipes-card-background-color,
+        recipe-card-header-color: #cdcdcd,
+        recipe-card-title-color: #909090,
+        recipe-card-link-color: inherit,
+  // recipe-card-source-color: #cdcdcd,
+  // recipe-card-source-link-color: #909090,
+  // recipe-card-description-color: inherit,
+        recipe-card-label-color: #cdcdcd,
+  // recipe-card-aspect-contents-color: #cdcdcd,
+  // recipe-card-notes-color: #cdcdcd,
+  // recipe-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $viewer-card-background-color;
+  div.title > a.title-link {
+    color: white;
   }
   a {
-    color: $salmon-link-color;
-    &.btn-info {
-      color: lightgray;
-    }
+    color: $viewer-card-link-color;
   }
-}
+  */
+        viewer-card-color: $viewer-panels-label-button-color,
+        viewer-card-background-color: $viewer-card-background-color,
+        viewer-card-header-color: white,
+        viewer-card-link-color: $viewer-card-link-color,
+        viewer-card-title-color: #909090,
+  // viewer-card-source-color: #cdcdcd,
+  // viewer-card-source-link-color: #909090,
+  // viewer-card-description-color: inherit,
+        viewer-card-label-color: #cdcdcd,
+  // viewer-card-aspect-contents-color: #cdcdcd,
+  // viewer-card-notes-color: #cdcdcd,
+  // viewer-card-tagsep-color: #cdcdcd,
 
-@mixin div-blue {
-  background-color: #5090A9;
-  color: #E6D7A3;
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: #C2D9E1;
-    color: #7E9796;
-  }
-  .center-button {
-    background-color: #C2D9E1;
-    background-image: unset;
-    color: #205D72;
-    border-color: #205D72;
+  /*
+  background-color: $friends-card-background-color;
+  div.title > a.title-link {
+    color: white;
   }
   a {
-    color: #A0B6C2;
-    &.btn-info {
-      color: lightgray;
-    }
+    color: $friends-card-link-color;
   }
-}
+$friends-navtab-background-color: #e4e0cf;
+$friends-navtab-color: #dbc046;
 
-@mixin div-purple {
-  background-color: #7D6D89;
-  color: #E8D6D6;
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: #D2CCD6;
-    color: #8F9092;
-  }
-  .center-button {
-    background-color: #E1E0E4;
-    background-image: unset;
-    color: #541D78;
-    border-color: #541D78;
-  }
-  form div a {
-    color: #E8D6D6;
-    &.btn-info {
-      color: lightgray;
-    }
-  }
-}
+$friends-card-background-color: #e9e4ca;
+$friends-panels-label-color: #e9e4ca;
+$friends-panels-label-button-color: #dbd3ab;
+$friends-panel-background-color: #e9e4ca;
+$friends-panel-background-transparent: rgba(233, 228, 202, 0);
+$friends-panel-label-color: #f3f2ea;
+$friends-card-link-color: mix($friends-panels-label-button-color, black, 80%);
+  */
+        friend-card-color: $friends-navtab-color,
+        friend-card-background-color: $friends-card-background-color,
+        friend-card-header-color: white,
+        friend-card-link-color: $friends-card-link-color,
+        friend-card-title-color: #909090,
+  // friend-card-source-color: #cdcdcd,
+  // friend-card-source-link-color: #909090,
+  // friend-card-description-color: inherit,
+        friend-card-label-color: #cdcdcd,
+  // friend-card-aspect-contents-color: #cdcdcd,
+  // friend-card-notes-color: #cdcdcd,
+  // friend-card-tagsep-color: #cdcdcd,
 
-/*
+  /*
+  background-color: $feeds-card-background-color;
+  div.title > a.title-link {
+    color: $feeds-navtab-color;
+  }
+  a {
+    color: $feeds-link-color;
+  }
 $feeds-navtab-background-color: #e7dfd6;
-$feeds-navtab-text-color: #de8822;
+$feeds-navtab-color: #de8822;
 $feeds-card-background-color: #f3e3cf;
 $feeds-panel-background-color: #e7dfd6;
 $feeds-panel-background-transparent: rgba(247, 223, 214, 0);
 $feeds-panel-label-color: #f5f2ee;
-*/
+  */
+        feed-card-color: inherit,
+        feed-card-background-color: $feeds-card-background-color,
+        feed-card-header-color: $feeds-navtab-color,
+        feed-card-link-color: $feeds-link-color,
+        feed-card-title-color: $feeds-navtab-color,
+  // feed-card-source-color: #cdcdcd,
+  // feed-card-source-link-color: #909090,
+  // feed-card-description-color: inherit,
+        feed-card-label-color: mix($feeds-navtab-color, white, 75%),
+  // feed-card-aspect-contents-color: #cdcdcd,
+  // feed-card-notes-color: #cdcdcd,
+  // feed-card-tagsep-color: #cdcdcd,
 
-$feeds-background-color: $feeds-card-background-color;
-$feeds-text-color: $feeds-navtab-text-color;
-$feeds-button-color: $feeds-panel-label-color;
-$feeds-field-background-color: $feeds-navtab-background-color;
-$feeds-link-color: $feeds-navtab-text-color;
-
-@mixin div-feeds {
-  background-color: $feeds-background-color;
-  color: $feeds-text-color;
-  input.string, textarea, input[type='text'], input[type='password'], input[type='email'], div.form-group.string > ul.token-input-list-facebook {
-    background-color: $feeds-field-background-color;
-    color: $feeds-text-color;
+  /*
+  color: $user-card-color;
+  background-color: $user-card-background-color;
+  div.title > a.title-link {
+    color: $user-card-title-color;
   }
-  .center-button {
-    background-color: $feeds-field-background-color;
-    background-image: unset;
-    color: $feeds-button-color;
-    border-color: $feeds-button-color;
+  .card-aspect-label {
+    color: $user-card-label-color;
   }
   a {
-    color: $feeds-link-color;
-    &.btn-info {
-      color: lightgray;
+    color: #888888;
+  }
+  */
+        user-card-color: $user-card-color,
+        user-card-background-color: $user-card-background-color,
+        user-card-header-color: $user-card-title-color,
+        user-card-label-color: $user-card-label-color,
+        user-card-link-color: #888888,
+        user-card-title-color: #909090,
+  // user-card-source-color: #cdcdcd,
+  // user-card-source-link-color: #909090,
+  // user-card-description-color: inherit,
+  // user-card-aspect-contents-color: #cdcdcd,
+  // user-card-notes-color: #cdcdcd,
+  // user-card-tagsep-color: #cdcdcd,
+
+  /*
+  background-color: $lists-card-background-color;
+  div.title > a.title-link {
+    color: rgba($lists-navtab-color, 0.6);
+  }
+  a {
+    color: $lists-panels-label-button-color;
+  }
+$lists-navtab-background-color: #dbe0dd;
+$lists-navtab-color: #1d6a2b;
+$lists-card-background-color: #d0dbd2;
+$lists-panels-label-color: #e9e4ca;
+$lists-panels-label-button-color: #94b79a;
+$lists-panel-background-color: #dbe0dd;
+$lists-panel-background-transparent: rgba(219, 224, 221, 0);
+$lists-panel-label-color: #e9eeea;
+  */
+        list-card-color: inherit,
+        list-card-background-color: $lists-card-background-color,
+        list-card-header-color: rgba($lists-navtab-color, 0.6),
+        list-card-link-color: $lists-panels-label-button-color,
+        list-card-title-color: $lists-navtab-color,
+  // list-card-source-color: #cdcdcd,
+  // list-card-source-link-color: #909090,
+  // list-card-description-color: inherit,
+        list-card-label-color: #cdcdcd,
+  // list-card-aspect-contents-color: #cdcdcd,
+  // list-card-notes-color: #cdcdcd,
+  // list-card-tagsep-color: #cdcdcd,
+
+        /* Sites: the former entity-card  */
+        site-card-color: #909090,
+        site-card-background-color: inherit,
+        site-card-title-color: #909090,
+        site-card-link-color: inherit,
+        site-card-header-color: #cdcdcd,
+        // site-card-source-color: #cdcdcd,
+        // site-card-source-link-color: #909090,
+        // site-card-description-color: inherit,
+        site-card-label-color: #cdcdcd,
+        // site-card-aspect-contents-color: #cdcdcd,
+        // site-card-notes-color: #cdcdcd,
+        // site-card-tagsep-color: #cdcdcd,
+);
+
+@mixin card-color-scheme($cardType) {
+  color: map-get($card-colors, unquote("#{$cardType}-card-color"));
+  background-color: map-get($card-colors, unquote("#{$cardType}-card-background-color"));
+  a.title-link, span.title-link {
+    color: map-get($card-colors, unquote("#{$cardType}-card-title-color"));
+  }
+  a {
+    color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+  }
+  h3 { // Section header
+    color: map-get($card-colors, unquote("#{$cardType}-card-header-color"));
+  }
+  div.source {
+    color: #999; // map-get($card-colors, unquote("#{$cardType}-card-source-color"));
+    a.source-link {
+      color: #77a2be; // map-get($card-colors, unquote("#{$cardType}-card-source-link-color"));
+    }
+  }
+  .description {
+    color: #949292;  // map-get($card-colors, unquote("#{$cardType}-card-description-color"));
+  }
+  .card-aspect-label {
+    color: map-get($card-colors, unquote("#{$cardType}-card-label-color"));
+  }
+  div.card-aspect-contents {
+    color: #909090; // map-get($card-colors, unquote("#{$cardType}-card-aspect-contents-color"));
+    &.notes {
+      color: #aaaaaa; // map-get($card-colors, unquote("#{$cardType}-card-notes-color"));
+    }
+    span.tagsep {
+      color: #8ac5d2; // map-get($card-colors, unquote("#{$cardType}-card-tagsep-color"));
     }
   }
 }

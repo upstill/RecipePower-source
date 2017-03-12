@@ -36,7 +36,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "try substitute on patijinich" do
     url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
     mp = PageRef.new url: url
-    mp.bkg_perform
+    mp.bkg_go
     assert mp.bad?
     new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
     assert_equal mp, new_mp
@@ -51,7 +51,7 @@ class PageRefTest < ActiveSupport::TestCase
 
     url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
     mpbad = PageRef::RecipePageRef.new url: url
-    mpbad.bkg_perform
+    mpbad.bkg_go
     assert mpbad.bad?
     badid = mpbad.id
 
@@ -148,7 +148,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert_nil pr.id
     assert !pr.errors.any?
 
-    pr.bkg_perform
+    pr.bkg_go true
     assert pr.bad?
     assert_not_nil pr.id
     assert_equal url, pr.url
@@ -174,7 +174,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "funky direct" do
     url = "http://www.finecooking.com/recipes/spicy-red-pepper-cilantro-sauce.aspx"
     pr = PageRef::RecipePageRef.fetch url
-    pr.bkg_perform
+    pr.bkg_go
     x=2
   end
 
@@ -208,6 +208,15 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal ref.id, ref2.id, "Referent's reference not ours"
     assert ref.referents.first, "New ref didn't get referent"
     assert_equal ref.referents.first.id, rft.id, "Reference's referent doesn't match"
+  end
+
+  test "answers.com behaves correctly" do
+    # Unfortunately, Mercury gets fooled by answers.com pages, thinking the url is the home page
+    # PageRef.fetch special-cases that (smell!), and here we test it.
+    url = "http://www.answers.com/topic/pinch"
+    dpr = DefinitionPageRef.fetch url
+    assert dpr
+    assert_equal url, dpr.url
   end
 
 end

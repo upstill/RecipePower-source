@@ -1,0 +1,1040 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class RecipeServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-convert_references">::convert_references</a>
+    
+    <li ><a href="#method-c-fix_redundant">::fix_redundant</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-probe_uris">::probe_uris</a>
+    
+    <li ><a href="#method-c-time_lookup">::time_lookup</a>
+    
+    <li ><a href="#method-i-convert_references">#convert_references</a>
+    
+    <li ><a href="#method-i-correct_url_or_destroy">#correct_url_or_destroy</a>
+    
+    <li ><a href="#method-i-probe_uri">#probe_uri</a>
+    
+    <li ><a href="#method-i-scrape">#scrape</a>
+    
+    <li ><a href="#method-i-show_tags">#show_tags</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-RecipeServices">
+  <h1 id="class-RecipeServices" class="class">
+    class RecipeServices
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-recipe" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">recipe</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-convert_references" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">convert_references</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="convert_references-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_references</span>
+  <span class="ruby-comment"># Ensure all recipes have a PageRef</span>
+  <span class="ruby-identifier">reports</span> = [ <span class="ruby-string">&#39;***** RecipeServices.convert_references ********&#39;</span>]
+  <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:affiliate_id</span>)).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rec</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>
+        <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">destroy</span>
+        <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">reload</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">rec</span>).<span class="ruby-identifier">convert_references</span>
+    <span class="ruby-keyword">end</span>
+  }
+
+  <span class="ruby-identifier">procids</span> =
+      (<span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">virgin</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
+          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">processing</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
+          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">bad</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
+          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">http_status</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>)
+      ).<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">sort</span>
+
+  <span class="ruby-comment"># Ensure all RecipePageRefs have valid status and http_status</span>
+  <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">procids</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span> <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pr</span>).<span class="ruby-identifier">ensure_status</span> }
+
+  <span class="ruby-comment"># Clean up the PageRefs with nil URLs</span>
+  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:recipes</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span>
+         <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
+           <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>).<span class="ruby-identifier">correct_url_or_destroy</span>
+         }
+       }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">sort</span>
+
+  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">bad</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:recipes</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">present?</span>
+      <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
+        <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>).<span class="ruby-identifier">correct_url_or_destroy</span>
+      }
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-node">&quot;RecipePageRef #{pr.id} (#{pr.url}) has no recipes&quot;</span>
+    <span class="ruby-keyword">end</span>
+  }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">sort</span>
+  <span class="ruby-identifier">reports</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-fix_redundant" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fix_redundant</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Find all recipes that are redundant (ie., they have the same canonical url
+as another) and merge them into the one that already owns the URL.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="fix_redundant-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 172</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fix_redundant</span>
+  <span class="ruby-identifier">redundant</span> = []
+  <span class="ruby-identifier">current_ids</span> = <span class="ruby-constant">Set</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;RecipeReference&quot;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:affiliate_id</span>)
+  <span class="ruby-identifier">all_ids</span> = <span class="ruby-constant">Set</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>)
+  (<span class="ruby-identifier">all_ids</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">current_ids</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">rcp</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">id</span>
+    <span class="ruby-identifier">old_rcp</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">rcp</span>.<span class="ruby-identifier">url</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Recipe ##{rcp.id} (url #{rcp.url})...&quot;</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})&quot;</span>
+    <span class="ruby-identifier">old_rcp</span>.<span class="ruby-identifier">absorb</span> <span class="ruby-identifier">rcp</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">old_rcp</span>).<span class="ruby-identifier">test_conversion</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(recipe, current_user=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">recipe</span>, <span class="ruby-identifier">current_user</span>=<span class="ruby-keyword">nil</span>)
+  <span class="ruby-ivar">@recipe</span> = <span class="ruby-identifier">recipe</span>
+  <span class="ruby-comment"># @current_user = current_user</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-probe_uris" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">probe_uris</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Take another look at the recipes&#39; links which haven&#39;t been
+validated</p>
+          
+          
+
+          
+          <div class="method-source-code" id="probe_uris-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">probe_uris</span>
+  <span class="ruby-identifier">reports</span> = []
+  <span class="ruby-identifier">unreachables</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>, <span class="ruby-value">:gleaning</span>).<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span> <span class="ruby-identifier">recipe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reachable?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span> }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;**** Rechecking #{unreachables.count} recipes...&quot;</span>
+  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">unreachables</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">unreachable</span><span class="ruby-operator">|</span>
+    <span class="ruby-comment"># Take another crack at the unreachable recipes</span>
+    <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">unreachable</span>).<span class="ruby-identifier">probe_uri</span>
+  }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-identifier">unreachables</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>, <span class="ruby-value">:gleaning</span>).<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span> <span class="ruby-identifier">recipe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reachable?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span> }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;**** #{unreachables.count} recipes unreachable after checking&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-time_lookup" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">time_lookup</span><span
+            class="method-args">(ix=0, note='')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="time_lookup-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 205</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">time_lookup</span> <span class="ruby-identifier">ix</span>=<span class="ruby-value">0</span>, <span class="ruby-identifier">note</span>=<span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">ix</span>, <span class="ruby-identifier">note</span> = <span class="ruby-value">0</span>, <span class="ruby-identifier">ix</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ix</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
+  <span class="ruby-identifier">recipe_urls</span> = [
+      <span class="ruby-string">&#39;http://www.bento.com/rf_ok.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_temp.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_yaki.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_unagi.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/rf_nabe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/fexp-labels.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/trt-shabu.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/trt-tonkatsu.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2009/05/20/dining/203frex.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bento.com/tr-mich.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cavolettodibruxelles.it/2008/07/la-torta-di-ciliege&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2013/jun/13/how-to-make-perfect-cucumber-sandwiches&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/1015851/spanish-tortilla-with-tomato-pepper-salad.html&#39;</span>,
+      <span class="ruby-string">&#39;http://zoebakes.com/2013/05/01/cherry-chocolate-cake/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/07/sardine-pate/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bbcgoodfood.com/recipes/420616/rhubarb-crumble&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/mario-batali/pollo-alla-romana-roman-style-chicken-recipe.html?soc=sharingfb&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/mario-batali/pollo-alla-romana-roman-style-chicken-recipe/index.html?soc=sharingfb&#39;</span>,
+      <span class="ruby-string">&#39;http://www.haydenflourmills.com/blog/2013/9/26/tangy-miso-farro-salad&#39;</span>,
+      <span class="ruby-string">&#39;http://haydenflourmills.com/blog/2013/9/26/tangy-miso-farro-salad&#39;</span>,
+      <span class="ruby-string">&#39;http://spoonful.com/recipes/persimmon-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/whole-wild-salmon-fillet-with-mustard-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/flaugnarde-with-pears&#39;</span>,
+      <span class="ruby-string">&#39;http://www.seriouseats.com/recipes/2011/11/mock-apple-pie-ritz-cracker-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/10/persian-cheese-panir/&#39;</span>,
+      <span class="ruby-string">&#39;http://oggi-icandothat.blogspot.com/2008/02/robert-rodriguezs-puerco-pibil.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/wordofmouth/2011/oct/20/how-to-cook-perfect-tarte-tatin&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/wordofmouth/2011/oct/20/how-to-cook-perfect-tarte-tatin&#39;</span>,
+      <span class="ruby-string">&#39;http://ricette.giallozafferano.it/Involtini-di-tacchino-ripieni-con-funghi-Champignon.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Roasted+pumpkin+wedges+with+chestnut%2C+cinnamon+%26+fresh+bay+leaves+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Roasted+pumpkin+wedges+with+chestnut%2C+cinnamon+%26+fresh+bay+leaves+&#39;</span>,
+      <span class="ruby-string">&#39;http://ricette.giallozafferano.it/Mostarda-di-Cremona.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/uk/2006/nov/19/christmas.foodanddrink1?recipetitle=Turkey+breast+joint+with+sloe+gin+cranberry+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/uk/2006/nov/19/christmas.foodanddrink1?recipetitle=Turkey+breast+joint+with+sloe+gin+cranberry+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/apr/27/recipes.foodanddrink4?recipetitle=Ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/apr/27/recipes.foodanddrink4?recipetitle=Ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/blog/2011/10/apple-pie-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/2011/10/apple-pie-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10680-chicken-chile-verde&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/11/06/black-walnut-ice-cream/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/29311-chocolate-lava-cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/14327-mocha-pudding-cake&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10821-upside-down-banana-coffee-tart&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/29553-bacon-apple-and-blue-cheese-omelet&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/10/31/pickled-cauliflower/&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/13098-diana-kennedy-s-carnitas&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/13098_diana_kennedys_carnitas&#39;</span>,
+      <span class="ruby-string">&#39;http://huntergathercook.typepad.com/huntergathering_wild_fres/2011/10/espelette-chillis-perfect-peppers-and-basque-soup.html&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/shaved-fennel-red-onion-and--celery-salad-with-salami&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec1-20111110,0,5063589.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec2-20111110,0,5718950.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec4-20111110,0,7029672.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.latimes.com/features/food/la-fo-pulquerias-rec3-20111110,0,6374311.story&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/flaky-blood-orange-tart&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/australia-food-blog/2013/dec/20/kylie-kwongs-crispy-pork-belly-recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/australia-food-blog/2013/dec/22/australian-christmas-feasts-guy-grossi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/05/tart-au-citron-french-lemon-tart/&#39;</span>,
+      <span class="ruby-string">&#39;http://frenchfood.about.com/od/desserts/r/lemontart.htm&#39;</span>,
+      <span class="ruby-string">&#39;http://ohmyveggies.com/recipe-sriracha-snap-peas-with-red-pepper/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/cheesy-farro-and-tomato-risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.taste.com.au/recipes/26063/rich+almond+ricotta+cake&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-salad/&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/9949-carrot-gnocchi-with-butter-and-sage-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://food52.com/recipes/9949_carrot_gnocchi_with_butter_and_sage_sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/07/swiss-chard-and-tahini-beoreg/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/10883-croissant-and-armagnac-bread-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/aug/19/courgette-recipes-yotam-ottolenghi?INTCMP=SRCH&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/aug/19/courgette-recipes-yotam-ottolenghi?INTCMP=SRCH&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/oct/23/aubergine-with-herbs-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/oct/23/aubergine-with-herbs-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/moroccan-pancakes/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/ricotta-lebanese-style-areesheh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/08/farmers-cheese-homemade-jeben-baladi/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/01/14/acorn-pasta-and-the-mechanics-of-eating-acorns/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/acorns-nuts-and-other-wild-starches/acorn-soup/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/acorn-soup/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/10/11/acorn-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/black-walnut-parsley-pesto/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/ancient-roman-fava-bean-dip/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/03/25/cardoon-gratin/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/unusual-garden-veggies/cicerchia-bean-agnolotti/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/wild-mushroom-pasta-with-a-gin-cream-sauce/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/red-wine-wild-mushroom-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/pumpkin-or-squash-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/regular-garden-veggies/pumpkin-or-squash-spaetzle/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/calabrian-hot-pepper-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/strettine-an-italian-nettle-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2013/05/23/ramp-pasta-morels-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/ramp-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2012/12/12/snowball-cookies-recipe-walnut/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/acorns-nuts-and-other-wild-starches/black-walnut-snowball-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://smittenkitchen.com/blog/2013/08/kale-salad-with-pecorino-and-walnuts/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/the-ultimate-southern-fried-chicken&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.countrytrading.co.nz/2014/01/01/how-to-make-nitrate-free-bacon-in-3-days/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/venison-recipes/venison-stews/spring-lamb-sugo/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/duck-and-goose-recipes-the-nasty-bits/duck-liver-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/01/08/making-wild-game-tortelli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/foraging-recipes/greens-and-herbs/borage-and-ricotta-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/borage-and-ricotta-ravioli/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/greens-and-herbs/nettle-ravioli-northern-italian-style/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/11/19/pelmeni-and-the-eating-of-bears/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/veggie-recipes/mushroom-recipes/honey-mushroom-pierogi/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/christmas-leftovers-recipes-locatelli-roux?recipetitle=Turkey+meatballs+in+sweet+and+sour+sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+with+pistachio+and+apricot+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+with+pistachio+and+apricot+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+breast+steaks+with+prune+gravy&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/14/nigel-slater-turkey-christmas-recipe?recipetitle=Turkey+breast+steaks+with+prune+gravy&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/foodanddrink.recipes?recipetitle=Roast+turkey%2C+apricot+and+ginger+stuffing+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/foodanddrink.recipes?recipetitle=Roast+turkey%2C+apricot+and+ginger+stuffing+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+fricassee+with+porcini&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+fricassee+with+porcini&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+brussels+sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/nov/18/recipes.foodanddrink2?recipetitle=Turkey+stuffed+with+brussels+sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/uk/2005/dec/24/christmas.foodanddrink?recipetitle=Devilled+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/uk/2005/dec/24/christmas.foodanddrink?recipetitle=Devilled+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/dec/09/foodanddrink.recipes1?recipetitle=Traditional+roast+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/dec/09/foodanddrink.recipes1?recipetitle=Traditional+roast+turkey&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/may/13/foodanddrink.recipes1?recipetitle=Turkey+meatloaf&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/may/13/foodanddrink.recipes1?recipetitle=Turkey+meatloaf&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/18/christmas-starters-stuffing-recipes?recipetitle=Pear+and+celeriac+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/18/christmas-starters-stuffing-recipes?recipetitle=Pear+and+celeriac+stuffing&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/dec/27/nigel-slater-chestnut-mincemeat-recipes?recipetitle=PARSNIP%2C+CHESTNUT+AND+MUSHROOM+CASSEROLE&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/dec/27/nigel-slater-chestnut-mincemeat-recipes?recipetitle=PARSNIP%2C+CHESTNUT+AND+MUSHROOM+CASSEROLE&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2001/jun/10/foodanddrink.recipes3?recipetitle=Thai+chicken+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2001/jun/10/foodanddrink.recipes3?recipetitle=Thai+chicken+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/feb/15/foodanddrink.recipes?recipetitle=Grilled+pork+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/feb/15/foodanddrink.recipes?recipetitle=Grilled+pork+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/feb/22/foodanddrink.shopping?recipetitle=Roast+pork+belly+with+five-spice+rub&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/feb/22/foodanddrink.shopping?recipetitle=Roast+pork+belly+with+five-spice+rub&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/may/16/foodanddrink.recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/may/16/foodanddrink.recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/wordofmouth/2008/nov/25/recipe-fish?recipetitle=Smoked+haddock+and+leek+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/wordofmouth/2008/nov/25/recipe-fish?recipetitle=Smoked+haddock+and+leek+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.chow.com/recipes/13580-braised-brussels-sprouts&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/soups-stews-and-broths/sugo-danatra-wild-duck-ragu/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/wild-game/duck-goose-recipes/soups-stews-and-broths/ducky-tomato-sauce-for-pasta/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cookinglight.com/food/recipe-finder/myplate-inspired-beef-recipes-00412000081047/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/brussels-sprouts-kimchi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cookinglight.com/food/recipe-finder/myplate-inspired-quick-easy-00412000081022/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/milk-and-bread-pudding-ashtaliyeh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.myrecipes.com/recipe/chicken-breasts-with-tomatoes-olives-10000001918514/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/spicy-pork-and-mustard-green-soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.dailymail.co.uk/home/you/article-2086191/Recipe-Whole-lemon-almond-cake.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodnetwork.com/recipes/ina-garten/perfect-roast-chicken-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.buzzfeed.com/christinebyrne/roast-chicken-rules&#39;</span>,
+      <span class="ruby-string">&#39;http://vegetarian.about.com/od/soupssalads/r/MisoSoup.htm&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/apr/26/nigel-slater-salads?recipetitle=Sheep%27s+cheese%2C+sprouting+leaves+and+orange+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/apr/26/nigel-slater-salads?recipetitle=Sheep%27s+cheese%2C+sprouting+leaves+and+orange+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/may/10/spring-onions-recipes?recipetitle=Crystal+noodle+salad+with+pickled+ginger+and+lime&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/may/10/spring-onions-recipes?recipetitle=Crystal+noodle+salad+with+pickled+ginger+and+lime&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/18/hot-sour-mushroom-soup-recipe?recipetitle=Yotam+Ottolenghi%27s+hot+and+sour+mushroom+soup+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/18/hot-sour-mushroom-soup-recipe?recipetitle=Yotam+Ottolenghi%27s+hot+and+sour+mushroom+soup+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/15/chicken-lemongrass-broth-recipe?recipetitle=Hot+and+sour+chicken+and+lemongrass+broth&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/15/chicken-lemongrass-broth-recipe?recipetitle=Hot+and+sour+chicken+and+lemongrass+broth&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/mar/13/curry-laksa-recipe-yotam-ottolenghi?recipetitle=Yotam+Ottolenghi%27s+curry+laksa+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/mar/13/curry-laksa-recipe-yotam-ottolenghi?recipetitle=Yotam+Ottolenghi%27s+curry+laksa+recipe&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/jan/10/nigel-slater-greens-recipes?recipetitle=CAULIFLOWER+GRATIN+WITH+OAT+AND+SUNFLOWER+SEED+CRUST&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/jan/10/nigel-slater-greens-recipes?recipetitle=CAULIFLOWER+GRATIN+WITH+OAT+AND+SUNFLOWER+SEED+CRUST&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2004/dec/04/foodanddrink.shopping3?recipetitle=Brussels+sprouts+with+ginger+and+tomato&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2004/dec/04/foodanddrink.shopping3?recipetitle=Brussels+sprouts+with+ginger+and+tomato&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2005/dec/10/foodanddrink.recipes?recipetitle=Mashed+Brussels+sprouts+with+parmesan+and+cream&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2005/dec/10/foodanddrink.recipes?recipetitle=Mashed+Brussels+sprouts+with+parmesan+and+cream&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2007/sep/23/foodanddrink.features5?recipetitle=Brussels+sprouts+with+pancetta+and+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2007/sep/23/foodanddrink.features5?recipetitle=Brussels+sprouts+with+pancetta+and+chestnuts&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/theguardian/2007/nov/24/weekend7.weekend3?recipetitle=Brussels+sprouts+and+tofu&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/theguardian/2007/nov/24/weekend7.weekend3?recipetitle=Brussels+sprouts+and+tofu&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/bread-and-prune-gnocchi-with-plum-brandy-and-pork-&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Pan-fried+brussels+sprouts+and+shallots+with+pomegranate+%26+purple+basil+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/06/side-dishes-christmas-recipes?recipetitle=Pan-fried+brussels+sprouts+and+shallots+with+pomegranate+%26+purple+basil+&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2009/nov/08/christmas-recipe-top-chefs-tips?recipetitle=Jason+Atherton%3A+Brussels+sprout+and+chestnut+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2009/nov/08/christmas-recipe-top-chefs-tips?recipetitle=Jason+Atherton%3A+Brussels+sprout+and+chestnut+risotto&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/dec/04/christmas-standby-recipes-angela-hartnett?recipetitle=Brussels+sprout+and+potato+bubble+and+squeak&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/dec/04/christmas-standby-recipes-angela-hartnett?recipetitle=Brussels+sprout+and+potato+bubble+and+squeak&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Creamed+brussels+sprouts+with+bacon&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Creamed+brussels+sprouts+with+bacon&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Roasted+brussels+sprouts+with+shallots+and+caraway+seeds&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Roasted+brussels+sprouts+with+shallots+and+caraway+seeds&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/mar/29/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Poached+baby+vegetables+with+caper+mayonnaise&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/mar/29/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Poached+baby+vegetables+with+caper+mayonnaise&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/jun/28/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Gado+gado&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/jun/28/recipe.foodanddrink?recipetitle=The+new+vegetarian%3A+Gado+gado&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2008/dec/03/weekly-recipe-soup?recipetitle=White+bean+and+winter+greens+soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2008/dec/03/weekly-recipe-soup?recipetitle=White+bean+and+winter+greens+soup&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipe/brown-butter-polenta-cake-with-maple-caramel&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/stuffed-kale-with-bulgur-tabbouleh-and-lime-yogurt-dip&#39;</span>,
+      <span class="ruby-string">&#39;http://www.epicurious.com/recipes/food/views/Lentil-Salad-with-Balsamic-Vinaigrette-101018&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/feb/19/recipes-from-nopi-yotam-ottolenghi?recipetitle=Raw+Brussels+sprouts+with+oyster+mushrooms+and+quail+eggs&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/feb/19/recipes-from-nopi-yotam-ottolenghi?recipetitle=Raw+Brussels+sprouts+with+oyster+mushrooms+and+quail+eggs&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/nov/11/spiced-lamb-shanks-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/nov/11/spiced-lamb-shanks-recipe-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/11552/puntarella-with-green-anchoiade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/recipes/11552/Puntarella-With-Green-Ancho239ade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.thechefproject.com//Assets/recipes/SriLanka.pdf&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/banoffee-pie/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/swiss-chard-olive-oil/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/artichoke-smash/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/roasted-vegetables/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/balsamic-glazed-duck/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/salad-greens-butternut-squash/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/devils-on-horseback/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/sweet-potato-meringue-pie/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/cauliflower-pears/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/collard-greens/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/cornbread-andouille-stuffing/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/slow-cooked-roast-turkey/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/listings/recipe/oyster-chowder/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2011/11/16/dining/cauliflower-with-curry-butter-recipe.html&#39;</span>,
+      <span class="ruby-string">&#39;http://readynutrition.com/resources/survival-food-series-3-ways-to-naturally-make-yeast_02032011/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.sfgate.com/cgi-bin/article.cgi?f=/c/a/2011/11/20/FDM41M0ORE.DTL&amp;ao=2&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/mafaldine-with-rabbit-ragu&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/salmon-with-vodka--sauce-and-caviar&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/malloreddus-with-mixed-vegetables&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/cheese-fondue-with-grappa--and-walnut-bread&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/sea-bream-with-clams&#39;</span>,
+      <span class="ruby-string">&#39;http://www.mariquita.com/recipes/agretti.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.localforage.com/local_forage/2006/10/on_sunday_i_got.html&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.junbelen.com/2010/06/25/how-to-make-the-best-brioche-bread-pudding-tartine-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Brussels+sprout+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2010/nov/13/brussels-sprouts-recipes-fearnley-whittingstall?recipetitle=Brussels+sprout+salad&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/tartine-bakerys-panettone&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/sweet-roll-kaak-alleeta/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/kibbeh-with-arnabiyeh-sauce-kibbeh-arnabiyeh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/zaatar-flatbread-with-jreesh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/date-sandwich-cake/&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/roman-style-salt-cod-in-a-seed-and-nut-crust--&#39;</span>,
+      <span class="ruby-string">&#39;http://www.streetgourmetla.com/2011/11/cabrito-al-pastor-at-gran-san-carlos.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/kibbeh-mortar-jurn/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/nov/25/prawn-okra-gumbo-potatocake-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/nov/25/prawn-okra-gumbo-potatocake-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/dec/02/christmas-party-food-yotam-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/dec/02/christmas-party-food-yotam-ottolenghi&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/sweet-torte-of-cannellini-beans-ricotta-and-cocoa-powder&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/creamy-sweet-polenta--with-cold-milk&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/rice-pudding&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/beets-2011-12/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/dried-fruit-salad-khoshaf-2/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/sunchokes-2011-12/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/brussels-sprouts-2011-11/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/empire-apples-2011-11/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/fennel-2011-10/&#39;</span>,
+      <span class="ruby-string">&#39;http://nymag.com/restaurants/recipes/inseason/albacore-tuna-2011-10/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.theguardian.com/lifeandstyle/2011/dec/16/roasted-squash-stuffed-quince-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://www.guardian.co.uk/lifeandstyle/2011/dec/16/roasted-squash-stuffed-quince-recipes&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/pirotecnica_2&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/11/23/wild-turkey-risotto/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.britishlarder.co.uk/festive-christmas-pudding/#axzz1h0SM1ry4&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/iraqi-taffy-mann-al-sama/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/bulgur-and-cumin-pate-kammounieh/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2011/12/eggplant-dip-mtabbal/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/01/sichuan-stir-fry-puffballs/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/04/braised-duck-legs-with-leeks/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2011/12/14/roast-snipe-and-slow-days/&#39;</span>,
+      <span class="ruby-string">&#39;http://lacucinaitalianamagazine.com/recipe/panettone&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/12/iraqi-cuisine-al-tabekh-al-3iraki-a-giveaway/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/11/areesheh-turnovers/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.tasteofbeirut.com/2013/11/areesheh-cheese/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.cooks.com/recipe/4m3l00w3/very-moist-chocolate-cake.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.hungrycravings.com/2010/01/bergamot-orange-dreams.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2009/05/20/dining/202frex.html&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.umamimart.com/2011/12/japanified-arancini/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2006/12/moroccan-preser-1/&#39;</span>,
+      <span class="ruby-string">&#39;http://honest-food.net/2010/02/04/preserving-lemons/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2008/11/rosy-poached-quince/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.nytimes.com/2010/11/10/dining/10chefrex1.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bonappetit.com/recipes/2011/05/rainbow-cookies&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/grilled-lamb-shoulder-chops-with-manischewitz-glaze&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/oysters-rocafella&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/chicken-with-candied-cashews&#39;</span>,
+      <span class="ruby-string">&#39;http://chocolateandzucchini.com/recipes/salads/oyster-mushroom-salad-with-apple-and-bergamot-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://chocolateandzucchini.com/archives/2005/03/oyster_mushroom_salad_with_apple_and_bergamot.php&#39;</span>,
+      <span class="ruby-string">&#39;http://www.foodandwine.com/recipes/roast-pork-loin-with-armagnac-prune-sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.bbc.co.uk/food/recipes/panfriedporkfilletwi_88500&#39;</span>,
+      <span class="ruby-string">&#39;http://seidhr.blogspot.com/2009/01/bergamot-marmalade.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2010/03/bergamot-marmalade-recipe/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.thegardenofeating.org/2008/03/meyer-lemon-and-bergamot-orange-citrus.html&#39;</span>,
+      <span class="ruby-string">&#39;http://gardenofeatingblog.blogspot.com/2008/03/meyer-lemon-and-bergamot-orange-citrus.html&#39;</span>,
+      <span class="ruby-string">&#39;http://www.hungrycravings.com/2010/01/single-bergamot-orange.html&#39;</span>,
+      <span class="ruby-string">&#39;http://sourplum.wordpress.com/2011/01/08/bergamot-sablee-cookies/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2007/07/planet-of-the-c-1/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/06/socca-enfin/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2009/10/crepes-dentelles/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.davidlebovitz.com/2010/09/plum-and-rhubarb-crisp/&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Baccala-Salad&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Pasta-Con-Le-Sarde-Sardines&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Whole-Roasted-Branzino-with-Fennel-and-Onions&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Lobster-Fra-Diavolo-Lobster-Spicy-Tomato-Sauce&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Feast-of-Seven-Fishes-Shrimp-Scampi&#39;</span>,
+      <span class="ruby-string">&#39;http://www.saveur.com/article/Recipes/Salt-Cod-Cake-on-Grilled-Toast&#39;</span>,
+      <span class="ruby-string">&#39;http://blog.umamimart.com/2011/12/happy-hour-tom-jerry-the-original-winter-cocktail/&#39;</span>,
+      <span class="ruby-string">&#39;http://umamimart.com/2011/12/happy-hour-tom-jerry-the-original-winter-cocktail/&#39;</span>
+  ]
+  <span class="ruby-identifier">recipe_ids</span> = [<span class="ruby-value">2670</span>, <span class="ruby-value">29</span>, <span class="ruby-value">30</span>, <span class="ruby-value">31</span>, <span class="ruby-value">32</span>, <span class="ruby-value">33</span>, <span class="ruby-value">35</span>, <span class="ruby-value">36</span>, <span class="ruby-value">37</span>, <span class="ruby-value">12</span>, <span class="ruby-value">13</span>, <span class="ruby-value">15</span>, <span class="ruby-value">16</span>, <span class="ruby-value">17</span>, <span class="ruby-value">18</span>, <span class="ruby-value">19</span>, <span class="ruby-value">20</span>, <span class="ruby-value">3</span>, <span class="ruby-value">23</span>, <span class="ruby-value">24</span>, <span class="ruby-value">25</span>, <span class="ruby-value">26</span>, <span class="ruby-value">27</span>, <span class="ruby-value">28</span>, <span class="ruby-value">2671</span>, <span class="ruby-value">2672</span>, <span class="ruby-value">2673</span>, <span class="ruby-value">2674</span>, <span class="ruby-value">2591</span>, <span class="ruby-value">2675</span>, <span class="ruby-value">2676</span>, <span class="ruby-value">2677</span>, <span class="ruby-value">14</span>, <span class="ruby-value">2693</span>, <span class="ruby-value">56</span>, <span class="ruby-value">57</span>, <span class="ruby-value">59</span>, <span class="ruby-value">60</span>, <span class="ruby-value">61</span>, <span class="ruby-value">62</span>, <span class="ruby-value">63</span>, <span class="ruby-value">64</span>, <span class="ruby-value">65</span>, <span class="ruby-value">67</span>, <span class="ruby-value">68</span>, <span class="ruby-value">69</span>, <span class="ruby-value">70</span>, <span class="ruby-value">76</span>, <span class="ruby-value">77</span>, <span class="ruby-value">79</span>, <span class="ruby-value">80</span>, <span class="ruby-value">81</span>, <span class="ruby-value">82</span>, <span class="ruby-value">83</span>, <span class="ruby-value">84</span>, <span class="ruby-value">85</span>, <span class="ruby-value">1092</span>, <span class="ruby-value">47</span>, <span class="ruby-value">71</span>, <span class="ruby-value">2679</span>, <span class="ruby-value">2681</span>, <span class="ruby-value">2680</span>, <span class="ruby-value">2682</span>, <span class="ruby-value">2863</span>, <span class="ruby-value">2683</span>, <span class="ruby-value">86</span>, <span class="ruby-value">95</span>, <span class="ruby-value">96</span>, <span class="ruby-value">97</span>, <span class="ruby-value">98</span>, <span class="ruby-value">99</span>, <span class="ruby-value">100</span>, <span class="ruby-value">105</span>, <span class="ruby-value">106</span>, <span class="ruby-value">107</span>, <span class="ruby-value">108</span>, <span class="ruby-value">109</span>, <span class="ruby-value">110</span>, <span class="ruby-value">111</span>, <span class="ruby-value">112</span>, <span class="ruby-value">113</span>, <span class="ruby-value">114</span>, <span class="ruby-value">115</span>, <span class="ruby-value">116</span>, <span class="ruby-value">117</span>, <span class="ruby-value">119</span>, <span class="ruby-value">120</span>, <span class="ruby-value">121</span>, <span class="ruby-value">123</span>, <span class="ruby-value">87</span>, <span class="ruby-value">88</span>, <span class="ruby-value">2687</span>, <span class="ruby-value">2694</span>, <span class="ruby-value">2685</span>, <span class="ruby-value">102</span>, <span class="ruby-value">2686</span>, <span class="ruby-value">2688</span>, <span class="ruby-value">2689</span>, <span class="ruby-value">132</span>, <span class="ruby-value">133</span>, <span class="ruby-value">134</span>, <span class="ruby-value">135</span>, <span class="ruby-value">136</span>, <span class="ruby-value">138</span>, <span class="ruby-value">143</span>, <span class="ruby-value">144</span>, <span class="ruby-value">145</span>, <span class="ruby-value">146</span>, <span class="ruby-value">147</span>, <span class="ruby-value">149</span>, <span class="ruby-value">150</span>, <span class="ruby-value">151</span>, <span class="ruby-value">152</span>, <span class="ruby-value">125</span>, <span class="ruby-value">127</span>, <span class="ruby-value">129</span>, <span class="ruby-value">2690</span>, <span class="ruby-value">2692</span>, <span class="ruby-value">2866</span>, <span class="ruby-value">2867</span>, <span class="ruby-value">2868</span>, <span class="ruby-value">2869</span>, <span class="ruby-value">2691</span>, <span class="ruby-value">154</span>, <span class="ruby-value">156</span>, <span class="ruby-value">158</span>, <span class="ruby-value">159</span>, <span class="ruby-value">160</span>, <span class="ruby-value">161</span>, <span class="ruby-value">162</span>, <span class="ruby-value">163</span>, <span class="ruby-value">164</span>, <span class="ruby-value">165</span>, <span class="ruby-value">166</span>, <span class="ruby-value">167</span>, <span class="ruby-value">168</span>, <span class="ruby-value">170</span>, <span class="ruby-value">171</span>, <span class="ruby-value">172</span>, <span class="ruby-value">173</span>, <span class="ruby-value">174</span>, <span class="ruby-value">175</span>, <span class="ruby-value">179</span>, <span class="ruby-value">184</span>, <span class="ruby-value">185</span>, <span class="ruby-value">186</span>, <span class="ruby-value">187</span>, <span class="ruby-value">188</span>, <span class="ruby-value">153</span>, <span class="ruby-value">176</span>, <span class="ruby-value">2695</span>, <span class="ruby-value">2696</span>, <span class="ruby-value">2697</span>, <span class="ruby-value">2698</span>, <span class="ruby-value">2699</span>, <span class="ruby-value">189</span>, <span class="ruby-value">191</span>, <span class="ruby-value">192</span>, <span class="ruby-value">212</span>, <span class="ruby-value">194</span>, <span class="ruby-value">2700</span>, <span class="ruby-value">2701</span>, <span class="ruby-value">2702</span>, <span class="ruby-value">2703</span>, <span class="ruby-value">2704</span>, <span class="ruby-value">1110</span>, <span class="ruby-value">198</span>, <span class="ruby-value">199</span>, <span class="ruby-value">200</span>, <span class="ruby-value">201</span>, <span class="ruby-value">203</span>, <span class="ruby-value">204</span>, <span class="ruby-value">205</span>, <span class="ruby-value">207</span>, <span class="ruby-value">208</span>, <span class="ruby-value">210</span>, <span class="ruby-value">211</span>, <span class="ruby-value">213</span>, <span class="ruby-value">214</span>, <span class="ruby-value">215</span>, <span class="ruby-value">216</span>, <span class="ruby-value">217</span>, <span class="ruby-value">218</span>, <span class="ruby-value">219</span>, <span class="ruby-value">220</span>, <span class="ruby-value">193</span>, <span class="ruby-value">230</span>, <span class="ruby-value">221</span>, <span class="ruby-value">222</span>, <span class="ruby-value">240</span>, <span class="ruby-value">259</span>, <span class="ruby-value">265</span>, <span class="ruby-value">225</span>, <span class="ruby-value">227</span>, <span class="ruby-value">228</span>, <span class="ruby-value">229</span>, <span class="ruby-value">231</span>, <span class="ruby-value">233</span>, <span class="ruby-value">235</span>, <span class="ruby-value">236</span>, <span class="ruby-value">237</span>, <span class="ruby-value">238</span>, <span class="ruby-value">239</span>, <span class="ruby-value">241</span>, <span class="ruby-value">242</span>, <span class="ruby-value">243</span>, <span class="ruby-value">244</span>, <span class="ruby-value">245</span>, <span class="ruby-value">246</span>, <span class="ruby-value">249</span>, <span class="ruby-value">250</span>, <span class="ruby-value">251</span>, <span class="ruby-value">252</span>, <span class="ruby-value">261</span>, <span class="ruby-value">253</span>, <span class="ruby-value">277</span>, <span class="ruby-value">255</span>, <span class="ruby-value">256</span>, <span class="ruby-value">258</span>, <span class="ruby-value">1162</span>, <span class="ruby-value">1164</span>, <span class="ruby-value">1350</span>, <span class="ruby-value">1357</span>, <span class="ruby-value">1597</span>, <span class="ruby-value">1601</span>, <span class="ruby-value">1801</span>, <span class="ruby-value">2705</span>, <span class="ruby-value">2706</span>, <span class="ruby-value">2707</span>, <span class="ruby-value">2708</span>, <span class="ruby-value">2709</span>, <span class="ruby-value">2710</span>, <span class="ruby-value">2711</span>, <span class="ruby-value">2712</span>, <span class="ruby-value">262</span>, <span class="ruby-value">263</span>, <span class="ruby-value">264</span>, <span class="ruby-value">285</span>, <span class="ruby-value">267</span>, <span class="ruby-value">269</span>, <span class="ruby-value">273</span>, <span class="ruby-value">274</span>, <span class="ruby-value">275</span>, <span class="ruby-value">276</span>, <span class="ruby-value">1214</span>, <span class="ruby-value">254</span>, <span class="ruby-value">270</span>, <span class="ruby-value">278</span>, <span class="ruby-value">279</span>, <span class="ruby-value">281</span>, <span class="ruby-value">2870</span>, <span class="ruby-value">2713</span>, <span class="ruby-value">2714</span>, <span class="ruby-value">292</span>, <span class="ruby-value">2715</span>, <span class="ruby-value">2716</span>, <span class="ruby-value">2717</span>, <span class="ruby-value">2718</span>, <span class="ruby-value">2719</span>, <span class="ruby-value">2720</span>, <span class="ruby-value">2721</span>, <span class="ruby-value">2722</span>, <span class="ruby-value">291</span>, <span class="ruby-value">293</span>, <span class="ruby-value">299</span>, <span class="ruby-value">300</span>, <span class="ruby-value">302</span>, <span class="ruby-value">303</span>, <span class="ruby-value">312</span>, <span class="ruby-value">314</span>, <span class="ruby-value">315</span>, <span class="ruby-value">316</span>, <span class="ruby-value">317</span>, <span class="ruby-value">318</span>, <span class="ruby-value">319</span>, <span class="ruby-value">309</span>, <span class="ruby-value">305</span>, <span class="ruby-value">286</span>, <span class="ruby-value">288</span>, <span class="ruby-value">289</span>, <span class="ruby-value">321</span>, <span class="ruby-value">322</span>, <span class="ruby-value">323</span>, <span class="ruby-value">2723</span>, <span class="ruby-value">2724</span>, <span class="ruby-value">2725</span>, <span class="ruby-value">2726</span>, <span class="ruby-value">2727</span>, <span class="ruby-value">2728</span>, <span class="ruby-value">2729</span>, <span class="ruby-value">2730</span>, <span class="ruby-value">2731</span>, <span class="ruby-value">2732</span>, <span class="ruby-value">2733</span>, <span class="ruby-value">2734</span>, <span class="ruby-value">2735</span>, <span class="ruby-value">325</span>, <span class="ruby-value">327</span>, <span class="ruby-value">329</span>, <span class="ruby-value">332</span>, <span class="ruby-value">333</span>]
+  <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">index_name</span> = <span class="ruby-identifier">index_table</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">time</span> = <span class="ruby-constant">Benchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">ix</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">0</span> <span class="ruby-comment"># Preflight: ensure that all the pagerefs exist</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;RecipePageRef&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;page_refs_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:page_refs</span>
+        <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">url</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Reference via Recipe&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:references</span>
+        <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">2</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Recipe via Reference&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:references</span>
+        <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">recipe_urls</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">recipe</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">recipe</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">3</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Recipe via ID-no ref&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;recipes_index_by_id&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:recipes</span>
+        <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">recipe</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">id</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">4</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Recipe via Title&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;recipes_index_by_title&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:recipes</span>
+        <span class="ruby-node">%w{morels quinoa avocado grilled chicken trout chilli cauliflower mushroom batali smitten yotam Mexican tofu parmesan tofu ginger peanuts figs salmon}</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">str</span><span class="ruby-operator">|</span>
+          <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;title ILIKE ?&#39;</span>, <span class="ruby-node">&quot;%#{str}%&quot;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rcp</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ttl</span> = <span class="ruby-identifier">rcp</span>.<span class="ruby-identifier">title</span> }
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">5</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;RecipePageRef&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;page_refs_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:page_refs</span>
+        <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ref</span> = <span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">url</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">6</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Site (PageRef)&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-keyword">nil</span>
+        <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">recipe_ids</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">site</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">7</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Site (Reference)&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-keyword">nil</span>
+        <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">recipe_ids</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">site</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">8</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;RecipePageRef by url (single query)&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;page_refs_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:page_refs</span>
+        <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>, <span class="ruby-keyword">true</span>
+        }
+      <span class="ruby-keyword">when</span> <span class="ruby-value">9</span>
+        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;RecipePageRef by url (two queries)&quot;</span>
+        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;page_refs_index_by_url_and_type&quot;</span>
+        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:page_refs</span>
+        <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>, <span class="ruby-keyword">false</span>
+        }
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">time_report</span> = <span class="ruby-node">&quot;usertime: #{time.utime.round(4)}, systemtime: #{time.stime.round(4)}, CPU time: #{time.cutime.round(4)}, system CPU time: #{time.cstime.round(4)} = #{time.total.round(4)}; real #{time.real.round(4)}&quot;</span>
+  <span class="ruby-identifier">index_status</span> = <span class="ruby-string">&quot;unindexed&quot;</span>
+  <span class="ruby-identifier">index_status</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-string">&#39;un&#39;</span>,<span class="ruby-string">&#39;&#39;</span>) <span class="ruby-keyword">if</span> (<span class="ruby-identifier">index_name</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span>
+      <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>.<span class="ruby-identifier">connection</span>.<span class="ruby-identifier">index_name_exists?</span>( <span class="ruby-identifier">index_table</span>, <span class="ruby-identifier">index_name</span>, <span class="ruby-keyword">false</span>))
+  <span class="ruby-identifier">line1</span> = <span class="ruby-node">&quot;#{ix}: #{label} at #{Time.new} (#{index_status}) #{note}:&quot;</span>
+  <span class="ruby-identifier">line2</span> = <span class="ruby-string">&quot;\t&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">time_report</span>
+  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&quot;db_timings&quot;</span>, <span class="ruby-string">&#39;a&#39;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">file</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">line1</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;\n&quot;</span>
+    <span class="ruby-identifier">file</span>.<span class="ruby-identifier">write</span> <span class="ruby-identifier">line2</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;\n&quot;</span>
+  }
+  <span class="ruby-node">&quot;#{line1}\n#{line2}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-convert_references" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">convert_references</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="convert_references-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">convert_references</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Converting references for recipe #{recipe.id}:&quot;</span>
+  <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">affiliate_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">reference</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">reference</span>.<span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-comment"># recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Enqueued RecipePageReference ##{reference.id} (#{reference.url})&quot;</span>
+    <span class="ruby-identifier">reference</span>.<span class="ruby-identifier">bkg_asynch</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;...returned&quot;</span>
+  }
+  <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reload</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-correct_url_or_destroy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">correct_url_or_destroy</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Check to see that a recipe can be reached. Three possibilities: good: carry
+on (return nil) bad and consequently destroyed: all is well (return nil)
+bad but collected by non-super-users: return the recipe for further
+processing</p>
+          
+          
+
+          
+          <div class="method-source-code" id="correct_url_or_destroy-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 87</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">correct_url_or_destroy</span>
+    <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>
+<span class="ruby-comment">    if !pr || pr.url.blank?
+      pr.destroy if pr
+      pr = (recipe.page_ref = PageRefServices.convert_reference(recipe.reference))
+      recipe.save
+    else
+      pr.perform unless pr.good? # Take another chance on a response
+    end
+</span>    <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bkg_go</span>(<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>) <span class="ruby-comment"># Take another chance on a response</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
+      <span class="ruby-comment"># Try correcting the url via regexp</span>
+      <span class="ruby-identifier">prs</span> = <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pr</span>)
+      <span class="ruby-identifier">old_url</span> = <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span>
+      <span class="ruby-identifier">new_page_ref</span> = <span class="ruby-keyword">nil</span>
+      [
+          [<span class="ruby-string">&#39;saveur.com/article/Recipe&#39;</span>, <span class="ruby-string">&#39;saveur.com/article/Recipes&#39;</span>],
+          [<span class="ruby-regexp">/www.tasteofbeirut.com\/\d\d\d\d\/\d\d/</span>, <span class="ruby-string">&#39;www.tasteofbeirut.com&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2011/09/you-know-you-want-it-green-pozole.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/you_know_you_want_it_green_pozole/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/02/lamb_barbacoa_in_adobo.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/lamb_barbacoa_in_adobo&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/04/apple-radish-watercress-salad-pistachio-chile-de-arbol.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/apple_radish_watercress_salad_pistachio_chile_de_arbol/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/05/creamy-poblano-soup.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/creamy-poblano-soup/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/06/cleaning-cactus-paddles-or-nopales.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/cleaning_cactus_paddles_or_nopales/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/07/blissful-corn-torte.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/blissful-corn-torte/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/07/cajeta-crepes-with-toasted-pecans.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/cajeta-crepes-with-toasted-pecans/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/07/snapper-in-a-poblano-chile-sauce.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/snapper-in-a-poblano-chile-sauce/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/08/cucumber-soup-with-pomegranate.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/cucumber_soup_with_pomegranate/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/08/mexican-wedding-cookies-1.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/mexican-wedding-cookies/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/09/chayote-squash-and-pickled-onion-salad.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/chayote-squash-and-pickled-onion-salad/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/10/purslane-or-verdolagas.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/2012/10/purslane_or_verdolagas/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/11/-fluffy-plantain-and-pecan.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/fluffy-plantain-and-pecan-bread/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/11/cactus-paddle-tostadas.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/cactus-paddle-tostada/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/11/sweet-potato-rounds-with-a-punch.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/sweet_potato_rounds_with_a_punch/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2012/11/zucchini-soup-with-tortilla-crisps.html&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/zucchini-soup-with-tortilla-crisps/&#39;</span>],
+          [<span class="ruby-string">&#39;http://patismexicantable.com/2011/06/dumplings/&#39;</span>,
+           <span class="ruby-string">&#39;https://patijinich.com/recipe/chochoyotes-corn-masa-dumplings/&#39;</span>],
+          [<span class="ruby-string">&#39;http://https//patijinich.com&#39;</span>, <span class="ruby-string">&#39;https://patijinich.com&#39;</span>]
+      ].<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">args</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span> = <span class="ruby-identifier">prs</span>.<span class="ruby-identifier">try_substitute</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">pr</span>
+            <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span> = <span class="ruby-identifier">new_page_ref</span>
+            <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">save</span>
+            <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">glean!</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span>.<span class="ruby-identifier">bad?</span>
+          <span class="ruby-keyword">end</span>
+          <span class="ruby-keyword">return</span> <span class="ruby-node">&quot;Replaced PageRef ##{pr.id} &#39;#{old_url}&#39; with #{new_page_ref.id} &#39;#{new_page_ref.url}&#39;(#{new_page_ref.status}) http_status #{new_page_ref.http_status}&quot;</span>
+        <span class="ruby-keyword">end</span>
+      }
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
+    <span class="ruby-comment"># Still bad, after all that</span>
+    <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">glean!</span>(<span class="ruby-keyword">true</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-comment"># Presumably the gleaning matches the old url</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">good?</span>
+      <span class="ruby-node">&quot;Wouldn&#39;t destroy Recipe ##{recipe.id} (#{pr.url}): can be reached via gleaning&quot;</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>[<span class="ruby-value">400</span>, <span class="ruby-value">404</span>, <span class="ruby-value">410</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">http_status</span>
+      <span class="ruby-node">&quot;Wouldn&#39;t destroy Recipe ##{recipe.id} (#{pr.url}): gleaning HTTP isn&#39;t 400, 404 or 410 (is #{recipe.gleaning.http_status})&quot;</span>
+    <span class="ruby-keyword">elsif</span> (<span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">user_ids</span> <span class="ruby-operator">-</span> [<span class="ruby-value">1</span>, <span class="ruby-value">3</span>, <span class="ruby-value">5</span>]).<span class="ruby-identifier">present?</span>
+      <span class="ruby-node">&quot;Can&#39;t destroy Recipe ##{recipe.id} (#{pr.url}) because of existing users&quot;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">bad?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">recipe_ids</span> <span class="ruby-operator">==</span> [<span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">id</span>]
+        <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">destroy</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">destroy</span>
+      <span class="ruby-node">&quot;Destroyed recipe ##{recipe.id} (#{pr.url}): couldn&#39;t reach via gleaning (404 Not Found)&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-probe_uri" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">probe_uri</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Take another crack at the recipe&#39;s URI</p>
+          
+          
+
+          
+          <div class="method-source-code" id="probe_uri-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">probe_uri</span>
+  <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>).<span class="ruby-identifier">ensure_status</span> <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-scrape" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">scrape</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="scrape-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 186</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">scrape</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Recipe # #{@recipe.id}: #{@recipe.title}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tsite: #{@recipe.site.name} (#{@recipe.site.home})&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\turl: #{@recipe.url}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tdescription: #{@recipe.description}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tpicurl: #{@recipe.picurl}&quot;</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;\tExtractions:&quot;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">results</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span>(<span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">url</span>, <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">site</span>)
+    <span class="ruby-identifier">results</span>.<span class="ruby-identifier">labels</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">label</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\t\t#{label}: #{results.result_for(label)}&quot;</span> }
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;!!! Couldn\t open the page for analysis!&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">results</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-show_tags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">show_tags</span><span
+            class="method-args">(file=STDOUT)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="show_tags-source">
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 201</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">show_tags</span>(<span class="ruby-identifier">file</span>=<span class="ruby-constant">STDOUT</span>)
+  <span class="ruby-identifier">file</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">sort</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t1</span>, <span class="ruby-identifier">t2</span><span class="ruby-operator">|</span> <span class="ruby-identifier">t1</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">&lt;=&gt;</span> <span class="ruby-identifier">t2</span>.<span class="ruby-identifier">id</span> }.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-node">&quot;#{tag.id.to_s}: #{tag.name}&quot;</span> }.<span class="ruby-identifier">join</span> <span class="ruby-string">&quot;\n&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

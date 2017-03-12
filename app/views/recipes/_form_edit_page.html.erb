@@ -6,28 +6,28 @@
     </div>
     <div class="recipe_fields_div">
       <div class="recipe_tags_div">
-        <%= f.label :tagging_tokens, "Tags", :class => "recipe_field_label" -%>
+        <%= f.label :tagging_tokens, "Tags" -%>
         <%= f.text_field :tagging_tokens, "data-pre" => @recipe.tags.map(&:attributes).to_json %>
       </div>
       <div class="recipe_comment_div">
-        <%= f.label :comment, "Notes", :class => "recipe_field_label" -%>
+        <%= f.label :comment, "Notes" -%>
         <br><%= f.text_area :comment, placeholder: "What are your thoughts about this recipe?" %>
       </div>
       <div class="recipe_url_div">
-        <%= f.label :url, "URL", :class => "recipe_field_label" -%>
+        <%= f.label :url, "URL" -%>
         <br><%= f.text_field :url %>
       </div>
       <div class="recipe_title_div">
-        <%= f.label :title, "Title", :class => "recipe_field_label" -%>
+        <%= f.label :title, "Title" -%>
         <% @recipe.title %>
         <br><%= f.text_field :title %>
       </div>
       <div class="recipe_status_div">
-        <%# f.label :status, "Status: ", :class => "recipe_field_label" -%>
+        <%# f.label :status, "Status: " -%>
         <%# f.select :status, Recipe.status_select %>
         <%= f.check_box :private %>
         <%= f.label :private, "Private (for my eyes only)" %>
-        <%# f.label :privacy, "Privacy: ",:class=>"recipe_field_label" -%>
+        <%# f.label :privacy, "Privacy: " -%>
         <%# f.select :privacy, Recipe.privacy_select %>
       </div>
       <%= f.submit "Save", class: "btn btn-lg btn-success dialog-submit-button" %>

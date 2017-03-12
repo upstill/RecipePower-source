@@ -1,0 +1,1335 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ResponseServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+<div class="nav-section">
+  <h3>Table of Contents</h3>
+
+  <ul class="link-list" role="directory">
+    <li><a href="#class-ResponseServices-label-3E+page">&gt; page</a>
+    <li><a href="#class-ResponseServices-label-3E+injector+-28iff+param+-3D-3D+-3Ainjector-29">&gt; injector (iff <a href=":mode">param</a> == :injector)</a>
+    <li><a href="#class-ResponseServices-label-3E+modal+-28iff+param+-3D-3D+-3Amodal-29">&gt; modal (iff <a href=":mode">param</a> == :modal)</a>
+  </ul>
+</div>
+
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-admin_view-3F">#admin_view?</a>
+    
+    <li ><a href="#method-i-amend">#amend</a>
+    
+    <li ><a href="#method-i-container_selector">#container_selector</a>
+    
+    <li ><a href="#method-i-controller_model_class">#controller_model_class</a>
+    
+    <li ><a href="#method-i-controller_model_name">#controller_model_name</a>
+    
+    <li ><a href="#method-i-decorate_path">#decorate_path</a>
+    
+    <li ><a href="#method-i-dialog-3F">#dialog?</a>
+    
+    <li ><a href="#method-i-find_view">#find_view</a>
+    
+    <li ><a href="#method-i-format_class">#format_class</a>
+    
+    <li ><a href="#method-i-injector-3F">#injector?</a>
+    
+    <li ><a href="#method-i-invitation_token">#invitation_token</a>
+    
+    <li ><a href="#method-i-invitation_token-3D">#invitation_token=</a>
+    
+    <li ><a href="#method-i-is_injector">#is_injector</a>
+    
+    <li ><a href="#method-i-notification_token">#notification_token</a>
+    
+    <li ><a href="#method-i-notification_token-3D">#notification_token=</a>
+    
+    <li ><a href="#method-i-omniauth_pending">#omniauth_pending</a>
+    
+    <li ><a href="#method-i-originator">#originator</a>
+    
+    <li ><a href="#method-i-page_title">#page_title</a>
+    
+    <li ><a href="#method-i-pending_invitee">#pending_invitee</a>
+    
+    <li ><a href="#method-i-pending_notification">#pending_notification</a>
+    
+    <li ><a href="#method-i-push_state">#push_state</a>
+    
+    <li ><a href="#method-i-redirect_params">#redirect_params</a>
+    
+    <li ><a href="#method-i-render_params">#render_params</a>
+    
+    <li ><a href="#method-i-select_render">#select_render</a>
+    
+    <li ><a href="#method-i-user">#user</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ResponseServices">
+  <h1 id="class-ResponseServices" class="class">
+    class ResponseServices
+  </h1>
+
+  <section class="description">
+    
+<p>Class to govern production of pages and dialogs depending on context and
+params Format:</p>
+
+<h1 id="class-ResponseServices-label-3E+page">&gt; page<span><a href="#class-ResponseServices-label-3E+page">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h1 id="class-ResponseServices-label-3E+injector+-28iff+param+-3D-3D+-3Ainjector-29">&gt; injector (iff <a href=":mode">param</a> == :injector)<span><a href="#class-ResponseServices-label-3E+injector+-28iff+param+-3D-3D+-3Ainjector-29">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+<h1 id="class-ResponseServices-label-3E+modal+-28iff+param+-3D-3D+-3Amodal-29">&gt; modal (iff <a href=":mode">param</a> == :modal)<span><a href="#class-ResponseServices-label-3E+modal+-28iff+param+-3D-3D+-3Amodal-29">&para;</a> <a href="#top">&uarr;</a></span></h1>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-action" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">action</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-active_menu" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">active_menu</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-controller" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">controller</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-controller_instance" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">controller_instance</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-format" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">format</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-item_mode" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">item_mode</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-mode" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">mode</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-page_url" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">page_url</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-requestpath" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">requestpath</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-specs" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">specs</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-title" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">title</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-trigger" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">trigger</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-user" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">user</span><span
+            class="attribute-access-type">[W]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-uuid" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">uuid</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(params, session, request)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">params</span>, <span class="ruby-identifier">session</span>, <span class="ruby-identifier">request</span>
+  <span class="ruby-ivar">@request</span> = <span class="ruby-identifier">request</span>
+  <span class="ruby-ivar">@requestpath</span> = <span class="ruby-identifier">request</span>.<span class="ruby-identifier">fullpath</span>
+  <span class="ruby-ivar">@format</span> = <span class="ruby-ivar">@request</span>.<span class="ruby-identifier">format</span>.<span class="ruby-identifier">symbol</span>
+  <span class="ruby-ivar">@session</span> = <span class="ruby-identifier">session</span>
+  <span class="ruby-ivar">@response</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:response</span>]
+  <span class="ruby-ivar">@controller</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:controller</span>]
+  <span class="ruby-ivar">@active_menu</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:am</span>]
+  <span class="ruby-ivar">@action</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
+  <span class="ruby-ivar">@nopush</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:nopush</span>]
+  <span class="ruby-comment"># A trigger is a request for a popup, embedded in the query string</span>
+  <span class="ruby-ivar">@trigger</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:trigger</span>].<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^&quot;?([^&quot;]*)&quot;?/</span>, <span class="ruby-string">&#39;\1&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:trigger</span>]
+  <span class="ruby-ivar">@title</span> = <span class="ruby-ivar">@controller</span>.<span class="ruby-identifier">capitalize</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;#&quot;</span><span class="ruby-operator">+</span><span class="ruby-ivar">@action</span>
+
+  <span class="ruby-comment"># How composites are presented: :table, :strip, :masonry, :feed_entry, :card</span>
+  <span class="ruby-comment"># ...thus governing how individuals are presented</span>
+  <span class="ruby-ivar">@item_mode</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:item_mode</span>].<span class="ruby-identifier">to_sym</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:item_mode</span>]
+
+  <span class="ruby-comment"># Mode will be either</span>
+  <span class="ruby-comment"># :modal for a dialog</span>
+  <span class="ruby-comment"># :injector for a dialog in the context of foreign collection</span>
+  <span class="ruby-comment"># :page to render the whole page (for an html request)</span>
+  <span class="ruby-ivar">@mode</span> = (<span class="ruby-identifier">params</span>[<span class="ruby-value">:mode</span>] <span class="ruby-operator">||</span> <span class="ruby-value">:page</span>).<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-comment"># (@format == :html ? :page : :modal)).to_sym</span>
+
+  <span class="ruby-comment"># Save the parameters we might want to pass back</span>
+  <span class="ruby-ivar">@meaningful_params</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">except</span> <span class="ruby-value">:controller</span>, <span class="ruby-value">:action</span>, <span class="ruby-value">:mode</span>, <span class="ruby-value">:format</span> <span class="ruby-comment"># , :id, :nocache</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-admin_view-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">admin_view?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="admin_view-3F-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 131</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">admin_view?</span>
+  <span class="ruby-ivar">@session</span>[<span class="ruby-value">:admin_view</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-amend" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">amend</span><span
+            class="method-args">(origin_url)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Change the response parameters to accommodate another URL, e.g. one that
+came in via omniauth</p>
+          
+          
+
+          
+          <div class="method-source-code" id="amend-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 81</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">amend</span> <span class="ruby-identifier">origin_url</span>
+  <span class="ruby-identifier">origin_url</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/^&quot;?([^&quot;]*)&quot;?/</span>, <span class="ruby-string">&#39;\1&#39;</span>  <span class="ruby-comment"># Remove any enclosing quotes</span>
+  <span class="ruby-identifier">query_str</span> = (<span class="ruby-identifier">match</span> = <span class="ruby-identifier">origin_url</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/^[^?]*\?(.*)/</span> ) <span class="ruby-operator">?</span> <span class="ruby-identifier">match</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-identifier">query_params</span> = <span class="ruby-identifier">query_str</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> {} <span class="ruby-operator">:</span> <span class="ruby-constant">Hash</span>[ <span class="ruby-constant">CGI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">query_str</span>).<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">elmt</span><span class="ruby-operator">|</span> [<span class="ruby-identifier">elmt</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">to_sym</span>, <span class="ruby-identifier">elmt</span>.<span class="ruby-identifier">last</span>.<span class="ruby-identifier">first</span>] } ]
+  <span class="ruby-comment"># Format refers to how to present the content: within a dialog, or on a page</span>
+  <span class="ruby-ivar">@mode</span> = <span class="ruby-identifier">query_params</span>[<span class="ruby-value">:mode</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-container_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">container_selector</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Used for targeting a stream to either the page or part of a dialog</p>
+          
+          
+
+          
+          <div class="method-source-code" id="container_selector-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 158</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">container_selector</span>
+  <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:modal</span> <span class="ruby-operator">?</span> <span class="ruby-string">&quot;div.dialog&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;div.pagelet&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-controller_model_class" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">controller_model_class</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>What model is the controller addressing?</p>
+          
+          
+
+          
+          <div class="method-source-code" id="controller_model_class-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">controller_model_class</span>
+  <span class="ruby-identifier">controller_model_name</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-controller_model_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">controller_model_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="controller_model_name-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">controller_model_name</span>
+  <span class="ruby-ivar">@controller</span>.<span class="ruby-identifier">singularize</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-decorate_path" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">decorate_path</span><span
+            class="method-args">(path=nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Modify a path to match the current request, asserting other options as
+provided If path is not provided, resort to the current path</p>
+          
+          
+
+          
+          <div class="method-source-code" id="decorate_path-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 110</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">decorate_path</span> <span class="ruby-identifier">path</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">path</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">path</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">path</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@request</span>.<span class="ruby-identifier">url</span>
+  <span class="ruby-identifier">assert_query</span> <span class="ruby-identifier">path</span>, <span class="ruby-identifier">redirect_params</span>( <span class="ruby-identifier">options</span> )
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog-3F-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 89</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog?</span>
+  <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:modal</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:injector</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-find_view" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">find_view</span><span
+            class="method-args">(ctrl_class=nil, file=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the appropriate template for the current controller and action,
+suitable for render :template OR, start with a controller class and
+filename, looking for that file in the class hierarchy NB The reason that
+this exists is to go through the standard search path</p>
+          
+          
+
+          
+          <div class="method-source-code" id="find_view-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 138</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">find_view</span> <span class="ruby-identifier">ctrl_class</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">file</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">ctrl_class</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">controller_instance</span>.<span class="ruby-identifier">class</span>
+  <span class="ruby-identifier">file</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">action</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-identifier">ctrl_class</span>.<span class="ruby-identifier">ancestors</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">anc</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span> = <span class="ruby-identifier">anc</span>.<span class="ruby-identifier">instance_variable_get</span>(<span class="ruby-value">:@controller_path</span>)
+      <span class="ruby-keyword">return</span> <span class="ruby-node">&quot;#{path}/#{file}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-constant">File</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-constant">Rails</span>.<span class="ruby-identifier">root</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;app&quot;</span>, <span class="ruby-string">&quot;views&quot;</span>, <span class="ruby-identifier">path</span>, <span class="ruby-node">&quot;#{file}.html.erb&quot;</span>))
+      <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;application&quot;</span>
+    <span class="ruby-keyword">end</span>
+  }
+  <span class="ruby-node">&quot;#{controller_instance.class.ancestors[0].controller_path}/#{action}&quot;</span> <span class="ruby-comment"># This will crash, but oh well...</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-format_class" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">format_class</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return the class specifier for styling according to the mode</p>
+          
+          
+
+          
+          <div class="method-source-code" id="format_class-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 153</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">format_class</span>
+  <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:modal</span> <span class="ruby-operator">?</span> <span class="ruby-string">&quot;floating&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@mode</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-injector-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">injector?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Returns true if we&#39;re in the context of a foreign page</p>
+          
+          
+
+          
+          <div class="method-source-code" id="injector-3F-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">injector?</span>
+  <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:injector</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-invitation_token" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">invitation_token</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="invitation_token-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 190</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_token</span>
+  <span class="ruby-ivar">@invitation_token</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@session</span>[<span class="ruby-value">:invitation_token</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-invitation_token-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">invitation_token=</span><span
+            class="method-args">(it)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Set the <a
+href="ResponseServices.html#method-i-invitation_token">#invitation_token</a>
+and store it in the @session</p>
+          
+          
+
+          
+          <div class="method-source-code" id="invitation_token-3D-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 195</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_token=</span> <span class="ruby-identifier">it</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@invitation_token</span> = <span class="ruby-identifier">it</span>
+    <span class="ruby-ivar">@session</span>[<span class="ruby-value">:invitation_token</span>] = <span class="ruby-identifier">it</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-ivar">@session</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:invitation_token</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-is_injector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">is_injector</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="is_injector-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 93</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">is_injector</span>
+  <span class="ruby-ivar">@mode</span> = <span class="ruby-value">:injector</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-notification_token" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">notification_token</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="notification_token-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 203</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">notification_token</span>
+  <span class="ruby-ivar">@notification_token</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@session</span>[<span class="ruby-value">:notification_token</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-notification_token-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">notification_token=</span><span
+            class="method-args">(it)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Set the <a
+href="ResponseServices.html#method-i-notification_token">#notification_token</a>
+and store it in the @session</p>
+          
+          
+
+          
+          <div class="method-source-code" id="notification_token-3D-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 208</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">notification_token=</span> <span class="ruby-identifier">it</span>
+  <span class="ruby-ivar">@notification_token</span> = <span class="ruby-ivar">@session</span>[<span class="ruby-value">:notification_token</span>] = <span class="ruby-identifier">it</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-omniauth_pending" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">omniauth_pending</span><span
+            class="method-args">(clear = false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="omniauth_pending-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 75</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">omniauth_pending</span> <span class="ruby-identifier">clear</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-ivar">@session</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:omniauth</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">clear</span>
+  <span class="ruby-ivar">@session</span>[<span class="ruby-value">:omniauth</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@session</span>[<span class="ruby-value">:omniauth</span>][<span class="ruby-value">:provider</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-originator" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">originator</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a URL that reproduces the current request</p>
+          
+          
+
+          
+          <div class="method-source-code" id="originator-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 57</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">originator</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@originator</span>
+    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-ivar">@request</span>.<span class="ruby-identifier">url</span>
+    <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span> = <span class="ruby-ivar">@meaningful_params</span>.<span class="ruby-identifier">to_param</span>).<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\..*/</span>,<span class="ruby-string">&#39;&#39;</span>) <span class="ruby-comment"># Remove any format indicator</span>
+    <span class="ruby-ivar">@originator</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@originator</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-page_title" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">page_title</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="page_title-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 162</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_title</span>
+  <span class="ruby-node">&quot;RecipePower | #{@title}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pending_invitee" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pending_invitee</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pending_invitee-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 181</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pending_invitee</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@pending_invitee</span>
+    <span class="ruby-ivar">@pending_invitee</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by_invitation_token</span>(<span class="ruby-identifier">invitation_token</span>, <span class="ruby-keyword">false</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">invitation_token</span>
+    <span class="ruby-comment"># If the invitation is to the current user, we can safely clear the pending invitation</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@pending_invitee</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">user</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-ivar">@pending_invitee</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">user</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@pending_invitee</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pending_notification" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pending_notification</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pending_notification-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 212</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pending_notification</span>
+  <span class="ruby-ivar">@notification</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">Notification</span>.<span class="ruby-identifier">find_by_notification_token</span>(<span class="ruby-ivar">@notification_token</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">notification_token</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-push_state" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">push_state</span><span
+            class="method-args">(action=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide an array of parameters for pushState on the client such that: 1)
+the page can be reloaded without modification 2) when popping the state,
+reload only those portions that need to be reloaded (via JSON request)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="push_state-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 70</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">push_state</span> <span class="ruby-identifier">action</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># TODO: modify originator according to action</span>
+  [ { <span class="ruby-identifier">format</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;json&#39;</span>, <span class="ruby-identifier">queryparams</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">nopush</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span> } }, <span class="ruby-identifier">page_title</span>, <span class="ruby-identifier">originator</span> ] <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@nopush</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-redirect_params" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">redirect_params</span><span
+            class="method-args">(options = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Forward the appropriate parameters to a subsequent request</p>
+          
+          
+
+          
+          <div class="method-source-code" id="redirect_params-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 103</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">redirect_params</span> <span class="ruby-identifier">options</span> = {}
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:mode</span>] = <span class="ruby-ivar">@mode</span> <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:page</span>
+  <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-render_params" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">render_params</span><span
+            class="method-args">(defaults = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return appropriate parameters for a render call, asserting defaults as
+necessary</p>
+          
+          
+
+          
+          <div class="method-source-code" id="render_params-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 119</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render_params</span> <span class="ruby-identifier">defaults</span> = {}
+  <span class="ruby-identifier">defaults</span>.<span class="ruby-identifier">merge</span> <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span>
+                     <span class="ruby-keyword">case</span> <span class="ruby-ivar">@mode</span>
+                       <span class="ruby-keyword">when</span> <span class="ruby-value">:injector</span>
+                         <span class="ruby-string">&quot;injector&quot;</span>
+                       <span class="ruby-keyword">when</span> <span class="ruby-value">:page</span>
+                         <span class="ruby-string">&quot;application&quot;</span>
+                       <span class="ruby-keyword">else</span>
+                         <span class="ruby-keyword">false</span>
+                     <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-select_render" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">select_render</span><span
+            class="method-args">(action=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Used in templates for standard actions (e.g., new, edit, show) to choose a
+partial depending on whether the response is for the injector, a modal
+dialog, or a page</p>
+          
+          
+
+          
+          <div class="method-source-code" id="select_render-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 168</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">select_render</span> <span class="ruby-identifier">action</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># defaults to current action, though another may be specified, even a full path</span>
+  <span class="ruby-node">&quot;#{action || @action}_&quot;</span><span class="ruby-operator">+</span>
+      <span class="ruby-keyword">case</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-identifier">injector?</span>
+          <span class="ruby-string">&quot;injector&quot;</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-identifier">dialog?</span>
+          <span class="ruby-string">&quot;modal&quot;</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-string">&quot;page&quot;</span>
+      <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-user" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">user</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="user-source">
+            <pre><span class="ruby-comment"># File app/services/response_services.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">user</span>
+  <span class="ruby-ivar">@user</span> <span class="ruby-operator">||=</span> <span class="ruby-ivar">@controller_instance</span>.<span class="ruby-identifier">current_user_or_guest</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

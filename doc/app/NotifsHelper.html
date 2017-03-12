@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module NotifsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-do_notifs">#do_notifs</a>
+    
+    <li ><a href="#method-i-handle_invitation">#handle_invitation</a>
+    
+    <li ><a href="#method-i-handle_invitation_and_login">#handle_invitation_and_login</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-NotifsHelper">
+  <h1 id="module-NotifsHelper" class="module">
+    module NotifsHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-do_notifs" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">do_notifs</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>To go with any page: present pending notifications (and invitations) in a
+modal atop</p>
+          
+          
+
+          
+          <div class="method-source-code" id="do_notifs-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">do_notifs</span>
+  <span class="ruby-identifier">handle_invitation_and_login</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-handle_invitation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">handle_invitation</span><span
+            class="method-args">(partial, advise=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Deal with an invitation, rendering it to the given partial if there&#39;s
+action to be taken. If no action is to be taken and advise is true, then
+provide an advisory alert</p>
+          
+          
+
+          
+          <div class="method-source-code" id="handle_invitation-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">handle_invitation</span> <span class="ruby-identifier">partial</span>, <span class="ruby-identifier">advise</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">invitee</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_invitee</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+    <span class="ruby-comment"># The pending invitation is valid</span>
+    <span class="ruby-identifier">it</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span>
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+      <span class="ruby-comment"># ...but someone is already logged in!</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">invitee</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">current_user</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">aliased_to</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">advise</span>
+          <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&#39;You\ve already accepted this invitation!&#39;</span>
+          <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;alerts/popup_modal&#39;</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:make_alias</span>]
+        <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">aliased_to</span> = <span class="ruby-identifier">current_user</span>
+        <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">save</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">advise</span>
+          <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Invitation accepted; you&#39;re now following #{invitee.invitation_issuer}--and vice versa&quot;</span>
+          <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;alerts/popup_modal&#39;</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">follows?</span> <span class="ruby-identifier">invitee</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">advise</span>
+          <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;You&#39;re already following #{invitee.invitation_issuer}!&quot;</span>
+          <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;alerts/popup_modal&#39;</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-comment"># Invitation is for another, not-yet-accepted &#39;user&#39;; enquire if it&#39;s the same person</span>
+        <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;invitations/check_alias&#39;</span>, <span class="ruby-identifier">invitee</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>, <span class="ruby-identifier">invitation_token</span><span class="ruby-operator">:</span> <span class="ruby-identifier">it</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-comment"># Finally! Nobody logged in and invitation token is valid =&gt; render acceptance dialog</span>
+      <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">extend_fields</span>
+      <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-identifier">it</span> <span class="ruby-comment"># The token is still pending; if user chooses to sign in, it will be processed</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span>, <span class="ruby-identifier">resource</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">advise</span>
+        <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;alerts/popup_modal&#39;</span>, <span class="ruby-identifier">alert_msg</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sorry, that invitation has expired (perhaps you accepted it?)&#39;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-comment"># Bad invitation token =&gt; nullify the invitation and incorporate into panel</span>
+      <span class="ruby-identifier">invitee_error</span> = <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-string">&#39;Sorry, that invitation has expired. But do sign up!&#39;</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span>, <span class="ruby-identifier">invitee_error</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee_error</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-handle_invitation_and_login" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">handle_invitation_and_login</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Any pending invitation gets handled here, and also getting login
+credentials w/o an invitation</p>
+          
+          
+
+          
+          <div class="method-source-code" id="handle_invitation_and_login-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">handle_invitation_and_login</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+    <span class="ruby-comment"># User logged in: check for notifications</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">notif</span> = <span class="ruby-identifier">notifiable_notification</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;notifications/present&#39;</span>, <span class="ruby-identifier">presenter</span><span class="ruby-operator">:</span> <span class="ruby-identifier">present</span>(<span class="ruby-identifier">notif</span>, <span class="ruby-identifier">current_user</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span>
+    <span class="ruby-comment"># Sort out a pending invitation, whether anyone is logged in or not</span>
+    <span class="ruby-identifier">handle_invitation</span> <span class="ruby-string">&#39;notifs/panel&#39;</span>, <span class="ruby-operator">!</span><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">notification_token</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-comment"># The simplest case: no invitation token, no current user</span>
+    <span class="ruby-comment"># Simply present login options</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;notifs/panel&#39;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -8,7 +8,6 @@ class ReferenceServices
     self.reference = reference
   end
 
-
   # Assert an image, linking back to a referent
   def self.assert_image_for_referent(uri, tag_or_referent)
       refs = Reference::ImageReference.find_or_initialize uri
@@ -29,13 +28,6 @@ class ReferenceServices
           end
       end
       refs.first
-  end
-
-  def self.convert_references klass=nil
-    puts DefinitionReference.all.collect { |ref|
-           pr = DefinitionPageRef.fetch ref.url
-           pr.url if pr.bad?
-         }
   end
 
   # Convert ALL references to STI specification

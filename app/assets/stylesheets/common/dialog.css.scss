@@ -11,13 +11,6 @@ div.dialog {
   font: 16px arial, sans-serif;
   line-height: 130%;
   font-weight: normal;
-  ul.token-input-list-facebook {
-    font: 14px arial, sans-serif;
-    li.token-input-input-token-facebook input[type='text'] {
-      padding: 0;
-      margin: 0;
-    }
-  }
   &.modal {
     div.modal-dialog {
       z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
@@ -33,6 +26,18 @@ div.dialog {
     .form-button {
 	float: right;
   	margin: 10px;
+    }
+  }
+  &.injector {
+    font: 16px arial, sans-serif;
+    font-weight: bold;
+    width: 600px;
+    height: auto;
+    form {
+      margin: 10px;
+      display: inline-block;
+      width: auto;
+      vertical-align: top;
     }
   }
   .red_body {
@@ -56,117 +61,132 @@ div.dialog {
   }
 }
 
-.hdrdiv {
-  float: left;
-  padding: 0em;
-  padding-top: 11px;
-  height: 15px;
-  width: auto
-}
-
 // In development: new geometry for dialogs. See also color schemes following
-div.dialog.new-style {
-  &.injector {
-    font: 16px arial, sans-serif;
-    font-weight: bold;
-    width: 600px;
-    height: auto;
-    form {
-      margin: 10px;
-      display: inline-block;
-      width: auto;
-      vertical-align: top;
-    }
-  }
-  div.modal-dialog {
-    font-family: $oswald; // $archivo;
-    font-size: 20px;
-    letter-spacing: 2px;
-    min-width: 300px;
-    margin-left: auto; // width/2)
-    margin-right: auto; // width/2)
-    &.modal-xl {
-      width: 100%; // responsive width
-    }
-    &.modal-lg {
-      width: 60%; // responsive width
-    }
-    &.dialog-xs {
-      width: 100%;
-      max-width: 370px;
-    }
-    &.dialog-sm {
-      width: 100%;
-      max-width: 470px;
-    }
-    label .locked-tags {
-      font-size: 0.8em;
-      font-weight: bold;
-      color: mix(#9ab3a0, black, 90%)
-    }
-    input.string,
-    input.password,
-    textarea {
-      line-height: 1.5em;
-      width: 86%;
-      margin-left: 7%;
-      margin-bottom: 5px;
-      &.full-width {
-        width: 100%;
-        margin-left: 0;
-      }
-    }
-    div.modal-content {
-      div.modal-header {
-        text-align: center;
-        padding-bottom: 5px;
-        min-height: 40px; // Leave room for the close-box
-        border-bottom: unset;
-        button.dialog-x-box {
-          position: absolute;
-          top: -14px;
-          right: 10px;
-          font-size: 3em;
-          font-weight: 700;
-        }
-      }
-      div.modal-body {
-        padding-top: 5px;
-        div.form-group {
-          margin-top: 10px;
-        }
-        p {
-          font-family: $archivo; // $oswald-light; // $archivo;
-          letter-spacing: 3px;
-          line-height: 1.4em;
-        }
-      }
-      div.modal-footer {
-        text-align: center;
-        border-top: unset;
-      }
-      .prompt {
-        margin: 5px 0px;
-        // font:20px arial,sans-serif;
-        // font-weight:bold
-      }
-    }
-  }
-}
-
-div.new-style {
+div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) can take these stylings as well
+  font: 16px arial, sans-serif;
   line-height: 1.5em;
-  input[type='text'], input[type='password'], input[type='email'], input[type='url'] {
-    width: 86%;
+  font-weight: normal;
+  &.dialog {
+    div.modal-dialog {
+      font-family: $oswald; // $archivo;
+      font-size: 20px;
+      letter-spacing: 2px;
+      min-width: 300px;
+      margin-left: auto; // width/2)
+      margin-right: auto; // width/2)
+      &.modal-xl {
+        width: 100%; // responsive width
+      }
+      &.modal-lg {
+        width: 60%; // responsive width
+      }
+      &.dialog-xs {
+        width: 100%;
+        max-width: 370px;
+      }
+      &.dialog-sm {
+        width: 100%;
+        max-width: 470px;
+      }
+      label .locked-tags {
+        font-size: 0.8em;
+        font-weight: bold;
+        color: mix(#9ab3a0, black, 90%)
+      }
+      input.string,
+      input.password,
+      textarea {
+        line-height: 1.5em;
+        width: 94%;
+        margin-left: 6%;
+        margin-bottom: 5px;
+        &.full-width {
+          width: 100%;
+          margin-left: 0;
+        }
+      }
+      div.modal-content {
+        div.modal-header {
+          text-align: center;
+          padding-bottom: 5px;
+          min-height: 3em; // Leave room for the close box
+          border-bottom: unset;
+          button.dialog-x-box {
+            position: absolute;
+            top: -14px;
+            right: 10px;
+            font-size: 3em;
+            font-weight: 700;
+          }
+        }
+        div.modal-body {
+          padding-top: 5px;
+          div.form-group {
+            margin-top: 10px;
+          }
+          p {
+            font-family: $archivo; // $oswald-light; // $archivo;
+            letter-spacing: 3px;
+            line-height: 1.4em;
+          }
+        }
+        div.modal-footer {
+          text-align: center;
+          border-top: unset;
+        }
+        .prompt {
+          margin: 5px 0px;
+          // font:20px arial,sans-serif;
+          // font-weight:bold
+        }
+      }
+    }
+  }
+  input[type='text'],
+  input[type='password'],
+  input[type='email'],
+  input[type='url'] {
+    width: 93%;
     margin-left: 7%;
-    height: 2em;
-    padding: 15px;
+    margin-top: 5px;
+    height: 2.5em;
+    padding: 0 15px 0 10px;
     margin-bottom: 25px;
     font-style: oblique;
+    font-size: 1.2em;
+    &.token-input-field {
+      height: 1.5em;
+    }
+  }
+  ul.token-input-list-facebook {
+    font: 15px arial, sans-serif;
+    padding-top: 3px;
+    padding-bottom: 3px;
+    li.token-input-input-token-facebook input[type='text'] {
+      padding: 0 0 0 4px;
+      margin: 0;
+    }
   }
   li.token-input-input-token-facebook {
     input[type='text'] {
       border-radius: 20px;
+    }
+  }
+  // For items in a dialog (i.e., label + entry)
+  div.item-enclosure {
+    width: 97%;
+    margin: auto;
+  }
+  div.label-enclosure {
+    width: 100%;
+    height: auto;
+    .label-right {
+      display: inline-block;
+      float: right;
+      max-width: 100%;
+      span {
+        font-size: 16px;
+      }
     }
   }
   label.checkbox {
@@ -189,23 +209,23 @@ div.new-style {
 }
 
 div.dialog.new-style.purple div.modal-dialog div.modal-content {
-  @include div-purple;
+  @include dialog-color-scheme(purple);
 }
 
 div.dialog.new-style.green div.modal-dialog div.modal-content {
-  @include div-green;
+  @include dialog-color-scheme(green);
 }
 
 div.dialog.new-style.salmon div.modal-dialog div.modal-content {
-  @include div-salmon;
+  @include dialog-color-scheme(salmon);
 }
 
 div.dialog.new-style.blue div.modal-dialog div.modal-content {
-  @include div-blue;
+  @include dialog-color-scheme(blue);
 }
 
 div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
-  @include div-feeds;
+  @include dialog-color-scheme(feeds);
 }
 
 div.form-group.user_remember_me {

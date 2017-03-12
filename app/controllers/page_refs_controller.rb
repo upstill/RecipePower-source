@@ -42,10 +42,13 @@ class PageRefsController < ApplicationController
   end
 
   # DELETE /page_refs/1
+=begin
+  # Handled in ApplicationController
   def destroy
     page_ref.destroy
     redirect_to page_refs_url, notice: 'Mercury page was successfully destroyed.'
   end
+=end
 
   def scrape
     begin

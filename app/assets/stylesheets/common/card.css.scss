@@ -35,11 +35,15 @@ div.card-item {
   position: relative;
   top: 15px;
   margin-bottom: 2em;
-  color: $generic-card-text-color;
+  color: #909090;
+  @include card-color-scheme(generic);
+  /*
+  color: $generic-card-color;
   background-color: $generic-card-background-color;
   div.title > a.title-link {
     color: $generic-card-title-color;
   }
+  */
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;
@@ -57,10 +61,8 @@ div.card-item {
     font-family: $oswald-light;
     font-size: 1em;
     padding: 0.6em 1em 0.2em 1.2em;
-    color: #999;
     margin: 0em -1em;
     a.source-link {
-      color: #77a2be;
       letter-spacing: 1px;
     }
   }
@@ -103,23 +105,18 @@ div.card-item {
   }
   div.card-aspect-contents {
     font-weight: 400;
-    color: #909090;
     font-size: 1.2em;
     line-height: 1.4em;
     margin-top: 0.2em;
     margin-bottom: 0.5em;
-    // color: #8D8F90;
     &.description {
       font-size: 0.6em;
-      color: #949292;
     }
     &.notes {
       font-size: 0.5em;
-      color: #aaaaaa;
     }
     span.tagsep {
       font-size: 1.3em;
-      color: #8ac5d2;
       font-family: Helvetica, sans-serif;
       font-weight: 200;
       font-size: 1.2em;
@@ -143,6 +140,40 @@ div.card-item {
   &.row {
     margin: 0.5em;
   }
+    /*
+    div.vote-buttons { // Saved from entity-card
+      font-size: 1.2em;
+      float: right;
+      margin-right: -0.5em;
+      margin-bottom: 0.5em;
+      a.vote-button {
+        font-size: 1.4em;
+      }
+    }
+    */
+  div.vote-buttons {
+    font-size: 0.5em;
+    line-height: initial;
+    float: right;
+    position: absolute;
+    top: 0;
+    right: 0.2em;
+    margin-top: 0.3em;
+    margin-right: 0.15em;
+    margin-bottom: 0.5em;
+    background-color: inherit;
+    a.vote-button {
+      font-size: 1.4em;
+    }
+    div.vote-div {
+      width: auto;
+      display: inline-block;
+      text-align: center;
+      font-family: Oswald;
+      letter-spacing: 2px;
+      color: #dbc046;
+    }
+  }
   &.cardlet-item {
     width: 350px;
     @include respond-to(phone) {
@@ -161,13 +192,12 @@ div.card-item {
       width: 355px; // ($break-large - (30+10))/2;
     }
     @include respond-to(wide) {
-      width: 306px; // ($break-wide - (30+20))/3;
+      width: 373px; // 306px; // ($break-wide - (30+20))/3;
     }
     padding: 1em 1em 0 1em;
-    background-color: $recipes-card-background-color;
     font-family: $archivo;
     margin-top: 0;
-    font-size: 50%;
+    font-size: 80%;
     div.bottom-strip {
       position: absolute;
       bottom: -0.4em;
@@ -175,66 +205,73 @@ div.card-item {
       right: -0.4em;
       height: 3em;
       font-size: 1.8em;
-      background: $recipes-card-background-color;
     }
     div.source {
       border-bottom: 0.3em solid #b95454;
       margin-bottom: 0.5em;
     }
     div.title-box {
-      // min-height: 3.6em;
-      // margin-bottom: 1em;
-      // margin-top: 0.2em;
       margin-right: 1em;
-      font-size: 2.1em;
+      font-size: 1.8em;
       font-family: $archivo;
       font-weight: 700;
       letter-spacing: 0.9px;
       line-height: 1.2em;
-      a.title-link {
-        color: #4f4d4a;
-      }
     }
     td.pic-box {
       width: 165px;
       padding-right: 8px;
     }
   }
-  &.card-large {
-    div.vote-buttons {
+  div.pic-inset {
+    a.upload-button {
       font-size: 1.2em;
-      float: right;
-      margin-right: -0.5em;
-      margin-bottom: 0.5em;
-      a.vote-button {
-        font-size: 1.4em;
-      }
+      display: block;
+      text-align: center;
+      margin-left: auto;
+      margin-right: auto;
+      margin-top: 10px;
     }
   }
+  div.owner-pic {
+    width: 60%;
+  }
+  div.title {
+    // min-height: 3.6em;
+    // margin-bottom: 1em;
+    padding-right: 35px;
+    font-size: 2.4em;
+    font-family: $archivo;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    line-height: 1.2em;
+  }
+  svg#vote-up {
+    color: mix($vote-glyph-color, black, 93%);
+    fill: mix($vote-glyph-color, black, 93%);
+  }
+  svg#vote-down {
+    color: mix($vote-glyph-color, black, 93%);
+    fill: mix($vote-glyph-color, black, 93%);
+  }
   &.recipe-card {
-    // width: 350px;
+    @include card-color-scheme(recipe);
+    /*
     background-color: $recipes-card-background-color;
     a {
       color: $recipes-panels-label-button-color;
     }
+    */
     .description {
       font-size: 1.2em;
-      color: #a2a2a2;
     }
+    /*
     h3 {
       color: #cdcdcd;
     }
+    */
     td.upper-content {
       padding-left: 1em;
-    }
-    td.lower-content {
-      // padding-left: 0.5em;
-      padding-bottom: 0.3em;
-      vertical-align: bottom;
-      font-size: 2em;
-      div.share-button {
-        float: right;
-      }
     }
     .title-bar {
       border-bottom: 0.3em solid #b95454;
@@ -252,26 +289,10 @@ div.card-item {
       letter-spacing: 2px;
       line-height: 1.2em;
     }
-    div.vote-buttons {
-      font-size: 1.2em;
-      float: right;
-      margin-right: -0.5em;
-      margin-bottom: 0.5em;
-      a.vote-button {
-        font-size: 1.4em;
-      }
-    }
-  }
-  &.comments-card {
-    padding-left: 35px;
-    padding-right: 10px;
-    padding-top: 5px;
-    div.title-bar {
-      font-family: $oswald-bold;
-      font-size: 24pt;
-    }
   }
   &.viewer-card {
+    @include card-color-scheme(viewer);
+    /*
     background-color: $viewer-card-background-color;
     div.title > a.title-link {
       color: white;
@@ -279,8 +300,11 @@ div.card-item {
     a {
       color: $viewer-card-link-color;
     }
+    */
   }
   &.friend-card {
+    @include card-color-scheme(friend);
+    /*
     background-color: $friends-card-background-color;
     div.title > a.title-link {
       color: white;
@@ -288,35 +312,24 @@ div.card-item {
     a {
       color: $friends-card-link-color;
     }
-    div.sprite-glyph
-    svg#vote-up {
-      color: mix($vote-glyph-color, black, 93%);
-      fill: mix($vote-glyph-color, black, 93%);
-    }
-    svg#vote-down {
-      color: mix($vote-glyph-color, black, 93%);
-      fill: mix($vote-glyph-color, black, 93%);
-    }
+    */
   }
   &.feed-card {
+    @include card-color-scheme(feed);
+    /*
     background-color: $feeds-card-background-color;
     div.title > a.title-link {
-      color: $feeds-navtab-text-color;
+      color: $feeds-navtab-color;
     }
     a {
       color: $feeds-link-color;
     }
-    svg#vote-up {
-      color: mix($vote-glyph-color, black, 93%);
-      fill: mix($vote-glyph-color, black, 93%);
-    }
-    svg#vote-down {
-      color: mix($vote-glyph-color, black, 93%);
-      fill: mix($vote-glyph-color, black, 93%);
-    }
+    */
   }
   &.user-card {
-    color: $user-card-text-color;
+    @include card-color-scheme(user);
+    /*
+    color: $user-card-color;
     background-color: $user-card-background-color;
     div.title > a.title-link {
       color: $user-card-title-color;
@@ -327,69 +340,189 @@ div.card-item {
     a {
       color: #888888;
     }
+    */
   }
   &.list-card {
+    @include card-color-scheme(list);
+    /*
     background-color: $lists-card-background-color;
     div.title > a.title-link {
-      color: rgba($lists-navtab-text-color, 0.6);
+      color: rgba($lists-navtab-color, 0.6);
     }
     a {
       color: $lists-panels-label-button-color;
     }
+    */
   }
-  &.entity-card {
-    color: #909090;
-    div.vote-buttons {
-      position: absolute;
-      top: 0;
-      right: 0.2em;
+  &.comments-card {
+    padding-left: 35px;
+    padding-right: 10px;
+    padding-top: 5px;
+    div.title-bar {
+      font-family: $oswald-bold;
+      font-size: 24pt;
     }
-    div.pic-inset {
-      a.upload-button {
-        font-size: 1.2em;
-        display: block;
-        text-align: center;
-        margin-left: auto;
-        margin-right: auto;
-        margin-top: 10px;
+  }
+
+  /* card-grid is a "master" card, as shown on a #show or #associated page */
+  &.card-grid {
+    position: relative;
+    padding-top: 1em;
+    padding-bottom: 3em;
+    div.grid-item {
+      ul.token-input-list-facebook {
+        min-width: 100px;
+        width: 100%;
+      }
+      form {
+        width: 100%;
+        div.inline-text-field {
+          width: 100%;
+          div.form-group {
+            margin-bottom: 0;
+          }
+          input {
+            width: 100%;
+          }
+        }
+        input.form-button {
+          margin-top: 1em;
+        }
       }
     }
-    div.owner-pic {
-      width: 60%;
+    div.stamp.avatar {
+      margin-right: 15px;
+      height: auto;
+      float: left;
     }
-    td.lower-content {
-      padding-bottom: 0.3em;
-      // padding-left: 0.5em;
-      vertical-align: bottom;
-      font-size: 2em;
-      div.share-button {
-        position: absolute;
-        right: 8px;
-        bottom: 3px;
-      }
-    }
-    div.title {
-      // min-height: 3.6em;
-      // margin-bottom: 1em;
-      padding-right: 35px;
+    div.stamp.title {
+      // padding-right: 35px;
       font-size: 2.4em;
       font-family: $archivo;
       font-weight: 700;
       letter-spacing: 1.5px;
-      line-height: 1.2em;
-    }
-    div.vote-buttons {
-      font-size: 0.5em;
-      line-height: initial;
-      float: right;
-      margin-top: 0.3em;
-      margin-right: 0.15em;
+      // line-height: 1.2em;
+      width: 100%;
+      margin-bottom: 15px;
+      padding-right: 40px; // To allow room for the votes
       background-color: inherit;
-      a.vote-button {
-        font-size: 1.4em;
+    }
+    div.card-column {
+      @include respond-to(phone) {
+        width: $col-width-phone;
+      }
+      @include respond-to(small) {
+        width: $col-width-small;
+      }
+      @include respond-to(medium) {
+        width: $col-width-medium;
+        &.found_by {
+          width: $col-width-medium * 0.7;
+        }
+        &.created_by {
+          width: $col-width-medium * 0.7;
+        }
+      }
+      @include respond-to(largish) {
+        width: $col-width-largish;
+        &.found_by {
+          width: $col-width-largish * 0.7;
+        }
+        &.created_by {
+          width: $col-width-largish * 0.7;
+        }
+      }
+      @include respond-to(large) {
+        width: $col-width-large;
+        &.found_by {
+          width: $col-width-large * 0.7;
+        }
+        &.created_by {
+          width: $col-width-large * 0.7;
+        }
+      }
+      @include respond-to(wide) {
+        width: $col-width-wide;
+        &.found_by {
+          width: $col-width-wide * 0.7;
+        }
+        &.created_by {
+          width: $col-width-wide * 0.7;
+        }
+      }
+      // border: 1px solid blue;
+      &.card-column-lg {
+        @include respond-to(phone) {
+          width: $col-width-lg-phone;
+        }
+        @include respond-to(small) {
+          width: $col-width-lg-small;
+        }
+        @include respond-to(medium) {
+          width: $col-width-lg-medium;
+        }
+        @include respond-to(largish) {
+          width: $col-width-lg-largish;
+        }
+        @include respond-to(large) {
+          width: $col-width-lg-large;
+        }
+        @include respond-to(wide) {
+          width: $col-width-lg-wide;
+        }
+        // border: 1px solid blue;
+      }
+      &.card-column-xl {
+        @include respond-to(phone) {
+          width: $col-width-xl-phone;
+        }
+        @include respond-to(small) {
+          width: $col-width-xl-small;
+        }
+        @include respond-to(medium) {
+          width: $col-width-xl-medium;
+        }
+        @include respond-to(largish) {
+          width: $col-width-xl-largish;
+        }
+        @include respond-to(large) {
+          width: $col-width-xl-large;
+        }
+        @include respond-to(wide) {
+          width: $col-width-xl-wide;
+        }
+        // border: 1px solid blue;
+      }
+    }
+    div.lower-content {
+      width: 100%;
+      height: 1.5em;
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      padding-bottom: 0.3em;
+      padding-left: inherit;
+      // padding-left: 0.5em;
+      vertical-align: bottom;
+      font-size: 2em;
+      div.tool-menu {
+        bottom: 7px;
+      }
+      div.share-button {
+        position: absolute;
+        right: 6px;
+        bottom: 0;
       }
     }
   }
+}
+
+/* Used on user's sub-collection page for switching among collection, friends, treasuries, etc. */
+td.lower-content {
+  padding-bottom: 0.3em;
+  // padding-left: 0.5em;
+  vertical-align: bottom;
+  font-size: 2em;
 }
 
 table.cardlet-table {
@@ -417,155 +550,4 @@ div.pic_preview {
 .bootstrap-filestyle {
   margin-top: 20px;
   text-align: center;
-}
-
-div.card-grid {
-  position: relative;
-  padding-top: 1em;
-  padding-bottom: 3em;
-  div.grid-item {
-    ul.token-input-list-facebook {
-      min-width: 100px;
-      width: 100%;
-    }
-    form {
-      width: 100%;
-      div.inline-text-field {
-        width: 100%;
-        div.form-group {
-          margin-bottom: 0;
-        }
-        input {
-          width: 100%;
-        }
-      }
-      input.form-button {
-        margin-top: 1em;
-      }
-    }
-  }
-  div.stamp.avatar {
-    margin-right: 15px;
-    height: auto;
-    float: left;
-  }
-  div.stamp.title {
-    // padding-right: 35px;
-    font-size: 2.4em;
-    font-family: $archivo;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    // line-height: 1.2em;
-    width: 100%;
-    margin-bottom: 15px;
-    padding-right: 30px; // To allow room for the votes
-    background-color: inherit;
-  }
-  div.card-column {
-    @include respond-to(phone) {
-      width: $col-width-phone;
-    }
-    @include respond-to(small) {
-      width: $col-width-small;
-    }
-    @include respond-to(medium) {
-      width: $col-width-medium;
-      &.found_by {
-        width: $col-width-medium * 0.7;
-      }
-      &.created_by {
-        width: $col-width-medium * 0.7;
-      }
-    }
-    @include respond-to(largish) {
-      width: $col-width-largish;
-      &.found_by {
-        width: $col-width-largish * 0.7;
-      }
-      &.created_by {
-        width: $col-width-largish * 0.7;
-      }
-    }
-    @include respond-to(large) {
-      width: $col-width-large;
-      &.found_by {
-        width: $col-width-large * 0.7;
-      }
-      &.created_by {
-        width: $col-width-large * 0.7;
-      }
-    }
-    @include respond-to(wide) {
-      width: $col-width-wide;
-      &.found_by {
-        width: $col-width-wide * 0.7;
-      }
-      &.created_by {
-        width: $col-width-wide * 0.7;
-      }
-    }
-    // border: 1px solid blue;
-    &.card-column-lg {
-      @include respond-to(phone) {
-        width: $col-width-lg-phone;
-      }
-      @include respond-to(small) {
-        width: $col-width-lg-small;
-      }
-      @include respond-to(medium) {
-        width: $col-width-lg-medium;
-      }
-      @include respond-to(largish) {
-        width: $col-width-lg-largish;
-      }
-      @include respond-to(large) {
-        width: $col-width-lg-large;
-      }
-      @include respond-to(wide) {
-        width: $col-width-lg-wide;
-      }
-      // border: 1px solid blue;
-    }
-    &.card-column-xl {
-      @include respond-to(phone) {
-        width: $col-width-xl-phone;
-      }
-      @include respond-to(small) {
-        width: $col-width-xl-small;
-      }
-      @include respond-to(medium) {
-        width: $col-width-xl-medium;
-      }
-      @include respond-to(largish) {
-        width: $col-width-xl-largish;
-      }
-      @include respond-to(large) {
-        width: $col-width-xl-large;
-      }
-      @include respond-to(wide) {
-        width: $col-width-xl-wide;
-      }
-      // border: 1px solid blue;
-    }
-  }
-  div.lower-content {
-    width: 100%;
-    height: 1.5em;
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    padding-bottom: 0.3em;
-    padding-left: inherit;
-    // padding-left: 0.5em;
-    vertical-align: bottom;
-    font-size: 2em;
-    div.tool-menu {
-      bottom: 7px;
-    }
-    div.share-button {
-      position: absolute;
-      right: 6px;
-      bottom: 0;
-    }
-  }
 }

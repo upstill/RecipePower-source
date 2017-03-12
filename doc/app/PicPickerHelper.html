@@ -1,0 +1,413 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module PicPickerHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-pic_field">#pic_field</a>
+    
+    <li ><a href="#method-i-pic_picker_go_button">#pic_picker_go_button</a>
+    
+    <li ><a href="#method-i-pic_picker_golinkid">#pic_picker_golinkid</a>
+    
+    <li ><a href="#method-i-pic_picker_select_list">#pic_picker_select_list</a>
+    
+    <li ><a href="#method-i-pic_preview_img_id">#pic_preview_img_id</a>
+    
+    <li ><a href="#method-i-pic_preview_input_id">#pic_preview_input_id</a>
+    
+    <li ><a href="#method-i-pic_preview_widget">#pic_preview_widget</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-PicPickerHelper">
+  <h1 id="module-PicPickerHelper" class="module">
+    module PicPickerHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-pic_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_field</span><span
+            class="method-args">(form, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Show an image that will resize to fit an enclosing div, possibly with a
+link to an editing dialog We&#39;ll need the id of the object, and the name
+of the field containing the picture&#39;s url</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pic_field-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 13</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_field</span> <span class="ruby-identifier">form</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-comment"># We work with a decorator, whether provided or not</span>
+  <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:decorator</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">form</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-comment"># The form may be working with an object, not its decorator</span>
+  <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">decorate</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>)
+
+  <span class="ruby-identifier">pic_area</span> = <span class="ruby-identifier">image_with_error_recovery</span> <span class="ruby-identifier">decorator</span>,
+                                       <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_preview_img_id</span>(<span class="ruby-identifier">decorator</span>),
+                                       <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;fixed-width&#39;</span>,
+                                       <span class="ruby-identifier">fallback_img</span><span class="ruby-operator">:</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:fallback_img</span>] <span class="ruby-operator">||</span> <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">field_options</span> = {
+      <span class="ruby-identifier">rel</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;jpg,png,gif&#39;</span>,
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;hidden_text&#39;</span>,
+      <span class="ruby-identifier">onchange</span><span class="ruby-operator">:</span> (<span class="ruby-string">&#39;RP.submit.enclosing_form&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:submit_on_change</span>])
+  }
+  <span class="ruby-identifier">preview</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+                        <span class="ruby-identifier">pic_area</span><span class="ruby-operator">+</span><span class="ruby-identifier">form</span>.<span class="ruby-identifier">hidden_field</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">picable_attribute</span>, <span class="ruby-identifier">field_options</span>.<span class="ruby-identifier">compact</span>),
+                        <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic_preview&#39;</span>
+  <span class="ruby-identifier">preview</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                         <span class="ruby-identifier">pic_picker_go_button</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:fallback_img</span>]),
+                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic_picker_link&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:nopicker</span>]
+  <span class="ruby-identifier">preview</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_picker_go_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_picker_go_button</span><span
+            class="method-args">(decorator, picker_fallback_img=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The link to the picture-picking dialog preloads the dialog, extracting
+picture links from the recipe&#39;s page</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pic_picker_go_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 59</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_picker_go_button</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">picker_fallback_img</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">golink</span> = <span class="ruby-identifier">polymorphic_path</span> [<span class="ruby-value">:editpic</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>],
+                            <span class="ruby-identifier">golinkid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_picker_golinkid</span>(<span class="ruby-identifier">decorator</span>),
+                            <span class="ruby-identifier">fallback_img</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">picker_fallback_img</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;NoPictureOnFile.png&#39;</span>)
+  <span class="ruby-identifier">button_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">pageurl</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;Pick Picture...&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;Picture from Web...&#39;</span>,
+                   <span class="ruby-identifier">golink</span>,
+                   <span class="ruby-string">&#39;default&#39;</span>,
+                   <span class="ruby-string">&#39;small&#39;</span>,
+                   <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_picker_golinkid</span>(<span class="ruby-identifier">decorator</span>),
+                   <span class="ruby-identifier">preload</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+                   <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>,
+                   <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic_picker_golink&#39;</span>,
+                   <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {
+                       <span class="ruby-identifier">inputid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_preview_input_id</span>(<span class="ruby-identifier">decorator</span>),
+                       <span class="ruby-identifier">imageid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_preview_img_id</span>(<span class="ruby-identifier">decorator</span>)
+                   }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_picker_golinkid" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_picker_golinkid</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pic_picker_golinkid-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 54</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_picker_golinkid</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-node">&quot;golink#{decorator.id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_picker_select_list" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_picker_select_list</span><span
+            class="method-args">(urls)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pic_picker_select_list-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_picker_select_list</span> <span class="ruby-identifier">urls</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-string">&#39;&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">thumbNum</span> = <span class="ruby-value">0</span>
+  <span class="ruby-identifier">pics</span> = <span class="ruby-identifier">urls</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">image_with_error_recovery</span>(<span class="ruby-identifier">url</span>,
+                              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic-pickee&#39;</span>,
+                              <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;thumbnail#{thumbNum += 1}&quot;</span>,
+                              <span class="ruby-identifier">alt</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;No Image Available&#39;</span>)
+  }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">pics</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic-pickees&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_preview_img_id" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_preview_img_id</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pic_preview_img_id-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 3</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_preview_img_id</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-node">&quot;rcpPic#{decorator.id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_preview_input_id" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_preview_input_id</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pic_preview_input_id-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_preview_input_id</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">element_id</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">picable_attribute</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pic_preview_widget" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pic_preview_widget</span><span
+            class="method-args">(decorator, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Bare-metal version of the pic preview widget, for use in a template file</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pic_preview_widget-source">
+            <pre><span class="ruby-comment"># File app/helpers/pic_picker_helper.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pic_preview_widget</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">pic_preview</span> =
+    <span class="ruby-identifier">image_with_error_recovery</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>,
+                              <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_preview_img_id</span>(<span class="ruby-identifier">decorator</span>),
+                              <span class="ruby-identifier">fill_mode</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;fixed-width&#39;</span>) <span class="ruby-operator">+</span>
+    <span class="ruby-identifier">hidden_field_tag</span>( <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">field_name</span>(<span class="ruby-value">:picurl</span>),
+                      <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">picuri</span>,
+                      <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pic_preview_input_id</span>(<span class="ruby-identifier">decorator</span>),
+                      <span class="ruby-identifier">rel</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;jpg,png,gif&#39;</span>,
+                      <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;text&#39;</span>
+    )
+
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">pic_preview</span>, <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:pic_preview</span>)<span class="ruby-operator">+</span>
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">pic_picker_go_button</span>(<span class="ruby-identifier">decorator</span>), <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:pic_picker_link</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

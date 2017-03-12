@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class AuthenticationsController - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="ApplicationController.html">ApplicationController</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-create">#create</a>
+    
+    <li ><a href="#method-i-destroy">#destroy</a>
+    
+    <li ><a href="#method-i-failure">#failure</a>
+    
+    <li ><a href="#method-i-handle_unverified_request">#handle_unverified_request</a>
+    
+    <li ><a href="#method-i-index">#index</a>
+    
+    <li ><a href="#method-i-new">#new</a>
+    
+    <li ><a href="#method-i-verify">#verify</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-AuthenticationsController">
+  <h1 id="class-AuthenticationsController" class="class">
+    class AuthenticationsController
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-create" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">create</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Callback after omniauth authentication</p>
+          
+          
+
+          
+          <div class="method-source-code" id="create-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 45</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
+  <span class="ruby-comment"># render :text =&gt; request.env[&#39;omniauth.auth&#39;].to_yaml</span>
+  <span class="ruby-identifier">omniauth</span> = <span class="ruby-identifier">request</span>.<span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;omniauth.auth&#39;</span>]
+  <span class="ruby-comment"># render text: omniauth.to_yaml</span>
+  <span class="ruby-identifier">authparams</span> = <span class="ruby-identifier">omniauth</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-string">&#39;provider&#39;</span>, <span class="ruby-string">&#39;uid&#39;</span>)
+  <span class="ruby-comment"># Our query parameters appear in env[&#39;omniauth.params&#39;]</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">origin_url</span> = <span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;omniauth.origin&#39;</span>]  <span class="ruby-comment"># Remove any enclosing quotes</span>
+    <span class="ruby-identifier">origin_url</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/^&quot;?([^&quot;]*)&quot;?/</span>, <span class="ruby-string">&#39;\1&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Originator is where we came from, so we can go back there if login fails</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">originator</span> = <span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;omniauth.params&#39;</span>][<span class="ruby-string">&#39;originator&#39;</span>]  <span class="ruby-comment"># Remove any enclosing quotes</span>
+    <span class="ruby-identifier">originator</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/^&quot;?([^&quot;]*)&quot;?/</span>, <span class="ruby-string">&#39;\1&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Check for existing authorization</span>
+  <span class="ruby-ivar">@authentication</span> = <span class="ruby-constant">Authentication</span>.<span class="ruby-identifier">find_by_provider_and_uid</span>(<span class="ruby-identifier">omniauth</span>[<span class="ruby-string">&#39;provider&#39;</span>], <span class="ruby-identifier">omniauth</span>[<span class="ruby-string">&#39;uid&#39;</span>])
+  (<span class="ruby-identifier">info</span> = <span class="ruby-identifier">omniauth</span>[<span class="ruby-string">&#39;info&#39;</span>]) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">email</span> = <span class="ruby-identifier">info</span>[<span class="ruby-string">&#39;email&#39;</span>]) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by_email</span>(<span class="ruby-identifier">email</span>))
+  <span class="ruby-identifier">intention</span> = <span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;omniauth.params&#39;</span>][<span class="ruby-string">&#39;intention&#39;</span>] <span class="ruby-comment"># If intention is &#39;signup&#39;, don&#39;t accept existing authentications</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">intention</span> <span class="ruby-operator">==</span> <span class="ruby-string">&quot;signup&quot;</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@authentication</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">user</span> <span class="ruby-comment"># This authentication method already in use</span>
+      <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;That #{omniauth.provider.capitalize} login is already in use on RecipePower.&lt;br&gt;Perhaps you just need to sign in?&quot;</span>
+      <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">amend</span> <span class="ruby-identifier">originator</span>
+      <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">originator</span>
+    <span class="ruby-keyword">else</span>  <span class="ruby-comment"># No user and no authentication: perfect</span>
+      <span class="ruby-comment"># Just create the account, getting what we can get out of the authorization info</span>
+      (<span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span>).<span class="ruby-identifier">apply_omniauth</span>(<span class="ruby-identifier">omniauth</span>)
+      <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">amend</span> <span class="ruby-identifier">originator</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">save</span>
+        <span class="ruby-ivar">@authentication</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">authentications</span>.<span class="ruby-identifier">create!</span>(<span class="ruby-identifier">authparams</span>) <span class="ruby-comment"># Link authorization to user</span>
+        <span class="ruby-identifier">sign_in</span> <span class="ruby-identifier">user</span>, <span class="ruby-value">:event</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:authentication</span>
+        <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span> = <span class="ruby-identifier">user</span>
+        <span class="ruby-constant">RpMailer</span>.<span class="ruby-identifier">welcome_email</span>(<span class="ruby-identifier">user</span>).<span class="ruby-identifier">deliver</span>
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] =
+            <span class="ruby-node">%Q{Welcome to RecipePower, #{user.polite_name}! Introductory email is on its way. }</span>
+        <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">user</span>)
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-comment"># If user can&#39;t be saved, go back to edit params</span>
+        <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">decorate_path</span>(<span class="ruby-identifier">new_user_registration_url</span>)
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-comment"># Intention is not signing up</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">current_user</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@authentication</span> <span class="ruby-comment"># Authentication already in use</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@authentication</span>.<span class="ruby-identifier">user</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">current_user</span>
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;You&#39;re already connected through #{@authentication.provider_name}!&quot;</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Sorry, your current #{@authentication.provider_name} login is tied to another RecipePower user.&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-comment"># Add the authentication method to the current user. We return to the authentications dialog</span>
+      <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">apply_omniauth</span>(<span class="ruby-identifier">omniauth</span>)
+      <span class="ruby-ivar">@authentication</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">authentications</span>.<span class="ruby-identifier">create!</span>(<span class="ruby-identifier">authparams</span>) <span class="ruby-comment"># Link to existing user</span>
+      <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Yay! You&#39;re now connected to RecipePower through #{@authentication.provider_name}.&quot;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">origin_url</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-ivar">@authentication</span>
+    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Yay! Signed in with #{@authentication.provider_name}. Welcome back, #{@authentication.user.handle}!&quot;</span>
+    <span class="ruby-identifier">sign_in</span> <span class="ruby-ivar">@authentication</span>.<span class="ruby-identifier">user</span>, <span class="ruby-value">:event</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:authentication</span>
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">amend</span> <span class="ruby-identifier">originator</span>
+    <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-ivar">@authentication</span>.<span class="ruby-identifier">user</span>)
+  <span class="ruby-comment"># This is a new authentication (not previously linked to a user) and there is</span>
+  <span class="ruby-comment"># no current user to link it to. It&#39;s possible that the authentication will come with</span>
+  <span class="ruby-comment"># an email address which we can use to log the user in.</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">user</span>
+    <span class="ruby-identifier">user</span>.<span class="ruby-identifier">apply_omniauth</span>(<span class="ruby-identifier">omniauth</span>)
+    <span class="ruby-ivar">@authentication</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">authentications</span>.<span class="ruby-identifier">create!</span>(<span class="ruby-identifier">authparams</span>) <span class="ruby-comment"># Link to existing user</span>
+    <span class="ruby-identifier">sign_in</span> <span class="ruby-identifier">user</span>, <span class="ruby-value">:event</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:authentication</span>
+    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Yay! Signed in with #{@authentication.provider_name}. Nice to see you again, #{user.handle}!&quot;</span>
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">amend</span> <span class="ruby-identifier">originator</span>
+    <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">user</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># We haven&#39;t managed to get the user signed in by other means, but we still have an authorization</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">current_user</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">user</span>)  <span class="ruby-comment"># Failed login not because of failed invitation</span>
+    <span class="ruby-comment"># The email didn&#39;t come in the authorization, so we now need to</span>
+    <span class="ruby-comment"># discriminate between an existing user(and have them log in)</span>
+    <span class="ruby-comment"># and a new user (and have them sign up). Time to throw the problem</span>
+    <span class="ruby-comment"># over to the user controller, providing it with the authorization.</span>
+    <span class="ruby-identifier">session</span>[<span class="ruby-value">:omniauth</span>] = <span class="ruby-identifier">omniauth</span>.<span class="ruby-identifier">except</span>(<span class="ruby-string">&#39;extra&#39;</span>)
+    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-string">&quot;Hmm, apparently that service isn&#39;t linked to your account. If you log in by other means (perhaps you need to create an account?), you can link that service in Sign-In Services&quot;</span>
+    <span class="ruby-identifier">url_to</span> = <span class="ruby-identifier">originator</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">new_user_session_path</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># response_service.amend origin_url # Amend response expectations according to the originating URL</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;callback&#39;</span>, <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:locals</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-identifier">url_to</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url_to</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-destroy" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">destroy</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="destroy-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 129</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
+  <span class="ruby-ivar">@authentication</span> = <span class="ruby-constant">Authentication</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-ivar">@authentication</span>.<span class="ruby-identifier">destroy</span>
+  <span class="ruby-identifier">flash</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-node">&quot;Okay, no more #{@authentication.provider_name} authentication for you!&quot;</span>
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
+      <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">authentications_url</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">303</span>
+    }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
+      <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">authentications_url</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">303</span>
+    }
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">js</span> {
+      <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;destroy&quot;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">provider</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@authentication</span>.<span class="ruby-identifier">provider</span>}
+    }
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-failure" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">failure</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="failure-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">failure</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;callback&#39;</span>, <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-handle_unverified_request" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">handle_unverified_request</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="handle_unverified_request-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">handle_unverified_request</span>
+  <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-index" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">index</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="index-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
+  <span class="ruby-ivar">@authentications</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">authentications</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+  <span class="ruby-ivar">@auth_delete</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-ivar">@auth_context</span> = <span class="ruby-value">:manage</span>
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get a new authentication (==login)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
+  <span class="ruby-ivar">@authentications</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">authentications</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+    <span class="ruby-comment"># flash[:notice] = &quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">current_user</span>), <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@auth_delete</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verify" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">verify</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get a new authentication (==login) for a specific user</p>
+          
+          
+
+          
+          <div class="method-source-code" id="verify-source">
+            <pre><span class="ruby-comment"># File app/controllers/authentications_controller.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">verify</span>
+  <span class="ruby-ivar">@authentications</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">authentications</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+    <span class="ruby-comment"># flash[:notice] = &quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">current_user</span>), <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@auth_delete</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-ivar">@auth_context</span> = <span class="ruby-value">:manage</span>
+  <span class="ruby-identifier">smartrender</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

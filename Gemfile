@@ -46,7 +46,7 @@ gem 'jquery-ui-rails', '~> 3.0'
 gem 'coffee-rails', "~> 4.0.0"
 gem 'uglifier', '>= 1.3.0'
 # gem 'compass-rails'
-gem 'sass-rails', " ~> 4.0"
+gem 'sass-rails', " ~> 5.0"
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 # gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
@@ -71,7 +71,7 @@ gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 ###### Worker management
 gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
 gem 'delayed_job_active_record', git: 'git://github.com/collectiveidea/delayed_job_active_record.git'
-gem 'daemons'
+gem 'daemons' # Per DelayedJob documentation
 gem 'hirefire-resource'
 
 ###### Deploy with Capistrano

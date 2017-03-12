@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module ListsHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-hover_menu">#hover_menu</a>
+    
+    <li ><a href="#method-i-list_lists_with_status">#list_lists_with_status</a>
+    
+    <li ><a href="#method-i-list_menu_item">#list_menu_item</a>
+    
+    <li ><a href="#method-i-list_menu_item_replacement">#list_menu_item_replacement</a>
+    
+    <li ><a href="#method-i-pin_button">#pin_button</a>
+    
+    <li ><a href="#method-i-pin_navmenu">#pin_navmenu</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-ListsHelper">
+  <h1 id="module-ListsHelper" class="module">
+    module ListsHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-hover_menu" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">hover_menu</span><span
+            class="method-args">(label, options={}) { || ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="hover_menu-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">hover_menu</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;shared/hover_menu&#39;</span>,
+                                      <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span>,
+                                      <span class="ruby-identifier">klass</span><span class="ruby-operator">:</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>,
+                                      <span class="ruby-identifier">links</span><span class="ruby-operator">:</span> <span class="ruby-keyword">yield</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-list_lists_with_status" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">list_lists_with_status</span><span
+            class="method-args">(lists_with_status)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Describe all the lists and their statuses</p>
+          
+          
+
+          
+          <div class="method-source-code" id="list_lists_with_status-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 76</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">list_lists_with_status</span> <span class="ruby-identifier">lists_with_status</span>
+  <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">lists_with_status</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list_or_list_with_status</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">list_or_list_with_status</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Array</span>
+      <span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span> = <span class="ruby-identifier">list_or_list_with_status</span>.<span class="ruby-identifier">first</span>, <span class="ruby-identifier">list_or_list_with_status</span>.<span class="ruby-identifier">last</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span> = <span class="ruby-identifier">list_or_list_with_status</span>, <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">name</span> = <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-identifier">list</span>.<span class="ruby-identifier">name_tag</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">truncate</span>(<span class="ruby-value">50</span>).<span class="ruby-identifier">downcase</span>, <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">list</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:partial</span>, <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;taglink&#39;</span> )
+    <span class="ruby-identifier">name</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; (#{user_homelink list.owner})&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">tagging_user_id</span>
+    <span class="ruby-identifier">name</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;--#{status}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">env</span>.<span class="ruby-identifier">development?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">status</span>
+    <span class="ruby-identifier">name</span>
+  }.<span class="ruby-identifier">compact</span>, <span class="ruby-string">&#39;&amp;nbsp;&lt;span class=&quot;tagsep&quot;&gt;|&lt;/span&gt; &#39;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-list_menu_item" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">list_menu_item</span><span
+            class="method-args">(l, entity, styling)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p># Offer to let the user save the item in their collection and any list they
+own, plus a new list # NB Obsolete: now supplanted by list-manager dialog
+def collectible_list_menu decorator, user, styling, options={}</p>
+
+<pre class="ruby"><span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>
+  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-identifier">hover_menu</span> <span class="ruby-identifier">sprite_glyph</span>(:<span class="ruby-string">&quot;list-add&quot;</span>), <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">decorator</span>)) <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">already_collected</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">collectible_collected?</span> <span class="ruby-identifier">current_user_or_guest_id</span>
+    <span class="ruby-identifier">cl</span> = <span class="ruby-identifier">collection_link</span> <span class="ruby-identifier">decorator</span>,
+                         <span class="ruby-identifier">checkbox_menu_item_label</span>(<span class="ruby-string">&quot;Collection&quot;</span>, <span class="ruby-identifier">already_collected</span>),
+                         <span class="ruby-identifier">styling</span>,
+                         :<span class="ruby-identifier">in_collection</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">already_collected</span>,
+                         :<span class="ruby-keyword">class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;checkbox-menu-item collection&quot;</span>
+    [ <span class="ruby-identifier">content_tag</span>(:<span class="ruby-identifier">li</span>, <span class="ruby-identifier">cl</span>),
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">owned_lists</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">l</span><span class="ruby-operator">|</span> <span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">li</span>, (<span class="ruby-identifier">list_menu_item</span> <span class="ruby-identifier">l</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">l</span>))) },
+      <span class="ruby-string">&quot;&lt;hr class=&#39;menu&#39;&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>,
+      <span class="ruby-identifier">content_tag</span>(:<span class="ruby-identifier">li</span>,
+                  <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&quot;Start a List...&quot;</span>,
+                                 <span class="ruby-identifier">new_list_path</span>(<span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">entity_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">id</span>),
+                                 <span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> :<span class="ruby-identifier">modal</span>,
+                                 <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;transient&quot;</span>))
+    ].<span class="ruby-identifier">flatten</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">else</span>
+  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-string">&quot;&quot;</span>,
+                 <span class="ruby-identifier">new_user_registration_path</span>(<span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">alert</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;You can collect things and make lists once you&#39;re logged in&quot;</span>},
+                                            <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Join RecipePower&quot;</span>),
+                 <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>( <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;glyphicon glyphicon-pushpin&quot;</span> )
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>end</p>
+          
+          
+
+          
+          <div class="method-source-code" id="list_menu_item-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">list_menu_item</span> <span class="ruby-identifier">l</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>
+  <span class="ruby-identifier">already_collected</span> = <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">l</span>).<span class="ruby-identifier">include?</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">current_user_or_guest_id</span>
+  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">checkbox_menu_item_label</span>(<span class="ruby-identifier">l</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">truncate</span>(<span class="ruby-value">20</span>), <span class="ruby-identifier">already_collected</span>),
+                 <span class="ruby-identifier">pin_list_path</span>(<span class="ruby-identifier">l</span>,
+                      <span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">entity</span>.<span class="ruby-identifier">klass</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">rescue</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>),
+                      <span class="ruby-identifier">entity_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">id</span>,
+                      <span class="ruby-identifier">oust</span><span class="ruby-operator">:</span> <span class="ruby-identifier">already_collected</span>,
+                      <span class="ruby-identifier">styling</span><span class="ruby-operator">:</span> <span class="ruby-identifier">styling</span>),
+                 <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;POST&quot;</span>,
+                 <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;checkbox-menu-item #{dom_id(l)}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-list_menu_item_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">list_menu_item_replacement</span><span
+            class="method-args">(list, entity, styling)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="list_menu_item_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 64</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">list_menu_item_replacement</span> <span class="ruby-identifier">list</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>
+  [ <span class="ruby-node">&quot;ul.#{dom_id entity} a.checkbox-menu-item.#{dom_id list}&quot;</span>, <span class="ruby-identifier">list_menu_item</span>(<span class="ruby-identifier">list</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pin_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pin_button</span><span
+            class="method-args">(list, entity)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a button for adding (pinning) an entity to the list</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pin_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pin_button</span> <span class="ruby-identifier">list</span>, <span class="ruby-identifier">entity</span>
+  <span class="ruby-identifier">button_to_submit</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">name</span>,
+                   <span class="ruby-identifier">pin_list_path</span>(<span class="ruby-identifier">list</span>),
+                   <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;POST&quot;</span>,
+                   <span class="ruby-identifier">query</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">entity</span>.<span class="ruby-identifier">klass</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">rescue</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>), <span class="ruby-identifier">entity_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">id</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pin_navmenu" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pin_navmenu</span><span
+            class="method-args">(entity)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pin_navmenu-source">
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pin_navmenu</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-identifier">navtab</span> <span class="ruby-value">:pin</span>, <span class="ruby-string">&quot;+&quot;</span>, <span class="ruby-identifier">users_path</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">owned_lists</span>[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-value">10</span>].<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">l</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">navlink</span> <span class="ruby-node">&quot;Add to &#39;#{l.name.truncate(20)}&#39;&quot;</span>, <span class="ruby-identifier">pin_list_path</span>(<span class="ruby-identifier">l</span>), <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">l</span>)
+    }
+  <span class="ruby-keyword">end</span>
+
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

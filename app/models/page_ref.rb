@@ -15,7 +15,7 @@ class PageRef < ActiveRecord::Base
   @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode
 
   attr_accessor :extant_pr
 
@@ -73,6 +73,10 @@ class PageRef < ActiveRecord::Base
         self.errors.add :url, (self.error_message = data['messages'])
       else
         self.error_message = data['errorMessage']
+      end
+      if data['domain'] == 'www.answers.com'
+        # We can't trust answers.com to provide a straight url, so we have to special-case it
+        data['url'] = url
       end
       self.http_status =
           if self.error_message.blank?

@@ -1,14 +1,14 @@
 <% if response_service.injector? %>
     <%= form_for(resource, :as => resource_name, :url => registration_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
         <div class="signin">
-          <strong>...open an account with just an email:</strong><br>
+          <p style="margin: 0 0 10px 0;"><strong>Open an account with just an email:</strong><br></p>
           <%= form_errors_helper f, resource %>
           <div class="signin_credentials">
             <%# f.label :username, "Username (Handle)".html_safe, class: "signin_element" %>
             <%# f.text_field :username, class: "signin_element", placeholder: "CoolBeans" %>
             <%# f.label :fullname, "Full Name".html_safe, class: "signin_element" %>
             <%# f.text_field :fullname, class: "signin_element", placeholder: "Joe Cool" %>
-            <%= f.label :email, 'Email'.html_safe, class: 'signin_element' %>
+            <%# f.label :email, 'Email'.html_safe, class: 'signin_element' %>
             <%= f.text_field :email, class: 'signin_element', placeholder: 'peerless@nonpareil.net' %>
             <%# f.label :password, class: "signin_element" %>
             <%# f.password_field :password, class: "signin_element" %>
@@ -21,10 +21,17 @@
         <%# devise_error_messages! %>
         <%# form_errors_helper f, resource %>
         <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>
-        <%= f.input :email, label: false, placeholder: 'email', autofocus: true %>
+        <%= f.input :email,
+                    placeholder: 'email',
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    autofocus: true %>
         <%# f.input :fullname, label: "Full Name", placeholder: "Joe Cool" %>
-        <%= f.input :password, label: false, placeholder: 'password' %>
-        <%= f.input :password_confirmation, label: false, placeholder: 'confirm password' %>
+        <%= f.input :password,
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    placeholder: 'password' %>
+        <%= f.input :password_confirmation,
+                    label_html: {class: 'placetaker'}, # Hidden when placeholder available
+                    placeholder: 'confirm password' %>
         <%= f.submit 'SIGN ME UP!', class: 'dialog-submit-button btn btn-xl center-button free' %>
     <% end %>
 <% end %>

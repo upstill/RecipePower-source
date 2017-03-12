@@ -8,7 +8,10 @@
           <div class="signin_credentials">
             <%# f.label :login, "Username or Email (your choice)".html_safe %>
             <%# f.text_field :login, class: "signin_element" %>
-            <%= f.input :login, label: "Username or Email (your choice)" %>
+            <%= f.input :login,
+                        label: 'Username or Email (your choice):&nbsp;&nbsp;'.html_safe,
+                        html: { padding: '5px', width: '300px' }
+            %>
           </div>
           <%= f.submit "Email instructions to reset password", class: "btn btn-success" %>
         </div>

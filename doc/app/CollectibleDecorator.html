@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class CollectibleDecorator - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Draper::Decorator
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="Templateer.html">Templateer</a>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-build">::build</a>
+    
+    <li ><a href="#method-i-arity">#arity</a>
+    
+    <li ><a href="#method-i-assert_gleaning">#assert_gleaning</a>
+    
+    <li ><a href="#method-i-assert_gleaning_attribute">#assert_gleaning_attribute</a>
+    
+    <li ><a href="#method-i-attribute_for">#attribute_for</a>
+    
+    <li ><a href="#method-i-attribute_name_for">#attribute_name_for</a>
+    
+    <li ><a href="#method-i-editable_tagtypes">#editable_tagtypes</a>
+    
+    <li ><a href="#method-i-eligible_tagtypes">#eligible_tagtypes</a>
+    
+    <li ><a href="#method-i-extract">#extract</a>
+    
+    <li ><a href="#method-i-finderlabels">#finderlabels</a>
+    
+    <li ><a href="#method-i-findings-3D">#findings=</a>
+    
+    <li ><a href="#method-i-first_collector">#first_collector</a>
+    
+    <li ><a href="#method-i-image_class">#image_class</a>
+    
+    <li ><a href="#method-i-individual_tagtypes">#individual_tagtypes</a>
+    
+    <li class="calls-super" ><a href="#method-i-method_missing">#method_missing</a>
+    
+    <li ><a href="#method-i-misc_tags_name_expanded">#misc_tags_name_expanded</a>
+    
+    <li ><a href="#method-i-misc_tagtypes">#misc_tagtypes</a>
+    
+    <li ><a href="#method-i-pageurl">#pageurl</a>
+    
+    <li ><a href="#method-i-picurl">#picurl</a>
+    
+    <li ><a href="#method-i-read_only">#read_only</a>
+    
+    <li ><a href="#method-i-robotags">#robotags</a>
+    
+    <li ><a href="#method-i-sample_page">#sample_page</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-CollectibleDecorator">
+  <h1 id="class-CollectibleDecorator" class="class">
+    class CollectibleDecorator
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-build" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build</span><span
+            class="method-args">(entity_type, entity_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Build an entity and its decorator based on type and ID of an existing
+object</p>
+          
+          
+
+          
+          <div class="method-source-code" id="build-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 213</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">build</span> <span class="ruby-identifier">entity_type</span>, <span class="ruby-identifier">entity_id</span>
+  <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_id</span>).<span class="ruby-identifier">decorate</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-arity" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">arity</span><span
+            class="method-args">(fieldname)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define presentation-specific methods here. Helpers are accessed through
+`helpers` (aka `h`). You can override attributes, for example:</p>
+
+<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">created_at</span>
+  <span class="ruby-identifier">helpers</span>.<span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">span</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;time&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">object</span>.<span class="ruby-identifier">created_at</span>.<span class="ruby-identifier">strftime</span>(<span class="ruby-string">&quot;%a %m/%d/%y&quot;</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="arity-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 136</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">arity</span> <span class="ruby-identifier">fieldname</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">downcase</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-regexp">/_tags$/</span>
+      <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/_tags$/</span>, <span class="ruby-string">&#39;&#39;</span>
+      <span class="ruby-identifier">tagtype</span> = [<span class="ruby-string">&#39;Culinary Term&#39;</span>, <span class="ruby-string">&#39;Untyped&#39;</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span><span class="ruby-operator">==</span><span class="ruby-string">&#39;Other&#39;</span>
+      <span class="ruby-identifier">visible_tags</span>(<span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">tagtype</span>).<span class="ruby-identifier">count</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;list&#39;</span>, <span class="ruby-string">&#39;lists&#39;</span>
+      <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">associated_lists</span>(<span class="ruby-identifier">object</span>).<span class="ruby-identifier">count</span> <span class="ruby-comment"># ListServices.find_by_listee(object).count</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-assert_gleaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert_gleaning</span><span
+            class="method-args">(gleaning)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Process the results of a gleaning</p>
+          
+          
+
+          
+          <div class="method-source-code" id="assert_gleaning-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 42</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_gleaning</span> <span class="ruby-identifier">gleaning</span>
+  <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">extract1</span> <span class="ruby-string">&#39;Title&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">value</span> <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">extract1</span> <span class="ruby-string">&#39;Image&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">image</span> = <span class="ruby-identifier">value</span> <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">extract1</span> <span class="ruby-string">&#39;Description&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">value</span> <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-assert_gleaning_attribute" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert_gleaning_attribute</span><span
+            class="method-args">(label, value)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>When attributes are selected directly and returned as gleaning attributes,
+assert them into the model</p>
+          
+          
+
+          
+          <div class="method-source-code" id="assert_gleaning_attribute-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 125</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_gleaning_attribute</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">value</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-attribute_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attribute_for</span><span
+            class="method-args">(what)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Translation from label names to attribute names</p>
+          
+          
+
+          
+          <div class="method-source-code" id="attribute_for-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">attribute_for</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">to_sym</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-attribute_name_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attribute_name_for</span><span
+            class="method-args">(label)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="attribute_name_for-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 32</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">attribute_name_for</span> <span class="ruby-identifier">label</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">label</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Title&#39;</span>
+      <span class="ruby-string">&#39;title&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Description&#39;</span>
+      <span class="ruby-string">&#39;description&#39;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-editable_tagtypes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">editable_tagtypes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="editable_tagtypes-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 237</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">editable_tagtypes</span>
+  <span class="ruby-identifier">individual_tagtypes</span> <span class="ruby-operator">-</span> [ <span class="ruby-value">:List</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-eligible_tagtypes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">eligible_tagtypes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>What types of tag are selectable for tagging the entity, i.e., pertain to
+the type of collectible we&#39;re talking about</p>
+          
+          
+
+          
+          <div class="method-source-code" id="eligible_tagtypes-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 228</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">eligible_tagtypes</span>
+  [ <span class="ruby-value">:Untyped</span>, <span class="ruby-value">:Source</span>, <span class="ruby-value">:Author</span>, <span class="ruby-value">:CulinaryTerm</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-extract" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">extract</span><span
+            class="method-args">(fieldname)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="extract-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 147</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">extract</span> <span class="ruby-identifier">fieldname</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">downcase</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/_tags$/</span>
+        <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/_tags$/</span>, <span class="ruby-string">&#39;&#39;</span>
+        <span class="ruby-identifier">tagtype</span> = [<span class="ruby-string">&#39;Culinary Term&#39;</span>, <span class="ruby-string">&#39;Untyped&#39;</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span><span class="ruby-operator">==</span><span class="ruby-string">&#39;Other&#39;</span>
+        <span class="ruby-identifier">strjoin</span> <span class="ruby-identifier">visible_tags</span>(<span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">tagtype</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
+                  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">tag</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;rcp_list_element_tag&#39;</span>
+                }
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^tags$/</span>
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">list_tags_for_collectible</span> <span class="ruby-identifier">visible_tags</span>( <span class="ruby-value">:tagtype_x</span> =<span class="ruby-operator">&gt;</span> [ <span class="ruby-value">:Question</span>, <span class="ruby-value">:List</span> ]), <span class="ruby-keyword">self</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^lists$/</span>
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">list_lists_with_status</span> <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">associated_lists_with_status</span>(<span class="ruby-keyword">self</span>)
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^rcp/</span>
+        <span class="ruby-identifier">attrname</span> = <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^rcp/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">downcase</span>
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">attrname</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;picsafeurl&#39;</span>
+            <span class="ruby-identifier">object</span>.<span class="ruby-identifier">imgdata</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;titlelink&#39;</span>
+            <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">object</span>.<span class="ruby-identifier">url</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;video&#39;</span>
+            (<span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">object</span>.<span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span>
+            <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/\.youtube.com/</span>) <span class="ruby-operator">&amp;&amp;</span>
+            (<span class="ruby-identifier">vid</span> = <span class="ruby-constant">YouTubeAddy</span>.<span class="ruby-identifier">extract_video_id</span>(<span class="ruby-identifier">object</span>.<span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span>
+            <span class="ruby-node">&quot;https://www.youtube.com/embed/#{vid}&quot;</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">object</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">attrname</span>.<span class="ruby-identifier">to_sym</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">respond_to?</span> <span class="ruby-identifier">attrname</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^comments/</span>
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^comments_/</span>, <span class="ruby-string">&#39;&#39;</span>)
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;mine&#39;</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;friends&#39;</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;others&#39;</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;site&#39;</span>
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">sourcename</span>, <span class="ruby-identifier">object</span>.<span class="ruby-identifier">sourcehome</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tablink&#39;</span>
+<span class="ruby-comment">      when &#39;list&#39;, &#39;lists&#39;
+        strjoin ListServices.find_by_listee(object).collect { |list|
+                  llink = h.link_to_submit list.name, list, class: &#39;rcp_list_element_tag&#39;
+                  if list.owner_id == object.tagging_user_id
+                    llink
+                  else
+                    ulink = h.link_to list.owner.handle, list.owner, class: &#39;rcp_list_element_tag&#39;
+                    &quot;#{llink} (#{ulink})&quot;.html_safe
+                  end
+                }
+</span>      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;collections&#39;</span>
+        <span class="ruby-identifier">strjoin</span> <span class="ruby-constant">CollectibleServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">object</span>).<span class="ruby-identifier">collectors</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">user</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to_submit</span>( <span class="ruby-identifier">user</span>.<span class="ruby-identifier">handle</span>, <span class="ruby-identifier">h</span>.<span class="ruby-identifier">user_path</span>(<span class="ruby-identifier">user</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">tagging_user_id</span>
+        }.<span class="ruby-identifier">compact</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;feeds&#39;</span>
+        <span class="ruby-identifier">strjoin</span>(<span class="ruby-identifier">object</span>.<span class="ruby-identifier">feeds</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">approved</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">feed</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">feed</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">h</span>.<span class="ruby-identifier">feed_path</span>(<span class="ruby-identifier">feed</span>) },<span class="ruby-string">&#39;&#39;</span>,<span class="ruby-string">&#39;&#39;</span>,<span class="ruby-string">&#39;,&#39;</span>, <span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;classname_lower&#39;</span>
+        <span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span>
+      <span class="ruby-keyword">else</span>
+        (<span class="ruby-identifier">method</span>(<span class="ruby-identifier">fieldname</span>.<span class="ruby-identifier">to_sym</span>).<span class="ruby-identifier">call</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-finderlabels" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">finderlabels</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Declare the set of gleanings labels that we can handle</p>
+          
+          
+
+          
+          <div class="method-source-code" id="finderlabels-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 28</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">finderlabels</span>
+  <span class="ruby-node">%w{ Image Title Description }</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-findings-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">findings=</span><span
+            class="method-args">(findings)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Here&#39;s where we incorporate findings from a page into the corresponding
+entity</p>
+          
+          
+
+          
+          <div class="method-source-code" id="findings-3D-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 49</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">findings=</span> <span class="ruby-identifier">findings</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Title&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Title&#39;</span>).<span class="ruby-identifier">present?</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Description&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Description&#39;</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">description</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">ts</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># TaggingService object</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Recipe</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">prep_time</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Prep Time&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Prep Time&#39;</span>).<span class="ruby-identifier">present?</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cook_time</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Cooking Time&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Cooking Time&#39;</span>).<span class="ruby-identifier">present?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Total Time&#39;</span>).<span class="ruby-identifier">present?</span>
+        <span class="ruby-identifier">tt</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span> (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">total_time</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Total Time&#39;</span>)), <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Time</span>
+        <span class="ruby-identifier">tt</span> <span class="ruby-operator">&amp;&amp;</span> ((<span class="ruby-identifier">ts</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">object</span>).<span class="ruby-identifier">tag_with</span> <span class="ruby-identifier">tt</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>)
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">yield</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Yield&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Yield&#39;</span>).<span class="ruby-identifier">present?</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Image&#39;</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">image</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">image</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Image&#39;</span>)
+      <span class="ruby-identifier">image_changed</span> = <span class="ruby-identifier">image</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">id</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">changed?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">image_changed</span> <span class="ruby-comment"># No other extractions need apply until saved</span>
+    <span class="ruby-identifier">ts</span> = <span class="ruby-keyword">nil</span>
+    {
+        <span class="ruby-string">&#39;Author&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Author&#39;</span>,
+        <span class="ruby-string">&#39;Course&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Course&#39;</span>,
+        <span class="ruby-string">&#39;Occasion&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Occasion&#39;</span>,
+        <span class="ruby-string">&#39;Dish&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Dish&#39;</span>,
+        <span class="ruby-string">&#39;Tag&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">nil</span>,
+        <span class="ruby-string">&#39;Diet&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Diet&#39;</span>,
+        <span class="ruby-string">&#39;Genre&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Genre&#39;</span>,
+        <span class="ruby-string">&#39;List&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;List&#39;</span>,
+        <span class="ruby-string">&#39;Ingredient&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Ingredient&#39;</span>
+    }.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">label</span>, <span class="ruby-identifier">type</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagstrings</span> =
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagstring</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-identifier">label</span>)
+            [ <span class="ruby-identifier">tagstring</span> ]
+          <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">tagstring</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-identifier">label</span>.<span class="ruby-identifier">pluralize</span>)
+            <span class="ruby-identifier">tagstring</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:strip</span>)
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">ts</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">object</span>
+        <span class="ruby-identifier">tagstrings</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tagname</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">tag_with</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>, {<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type</span>}.<span class="ruby-identifier">compact</span>
+        }
+      <span class="ruby-keyword">end</span>
+    }
+<span class="ruby-comment">    if author = findings.result_for(&#39;Author&#39;)
+      ts ||= TaggingServices.new object
+      ts.tag_with author, User.super_id, type: &#39;Author&#39;
+    end
+    if course = findings.result_for(&#39;Course&#39;)
+      ts ||= TaggingServices.new object
+      ts.tag_with course, User.super_id, type: &#39;Course&#39;
+    end
+    if occasion = findings.result_for(&#39;Occasion&#39;)
+      ts ||= TaggingServices.new object
+      ts.tag_with occasion, User.super_id, type: &#39;Occasion&#39;
+    end
+    if tagstring = findings.result_for(&#39;Tags&#39;)
+      ts ||= TaggingServices.new object
+      tagstring.split(&#39;,&#39;).map(&amp;:strip).each { |tagname| ts.tag_with tagname, User.super_id }
+    end
+    if tagstring = findings.result_for(&#39;Diet&#39;)
+      ts ||= TaggingServices.new object
+      tagstring.split(&#39;,&#39;).map(&amp;:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: Tag.typenum(:Diet) }
+    end
+    if tagstring = findings.result_for(&#39;Ingredients&#39;)
+      ts ||= TaggingServices.new object
+      tagstring.split(&#39;,&#39;).map(&amp;:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: &#39;Ingredient&#39; }
+    end
+</span>  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-first_collector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">first_collector</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Get the user who first collected the recipe (or at least the one with the
+oldest <a href="Rcpref.html">Rcpref</a>)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="first_collector-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 222</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">first_collector</span>
+  <span class="ruby-comment"># find_by_id handles the NULL case (no User has in collection)</span>
+  <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by_id</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">toucher_pointers</span>.<span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;created_at ASC&#39;</span>).<span class="ruby-identifier">limit</span>(<span class="ruby-value">1</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:user_id</span>).<span class="ruby-identifier">first</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-image_class" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">image_class</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="image_class-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 217</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">image_class</span>
+  <span class="ruby-identifier">dom_id</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;_pic&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-individual_tagtypes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">individual_tagtypes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Specify the types of tag that get displayed individually on the card. :Misc
+is a special “grab bag” type for all eligible types not shown individually</p>
+          
+          
+
+          
+          <div class="method-source-code" id="individual_tagtypes-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 233</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">individual_tagtypes</span>
+  [ <span class="ruby-value">:Misc</span>, <span class="ruby-value">:Source</span>, <span class="ruby-value">:Author</span>, <span class="ruby-value">:List</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-method_missing" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">method_missing</span><span
+            class="method-args">(namesym, *args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Here&#39;s where we define misc_tag_types, misc_tags_label,
+locked_misc_tags and editable_misc_tags</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Templateer.html#method-i-method_missing">Templateer#method_missing</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="method_missing-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 252</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span> <span class="ruby-identifier">namesym</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
+  <span class="ruby-keyword">case</span> (<span class="ruby-identifier">callname</span> = <span class="ruby-identifier">namesym</span>.<span class="ruby-identifier">to_s</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^(\w*)_tag_types$/</span>
+      <span class="ruby-identifier">typesym</span> = <span class="ruby-node">$1</span>.<span class="ruby-identifier">capitalize</span>.<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Misc</span> <span class="ruby-operator">?</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">misc_tagtypes</span>) <span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">typesym</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^(\w*)_tags_label$/</span>
+      <span class="ruby-identifier">typesym</span> = <span class="ruby-node">$1</span>.<span class="ruby-identifier">capitalize</span>.<span class="ruby-identifier">to_sym</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Misc</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;Misc. Tag&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typename</span>(<span class="ruby-identifier">typesym</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^(locked|editable|visible)_misc_tag(_token)?s(=)?$/</span>
+      <span class="ruby-identifier">callname</span> = <span class="ruby-identifier">misc_tags_name_expanded</span> <span class="ruby-identifier">callname</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-identifier">callname</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-misc_tags_name_expanded" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">misc_tags_name_expanded</span><span
+            class="method-args">(misc_name)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="misc_tags_name_expanded-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 246</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">misc_tags_name_expanded</span> <span class="ruby-identifier">misc_name</span>
+  <span class="ruby-comment"># Translate from &#39;misc&#39; to a sequence of type symbols for the Taggable class</span>
+  <span class="ruby-identifier">misc_name</span>.<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39;_misc_&#39;</span>, <span class="ruby-string">&#39;_&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">misc_tagtypes</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span><span class="ruby-operator">|</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typesym</span>(<span class="ruby-identifier">type</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;_&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-string">&#39;_&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-misc_tagtypes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">misc_tagtypes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The types of tag that appear under the &#39;Misc. Tags&#39; heading are the
+eligible ones, without those that are expressed individually</p>
+          
+          
+
+          
+          <div class="method-source-code" id="misc_tagtypes-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 242</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">misc_tagtypes</span>
+  <span class="ruby-identifier">eligible_tagtypes</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">individual_tagtypes</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pageurl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pageurl</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="pageurl-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pageurl</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:url_attribute</span>)
+    <span class="ruby-identifier">pageurl</span> = <span class="ruby-identifier">object</span>.<span class="ruby-identifier">url_attribute</span>
+    (<span class="ruby-identifier">pageurl</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">sample_page</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">valid_url</span>(<span class="ruby-identifier">pageurl</span>, <span class="ruby-identifier">sample_page</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">pageurl</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-picurl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">picurl</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="picurl-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">picurl</span>
+  <span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">object</span>.<span class="ruby-identifier">imglink</span>
+  (<span class="ruby-identifier">picurl</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">sample_page</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">valid_url</span>(<span class="ruby-identifier">picurl</span>, <span class="ruby-identifier">sample_page</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">picurl</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-read_only" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">read_only</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Collectibles are editable by default</p>
+          
+          
+
+          
+          <div class="method-source-code" id="read_only-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 208</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">read_only</span>
+  <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-robotags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">robotags</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The robotags are those owned by super</p>
+          
+          
+
+          
+          <div class="method-source-code" id="robotags-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 120</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">robotags</span>
+  <span class="ruby-identifier">object</span>.<span class="ruby-identifier">tags</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sample_page" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">sample_page</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="CollectibleDecorator.html#method-i-sample_page">#sample_page</a>
+is a full URL somewhere on the associated site so we can absolutize links</p>
+          
+          
+
+          
+          <div class="method-source-code" id="sample_page-source">
+            <pre><span class="ruby-comment"># File app/decorators/collectible_decorator.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">sample_page</span>
+
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

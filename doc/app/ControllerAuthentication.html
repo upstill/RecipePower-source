@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module ControllerAuthentication - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-included">::included</a>
+    
+    <li ><a href="#method-i-current_user_or_guest">#current_user_or_guest</a>
+    
+    <li ><a href="#method-i-current_user_or_guest_id">#current_user_or_guest_id</a>
+    
+    <li ><a href="#method-i-logged_in-3F">#logged_in?</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-ControllerAuthentication">
+  <h1 id="module-ControllerAuthentication" class="module">
+    module ControllerAuthentication
+  </h1>
+
+  <section class="description">
+    
+<p>This module is included in your application controller which makes several
+methods available to all controllers and views. Here&#39;s a common example
+you might add to your application layout file.</p>
+
+<pre>&lt;% if logged_in? %&gt;
+  Welcome &lt;%= current_user.username %&gt;.
+  &lt;%= link_to &quot;Edit profile&quot;, edit_current_user_path %&gt; or
+  &lt;%= link_to &quot;Log out&quot;, logout_path %&gt;
+&lt;% else %&gt;
+  &lt;%= link_to &quot;Sign up&quot;, signup_path %&gt; or
+  &lt;%= link_to &quot;log in&quot;, login_path %&gt;.
+&lt;% end %&gt;</pre>
+
+<p>You can also restrict unregistered users from accessing a controller using
+a before filter. For example.</p>
+
+<pre class="ruby"><span class="ruby-identifier">before_filter</span> :<span class="ruby-identifier">login_required</span>, :<span class="ruby-identifier">except</span> =<span class="ruby-operator">&gt;</span> [:<span class="ruby-identifier">index</span>, :<span class="ruby-identifier">show</span>]
+</pre>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-included" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">included</span><span
+            class="method-args">(controller)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="included-source">
+            <pre><span class="ruby-comment"># File app/mixins/controller_authentication.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">included</span>(<span class="ruby-identifier">controller</span>)
+    <span class="ruby-identifier">controller</span>.<span class="ruby-identifier">send</span> <span class="ruby-value">:helper_method</span>, <span class="ruby-value">:current_user_or_guest_id</span>, <span class="ruby-value">:logged_in?</span>
+    <span class="ruby-comment"># controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-current_user_or_guest" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">current_user_or_guest</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="current_user_or_guest-source">
+            <pre><span class="ruby-comment"># File app/mixins/controller_authentication.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">current_user_or_guest</span>
+    <span class="ruby-identifier">current_user</span> <span class="ruby-operator">||</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">guest</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-current_user_or_guest_id" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">current_user_or_guest_id</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="current_user_or_guest_id-source">
+            <pre><span class="ruby-comment"># File app/mixins/controller_authentication.rb, line 28</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">current_user_or_guest_id</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">current_user_or_guest</span>.<span class="ruby-identifier">id</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-logged_in-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">logged_in?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="logged_in-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/controller_authentication.rb, line 32</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">logged_in?</span>
+  <span class="ruby-identifier">current_user</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

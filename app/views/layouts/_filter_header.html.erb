@@ -8,9 +8,10 @@
     <div class="token-input-holder">
       <%= token_input_query(
                   :querytags => (viewparams ? viewparams.querytags : []),
-                  :hint => 'Type food terms and hit Enter or Return',
+                  :hint => '', # 'Type food terms and hit Enter or Return',
                   :glyphicon => (defined?(glyphicon) && glyphicon),
                   :autofocus => false,
+                  :class => 'token-input-text-input',
                   :placeholder => 'Let\'s cook up something...') %>
     </div>
 <% end %>

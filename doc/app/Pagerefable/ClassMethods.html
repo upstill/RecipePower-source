@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module Pagerefable::ClassMethods - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "../";
+</script>
+
+<script src="../js/jquery.js"></script>
+<script src="../js/darkfish.js"></script>
+
+<link href="../css/fonts.css" rel="stylesheet">
+<link href="../css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="../index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="../table_of_contents.html#pages">Pages</a>
+    <a href="../table_of_contents.html#classes">Classes</a>
+    <a href="../table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-i-pagerefable">#pagerefable</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-Pagerefable::ClassMethods">
+  <h1 id="module-Pagerefable::ClassMethods" class="module">
+    module Pagerefable::ClassMethods
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-pagerefable" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pagerefable</span><span
+            class="method-args">(url_attribute, reference_association=:page_ref, options = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="pagerefable-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/pagerefable.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pagerefable</span>(<span class="ruby-identifier">url_attribute</span>, <span class="ruby-identifier">reference_association</span>=<span class="ruby-value">:page_ref</span>, <span class="ruby-identifier">options</span> = {})
+  <span class="ruby-identifier">reference_association</span>, <span class="ruby-identifier">options</span> = <span class="ruby-value">:page_ref</span>, <span class="ruby-identifier">reference_association</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">reference_association</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+  <span class="ruby-identifier">reference_association</span> = <span class="ruby-identifier">reference_association</span>.<span class="ruby-identifier">to_sym</span>
+  <span class="ruby-identifier">ref_type</span> = <span class="ruby-node">&quot;#{self.to_s}PageRef&quot;</span>
+
+  <span class="ruby-comment"># The url attribute is accessible, but access is through an instance method that</span>
+  <span class="ruby-comment"># defers to a Reference</span>
+  <span class="ruby-identifier">attr_accessible</span> <span class="ruby-identifier">url_attribute</span>, <span class="ruby-identifier">reference_association</span>
+
+  <span class="ruby-comment"># has_one reference_association, -&gt; { where(type: ref_type).order(&#39;canonical DESC&#39;) }, foreign_key: &#39;affiliate_id&#39;, class_name: ref_type, :dependent=&gt;:destroy</span>
+  <span class="ruby-identifier">belongs_to</span> <span class="ruby-identifier">reference_association</span>, <span class="ruby-identifier">class_name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;PageRef&#39;</span>, <span class="ruby-identifier">foreign_key</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;page_ref_id&#39;</span>, <span class="ruby-identifier">validate</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
+
+  <span class="ruby-identifier">has_one</span> <span class="ruby-value">:site</span>, <span class="ruby-value">:through</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">reference_association</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:gleanable</span>]
+    <span class="ruby-comment"># A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to</span>
+    <span class="ruby-comment"># peg successful hits on finders. (Sites have an associated set of finders, on which they</span>
+    <span class="ruby-comment"># remember successful hits)</span>
+    <span class="ruby-identifier">has_one</span> <span class="ruby-value">:gleaning</span>, <span class="ruby-value">:as</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:entity</span>
+    <span class="ruby-identifier">accepts_nested_attributes_for</span> <span class="ruby-value">:gleaning</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class_eval</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-comment"># For the one attribute used to index the entity, provide access to its name for use in class and instance methods</span>
+    <span class="ruby-identifier">define_singleton_method</span> <span class="ruby-value">:url_attribute</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-identifier">url_attribute</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-comment"># The class gets two finder methods, for finding by exact url, and matching a root path (host+path)</span>
+    <span class="ruby-comment"># Locate an entity by its url. This could be the canonical url or any alias</span>
+    <span class="ruby-identifier">define_singleton_method</span> <span class="ruby-value">:find_by_url</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">page_ref_class</span> = (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;PageRef&#39;</span>).<span class="ruby-identifier">constantize</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-identifier">reference_association</span>).<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">page_ref_class</span>.<span class="ruby-identifier">url_query</span> <span class="ruby-identifier">url</span>)
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-comment"># Find entitites whose url matches the given path (which includes the host)</span>
+    <span class="ruby-identifier">define_singleton_method</span> <span class="ruby-value">:query_on_path</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">urpath</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">page_ref_class</span> = (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;PageRef&#39;</span>).<span class="ruby-identifier">constantize</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-identifier">reference_association</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">page_ref_class</span>.<span class="ruby-identifier">url_path_query</span> <span class="ruby-identifier">urpath</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">instance_eval</span> <span class="ruby-keyword">do</span>
+
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:gleanable</span>]
+      <span class="ruby-comment"># Glean info from the page in background as a DelayedJob job</span>
+      <span class="ruby-comment"># force =&gt; do the job even if it was priorly complete</span>
+      <span class="ruby-identifier">define_method</span> <span class="ruby-string">&#39;glean&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">refresh</span>=<span class="ruby-keyword">false</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">create_gleaning</span> <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">gleaning</span>
+        <span class="ruby-comment"># force ? gleaning.bkg_requeue : gleaning.bkg_enqueue</span>
+        <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-identifier">refresh</span>
+      <span class="ruby-keyword">end</span>
+
+      <span class="ruby-comment"># Glean info synchronously, i.e. don&#39;t return until it&#39;s done</span>
+      <span class="ruby-comment"># force =&gt; do the job even if it was priorly complete</span>
+      <span class="ruby-identifier">define_method</span> <span class="ruby-string">&#39;glean!&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">refresh</span>=<span class="ruby-keyword">false</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">create_gleaning</span> <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">gleaning</span>
+        <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">bkg_sync</span> <span class="ruby-identifier">refresh</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-comment"># URL, PageRef -&gt; PageRef</span>
+    <span class="ruby-comment"># Assign the URL to be used in accessing the entity. In the case of a successful redirect, this &lt;may&gt;</span>
+    <span class="ruby-comment"># be different from the one provided</span>
+    <span class="ruby-identifier">define_method</span> <span class="ruby-node">&quot;#{url_attribute}=&quot;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">klass</span> = <span class="ruby-identifier">ref_type</span>.<span class="ruby-identifier">constantize</span>
+      <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">url</span>
+      <span class="ruby-comment"># Now we have a pageref which has the url, either in the attribute or the aliases</span>
+      <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">good?</span>
+        <span class="ruby-comment"># The given url must be among the aliases =&gt; take it out and fetch on its own</span>
+        <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">-=</span> [ <span class="ruby-identifier">url</span> ]
+        <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">save</span>
+        <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">url</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-comment"># errors.add(:url, pr.errors[url_attribute]) if pr.errors[url_attribute].present?</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">page_ref</span> = <span class="ruby-identifier">pr</span>
+      <span class="ruby-identifier">glean</span>(<span class="ruby-keyword">true</span>) <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:gleaning</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">gleaning</span> <span class="ruby-comment"># Update the gleaning data, if any</span>
+      <span class="ruby-identifier">url</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-identifier">define_method</span>(<span class="ruby-identifier">url_attribute</span>) <span class="ruby-keyword">do</span>
+      <span class="ruby-comment"># This will cause an exception for entities without a corresponding reference</span>
+      <span class="ruby-identifier">page_ref</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">url</span> <span class="ruby-operator">:</span> (<span class="ruby-keyword">super</span>() <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">has_attribute?</span>(<span class="ruby-identifier">url_attribute</span>))
+    <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

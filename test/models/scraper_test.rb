@@ -942,7 +942,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_candied_peel_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', true
     scraper.bkg_sync(true)
-    assert_equal 8, ImageReference.count
+    assert_equal 9, ImageReference.count
     assert_equal 1, DefinitionReference.count
     assert_equal 1, show_tags(:Ingredient).count
     assert_equal 1, show_tags(:Source).count
@@ -975,7 +975,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper.bkg_sync(true)
     cheese_tag = Tag.where(normalized_name: 'cheese', tagtype: Tag.typenum(:Ingredient)).first
     # assert_equal 35, TagServices.new(cheese_tag).child_referents.count
-    assert_equal 6, show_tags(:Dish).count
+    assert_equal 7, show_tags(:Dish).count
     assert_equal 7, show_tags(:Course).count
     assert_equal 32, Recipe.count
   end
@@ -1021,7 +1021,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 45, occ_tag.recipes.count
     assert_equal 45, Recipe.count
     assert_equal 23, show_tags(:Dish).count
-    assert_equal 17, show_tags(:Ingredient).count
+    assert_equal 18, show_tags(:Ingredient).count
 
     assert_equal 8, show_tags(:Course).count
 

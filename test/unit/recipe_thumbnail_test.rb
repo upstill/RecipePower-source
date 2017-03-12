@@ -18,7 +18,7 @@ class RecipeThumbnailTest < ActiveSupport::TestCase
     assert_not_nil gpr.picture, "Should have a picture reference for valid URL"
     success = gpr.save
     assert success, "Recipe with pic should be saved"
-    gpr.picture.bkg_perform
+    gpr.picture.bkg_go
     assert_not_nil gpr.picture.thumbdata, "Should get data for good image"
   end
   

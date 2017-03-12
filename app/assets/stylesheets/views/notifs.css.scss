@@ -55,7 +55,7 @@ div.notifs {
         line-height: 2em;
       }
       @include respond-to(large-up) {
-        padding: 12px;
+        padding: 8px 11px;
         font-size: 1em;
         line-height: 2em;
       }
@@ -88,20 +88,44 @@ div.notifs {
   div.modal-header {
     text-align: center;
     border: none;
-    color: #ECE6CD;
-    a.signup {
-      font-size: 2em;
-      color: #ECE6CD;
-    }
-    a.signin {
-      font-size: 1.2em;
-      color: #ECE6CD
+    div.header-links {
+      span {
+        margin-top: 10px;
+        margin-bottom: 10px;
+        font-size: 2em;
+      }
+      &.signup,&.signin {
+        a {
+          text-decoration: underline;
+          position: absolute;
+          right: 3em;
+          top: 1.5em;
+          &.rollup {
+            text-decoration: none;
+            position: absolute;
+            top: 7px;
+            right: 7px;
+            font-size: 1.2em;
+            color: $green-link-color;
+          }
+          &:hover {
+            color: $green-color;
+          }
+        }
+      }
+      &.waiting {
+        a.signup {
+          color: $green-color;
+          font-size: 2em;
+        }
+        a.signin {
+          color: $green-color;
+          font-size: 1.2em;
+        }
+      }
     }
     a.rollup {
       display: none;
-      float: right;
-      font-size: 1.2em;
-      color: #ECE6CD;
     }
   }
   div.selectable {
@@ -114,10 +138,16 @@ div.notifs {
     }
   }
   div.modal-content {
-    @include div-green;
+    @include dialog-color-scheme(green);
     div.flash_notifications {
       padding-left: 1em;
       padding-right: 1em;
     }
+  }
+}
+.placeholder {
+  // Labels on form items are hidden if placeholders are available
+  div.form-group label.placetaker {
+    display: none;
   }
 }

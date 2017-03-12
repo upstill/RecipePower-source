@@ -48,6 +48,22 @@ class ApplicationController < ActionController::Base
     flash[:popup] = 'Thumbs '+(@decorator.approved ? 'Up' : 'Down')
   end
 
+  # Generic action for destroying an entity
+  def destroy
+    if update_and_decorate
+      @decorator.destroy
+      if resource_errors_to_flash(@decorator.object)
+        render :errors
+      else
+        flash[:popup] = "#{@decorator.human_name} is no more."
+        render :update
+      end
+    else
+      flash[:alert] = "Can't locate #{params[:controller].singularize} ##{params[:id] || '<unknown>'}"
+      render :errors
+    end
+  end
+
   # Set up a model for editing or rendering. The parameters are orthogonal:
   # If entity is nil, it is either fetched using params[:id] or created anew
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity

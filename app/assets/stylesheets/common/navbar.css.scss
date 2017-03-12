@@ -61,7 +61,7 @@ li.master-navtab {
   &#collections-navtab {
     background-color: $recipes-navtab-background-color;
     a {
-      color: $recipes-navtab-text-color;
+      color: $recipes-navtab-color;
     }
   }
   &#friends-navtab {
@@ -70,7 +70,7 @@ li.master-navtab {
     //padding:80px 8px 0;
     //text-shadow: none;
     a {
-      color: $friends-navtab-text-color;
+      color: $friends-navtab-color;
     }
   }
 
@@ -80,7 +80,7 @@ li.master-navtab {
     //padding: 80px 18px 0;
     //text-shadow: none;
     a {
-      color: $lists-navtab-text-color;
+      color: $lists-navtab-color;
     }
   }
 
@@ -90,7 +90,7 @@ li.master-navtab {
     //padding: 80px 34px 0;
     //text-shadow: none;
     a {
-      color: $feeds-navtab-text-color;
+      color: $feeds-navtab-color;
     }
   }
 
@@ -181,46 +181,30 @@ body.logged-in {
         text-shadow: none;
         text-align: center;
         &#collections-navtab {
+          @include menu-color-scheme(recipes);
+          /*
           background-color: $recipes-navtab-background-color;
             a {
-            color: $recipes-navtab-text-color;
+            color: $recipes-navtab-color;
           }
+          */
         }
         &#friends-navtab {
-          background-color: $friends-navtab-background-color;
-          //margin: 0 7px;
-          //padding:80px 8px 0;
-          //text-shadow: none;
-            a {
-            color: $friends-navtab-text-color;
-          }
+          @include menu-color-scheme(friends);
         }
         &#my_lists-navtab {
-          background-color: $lists-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 18px 0;
-          //text-shadow: none;
-            a {
-            color: $lists-navtab-text-color;
-          }
+          @include menu-color-scheme(lists);
         }
         &#feeds-navtab {
-          background-color: $feeds-navtab-background-color;
-          //margin: 0 7px;
-          //padding: 80px 34px 0;
-          //text-shadow: none;
+          @include menu-color-scheme(feeds);
           @include respond-to(large-up) {
             // Mobile menu: stacks up and fills the screen
             padding-left: 34px;
             padding-right: 34px;
           }
-          a {
-            color: $feeds-navtab-text-color;
-          }
         }
         &#home-navtab {
-          background-color: $header-outline-color; // #ecdad7
-          //margin: 0 7px;
+          @include menu-color-scheme(home);
           @include respond-to(large-up) {
             padding: 0;
           }
@@ -414,13 +398,22 @@ body.logged-in {
       height: $header-height;
       padding: 4px;
       // left: -$logo-clearance-sm;
-      content: image-url('RP-logo-small.png');
+      content: image-url('rp-logo-sm.png');
     }
     @include respond-to(large-up) {
       // left: -20px;
       height: 200px;
       left: 15px;
       content: image-url('rp-logo.png');
+    }
+    &.compact {
+      @include respond-to(large-up) {
+        // left: -20px;
+        height: 53px;
+        left: 4px;
+        top: 7px;
+        content: image-url('rp-logo-sm.png');
+      }
     }
   }
   div.form-group {
@@ -462,6 +455,10 @@ body.logged-in {
         }
         div.search-glyph {
           height: 100%; // top: 0.6em;
+          span.glyphicon {
+            top: -1px;
+            right: 2px;
+          }
         }
       }
     }

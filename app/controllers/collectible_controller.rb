@@ -122,6 +122,8 @@ class CollectibleController < ApplicationController
     end
   end
 
+=begin
+  # Moved to ApplicationController for generic action; subclasses may, of course, override
   # DELETE /feeds/1
   # DELETE /feeds/1.json
   def destroy
@@ -138,6 +140,7 @@ class CollectibleController < ApplicationController
       render :errors
     end
   end
+=end
 
   # Register that the entity was touched by the current user.
   # Since that entity will now be at the head return a new first item in the list.

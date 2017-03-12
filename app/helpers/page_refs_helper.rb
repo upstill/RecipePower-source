@@ -1,13 +1,5 @@
 module PageRefsHelper
 
-  def page_ref_homelink pr
-    link_to (pr.title.present? ? pr.title : pr.url), pr.url
-  end
-
-  def page_ref_showlink pr, ttl=nil
-    link_to_submit (ttl || (pr.title.present? ? pr.title : pr.url)), page_ref_path(pr)
-  end
-
   # Show a reference, using as text the name of the related site
   def present_definition def_page_ref
     ref_link = (ref_name = def_page_ref.decorate.name).present? ?
@@ -24,14 +16,11 @@ module PageRefsHelper
     separator = summary_separator options[:separator]
     header, inward_separator = '', summary_separator(separator)
     if options[:header] || options[:label]
-      header = safe_join([
-                             "#{options[:label] || 'Page'} (##{page_ref_showlink(pr, pr.id.to_s)})".html_safe,
-                             page_ref_homelink(pr)
-                         ], ': '.html_safe,
-      )
-      inward_separator = summary_separator separator
+      header = "#{options[:label] || 'Page'} (##{pr.id}): ".html_safe +
+          homelink(pr.becomes(PageRef).decorate,
+                   nuke_button: !%w{ SitePageRef RecipePageRef }.include?(pr.type))
     end
-    referent_summaries = (pr.is_a?(Referrable) ? pr.referents : []).collect { |referent|
+    referent_summaries = (pr.is_a?(Referrable) ? pr.referents.limit(8) : []).collect { |referent|
       summarize_referent referent, label: "#{referent.class} ##{referent.id}", separator: separator
     }
     summarize_set '', [header] + referent_summaries, separator

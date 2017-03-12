@@ -74,19 +74,20 @@ class FinderServices
       next unless (selector = finder.selector) &&
           (matches = nkdoc.css(selector)) &&
           (matches.count > 0)
-      attribute_name = finder.attribute_name
+      attribute_name = (finder.attribute_name.to_s if finder.attribute_name)
       result = Result.new finder # For accumulating results
       matches.each do |ou|
         children = (ou.name == 'ul') ? ou.css('li') : [ou]
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
-          if attribute_value = attribute_name && child.attributes[attribute_name.to_s].to_s
+          if attribute_value = attribute_name && child.attributes[attribute_name].to_s
+            attribute_value = URI.join(pagehome, attribute_value).to_s if(%w{ href src}.include? attribute_name)
             result.push attribute_value
           elsif child.name == 'a'
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'
             outstr = child.attributes['src'].to_s
-            result.push outstr unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
+            result.push URI.join(pagehome, outstr) unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
             # If there's an enclosed link coextensive with the content, emit the link
           elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             result.glean_atag finder[:linkpath], atag, pagehome

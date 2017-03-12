@@ -1,0 +1,783 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module RecipesHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-collectible_info_icon">#collectible_info_icon</a>
+    
+    <li ><a href="#method-i-collectible_masonry_datablock">#collectible_masonry_datablock</a>
+    
+    <li ><a href="#method-i-collectible_show_thumbnail">#collectible_show_thumbnail</a>
+    
+    <li ><a href="#method-i-collectible_source_link">#collectible_source_link</a>
+    
+    <li ><a href="#method-i-collectible_tablink">#collectible_tablink</a>
+    
+    <li ><a href="#method-i-collectible_title_link">#collectible_title_link</a>
+    
+    <li ><a href="#method-i-cookmark_count">#cookmark_count</a>
+    
+    <li ><a href="#method-i-grab_recipe_link">#grab_recipe_link</a>
+    
+    <li ><a href="#method-i-ownership_status">#ownership_status</a>
+    
+    <li ><a href="#method-i-present_comments">#present_comments</a>
+    
+    <li ><a href="#method-i-recipe_comments_div">#recipe_comments_div</a>
+    
+    <li ><a href="#method-i-recipe_tags_div">#recipe_tags_div</a>
+    
+    <li ><a href="#method-i-recipe_title_div">#recipe_title_div</a>
+    
+    <li ><a href="#method-i-recipe_uncollect_button">#recipe_uncollect_button</a>
+    
+    <li ><a href="#method-i-summarize_alltags">#summarize_alltags</a>
+    
+    <li ><a href="#method-i-tagjoin">#tagjoin</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-RecipesHelper">
+  <h1 id="module-RecipesHelper" class="module">
+    module RecipesHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-collectible_info_icon" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_info_icon</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_info_icon-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_info_icon</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-identifier">alltags</span> = <span class="ruby-identifier">summarize_alltags</span>(<span class="ruby-identifier">entity</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">tags</span> = <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">escapeHTML</span> <span class="ruby-identifier">alltags</span>
+  <span class="ruby-identifier">span</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>,
+              <span class="ruby-string">&#39;&#39;</span>,
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open&#39;</span>,
+              <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">tags</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tags</span>, <span class="ruby-identifier">description</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">description</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span> }
+  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">span</span>, <span class="ruby-identifier">polymorphic_path</span>(<span class="ruby-identifier">entity</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_masonry_datablock" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_masonry_datablock</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_masonry_datablock-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 50</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_masonry_datablock</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">title_link</span> = <span class="ruby-identifier">collectible_title_link</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-string">&#39;rcp_grid_element_title&#39;</span>
+  <span class="ruby-identifier">source_element</span> = <span class="ruby-identifier">collectible_source_link</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, (<span class="ruby-identifier">title_link</span><span class="ruby-operator">+</span><span class="ruby-identifier">source_element</span>).<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;rcp_grid_datablock&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_show_thumbnail" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_show_thumbnail</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_show_thumbnail-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 44</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_show_thumbnail</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">image_div</span> = <span class="ruby-identifier">image_enclosure</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pic-box&#39;</span>, <span class="ruby-identifier">fill_mode</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;fixed-width&#39;</span>, <span class="ruby-identifier">fallback_img</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">title</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-node">&quot;#{image_div}#{title}&quot;</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;cardlet-item #{decorator.dom_id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_source_link" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_source_link</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_source_link-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 33</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_source_link</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">List</span>
+    <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;a list by &#39;</span>
+    <span class="ruby-identifier">link</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">owner</span>.<span class="ruby-identifier">handle</span>, <span class="ruby-identifier">user_path</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">owner</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>)
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;from &#39;</span>
+    <span class="ruby-identifier">link</span> = <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">sourcename</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">sourcehome</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tablink&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, (<span class="ruby-identifier">label</span><span class="ruby-operator">+</span><span class="ruby-identifier">link</span>).<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;rcp_grid_element_source&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_tablink" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_tablink</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_tablink-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_tablink</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Recipe</span>, <span class="ruby-constant">Site</span>
+      <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">url</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tablink&#39;</span>, <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">report</span><span class="ruby-operator">:</span> <span class="ruby-identifier">touchpath</span>(<span class="ruby-identifier">decorator</span>)} <span class="ruby-comment"># ...to open up a new tab</span>
+    <span class="ruby-keyword">else</span> <span class="ruby-comment"># Internal entities get opened up in a new partial</span>
+      <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span> <span class="ruby-comment"># , class: &#39;tablink&#39;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_title_link" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_title_link</span><span
+            class="method-args">(decorator, pclass='title')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_title_link-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_title_link</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">pclass</span>=<span class="ruby-string">&#39;title&#39;</span>
+  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">entity</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Recipe</span>, <span class="ruby-constant">Site</span>
+      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;&#39;</span>
+      <span class="ruby-identifier">itemlink</span> = <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">url</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tablink&#39;</span>, <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">report</span><span class="ruby-operator">:</span> <span class="ruby-identifier">touchpath</span>(<span class="ruby-identifier">decorator</span>)} <span class="ruby-comment"># ...to open up a new tab</span>
+    <span class="ruby-keyword">else</span> <span class="ruby-comment"># Other internal entities get opened up in a new partial</span>
+      <span class="ruby-identifier">label</span> = <span class="ruby-node">&quot;#{entity.class.to_s}: &quot;</span>
+      <span class="ruby-identifier">itemlink</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">url</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;tablink&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:p</span>, <span class="ruby-identifier">label</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">itemlink</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">pclass</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-cookmark_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">cookmark_count</span><span
+            class="method-args">(collectible_entity, user)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide the cookmark-count line</p>
+          
+          
+
+          
+          <div class="method-source-code" id="cookmark_count-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 170</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">cookmark_count</span>(<span class="ruby-identifier">collectible_entity</span>, <span class="ruby-identifier">user</span>)
+   <span class="ruby-identifier">count</span> = <span class="ruby-identifier">collectible_entity</span>.<span class="ruby-identifier">num_cookmarks</span>
+   <span class="ruby-identifier">result</span> = <span class="ruby-identifier">count</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&#39; Cookmark&#39;</span><span class="ruby-operator">+</span>((<span class="ruby-identifier">count</span><span class="ruby-operator">&gt;</span><span class="ruby-value">1</span>)<span class="ruby-operator">?</span><span class="ruby-string">&#39;s&#39;</span><span class="ruby-operator">:</span><span class="ruby-string">&#39;&#39;</span>)
+   <span class="ruby-keyword">if</span> <span class="ruby-identifier">collectible_entity</span>.<span class="ruby-identifier">collectible_collected?</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>
+      <span class="ruby-identifier">result</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39; (including mine)&#39;</span>
+   <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">result</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;: &#39;</span> <span class="ruby-operator">+</span> 
+                <span class="ruby-identifier">link_to</span>(<span class="ruby-string">&#39;Update with Javascript Helper&#39;</span>,
+                             <span class="ruby-value">:url</span> =<span class="ruby-operator">&gt;</span> {<span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;cmcount&#39;</span>},
+                               <span class="ruby-value">:update</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;response5&#39;</span>)
+   <span class="ruby-keyword">end</span>
+   <span class="ruby-node">&quot;&lt;span class=\&quot;cmcount\&quot; id=\&quot;cmcount#{collectible_entity.id}\&quot;&gt;#{result}&lt;/span&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-grab_recipe_link" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">grab_recipe_link</span><span
+            class="method-args">(label, recipe)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="grab_recipe_link-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 102</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">grab_recipe_link</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">recipe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ownership_status" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ownership_status</span><span
+            class="method-args">(rcp)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>If the recipe doesn&#39;t belong to the current user&#39;s collection,</p>
+
+<pre class="ruby"><span class="ruby-identifier">provide</span> <span class="ruby-identifier">a</span> <span class="ruby-identifier">link</span> <span class="ruby-identifier">to</span> <span class="ruby-identifier">add</span> <span class="ruby-identifier">it</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="ownership_status-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 107</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ownership_status</span>(<span class="ruby-identifier">rcp</span>)
+        <span class="ruby-comment"># Summarize ownership as a list of owners, each linked to their collection</span>
+        (<span class="ruby-identifier">rcp</span>.<span class="ruby-identifier">users</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span> <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">handle</span>, <span class="ruby-identifier">default_next_path</span>( <span class="ruby-value">:owner=</span><span class="ruby-operator">&gt;</span><span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>) }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-present_comments" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">present_comments</span><span
+            class="method-args">(recipe)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present the comments to this user. Now, all comments starting with
+his/hers, but ultimately those of his friends</p>
+          
+          
+
+          
+          <div class="method-source-code" id="present_comments-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 163</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_comments</span> <span class="ruby-identifier">recipe</span>
+    <span class="ruby-identifier">out</span> = (<span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">collectible_comment</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-identifier">out</span> = <span class="ruby-node">&quot;My two cents: &#39;#{out}&#39;&lt;br&gt;&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">out</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">out</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-recipe_comments_div" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">recipe_comments_div</span><span
+            class="method-args">(recipe, whose)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="recipe_comments_div-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 73</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">recipe_comments_div</span> <span class="ruby-identifier">recipe</span>, <span class="ruby-identifier">whose</span>
+  <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">collectible_user_id</span>
+  <span class="ruby-identifier">comments</span> =
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">whose</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-value">:mine</span>
+    <span class="ruby-identifier">header_text</span> = <span class="ruby-string">&#39;My Comments&#39;</span>
+    (<span class="ruby-identifier">commstr</span> = <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">collectible_comment</span>) <span class="ruby-operator">?</span> [ { <span class="ruby-identifier">body</span><span class="ruby-operator">:</span> <span class="ruby-identifier">commstr</span> } ] <span class="ruby-operator">:</span> [] 
+  <span class="ruby-keyword">when</span> <span class="ruby-value">:friends</span>
+    <span class="ruby-identifier">header_text</span> = <span class="ruby-string">&#39;Comments of Friends&#39;</span>
+    <span class="ruby-identifier">user</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">fid</span><span class="ruby-operator">|</span> 
+      <span class="ruby-identifier">commstr</span> = <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">comment</span> <span class="ruby-identifier">fid</span> 
+      { <span class="ruby-identifier">source</span><span class="ruby-operator">:</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">fid</span>).<span class="ruby-identifier">handle</span>, <span class="ruby-identifier">body</span><span class="ruby-operator">:</span> <span class="ruby-identifier">commstr</span> } <span class="ruby-keyword">unless</span> <span class="ruby-identifier">commstr</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">private</span>(<span class="ruby-identifier">fid</span>)
+    }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-value">:others</span>
+    <span class="ruby-identifier">header_text</span> = <span class="ruby-string">&#39;Comments of Others&#39;</span>
+    <span class="ruby-constant">Rcpref</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-identifier">recipe</span>).
+      <span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;comment &lt;&gt; \\ AND private &lt;&gt; TRUE&#39;</span>).
+      <span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;user_id not in (?)&#39;</span>, <span class="ruby-identifier">user</span>.<span class="ruby-identifier">followee_ids</span><span class="ruby-operator">&lt;&lt;</span><span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rref</span><span class="ruby-operator">|</span>
+        { <span class="ruby-identifier">source</span><span class="ruby-operator">:</span> <span class="ruby-identifier">rref</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">handle</span>, <span class="ruby-identifier">body</span><span class="ruby-operator">:</span> <span class="ruby-identifier">rref</span>.<span class="ruby-identifier">comment</span> }
+      }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">comments</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">commentstr</span> = <span class="ruby-identifier">comments</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">comment</span><span class="ruby-operator">|</span> 
+    <span class="ruby-identifier">srcstr</span> = <span class="ruby-identifier">comment</span>[<span class="ruby-value">:source</span>] <span class="ruby-operator">?</span> <span class="ruby-node">%Q{&lt;strong&gt;#{comment[:source]}&lt;/strong&gt;: }</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-node">%Q{&lt;li&gt;#{srcstr}#{comment[:body]}&lt;/li&gt;}</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">comment</span>[<span class="ruby-value">:body</span>].<span class="ruby-identifier">blank?</span>
+  }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&#39;</span>)
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-node">&quot;&lt;h3&gt;#{header_text}&lt;/h3&gt;&lt;ul&gt;#{commentstr}&lt;/ul&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-recipe_tags_div" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">recipe_tags_div</span><span
+            class="method-args">(recipe)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="recipe_tags_div-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">recipe_tags_div</span> <span class="ruby-identifier">recipe</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, 
+    <span class="ruby-identifier">summarize_alltags</span>(<span class="ruby-identifier">recipe</span>) <span class="ruby-operator">||</span> 
+    <span class="ruby-node">%Q{&lt;p&gt;...a dish with no tags or ratings in RecipePower!?! Why not #{tag_recipe_link(%q{add some}, recipe)}?&lt;/p&gt;}</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-recipe_title_div" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">recipe_title_div</span><span
+            class="method-args">(recipe)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="recipe_title_div-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">recipe_title_div</span> <span class="ruby-identifier">recipe</span>
+  <span class="ruby-node">&quot;&lt;div&gt;&lt;h3&gt;#{recipe.title}&lt;/h3&gt;&lt;/div&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-recipe_uncollect_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">recipe_uncollect_button</span><span
+            class="method-args">(recipe, browser_item)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="recipe_uncollect_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 112</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">recipe_uncollect_button</span> <span class="ruby-identifier">recipe</span>, <span class="ruby-identifier">browser_item</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipe</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">browser_item</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:tag</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tag</span> = <span class="ruby-identifier">browser_item</span>.<span class="ruby-identifier">tag</span>)
+  <span class="ruby-identifier">link_to</span> <span class="ruby-string">&#39;X&#39;</span>,
+          <span class="ruby-identifier">remove_recipe_tag_path</span>(<span class="ruby-identifier">recipe</span>, <span class="ruby-identifier">tag</span>),
+          <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;POST&#39;</span>,
+          <span class="ruby-identifier">remote</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+          <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Remove from this collection&#39;</span>,
+          <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;btn btn-default btn-xs&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_alltags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_alltags</span><span
+            class="method-args">(taggable_entity)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide an English-language summary of the tags for a recipe.</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_alltags-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_alltags</span>(<span class="ruby-identifier">taggable_entity</span>)
+
+    <span class="ruby-identifier">tags</span> = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+    <span class="ruby-identifier">taggable_entity</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tags</span>[<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">tag</span> }
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">empty?</span>
+    
+    <span class="ruby-identifier">genrestr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">1</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-string">&#39; &#39;</span>
+    <span class="ruby-identifier">rolestr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">2</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; for &#39;</span>
+
+    <span class="ruby-identifier">procstr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">3</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; with &#39;</span>, <span class="ruby-string">&#39; process&#39;</span>
+    <span class="ruby-identifier">foodstr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">4</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; that includes &#39;</span>
+    <span class="ruby-identifier">sourcestr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">6</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; from &#39;</span>
+    <span class="ruby-identifier">authorstr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">7</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; by &#39;</span>
+    <span class="ruby-identifier">toolstr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">12</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; with &#39;</span>
+
+    <span class="ruby-identifier">occasionstr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">8</span>], <span class="ruby-keyword">false</span>, <span class="ruby-string">&#39; good for&#39;</span>
+    <span class="ruby-identifier">intereststr</span> = <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>[<span class="ruby-value">11</span>], <span class="ruby-keyword">true</span>, <span class="ruby-string">&#39; tagged by Interest for &#39;</span>
+
+    <span class="ruby-identifier">otherstr</span> = <span class="ruby-identifier">tagjoin</span> (<span class="ruby-identifier">tags</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">+</span><span class="ruby-identifier">tags</span>[<span class="ruby-value">13</span>]<span class="ruby-operator">+</span><span class="ruby-identifier">tags</span>[<span class="ruby-value">14</span>]), <span class="ruby-keyword">true</span>, <span class="ruby-string">&#39; Miscellaneous tags: &#39;</span>, <span class="ruby-string">&#39;.&#39;</span>
+    
+    <span class="ruby-identifier">strlist</span> = [<span class="ruby-identifier">sourcestr</span>, <span class="ruby-identifier">authorstr</span>, <span class="ruby-identifier">foodstr</span>, <span class="ruby-identifier">procstr</span>, <span class="ruby-identifier">toolstr</span>].<span class="ruby-identifier">keep_if</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">str</span><span class="ruby-operator">|</span> <span class="ruby-operator">!</span><span class="ruby-identifier">str</span>.<span class="ruby-identifier">empty?</span> }
+    
+    <span class="ruby-identifier">genrestr</span> = <span class="ruby-string">&#39;&lt;span&gt;untagged&lt;/span&gt;&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">strlist</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">genrestr</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">occasionstr</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">intereststr</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">otherstr</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">genrestr</span>.<span class="ruby-identifier">blank?</span>
+        <span class="ruby-identifier">article</span> = <span class="ruby-string">&#39;A&#39;</span>
+    <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">article</span> = (<span class="ruby-identifier">genrestr</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/&gt;[aeiouAEIOU]/i</span>) <span class="ruby-operator">?</span> <span class="ruby-string">&#39;An &#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;A &#39;</span>
+    <span class="ruby-keyword">end</span>
+    
+    ((<span class="ruby-identifier">article</span><span class="ruby-operator">+</span><span class="ruby-identifier">genrestr</span><span class="ruby-operator">+</span><span class="ruby-string">&#39; recipe&#39;</span><span class="ruby-operator">+</span>(<span class="ruby-identifier">strlist</span>.<span class="ruby-identifier">shift</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>)<span class="ruby-operator">+</span>
+      <span class="ruby-identifier">strjoin</span>(<span class="ruby-identifier">strlist</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-string">&#39;; &#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;.&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/A\s*recipe\./</span>,<span class="ruby-string">&#39;&#39;</span>)<span class="ruby-operator">+</span>
+    <span class="ruby-identifier">strjoin</span>([<span class="ruby-identifier">occasionstr</span>, <span class="ruby-identifier">intereststr</span>], <span class="ruby-string">&#39; &#39;</span>, <span class="ruby-string">&#39;.&#39;</span>, <span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">capitalize</span><span class="ruby-operator">+</span>
+    <span class="ruby-identifier">otherstr</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tagjoin" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tagjoin</span><span
+            class="method-args">(tags, enquote = false, before = '', after = '', joiner = ',')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tagjoin-source">
+            <pre><span class="ruby-comment"># File app/helpers/recipes_helper.rb, line 122</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagjoin</span> <span class="ruby-identifier">tags</span>, <span class="ruby-identifier">enquote</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">before</span> = <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">after</span> = <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">joiner</span> = <span class="ruby-string">&#39;,&#39;</span>
+    <span class="ruby-identifier">strjoin</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">collect</span>{ <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">link_to</span> (<span class="ruby-identifier">enquote</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;&#39;#{tag.name}&#39;&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>), <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;rcp_list_element_tag&#39;</span> }, <span class="ruby-identifier">before</span>, <span class="ruby-identifier">after</span>, <span class="ruby-identifier">joiner</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

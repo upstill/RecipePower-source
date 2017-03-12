@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module CardPresentation - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    <div id="extends-section" class="nav-section">
+  <h3>Extended With Modules</h3>
+
+  <ul class="link-list">
+    
+  
+    <li><span class="extend">ActiveSupport::Concern</span>
+  
+  
+  </ul>
+</div>
+
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-card_aspect">#card_aspect</a>
+    
+    <li ><a href="#method-i-card_aspect_editor">#card_aspect_editor</a>
+    
+    <li ><a href="#method-i-card_aspect_editor_replacement">#card_aspect_editor_replacement</a>
+    
+    <li ><a href="#method-i-card_aspect_enclosure">#card_aspect_enclosure</a>
+    
+    <li ><a href="#method-i-card_aspect_rendered">#card_aspect_rendered</a>
+    
+    <li ><a href="#method-i-card_aspect_replacement">#card_aspect_replacement</a>
+    
+    <li ><a href="#method-i-card_aspect_selector">#card_aspect_selector</a>
+    
+    <li ><a href="#method-i-card_aspects">#card_aspects</a>
+    
+    <li ><a href="#method-i-card_aspects_filtered">#card_aspects_filtered</a>
+    
+    <li ><a href="#method-i-card_avatar">#card_avatar</a>
+    
+    <li ><a href="#method-i-card_avatar_column">#card_avatar_column</a>
+    
+    <li ><a href="#method-i-card_header">#card_header</a>
+    
+    <li ><a href="#method-i-card_header_content">#card_header_content</a>
+    
+    <li ><a href="#method-i-card_homelink">#card_homelink</a>
+    
+    <li ><a href="#method-i-card_ncolumns">#card_ncolumns</a>
+    
+    <li ><a href="#method-i-card_subhead">#card_subhead</a>
+    
+    <li ><a href="#method-i-card_subhead_content">#card_subhead_content</a>
+    
+    <li ><a href="#method-i-card_video">#card_video</a>
+    
+    <li ><a href="#method-i-card_video-3F">#card_video?</a>
+    
+    <li ><a href="#method-i-collect_button">#collect_button</a>
+    
+    <li ><a href="#method-i-collectible_from_card-3F">#collectible_from_card?</a>
+    
+    <li ><a href="#method-i-column">#column</a>
+    
+    <li ><a href="#method-i-edit_button">#edit_button</a>
+    
+    <li ><a href="#method-i-editable_from_card-3F">#editable_from_card?</a>
+    
+    <li ><a href="#method-i-entity_links">#entity_links</a>
+    
+    <li ><a href="#method-i-field_count">#field_count</a>
+    
+    <li ><a href="#method-i-field_label_counted">#field_label_counted</a>
+    
+    <li ><a href="#method-i-field_value">#field_value</a>
+    
+    <li ><a href="#method-i-present_field">#present_field</a>
+    
+    <li ><a href="#method-i-present_field_label">#present_field_label</a>
+    
+    <li ><a href="#method-i-present_field_wrapped">#present_field_wrapped</a>
+    
+    <li ><a href="#method-i-rendered_aspects">#rendered_aspects</a>
+    
+    <li ><a href="#method-i-sharable_from_card-3F">#sharable_from_card?</a>
+    
+    <li ><a href="#method-i-share_button">#share_button</a>
+    
+    <li ><a href="#method-i-tag_button">#tag_button</a>
+    
+    <li ><a href="#method-i-tools_menu">#tools_menu</a>
+    
+    <li ><a href="#method-i-votable_from_card-3F">#votable_from_card?</a>
+    
+    <li ><a href="#method-i-vote_buttons">#vote_buttons</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-CardPresentation">
+  <h1 id="module-CardPresentation" class="module">
+    module CardPresentation
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-card_aspect" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 99</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">contents</span> =
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:authToken</span>
+      <span class="ruby-identifier">form_authenticity_token</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:description</span>
+      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;&#39;</span>
+      <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">description</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:description</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">description</span>
+    <span class="ruby-keyword">else</span> <span class="ruby-comment"># Fall back on the decorator&#39;s version</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:present_field</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">present_field</span>(<span class="ruby-identifier">which</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">extract</span>(<span class="ruby-identifier">which</span>)
+  <span class="ruby-keyword">end</span>
+  [ <span class="ruby-identifier">label</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">capitalize</span>.<span class="ruby-identifier">tr</span>(<span class="ruby-string">&#39;_&#39;</span>, <span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">to_sym</span>, <span class="ruby-identifier">contents</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_editor" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_editor</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_editor-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_editor</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-identifier">card_aspect_enclosure</span> <span class="ruby-identifier">which</span>, <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-node">&quot;form_#{which}&quot;</span>, <span class="ruby-identifier">user</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewer</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_editor_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_editor_replacement</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_editor_replacement-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_editor_replacement</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">repl</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aspect_editor</span>(<span class="ruby-identifier">which</span>)
+    [<span class="ruby-identifier">card_aspect_selector</span>(<span class="ruby-identifier">which</span>), <span class="ruby-identifier">repl</span>]
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_enclosure" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_enclosure</span><span
+            class="method-args">(which, contents, label=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_enclosure-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_enclosure</span> <span class="ruby-identifier">which</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-identifier">label</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">which</span> = <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">contents</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">label</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">which</span>.<span class="ruby-identifier">capitalize</span>.<span class="ruby-identifier">tr</span>(<span class="ruby-string">&#39;_&#39;</span>, <span class="ruby-string">&#39; &#39;</span>)
+    (<span class="ruby-identifier">label</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">label</span>.<span class="ruby-identifier">upcase</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;card-aspect-label &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">which</span>) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>) <span class="ruby-operator">+</span>
+    <span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;card-aspect-contents &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">which</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_rendered" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_rendered</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_rendered-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_rendered</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-identifier">label</span>, <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-identifier">card_aspect_enclosure</span> <span class="ruby-identifier">which</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-identifier">label</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_replacement</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_replacement-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 50</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_replacement</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">repl</span> = <span class="ruby-identifier">aspect</span>(<span class="ruby-identifier">which</span>)
+    [<span class="ruby-identifier">card_aspect_selector</span>(<span class="ruby-identifier">which</span>), <span class="ruby-identifier">repl</span>]
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspect_selector" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect_selector</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspect_selector-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 46</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect_selector</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-node">&quot;tr.#{which}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspects" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspects</span><span
+            class="method-args">(for_column=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Enumerate the possible aspects of the card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspects-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">for_column</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">individual_tagtypes</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspects_filtered" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspects_filtered</span><span
+            class="method-args">(*args)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Select available aspects according to the given arguments The arguments are
+strings selecting particular aspects A terminating options hash can provide
+exceptions</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspects_filtered-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 84</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects_filtered</span> <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
+  <span class="ruby-identifier">aspects</span> = <span class="ruby-identifier">card_aspects</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">args</span>.<span class="ruby-identifier">last</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">pop</span> <span class="ruby-operator">:</span> {}
+  <span class="ruby-identifier">aspects</span> <span class="ruby-operator">-=</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:except</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:except</span>]
+  <span class="ruby-identifier">aspects</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_avatar" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_avatar</span><span
+            class="method-args">(options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p># Does this presenter have an avatar to present on cards, etc? def <a
+href="CardPresentation.html#method-i-card_avatar">#card_avatar</a>?</p>
+
+<pre class="ruby"><span class="ruby-keyword">false</span>
+</pre>
+
+<p>end</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_avatar-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 182</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar</span> <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_avatar_column" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_avatar_column</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_avatar_column-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar_column</span>
+  <span class="ruby-comment"># nil by default</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_header" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_header</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_header-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_header</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">card_header_content</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;card-aspect-label header&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_header_content" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_header_content</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_header_content-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_header_content</span>
+  <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">downcase</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_homelink" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_homelink</span><span
+            class="method-args">(options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide the card&#39;s title with a link to the entity involved NB This is
+meant to be overridden by entities (recipes, sites…) that link externally</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_homelink-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_homelink</span> <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_ncolumns" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_ncolumns</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>How many columns does the card have (next to the avatar)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_ncolumns-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 66</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_ncolumns</span>
+  <span class="ruby-value">0</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_subhead" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_subhead</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_subhead-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_subhead</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">subhead</span> = <span class="ruby-identifier">card_subhead_content</span>).<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:p</span>, <span class="ruby-identifier">subhead</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;panel_heading&quot;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_subhead_content" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_subhead_content</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_subhead_content-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_subhead_content</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_video" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_video</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_video-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 171</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_video</span>
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_video-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_video?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_video-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 167</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_video?</span>
+  <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collect_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collect_button</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collect_button-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 223</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collect_button</span>
+  <span class="ruby-identifier">collectible_collect_button</span> <span class="ruby-identifier">decorator</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">collectible_from_card?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collectible_from_card-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collectible_from_card?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="collectible_from_card-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 219</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_from_card?</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Collectible</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-column" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">column</span><span
+            class="method-args">(which_column)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Render the n-th column (limited by <a
+href="CardPresentation.html#method-i-card_ncolumns">#card_ncolumns</a>)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="column-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 71</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">column</span> <span class="ruby-identifier">which_column</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">content</span> = <span class="ruby-identifier">card_aspects</span>(<span class="ruby-identifier">which_column</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">aspect</span><span class="ruby-operator">|</span> <span class="ruby-identifier">card_aspect_rendered</span> <span class="ruby-identifier">aspect</span> }.<span class="ruby-identifier">compact</span>).<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">safe_join</span>(<span class="ruby-identifier">content</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;col-md-#{12/card_ncolumns}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-edit_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">edit_button</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="edit_button-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 191</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">edit_button</span>
+  <span class="ruby-identifier">collectible_edit_button</span> <span class="ruby-identifier">decorator</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">editable_from_card?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-editable_from_card-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">editable_from_card?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Entities are editable, sharable, votable and collectible from the card by
+default</p>
+          
+          
+
+          
+          <div class="method-source-code" id="editable_from_card-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 187</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">editable_from_card?</span>
+  <span class="ruby-keyword">true</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-entity_links" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">entity_links</span><span
+            class="method-args">(entities, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a list of links to a partial for the home of each entity</p>
+          
+          
+
+          
+          <div class="method-source-code" id="entity_links-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 159</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_links</span> <span class="ruby-identifier">entities</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">entities</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">entity</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>
+    <span class="ruby-identifier">homelink</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:homelink</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">homelink</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">entity</span>)
+    <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>, <span class="ruby-identifier">homelink</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:mode</span>] <span class="ruby-operator">||</span> <span class="ruby-value">:partial</span>)
+  }, (<span class="ruby-identifier">options</span>[<span class="ruby-value">:joinstr</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;, &#39;</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-field_count" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">field_count</span><span
+            class="method-args">(what)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="field_count-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 131</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">field_count</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:arity</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">arity</span>(<span class="ruby-identifier">what</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-field_label_counted" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">field_label_counted</span><span
+            class="method-args">(what, count)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="field_label_counted-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 147</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">field_label_counted</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">count</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">count</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
+      <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">singularize</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">pluralize</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-field_value" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">field_value</span><span
+            class="method-args">(what=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="field_value-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 120</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">field_value</span> <span class="ruby-identifier">what</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">form_authenticity_token</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">what</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">what</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;authToken&#39;</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span> = <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">extract</span>(<span class="ruby-identifier">what</span>)
+    <span class="ruby-identifier">val</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-present_field" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">present_field</span><span
+            class="method-args">(what=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="present_field-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_field</span> <span class="ruby-identifier">what</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">field_value</span>(<span class="ruby-identifier">what</span>) <span class="ruby-operator">||</span> <span class="ruby-node">%Q{%%#{(what || &#39;&#39;).to_s}%%}</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-present_field_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">present_field_label</span><span
+            class="method-args">(what)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="present_field_label-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 135</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_field_label</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">what</span>.<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39;_tags&#39;</span>, <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">field_count</span>(<span class="ruby-identifier">what</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span>
+      <span class="ruby-node">&quot;%%#{what}_label_plural%%&quot;</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;%%#{what}_label_singular%%&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+      <span class="ruby-identifier">label</span>.<span class="ruby-identifier">singularize</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">label</span>.<span class="ruby-identifier">pluralize</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-present_field_wrapped" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">present_field_wrapped</span><span
+            class="method-args">(what=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="present_field_wrapped-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 114</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_field_wrapped</span> <span class="ruby-identifier">what</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>,
+                <span class="ruby-identifier">present_field</span>(<span class="ruby-identifier">what</span>),
+                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;hide-if-empty&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-rendered_aspects" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">rendered_aspects</span><span
+            class="method-args">(*args) { |aspect, contents| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Call the provided block for each aspect of the card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="rendered_aspects-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 92</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">rendered_aspects</span> <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
+  <span class="ruby-identifier">card_aspects_filtered</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">aspect</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">card_aspect_rendered</span> <span class="ruby-identifier">aspect</span>
+    <span class="ruby-keyword">yield</span> <span class="ruby-identifier">aspect</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">contents</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">contents</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-sharable_from_card-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">sharable_from_card?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="sharable_from_card-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 203</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">sharable_from_card?</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Collectible</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-share_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">share_button</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="share_button-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 207</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">share_button</span>
+  <span class="ruby-identifier">collectible_share_button</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-string">&#39;lg&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">sharable_from_card?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tag_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tag_button</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tag_button-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 195</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_button</span>
+  <span class="ruby-identifier">collectible_tag_button</span>(<span class="ruby-identifier">decorator</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Taggable</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tools_menu" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tools_menu</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="tools_menu-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 199</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tools_menu</span>
+  <span class="ruby-identifier">collectible_tools_menu</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-string">&#39;lg&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">editable_from_card?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-votable_from_card-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">votable_from_card?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="votable_from_card-3F-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 211</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">votable_from_card?</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Voteable</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-vote_buttons" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">vote_buttons</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="vote_buttons-source">
+            <pre><span class="ruby-comment"># File app/mixins/card_presentation.rb, line 215</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">vote_buttons</span>
+  <span class="ruby-identifier">collectible_vote_buttons</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;stamp votes&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">votable_from_card?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

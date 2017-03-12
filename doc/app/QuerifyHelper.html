@@ -1,0 +1,320 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module QuerifyHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-querify_block">#querify_block</a>
+    
+    <li ><a href="#method-i-querify_button">#querify_button</a>
+    
+    <li ><a href="#method-i-querify_item">#querify_item</a>
+    
+    <li ><a href="#method-i-querify_link">#querify_link</a>
+    
+    <li ><a href="#method-i-querify_radiobutton">#querify_radiobutton</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-QuerifyHelper">
+  <h1 id="module-QuerifyHelper" class="module">
+    module QuerifyHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-querify_block" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify_block</span><span
+            class="method-args">(url, body_content = '', options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>A <a href="QuerifyHelper.html#method-i-querify_block">#querify_block</a>
+defines a context for querify actions – it takes querify params from
+enclosing blocks AND from enclosed buttons – IF it has an associated URL,
+it executes upon loading and upon receipt of other params – it broadcasts
+any param changes to other, lower querify blocks and links</p>
+          
+          
+
+          
+          <div class="method-source-code" id="querify_block-source">
+            <pre><span class="ruby-comment"># File app/helpers/querify_helper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querify_block</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">body_content</span> = <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">url</span>, <span class="ruby-identifier">body_content</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">body_content</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">body_content</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">body_content</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:tag</span>) <span class="ruby-operator">||</span> <span class="ruby-value">:div</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span> <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} querify querify-supe #{&#39;querify-exec&#39; if url}&quot;</span>
+  <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge!</span>( <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span> }) <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:onload</span>] = <span class="ruby-string">&#39;RP.querify.onload(event);&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:autoload</span>)
+  <span class="ruby-identifier">body_content</span> = <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">body_content</span>, <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-querify_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify_button</span><span
+            class="method-args">(name, value, options={}) { || ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Declare a button which propagates parameter changes to enclosing querify
+supes</p>
+          
+          
+
+          
+          <div class="method-source-code" id="querify_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/querify_helper.rb, line 47</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querify_button</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">value</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">button_tag</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;querify&#39;</span>,
+             <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} querify querify-button&quot;</span>,
+             <span class="ruby-identifier">onclick</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;RP.querify.onclick(event);&#39;</span>, <span class="ruby-comment"># Send when clicked</span>
+             <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">name</span>,
+             <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">value</span>) <span class="ruby-keyword">do</span>
+    <span class="ruby-keyword">yield</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-querify_item" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify_item</span><span
+            class="method-args">(label, qparams, options={ })</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="querify_item-source">
+            <pre><span class="ruby-comment"># File app/helpers/querify_helper.rb, line 31</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querify_item</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">qparams</span>, <span class="ruby-identifier">options</span>={ }
+  <span class="ruby-identifier">querify_link</span> <span class="ruby-identifier">label</span>, <span class="ruby-string">&#39;#&#39;</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>( <span class="ruby-identifier">qparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">qparams</span> )
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-querify_link" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify_link</span><span
+            class="method-args">(label, url, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Declare a link which records param changes and maintains a clickable link
+influenced by those params</p>
+          
+          
+
+          
+          <div class="method-source-code" id="querify_link-source">
+            <pre><span class="ruby-comment"># File app/helpers/querify_helper.rb, line 22</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querify_link</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">url</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">label</span>,
+                 <span class="ruby-identifier">url</span>,
+                 <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(
+                     <span class="ruby-identifier">handler_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;querify-link&#39;</span>,
+                     <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} querify&quot;</span>
+                 )
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-querify_radiobutton" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">querify_radiobutton</span><span
+            class="method-args">(label, qparams, options={ })</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="querify_radiobutton-source">
+            <pre><span class="ruby-comment"># File app/helpers/querify_helper.rb, line 35</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">querify_radiobutton</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">qparams</span>, <span class="ruby-identifier">options</span>={ }
+  <span class="ruby-identifier">active</span> = <span class="ruby-identifier">qparams</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:active</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:label</span>,
+              <span class="ruby-identifier">radio_button_tag</span>(<span class="ruby-identifier">qparams</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">first</span>,
+                               <span class="ruby-identifier">qparams</span>.<span class="ruby-identifier">values</span>.<span class="ruby-identifier">first</span>,
+                               <span class="ruby-identifier">active</span>,
+                               <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;querify-select&#39;</span>,
+                               <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">qparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">qparams</span> })<span class="ruby-operator">+</span><span class="ruby-identifier">label</span>.<span class="ruby-identifier">html_safe</span>,
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} btn #{&#39;active&#39; if active}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

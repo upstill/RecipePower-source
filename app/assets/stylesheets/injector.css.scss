@@ -34,12 +34,19 @@ div.dialog.injector {
   }
   &.new_password {
     width: 500px;
+    div.form-group.user_login {
+      input {
+        padding: 5px;
+        width: 230px;
+        font-size: 1em;
+      }
+    }
   }
   .auth_poss {
     float: left; // display: inline-block;
     font: 16px arial, sans-serif;
-    width: 370px; // auto;
-    margin: 0.5em .1em;
+    width: 240px; // auto;
+    margin: 0.5em 1.1em 0.5em 0.1em;
     // border-right:1px solid black;
     .auth_provider {
       display: inline-block;
@@ -61,7 +68,7 @@ div.dialog.injector {
   }
   .or {
     width: 30px;
-    height: 80px;
+    height: 70px;
     border-right: solid 1px #CCCCCC;
     border-left: solid 1px #CCCCCC;
     margin: 0px;
@@ -73,7 +80,7 @@ div.dialog.injector {
     float: left; // display: inline-block; vertical-align: top;
   }
   &.new_registration {
-    width: 840px;
+    width: 670px;
     font: 12px arial, sans-serif;
     font-weight: bold;
     height: auto;
@@ -90,12 +97,14 @@ div.dialog.injector {
       // border-left:1px solid black;
       vertical-align: top;
       .signin_credentials {
-        width: 210px;
+        width: 310px;
         display: inline-block;
         vertical-align: top;
         margin-top: 0.2em;
         .signin_element {
           width: 95%;
+          font-size: 1em;
+          padding: 3px;
         }
       }
     }
@@ -122,7 +131,7 @@ div.dialog.injector {
     }
   }
   &.sign_in {
-    width: 840px;
+    width: 712px;
     font: 12px arial, sans-serif;
     font-weight: bold;
     height: auto;
@@ -142,8 +151,8 @@ div.dialog.injector {
       float: left; // display: inline-block; vertical-align: top;
     }
     .signin {
-      margin: 0px 5px;
-      padding: 7px;
+      margin: 0 0 0 5px;
+      padding: 7px 0 7px 7px;
       display: inline-block;
       font: 16px arial, sans-serif;
       width: auto;
@@ -158,9 +167,13 @@ div.dialog.injector {
         width: 210px;
         display: inline-block;
         vertical-align: top;
-        margin-top: 0.2em;
+        margin-top: 0.5em;
         .signin_element {
           width: 95%;
+        }
+        input.signin_element {
+          margin-top: 3px;
+          margin-bottom: 10px;
         }
       }
     }
@@ -220,11 +233,6 @@ div.dialog.injector {
     div.edit_recipe_element {
       height: 40px;
       padding-bottom: 0.2em
-    }
-    div.edit_recipe_field_textarea {
-      display: inline-block;
-      vertical-align: top;
-      width: 460px
     }
     div.edit_recipe_field {
       width: 95%;

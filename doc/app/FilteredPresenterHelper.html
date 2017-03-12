@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module FilteredPresenterHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-filtered_presenter_org_buttons">#filtered_presenter_org_buttons</a>
+    
+    <li ><a href="#method-i-filtered_presenter_org_buttons_replacement">#filtered_presenter_org_buttons_replacement</a>
+    
+    <li ><a href="#method-i-filtered_presenter_panel_results">#filtered_presenter_panel_results</a>
+    
+    <li ><a href="#method-i-filtered_presenter_panel_results_placeholder">#filtered_presenter_panel_results_placeholder</a>
+    
+    <li ><a href="#method-i-filtered_presenter_panel_results_replacement">#filtered_presenter_panel_results_replacement</a>
+    
+    <li ><a href="#method-i-filtered_presenter_table_results">#filtered_presenter_table_results</a>
+    
+    <li ><a href="#method-i-filtered_presenter_table_results_placeholder">#filtered_presenter_table_results_placeholder</a>
+    
+    <li ><a href="#method-i-filtered_presenter_table_results_replacement">#filtered_presenter_table_results_replacement</a>
+    
+    <li ><a href="#method-i-filtered_presenter_tail">#filtered_presenter_tail</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-FilteredPresenterHelper">
+  <h1 id="module-FilteredPresenterHelper" class="module">
+    module FilteredPresenterHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-filtered_presenter_org_buttons" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_org_buttons</span><span
+            class="method-args">(viewparams, context='panels', options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_org_buttons-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 2</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_org_buttons</span> <span class="ruby-identifier">viewparams</span>, <span class="ruby-identifier">context</span>=<span class="ruby-string">&#39;panels&#39;</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">context</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">context</span>, <span class="ruby-identifier">options</span> = <span class="ruby-string">&#39;panels&#39;</span>, <span class="ruby-identifier">context</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">buttons</span> = <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-identifier">display_style</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:display_style</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">viewparams</span>.<span class="ruby-identifier">display_style</span>
+  <span class="ruby-identifier">label</span> =
+  <span class="ruby-identifier">viewparams</span>.<span class="ruby-identifier">org_buttons</span>(<span class="ruby-identifier">context</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">label</span>, <span class="ruby-identifier">qparams</span>, <span class="ruby-identifier">link_options</span> = {}<span class="ruby-operator">|</span>
+    <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:class</span>] =
+        <span class="ruby-node">&quot;#{link_options[:class]} org-button #{display_style} #{options[:class]}&quot;</span>
+    <span class="ruby-identifier">buttons</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">querify_radiobutton</span>( <span class="ruby-identifier">label</span>.<span class="ruby-identifier">upcase</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">qparams</span>, <span class="ruby-identifier">link_options</span> )
+  <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">buttons</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">buttons</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;btn-group&#39;</span>, <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">toggle</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;buttons&#39;</span> }).<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-identifier">label</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;org-buttons-label&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">buttons</span>,
+                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;org-buttons #{display_style} #{context}-buttons&quot;</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_org_buttons_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_org_buttons_replacement</span><span
+            class="method-args">(viewparams, context='panels')</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_org_buttons_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_org_buttons_replacement</span> <span class="ruby-identifier">viewparams</span>, <span class="ruby-identifier">context</span>=<span class="ruby-string">&#39;panels&#39;</span>
+  [ <span class="ruby-node">&quot;div.org-buttons.#{context}-buttons.#{viewparams.display_style}&quot;</span>, <span class="ruby-identifier">filtered_presenter_org_buttons</span>(<span class="ruby-identifier">viewparams</span>, <span class="ruby-identifier">context</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_panel_results" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_panel_results</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_panel_results-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_panel_results</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-node">&quot;filtered_presenter/present/#{viewparams.results_partial}&quot;</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewparams</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_panel_results_placeholder" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_panel_results_placeholder</span><span
+            class="method-args">(type)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_panel_results_placeholder-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_panel_results_placeholder</span> <span class="ruby-identifier">type</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;results #{type.to_s.extensions_to_classes} placeholder&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_panel_results_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_panel_results_replacement</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_panel_results_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 33</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_panel_results_replacement</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">selector</span> = <span class="ruby-string">&#39;.results&#39;</span>
+  <span class="ruby-identifier">selector</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;.&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">viewparams</span>.<span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">extensions_to_selector</span>
+  [<span class="ruby-identifier">selector</span>, <span class="ruby-identifier">filtered_presenter_panel_results</span>(<span class="ruby-identifier">viewparams</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_table_results" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_table_results</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_table_results-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_table_results</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-node">&quot;filtered_presenter/present/#{viewparams.results_partial}&quot;</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewparams</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_table_results_placeholder" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_table_results_placeholder</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_table_results_placeholder-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 39</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_table_results_placeholder</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:tbody</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;results #{viewparams.result_type} placeholder&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_table_results_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_table_results_replacement</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_table_results_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 47</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_table_results_replacement</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">selector</span> = <span class="ruby-string">&#39;.results&#39;</span>
+  <span class="ruby-identifier">selector</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;.&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">viewparams</span>.<span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">extensions_to_selector</span>
+  [<span class="ruby-identifier">selector</span>, <span class="ruby-identifier">filtered_presenter_table_results</span>(<span class="ruby-identifier">viewparams</span>) ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-filtered_presenter_tail" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">filtered_presenter_tail</span><span
+            class="method-args">(viewparams)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="filtered_presenter_tail-source">
+            <pre><span class="ruby-comment"># File app/helpers/filtered_presenter_helper.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_presenter_tail</span> <span class="ruby-identifier">viewparams</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-node">&quot;filtered_presenter/present/#{viewparams.tail_partial}&quot;</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewparams</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

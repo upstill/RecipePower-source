@@ -1,0 +1,485 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module ImagesHelper - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-i-image_enclosure">#image_enclosure</a>
+    
+    <li ><a href="#method-i-image_from_decorator">#image_from_decorator</a>
+    
+    <li ><a href="#method-i-image_with_error_recovery">#image_with_error_recovery</a>
+    
+    <li ><a href="#method-i-labelled_avatar">#labelled_avatar</a>
+    
+    <li ><a href="#method-i-resizing_image_tag">#resizing_image_tag</a>
+    
+    <li ><a href="#method-i-safe_image_div">#safe_image_div</a>
+    
+    <li ><a href="#method-i-video_embed">#video_embed</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-ImagesHelper">
+  <h1 id="module-ImagesHelper" class="module">
+    module ImagesHelper
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-image_enclosure" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">image_enclosure</span><span
+            class="method-args">(decorator, tag=:div, opts_in={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define a div or other content tag for enclosing an image. options
+:fill_mode, :explain and :fallback_img are passed to <a
+href="ImagesHelper.html#method-i-image_with_error_recovery">#image_with_error_recovery</a>
+Others are passed to content_tag</p>
+          
+          
+
+          
+          <div class="method-source-code" id="image_enclosure-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 50</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">image_enclosure</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">tag</span>=<span class="ruby-value">:div</span>, <span class="ruby-identifier">opts_in</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">opts_in</span> = <span class="ruby-value">:div</span>, <span class="ruby-identifier">tag</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">image_options</span> = <span class="ruby-identifier">opts_in</span>.<span class="ruby-identifier">clone</span>
+  <span class="ruby-identifier">nolink</span> = <span class="ruby-identifier">image_options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:nolink</span>
+  <span class="ruby-identifier">enclosure_options</span> = <span class="ruby-identifier">image_options</span>.<span class="ruby-identifier">slice!</span> <span class="ruby-value">:fill_mode</span>, <span class="ruby-value">:explain</span>, <span class="ruby-value">:fallback_img</span>, <span class="ruby-value">:handle_empty</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">content</span> = <span class="ruby-identifier">image_with_error_recovery</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">image_options</span> )
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">to_sym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:div</span>
+      <span class="ruby-identifier">enclosure_options</span>[<span class="ruby-value">:style</span>] = <span class="ruby-identifier">enclosure_options</span>[<span class="ruby-value">:style</span>].<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span>
+          (<span class="ruby-identifier">image_options</span>[<span class="ruby-value">:fill_mode</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>) <span class="ruby-operator">==</span> <span class="ruby-string">&#39;fixed-height&#39;</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;width: auto; height: 100%;&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;width: 100%; height: auto;&#39;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">content</span> = <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-identifier">content</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">nolink</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">content</span>, <span class="ruby-identifier">enclosure_options</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-image_from_decorator" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">image_from_decorator</span><span
+            class="method-args">(decorator, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="image_from_decorator-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">image_from_decorator</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">image_with_error_recovery</span> <span class="ruby-identifier">decorator</span>,
+                            {
+                                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">image_class</span>,
+                                <span class="ruby-identifier">fallback_img</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">User</span>),
+                                <span class="ruby-identifier">fill_mode</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;fixed-width&#39;</span>
+                            }.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-image_with_error_recovery" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">image_with_error_recovery</span><span
+            class="method-args">(url_or_object, opts_in={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define an image tag which responds reasonably to image failure using
+pics.js. url_or_object: either a string, or a decorator, or an object (as
+long as it responds to imgdata and fallback_imgdata) opts_in are passed to
+the image_tag, except:</p>
+<ul><li>
+<p>:fill_mode causes the image to be dynamically fit within its container if
+truthy</p>
+</li><li>
+<p>:explain causes a bogus image to be replaced with NoPictureOnFile.png or
+BadPicURL.png</p>
+</li><li>
+<p>:fallback_img forces an image tag to be produced if there is no url – if
+the option value is a string, it&#39;s used as specified – otherwise,
+it&#39;s fetched from url_or_object</p>
+</li></ul>
+          
+          
+
+          
+          <div class="method-source-code" id="image_with_error_recovery-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 11</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">image_with_error_recovery</span> <span class="ruby-identifier">url_or_object</span>, <span class="ruby-identifier">opts_in</span>={}
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">opts_in</span>.<span class="ruby-identifier">clone</span>
+  <span class="ruby-identifier">fallback_img</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:fallback_img</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url_or_object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">String</span>
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">url_or_object</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-comment"># Extract the url from the object</span>
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">url_or_object</span>.<span class="ruby-identifier">imgdata</span>
+    <span class="ruby-identifier">fallback_img</span> = <span class="ruby-identifier">url_or_object</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:fallback_imgdata</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">image_path</span>(<span class="ruby-identifier">url_or_object</span>.<span class="ruby-identifier">fallback_imgdata</span>) <span class="ruby-keyword">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">fallback_img</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">fallback_img</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:alt</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">fallback_img</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">fallback_img</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">fallback_img</span>.<span class="ruby-identifier">present?</span>  <span class="ruby-comment"># Had better be a string if the url was a string</span>
+
+  <span class="ruby-comment"># The :fill_mode option requests the image be resized to fit its container</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">fill_mode</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:fill_mode</span>)
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] = <span class="ruby-node">&quot;#{options[:class]} #{fill_mode}&quot;</span> <span class="ruby-comment"># Add fill-mode indicator to class</span>
+    <span class="ruby-comment"># options[:class] = &quot;#{options[:class]} fitPic #{fill_mode}&quot; # Add fitPic class and mode indicator</span>
+    <span class="ruby-comment"># options[:onload] = &#39;doFitImage(event);&#39;  # Fit the image onload</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] <span class="ruby-operator">||=</span> {}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:explain</span>
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">fallback_img</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">fallback_img</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] = {
+        <span class="ruby-identifier">emptyurlfallback</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:emptyurlfallback</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">image_path</span>(<span class="ruby-string">&#39;NoPictureOnFile.png&#39;</span>)),
+        <span class="ruby-identifier">bogusurlfallback</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:bogusurlfallback</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">image_path</span>(<span class="ruby-string">&#39;BadPicURL.png&#39;</span>))
+    }.<span class="ruby-identifier">merge</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>]
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>][<span class="ruby-value">:handle_empty</span>] = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:handle_empty</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:handle_empty</span>]
+
+  <span class="ruby-comment"># if url.present? || fallback_img</span>
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:alt</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;Image Not Accessible&#39;</span>
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:onError</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;onImageError(this);&#39;</span>
+    <span class="ruby-identifier">image_tag</span> ((<span class="ruby-identifier">url</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">||</span> (<span class="ruby-identifier">fallback_img</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">fallback_img</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>), <span class="ruby-identifier">options</span>
+  <span class="ruby-comment"># end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-labelled_avatar" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">labelled_avatar</span><span
+            class="method-args">(decorator, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="labelled_avatar-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">labelled_avatar</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+              <span class="ruby-identifier">image_from_decorator</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>),
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;owner-pic&#39;</span>) <span class="ruby-operator">+</span>
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">decorator</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;owner-name&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-resizing_image_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">resizing_image_tag</span><span
+            class="method-args">(decorator, fallback=false, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide an image tag that resizes according to <a
+href=":fill_mode">options</a>. We give the tag an id according to the
+decorator, and an alt; Both of those may be explicitly provided with the
+options OBSOLETE (unused, folded into <a
+href="ImagesHelper.html#method-i-image_with_error_recovery">#image_with_error_recovery</a>)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="resizing_image_tag-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 88</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">resizing_image_tag</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">fallback</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">fallback</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">fallback</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">fallback</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">url</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">imgdata</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">fallback</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">url</span> = <span class="ruby-identifier">image_path</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">fallback_imgdata</span>)).<span class="ruby-identifier">present?</span>)
+      <span class="ruby-identifier">image_with_error_recovery</span> <span class="ruby-identifier">url</span>,
+                                <span class="ruby-identifier">alt</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:alt</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&quot;Image Not Accessible&quot;</span>),
+                                <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:id</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">decorator</span>)),
+                                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} #{options[:fill_mode] || &#39;fixed-width&#39;}&quot;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>
+      <span class="ruby-identifier">url</span> = <span class="ruby-string">&quot;data URL&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^data:/</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">url</span> = <span class="ruby-string">&quot;nil URL&quot;</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">content</span> =
+        <span class="ruby-node">&quot;Error rendering image #{url.truncate(255)} from &quot;</span><span class="ruby-operator">+</span> (<span class="ruby-identifier">decorator</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;#{decorator.human_name} #{decorator.id}: &#39;#{decorator.title}&#39;&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;null #{decorator.human_name}&quot;</span>)
+    <span class="ruby-constant">ExceptionNotification</span><span class="ruby-operator">::</span><span class="ruby-constant">Notifier</span>.<span class="ruby-identifier">exception_notification</span>(<span class="ruby-identifier">request</span>.<span class="ruby-identifier">env</span>, <span class="ruby-identifier">e</span>, <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">message</span><span class="ruby-operator">:</span> <span class="ruby-identifier">content</span>}).<span class="ruby-identifier">deliver</span>
+    <span class="ruby-identifier">content</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-safe_image_div" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">safe_image_div</span><span
+            class="method-args">(decorator, fallback=false, options = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Sort out a suitable URL to stuff into an image thumbnail, enclosing it in a
+div of the class given in options. The image will stretch either
+horizontally (fill_mode: “fixed-height”) or vertically (fill_mode:
+“fixed-width”) within the dimensions given by the enclosing div. OBSOLETE:
+folded into <a
+href="ImagesHelper.html#method-i-image_enclosure">#image_enclosure</a></p>
+          
+          
+
+          
+          <div class="method-source-code" id="safe_image_div-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 116</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">safe_image_div</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">fallback</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">options</span> = {}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">fallback</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">fallback</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">fallback</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">fill_mode</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:fill_mode</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;fixed-width&#39;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">image</span> = <span class="ruby-identifier">image_with_error_recovery</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">explain</span><span class="ruby-operator">:</span> <span class="ruby-operator">!</span><span class="ruby-identifier">fallback</span>, <span class="ruby-identifier">fill_mode</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fill_mode</span>)
+    <span class="ruby-identifier">style</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">fill_mode</span>
+              <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;fixed-width&quot;</span>
+                <span class="ruby-string">&quot;width: 100%; height: auto;&quot;</span>
+              <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;fixed-height&quot;</span>
+                <span class="ruby-string">&quot;width: auto; height: 100%;&quot;</span>
+            <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:style</span>] = <span class="ruby-identifier">style</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">style</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">image</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">url</span>), <span class="ruby-identifier">options</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-video_embed" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">video_embed</span><span
+            class="method-args">(vidlink)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="video_embed-source">
+            <pre><span class="ruby-comment"># File app/helpers/images_helper.rb, line 133</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">video_embed</span> <span class="ruby-identifier">vidlink</span>
+    <span class="ruby-identifier">iframe</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:iframe</span>,
+                         <span class="ruby-string">&#39;&#39;</span>,
+                         <span class="ruby-identifier">src</span><span class="ruby-operator">:</span> <span class="ruby-identifier">vidlink</span>,
+                         <span class="ruby-identifier">frameborder</span><span class="ruby-operator">:</span> <span class="ruby-value">0</span>,
+                         <span class="ruby-identifier">height</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;100%&#39;</span>,
+                         <span class="ruby-identifier">width</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;100%&#39;</span>
+    <span class="ruby-identifier">vbelement</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">iframe</span>, <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;vbelement&#39;</span>
+    <span class="ruby-identifier">vbdummy</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">vbelement</span>, <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;vbdummy&#39;</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">vbdummy</span>, <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;vidbox&#39;</span>
+<span class="ruby-comment">  &lt;div id=&quot;vidbox&quot;&gt;
+    &lt;div id=&quot;vbdummy&quot;&gt;
+      &lt;div id=&quot;vbelement&quot;&gt;
+        &lt;iframe width=&quot;100%&quot; height=&quot;100%&quot; src=&quot;&lt;%= vid %&gt;&quot; frameborder=&quot;0&quot;&gt;&lt;/iframe&gt;
+      &lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+</span>
+  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

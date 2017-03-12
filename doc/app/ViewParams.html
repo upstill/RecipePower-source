@@ -1,0 +1,440 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ViewParams - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-display_style">#display_style</a>
+    
+    <li ><a href="#method-i-page_title">#page_title</a>
+    
+    <li ><a href="#method-i-panel_label">#panel_label</a>
+    
+    <li ><a href="#method-i-panel_title">#panel_title</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ViewParams">
+  <h1 id="class-ViewParams" class="class">
+    class ViewParams
+  </h1>
+
+  <section class="description">
+    
+<p>This class bundles up the parameters used in views off the presenter.</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-filtered_presenter" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">filtered_presenter</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-item_mode" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">item_mode</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-link_address" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">link_address</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-result_type" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">result_type</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-results_path" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">results_path</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(fp, qparams={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Use a filtered presenter and a subtype to define the parameters</p>
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/presenters/filtered_presenter.rb, line 68</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">fp</span>, <span class="ruby-identifier">qparams</span>={}
+  <span class="ruby-ivar">@result_type</span> = <span class="ruby-constant">ResultType</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">qparams</span>[<span class="ruby-value">:result_type</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">result_type</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-ivar">@filtered_presenter</span> = <span class="ruby-identifier">fp</span>
+  <span class="ruby-ivar">@link_address</span> = <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">decorate_path</span> <span class="ruby-identifier">qparams</span>
+  <span class="ruby-ivar">@results_path</span> = <span class="ruby-identifier">assert_query</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">results_path</span>, <span class="ruby-identifier">qparams</span>
+  <span class="ruby-ivar">@item_mode</span> = <span class="ruby-identifier">qparams</span>[<span class="ruby-value">:item_mode</span>] <span class="ruby-operator">||</span> (<span class="ruby-identifier">fp</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">item_mode</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-display_style" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">display_style</span><span
+            class="method-args">(specific=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="display_style-source">
+            <pre><span class="ruby-comment"># File app/presenters/filtered_presenter.rb, line 139</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">display_style</span> <span class="ruby-identifier">specific</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">specific</span> <span class="ruby-operator">&amp;&amp;</span> ([<span class="ruby-string">&#39;friends&#39;</span>, <span class="ruby-string">&#39;users&#39;</span>, <span class="ruby-string">&#39;collection&#39;</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-keyword">nil</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">result_type</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">entity</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">User</span>)
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">viewer</span>
+      <span class="ruby-string">&#39;viewer&#39;</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">follows?</span> <span class="ruby-identifier">entity</span>
+      <span class="ruby-string">&#39;friend&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-string">&#39;user&#39;</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">entity</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">underscore</span>.<span class="ruby-identifier">singularize</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">root</span>.<span class="ruby-identifier">singularize</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-page_title" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">page_title</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>For use in the address bar</p>
+          
+          
+
+          
+          <div class="method-source-code" id="page_title-source">
+            <pre><span class="ruby-comment"># File app/presenters/filtered_presenter.rb, line 77</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_title</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">display_style</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;viewer&#39;</span>
+      <span class="ruby-string">&#39;my collection&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;friend&#39;</span>
+      <span class="ruby-node">&quot;#{entity.salutation.downcase}&#39;s collection&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;user&#39;</span>
+      <span class="ruby-node">&quot;#{entity.polite_name.downcase}&#39;s collection&quot;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;recipe&#39;</span>
+      <span class="ruby-string">&#39;related&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;feed&#39;</span>
+      <span class="ruby-string">&#39;feeds&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;list&#39;</span>
+      <span class="ruby-string">&#39;contents&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;feed_entry&#39;</span>
+      <span class="ruby-string">&#39;entries&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">display_style</span>.<span class="ruby-identifier">pluralize</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-panel_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">panel_label</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="panel_label-source">
+            <pre><span class="ruby-comment"># File app/presenters/filtered_presenter.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">panel_label</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">panel_label</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">pluralize</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">respond_to?</span> <span class="ruby-value">:panel_label</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">rt</span> = <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">root</span> <span class="ruby-comment"># result_type.subtype || result_type.root</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;lists&#39;</span>
+      <span class="ruby-string">&#39;treasuries&#39;</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;feed_entries&#39;</span>
+      <span class="ruby-string">&#39;entries&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">rt</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-panel_title" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">panel_title</span><span
+            class="method-args">(short=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="panel_title-source">
+            <pre><span class="ruby-comment"># File app/presenters/filtered_presenter.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">panel_title</span> <span class="ruby-identifier">short</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">panel_title</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">respond_to?</span> <span class="ruby-value">:panel_title</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">user</span> = <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">entity</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">User</span>)
+    <span class="ruby-identifier">is_me</span> = (<span class="ruby-identifier">user</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">viewer</span>)
+    <span class="ruby-identifier">is_friend</span> = <span class="ruby-identifier">filtered_presenter</span>.<span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">follows?</span> <span class="ruby-identifier">user</span>
+    <span class="ruby-identifier">salutation</span> = (<span class="ruby-identifier">is_friend</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">salutation</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">polite_name</span>).<span class="ruby-identifier">downcase</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">short</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-node">%Q{#{is_me ? &#39;my&#39; : salutation+&#39;\&#39;s&#39;} #{panel_label}}</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">result_type</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;recipes&#39;</span>, <span class="ruby-string">&#39;cookmarks&#39;</span>
+          <span class="ruby-identifier">is_me</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;#{panel_label} I&#39;ve collected&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{panel_label} collected by #{salutation}&quot;</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;lists.owned&#39;</span>
+          <span class="ruby-identifier">is_me</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;my own #{panel_label}&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{salutation}&#39;s own #{panel_label}&quot;</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;lists.collected&#39;</span>
+          <span class="ruby-identifier">is_me</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;#{panel_label} I&#39;ve collected&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{panel_label} collected by #{salutation}&quot;</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;friends&#39;</span>
+          <span class="ruby-identifier">is_me</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;people I\m following&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;people #{salutation} is following&quot;</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;feeds&#39;</span>
+          <span class="ruby-identifier">is_me</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;feeds I\m following&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;feeds followed by #{salutation}&quot;</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-node">&quot;#{panel_label.capitalize} by #{is_me ? &#39;me&#39; : salutation}&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">panel_label</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
