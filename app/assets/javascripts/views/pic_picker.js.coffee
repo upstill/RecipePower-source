@@ -41,6 +41,10 @@ mydlog = () ->
 RP.pic_picker.close = (dlog) ->
 	stash_in_golink dlog
 
+# When the pic_picker is activated in a dialog...
+RP.pic_picker.activate = (pane) ->
+
+
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'

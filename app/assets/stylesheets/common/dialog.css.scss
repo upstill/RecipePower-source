@@ -231,3 +231,10 @@ div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
 div.form-group.user_remember_me {
   margin-bottom: 0;
 }
+
+div.pane {
+  display: none;
+  &.active {
+    display: block;
+  }
+}

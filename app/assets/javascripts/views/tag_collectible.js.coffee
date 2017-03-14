@@ -10,14 +10,15 @@ RP.tag_collectible.bind = (dlog) ->
 	dlog ||= $('body') # window.document
 	# Set up processing for click events on links with a 'tag-collectible-link' class
 
-me = () ->
-	$('div.tag-collectible')[0]
+mydlog = () ->
+	$('div.dialog.tag-collectible')[0] || $('div.pane#tag-collectible-pane').closest('div.dialog')[0]
 
-tagger_selector = "div.tag-collectible #tagging_tokens"
+mypane = () ->
+	$('div.pane#tag-collectible-pane')[0] || $('div.dialog.tag-collectible')[0]
 
 # When dialog is loaded, activate its functionality
 RP.tag_collectible.onopen = (dlog) ->
-	dlog = me()
+	dlog = mydlog()
 	# Only proceed if the dialog has children
 	if $('.tag-collectible > *').length > 0
 		# Set up any tokenInput fields so the before-data is current

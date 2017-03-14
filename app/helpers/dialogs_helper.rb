@@ -54,7 +54,7 @@ module DialogsHelper
       ttl, options = nil, ttl
     end
     dialog_class = options[:dialog_class]
-    header = modal_header ttl
+    header = modal_header ttl, header_contents: options.delete(:header_contents)
     options[:body_contents] ||= with_output_buffer(&block)
     body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
@@ -76,12 +76,13 @@ module DialogsHelper
                 options).html_safe
   end
 
-  def modal_header ttl
+  def modal_header ttl, options={}
+    contents = options[:header_contents] ||
+        (ttl.present? && content_tag(:h3, ttl)) ||
+        ''
     response_service.injector? ?
         injector_cancel_button('X') :
-        content_tag(:div,
-                    ttl.present? ? content_tag(:h3, ttl) : '',
-                    class: 'modal-header')
+        content_tag(:div, contents, class: 'modal-header')
   end
 
   def modal_body options={}, &block
@@ -98,6 +99,27 @@ module DialogsHelper
   def modal_footer(options={}, &block)
     ft = options[:body_contents] || with_output_buffer(&block)
     content_tag :div, ft, class: "modal-footer row #{options[:class]}"
+  end
+
+  def pane_buttons keyvals={}
+    input = '<input type="radio" name="options" autocomplete="off" checked '
+    active = 'active'  # Marks the input
+    btns = keyvals.collect { |key, val|
+      if val.present?
+        label = content_tag :label,
+                            (input + "data-pane='#{key}'> " + val).html_safe,
+                            class: 'btn btn-primary ' + active
+        active = ''
+        input.sub! 'checked', ''
+        label
+      end
+    }.compact
+    content_tag(:div,
+                safe_join(btns),
+                class: 'btn-group',
+                id: 'paneButtons',
+                data: { toggle: 'buttons' },
+                role: 'group') if btns.count > 1
   end
 
   # Place the header for a dialog, including setting its Onload function.

@@ -1,44 +1,6 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template    %>
 <%= modal_dialog "tag-collectible new-style green", decorator.title.truncate(70), dialog_class: 'modal-lg' do %>
-    <form accept-charset="UTF-8"
-          action="<%= decorator.tag_path %>"
-          class="form-inline tag-collectible"
-          data-remote="true"
-          data-type="json"
-          <%# "data-always_submit='true'" if decorator.picuri_problem %>
-          id="tag_collectible_<%= decorator.id %>">
-      <input name="utf8" type="hidden" value="&#x2713;"/>
-      <input name="_method" type="hidden" value="patch"/>
-      <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
-
-      <div class="modal-body" style="overflow:visible">
-        <div class="notifications-panel">
-          <%= flash_notifications_div %>
-        </div>
-        <div class="row">
-          <div class="col-md-12">
-            <% if response_service.admin_view? %>
-                <div class="control-group">
-                  <label class="string optional">Title</label>
-                  <textarea class="full-width" rows=1 id="<%= decorator.element_id :title %>" name="<%= decorator.field_name :title %>" placeholder="Title"><%= decorator.title %></textarea>
-                </div>
-            <% end %>
-            <%= tagging_fields decorator %>
-            <div class="control-group">
-              <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">
-              <label class="string optional">Comment</label>
-              <textarea class="full-width" id="<%= decorator.element_id :collectible_comment %>" name="<%= decorator.field_name :collectible_comment %>" placeholder="Anything you'd like to say about this <%= decorator.human_name false, false %>" rows="3"><%= decorator.collectible_comment %></textarea>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <%= dialog_submit_button %>
-        <%= dialog_cancel_button %>
-      </div>
-    </form>
-    </div>
-    </div>
+    <%= render 'form_tag' %>
 <% end %>
 
