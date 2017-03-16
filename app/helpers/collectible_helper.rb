@@ -233,7 +233,6 @@ module CollectibleHelper
     taglist = decorator.object.tags.collect { |tag|
       link_to_submit(tag.name.downcase, tag, :mode => :modal, :class => 'taglink')
     }.join '&nbsp;<span class="tagsep">|</span> '
-    # <span class="<%= recipe_list_element_golink_class item %>">
     button = content_tag :div, collectible_tag_button(decorator), class: 'inline-glyphicon'
     (taglist+'&nbsp;'+button).html_safe
   end

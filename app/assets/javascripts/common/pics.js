@@ -74,7 +74,7 @@ function fitImage(img) {
     return true;
 }
 
-// Set the source for the preview image, only loading the form field when the image is successfully loaded
+// Set the source for the preview image, only loading the URL into the form field when the image is successfully loaded
 // NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
 function set_image_safely(imageElmt, url, formsel) {
     $(formsel).attr('value', url || "")

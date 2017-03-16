@@ -1,37 +1,9 @@
 RP.pic_picker ||= {}
 
-# The link that opened the dialog
-mylink = () ->
-	$('a.pic_picker_golink')
-
-originating_golink_selector = () ->
-	if golinkid = $('input.icon_picker').data 'golinkid'
-		return 'a#'+golinkid
-
-# Clone the dialog and save the clone in the originating link
-stash_in_golink = (dlog) ->
-	clone = dlog.cloneNode true
-	# The selector for the golink has been stored in data for the input
-	$(originating_golink_selector()).data 'preloaded', clone
-
-url_result = () ->
-	$('input#pic-picker-url').attr('value')
-
-# From wherever, set the picked URL value and load it into the proview (and result)
-set_picker_input = (url) ->
-	$('input.icon_picker').attr 'value', url
-	load_picked_image()
-
-load_picked_image = () ->
-	previewImg 'input.icon_picker', 'div.preview img', 'input#pic-picker-url'
-
-# The pic_picker dialog itself
-mydlog = () ->
-	$('div.dialog.pic_picker')
-
-# Close with save
-RP.pic_picker.close = (dlog) ->
-	stash_in_golink dlog
+# We try an image url by assigning it to an img element, then moving it to the input field if loaded successfully
+preview_selector = 'div.preview img'
+try_img = (url) ->
+	set_image_safely preview_selector, url, 'input#pic-picker-url'
 
 # When the pic_picker is activated in a dialog...
 RP.pic_picker.activate = (pane) ->
@@ -43,6 +15,7 @@ RP.pic_picker.activate = (pane) ->
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
+	# To handle pasting of page URLs, image URLS (including data:) and image blobs, we intercept the paste event
 	$(dlog).on 'paste', "#pic-picker-magic", (event) ->  # nee 'input'
 		console.log "Paste into pic-picker magic"
 		contents = event.originalEvent.clipboardData.getData 'text'
@@ -56,8 +29,7 @@ RP.pic_picker.open = (dlog) ->
 				event.preventDefault()
 			imgsrc: ->
 				console.log "...pasted image URL"
-				# previewImg 'input#pic-picker-magic', 'div.preview img', 'input#pic-picker-url'
-				set_image_safely 'div.preview img', contents, 'input#pic-picker-url'
+				try_img contents
 				event.preventDefault()
 			error: ->
 				console.log "...bad/unparsable URL"
@@ -65,14 +37,14 @@ RP.pic_picker.open = (dlog) ->
 					contents = contents.slice(0, 20) + '...'
 				RP.notifications.post "Sorry, but '" + contents + "' doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
 		}
-
+	# Here's how we handle image blobs (if the paste handler didn't handle it b/c it's not text)
 	$('input[type="text"]', dlog).pasteImageReader (results) ->
 		{filename, dataURL} = results
-		set_image_safely 'div.preview img', dataURL, 'input#pic-picker-url'
+		try_img dataURL
 
-	# When the 'src' for an image is set and things settle down (for better or worse),
+	# When the 'src' for the preview image is set and things settle down (for better or worse),
 	# check the status and report as necessary.
-	$('div.preview img').on 'ready', (event) ->
+	$(preview_selector).on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
 			$('.dialog-submit-button', dlog).addClass 'disabled'
 			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
@@ -82,60 +54,35 @@ RP.pic_picker.open = (dlog) ->
 				prompt = 'to leave the recipe without an image.'
 			else
 				prompt = 'to use this image.'
-			RP.notifications.post 'Click Save '+prompt, 'flash-alert'
+			# RP.notifications.post 'Click Save '+prompt, 'flash-alert'
 
-	$(dlog).on 'click','a.image_preview_button', (event) ->
-		load_picked_image()
-
-	$(dlog).on 'click','a.url-extract-button', (event) ->
-		# Fire the url-extract-button's URL, with the addition of the given URL
-		elmt = event.currentTarget
-		url = $('input.url_picker').attr('value')
-		request = RP.build_request $(elmt).data('href'), { url: url }
-		RP.submit.enqueue request, elmt
-		event.preventDefault()
-
-	$(dlog).on 'click','.dialog-submit-button', (event) ->
-		url = url_result()
-		if targetGolinkSelector = originating_golink_selector()
-			RP.dialog.close event # Move on to tidying up
-			# The input field points to the originating golink
-			if linkdata = $(targetGolinkSelector).data()
-				imagePreviewWidgetSet linkdata.imageid, linkdata.inputid, url
-
+	# When an image in the select-list gets clicked, move it to the preview
 	$(dlog).on 'click','img.pic-pickee', (event) ->
 		clickee = RP.event_target event
-		set_picker_input (clickee.getAttribute 'src')
+		url = (clickee.getAttribute 'src')
+		try_img url
 
-	$(dlog).on 'change', 'input.pic-picker-url', (event) ->
-		clickee = RP.event_target event
-		set_picker_input clickee.getAttribute('value')
-
-	$('img.pic-pickee').load (evt) ->
-		check_image this
-
+	# ...We can also upload files directly
 	if uploader = $('input.directUpload', dlog)[0]
 		uploader_init uploader
 
-	$('img.pic-pickee').each (index, img) ->
-		check_image img
-		true
-
-	# imagesLoaded fires when all the images are either loaded or fail
+	# imagesLoaded fires when all the pickable images are either loaded or fail
 	imagesLoaded 'img.pic-pickee', (instance) ->
 		# Just in case: when all images are loaded, check for qualifying images that are still hidden
 		$(':hidden', dlog).each (index, img) ->
-			check_image img
+			# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
+			if (img.tagName == 'IMG') && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
+				$(img).show()
 	return true
 
-# Once an image is loaded, check that it's both complete (i.e., no errors) and of appropriate size and aspect ratio
-check_image = (img) ->
-	# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
-	if (img.tagName == 'IMG') && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
-		$(img).show()
-
+# This element is used to parse image URLs
 parser = document.createElement 'a'
 
+# Decide whether the 'contents' string represents:
+# 	a URL leading to an image;
+#   an arbitrary url, which will be gleaned for images for the pick-list
+#   a 'data:' image string
+# There is a callback in the options for each possibility
 parse_actions = (contents, options) ->
 	if contents && contents.length > 0
 		console.log "...text pasted: " + contents

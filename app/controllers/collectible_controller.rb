@@ -74,7 +74,6 @@ class CollectibleController < ApplicationController
 
   def editpic
     update_and_decorate
-    @golinkid = params[:golinkid]
     @fallback_img = params[:fallback_img]
     gleaning =
     if @pageurl = params[:url]

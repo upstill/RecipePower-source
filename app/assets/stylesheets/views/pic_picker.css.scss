@@ -1,20 +1,3 @@
-div.pic_picker_field {
-  div.pic_picker_link {
-    font:14px arial,sans-serif;
-    font-weight:bold;
-    margin-left:auto;
-    margin-right:auto;
-    text-align:center;
-    margin-top:10px;
-    margin-bottom:10px;
-    a.pic_picker_golink {
-      visibility: hidden;
-      &.loaded {
-        visibility: visible;
-      }
-    }
-  }
-}
 
 img.pic-pickee {
   width: 90%;

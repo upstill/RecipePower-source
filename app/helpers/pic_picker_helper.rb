@@ -28,12 +28,15 @@ module PicPickerHelper
     preview = content_tag :div,
                           pic_area+form.hidden_field(decorator.picable_attribute, field_options.compact),
                           class: 'pic_preview'
+=begin
     preview << content_tag(:div,
                            pic_picker_go_button(decorator, options[:fallback_img]),
                            class: 'pic_picker_link') unless options[:nopicker]
+=end
     preview
   end
 
+=begin
   # Bare-metal version of the pic preview widget, for use in a template file
   def pic_preview_widget decorator, options={}
     pic_preview =
@@ -49,10 +52,6 @@ module PicPickerHelper
 
     content_tag(:div, pic_preview, :class => :pic_preview)+
     content_tag(:div, pic_picker_go_button(decorator), :class => :pic_picker_link)
-  end
-
-  def pic_picker_golinkid decorator
-    "golink#{decorator.id}"
   end
 
   # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
@@ -73,6 +72,7 @@ module PicPickerHelper
                          imageid: pic_preview_img_id(decorator)
                      }
   end
+=end
 
   def pic_picker_select_list urls
     return '' if urls.empty?
