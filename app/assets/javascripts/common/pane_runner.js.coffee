@@ -1,4 +1,4 @@
-# Generic dialog management
+# Management of panes within a dialog
 RP.pane_runner = RP.pane_runner || {}
 
 notify_pane = (what, pane) ->

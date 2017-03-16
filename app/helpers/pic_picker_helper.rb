@@ -77,13 +77,12 @@ module PicPickerHelper
   def pic_picker_select_list urls
     return '' if urls.empty?
     thumbNum = 0
-    pics = urls.collect { |url|
+    urls.collect { |url|
       image_with_error_recovery(url,
                                 class: 'pic-pickee',
                                 id: "thumbnail#{thumbNum += 1}",
                                 alt: 'No Image Available')
     }.join(' ').html_safe
-    content_tag :div, pics, class: 'pic-pickees'
   end
 
 end

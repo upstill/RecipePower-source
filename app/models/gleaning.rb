@@ -19,7 +19,7 @@ class Gleaning < ActiveRecord::Base
   # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
   def self.glean url_or_decorator, *labels
     if url_or_decorator.is_a? String
-      (gleaning = self.new).go url_or_decorator
+      (gleaning = self.new status: :processing).go url_or_decorator
     elsif url_or_decorator.object.respond_to? :gleaning
       url = url_or_decorator.pageurl
       url_or_decorator.glean!
@@ -43,7 +43,7 @@ class Gleaning < ActiveRecord::Base
         # We assume the first three-digit number is the HTTP status code
         self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
       }
-      entity.decorate.after_gleaning(self) if entity.decorate.respond_to?(:after_gleaning)
+      entity.decorate.after_gleaning(self) if entity && entity.decorate.respond_to?(:after_gleaning)
       self.results # Returning success indicator
     end
   end

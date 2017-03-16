@@ -25,14 +25,6 @@ set_picker_input = (url) ->
 load_picked_image = () ->
 	previewImg 'input.icon_picker', 'div.preview img', 'input#pic-picker-url'
 
-# Replace the dialog by with one generated from a different page
-extract_from_page = (event) ->
-	# Fire the url-extract-button's URL, with the addition of the given URL
-	elmt = event.currentTarget
-	request = RP.build_request $(elmt).data('href'), { url: $('input.url_picker').attr('value') }
-	RP.submit.enqueue request, elmt
-	event.preventDefault()
-
 # The pic_picker dialog itself
 mydlog = () ->
 	$('div.dialog.pic_picker')
@@ -43,13 +35,43 @@ RP.pic_picker.close = (dlog) ->
 
 # When the pic_picker is activated in a dialog...
 RP.pic_picker.activate = (pane) ->
-
+	console.log "Pic-picker pane activated"
+	$('input#pic-picker-magic', pane).focus()
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
+	$(dlog).on 'paste', "#pic-picker-magic", (event) ->  # nee 'input'
+		console.log "Paste into pic-picker magic"
+		contents = event.originalEvent.clipboardData.getData 'text'
+		parse_actions contents, {
+			url: ->
+				console.log "...trying text as URL"
+				# Fire the url-extract-button's URL, with the addition of the given URL
+				elmt = event.currentTarget # $('a.url-extract-button')[0]
+				request = RP.build_request $(elmt).data('gleaning-url'), { url: contents }
+				RP.submit.enqueue request, elmt
+				event.preventDefault()
+			imgsrc: ->
+				console.log "...pasted image URL"
+				# previewImg 'input#pic-picker-magic', 'div.preview img', 'input#pic-picker-url'
+				set_image_safely 'div.preview img', contents, 'input#pic-picker-url'
+				event.preventDefault()
+			error: ->
+				console.log "...bad/unparsable URL"
+				if contents.length > 20
+					contents = contents.slice(0, 20) + '...'
+				RP.notifications.post "Sorry, but '" + contents + "' doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
+		}
+
+	$('input[type="text"]', dlog).pasteImageReader (results) ->
+		{filename, dataURL} = results
+		set_image_safely 'div.preview img', dataURL, 'input#pic-picker-url'
+
+	# When the 'src' for an image is set and things settle down (for better or worse),
+	# check the status and report as necessary.
 	$('div.preview img').on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
 			$('.dialog-submit-button', dlog).addClass 'disabled'
@@ -66,11 +88,12 @@ RP.pic_picker.open = (dlog) ->
 		load_picked_image()
 
 	$(dlog).on 'click','a.url-extract-button', (event) ->
-		extract_from_page(event)
-
-	$('input[type="text"]', dlog).pasteImageReader (results) ->
-		{filename, dataURL} = results
-		set_image_safely 'div.preview img', dataURL, 'input#pic-picker-url'
+		# Fire the url-extract-button's URL, with the addition of the given URL
+		elmt = event.currentTarget
+		url = $('input.url_picker').attr('value')
+		request = RP.build_request $(elmt).data('href'), { url: url }
+		RP.submit.enqueue request, elmt
+		event.preventDefault()
 
 	$(dlog).on 'click','.dialog-submit-button', (event) ->
 		url = url_result()
@@ -110,3 +133,19 @@ check_image = (img) ->
 	# We only allow images that are over 100 pixels in size, with a maximum A/R of 3
 	if (img.tagName == 'IMG') && img.complete && (img.naturalWidth > 100 && img.naturalHeight > 100 && img.naturalHeight > (img.naturalWidth/3))
 		$(img).show()
+
+parser = document.createElement 'a'
+
+parse_actions = (contents, options) ->
+	if contents && contents.length > 0
+		console.log "...text pasted: " + contents
+		if contents.match(/^\s*https?:/) # A URL
+			parser.href = contents;
+			if parser.pathname.match /\.(jpg|jpeg|tif|tiff|gif|png)$/ # The input is an image URL
+				(typeof options.imgsrc == 'function') && options.imgsrc()
+			else
+				(typeof options.url == 'function') && options.url()
+		else if contents.match /^\s*data/
+			(typeof options.imgsrc == 'function') && options.imgsrc()
+		else
+			(typeof options.error == 'function') && options.error()

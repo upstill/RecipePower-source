@@ -114,7 +114,7 @@ function previewImg(inputsel, imagesel, formsel) {
     set_image_safely(imagesel, url, formsel);
     return false;
 }
-
+//
 // Place an image URL into both a preview image  and an accompanying input field, if any
 function imagePreviewWidgetSet(imgID, inputID, url) {
     set_image_safely("img#" + imgID, url, "input#" + inputID)
@@ -131,3 +131,4 @@ RP.validate_img = function (event) {
         }
     }
 }
+

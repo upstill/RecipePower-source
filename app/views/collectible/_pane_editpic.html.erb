@@ -1,3 +1,4 @@
+<div class="pane" id="pic_picker-pane">
   <div class="row">
     <div class="col-xs-12 col-sm-6 col-md-5">
       <div class="preview">
@@ -10,7 +11,6 @@
       <%= render 'pic_select_list' %>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-7">
-
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
           <span class="prompt">If you have the web address (URL) of an image, type or paste it here and click Preview.</span>
@@ -37,30 +37,29 @@
         <%= link_to_submit 'Extract Images',
                            polymorphic_path([:editpic, @decorator]),
                            class: 'btn btn-info url-extract-button float-right-button',
-                           data: { :'wait-msg' => 'Give us a sec to crack that page...' },
+                           data: {:'wait-msg' => 'Give us a sec to crack that page...'},
                            mode: :modal
         %>
       </div>
     </div>
   </div>
-
   <% if @decorator.pageurl && @pic_select_list.blank? %>
       <div class="row">
         <div class="col-xs-12 col-sm-12 col-md-12">
           <div style="margin: 10px;">
-                <span class="prompt">
-                  ...or, you can <%= link_to 'visit the recipe\'s webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>, hit the Cookmark button, and pick a picture from there.
-                </span>
+                    <span class="prompt">
+                      ...or, you can <%= link_to 'visit the recipe\'s webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>
+                      , hit the Cookmark button, and pick a picture from there.
+                    </span>
           </div>
         </div>
       </div>
   <% end %>
-
-  <%= modal_footer do %>
-      <%= form_for @decorator.object, :method => :patch, data: {type: 'json'} do |f| %>
-          <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
-          <%# f.submit "Save" %>
-          <%= form_actions f %>
-      <% end %>
-      <%# dialog_cancel_button "Cancel" %>
-  <% end %>
+  <input id="pic-picker-magic"
+         value="Some silly shit"
+         type="text"
+         autofocus="autofocus"
+         data-gleaning-url="<%= polymorphic_path [:glean, @decorator.object] %>"
+         name="recipe[picurl]">
+  <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
+</div>

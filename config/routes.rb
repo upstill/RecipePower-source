@@ -26,6 +26,7 @@ RP::Application.routes.draw do
     member do
       get 'touch'
       get 'associated'
+      get 'glean'
       patch 'collect'
     end
   end

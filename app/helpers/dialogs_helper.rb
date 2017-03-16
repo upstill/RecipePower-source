@@ -122,6 +122,21 @@ module DialogsHelper
                 role: 'group') if btns.count > 1
   end
 
+  def dialog_pane(name, &block)
+    contents = with_output_buffer(&block)
+    content_tag(:div,
+                content_tag(:div,
+                            content_tag(:div,
+                                        contents,
+                                        class: 'col-md-12'
+                            ),
+                            class: 'row'
+                ),
+                class: 'pane',
+                id: name+'-pane'
+    ).html_safe
+  end
+
   # Place the header for a dialog, including setting its Onload function.
   # Currently handled this way (e.g., symbols that have been supported)
   #   :edit_recipe
