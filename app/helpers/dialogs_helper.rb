@@ -122,17 +122,15 @@ module DialogsHelper
                 role: 'group') if btns.count > 1
   end
 
-  def dialog_pane(name, &block)
+  def dialog_pane(name, inner_col=true, &block)
     contents = with_output_buffer(&block)
+    contents = content_tag(:div,
+                           contents,
+                           class: 'col-md-12'
+    ) if inner_col
     content_tag(:div,
-                content_tag(:div,
-                            content_tag(:div,
-                                        contents,
-                                        class: 'col-md-12'
-                            ),
-                            class: 'row'
-                ),
-                class: 'pane',
+                content_tag(:div, contents, class: 'row'),
+                class: name+' pane',
                 id: name+'-pane'
     ).html_safe
   end

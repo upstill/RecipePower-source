@@ -1,5 +1,5 @@
 <%= modal_dialog 'pane_runner new-style green',
-                 header_contents: pane_buttons( comment: 'Comment',
+                 header_contents: pane_buttons( 'comment-collectible': 'Comment',
                                                 edit_recipe: 'Title & Description',
                                                 'tag-collectible': 'Tags',
                                                 lists_collectible: 'Treasuries',
@@ -11,10 +11,11 @@
     </div>
     <%= form_for @recipe do |f| %>
         <%= form_errors_helper f, @recipe %>
-        <%= render 'pane_comment', f: f %>
+        <%= render 'pane_comment_collectible', f: f %>
         <%= render 'pane_tag', f: f %>
         <%= render 'pane_edit', f: f %>
         <%= render 'pane_editpic', f: f %>
+        <%= render 'pane_lists_collectible', f: f %>
 
         <div class="modal-footer">
           <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
@@ -30,69 +31,4 @@
           <%= dialog_cancel_button %>
         </div>
     <% end %>
-
-    <%# render 'form_lists' %>
-    <form accept-charset="UTF-8"
-          action="<%= polymorphic_path [:lists, @decorator.object ] %>"
-          class="form-inline lists-collectible"
-          data-remote="true"
-          data-type="json"
-          <%# "data-always_submit='true'" if @decorator.picuri_problem %>
-          id="lists_collectible_<%= @decorator.id %>">
-      <input name="utf8" type="hidden" value="&#x2713;"/>
-      <input name="_method" type="hidden" value="patch"/>
-      <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
-      <% user_decorator = current_user_or_guest.decorate %>
-      <% all_tags = user_decorator.list_tags %>
-      <% classify_listtags all_tags %>
-      <% used_tags = user_decorator.list_tags(@decorator) %>
-      <% classify_listtags used_tags %>
-      <div class="pane" id="lists_collectible-pane">
-        <div class="row">
-          <div class="col-md-12">
-            <div class="control-group now-appearing">
-              <label class="string optional">Now Appearing in the Treasuries:</label>
-              <input id="<%= @decorator.element_id :tagging_user_id %>"
-                     name="<%= @decorator.field_name :tagging_user_id %>"
-                     type="hidden"
-                     value="<%= @decorator.tagging_user_id %>">
-              <input type="text"
-                     class="token-input-field-pending"
-                     id="tagging_list_tokens"
-                     name="<%= @decorator.field_name :tagging_list_tokens %>"
-                     rows="2"
-                     size="30"
-                     placeholder="Lists"
-                     data-taglist="<%= all_tags.to_json %>"
-                     data-pre="<%= used_tags.to_json %>"
-                     data-allowFreeTagging="true"
-                     data-eventHandler="RP.lists_collectible"
-                     data-theme="list"
-                     data-query="tagtype=16"
-                     data-noResultsText="No such treasury now; hit Enter to start a new one"
-                     data-hintText="Search for a treasury by typing"/>
-            </div>
-            <div class="control-group">
-              <label class="string optional" style="margin-top: 40px;">Suggested Treasuries</label>
-              <div class="selection-list" data->
-                <% all_tags.each do |tagspec| %>
-                    <!--Include only the lists of friends and self -->
-                    <% if tagspec[:sortval] < 4 %>
-                        <a href="#"
-                           class="selection-item <%= tagspec[:cssclass] %>"
-                           id="<%= tagspec[:cssid] %>"
-                           data-to_selector="#tagging_list_tokens"
-                           data-tokeninput="<%= tagspec.to_json %>"
-                           <%= %q{style="display: none;"} if used_tags.include? tagspec %>
-                           title="Click to Add">
-                          <%= tagspec[:name] %>
-                        </a>
-                    <% end %>
-                <% end %>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-     </form>
 <% end %>

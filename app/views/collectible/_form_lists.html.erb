@@ -1,17 +1,17 @@
 <form accept-charset="UTF-8"
-      action="<%= polymorphic_path [:lists, decorator.object ] %>"
-      class="form-inline lists-collectible"
+      action="<%= polymorphic_path [:lists, @decorator.object ] %>"
+      class="form-inline lists_collectible"
       data-remote="true"
       data-type="json"
-      <%# "data-always_submit='true'" if decorator.picuri_problem %>
-      id="lists_collectible_<%= decorator.id %>">
+      <%# "data-always_submit='true'" if @decorator.picuri_problem %>
+      id="lists_collectible_<%= @decorator.id %>">
   <input name="utf8" type="hidden" value="&#x2713;"/>
   <input name="_method" type="hidden" value="patch"/>
   <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
   <% user_decorator = current_user_or_guest.decorate %>
   <% all_tags = user_decorator.list_tags %>
   <% classify_listtags all_tags %>
-  <% used_tags = user_decorator.list_tags(decorator) %>
+  <% used_tags = user_decorator.list_tags(@decorator) %>
   <% classify_listtags used_tags %>
   <div class="row">
     <div class="col-md-12">
@@ -20,14 +20,14 @@
       </div>
       <div class="control-group now-appearing">
         <label class="string optional">Now Appearing in the Treasuries:</label>
-        <input id="<%= decorator.element_id :tagging_user_id %>"
-               name="<%= decorator.field_name :tagging_user_id %>"
+        <input id="<%= @decorator.element_id :tagging_user_id %>"
+               name="<%= @decorator.field_name :tagging_user_id %>"
                type="hidden"
-               value="<%= decorator.tagging_user_id %>">
+               value="<%= @decorator.tagging_user_id %>">
         <input type="text"
                class="token-input-field-pending"
                id="tagging_list_tokens"
-               name="<%= decorator.field_name :tagging_list_tokens %>"
+               name="<%= @decorator.field_name :tagging_list_tokens %>"
                rows="2"
                size="30"
                placeholder="Lists"

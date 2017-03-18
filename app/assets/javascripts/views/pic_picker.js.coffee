@@ -9,6 +9,8 @@ try_img = (url) ->
 RP.pic_picker.activate = (pane) ->
 	console.log "Pic-picker pane activated"
 	$('input#pic-picker-magic', pane).focus()
+	if $('div.pic-pickees img:not(.bogus)').length == 0
+		$('div.pic-pickees span.prompt').hide()
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog

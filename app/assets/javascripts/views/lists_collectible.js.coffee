@@ -2,9 +2,6 @@
 #
 RP.lists_collectible = RP.lists_collectible || {}
 
-me = () ->
-	$('div.lists-collectible.dialog')
-
 token_input = () ->
 	$('input#tagging_list_tokens')
 
@@ -34,7 +31,6 @@ RP.lists_collectible.onReady = (whatever) ->
 		tokeninput = $(item).data 'tokeninput'
 		if tokeninput.cssclass
 			$(item).addClass tokeninput.cssclass
-
 
 # When dialog is loaded, activate its functionality
 RP.lists_collectible.onload = (dlog) ->

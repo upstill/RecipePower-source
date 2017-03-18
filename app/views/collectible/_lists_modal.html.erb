@@ -1,6 +1,6 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template        %>
-<%= modal_dialog "lists-collectible new-style green", decorator.title.truncate(70), dialog_class: 'dialog-sm' do %>
+<%= modal_dialog "lists_collectible new-style green", decorator.title.truncate(70), dialog_class: 'dialog-sm' do %>
     <div class="content">
       <%= render 'form_lists' %>
     </div>
