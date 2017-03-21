@@ -1,6 +1,9 @@
 <%= dialog_pane 'pic_picker', false do %>
     <div class="col-xs-12 col-sm-6 col-md-5">
-      <div class="preview">
+      <div class="preview"
+           id="pic-picker-magic"
+           data-gleaning-url="<%= polymorphic_path [:glean, @decorator.object] %>"
+           contenteditable='true'>
         <%= image_with_error_recovery @decorator,
                                       id: 'rcpPic',
                                       fallback_img: true,
@@ -11,21 +14,17 @@
     </div>
     <div class="col-xs-12 col-sm-6 col-md-7">
       <p>
-        Hint: If there are no suitable images to choose from, you can copy and paste an image (or another web
-        page) into here.</span>
-      </p>
-
-      <p>
-        ...or, you
+        Hint: You can paste an image (or another web page) here, or you
         can <%= link_to 'go to the webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>
         , hit the Cookmark button, and pick a picture from there.
       </p>
-      <input id="pic-picker-magic"
+<!--     <input id="pic-picker-magic"
              value="Some silly shit"
              type="text"
              autofocus="autofocus"
-             data-gleaning-url="<%= polymorphic_path [:glean, @decorator.object] %>"
+             data-gleaning-url="<%# polymorphic_path [:glean, @decorator.object] %>"
              name="recipe[picurl]">
+-->
       <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
     </div>
 <% end %>

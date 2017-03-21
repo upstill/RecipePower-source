@@ -5,29 +5,66 @@ preview_selector = 'div.preview img'
 try_img = (url) ->
 	set_image_safely preview_selector, url, 'input#pic-picker-url'
 
+focus_selector = 'div.preview' # input#pic-picker-magic'
+
+arm_pane = (dlog_or_pane) ->
+	# $('input#pic-picker-magic', dlog_or_pane).focus()
+	$(focus_selector, dlog_or_pane).attr('tabindex', 0)
+	$(focus_selector, dlog_or_pane).focus()
+	if $('div.pic-pickees img:not(.bogus)').length == 0
+		$('div.pic-pickees span.prompt').hide()
+
 # When the pic_picker is activated in a dialog...
 RP.pic_picker.activate = (pane) ->
 	console.log "Pic-picker pane activated"
-	$('input#pic-picker-magic', pane).focus()
-	if $('div.pic-pickees img:not(.bogus)').length == 0
-		$('div.pic-pickees span.prompt').hide()
+	arm_pane pane
+
+# event.type must be keypress
+getChar = (event) ->
+	if event.which == null
+		return String.fromCharCode event.keyCode # IE
+	else if event.which!=0 && event.charCode!=0
+		return String.fromCharCode event.which   # the rest
+	else
+		return null // special key
+
+do_cut = (event) ->
+	console.log 'Cut event received'
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
+	# Here's how we handle image blobs (if the paste handler didn't handle it b/c it's not text)
+	$('input[type="text"]', dlog).pasteImageReader (results) ->
+		{filename, dataURL} = results
+		try_img dataURL
 	# To handle pasting of page URLs, image URLS (including data:) and image blobs, we intercept the paste event
-	$(dlog).on 'paste', "#pic-picker-magic", (event) ->  # nee 'input'
+	document.getElementById('pic-picker-magic').addEventListener 'keypress', (e) ->
+		c = getChar e
+		e.preventDefault()
+		e.stopPropagation();
+	document.getElementById('pic-picker-magic').addEventListener 'keydown', (e) ->
+		# if !(e.shiftKey || e.ctrlKey || e.altKey || e.metaKey || (e.keyCode == 8))
+		if e.keyCode == 8 # Delete key removes the image
+			do_cut e
+			e.preventDefault()
+			e.stopPropagation()
+	document.getElementById('pic-picker-magic').addEventListener 'cut', do_cut
+	document.getElementById('pic-picker-magic').addEventListener 'paste', (event) ->
 		console.log "Paste into pic-picker magic"
-		contents = event.originalEvent.clipboardData.getData 'text'
+		# Get pasted data via clipboard API
+		clipboardData = event.clipboardData || window.clipboardData;
+		contents = clipboardData.getData 'text'
+		target_div = $('div#pic-picker-magic')[0]
 		parse_actions contents, {
 			url: ->
 				console.log "...trying text as URL"
 				# Fire the url-extract-button's URL, with the addition of the given URL
-				elmt = event.currentTarget # $('a.url-extract-button')[0]
-				request = RP.build_request $(elmt).data('gleaning-url'), { url: contents }
-				RP.submit.enqueue request, elmt
+				elmt = event.target # $('a.url-extract-button')[0]
+				request = RP.build_request $(target_div).data('gleaning-url'), { url: contents }
+				RP.submit.enqueue request, target_div
 				event.preventDefault()
 			imgsrc: ->
 				console.log "...pasted image URL"
@@ -38,12 +75,10 @@ RP.pic_picker.open = (dlog) ->
 				if contents.length > 20
 					contents = contents.slice(0, 20) + '...'
 				RP.notifications.post "Sorry, but '" + contents + "' doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
+				event.preventDefault()
 		}
-	# Here's how we handle image blobs (if the paste handler didn't handle it b/c it's not text)
-	$('input[type="text"]', dlog).pasteImageReader (results) ->
-		{filename, dataURL} = results
-		try_img dataURL
-
+	if !$(dlog).hasClass 'pane' # Wait until the pane is activated to arm it
+		arm_pane dlog
 	# When the 'src' for the preview image is set and things settle down (for better or worse),
 	# check the status and report as necessary.
 	$(preview_selector).on 'ready', (event) ->
