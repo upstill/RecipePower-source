@@ -20,16 +20,17 @@ module ImagesHelper
     end
     options[:alt] ||= fallback_img if fallback_img.is_a?(String) && fallback_img.present?  # Had better be a string if the url was a string
 
+    options[:data] ||= {}
     # The :fill_mode option requests the image be resized to fit its container
     if fill_mode = options.delete(:fill_mode)
+      options[:data][:fillmode] = fill_mode
       options[:class] = "#{options[:class]} #{fill_mode}" # Add fill-mode indicator to class
       # options[:class] = "#{options[:class]} fitPic #{fill_mode}" # Add fitPic class and mode indicator
       # options[:onload] = 'doFitImage(event);'  # Fit the image onload
     end
 
-    options[:data] ||= {}
     if options.delete :explain
-      url = fallback_img if url.blank? && fallback_img.is_a?(String)
+      # url = fallback_img if url.blank? && fallback_img.is_a?(String)
       options[:data] = {
           emptyurlfallback: (options.delete(:emptyurlfallback) || image_path('NoPictureOnFile.png')),
           bogusurlfallback: (options.delete(:bogusurlfallback) || image_path('BadPicURL.png'))
@@ -38,9 +39,10 @@ module ImagesHelper
     options[:data][:handle_empty] = options.delete(:handle_empty) if options[:handle_empty]
 
     # if url.present? || fallback_img
-      options[:alt] ||= 'Image Not Accessible'
-      options[:onError] ||= 'onImageError(this);'
-      image_tag ((url.present? && url) || (fallback_img.is_a?(String) && fallback_img) || ''), options
+    options[:alt] ||= 'Image Not Accessible'
+    options[:onError] ||= 'onImageError(this);'
+    # image_tag ((url.present? && url) || (fallback_img.is_a?(String) && fallback_img) || ''), options
+    image_tag (url || ''), options
     # end
   end
 

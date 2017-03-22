@@ -74,12 +74,18 @@ function fitImage(img) {
     return true;
 }
 
+function get_image(imageSel) {
+    return $(imageSel).attr('src');
+}
+
 // Set the source for the preview image, only loading the URL into the form field when the image is successfully loaded
 // NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
 function set_image_safely(imageElmt, url, formsel) {
     $(formsel).attr('value', url || "")
     if (url.length < 1) {  // Substitute empty url with placeholder for display purposes only
         url = $(imageElmt).data('emptyurlfallback') || ""
+    }
+    if (url.length < 1) {  // If the url is STILL empty, render the image invisible
         $(imageElmt).addClass('empty')
     } else {
         $(imageElmt).removeClass('empty')
@@ -92,7 +98,8 @@ function set_image_safely(imageElmt, url, formsel) {
         var img = image.img;
         var fallback;
         if (image.isLoaded) {
-            $(img).addClass("loaded")
+            $(img).addClass("loaded");
+            fitImage($(img)[0]);
         } else {
             $(img).addClass("bogus").removeClass("loaded");
             img.src = $(img).data("bogusurlfallback") || "";

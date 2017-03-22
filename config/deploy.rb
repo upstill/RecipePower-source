@@ -1,5 +1,5 @@
 # config valid only for Capistrano 3.1
-lock '3.7.1' # '3.3.5' # '3.6.1' # '3.2.1'
+lock '3.3.5' # '3.7.1' # '3.6.1' # '3.2.1'
 
 require "./config/recipes/base"
 require "./config/recipes/nginx"

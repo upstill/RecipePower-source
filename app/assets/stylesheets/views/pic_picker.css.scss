@@ -12,15 +12,19 @@ div.pic-pickees {
   overflow-y: auto;
 }
 
+img#rcpPic {
+  width: 100%;
+}
+
 // Portion of a pic_picker which shows an image, accompanied by its url in a hidden field
 div.pic_preview {
-  width:100%;
-  height:auto;
-  margin-left:auto;
-  margin-right:auto;
+  width: 100%;
+  height: auto;
+  margin-left: auto;
+  margin-right: auto;
   text-align: center;
   input {
-    display:none;
+    display: none;
   }
   img {
     // visibility: hidden;
@@ -33,24 +37,25 @@ div.pic_preview {
   }
 }
 
-div.pic_picker { // Dialog
-	.preview {
-		margin-bottom: 10px;
-		// outline:#909090 2px solid;
-		text-align: center;
-	}
-    .float-right-button {
-      margin: 20px;
-      float: right;
-    }
-	.prompt {
-		font:18px arial,sans-serif;
-		font-weight:bold;
-	}
-	.picCell {
-		width:96px;
-		height:72px;
-		margin:10px;
-		text-align:center
-	}
+div.pic_picker {
+  // Dialog
+  .preview {
+    margin-bottom: 10px;
+    // outline:#909090 2px solid;
+    color: transparent; // Hide the blinking text cursor
+  }
+  .float-right-button {
+    margin: 20px;
+    float: right;
+  }
+  .prompt {
+    font: 18px arial, sans-serif;
+    font-weight: bold;
+  }
+  .picCell {
+    width: 96px;
+    height: 72px;
+    margin: 10px;
+    text-align: center
+  }
 }

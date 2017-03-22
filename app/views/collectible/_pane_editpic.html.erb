@@ -7,7 +7,9 @@
         <%= image_with_error_recovery @decorator,
                                       id: 'rcpPic',
                                       fallback_img: true,
-                                      fill_mode: 'fixed-width' %>
+                                      explain: true,
+                                      fill_mode: 'width'
+        %>
       </div>
       <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
       <%= render 'pic_select_list' %>

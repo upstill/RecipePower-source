@@ -2,14 +2,28 @@ RP.pic_picker ||= {}
 
 # We try an image url by assigning it to an img element, then moving it to the input field if loaded successfully
 preview_selector = 'div.preview img'
-try_img = (url) ->
+
+# Paste an image into the preview pane, pausing to save the previous image, if any, on the picker list
+do_paste = (url) ->
+	url ||= ''
+	prior = $('input#pic-picker-url')[0].value # get_image preview_selector
+	# Save the old image on the 'pic-pickees' list, if appropriate
+	if prior.length > 1
+		console.log "Saving image '" + prior + "'"
+		matcher = null
+		$('div.pic-pickees img.pic-pickee').each (ix) ->
+			if this.src == prior
+				matcher = this
+		if !matcher
+			txt = "<img src='" + prior + "' class='pic-pickee'>"
+			$(txt).insertAfter "div.pic-pickees span.prompt"
 	set_image_safely preview_selector, url, 'input#pic-picker-url'
 
 focus_selector = 'div.preview' # input#pic-picker-magic'
 
 arm_pane = (dlog_or_pane) ->
 	# $('input#pic-picker-magic', dlog_or_pane).focus()
-	$(focus_selector, dlog_or_pane).attr('tabindex', 0)
+	$(focus_selector, dlog_or_pane).attr 'tabindex', 0
 	$(focus_selector, dlog_or_pane).focus()
 	if $('div.pic-pickees img:not(.bogus)').length == 0
 		$('div.pic-pickees span.prompt').hide()
@@ -19,18 +33,6 @@ RP.pic_picker.activate = (pane) ->
 	console.log "Pic-picker pane activated"
 	arm_pane pane
 
-# event.type must be keypress
-getChar = (event) ->
-	if event.which == null
-		return String.fromCharCode event.keyCode # IE
-	else if event.which!=0 && event.charCode!=0
-		return String.fromCharCode event.which   # the rest
-	else
-		return null // special key
-
-do_cut = (event) ->
-	console.log 'Cut event received'
-
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
 # -- the data of the link must contain urls for each image, separated by ';'
@@ -39,19 +41,18 @@ RP.pic_picker.open = (dlog) ->
 	# Here's how we handle image blobs (if the paste handler didn't handle it b/c it's not text)
 	$('input[type="text"]', dlog).pasteImageReader (results) ->
 		{filename, dataURL} = results
-		try_img dataURL
+		do_paste dataURL
 	# To handle pasting of page URLs, image URLS (including data:) and image blobs, we intercept the paste event
 	document.getElementById('pic-picker-magic').addEventListener 'keypress', (e) ->
-		c = getChar e
 		e.preventDefault()
 		e.stopPropagation();
 	document.getElementById('pic-picker-magic').addEventListener 'keydown', (e) ->
 		# if !(e.shiftKey || e.ctrlKey || e.altKey || e.metaKey || (e.keyCode == 8))
 		if e.keyCode == 8 # Delete key removes the image
-			do_cut e
+			do_paste()
 			e.preventDefault()
 			e.stopPropagation()
-	document.getElementById('pic-picker-magic').addEventListener 'cut', do_cut
+	document.getElementById('pic-picker-magic').addEventListener 'cut', do_paste
 	document.getElementById('pic-picker-magic').addEventListener 'paste', (event) ->
 		console.log "Paste into pic-picker magic"
 		# Get pasted data via clipboard API
@@ -68,7 +69,7 @@ RP.pic_picker.open = (dlog) ->
 				event.preventDefault()
 			imgsrc: ->
 				console.log "...pasted image URL"
-				try_img contents
+				do_paste contents
 				event.preventDefault()
 			error: ->
 				console.log "...bad/unparsable URL"
@@ -97,7 +98,7 @@ RP.pic_picker.open = (dlog) ->
 	$(dlog).on 'click','img.pic-pickee', (event) ->
 		clickee = RP.event_target event
 		url = (clickee.getAttribute 'src')
-		try_img url
+		do_paste url
 
 	# ...We can also upload files directly
 	if uploader = $('input.directUpload', dlog)[0]
