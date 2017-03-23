@@ -18,22 +18,16 @@ module PicPickerHelper
 
     pic_area = image_with_error_recovery decorator,
                                          id: pic_preview_img_id(decorator),
-                                         class: 'fixed-width',
+                                         fill_mode: 'fixed-width',
                                          fallback_img: options[:fallback_img] || true
-    field_options = {
-        rel: 'jpg,png,gif',
-        class: 'hidden_text',
-        onchange: ('RP.submit.enclosing_form' if options[:submit_on_change])
-    }
-    preview = content_tag :div,
-                          pic_area+form.hidden_field(decorator.picable_attribute, field_options.compact),
-                          class: 'pic_preview'
-=begin
-    preview << content_tag(:div,
-                           pic_picker_go_button(decorator, options[:fallback_img]),
-                           class: 'pic_picker_link') unless options[:nopicker]
-=end
-    preview
+
+    form_field = form.hidden_field decorator.picable_attribute,
+                                   {
+                                       rel: 'jpg,png,gif',
+                                       class: 'hidden_text',
+                                       onchange: ('RP.submit.enclosing_form' if options[:submit_on_change])
+                                   }.compact
+    content_tag :div, pic_area+form_field, class: 'pic_preview'
   end
 
 =begin

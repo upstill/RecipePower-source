@@ -25,8 +25,12 @@ RP.lists_collectible.onAdd = (tokeninput) ->
 RP.lists_collectible.onDelete = (tokeninput) ->
 	$('div.selection-list a#'+tokeninput.cssid).show()
 
-RP.lists_collectible.onReady = (whatever) ->
+RP.lists_collectible.activate = (tipane) ->
+	console.log 'Activated Lists_collectible'
 	$('li.token-input-input-token input').trigger 'click'
+	$('li.token-input-input-token input').focus()
+
+RP.lists_collectible.onReady = (whatever) ->
 	input_tokens().each (ix, item) ->
 		tokeninput = $(item).data 'tokeninput'
 		if tokeninput.cssclass

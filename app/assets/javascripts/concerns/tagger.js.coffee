@@ -46,11 +46,6 @@ RP.tagger.select_type = (event) ->
 RP.tagger.select_batch = (event) ->
 	RP.querify.propagate event.target, { batch: event.target.value }
 
-###
-RP.tagger.fix_width = ->
-	$('ul.token-input-list-facebook li.token-input-input-token-facebook input').css('width', '185px;')
-###
-
 check_enabler = (elmt) ->
 	# An enabler specifies an element that will be en/disabled when there are tokens extant
 	# e.g., a Submit button that can be enabled when a token has been input

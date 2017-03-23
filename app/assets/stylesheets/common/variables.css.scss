@@ -25,7 +25,7 @@ $viewer-card-link-color: mix($viewer-panels-label-button-color, black, 70%);
 // For material relating to lists of the current user
 
 $friends-navtab-background-color: #e4e0cf;
-$friends-navtab-color: #dbc046;
+$friends-navtab-color: #bfa73d;
 
 $friends-card-background-color: #e9e4ca;
 $friends-panels-label-color: #e9e4ca;
@@ -296,22 +296,31 @@ $dialog-colors: (
 @mixin dialog-color-scheme($colorName) {
   background-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
   color: map-get($dialog-colors, unquote("#{$colorName}-color"));
-  li.token-input-token-facebook { // The collected token(s)
+  li.token-input-token-facebook, li.token-input-token { // The collected token(s)
     color: mix(map-get($dialog-colors, unquote("#{$colorName}-color")), white, 70%);
     background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-background-color")), map-get($dialog-colors, unquote("#{$colorName}-field-background-color")), 70%);
     border-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
   }
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
+  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook, ul.token-input-list  {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-field-color"));
   }
-  select, div.token-input-dropdown-facebook {
+  select, div.token-input-dropdown-facebook, div.token-input-dropdown {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
   input.center-button {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
+    background-image: unset;
+    color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
+  }
+  div#paneButtons label.btn-primary {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
+    &.active {
+      background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-button-background-color")), black, 90%);
+    }
     background-image: unset;
     color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
@@ -326,6 +335,59 @@ $dialog-colors: (
     background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-flash-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-flash-border-color"));
+  }
+  div.lists_collectible {
+    div.control-group {
+      ul.token-input-list {
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        font-size: 16px;
+        width: 100%;
+        li.token-input-input-token input.token-input-field {
+          margin: 3px;
+        }
+      }
+      li.token-input-token {
+        margin: 5px;
+        outline-color: p {
+          width: 96%;
+        }
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        color: map-get($dialog-colors, unquote("#{$colorName}-button-color")); // map-get($dialog-colors, unquote("green-button-color"));
+        outline: 3px solid mix(
+                        map-get($dialog-colors, unquote("#{$colorName}-button-color")),
+                        map-get($dialog-colors, unquote("#{$colorName}-field-background-color")),
+                        40%
+        );
+      }
+    }
+    div.selection-list {
+      outline: 1px solid black;
+      overflow-y: scroll;
+      height: 7em;
+      margin: 5px 20px;
+      padding: 2px;
+      a.selection-item {
+        margin: 3px 8px 3px 4px;
+        padding-left: 5px;
+        font-size: 0.8em;
+        display: block;
+        line-height: 2.2em;
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        color: map-get($dialog-colors, unquote("#{$colorName}-background-color")); // map-get($dialog-colors, unquote("green-button-color"));
+        &.owned {
+          background-color: $lists-navtab-background-color;
+          color: $lists-navtab-color;
+        }
+        &.contributed {
+          background-color: $recipes-navtab-background-color;
+          color: $recipes-navtab-color;
+        }
+        &.friends {
+          background-color: $friends-navtab-background-color;
+          color: $friends-navtab-color;
+        }
+      }
+    }
   }
 }
 

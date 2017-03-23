@@ -158,7 +158,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       height: 1.5em;
     }
   }
-  ul.token-input-list-facebook {
+  ul.token-input-list, ul.token-input-list-facebook {
     font: 15px arial, sans-serif;
     padding-top: 3px;
     padding-bottom: 3px;
@@ -167,7 +167,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       margin: 0;
     }
   }
-  li.token-input-input-token-facebook {
+  li.token-input-input-token, li.token-input-input-token-facebook {
     input[type='text'] {
       border-radius: 20px;
     }

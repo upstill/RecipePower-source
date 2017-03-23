@@ -46,12 +46,11 @@ function fitImage(img) {
 
     var frameAR = frameWidth / frameHeight;
     var imgAR = picWidth / picHeight;
-    var fillmode = $(img).data("fillmode") || "none";
-    if (fillmode == "width") {
+    if ($(img).hasClass("fixed-width")) {
         // Size image to fit parent's width
         $(img).css("width", frameWidth);
         $(img).css("height", frameWidth / imgAR);
-    } else if (fillmode == "height") {
+    } else if ($(img).hasClass("fixed-height")) {
         // Size image to fit parent's height
         $(img).css("height", frameHeight);
         $(img).css("width", frameHeight * imgAR);
