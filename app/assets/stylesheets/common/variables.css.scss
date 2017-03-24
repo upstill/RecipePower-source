@@ -305,6 +305,13 @@ $dialog-colors: (
   input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook, ul.token-input-list  {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-field-color"));
+    &::placeholder {
+      color: mix(
+                      map-get($dialog-colors, unquote("#{$colorName}-field-color")),
+                      map-get($dialog-colors, unquote("#{$colorName}-field-background-color")),
+                      50%
+      );
+    }
   }
   select, div.token-input-dropdown-facebook, div.token-input-dropdown {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));

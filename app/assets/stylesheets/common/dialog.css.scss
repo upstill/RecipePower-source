@@ -98,6 +98,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       textarea {
         line-height: 1.5em;
         width: 94%;
+        max-width: 94%;
         margin-left: 6%;
         margin-bottom: 5px;
         &.full-width {
@@ -157,7 +158,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     &.token-input-field {
       height: 1.5em;
     }
-    &.description {
+    &.description, &.comment {
       font-size: 1em;
     }
   }

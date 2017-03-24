@@ -6,6 +6,7 @@
       </div>
       <input id="<%= @decorator.element_id :collectible_user_id %>" name="<%= @decorator.field_name :collectible_user_id %>" type="hidden" value="<%= @decorator.collectible_user_id %>">
       <%= f.text_area :collectible_comment,
+                      :class => 'comment',
                       :id => @decorator.element_id(:collectible_comment),
                       :label => false,
                       :placeholder => "Anything you'd like to say about this #{@decorator.human_name false, false}." %>
