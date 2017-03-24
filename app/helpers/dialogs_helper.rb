@@ -101,9 +101,26 @@ module DialogsHelper
     content_tag :div, ft, class: "modal-footer row #{options[:class]}"
   end
 
-  def pane_buttons keyvals={}
+  def pane_dialog decorator, colorscheme='green'
+    bc = content_tag( :div, flash_notifications_div, class: 'notifications-panel')+
+         render('form', decorator: decorator, in_panes: true)
+
+    modal_dialog "pane_runner new-style #{colorscheme}",
+                 header_contents: dialog_pane_buttons(decorator),
+                 dialog_class: 'modal-lg',
+                 body_contents: bc
+  end
+
+  def dialog_pane_buttons decorator
+    keyvals={
+        :'comment-collectible' => ('Comment' if decorator.object.is_a? Collectible),
+        :edit_recipe => 'Title & Description',
+        :'tag-collectible' => ('Tags' if decorator.object.is_a? Taggable),
+        :lists_collectible => ('Treasuries' if decorator.object.is_a? Taggable),
+        :pic_picker => ('Picture' if decorator.object.is_a? Picable)
+    }.compact
     input = '<input type="radio" name="options" autocomplete="off" checked '
-    active = 'active'  # Marks the input
+    active = 'active' # Marks the input
     btns = keyvals.collect { |key, val|
       if val.present?
         label = content_tag :label,
@@ -118,12 +135,25 @@ module DialogsHelper
                 safe_join(btns),
                 class: 'btn-group',
                 id: 'paneButtons',
-                data: { toggle: 'buttons' },
+                data: {toggle: 'buttons'},
                 role: 'group') if btns.count > 1
   end
 
-  def dialog_pane(name, inner_col=true, &block)
-    contents = with_output_buffer(&block)
+  def dialog_panes decorator, f
+    result = ''.html_safe
+    result << render('pane_comment_collectible', decorator: decorator, f: f) if decorator.object.is_a? Collectible
+    result << render('pane_tag', decorator: decorator, f: f) if decorator.object.is_a? Taggable
+    result << render('pane_edit', decorator: decorator, f: f)
+    result << render('pane_editpic', decorator: decorator, f: f) if decorator.object.is_a? Picable
+    result << render('pane_lists_collectible', decorator: decorator, f: f) if decorator.object.is_a? Taggable
+    result
+  end
+
+  def dialog_pane(name, inner_col=true, form_params={}, &block)
+    if inner_col.is_a? Hash
+      inner_col, form_params = true, inner_col
+    end
+    contents = block_given? ? with_output_buffer(&block) : render('form_content', form_params)
     contents = content_tag(:div,
                            contents,
                            class: 'col-md-12'

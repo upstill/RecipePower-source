@@ -64,7 +64,7 @@ class CollectibleController < ApplicationController
       Gleaning.glean @pageurl, 'Image'
     else
       @decorator.gleaning
-    end
+    end if @decorator.object.respond_to?(:gleaning)
     @image_list = (gleaning && gleaning.images) ? gleaning.images : []
     if @pageurl.present? && @image_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'

@@ -2,7 +2,8 @@ module CollectibleHelper
 
   # List of buttons in the panel
   def collectible_buttons_available
-    %w{ edit_button lists_button tools_menu tag_button share_button upload_button collect_button}
+    # Used to be (before edit_button absorbed all the rest): %w{ edit_button lists_button tools_menu tag_button share_button upload_button collect_button}
+    %w{ edit_button share_button upload_button collect_button}
   end
 
   # Styling hash asserting all buttons
