@@ -157,6 +157,9 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     &.token-input-field {
       height: 1.5em;
     }
+    &.description {
+      font-size: 1em;
+    }
   }
   ul.token-input-list, ul.token-input-list-facebook {
     font: 15px arial, sans-serif;
