@@ -106,47 +106,9 @@ module DialogsHelper
          render('form', decorator: decorator, in_panes: true)
 
     modal_dialog "pane_runner new-style #{colorscheme}",
-                 header_contents: dialog_pane_buttons(decorator),
+                 header_contents: decorator.dialog_pane_buttons,
                  dialog_class: 'modal-lg',
                  body_contents: bc
-  end
-
-  def dialog_pane_buttons decorator
-    keyvals={
-        :'comment-collectible' => ('Comment' if decorator.object.is_a? Collectible),
-        :edit_recipe => 'Title & Description',
-        :'tag-collectible' => ('Tags' if decorator.object.is_a? Taggable),
-        :lists_collectible => ('Treasuries' if decorator.object.is_a? Taggable),
-        :pic_picker => ('Picture' if decorator.object.is_a? Picable)
-    }.compact
-    input = '<input type="radio" name="options" autocomplete="off" checked '
-    active = 'active' # Marks the input
-    btns = keyvals.collect { |key, val|
-      if val.present?
-        label = content_tag :label,
-                            (input + "data-pane='#{key}'> " + val).html_safe,
-                            class: 'btn btn-primary ' + active
-        active = ''
-        input.sub! 'checked', ''
-        label
-      end
-    }.compact
-    content_tag(:div,
-                safe_join(btns),
-                class: 'btn-group',
-                id: 'paneButtons',
-                data: {toggle: 'buttons'},
-                role: 'group') if btns.count > 1
-  end
-
-  def dialog_panes decorator, f
-    result = ''.html_safe
-    result << render('pane_comment_collectible', decorator: decorator, f: f) if decorator.object.is_a? Collectible
-    result << render('pane_tag', decorator: decorator, f: f) if decorator.object.is_a? Taggable
-    result << render('pane_edit', decorator: decorator, f: f)
-    result << render('pane_editpic', decorator: decorator, f: f) if decorator.object.is_a? Picable
-    result << render('pane_lists_collectible', decorator: decorator, f: f) if decorator.object.is_a? Taggable
-    result
   end
 
   def dialog_pane(name, inner_col=true, form_params={}, &block)
@@ -160,8 +122,8 @@ module DialogsHelper
     ) if inner_col
     content_tag(:div,
                 content_tag(:div, contents, class: 'row'),
-                class: name+' pane',
-                id: name+'-pane'
+                class: "#{name} pane",
+                id: "#{name}-pane"
     ).html_safe
   end
 

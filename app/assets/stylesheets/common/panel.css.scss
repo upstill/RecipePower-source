@@ -27,8 +27,8 @@ div.results-panel {
     color: $feeds-panel-label-color;
   }
   &.lists {
-    background-color: $lists-panel-background-color;
-    color: $lists-panel-label-color;
+    background-color: $list-panel-background-color;
+    color: $list-panel-label-color;
   }
   .results-menu {
     width: 100%;
@@ -112,7 +112,7 @@ div.results-panel {
       &.lists {
         top: 88px;
         font-size: 59px;
-        color: $lists-panel-label-color;
+        color: $list-panel-label-color;
       }
       .results-img {
         width: 70px;

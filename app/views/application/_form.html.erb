@@ -2,7 +2,7 @@
 <%= form_for decorator.object do |f| %>
     <%= form_errors_helper f, decorator.object %>
     <!--The form_content partial is specific to each entity type-->
-    <%= in_panes ? dialog_panes(decorator, f) : render('form_content', decorator: decorator) %>
+    <%= in_panes ? decorator.dialog_panes(f) : render('form_content', decorator: decorator) %>
     <div class="modal-footer">
       <% objname = decorator.object.class.to_s %>
       <% if permitted_to?(:admin, objname.underscore.to_sym) && response_service.admin_view? %>

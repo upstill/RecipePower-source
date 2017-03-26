@@ -1,4 +1,2 @@
 <%# Fields for an edit-list dialog %>
-<%= modal_dialog 'edit_list new-style green', "Edit #{@list.name}"+(@list.description.blank? ? "" : ": "+@list.description) do %>
-  <%= render "form" %>
-<% end %>
+<%= pane_dialog @decorator, 'list-dialog' %>

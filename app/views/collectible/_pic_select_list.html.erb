@@ -1,5 +1,5 @@
 <div class="pic-pickees">
-  <% if @image_list.present? %>
+  <% if @image_list %>
       <br><span class="prompt">Click on an image to grab it.</span>
       <%= pic_picker_select_list(@image_list) %>
   <% else %>

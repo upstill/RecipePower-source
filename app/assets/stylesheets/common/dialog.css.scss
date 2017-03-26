@@ -100,7 +100,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         width: 94%;
         max-width: 94%;
         margin-left: 6%;
-        margin-bottom: 5px;
+        margin-bottom: 25px;
         &.full-width {
           width: 100%;
           margin-left: 0;
@@ -144,6 +144,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     }
   }
   input[type='text'],
+  textarea,
   input[type='password'],
   input[type='email'],
   input[type='url'] {
@@ -229,7 +230,11 @@ div.dialog.new-style.blue div.modal-dialog div.modal-content {
 }
 
 div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
-  @include dialog-color-scheme(feeds);
+  @include dialog-color-scheme(feed-dialog);
+}
+
+div.dialog.new-style.list-dialog div.modal-dialog div.modal-content {
+  @include dialog-color-scheme(list-dialog);
 }
 
 div.form-group.user_remember_me {

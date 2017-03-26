@@ -262,15 +262,15 @@ div.results-panel.friends div.slider-fader {
 }
 
 div.results-panel.lists div.slider-fader {
-  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color);
+  background: -moz-linear-gradient(left, $list-panel-background-transparent, $list-panel-background-color);
   // background: -webkit-linear-gradient(left, rgba(216,224,226,0), #d8dde0);
   background: rgb(216, 221, 224); /* Old browsers */
-  background: -moz-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* FF3.6+ */
-  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $lists-panel-background-color), color-stop(100%, $lists-panel-background-color)); /* Chrome,Safari4+ */
-  background: -webkit-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Chrome10+,Safari5.1+ */
-  background: -o-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* Opera 11.10+ */
-  background: -ms-linear-gradient(left, $lists-panel-background-transparent, $lists-panel-background-color); /* IE10+ */
-  background: linear-gradient(to right, $lists-panel-background-transparent, $lists-panel-background-color); /* W3C */
+  background: -moz-linear-gradient(left, $list-panel-background-transparent, $list-panel-background-color); /* FF3.6+ */
+  background: -webkit-gradient(linear, left top, right top, color-stop(0%, $list-panel-background-color), color-stop(100%, $list-panel-background-color)); /* Chrome,Safari4+ */
+  background: -webkit-linear-gradient(left, $list-panel-background-transparent, $list-panel-background-color); /* Chrome10+,Safari5.1+ */
+  background: -o-linear-gradient(left, $list-panel-background-transparent, $list-panel-background-color); /* Opera 11.10+ */
+  background: -ms-linear-gradient(left, $list-panel-background-transparent, $list-panel-background-color); /* IE10+ */
+  background: linear-gradient(to right, $list-panel-background-transparent, $list-panel-background-color); /* W3C */
   filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#d8dde0', endColorstr='#d8dde0', GradientType=1); /* IE6-9 */
 }
 

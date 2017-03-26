@@ -55,12 +55,14 @@ $recipes-panel-label-color: #e5ebef;
 
 $lists-navtab-background-color: #dbe0dd;
 $lists-navtab-color: #1d6a2b;
-$lists-card-background-color: #d0dbd2;
-$lists-panels-label-color: #e9e4ca;
-$lists-panels-label-button-color: #94b79a;
-$lists-panel-background-color: #dbe0dd;
-$lists-panel-background-transparent: rgba(219, 224, 221, 0);
-$lists-panel-label-color: #e9eeea;
+$list-card-background-color: #d0dbd2;
+$list-card-color: $lists-navtab-color;
+$list-panels-background-color: #f6f8f7;
+$list-panels-label-color: #e9e4ca;
+$list-panels-label-button-color: #74977a;
+$list-panel-background-color: #dbe0dd;
+$list-panel-background-transparent: rgba(219, 224, 221, 0);
+$list-panel-label-color: #e9eeea;
 
 $feeds-navtab-background-color: #e7dfd6;
 $feeds-navtab-color: #de8822;
@@ -177,9 +179,9 @@ $salmon-field-color: #CF6361;
 
 $salmon-link-color: #E0A09E;
 
-$salmon-button-background-color: #D8E5DC; // Not correct, but TBD when used
+$salmon-button-background-color: #e5d1d0;
 $salmon-button-color: #CF2F27;
-$salmon-button-border-color: #385E44;
+$salmon-button-border-color: #cf7876;
 
 $blue-background-color: #5090A9;
 $blue-color: #E6D7A3;
@@ -276,19 +278,33 @@ $dialog-colors: (
         purple-flash-color: $purple-button-color,
         purple-flash-border-color: $purple-button-border-color,
 
-        feeds-background-color: $feeds-background-color,
-        feeds-color: $feeds-color,
-        feeds-link-color: $feeds-link-color,
-        feeds-field-background-color: $feeds-field-background-color,
-        feeds-field-color: $feeds-field-color,
-        feeds-select-background-color: $feeds-field-background-color,
-        feeds-select-color: $feeds-field-color,
-        feeds-button-background-color: $feeds-button-background-color,
-        feeds-button-color: $feeds-button-color,
-        feeds-button-border-color: $feeds-button-border-color,
-        feeds-flash-background-color: $feeds-button-background-color,
-        feeds-flash-color: $feeds-button-color,
-        feeds-flash-border-color: $feeds-button-border-color
+        feed-dialog-background-color: $feeds-background-color,
+        feed-dialog-color: $feeds-color,
+        feed-dialog-link-color: $feeds-link-color,
+        feed-dialog-field-background-color: $feeds-field-background-color,
+        feed-dialog-field-color: $feeds-field-color,
+        feed-dialog-select-background-color: $feeds-field-background-color,
+        feed-dialog-select-color: $feeds-field-color,
+        feed-dialog-button-background-color: $feeds-button-background-color,
+        feed-dialog-button-color: $feeds-button-color,
+        feed-dialog-button-border-color: $feeds-button-border-color,
+        feed-dialog-flash-background-color: $feeds-button-background-color,
+        feed-dialog-flash-color: $feeds-button-color,
+        feed-dialog-flash-border-color: $feeds-button-border-color,
+
+        list-dialog-background-color: $list-card-background-color,
+        list-dialog-color: $list-card-color,
+        list-dialog-link-color: $list-panel-label-color,
+        list-dialog-field-background-color: $list-panels-background-color,
+        list-dialog-field-color: $lists-navtab-color,
+        list-dialog-select-background-color: $list-panels-background-color,
+        list-dialog-select-color: $lists-navtab-color,
+        list-dialog-button-background-color: $list-panels-background-color,
+        list-dialog-button-color: $list-panels-label-button-color,
+        list-dialog-button-border-color: $lists-navtab-color,
+        list-dialog-flash-background-color: $list-panels-background-color,
+        list-dialog-flash-color: $list-panel-label-color,
+        list-dialog-flash-border-color: $lists-navtab-color
 
 );
 
@@ -574,9 +590,9 @@ $lists-panel-background-transparent: rgba(219, 224, 221, 0);
 $lists-panel-label-color: #e9eeea;
   */
         list-card-color: inherit,
-        list-card-background-color: $lists-card-background-color,
+        list-card-background-color: $list-card-background-color,
         list-card-header-color: rgba($lists-navtab-color, 0.6),
-        list-card-link-color: $lists-panels-label-button-color,
+        list-card-link-color: $list-panels-label-button-color,
         list-card-title-color: $lists-navtab-color,
   // list-card-source-color: #cdcdcd,
   // list-card-source-link-color: #909090,
