@@ -22,11 +22,16 @@ RP::Application.routes.draw do
     end
   end
 
+  concern :linkable do
+    member do
+      get 'glean/:what', :action => 'glean', :what => /titles|descriptions|images|feeds/, :as => 'glean'
+    end
+  end
+
   concern :collectible do
     member do
       get 'touch'
       get 'associated'
-      get 'glean'
       patch 'collect'
     end
   end
@@ -65,13 +70,7 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-  post '/votes/recipe/:id' => 'votes#create'
-  post '/votes/feed/:id' => 'votes#create'
-  post '/votes/feed_entry/:id' => 'votes#create'
-  post '/votes/list/:id' => 'votes#create'
-  post '/votes/product/:id' => 'votes#create'
-  post '/votes/site/:id' => 'votes#create'
-  post '/votes/user/:id' => 'votes#create'
+  post '/votes/:entity/:id' => 'votes#create', :entity => /recipe|feed|feed_entry|list|product|site|user/
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
@@ -137,10 +136,9 @@ RP::Application.routes.draw do
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
+  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable, :linkable] do
     member do
       post 'absorb'
-      post 'glean'
       get 'feeds'
       post 'approve' # (Admin only) approve the site for presentation
     end
@@ -212,7 +210,7 @@ RP::Application.routes.draw do
   resources :ratings
   resources :scales
 
-  resources :recipes, :concerns => [:picable, :collectible, :taggable] do
+  resources :recipes, :concerns => [:picable, :collectible, :taggable, :linkable] do
     member do
       get 'piclist'
     end

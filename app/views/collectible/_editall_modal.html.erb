@@ -5,11 +5,11 @@
         <div class="row pane edit-pane">
           <%= form_errors_helper f, @recipe %>
           <div class="col-md-12">
-            <%= gleaning_trigger @decorator %>
+            <%# gleaning_trigger @decorator %>
             <div class='item-enclosure'>
               <div class='label-enclosure'>
                 <%= f.label :title, 'Title' -%>
-                <%= gleaning_field @decorator, 'Title' %>
+                <%= gleaning_field @decorator, :titles %>
               </div>
               <%= f.text_field :title, :label => false %>
             </div>
@@ -17,7 +17,7 @@
             <div class='item-enclosure'>
               <div class='label-enclosure'>
                 <%= f.label :title, 'Description' -%>
-                <%= gleaning_field @decorator, 'Description' %>
+                <%= gleaning_field @decorator, :descriptions %>
               </div>
               <%= f.text_area :description, :label => false %>
             </div>
@@ -94,10 +94,7 @@
                                         fill_mode: 'fixed-width' %>
         </div>
         <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
-        <% if @pic_select_list.present? %>
-            <br><span class="prompt">Click on an image to grab it.</span>
-            <%= @pic_select_list %>
-        <% end %>
+        <%= gleaning_field @decorator, :images %>
       </div>
       <div class="col-xs-12 col-sm-6 col-md-7">
         <div class="row">

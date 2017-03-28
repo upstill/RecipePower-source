@@ -163,6 +163,9 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       font-size: 1em;
     }
   }
+  textarea {
+    height: 3.2em;
+  }
   ul.token-input-list, ul.token-input-list-facebook {
     font: 15px arial, sans-serif;
     padding-top: 3px;

@@ -9,6 +9,7 @@ class SitesController < CollectibleController
     smartrender 
   end
 
+=begin Controller methods handled at the Collectible level
   # GET /sites/1
   # GET /sites/1.json
   def show
@@ -38,6 +39,7 @@ class SitesController < CollectibleController
     response_service.title = 'New Site'
     render :edit
   end
+=end
 
   def feeds
     update_and_decorate

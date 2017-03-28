@@ -1,31 +1,30 @@
 module GleaningsHelper
 
   # Declare an element that either provides gleaned choices, or waits for a replacement request to come in
-  def gleaning_field decorator, label
-    if decorator.gleaning && decorator.gleaning.good?
-      gleaning_field_declaration decorator, label
-    else
-      gleaning_field_enclosure label,
-                               image_tag('ajax-loader.gif', class: 'beachball', style: 'height: 15px;')
+  def gleaning_field decorator, what, gleaning=nil
+    return unless gleaning ||= decorator.glean
+    if gleaning.good?
+      gleaning_field_declaration decorator, what, gleaning
+    elsif decorator.object.is_a?(Linkable)
+      trigger = link_to_submit 'Scrape',
+                               polymorphic_path([:glean, decorator.object], what: what), # gleaning_path(decorator.gleaning),
+                               class: 'trigger hide'
+      gleaning_field_enclosure what,
+                               trigger+image_tag('ajax-loader.gif', class: 'beachball', style: 'height: 15px;')
     end
   end
 
-  # Define a trigger link to fetch the gleaning field(s), iff needed
-  def gleaning_trigger decorator
-    link_to_submit 'Scrape',
-                   gleaning_path(decorator.gleaning),
-                   class: 'trigger hide' unless !decorator.gleaning || decorator.gleaning.good?
-  end
 
-  def gleaning_field_declaration decorator, label
-    entity_name = decorator.object.class.to_s.underscore
-    attribute_name = "#{entity_name}[gleaning_attributes][#{label}]"
+  def gleaning_field_declaration decorator, what, gleaning=nil
+    gleaning ||= decorator.gleaning
+    label = {titles: 'Title', descriptions: 'Description', images: 'Image', feeds: 'RSS Feed'}[what]
+    attribute_name = "#{decorator.param_key}[gleaning_attributes][#{what}]"
     target = nil
     field =
         case label
           when 'Title', 'Description'
             options = decorator.gleaning.options_for label
-            target = "#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]"
+            target = "#{decorator.param_key}[#{decorator.attribute_for label}]"
             if label == 'Title' && decorator.respond_to?(:page_ref) && decorator.page_ref.title.present?
               options << decorator.page_ref.title
             end
@@ -64,26 +63,43 @@ module GleaningsHelper
               label_tag('Gleaned Feeds') + gleaning.html_safe
             end
           when 'Image'
+            if gleaning.images.present?
+              content_tag(:span, 'Click on an image to grab it.', :class => 'prompt')
+              pic_picker_select_list(gleaning.images || [])
+            end
           when 'Tags'
           when 'Site Name'
           when 'Author'
           when 'Author Link'
         end
-    gleaning_field_enclosure label, field, target
+    gleaning_field_enclosure what, field, target
   end
 
-  def gleaning_field_replacement decorator, label
-    [ '.'+gleaning_field_class(label), gleaning_field_declaration(decorator, label) ]
+  def gleaning_field_replacement decorator, what, gleaning=nil
+    ['.'+gleaning_field_class(what), gleaning_field_declaration(decorator, what, gleaning)]
   end
 
-  def gleaning_field_class label
-    "gleaning-field-#{FinderServices.css_class label}"
+  def gleaning_field_class what
+    "gleaning-field-#{FinderServices.css_class what}"
   end
 
-  def gleaning_field_enclosure label, content, target=nil
-    content_tag :div,
-                content,
-                class: 'gleaning-field-enclosure label-right ' + gleaning_field_class(label),
-                data: { target: target }.compact
+  def gleaning_field_enclosure what, content, target=nil
+    klass = case what
+      when :images
+        'pic-pickees'
+      else
+        'gleaning-field-enclosure label-right' + gleaning_field_class(what)
+    end + ' ' + gleaning_field_class(what)
+    options = { class: klass }
+    options[:data] = { target: target } if target
+    content_tag :div, content, options
+  end
+
+  def gleaning_replacements decorator, what, gleaning=nil
+    {
+        replacements: [
+            gleaning_field_replacement(decorator, what, gleaning)
+        ]
+    }
   end
 end

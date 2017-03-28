@@ -8,6 +8,67 @@ class CollectibleDecorator < Draper::Decorator
     what.to_s.downcase.to_sym
   end
 
+  # ##### Extract various forms of the model's name
+  def model_name
+    @@mn ||= object.model_name
+  end
+
+  # Recipe => 'Recipe'
+  # FeedEntry => 'FeedEntry'
+  def name
+    model_name.name
+  end
+
+  # Recipe => 'recipe'
+  # FeedEntry => 'feed_entry'
+  def singular
+    model_name.singular
+  end
+
+  # Recipe => 'recipes'
+  # FeedEntry => 'feed_entries'
+  def plural
+    model_name.plural
+  end
+
+  # Recipe => 'recipe'
+  # FeedEntry => 'feed_entry'
+  def element
+    model_name.element
+  end
+
+  # Recipe => 'Recipe'
+  # FeedEntry => 'Feed entry'
+  def human
+    model_name.human
+  end
+
+  # Recipe => 'recipe'
+  # FeedEntry => 'feed_entry'
+  def param_key
+    model_name.param_key
+  end
+
+  # Recipe => 'recipes'
+  # FeedEntry => 'feed_entries'
+  def collection
+    model_name.collection
+  end
+
+  # Check permissions for current user to access controller method
+  def user_can? what
+    h.permitted_to? what.to_sym, collection.to_sym
+  end
+
+  # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
+  # Also, launch the gleaning as necessary
+  def glean force=false
+    if object.respond_to?(:glean)
+      object.glean force
+      object.gleaning unless object.gleaning.bad?
+    end
+  end
+
   # sample_page is a full URL somewhere on the associated site so we can absolutize links
   def sample_page
 
@@ -276,11 +337,11 @@ class CollectibleDecorator < Draper::Decorator
   def dialog_pane_buttons
     keyval = dialog_edit_button
     keyvals={
-        :'comment-collectible' => ('Comment' if object.is_a? Collectible),
-        keyval.first => keyval.last,
-        :'tag-collectible' => ('Tags' if object.is_a? Taggable),
-        :lists_collectible => ('Treasuries' if object.is_a? Taggable),
-        :pic_picker => ('Picture' if object.is_a? Picable)
+        :'comment-collectible' => ('Comment' if object.is_a?(Collectible)),
+        keyval.first => (keyval.last if user_can?(:admin)),
+        :'tag-collectible' => ('Tags' if object.is_a?(Taggable) && user_can?(:tag)),
+        :lists_collectible => ('Treasuries' if object.is_a?(Taggable) && user_can?(:lists)),
+        :pic_picker => ('Picture' if object.is_a?(Picable) && user_can?(:editpic))
     }.compact
     input = '<input type="radio" name="options" autocomplete="off" checked '
     active = 'active' # Marks the input
@@ -304,17 +365,17 @@ class CollectibleDecorator < Draper::Decorator
 
   # Here's how Collectibles render their panes into a dialog
   def dialog_panes f
-    result = ''.html_safe
-    result << h.render('pane_comment_collectible', decorator: self, f: f) if object.is_a? Collectible
-    result << h.render('pane_tag', decorator: self, f: f) if object.is_a? Taggable
-    result << h.render('pane_edit', decorator: self, f: f) if dialog_edit_button.first
-    result << h.render('pane_editpic', decorator: self, f: f) if object.is_a? Picable
-    result << h.render('pane_lists_collectible', decorator: self, f: f) if object.is_a? Taggable
+    result = ''.html_safe  # :lists, :tag, :editpic
+    result << h.render('pane_comment_collectible', decorator: self, f: f) if object.is_a?(Collectible)
+    result << h.render('pane_tag', decorator: self, f: f) if object.is_a?(Taggable) && user_can?(:tag)
+    result << h.render('pane_edit', decorator: self, f: f) if dialog_edit_button.first && user_can?(:admin)
+    result << h.render('pane_editpic', decorator: self, f: f) if object.is_a?(Picable) && user_can?(:editpic)
+    result << h.render('pane_lists_collectible', decorator: self, f: f) if object.is_a?(Taggable) && user_can?(:lists)
     result
   end
 
   def dialog_pane f
-    h.dialog_pane(dialog_edit_button.first, f: f) if dialog_edit_button.first
+    h.dialog_pane(dialog_edit_button.first, decorator: self, f: f) if dialog_edit_button.first
   end
 
   end

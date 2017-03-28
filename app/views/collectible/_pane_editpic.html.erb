@@ -2,7 +2,7 @@
     <div class="col-xs-12 col-sm-6 col-md-5">
       <div class="preview"
            id="pic-picker-magic"
-           data-gleaning-url="<%= polymorphic_path [:glean, @decorator.object] %>"
+           data-gleaning-url="<%= polymorphic_path [:glean, @decorator.object], what: 'images' %>"
            contenteditable='true'>
         <%= image_with_error_recovery @decorator,
                                       id: 'rcpPic',
@@ -12,7 +12,7 @@
         %>
       </div>
       <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
-      <%= render 'pic_select_list' %>
+      <%= gleaning_field @decorator, :images %>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-7">
       <p>

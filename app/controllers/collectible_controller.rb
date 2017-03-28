@@ -59,14 +59,15 @@ class CollectibleController < ApplicationController
   # Extract images from a URL
   def glean
     update_and_decorate
-    gleaning =
-    if @pageurl = params[:url]
-      Gleaning.glean @pageurl, 'Image'
-    else
-      @decorator.gleaning
-    end if @decorator.object.respond_to?(:gleaning)
-    @image_list = (gleaning && gleaning.images) ? gleaning.images : []
-    if @pageurl.present? && @image_list.blank?
+    @what = params[:what].to_sym
+    @gleaning =
+        if @pageurl = params[:url] # To glean images from another page
+          Gleaning.glean @pageurl, 'Image'
+        else
+          @decorator.glean! # Wait for gleaning to complete
+          @decorator.gleaning
+        end if @decorator.object.respond_to?(:gleaning)
+    if @pageurl.present? && @gleaning && @gleaning.images.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors
     end
@@ -176,7 +177,7 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate
-    response_service.title = @decorator && @decorator.title.truncate(20)
+    response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
   end

@@ -1,5 +1,1 @@
-{
-    replacements: [
-      gleaning_field_replacement(@entity_decorator, @finder.label)
-    ]
-}.merge(flash_notify).to_json
+gleaning_field_replacements(@entity_decorator, @finder.what).merge(flash_notify).to_json

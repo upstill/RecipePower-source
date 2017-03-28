@@ -10,4 +10,8 @@ class Finder < ActiveRecord::Base
   def labelsym
     @labelsym ||= label.downcase.gsub /\s/, '_'
   end
+
+  def what
+    (label == 'RSS Feed') ? :feeds : label.underscore.pluralize
+  end
 end
