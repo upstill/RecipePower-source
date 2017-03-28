@@ -14,8 +14,6 @@ RP::Application.routes.draw do
   get 'finders/create'
   post 'finders/create'
 
-  resources :gleanings, :only => [:new, :create, :show]
-
   concern :picable do
     member do
       get 'editpic' # Open dialog to acquire an image from various sources
