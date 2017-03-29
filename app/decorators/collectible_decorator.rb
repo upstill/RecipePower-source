@@ -9,10 +9,6 @@ class CollectibleDecorator < Draper::Decorator
   end
 
   # ##### Extract various forms of the model's name
-  def model_name
-    @@mn ||= object.model_name
-  end
-
   # Recipe => 'Recipe'
   # FeedEntry => 'FeedEntry'
   def name

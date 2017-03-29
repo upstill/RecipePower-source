@@ -127,7 +127,7 @@ class Gleaning < ActiveRecord::Base
 
   # Declare success on a label/value pair by voting up the corresponding finder
   def hit_on site, label, value
-    if results && value.present?
+    if value.present? && results && results[label].present?
       # Vote up each finder that produces this value
       results[label].each do |result|
         if result.out.include? value

@@ -18,7 +18,7 @@ module GleaningsHelper
   def gleaning_field_declaration decorator, what, gleaning=nil
     gleaning ||= decorator.gleaning
     label = {titles: 'Title', descriptions: 'Description', images: 'Image', feeds: 'RSS Feed'}[what]
-    attribute_name = "#{decorator.param_key}[gleaning_attributes][#{what}]"
+    attribute_name = "#{decorator.param_key}[gleaning_attributes][#{label}]"
     target = nil
     field =
         case label
