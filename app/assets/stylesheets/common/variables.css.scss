@@ -442,7 +442,7 @@ $card-colors: (
         generic-card-background-color: $generic-card-background-color,
         generic-card-header-color: $generic-card-title-color,
         generic-card-title-color: #909090,
-        generic-card-link-color: inherit,
+        generic-card-link-color: $generic-card-color,
   // generic-card-source-color: #cdcdcd,
   // generic-card-source-link-color: #909090,
   // generic-card-description-color: inherit,
@@ -455,7 +455,7 @@ $card-colors: (
         recipe-card-background-color: $recipes-card-background-color,
         recipe-card-header-color: #cdcdcd,
         recipe-card-title-color: #909090,
-        recipe-card-link-color: inherit,
+        recipe-card-link-color: $recipes-panels-label-button-color,
   // recipe-card-source-color: #cdcdcd,
   // recipe-card-source-link-color: #909090,
   // recipe-card-description-color: inherit,
@@ -597,16 +597,16 @@ $lists-panel-label-color: #e9eeea;
   // list-card-source-color: #cdcdcd,
   // list-card-source-link-color: #909090,
   // list-card-description-color: inherit,
-        list-card-label-color: #cdcdcd,
+        list-card-label-color: #aaaaaa,
   // list-card-aspect-contents-color: #cdcdcd,
   // list-card-notes-color: #cdcdcd,
   // list-card-tagsep-color: #cdcdcd,
 
         /* Sites: the former entity-card  */
         site-card-color: #909090,
-        site-card-background-color: inherit,
+        site-card-background-color: $generic-card-background-color,
         site-card-title-color: #909090,
-        site-card-link-color: inherit,
+        site-card-link-color: $generic-card-title-color,
         site-card-header-color: #cdcdcd,
         // site-card-source-color: #cdcdcd,
         // site-card-source-link-color: #909090,
@@ -625,6 +625,12 @@ $lists-panel-label-color: #e9eeea;
   }
   a {
     color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+  }
+  svg#vote-up, svg#vote-down {
+    // color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+    fill: mix(map-get($card-colors, unquote("#{$cardType}-card-title-color")),
+               map-get($card-colors, unquote("#{$cardType}-card-background-color")),
+               30%);
   }
   h3 { // Section header
     color: map-get($card-colors, unquote("#{$cardType}-card-header-color"));

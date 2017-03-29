@@ -1,9 +1,3 @@
 <%= dialog_pane 'tag-collectible' do %>
-    <% if response_service.admin_view? %>
-        <div class="control-group">
-          <label class="string optional">Title</label>
-          <textarea class="full-width" rows=1 id="<%= @decorator.element_id :title %>" name="<%= @decorator.field_name :title %>" placeholder="Title"><%= @decorator.title %></textarea>
-        </div>
-    <% end %>
-    <%= tagging_fields @decorator %>
+    <%= tagging_fields decorator %>
 <% end %>

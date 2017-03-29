@@ -26,12 +26,6 @@
         <% if permitted_to?(:admin, :sites) %>
             <div class='item-enclosure'>
               <div class='label-enclosure'>
-                <%= f.label :url, 'URL' -%>
-              </div>
-              <%= f.url_field :url %>
-            </div>
-            <div class='item-enclosure'>
-              <div class='label-enclosure'>
                 <%= f.label :home, 'Site Home' -%>
               </div>
               <%= f.url_field :home %>

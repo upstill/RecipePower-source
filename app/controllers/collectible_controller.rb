@@ -63,10 +63,10 @@ class CollectibleController < ApplicationController
     @gleaning =
         if @pageurl = params[:url] # To glean images from another page
           Gleaning.glean @pageurl, 'Image'
-        else
+        elsif @decorator.object.respond_to?(:gleaning)
           @decorator.glean! # Wait for gleaning to complete
           @decorator.gleaning
-        end if @decorator.object.respond_to?(:gleaning)
+        end
     if @pageurl.present? && @gleaning && @gleaning.images.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors

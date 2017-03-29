@@ -128,6 +128,8 @@ RP::Application.routes.draw do
   resources :lists, except: [:index, :create], :concerns => [:picable, :taggable, :collectible] do
     member do
       post 'pin' # Add an entity to a list
+      # We allow lists to do gleaning to get an image
+      get 'glean/:what', :action => 'glean', :what => 'images', :as => 'glean'
       get 'contents'
     end
   end
