@@ -8,6 +8,30 @@ module PicPickerHelper
     decorator.element_id decorator.picable_attribute
   end
 
+  # Define an image and surrounding <div> such that copy and paste apply to the image
+  # This is assumed to be embedded in a form, where the decorator's picture field gets
+  # set as appropriate.
+  # options:
+  #  - gleanable: accepts a URL for a page to be scanned for images, presenting a list for choosing
+  #  - uploadable: accepts a local file to be uploaded and saved on AWS
+  def pic_picker_magic decorator, f, options={}
+    divopts = {
+        class: 'preview',
+        id: 'pic-picker-magic',
+        contenteditable: true
+    }
+    divopts[:data] = { :'gleaning-url' => polymorphic_path( [:glean, decorator.object], what: 'images') } if options[:gleanable]
+    image = image_with_error_recovery decorator,
+                                      id: 'rcpPic',
+                                      fallback_img: true,
+                                      explain: true,
+                                      fill_mode: 'fixed-width'
+    preview = content_tag :div, image, divopts
+    preview << uploader_field(decorator, input_id: 'pic-picker-url', img_id: 'rcpPic') if options[:uploadable]
+    preview << gleaning_field(decorator, :images) if options[:gleanable]
+    preview + f.hidden_field(decorator.picable_attribute, id: 'pic-picker-url')
+  end
+
   # Show an image that will resize to fit an enclosing div, possibly with a link to an editing dialog
   # We'll need the id of the object, and the name of the field containing the picture's url
   def pic_field form, options={}

@@ -35,8 +35,7 @@ div.control-group {
 // @import "bootstrap";
 
 .modal-header h3 {
-  margin-top: 1em;
-  margin-bottom: 0;
+  margin: 0.5em;
   line-height: 30px;
 }
 
@@ -45,7 +44,7 @@ div.control-group {
   margin-bottom: 10px;
   &.section {
     margin-top: 15px;
-    margin-bottom: 8px;
+    margin-bottom: 15px;
   }
 }
 
@@ -121,88 +120,82 @@ body {
   }
 }
 
-div.form-group.actions {
-  margin-top: 5px;
-  height: 20px;
-}
-
-.alert-guide {
-  background-color: $guideBackground;
-  border-color: $guideBorder;
-  color: $guideText;
-}
-
-input.hidden_text {
-  display: none;
-}
-
-select.tag_type_selector {
-  width: 140px;
-}
-
-div.dialog.modal {
-  div.modal-dialog {
-  }
-}
-
-input[type=checkbox] {
-  margin-top: 0;
-  margin-right: 5px;
-  width: 20px;
-  height: 20px;
-}
-
-input[type=radio] {
-  margin-top: 0;
-  width: 20px;
-  height: 20px;
-}
-
-//.form-group {
-div.form-group.user_login {
+div.form-group {
   margin-bottom: 0;
-}
-div.form-group.user_password {
-  margin-bottom: 0;
-}
-// }
-
-div.dialog > label {
-  font: 16px arial, sans-serif;
-  font-weight: bold;
-}
-
-div.col-md-6.auth {
-  padding: 3px;
-}
-
-div.col-md-2.auth {
-  padding: 0 2px 0 14px;
-}
-
-.scrollable {
-  height: 100%;
-  overflow: auto;
-  border: 2px solid black;
-}
-
-.text-on-black {
-  color: white;
-}
-
-div#vidbox {
-  display: inline-block;
-  position: relative;
-  width: 100%;
-  #vbdummy {
-    padding-top: 75%; // 4:3 aspect ratio */
-  }
-  #vbelement {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    background-color: silver // show me! */
+  &.actions {
+    margin-top: 5px;
+    height: 20px;
   }
 }
+
+  .alert-guide {
+    background-color: $guideBackground;
+    border-color: $guideBorder;
+    color: $guideText;
+  }
+
+  input.hidden_text {
+    display: none;
+  }
+
+  select.tag_type_selector {
+    width: 140px;
+  }
+
+  div.dialog.modal {
+    div.modal-dialog {
+    }
+  }
+
+  input[type=checkbox] {
+    margin-top: 0;
+    margin-right: 5px;
+    width: 20px;
+    height: 20px;
+  }
+
+  input[type=radio] {
+    margin-top: 0;
+    width: 20px;
+    height: 20px;
+  }
+
+  div.dialog > label {
+    font: 16px arial, sans-serif;
+    font-weight: bold;
+  }
+
+  div.col-md-6.auth {
+    padding: 3px;
+  }
+
+  div.col-md-2.auth {
+    padding: 0 2px 0 14px;
+  }
+
+  .scrollable {
+    height: 100%;
+    overflow: auto;
+    border: 2px solid black;
+  }
+
+  .text-on-black {
+    color: white;
+  }
+
+  div#vidbox {
+    display: inline-block;
+    position: relative;
+    width: 100%;
+    #vbdummy {
+      padding-top: 75%; // 4:3 aspect ratio */
+    }
+    #vbelement {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: silver // show me! */
+    }
+  }

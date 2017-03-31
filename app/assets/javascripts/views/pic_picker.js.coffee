@@ -21,17 +21,21 @@ do_paste = (url) ->
 
 focus_selector = 'div.preview' # input#pic-picker-magic'
 
-arm_pane = (dlog_or_pane) ->
+# To be called when either the dialog opens or the pane activates
+RP.pic_picker.invoke_magic = (dlog_or_pane) ->
 	# $('input#pic-picker-magic', dlog_or_pane).focus()
 	$(focus_selector, dlog_or_pane).attr 'tabindex', 0
 	$(focus_selector, dlog_or_pane).focus()
 	if $('div.pic-pickees img:not(.bogus)').length == 0
 		$('div.pic-pickees span.prompt').hide()
 
+# To be called once when the dialog opens
+# RP.pic_picker.open_magic = (dlog_or_pane) ->
+
 # When the pic_picker is activated in a dialog...
 RP.pic_picker.activate = (pane) ->
 	console.log "Pic-picker pane activated"
-	arm_pane pane
+	RP.pic_picker.invoke_magic pane
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
@@ -79,7 +83,7 @@ RP.pic_picker.open = (dlog) ->
 				event.preventDefault()
 		}
 	if !$(dlog).hasClass 'pane' # Wait until the pane is activated to arm it
-		arm_pane dlog
+		RP.pic_picker.invoke_magic dlog
 	# When the 'src' for the preview image is set and things settle down (for better or worse),
 	# check the status and report as necessary.
 	$(preview_selector).on 'ready', (event) ->

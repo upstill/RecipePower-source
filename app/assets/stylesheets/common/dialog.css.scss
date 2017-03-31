@@ -122,9 +122,11 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         }
         div.modal-body {
           padding-top: 5px;
+          /*
           div.form-group {
             margin-top: 10px;
           }
+          */
           p {
             font-family: $archivo; // $oswald-light; // $archivo;
             letter-spacing: 3px;
@@ -151,11 +153,14 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     width: 93%;
     margin-left: 7%;
     margin-top: 5px;
-    height: 2.5em;
+    height: 2em;
     padding: 0 15px 0 10px;
     margin-bottom: 25px;
     font-style: oblique;
     font-size: 1.2em;
+    &.answer-text {
+      width: 85%;
+    }
     &.token-input-field {
       height: 1.5em;
     }
@@ -184,16 +189,30 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
   div.item-enclosure {
     width: 97%;
     margin: auto;
-  }
-  div.label-enclosure {
-    width: 100%;
-    height: auto;
-    .label-right {
-      display: inline-block;
-      float: right;
-      max-width: 100%;
-      span {
-        font-size: 16px;
+    &.boolean-item {
+      margin-bottom: 20px;
+      div.boolean label.boolean input.boolean {
+        margin-left: -30px;
+        margin-top: 2px;
+      }
+    }
+    &.select-item {
+      margin-bottom: 10px;
+      div.form-group label {
+        margin-top: 5px;
+        margin-bottom: 0;
+      }
+    }
+    div.label-enclosure {
+      width: 100%;
+      height: auto;
+      .label-right {
+        display: inline-block;
+        float: right;
+        max-width: 100%;
+        span {
+          font-size: 16px;
+        }
       }
     }
   }
