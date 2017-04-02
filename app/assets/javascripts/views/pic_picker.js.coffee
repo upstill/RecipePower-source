@@ -29,9 +29,6 @@ RP.pic_picker.invoke_magic = (dlog_or_pane) ->
 	if $('div.pic-pickees img:not(.bogus)').length == 0
 		$('div.pic-pickees span.prompt').hide()
 
-# To be called once when the dialog opens
-# RP.pic_picker.open_magic = (dlog_or_pane) ->
-
 # When the pic_picker is activated in a dialog...
 RP.pic_picker.activate = (pane) ->
 	console.log "Pic-picker pane activated"
@@ -103,10 +100,6 @@ RP.pic_picker.open = (dlog) ->
 		clickee = RP.event_target event
 		url = (clickee.getAttribute 'src')
 		do_paste url
-
-	# ...We can also upload files directly
-	if uploader = $('input.directUpload', dlog)[0]
-		uploader_init uploader
 
 	# imagesLoaded fires when all the pickable images are either loaded or fail
 	imagesLoaded 'img.pic-pickee', (instance) ->

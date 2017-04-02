@@ -219,11 +219,11 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
   label.checkbox {
     margin-bottom: 0;
   }
-  .center-button {
-    letter-spacing: 4px;
-    border-radius: 8px;
-    padding: 5px 10px;
+  .dialog-button {
     &.free {
+      letter-spacing: 4px;
+      border-radius: 8px;
+      padding: 5px 10px;
       margin-top: 20px;
       display: block;
       margin-left: auto;
@@ -231,6 +231,11 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     }
     &.btn-xl {
       font-size: 1.5em;
+    }
+    &.dialog-footer-button {
+	  // margin-top: 10px; // To match Bootstrap buttons
+      margin: 10px 5px;
+      float: left;
     }
   }
 }

@@ -333,11 +333,12 @@ $dialog-colors: (
     background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
-  input.center-button {
+  input.dialog-button, a.dialog-button, label[for=user_avatar_url] {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
     background-image: unset;
     color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
+    border-radius: 6px;
   }
   div#paneButtons label.btn-primary {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));

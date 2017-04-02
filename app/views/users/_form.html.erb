@@ -76,8 +76,8 @@
         </div>
         <hr>
         <%= form_actions f, submit_label: 'Update Details', cancel_path: users_path do
-          button_to_submit('Change Password', edit_user_registration_path, :mode => :modal, style: "margin-top: 10px;margin-right: 5px")+
-                  button_to_submit('Sign-in Services', authentications_path, :mode => :modal, style: "margin-top: 10px")
+          button_to_submit('Change Password', edit_user_registration_path, :mode => :modal, class: 'dialog-button dialog-footer-button')+
+                  button_to_submit('Sign-in Services', authentications_path, :mode => :modal, class: 'dialog-button dialog-footer-button')
         end %>
       </div>
     </div>

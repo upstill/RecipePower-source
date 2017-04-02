@@ -15,7 +15,7 @@ module UploaderHelper
   def uploader_field decorator, options={}
     uld = uploader_data(decorator).merge options
     content_tag :input, '',
-        class: 'directUpload',
+        class: 'directUpload dialog-button',
         id: 'user_avatar_url',
         label: 'Upload picture...',
         # onload: 'uploader_onload(event);',

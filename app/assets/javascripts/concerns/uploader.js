@@ -60,11 +60,10 @@ function uploader_init(elem) {
         var fileInput = $(elem);
         var form = $(fileInput.parents('form:first'));
         var submitButton = form.find('input[type="submit"]');
-        var progressBar = $("<div class='bar'></div>");
-        var barContainer = $("<div class='progress'></div>").append(progressBar);
+        fileInput.after($("<div class='progress'><div class='bar'></div></div>"));
+        var progressBar = $('div.bar', elem.nextSibling);
         var resizeImage = !(/Android(?!.*Chrome)|Opera/
             .test(window.navigator && navigator.userAgent));
-        fileInput.after(barContainer);
         var fuOptions = {
             fileInput: fileInput,
             url: url,
