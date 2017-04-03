@@ -52,6 +52,26 @@ RP.servePopup = () ->
 		return false
 ###
 
+RP.parameter_from = (name, url) ->
+	url ||= window.location.href
+	name = name.replace /[\[\]]/g, "\\$&"
+	regex = new RegExp "[?&]" + name + "(=([^&#]*)|&|#|$)"
+	results = regex.exec url
+	if !results
+		return null
+	if !results[2]
+		return ''
+	decodeURIComponent results[2].replace(/\+/g, " ")
+
+# MESSAGE RESPONDER to submit and process a URL
+RP.get_and_go = (data) ->
+# Parse a url to either replace a dialog or reload the page
+	url = decodeURIComponent data.url
+	if RP.parameter_from('mode', url) == 'modal' # It's a dialog request
+		RP.submit.submit_and_process(url);
+	else
+		window.location = url;
+
 # Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
 RP.makeExpandingArea = (containers) ->
 	i = 0;

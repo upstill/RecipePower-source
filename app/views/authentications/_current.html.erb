@@ -3,13 +3,14 @@
       <div class="authentications">
         <div class="prompt">You can log in to RecipePower using:</div>
         <% for authentication in @authentications %>
-            <div class="authentication">
-              <%= image_tag "#{authentication.provider}_32.png", :size => "32x32" %>
+            <div class="authentication dialog-button">
+              <%= image_tag "#{authentication.provider.sub /_.*/, ''}.svg", :size => "32x32" %>
               <div class="provider"><%= authentication.provider_name %></div>
               <div class="uid"><%= truncate authentication.uid.to_s, :length => 12 %></div>
               <% if @auth_delete || true %>
                   <%= link_to_submit "X", authentication_url(authentication),
                                      :method => :delete,
+                                     :mode => response_service.mode, # Respond in kind
                                      :"data-confirm-msg" => "Yes, disconnect from '"+authentication.provider_name+"'?",
                                      :"data-wait-msg" => "Hang on while we check with "+authentication.provider_name,
                                      :class => "remove" %>
@@ -21,5 +22,4 @@
           <p>*Click the 'X' to revoke the authorization.</p>
       <% end %>
     </div>
-    <hr style="margin:3px;">
 <% end %>

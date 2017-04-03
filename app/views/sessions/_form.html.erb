@@ -35,12 +35,14 @@
                     label: 'Username <b>or</b> Email'.html_safe,
                     label_html: {class: 'placetaker'},  # Hidden when placeholder available
                     autofocus: resource.login.blank?,
-                    placeholder: 'username or email' %>
+                    placeholder: 'username or email',
+                    input_html: { class: 'unlabelled' } %>
         <%= f.input :password,
                     label: 'Password',
                     label_html: {class: 'placetaker'},  # Hidden when placeholder available
                     autofocus: !resource.login.blank?,
-                    placeholder: 'password' %></p>
+                    placeholder: 'password',
+                    input_html: { class: 'unlabelled' } %></p>
         <%= f.submit 'SIGN IN', class: 'dialog-submit-button btn btn-xl dialog-button free' %>
         <p style="text-align: right; margin-bottom: 0px; margin-top: 10px;">
           <%= link_to_submit 'Forgot Password', new_user_password_path, mode: :modal %>

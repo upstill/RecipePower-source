@@ -143,6 +143,12 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
           // font-weight:bold
         }
       }
+      div.flash-notifications {
+        div.alert {
+          padding: 10px;
+          font-size: 18px;
+        }
+      }
     }
   }
   input[type='text'],
@@ -158,6 +164,10 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     margin-bottom: 25px;
     font-style: oblique;
     font-size: 1.2em;
+    &.unlabelled {
+      width: 90%;
+      margin-left: 6%;
+    }
     &.answer-text {
       width: 85%;
     }
@@ -224,7 +234,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       letter-spacing: 4px;
       border-radius: 8px;
       padding: 5px 10px;
-      margin-top: 20px;
+      // margin-top: 20px;
       display: block;
       margin-left: auto;
       margin-right: auto;

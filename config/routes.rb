@@ -76,6 +76,12 @@ RP::Application.routes.draw do
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
+  get '/auth/:provider/callback' => 'authentications#create'
+  post '/auth/:provider/callback' => 'authentications#create'
+  # !!! TODO: Why does this throw an error that 'auth_add' is created twice?
+  # get '/auth/:provider' => 'authentications#create', :as => 'auth_add'
+  # post '/auth/:provider' => 'authentications#create', :as => 'auth_add'
+
   devise_for :users, :skip => [:registrations], :controllers => {
                        :sessions => 'sessions',
                        :passwords => 'passwords',
@@ -99,9 +105,6 @@ RP::Application.routes.draw do
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
 
   end
-
-  get '/auth/:provider/callback' => 'authentications#create'
-  post '/auth/:provider/callback' => 'authentications#create'
 
   # Calling 'profile' action in 'users' controller edits the current user
   get 'users/profile' => 'users#profile'

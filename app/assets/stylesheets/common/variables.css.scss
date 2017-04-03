@@ -333,7 +333,7 @@ $dialog-colors: (
     background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
-  input.dialog-button, a.dialog-button, label[for=user_avatar_url] {
+  input.dialog-button, a.dialog-button, div.dialog-button, label[for=user_avatar_url] {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
     background-image: unset;
     color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
@@ -355,7 +355,7 @@ $dialog-colors: (
       color: lightyellow;
     }
   }
-  span.help-block.has-error {
+  span.help-block.has-error, div.alert-info {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-flash-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-flash-border-color"));

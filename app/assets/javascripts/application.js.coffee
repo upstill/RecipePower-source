@@ -31,7 +31,7 @@
 #= require masonry4.pkgd
 
 #= require authentication
-# require messaging
+#= require messaging
 
 # require_directory ./controllers
 # require bm
