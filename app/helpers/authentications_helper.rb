@@ -11,11 +11,11 @@ module AuthenticationsHelper
       query_params[:origin] = '"' + URI::encode(response_service.decorate_path(origin)) + '"'
     end
     auth_url = assert_query "#{rp_url '/auth/'+svc_lower}", query_params
+    size = options[:size] || :small
 
     link = content_tag :a,
                        image_tag(service+'.svg', :alt => service, class: service), # +service,
-                       :class => 'auth_provider small',
-                       :size => "32x32",
+                       :class => "auth_provider #{size}",
                        :href => auth_url,
                        :onclick => "RP.authentication.connect(event)", # response_service.injector? ? "yield_iframe(event)" : "RP.authentication.connect(event)",
                        :"data-hold_msg" => "Hang on while we check with "+service+"...",

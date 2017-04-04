@@ -45,8 +45,8 @@ div.dialog.injector {
   .auth_poss {
     float: left; // display: inline-block;
     font: 16px arial, sans-serif;
-    width: 240px; // auto;
-    margin: 0.5em 1.1em 0.5em 0.1em;
+    width: 175px; // auto;
+    margin: 0.5em 1.1em 0.5em 0.5em;
     // border-right:1px solid black;
     .auth_provider {
       display: inline-block;
@@ -131,7 +131,7 @@ div.dialog.injector {
     }
   }
   &.sign_in {
-    width: 712px;
+    width: 677px;
     font: 12px arial, sans-serif;
     font-weight: bold;
     height: auto;
@@ -152,7 +152,7 @@ div.dialog.injector {
     }
     .signin {
       margin: 0 0 0 5px;
-      padding: 7px 0 7px 7px;
+      padding: 0px 0 3px 7px;
       display: inline-block;
       font: 16px arial, sans-serif;
       width: auto;
@@ -160,11 +160,11 @@ div.dialog.injector {
       vertical-align: top;
       div.flash_notifications {
         font-size: 14px;
-        width: 375px;
+        // width: 375px;
         margin-top: 5px
       }
       .signin_credentials {
-        width: 210px;
+        width: 230px;
         display: inline-block;
         vertical-align: top;
         margin-top: 0.5em;
