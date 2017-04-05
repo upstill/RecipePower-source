@@ -61,8 +61,8 @@ class CollectibleServices
           mypath = uri.path.sub(/^\//, '').sub(/\/$/,'')
           sitepath = site_uri.path.sub(/^\//, '').sub(/\/$/,'')
           if site && uri.host == site_uri.host && mypath == sitepath
-            entity.site.decorate.findings = findings
-            return entity.site
+            site.decorate.findings = findings
+            return site
           else
             entity.decorate.findings = findings # Now set the title, description, etc.
           end

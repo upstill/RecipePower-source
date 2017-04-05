@@ -20,7 +20,8 @@ module PicPickerHelper
         id: 'pic-picker-magic',
         contenteditable: true
     }
-    divopts[:data] = { :'gleaning-url' => polymorphic_path( [:glean, decorator.object], what: 'images') } if options[:gleanable]
+    do_glean = (options[:gleanable] != false) && @decorator.object.respond_to?(:gleaning)
+    divopts[:data] = { :'gleaning-url' => polymorphic_path( [:glean, decorator.object], what: 'images') } if do_glean
     image = image_with_error_recovery decorator,
                                       id: 'rcpPic',
                                       fallback_img: true,
@@ -28,7 +29,7 @@ module PicPickerHelper
                                       fill_mode: 'fixed-width'
     preview = content_tag :div, image, divopts
     preview << uploader_field(decorator, input_id: 'pic-picker-url', img_id: 'rcpPic') if options[:uploadable]
-    preview << gleaning_field(decorator, :images) if options[:gleanable]
+    preview << gleaning_field(decorator, :images) if do_glean
     preview + f.hidden_field(decorator.picable_attribute, id: 'pic-picker-url')
   end
 

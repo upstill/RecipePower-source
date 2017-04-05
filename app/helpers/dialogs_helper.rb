@@ -58,16 +58,15 @@ module DialogsHelper
     options[:body_contents] ||= with_output_buffer(&block)
     body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
-        ['dialog',
+        ['dialog hide',
          which.to_s,
          response_service.format_class,
-         ('hide' unless options[:show]),
-         ('modal-pending fade' unless response_service.injector? || options[:show]),
+         ('modal-pending fade' unless response_service.injector?),
          options[:class]
         ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = {:'dialog-requires' => options[:requires]} if options[:requires]
-    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires, :dialog_class
+    options = options.slice! :noflash, :body_contents, :body_class, :requires, :dialog_class
     options[:title] ||= ttl if ttl
     content_tag(:div, # Outer block: dialog
                 content_tag(:div, # modal-dialog

@@ -1,11 +1,11 @@
 <%= dialog_pane 'pic_picker', false do %>
     <div class="col-xs-12 col-sm-6 col-md-5">
-      <%= pic_picker_magic decorator, f, uploadable: true, gleanable: true %>
+      <%= pic_picker_magic decorator, f, uploadable: true %>
     </div>
     <div class="col-xs-12 col-sm-6 col-md-7">
       <p>
-        <% if @decorator.object.is_a?(List) %>
-            Hint: You can paste an image or a web page here.
+        <% if @decorator.object.is_a?(List) || @decorator.object.is_a?(Feed) %>
+            Hint: You can paste an image here.
         <% else %>
             Hint: You can paste an image (or another web page) here, or you can
             <%= link_to ' go to the webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>

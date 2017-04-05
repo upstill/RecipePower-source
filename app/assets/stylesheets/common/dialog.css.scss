@@ -266,8 +266,8 @@ div.dialog.new-style.blue div.modal-dialog div.modal-content {
   @include dialog-color-scheme(blue);
 }
 
-div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
-  @include dialog-color-scheme(feed-dialog);
+div.dialog.new-style.feed-dialog div.modal-dialog div.modal-content {
+  @include dialog-color-scheme(green); // (feed-dialog);
 }
 
 div.dialog.new-style.list-dialog div.modal-dialog div.modal-content {
