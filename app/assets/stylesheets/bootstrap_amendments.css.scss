@@ -121,10 +121,13 @@ body {
 }
 
 div.form-group {
-  margin-bottom: 0;
+  margin-bottom: 25px; // A little more breathing room, if you please...
   &.actions {
     margin-top: 5px;
     height: 20px;
+  }
+  span.help-block {
+    padding: 7px;
   }
 }
 

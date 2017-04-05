@@ -100,7 +100,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         width: 94%;
         max-width: 94%;
         margin-left: 6%;
-        margin-bottom: 25px;
+        // margin-bottom: 25px;
         &.full-width {
           width: 100%;
           margin-left: 0;
@@ -161,7 +161,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
     margin-top: 5px;
     height: 2em;
     padding: 0 15px 0 10px;
-    margin-bottom: 25px;
+    // margin-bottom: 25px;
     font-style: oblique;
     font-size: 1.2em;
     &.unlabelled {

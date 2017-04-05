@@ -1,10 +1,10 @@
 <%= modal_dialog 'new_invitation new-style salmon', "Invite a Friend", data: { focus: "input#user_email" } do %>
+    <%= flash_notifications_div 'flash_notifications', false %>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name, :mode => response_service.mode), :html => {:method => :post} do |f| %>
-		<%= modal_body do %>
 		  <%# devise_error_messages! %>
 		  <%= form_errors_helper f %>
-			<%= f.input :invitee_tokens, 
-									:label => "Email(s)", 
+			<%# f.input :invitee_tokens,
+									:label => 'Email(s)',
 									:input_html => {
 										:class => "token-input-field-pending", 
 										:autofocus => true,
@@ -21,12 +21,13 @@
 											:request => "/users/#{current_user.id}/match_friends.json" 
 										}
 									} %>
-			<%= f.input :invitation_issuer, label: "How to identify you" %>
+            <%= f.input :email,
+                        :type => :email %>
+                <%= f.input :invitation_issuer, label: "How to identify you" %>
 			<% steve_msg = "As requested, here is your invitation to the website. At this stage, I'm really looking for two things: 1) Don't be shy about being critical! I can't promise to implement every suggestion, but I CAN promise to take very seriously your experience of the site. I really want to make something people love to use. 2) If you go out to the Web and cookmark 10 or 12 of your favorite recipes, that will not only get you over the hump to using the site, but it'll be a HUGE help for us in getting our content levered up. ...but thanks for whatever you have time to do.".html_safe %>
 		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4", value: ((current_user && current_user.email =~ /upstill/) ? steve_msg : "I'd like you to join me on RecipePower, exploring the world of recipes on the Web.")} %></p>
-		<% end %>
 		<%= modal_footer do %>
-	  	<%= f.submit "Send an invitation", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
+	  	    <%= f.submit "Send an invitation", class: "btn btn-lg btn-success dialog-submit-button" %>
 			<%= dialog_cancel_button "Never Mind" %>
 		<% end %>
 	<% end %>
