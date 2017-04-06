@@ -4,14 +4,18 @@
 <% intention ||= nil # Set to 'signup' if creating a new account %>
 <div class="auth_poss <%= response_service.format_class %>" style="overflow: visible">
   <div class="row">
-    <div class="col-md-12" style="text-align: right;">
-      <p style="margin-bottom: 1em; margin-top: 0"><strong><%= prompt.html_safe %>:&nbsp;&nbsp;&nbsp;</strong></p>
-      <%= auth_possible "Facebook", origin, originator, intention %>
-      <%= auth_possible "Google", origin, originator, intention, :svc_lower => "google_oauth2" %>
-      <%= auth_possible "Twitter", origin, originator, intention %>
+    <div class="col-sm-12 col-md-7">
+      <% if prompt.present? %>
+        <p style="margin-bottom: 1em; margin-top: 0"><strong><%= prompt.html_safe %>:&nbsp;&nbsp;&nbsp;</strong></p>
+      <% end %>
+      </div>
+    <div class="col-sm-12 col-md-5">
+      <%= auth_possible "Facebook", origin, originator, intention, :size => :medium %>
+      <%= auth_possible "Google", origin, originator, intention, :svc_lower => "google_oauth2", :size => :medium %>
+      <%= auth_possible "Twitter", origin, originator, intention, :size => :medium %>
       <%# auth_possible "Aol", origin, originator, intention %>
       <%# auth_possible "OpenID", origin, originator, intention, :svc_lower => "open_id" %>
-      <%= auth_possible "Yahoo", origin, originator, intention %>
+      <%# auth_possible "Yahoo", origin, originator, intention %>
     </div>
   </div>
 </div>

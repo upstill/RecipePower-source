@@ -135,10 +135,10 @@ class AuthenticationsController < ApplicationController
         redirect_to authentications_url, :status => 303
       }
       format.json {
-        redirect_to authentications_url, :status => 303
+        redirect_to authentications_url(mode: response_service.mode), :status => 303
       }
       format.js {
-        render action: "destroy", locals: {provider: @authentication.provider}
+        render action: 'destroy', locals: {provider: @authentication.provider}
       }
     end
   end

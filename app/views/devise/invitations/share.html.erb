@@ -1,33 +1,35 @@
 <% @decorator ||= @shared.decorate if @shared %>
 <%= modal_dialog 'share_collectible new-style salmon', "Share '#{@decorator.title.truncate(80)}'" do %>
-	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name, :mode => response_service.mode), :html => {:method => :post} do |f| %>
-		  <%# devise_error_messages! %>
-          <%= form_errors_helper f %>
-          <div><h4>Pick a RecipePower friend or provide any email address and we'll take care of the rest.</h4></div>
-			<%= f.input :invitee_tokens,
-									:label => false,
-									:input_html => {
-										:class => "token-input-field-pending", 
-										:autofocus => true,
-										:data => { 
-											:pre => (resource.invitee_tokens || []).collect { |token| 
-												token.kind_of?(Fixnum) ? 
-												{ "id" => token.to_s, "name" => User.find(token).handle } :
-												{ "id" => token, "name" => token } 
-											}.to_json,
-											:no_results_text => "No matches among friends, but outside emails work too",
-											:hint => "Type email addresses or match friends",
-											:allowFreeTagging => true,
-											:enabler => "input.dialog-submit-button",
-											:request => match_friends_user_path(current_user.id) # "/users/#{current_user.id}/match_friends.json"
-										}
-									} %>
-			<%= f.input :invitation_issuer, label: "How to identify you in the message" %>
-		  <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => { :rows=>"4" } %></p>
-      <%= f.hidden_field(:shared_type) if resource.shared_type %>
-      <%= f.hidden_field(:shared_id) if resource.shared_id %>
-		<%= modal_footer do %>
-	  	<%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
-		<% end %>
-	<% end %>
+    <%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name, :mode => response_service.mode), :html => {:method => :post} do |f| %>
+        <%# devise_error_messages! %>
+        <%= form_errors_helper f %>
+        <div>
+          <span class="prompt">Pick a RecipePower friend or provide any email address and we'll take care of the rest.</span>
+        </div>
+        <%= f.input :invitee_tokens,
+                    :label => false,
+                    :input_html => {
+                            :class => "token-input-field-pending",
+                            :autofocus => true,
+                            :data => {
+                                    :pre => (resource.invitee_tokens || []).collect { |token|
+                                      token.kind_of?(Fixnum) ?
+                                              {"id" => token.to_s, "name" => User.find(token).handle} :
+                                              {"id" => token, "name" => token}
+                                    }.to_json,
+                                    :no_results_text => "No matches among friends, but outside emails work too",
+                                    :hint => "Type email addresses or match friends",
+                                    :allowFreeTagging => true,
+                                    :enabler => "input.dialog-submit-button",
+                                    :request => match_friends_user_path(current_user.id) # "/users/#{current_user.id}/match_friends.json"
+                            }
+                    } %>
+        <%= f.input :invitation_issuer, label: "How to identify you in the message" %>
+        <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => {:rows => "4"} %></p>
+        <%= f.hidden_field(:shared_type) if resource.shared_type %>
+        <%= f.hidden_field(:shared_id) if resource.shared_id %>
+        <%= modal_footer do %>
+            <%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
+        <% end %>
+    <% end %>
 <% end %>

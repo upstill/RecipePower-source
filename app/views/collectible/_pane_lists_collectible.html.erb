@@ -1,0 +1,35 @@
+<% user_decorator = current_user_or_guest.decorate %>
+<%# all_tags = user_decorator.list_tags %>
+<%# classify_listtags all_tags %>
+<% used_tags = user_decorator.list_tags(@decorator) %>
+<% classify_listtags used_tags %>
+<%= dialog_pane 'lists_collectible' do %>
+    <div class="control-group now-appearing">
+      <label class="string optional">Now Appearing in the Treasuries:</label>
+      <input id="<%= @decorator.element_id :tagging_user_id %>"
+             name="<%= @decorator.field_name :tagging_user_id %>"
+             type="hidden"
+             value="<%= @decorator.tagging_user_id %>">
+      <input type="text"
+             class="token-input-field-pending"
+             id="tagging_list_tokens"
+             name="<%= @decorator.field_name :tagging_list_tokens %>"
+             rows="2"
+             size="30"
+             placeholder="Lists"
+             data-taglist="<%# all_tags.to_json %>"
+             data-pre="<%= used_tags.to_json %>"
+             data-allowFreeTagging="true"
+             data-eventHandler="RP.lists_collectible"
+             data-theme="list"
+             data-query="tagtype=16"
+             data-noResultsText="No such treasury now; hit Enter to start a new one"
+             data-hintText="Search for a treasury by typing"/>
+    </div>
+    <div id="lists-collectible-suggested">
+      <%= link_to_submit 'Sugs',
+                         polymorphic_path([:lists, decorator.object]), # gleaning_path(decorator.gleaning),
+                         class: 'trigger hide' %>
+    </div>
+    <%# render 'lists_collectible_suggested', decorator: @decorator %>
+<% end %>

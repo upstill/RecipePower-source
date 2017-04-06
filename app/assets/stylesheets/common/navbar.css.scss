@@ -171,6 +171,9 @@ body.logged-in {
       position: relative;
       padding: 0 10px 0 0;
       margin: 0;
+      #feeds-navmenu {
+        left: -28px; // Align the dropdown with the enclosure
+      }
       li.master-navtab {
         display: inline-block;
         float: left;
@@ -427,13 +430,13 @@ body.logged-in {
       z-index: $header-depth;
       @include respond-to(phone) {
         font-size: 12px;
-        ul.token-input-list-facebook {
+        ul.token-input-list, ul.token-input-list-facebook {
           min-width: 100px;
         }
       }
       @include respond-to(small) {
         font-size: 14px;
-        ul.token-input-list-facebook {
+        ul.token-input-list, ul.token-input-list-facebook {
           min-width: 150px;
         }
       }
@@ -449,7 +452,7 @@ body.logged-in {
       div.token-input-elmt {
         margin-top: 5px; // Adopted from token-input-list-facebook so we can center the glyph
         text-align: left;
-        ul.token-input-list-facebook {
+        ul.token-input-list, ul.token-input-list-facebook {
           max-width: 400px;
           margin: 0;
         }

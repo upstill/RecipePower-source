@@ -22,6 +22,16 @@ class NotificationPresenter < BasePresenter
     end
   end
 
+  # Where to go when the notification is to be acted upon. NB: for the use of NotificationController only
+  def post_action_path
+    case typesym
+      when :share
+        polymorphic_path shared
+      when :make_friend
+        polymorphic_path source
+    end
+  end
+
   def verbalization link_options={}
     case typesym
       when :share

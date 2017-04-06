@@ -3,67 +3,82 @@
     <%= form_errors_helper f %>
     <div class="row">
       <div class="col-md-4">
+        <%= pic_picker_magic decorator, f, uploadable: true %>
+<!--
         <div class="pic_picker_field">
-          <%= pic_field f, decorator: @decorator %>
+          <%# pic_field f, decorator: @decorator %>
         </div>
-        <div class="form-group user_image">
-          <%= uploader_field @decorator %>
+        <div class="form-group user_image" style="margin-bottom: 21px;">
+          <%# uploader_field @decorator %>
         </div>
+-->
       </div>
       <div class="col-md-8">
-        <div class="row">
-          <div class="col-md-12">
-            <%= f.input :username, label: 'Username (Handle)', autofocus: true %>
-          </div>
+        <div class="item-enclosure">
+          <%= f.input :username, label: 'Username (Handle)', autofocus: true %>
         </div>
         <div class="row">
           <div class="col-md-6">
-            <%= f.input :first_name, input_html: {cols: 125, rows: 1} %>
+            <div class="item-enclosure">
+              <%= f.input :first_name, input_html: {cols: 125, rows: 1} %>
+            </div>
           </div>
           <div class="col-md-6">
-            <%= f.input :last_name, input_html: {cols: 125, rows: 1} %>
+            <div class="item-enclosure">
+              <%= f.input :last_name, input_html: {cols: 125, rows: 1} %>
+            </div>
           </div>
         </div>
-        <div class="row">
-          <div class="col-md-12">
-            <%= f.input :fullname, label: 'Full Name (if different)', input_html: {cols: 125, rows: 1} %>
-          </div>
         </div>
-      </div>
     </div>
-    <div class="row bottom">
+    <div class="row">
       <div class="col-md-12">
-        <%= f.input :about, label: 'About Me', placeholder: 'Tell the world about yourself. Who Are You? What Do You Eat?', input_html: {cols: 125, rows: 4} %>
-        <%= f.input :email, input_html: {cols: 125, rows: 1} %>
-        <%= f.input :private, :as => :boolean, :label => 'Cloak of Invisibility (don\'t suggest as Friend)' %>
+        <div class="item-enclosure">
+          <%= f.input :fullname, label: 'Full Name (if different)', input_html: {cols: 125, rows: 1} %>
+        </div>
+        <div class="item-enclosure">
+          <%= f.input :about, label: 'About Me', placeholder: 'Tell the world about yourself. Who Are You? What Do You Eat?', input_html: {cols: 125, rows: 4} %>
+        </div>
+        <div class="item-enclosure">
+          <%= f.input :email, input_html: {cols: 125, rows: 1} %>
+        </div>
+        <div class="item-enclosure boolean-item">
+          <%= f.input :private, :as => :boolean, :label => 'Cloak of Invisibility (don\'t suggest as Friend)' %>
+        </div>
         <% if response_service.admin_view? && permitted_to?(:manage, response_service.user) %>
-            <%= f.input :role_id, label: 'Role', collection: response_service.user.role_select %>
+            <div class="item-enclosure select-item">
+              <%= f.input :role_id, label: 'Role', collection: response_service.user.role_select %>
+            </div>
         <% end %>
+        <hr>
+        <div class="item-enclosure">
+          <h3 class="section">Personal Questions</h3>
+          <%= tag_select Tag.where(tagtype: 15).to_a, response_service.user.questions %>
+          <%= f.fields_for :answers do |builder| %>
+              <%= render 'answer_fields', f: builder %>
+          <% end %>
+          <br>
+        </div>
+        <div class="item-enclosure" style="margin-top: 30px;">
+            <%= link_to_add_fields 'Add Another Question', f, :answers %>
+        </div>
+        <hr>
+        <div class="item-enclosure">
+          <h3 class="section">Desert-island Selections</h3>
+          <%= na_menu f, 'tag-selection-menu', response_service.user.tag_selections %>
+          <%= f.fields_for :tag_selections do |builder| %>
+              <%= render 'tag_selection_fields', f: builder %>
+          <% end %>
+        </div>
+        <div class="item-enclosure" style="margin-top: 30px;">
+          <!--NB: This is hidden in dialog.css until adding a selection is implemented-->
+            <%= link_to_add_fields 'Add Another Selection', f, :tag_selections %>
+        </div>
+        <hr>
+        <%= form_actions f, submit_label: 'Update Details', cancel_path: users_path do
+          button_to_submit('Change Password', edit_user_registration_path, :mode => :modal, class: 'dialog-button dialog-footer-button')+
+                  button_to_submit('Sign-in Services', authentications_path, :mode => :modal, class: 'dialog-button dialog-footer-button')
+        end %>
       </div>
     </div>
-    <div class="row">
-      <div class="col-md-12">
-        <h3 class="section" >Personal Questions</h3>
-        <%= tag_select Tag.where(tagtype: 15).to_a, response_service.user.questions %>
-        <%= f.fields_for :answers do |builder| %>
-            <%= render 'answer_fields', f: builder %>
-        <% end %>
-        <%# link_to_add_fields 'Add Question', f, :answers %>
-      </div>
-    </div>
-    <div class="row">
-      <div class="col-md-12">
-        <h3 class="section">Desert-island Selections</h3>
-        <%= na_menu f, 'tag-selection-menu', response_service.user.tag_selections %>
-        <%= f.fields_for :tag_selections do |builder| %>
-            <%= render 'tag_selection_fields', f: builder %>
-        <% end %>
-        <%# link_to_add_fields 'Add Desert Island Selection', f, :tag_selections %>
-      </div>
-    </div>
-    <hr>
-    <%= form_actions f, submit_label: 'Update Details', cancel_path: users_path do
-      button_to_submit('Change Password', edit_user_registration_path, :mode => :modal, style: "margin-top: 10px;margin-right: 5px")+
-      button_to_submit('Sign-in Services', authentications_path, :mode => :modal, style: "margin-top: 10px")
-    end %>
 <% end %>

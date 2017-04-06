@@ -7,14 +7,18 @@
 <% end %>
 <br>
 <%= link_to @decorator.title, (accept_invitation_link ?
-        polymorphic_url(@decorator.object, mode: :modal, :accept_invitation_link => accept_invitation_link) :
-        @decorator.url),
+                                    polymorphic_url(@decorator.object, mode: :modal, :accept_invitation_link => accept_invitation_link) :
+                                    @decorator.url),
             class: "share_recipe_title" %>
-<p>from&nbsp;
-  <%= link_to @decorator.sourcename,
-              divert_user_invitation_url(
-                      rpevent: RpEvent.event_trigger_data(@recipient, :invitation_diverted, @invitation_event, @sender),
-                      url: CGI::escape(@decorator.sourcehome),
-                      sender: @sender.id,
-                      recipient: @recipient.id),
-              class: "share_recipe_source" %></p>
+<% if @decorator.sourcename.present? %>
+    <p>from&nbsp;
+      <%= link_to @decorator.sourcename,
+                  divert_user_invitation_url(
+                          rpevent: RpEvent.event_trigger_data(@recipient, :invitation_diverted, @invitation_event, @sender),
+                          url: CGI::escape(@decorator.sourcehome),
+                          sender: @sender.id,
+                          recipient: @recipient.id),
+                  class: "share_recipe_source" %>
+    </p>
+<% end %>
+<p><%= @decorator.description %>This is where the description will go.</p>

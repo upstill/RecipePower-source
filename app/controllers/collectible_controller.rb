@@ -56,9 +56,25 @@ class CollectibleController < ApplicationController
     end
   end
 
+  # Extract images from a URL
+  def glean
+    update_and_decorate
+    @what = params[:what].to_sym
+    @gleaning =
+        if @pageurl = params[:url] # To glean images from another page
+          Gleaning.glean @pageurl, 'Image'
+        elsif @decorator.object.respond_to?(:gleaning)
+          @decorator.glean! # Wait for gleaning to complete
+          @decorator.gleaning
+        end
+    if @pageurl.present? && @gleaning && @gleaning.images.blank?
+      flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
+      render :errors
+    end
+  end
+
   def editpic
     update_and_decorate
-    @golinkid = params[:golinkid]
     @fallback_img = params[:fallback_img]
     gleaning =
     if @pageurl = params[:url]
@@ -68,8 +84,8 @@ class CollectibleController < ApplicationController
     else
       Gleaning.glean @decorator, 'Image'
     end
-    @pic_select_list = view_context.pic_picker_select_list(gleaning.images) if gleaning && gleaning.images
-    if @pageurl && @pic_select_list.blank?
+    @image_list = (gleaning && gleaning.images) ? gleaning.images : []
+    if @pageurl && @image_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors
     end
@@ -122,26 +138,6 @@ class CollectibleController < ApplicationController
     end
   end
 
-=begin
-  # Moved to ApplicationController for generic action; subclasses may, of course, override
-  # DELETE /feeds/1
-  # DELETE /feeds/1.json
-  def destroy
-    if update_and_decorate
-      @decorator.destroy
-      if resource_errors_to_flash(@decorator.object)
-        render :errors
-      else
-        flash[:popup] = "#{@decorator.human_name} is no more."
-        render :update
-      end
-    else
-      flash[:alert] = "Can't locate #{params[:controller].singularize} ##{params[:id] || '<unknown>'}"
-      render :errors
-    end
-  end
-=end
-
   # Register that the entity was touched by the current user.
   # Since that entity will now be at the head return a new first item in the list.
   def touch
@@ -172,13 +168,16 @@ class CollectibleController < ApplicationController
 
   def edit
     update_and_decorate
-    @decorator.glean if @decorator.object.respond_to?(:gleaning) && !@decorator.gleaning
+    if @decorator.object.respond_to?(:gleaning)
+      @decorator.glean unless @decorator.gleaning
+      # @image_list = (@decorator.gleaning && @decorator.gleaning.images) ? @decorator.gleaning.images : []
+    end
     smartrender
   end
 
   def show
     update_and_decorate
-    response_service.title = @decorator && @decorator.title.truncate(20)
+    response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
   end

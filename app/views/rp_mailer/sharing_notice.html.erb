@@ -166,8 +166,9 @@
   <body>
 		<div class="header_content">
 			<div class="message_banner">
-				<strong><%= @sender.polite_name %></strong> sez: Look what I found on
-				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %>.
+				<strong><%= @sender.polite_name %></strong> sez:
+				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %> has a
+              <%= @recipient.shared.model_name.human.downcase %> for you.
 			</div>
 			<% unless @recipient.invitation_message.blank? %>
 				<div class="message_content">
@@ -190,7 +191,7 @@
 		</div>
 		<div class="footer">
 	  	<p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
-			<p>Copyright 2012-2016 by RecipePower. All Rights Reserved</p>
+			<p>Copyright 2011-2017 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
 </html>

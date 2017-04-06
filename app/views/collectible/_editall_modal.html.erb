@@ -1,0 +1,221 @@
+<%= modal_dialog 'edit_recipe new-style green', dialog_class: 'modal-lg' do %>
+    <%# render 'form' %>
+    <%= pane_buttons [ [ 'Title & Description', 'edit-pane' ] ] %>
+    <%= form_for @recipe do |f| %>
+        <div class="row pane edit-pane">
+          <%= form_errors_helper f, @recipe %>
+          <div class="col-md-12">
+            <%# gleaning_trigger @decorator %>
+            <div class='item-enclosure'>
+              <div class='label-enclosure'>
+                <%= f.label :title, 'Title' -%>
+                <%= gleaning_field @decorator, :titles %>
+              </div>
+              <%= f.text_field :title, :label => false %>
+            </div>
+
+            <div class='item-enclosure'>
+              <div class='label-enclosure'>
+                <%= f.label :title, 'Description' -%>
+                <%= gleaning_field @decorator, :descriptions %>
+              </div>
+              <%= f.text_area :description, :label => false %>
+            </div>
+
+            <% if permitted_to?(:admin, :recipes) %>
+                <div class='item-enclosure'>
+                  <br><%= f.label :url, 'URL' -%>
+                  <br><%= f.url_field :url %>
+                </div>
+            <% end %>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
+              <% link_to_submit 'Destroy This Recipe',
+                                @decorator.object_path,
+                                :class => "pull-left",
+                                :style => 'color: #dddddd;',
+                                :button_style => :danger,
+                                :method => :delete,
+                                confirm: "This will permanently remove the #{@decorator.human_name} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
+          <% end %>
+          <%= dialog_submit_button %>
+          <%= dialog_cancel_button %>
+        </div>
+    <% end %>
+
+    <%# render 'form_tag' %>
+    <form accept-charset="UTF-8"
+          action="<%= decorator.tag_path %>"
+          class="form-inline tag-collectible"
+          data-remote="true"
+          data-type="json"
+          <%# "data-always_submit='true'" if decorator.picuri_problem %>
+          id="tag_collectible_<%= decorator.id %>">
+      <input name="utf8" type="hidden" value="&#x2713;"/>
+      <input name="_method" type="hidden" value="patch"/>
+      <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
+
+      <div class="modal-body" style="overflow:visible">
+        <div class="notifications-panel">
+          <%= flash_notifications_div %>
+        </div>
+        <div class="row pane tags-pane">
+          <div class="col-md-12">
+            <% if response_service.admin_view? %>
+                <div class="control-group">
+                  <label class="string optional">Title</label>
+                  <textarea class="full-width" rows=1 id="<%= decorator.element_id :title %>" name="<%= decorator.field_name :title %>" placeholder="Title"><%= decorator.title %></textarea>
+                </div>
+            <% end %>
+            <%= tagging_fields decorator %>
+            <div class="control-group">
+              <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">
+              <label class="string optional">Comment</label>
+              <textarea class="full-width" id="<%= decorator.element_id :collectible_comment %>" name="<%= decorator.field_name :collectible_comment %>" placeholder="Anything you'd like to say about this <%= decorator.human_name false, false %>" rows="3"><%= decorator.collectible_comment %></textarea>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <%= dialog_submit_button %>
+        <%= dialog_cancel_button %>
+      </div>
+    </form>
+
+    <%# render 'form_editpic' %>
+    <div class="row pane pic-pane">
+      <div class="col-xs-12 col-sm-6 col-md-5">
+        <div class="preview">
+          <%= image_with_error_recovery @decorator,
+                                        id: 'rcpPic',
+                                        fallback_img: true,
+                                        fill_mode: 'fixed-width' %>
+        </div>
+        <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
+        <%= gleaning_field @decorator, :images %>
+      </div>
+      <div class="col-xs-12 col-sm-6 col-md-7">
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12">
+            <span class="prompt">If you have the web address (URL) of an image, type or paste it here and click Preview.</span>
+            <input type="text"
+                   rel="jpg,png,gif"
+                   class="icon_picker"
+                   autofocus="autofocus"
+                   rows="2"
+                   style="width: 100%; margin-left: 0; margin-top: 10px"
+                   />
+          </div>
+          <%= link_to 'Preview', "#", class: 'btn btn-info image_preview_button float-right-button' %>
+        </div>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12">
+            <span class="prompt">To pick an image from any web page, type or paste the page's web address (URL) here and click Extract Images.</span>
+            <input type="text"
+                   class="url_picker"
+                   autofocus="autofocus"
+                   rows="2"
+                   style="width: 100%; margin-left: 0; margin-top: 10px"
+                   />
+          </div>
+          <%= link_to_submit 'Extract Images',
+                             polymorphic_path([:editpic, @decorator]),
+                             class: 'btn btn-info url-extract-button float-right-button',
+                             data: { :'wait-msg' => 'Give us a sec to crack that page...' },
+                             mode: :modal
+          %>
+        </div>
+      </div>
+    </div>
+
+    <% if @decorator.pageurl && @pic_select_list.blank? %>
+        <div class="row">
+          <div class="col-xs-12 col-sm-12 col-md-12">
+            <div style="margin: 10px;">
+                <span class="prompt">
+                  ...or, you can <%= link_to 'visit the recipe\'s webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>, hit the Cookmark button, and pick a picture from there.
+                </span>
+            </div>
+          </div>
+        </div>
+    <% end %>
+
+    <%= modal_footer do %>
+        <%= form_for @decorator.object, :method => :patch, data: {type: 'json'} do |f| %>
+            <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
+            <%# f.submit "Save" %>
+            <%= form_actions f %>
+        <% end %>
+        <%# dialog_cancel_button "Cancel" %>
+    <% end %>
+
+    <%# render 'form_lists' %>
+    <form accept-charset="UTF-8"
+          action="<%= polymorphic_path [:lists, decorator.object ] %>"
+          class="form-inline lists_collectible"
+          data-remote="true"
+          data-type="json"
+          <%# "data-always_submit='true'" if decorator.picuri_problem %>
+          id="lists_collectible_<%= decorator.id %>">
+      <input name="utf8" type="hidden" value="&#x2713;"/>
+      <input name="_method" type="hidden" value="patch"/>
+      <input name="authenticity_token" type="hidden" value="<%= form_authenticity_token %>"/>
+      <% user_decorator = current_user_or_guest.decorate %>
+      <% all_tags = user_decorator.list_tags %>
+      <% classify_listtags all_tags %>
+      <% used_tags = user_decorator.list_tags(decorator) %>
+      <% classify_listtags used_tags %>
+      <div class="row pane lists-pane">
+        <div class="col-md-12">
+          <div class="notifications-panel">
+            <%= flash_notifications_div %>
+          </div>
+          <div class="control-group now-appearing">
+            <label class="string optional">Now Appearing in the Treasuries:</label>
+            <input id="<%= decorator.element_id :tagging_user_id %>"
+                   name="<%= decorator.field_name :tagging_user_id %>"
+                   type="hidden"
+                   value="<%= decorator.tagging_user_id %>">
+            <input type="text"
+                   class="token-input-field-pending"
+                   id="tagging_list_tokens"
+                   name="<%= decorator.field_name :tagging_list_tokens %>"
+                   rows="2"
+                   size="30"
+                   placeholder="Lists"
+                   data-taglist="<%= all_tags.to_json %>"
+                   data-pre="<%= used_tags.to_json %>"
+                   data-allowFreeTagging="true"
+                   data-eventHandler="RP.lists_collectible"
+                   data-theme="list"
+                   data-query="tagtype=16"
+                   data-noResultsText="No such treasury now; hit Enter to start a new one"
+                   data-hintText="Search for a treasury by typing"/>
+          </div>
+          <div class="control-group">
+            <label class="string optional">Suggested Treasuries</label>
+            <div class="selection-list" data->
+              <% all_tags.each do |tagspec| %>
+                  <!--Include only the lists of friends and self -->
+                  <% if tagspec[:sortval] < 4 %>
+                      <a href="#"
+                         class="selection-item <%= tagspec[:cssclass] %>"
+                         id="<%= tagspec[:cssid] %>"
+                         data-to_selector="#tagging_list_tokens"
+                         data-tokeninput="<%= tagspec.to_json %>"
+                         <%= %q{style="display: none;"} if used_tags.include? tagspec %>
+                         title="Click to Add">
+                        <%= tagspec[:name] %>
+                      </a>
+                  <% end %>
+              <% end %>
+            </div>
+          </div>
+        </div>
+      </div>
+      <%= dialog_submit_button %>
+      <%= dialog_cancel_button %>
+    </form>
+<% end %>

@@ -1,0 +1,24 @@
+<% user_decorator = current_user_or_guest.decorate %>
+<% all_tags = user_decorator.list_tags %>
+<% classify_listtags all_tags %>
+<% used_tags = user_decorator.list_tags(decorator) %>
+<% classify_listtags used_tags %>
+<div class="control-group" id="lists-collectible-suggested">
+  <label class="string optional" style="margin-top: 40px;">Suggested Treasuries</label>
+  <div class="selection-list" >
+    <% all_tags.each do |tagspec| %>
+        <!--Include only the lists of friends and self -->
+        <% if tagspec[:sortval] < 4 %>
+            <a href="#"
+               class="selection-item <%= tagspec[:cssclass] %>"
+               id="<%= tagspec[:cssid] %>"
+               data-to_selector="#tagging_list_tokens"
+               data-tokeninput="<%= tagspec.to_json %>"
+               <%= %q{style="display: none;"} if used_tags.include? tagspec %>
+               title="Click to Add">
+              <%= tagspec[:name] %>
+            </a>
+        <% end %>
+    <% end %>
+  </div>
+</div>

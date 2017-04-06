@@ -1,0 +1,26 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class='item-enclosure'>
+      <div class='label-enclosure'>
+        <%= f.label :title, 'Title' -%>
+        <%= gleaning_field @decorator, :titles %>
+      </div>
+      <%= f.text_field :title, :label => false %>
+    </div>
+
+    <div class='item-enclosure'>
+      <div class='label-enclosure'>
+        <%= f.label :title, 'Description' -%>
+        <%= gleaning_field @decorator, :descriptions %>
+      </div>
+      <%= f.text_area :description, :label => false %>
+    </div>
+
+    <% if permitted_to?(:admin, :recipes) %>
+        <div class='item-enclosure'>
+          <br><%= f.label :url, 'URL' -%>
+          <br><%= f.url_field :url %>
+        </div>
+    <% end %>
+  </div>
+</div>

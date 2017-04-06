@@ -14,11 +14,15 @@ RP::Application.routes.draw do
   get 'finders/create'
   post 'finders/create'
 
-  resources :gleanings, :only => [:new, :create, :show]
-
   concern :picable do
     member do
       get 'editpic' # Open dialog to acquire an image from various sources
+    end
+  end
+
+  concern :linkable do
+    member do
+      get 'glean/:what', :action => 'glean', :what => /titles|descriptions|images|feeds/, :as => 'glean'
     end
   end
 
@@ -64,19 +68,19 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-  post '/votes/recipe/:id' => 'votes#create'
-  post '/votes/feed/:id' => 'votes#create'
-  post '/votes/feed_entry/:id' => 'votes#create'
-  post '/votes/list/:id' => 'votes#create'
-  post '/votes/product/:id' => 'votes#create'
-  post '/votes/site/:id' => 'votes#create'
-  post '/votes/user/:id' => 'votes#create'
+  post '/votes/:entity/:id' => 'votes#create', :entity => /recipe|feed|feed_entry|list|product|site|user/
 
   get "redirect/go", :as => "goto"
   put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
+
+  get '/auth/:provider/callback' => 'authentications#create'
+  post '/auth/:provider/callback' => 'authentications#create'
+  # !!! TODO: Why does this throw an error that 'auth_add' is created twice?
+  # get '/auth/:provider' => 'authentications#create', :as => 'auth_add'
+  # post '/auth/:provider' => 'authentications#create', :as => 'auth_add'
 
   devise_for :users, :skip => [:registrations], :controllers => {
                        :sessions => 'sessions',
@@ -101,9 +105,6 @@ RP::Application.routes.draw do
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
 
   end
-
-  get '/auth/:provider/callback' => 'authentications#create'
-  post '/auth/:provider/callback' => 'authentications#create'
 
   # Calling 'profile' action in 'users' controller edits the current user
   get 'users/profile' => 'users#profile'
@@ -130,16 +131,17 @@ RP::Application.routes.draw do
   resources :lists, except: [:index, :create], :concerns => [:picable, :taggable, :collectible] do
     member do
       post 'pin' # Add an entity to a list
+      # We allow lists to do gleaning to get an image
+      get 'glean/:what', :action => 'glean', :what => 'images', :as => 'glean'
       get 'contents'
     end
   end
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
+  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable, :linkable] do
     member do
       post 'absorb'
-      post 'glean'
       get 'feeds'
       post 'approve' # (Admin only) approve the site for presentation
     end
@@ -211,7 +213,7 @@ RP::Application.routes.draw do
   resources :ratings
   resources :scales
 
-  resources :recipes, :concerns => [:picable, :collectible, :taggable] do
+  resources :recipes, :concerns => [:picable, :collectible, :taggable, :linkable] do
     member do
       get 'piclist'
     end

@@ -144,7 +144,7 @@ class UserPresenter < CollectiblePresenter
   def show_or_edit which, val
     if is_viewer?
       if val.present?
-        (user.about + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs', :mode => :modal)).html_safe
+        user.about.html_safe # + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs', :mode => :modal)
       else
         card_aspect_editor which
       end

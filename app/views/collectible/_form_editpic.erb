@@ -1,0 +1,66 @@
+  <div class="row">
+    <div class="col-xs-12 col-sm-6 col-md-5">
+      <div class="preview">
+        <%= image_with_error_recovery @decorator,
+                                      id: 'rcpPic',
+                                      fallback_img: true,
+                                      fill_mode: 'fixed-width' %>
+      </div>
+      <%= uploader_field @decorator, input_id: 'pic-picker-url', img_id: 'rcpPic' %>
+      <%= gleaning_field @decorator, :images %>
+    </div>
+    <div class="col-xs-12 col-sm-6 col-md-7">
+
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <span class="prompt">If you have the web address (URL) of an image, type or paste it here and click Preview.</span>
+          <input type="text"
+                 rel="jpg,png,gif"
+                 class="icon_picker"
+                 autofocus="autofocus"
+                 rows="2"
+                 style="width: 100%; margin-left: 0; margin-top: 10px"
+                 />
+        </div>
+        <%= link_to 'Preview', "#", class: 'btn btn-info image_preview_button float-right-button' %>
+      </div>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <span class="prompt">To pick an image from any web page, type or paste the page's web address (URL) here and click Extract Images.</span>
+          <input type="text"
+                 class="url_picker"
+                 autofocus="autofocus"
+                 rows="2"
+                 style="width: 100%; margin-left: 0; margin-top: 10px"
+                 />
+        </div>
+        <%= link_to_submit 'Extract Images',
+                           polymorphic_path([:editpic, @decorator]),
+                           class: 'btn btn-info url-extract-button float-right-button',
+                           data: { :'wait-msg' => 'Give us a sec to crack that page...' },
+                           mode: :modal
+        %>
+      </div>
+    </div>
+  </div>
+
+  <% if @decorator.pageurl && @pic_select_list.blank? %>
+      <div class="row">
+        <div class="col-xs-12 col-sm-12 col-md-12">
+          <div style="margin: 10px;">
+                <span class="prompt">
+                  ...or, you can <%= link_to 'visit the recipe\'s webpage', @decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>, hit the Cookmark button, and pick a picture from there.
+                </span>
+          </div>
+        </div>
+      </div>
+  <% end %>
+
+  <%= modal_footer do %>
+      <%= form_for @decorator.object, :method => :patch, data: {type: 'json'} do |f| %>
+          <%= f.hidden_field @decorator.picable_attribute, id: 'pic-picker-url' %>
+          <%# f.submit "Save" %>
+          <%= form_actions f %>
+      <% end %>
+      <%# dialog_cancel_button "Cancel" %>
+  <% end %>

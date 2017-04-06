@@ -28,13 +28,18 @@ div.dialog {
   	margin: 10px;
     }
   }
+  div.form-group {
+    &.user_remember_me {
+      margin-bottom: 0;
+    }
+  }
   &.injector {
     font: 16px arial, sans-serif;
     font-weight: bold;
     width: 600px;
     height: auto;
     form {
-      margin: 10px;
+      margin: 7px 0 0 9px;
       display: inline-block;
       width: auto;
       vertical-align: top;
@@ -56,7 +61,7 @@ div.dialog {
     select.select {
       margin-left: 7px;
       margin-top: 4px;
-      vertical-align: top;
+      // vertical-align: top;
     }
   }
 }
@@ -98,8 +103,9 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       textarea {
         line-height: 1.5em;
         width: 94%;
+        max-width: 94%;
         margin-left: 6%;
-        margin-bottom: 5px;
+        // margin-bottom: 25px;
         &.full-width {
           width: 100%;
           margin-left: 0;
@@ -121,9 +127,11 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         }
         div.modal-body {
           padding-top: 5px;
+          /*
           div.form-group {
             margin-top: 10px;
           }
+          */
           p {
             font-family: $archivo; // $oswald-light; // $archivo;
             letter-spacing: 3px;
@@ -136,29 +144,50 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         }
         .prompt {
           margin: 5px 0px;
+          line-height: 1.5em;
           // font:20px arial,sans-serif;
           // font-weight:bold
+        }
+      }
+      div.flash-notifications {
+        div.alert {
+          padding: 10px;
+          font-size: 18px;
         }
       }
     }
   }
   input[type='text'],
+  textarea,
   input[type='password'],
   input[type='email'],
   input[type='url'] {
     width: 93%;
     margin-left: 7%;
     margin-top: 5px;
-    height: 2.5em;
+    height: 2em;
     padding: 0 15px 0 10px;
-    margin-bottom: 25px;
+    // margin-bottom: 25px;
     font-style: oblique;
     font-size: 1.2em;
+    &.unlabelled {
+      width: 90%;
+      margin-left: 6%;
+    }
+    &.answer-text {
+      width: 85%;
+    }
     &.token-input-field {
       height: 1.5em;
     }
+    &.description, &.comment {
+      font-size: 1em;
+    }
   }
-  ul.token-input-list-facebook {
+  textarea {
+    height: 3.2em;
+  }
+  ul.token-input-list, ul.token-input-list-facebook {
     font: 15px arial, sans-serif;
     padding-top: 3px;
     padding-bottom: 3px;
@@ -167,7 +196,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       margin: 0;
     }
   }
-  li.token-input-input-token-facebook {
+  li.token-input-input-token, li.token-input-input-token-facebook {
     input[type='text'] {
       border-radius: 20px;
     }
@@ -176,34 +205,53 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
   div.item-enclosure {
     width: 97%;
     margin: auto;
-  }
-  div.label-enclosure {
-    width: 100%;
-    height: auto;
-    .label-right {
-      display: inline-block;
-      float: right;
-      max-width: 100%;
-      span {
-        font-size: 16px;
+    &.boolean-item {
+      margin-bottom: 20px;
+      div.boolean label.boolean input.boolean {
+        margin-left: -30px;
+        margin-top: 2px;
+      }
+    }
+    &.select-item {
+      margin-bottom: 10px;
+      div.form-group label {
+        margin-top: 5px;
+        margin-bottom: 0;
+      }
+    }
+    div.label-enclosure {
+      width: 100%;
+      height: auto;
+      .label-right {
+        display: inline-block;
+        float: right;
+        max-width: 100%;
+        span {
+          font-size: 16px;
+        }
       }
     }
   }
   label.checkbox {
     margin-bottom: 0;
   }
-  .center-button {
-    letter-spacing: 4px;
-    border-radius: 8px;
-    padding: 5px 10px;
+  .dialog-button {
     &.free {
-      margin-top: 20px;
+      letter-spacing: 4px;
+      border-radius: 8px;
+      padding: 5px 10px;
+      // margin-top: 20px;
       display: block;
       margin-left: auto;
       margin-right: auto;
     }
     &.btn-xl {
       font-size: 1.5em;
+    }
+    &.dialog-footer-button {
+	  // margin-top: 10px; // To match Bootstrap buttons
+      margin: 10px 5px;
+      float: left;
     }
   }
 }
@@ -224,10 +272,17 @@ div.dialog.new-style.blue div.modal-dialog div.modal-content {
   @include dialog-color-scheme(blue);
 }
 
-div.dialog.new-style.feed-scheme div.modal-dialog div.modal-content {
-  @include dialog-color-scheme(feeds);
+div.dialog.new-style.feed-dialog div.modal-dialog div.modal-content {
+  @include dialog-color-scheme(green); // (feed-dialog);
 }
 
-div.form-group.user_remember_me {
-  margin-bottom: 0;
+div.dialog.new-style.list-dialog div.modal-dialog div.modal-content {
+  @include dialog-color-scheme(list-dialog);
+}
+
+div.pane {
+  display: none;
+  &.active {
+    display: block;
+  }
 }

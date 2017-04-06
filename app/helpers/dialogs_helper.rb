@@ -54,20 +54,19 @@ module DialogsHelper
       ttl, options = nil, ttl
     end
     dialog_class = options[:dialog_class]
-    header = modal_header ttl
+    header = modal_header ttl, header_contents: options.delete(:header_contents)
     options[:body_contents] ||= with_output_buffer(&block)
     body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
-        ['dialog',
+        ['dialog hide',
          which.to_s,
          response_service.format_class,
-         ('hide' unless options[:show]),
-         ('modal-pending fade' unless response_service.injector? || options[:show]),
+         ('modal-pending fade' unless response_service.injector?),
          options[:class]
         ].compact.join(' ')
     # The :requires option specifies JS modules that this dialog uses
     options[:data] = {:'dialog-requires' => options[:requires]} if options[:requires]
-    options = options.slice! :show, :noflash, :body_contents, :body_class, :requires, :dialog_class
+    options = options.slice! :noflash, :body_contents, :body_class, :requires, :dialog_class
     options[:title] ||= ttl if ttl
     content_tag(:div, # Outer block: dialog
                 content_tag(:div, # modal-dialog
@@ -76,12 +75,13 @@ module DialogsHelper
                 options).html_safe
   end
 
-  def modal_header ttl
+  def modal_header ttl, options={}
+    contents = options[:header_contents] ||
+        (ttl.present? && content_tag(:h3, ttl)) ||
+        ''
     response_service.injector? ?
         injector_cancel_button('X') :
-        content_tag(:div,
-                    ttl.present? ? content_tag(:h3, ttl) : '',
-                    class: 'modal-header')
+        content_tag(:div, contents, class: 'modal-header')
   end
 
   def modal_body options={}, &block
@@ -98,6 +98,32 @@ module DialogsHelper
   def modal_footer(options={}, &block)
     ft = options[:body_contents] || with_output_buffer(&block)
     content_tag :div, ft, class: "modal-footer row #{options[:class]}"
+  end
+
+  def pane_dialog decorator, colorscheme='green'
+    bc = content_tag( :div, flash_notifications_div, class: 'notifications-panel')+
+         render('form', decorator: decorator, in_panes: true)
+
+    modal_dialog "pane_runner new-style #{colorscheme}",
+                 header_contents: decorator.dialog_pane_buttons,
+                 dialog_class: 'modal-lg',
+                 body_contents: bc
+  end
+
+  def dialog_pane(name, inner_col=true, form_params={}, &block)
+    if inner_col.is_a? Hash
+      inner_col, form_params = true, inner_col
+    end
+    contents = block_given? ? with_output_buffer(&block) : render('form_content', form_params)
+    contents = content_tag(:div,
+                           contents,
+                           class: 'col-md-12'
+    ) if inner_col
+    content_tag(:div,
+                content_tag(:div, contents, class: 'row'),
+                class: "#{name} pane",
+                id: "#{name}-pane"
+    ).html_safe
   end
 
   # Place the header for a dialog, including setting its Onload function.

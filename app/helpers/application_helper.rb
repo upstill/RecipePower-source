@@ -71,9 +71,8 @@ module ApplicationHelper
   def link_to_add_fields(name, f, association, *initializers)
     data = data_to_add_fields f, association, *initializers
     link_to name,
-            '#', # style: 'display:none',
+            '#',
             class: 'add_fields',
-            style: 'display: block; height: 15px; font-size: 50px; position: relative; top: -10px',
             data: data
   end
 

@@ -25,7 +25,7 @@ $viewer-card-link-color: mix($viewer-panels-label-button-color, black, 70%);
 // For material relating to lists of the current user
 
 $friends-navtab-background-color: #e4e0cf;
-$friends-navtab-color: #dbc046;
+$friends-navtab-color: #bfa73d;
 
 $friends-card-background-color: #e9e4ca;
 $friends-panels-label-color: #e9e4ca;
@@ -55,12 +55,14 @@ $recipes-panel-label-color: #e5ebef;
 
 $lists-navtab-background-color: #dbe0dd;
 $lists-navtab-color: #1d6a2b;
-$lists-card-background-color: #d0dbd2;
-$lists-panels-label-color: #e9e4ca;
-$lists-panels-label-button-color: #94b79a;
-$lists-panel-background-color: #dbe0dd;
-$lists-panel-background-transparent: rgba(219, 224, 221, 0);
-$lists-panel-label-color: #e9eeea;
+$list-card-background-color: #d0dbd2;
+$list-card-color: $lists-navtab-color;
+$list-panels-background-color: #f6f8f7;
+$list-panels-label-color: #e9e4ca;
+$list-panels-label-button-color: #74977a;
+$list-panel-background-color: #dbe0dd;
+$list-panel-background-transparent: rgba(219, 224, 221, 0);
+$list-panel-label-color: #e9eeea;
 
 $feeds-navtab-background-color: #e7dfd6;
 $feeds-navtab-color: #de8822;
@@ -177,9 +179,9 @@ $salmon-field-color: #CF6361;
 
 $salmon-link-color: #E0A09E;
 
-$salmon-button-background-color: #D8E5DC; // Not correct, but TBD when used
+$salmon-button-background-color: #e5d1d0;
 $salmon-button-color: #CF2F27;
-$salmon-button-border-color: #385E44;
+$salmon-button-border-color: #cf7876;
 
 $blue-background-color: #5090A9;
 $blue-color: #E6D7A3;
@@ -276,19 +278,33 @@ $dialog-colors: (
         purple-flash-color: $purple-button-color,
         purple-flash-border-color: $purple-button-border-color,
 
-        feeds-background-color: $feeds-background-color,
-        feeds-color: $feeds-color,
-        feeds-link-color: $feeds-link-color,
-        feeds-field-background-color: $feeds-field-background-color,
-        feeds-field-color: $feeds-field-color,
-        feeds-select-background-color: $feeds-field-background-color,
-        feeds-select-color: $feeds-field-color,
-        feeds-button-background-color: $feeds-button-background-color,
-        feeds-button-color: $feeds-button-color,
-        feeds-button-border-color: $feeds-button-border-color,
-        feeds-flash-background-color: $feeds-button-background-color,
-        feeds-flash-color: $feeds-button-color,
-        feeds-flash-border-color: $feeds-button-border-color
+        feed-dialog-background-color: $feeds-background-color,
+        feed-dialog-color: $feeds-color,
+        feed-dialog-link-color: $feeds-link-color,
+        feed-dialog-field-background-color: $feeds-field-background-color,
+        feed-dialog-field-color: $feeds-field-color,
+        feed-dialog-select-background-color: $feeds-field-background-color,
+        feed-dialog-select-color: $feeds-field-color,
+        feed-dialog-button-background-color: $feeds-button-background-color,
+        feed-dialog-button-color: $feeds-button-color,
+        feed-dialog-button-border-color: $feeds-button-border-color,
+        feed-dialog-flash-background-color: $feeds-button-background-color,
+        feed-dialog-flash-color: $feeds-button-color,
+        feed-dialog-flash-border-color: $feeds-button-border-color,
+
+        list-dialog-background-color: $list-card-background-color,
+        list-dialog-color: $list-card-color,
+        list-dialog-link-color: $list-panel-label-color,
+        list-dialog-field-background-color: $list-panels-background-color,
+        list-dialog-field-color: $lists-navtab-color,
+        list-dialog-select-background-color: $list-panels-background-color,
+        list-dialog-select-color: $lists-navtab-color,
+        list-dialog-button-background-color: $list-panels-background-color,
+        list-dialog-button-color: $list-panels-label-button-color,
+        list-dialog-button-border-color: $lists-navtab-color,
+        list-dialog-flash-background-color: $list-panels-background-color,
+        list-dialog-flash-color: $list-panel-label-color,
+        list-dialog-flash-border-color: $lists-navtab-color
 
 );
 
@@ -296,22 +312,39 @@ $dialog-colors: (
 @mixin dialog-color-scheme($colorName) {
   background-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
   color: map-get($dialog-colors, unquote("#{$colorName}-color"));
-  li.token-input-token-facebook { // The collected token(s)
+  li.token-input-token-facebook, li.token-input-token { // The collected token(s)
     color: mix(map-get($dialog-colors, unquote("#{$colorName}-color")), white, 70%);
     background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-background-color")), map-get($dialog-colors, unquote("#{$colorName}-field-background-color")), 70%);
     border-color: map-get($dialog-colors, unquote("#{$colorName}-background-color"));
   }
   // input[type='text'], input[type='password'], input[type='email'] {
-  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook  {
+  input.string, textarea, input[type='text'], input[type='url'], input[type='password'], input[type='email'], ul.token-input-list-facebook, ul.token-input-list  {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-field-color"));
+    &::placeholder {
+      color: mix(
+                      map-get($dialog-colors, unquote("#{$colorName}-field-color")),
+                      map-get($dialog-colors, unquote("#{$colorName}-field-background-color")),
+                      50%
+      );
+    }
   }
-  select, div.token-input-dropdown-facebook {
+  select, div.token-input-dropdown-facebook, div.token-input-dropdown {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-select-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-select-color"));
   }
-  input.center-button {
+  input.dialog-button, a.dialog-button, div.dialog-button, label[for=user_avatar_url] {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
+    background-image: unset;
+    color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
+    border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
+    border-radius: 6px;
+  }
+  div#paneButtons label.btn-primary {
+    background-color: map-get($dialog-colors, unquote("#{$colorName}-button-background-color"));
+    &.active {
+      background-color: mix(map-get($dialog-colors, unquote("#{$colorName}-button-background-color")), black, 90%);
+    }
     background-image: unset;
     color: map-get($dialog-colors, unquote("#{$colorName}-button-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-button-border-color"));
@@ -322,10 +355,63 @@ $dialog-colors: (
       color: lightyellow;
     }
   }
-  span.help-block.has-error {
+  span.help-block.has-error, div.alert-info {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));
     color: map-get($dialog-colors, unquote("#{$colorName}-flash-color"));
     border-color: map-get($dialog-colors, unquote("#{$colorName}-flash-border-color"));
+  }
+  div.lists_collectible {
+    div.control-group {
+      ul.token-input-list {
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        font-size: 16px;
+        width: 100%;
+        li.token-input-input-token input.token-input-field {
+          margin: 3px;
+        }
+      }
+      li.token-input-token {
+        margin: 5px;
+        outline-color: p {
+          width: 96%;
+        }
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        color: map-get($dialog-colors, unquote("#{$colorName}-button-color")); // map-get($dialog-colors, unquote("green-button-color"));
+        outline: 3px solid mix(
+                        map-get($dialog-colors, unquote("#{$colorName}-button-color")),
+                        map-get($dialog-colors, unquote("#{$colorName}-field-background-color")),
+                        40%
+        );
+      }
+    }
+    div.selection-list {
+      outline: 1px solid black;
+      overflow-y: scroll;
+      height: 7em;
+      margin: 5px 20px;
+      padding: 2px;
+      a.selection-item {
+        margin: 3px 8px 3px 4px;
+        padding-left: 5px;
+        font-size: 0.8em;
+        display: block;
+        line-height: 2.2em;
+        background-color: map-get($dialog-colors, unquote("#{$colorName}-field-background-color"));
+        color: map-get($dialog-colors, unquote("#{$colorName}-background-color")); // map-get($dialog-colors, unquote("green-button-color"));
+        &.owned {
+          background-color: $lists-navtab-background-color;
+          color: $lists-navtab-color;
+        }
+        &.contributed {
+          background-color: $recipes-navtab-background-color;
+          color: $recipes-navtab-color;
+        }
+        &.friends {
+          background-color: $friends-navtab-background-color;
+          color: $friends-navtab-color;
+        }
+      }
+    }
   }
 }
 
@@ -357,7 +443,7 @@ $card-colors: (
         generic-card-background-color: $generic-card-background-color,
         generic-card-header-color: $generic-card-title-color,
         generic-card-title-color: #909090,
-        generic-card-link-color: inherit,
+        generic-card-link-color: $generic-card-color,
   // generic-card-source-color: #cdcdcd,
   // generic-card-source-link-color: #909090,
   // generic-card-description-color: inherit,
@@ -370,7 +456,7 @@ $card-colors: (
         recipe-card-background-color: $recipes-card-background-color,
         recipe-card-header-color: #cdcdcd,
         recipe-card-title-color: #909090,
-        recipe-card-link-color: inherit,
+        recipe-card-link-color: $recipes-panels-label-button-color,
   // recipe-card-source-color: #cdcdcd,
   // recipe-card-source-link-color: #909090,
   // recipe-card-description-color: inherit,
@@ -396,7 +482,7 @@ $card-colors: (
   // viewer-card-source-color: #cdcdcd,
   // viewer-card-source-link-color: #909090,
   // viewer-card-description-color: inherit,
-        viewer-card-label-color: #cdcdcd,
+        viewer-card-label-color: #999999,
   // viewer-card-aspect-contents-color: #cdcdcd,
   // viewer-card-notes-color: #cdcdcd,
   // viewer-card-tagsep-color: #cdcdcd,
@@ -505,23 +591,23 @@ $lists-panel-background-transparent: rgba(219, 224, 221, 0);
 $lists-panel-label-color: #e9eeea;
   */
         list-card-color: inherit,
-        list-card-background-color: $lists-card-background-color,
+        list-card-background-color: $list-card-background-color,
         list-card-header-color: rgba($lists-navtab-color, 0.6),
-        list-card-link-color: $lists-panels-label-button-color,
+        list-card-link-color: $list-panels-label-button-color,
         list-card-title-color: $lists-navtab-color,
   // list-card-source-color: #cdcdcd,
   // list-card-source-link-color: #909090,
   // list-card-description-color: inherit,
-        list-card-label-color: #cdcdcd,
+        list-card-label-color: #aaaaaa,
   // list-card-aspect-contents-color: #cdcdcd,
   // list-card-notes-color: #cdcdcd,
   // list-card-tagsep-color: #cdcdcd,
 
         /* Sites: the former entity-card  */
         site-card-color: #909090,
-        site-card-background-color: inherit,
+        site-card-background-color: $generic-card-background-color,
         site-card-title-color: #909090,
-        site-card-link-color: inherit,
+        site-card-link-color: $generic-card-title-color,
         site-card-header-color: #cdcdcd,
         // site-card-source-color: #cdcdcd,
         // site-card-source-link-color: #909090,
@@ -540,6 +626,12 @@ $lists-panel-label-color: #e9eeea;
   }
   a {
     color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+  }
+  svg#vote-up, svg#vote-down {
+    // color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+    fill: mix(map-get($card-colors, unquote("#{$cardType}-card-title-color")),
+               map-get($card-colors, unquote("#{$cardType}-card-background-color")),
+               30%);
   }
   h3 { // Section header
     color: map-get($card-colors, unquote("#{$cardType}-card-header-color"));

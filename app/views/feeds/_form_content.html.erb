@@ -1,0 +1,41 @@
+<div class="row">
+  <div class="col-md-12">
+    <div class='item-enclosure'>
+      <div class='label-enclosure'>
+        <%= f.label :title, 'Title' -%>
+      </div>
+      <%= f.text_field :title, :label => false, class: 'title' %>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12">
+    <div class='item-enclosure'>
+      <div class='label-enclosure'>
+        <%= f.label :description, 'Description' -%>
+      </div>
+      <%= f.text_area :description, :label => false, class: 'description' %>
+    </div>
+  </div>
+</div>
+<% if permitted_to?(:admin, :feeds) %>
+    <div class="row">
+      <div class="col-md-12">
+        <%= f.check_box :approved %>
+        <span class="prompt">Visible (approved for feedthrough)</span>
+        <%# f.input :approved, :as => :boolean, label: "Visible (approved for feedthrough)" %>
+        <%# f.input :feedtype, collection: Feed.feedtype_selection %>
+      </div>
+    </div>
+    <hr>
+    <div class="row">
+      <div class="col-md-12">
+        <div class='item-enclosure'>
+          <div class='label-enclosure'>
+            <%= f.label :url, 'URL' -%>
+          </div>
+          <%= f.text_field :url, :label => false %>
+        </div>
+      </div>
+    </div>
+<% end %>

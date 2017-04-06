@@ -246,14 +246,6 @@ div.card-item {
     letter-spacing: 1.5px;
     line-height: 1.2em;
   }
-  svg#vote-up {
-    color: mix($vote-glyph-color, black, 93%);
-    fill: mix($vote-glyph-color, black, 93%);
-  }
-  svg#vote-down {
-    color: mix($vote-glyph-color, black, 93%);
-    fill: mix($vote-glyph-color, black, 93%);
-  }
   &.recipe-card {
     @include card-color-scheme(recipe);
     /*
@@ -370,7 +362,7 @@ div.card-item {
     padding-top: 1em;
     padding-bottom: 3em;
     div.grid-item {
-      ul.token-input-list-facebook {
+      ul.token-input-list, ul.token-input-list-facebook {
         min-width: 100px;
         width: 100%;
       }
@@ -548,6 +540,7 @@ div.pic_preview {
 }
 
 .bootstrap-filestyle {
-  margin-top: 20px;
+  margin-top: 15px;
+  margin-bottom: 15px;
   text-align: center;
 }

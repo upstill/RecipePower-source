@@ -2,15 +2,15 @@
     <%= modal_body do %>
         <div class="row">
           <div class="col-md-12">
-            <%= gleaning_trigger @decorator %>
+            <%# gleaning_trigger @decorator, :title %>
             <%= f.label 'Name' %>
             <!--Construct a list of possible answers-->
-            <%= gleaning_field @decorator, 'Title' %>
+            <%= gleaning_field @decorator, :titles %>
             <%= f.input :name, :label => false %>
             <%= f.label 'Description' %>
-            <%= gleaning_field @decorator, 'Description' %>
+            <%= gleaning_field @decorator, :descriptions %>
             <%= f.input :description, :label => false %>
-            <%= gleaning_field @decorator, 'RSS Feed' if permitted_to?(:admin, :feeds) %>
+            <%= gleaning_field @decorator, :feeds if permitted_to?(:admin, :feeds) %>
           </div>
         </div>
         <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>

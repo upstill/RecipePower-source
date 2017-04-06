@@ -204,7 +204,7 @@ class FinderServices
   end
 
   def self.css_class label
-    label.downcase.gsub /\s/, '-'
+    label.to_s.downcase.gsub /\s/, '-'
   end
 
 end

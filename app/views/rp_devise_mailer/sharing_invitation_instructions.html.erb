@@ -166,7 +166,8 @@
   <body>
 		<div class="header_content">
 			<div class="message_banner">
-				<strong><%= (inviter_name || "Someone").split(/\s/).first %></strong> sez: Look what I found on
+				<strong><%= (inviter_name || "Someone").split(/\s/).first %></strong> sez:
+              Check out this <%= @decorator.object.model_name.human.downcase %> I found on
 				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %>.
 			</div>
 			<% unless @recipient.invitation_message.blank? %>
@@ -196,7 +197,7 @@
         </div>
         <div class="footer">
 	  	<p><%= link_to "Recipe Power", home_url, class: "brand" %></p>
-			<p>Copyright 2015 by RecipePower. All Rights Reserved</p>
+			<p>Copyright 2011-17 by RecipePower. All Rights Reserved</p>
 		</div>
   </body>
 </html>

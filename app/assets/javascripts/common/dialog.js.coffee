@@ -229,8 +229,11 @@ RP.dialog.notify = (what, dlog) ->
 	# If there's a manager module with a responder, call it
 	return if !dlog
 	RP.apply_hooks what, dlog # Run any messaging or functions associated with the dialog
-	if (mgr = manager_of dlog) && (fcn = mgr[what] || mgr["on" + what])
-		fcn dlog
+	if mgr = manager_of dlog
+		if mgr.notify
+			mgr.notify what, dlog
+		else if (fcn = mgr[what] || mgr["on" + what])
+			fcn dlog
 	# Otherwise, run the default
 	switch what
 		when 'load', 'onload'
@@ -251,6 +254,13 @@ RP.dialog.notify = (what, dlog) ->
 	# when "close", "onclose"
 	return
 ###
+
+RP.dialog.activate_pane = (id) ->
+	x=2
+
+RP.dialog.deactivate_pane = (id) ->
+	x=2
+
 
 # Special handler for dialogs imbedded in an iframe. See 'injector.js'
 notify_injector = (what, dlog) ->

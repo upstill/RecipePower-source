@@ -12,8 +12,8 @@
       <div class="stamp title">
         <%= presenter.vote_buttons %>
         <%= presenter.card_homelink link_direct: true, class: 'title-link' %>
-        <%= presenter.edit_button %>
-        <%= presenter.tag_button %>
+        <%= presenter.edit_button if decorator.user_can? :edit %>
+        <%# presenter.tag_button %>
         <%= presenter.collect_button %>
         <%= presenter.card_aspect_rendered :description %>
         <%= presenter.card_aspect_rendered :notes %>
@@ -24,7 +24,7 @@
           </div>
       <% end %>
       <div class="lower-content">
-        <%= presenter.tools_menu %>
+        <%# presenter.tools_menu %>
         <%= presenter.share_button %>
       </div>
     </div>

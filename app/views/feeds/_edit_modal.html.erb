@@ -1,4 +1,2 @@
 <%# Fields for an edit-feed dialog %>
-<%= modal_dialog 'edit_feed new-style salmon' do %>
-  <%= render 'edit_form' %>
-<% end %>
+<%= pane_dialog @decorator, 'feed-dialog' %>

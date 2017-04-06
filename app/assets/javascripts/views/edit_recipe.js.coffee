@@ -11,8 +11,11 @@ RP.edit_recipe.bind = (dlog) ->
 	# Set up processing for click events on links with a 'edit_recipe_link' class
 	$(dlog).on "click", '.edit_recipe_link', RP.edit_recipe.go
 
-me = () ->
-	$('div.edit_recipe')[0]
+mydlog = () ->
+	$('div.dialog.edit_recipe')[0] || $('div.pane#edit_recipe-pane').closest('div.dialog')[0]
+
+mypane = () ->
+	$('div.pane#edit_recipe-pane')[0] || $('div.dialog.edit_recipe')[0]
 
 collection_tagger_selector = "div.edit_recipe #recipe_collection_tokens"
 tagger_selector = "div.edit_recipe #recipe_tagging_tokens"
@@ -21,7 +24,7 @@ tagger_selector = "div.edit_recipe #recipe_tagging_tokens"
 RP.edit_recipe.go = (evt, xhr, settings) ->
 	rcpdata = $(this).data()
 	template = $('div.template#tag-collectible')
-	dlog = me()
+	dlog = mydlog()
 	# If it has children it's active, and should be put away, starting with hiding it.
 	if $('.edit_recipe > *').length > 0
 		$(dlog).hide()
@@ -52,7 +55,7 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 	$('textarea').autosize()
 		
 	# Hand it off to the dialog handler
-	RP.dialog.run me()
+	RP.dialog.run mydlog()
 	# When submitting the form, we abort if there's no change
 	# Stash the serialized form data for later comparison
 	# $('form.edit_recipe').data "before", recipedata $('form.edit_recipe').serializeArray()
@@ -66,11 +69,11 @@ RP.edit_recipe.go = (evt, xhr, settings) ->
 
 # When dialog is loaded, activate its functionality
 RP.edit_recipe.onload = (dlog) ->
-	dlog = me()
+	dlog = mydlog()
 	# Only proceed if the dialog has children
 	if $('.edit_recipe > *').length > 0
 		# The pic picker is preloaded onto its link element. Unhide the link when loading is complete
-		rcpid = $('form.edit_recipe', dlog).attr("id").replace /\D*/g, ''
+		rcpid = $('form', dlog).attr("id").replace /\D*/g, ''
 		if touch_recipe = RP.named_function "RP.rcp_list.touch_recipe"
 			touch_recipe rcpid
 

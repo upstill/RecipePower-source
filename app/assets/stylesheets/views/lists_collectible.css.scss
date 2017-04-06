@@ -1,25 +1,34 @@
 @mixin list-item-backgrounds {
   background-color: $green-field-background-color;
-  color: $lists-navtab-color;
+  color: map-get($dialog-colors, unquote("green-button-color"));
+  outline: 1px solid black;
   &.owned {
     background-color: $lists-navtab-background-color;
-    color: $lists-navtab-color;
+    color: map-get($dialog-colors, unquote("green-button-color"));
+    outline-color: map-get($dialog-colors, unquote("green-button-color"));
+    // color: $lists-navtab-color;
   }
   &.contributed {
     background-color: $recipes-navtab-background-color;
-    color: $recipes-navtab-color;
+    color: map-get($dialog-colors, unquote("green-button-color"));
+    outline-color: map-get($dialog-colors, unquote("green-button-color"));
+    // color: $recipes-navtab-color;
   }
   &.friends {
     background-color: $friends-navtab-background-color;
-    color: $friends-navtab-color;
+    color: map-get($dialog-colors, unquote("green-button-color"));
+    outline-color: map-get($dialog-colors, unquote("green-button-color"));
+    // color: $friends-navtab-color;
   }
   &.public {
     background-color: $green-field-background-color;
-    color: $green-color;
+    color: map-get($dialog-colors, unquote("green-button-color"));
+    outline-color: map-get($dialog-colors, unquote("green-button-color"));
+    // color: $green-color;
   }
 }
 
-div.lists-collectible {
+div.lists_collectible {
     div.control-group {
       ul.token-input-list {
         width: 100%;
@@ -37,13 +46,13 @@ div.lists-collectible {
     div.selection-list {
       outline: 1px solid black;
       overflow-y: scroll;
-      height: 6em;
+      height: 7em;
       margin: 5px 20px;
       padding: 2px;
       a.selection-item {
         margin: 3px 8px 3px 4px;
         padding-left: 5px;
-        font-size: 0.6em;
+        font-size: 0.7em;
         display: block;
         @include list-item-backgrounds;
       }

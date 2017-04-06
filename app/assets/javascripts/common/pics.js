@@ -46,12 +46,11 @@ function fitImage(img) {
 
     var frameAR = frameWidth / frameHeight;
     var imgAR = picWidth / picHeight;
-    var fillmode = $(img).data("fillmode") || "none";
-    if (fillmode == "width") {
+    if ($(img).hasClass("fixed-width")) {
         // Size image to fit parent's width
         $(img).css("width", frameWidth);
         $(img).css("height", frameWidth / imgAR);
-    } else if (fillmode == "height") {
+    } else if ($(img).hasClass("fixed-height")) {
         // Size image to fit parent's height
         $(img).css("height", frameHeight);
         $(img).css("width", frameHeight * imgAR);
@@ -74,12 +73,18 @@ function fitImage(img) {
     return true;
 }
 
-// Set the source for the preview image, only loading the form field when the image is successfully loaded
+function get_image(imageSel) {
+    return $(imageSel).attr('src');
+}
+
+// Set the source for the preview image, only loading the URL into the form field when the image is successfully loaded
 // NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
 function set_image_safely(imageElmt, url, formsel) {
     $(formsel).attr('value', url || "")
     if (url.length < 1) {  // Substitute empty url with placeholder for display purposes only
         url = $(imageElmt).data('emptyurlfallback') || ""
+    }
+    if (url.length < 1) {  // If the url is STILL empty, render the image invisible
         $(imageElmt).addClass('empty')
     } else {
         $(imageElmt).removeClass('empty')
@@ -92,7 +97,8 @@ function set_image_safely(imageElmt, url, formsel) {
         var img = image.img;
         var fallback;
         if (image.isLoaded) {
-            $(img).addClass("loaded")
+            $(img).addClass("loaded");
+            fitImage($(img)[0]);
         } else {
             $(img).addClass("bogus").removeClass("loaded");
             img.src = $(img).data("bogusurlfallback") || "";
@@ -114,7 +120,7 @@ function previewImg(inputsel, imagesel, formsel) {
     set_image_safely(imagesel, url, formsel);
     return false;
 }
-
+//
 // Place an image URL into both a preview image  and an accompanying input field, if any
 function imagePreviewWidgetSet(imgID, inputID, url) {
     set_image_safely("img#" + imgID, url, "input#" + inputID)
@@ -131,3 +137,4 @@ RP.validate_img = function (event) {
         }
     }
 }
+

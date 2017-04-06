@@ -1,5 +1,5 @@
 require "templateer.rb"
-class FeedEntryDecorator < Draper::Decorator
+class FeedEntryDecorator < CollectibleDecorator
   include Templateer
   delegate_all
 

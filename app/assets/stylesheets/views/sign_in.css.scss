@@ -59,25 +59,31 @@ div.sign_in .signin {
 	margin-right:5px;
 	text-align:center;
 	margin-bottom:10px;
+    width:auto;
+    height:32px;
 	&.small {
-		float:left;
-		width:auto;
-		height:32px;
-		text-decoration:none;
-		text-align:center;
-		margin:0;
-		padding:0;
+		// margin:0;
+		// padding:0;
 		// padding-right:0.5em;
-		font-size:9px;
-        img {
-          width: 40px;
-          height: 40px;
-          &.google {
-            background-color: #fefefe;
-          }
-        }
+		// font-size:9px;
+      margin-bottom:6px;
+      img {
+        width: 40px;
+        height: 40px;
+      }
 	}
+    &.medium {
+      width:48px;
+      height:48px;
+    }
+    &.large {
+      width:64px;
+      height:64px;
+    }
 	img {
-		display:block
+		display:block;
+        &.google {
+          background-color: #fefefe;
+        }
 	}
 }
