@@ -7,10 +7,10 @@
         <hr>
         <div class="row">
           <div class="col-md-12">
-            <%= f.input :subject, collection: ['Problem', 'Suggestion', 'Question', 'Other'], label: "Kind of Feedback", selected: "Question", input_html: {style: "width: 30%"} %>
+            <%= f.input :subject, collection: ['Problem', 'Suggestion', 'Question', 'Other'], label: "I have a", selected: "Question", input_html: {style: "width: 30%"} %>
             <%= f.input :email, label: "Username or Email (your choice)", autofocus: resource.email.blank? %>
             <%= f.input :comment, label: "Message", placeholder: "Your Feedback Here" %>
-            <%= f.input :docontact, as: :boolean, label: false, inline_label: "I'd like a response" %>
+            <%= f.input :docontact, as: :boolean, label: false, inline_label: '&nbsp;&nbsp;I\'d like a response'.html_safe %>
           </div>
         </div>
         <div class="row">

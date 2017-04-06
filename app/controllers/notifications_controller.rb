@@ -25,9 +25,13 @@ class NotificationsController < ApplicationController
 
   def accept
     if (token = params[:notification_token]) && (@notification = Notification.find_by_notification_token(token))
-      if current_user # Current user matches the notification: just collect the recipe
+      if current_user # Current user matches the notification: just redirect to the action path
         @notification.accept
         @presenter = NotificationPresenter.new(@notification, view_context, current_user_or_guest)
+        flash[:notice] = @presenter.report_accepted
+        if @presenter.post_action_path
+          redirect_to @presenter.post_action_path
+        end
       else # Need to login before anything else
         response_service.notification_token = params[:notification_token]
         redirect_to home_path # This will generate a trigger for the accept after login

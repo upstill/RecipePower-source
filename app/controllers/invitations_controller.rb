@@ -12,7 +12,8 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    self.resource = resource_class.new(invitation_message: 'Here\'s a little something I found on RecipePower. Have a look and tell me what you think.')
+    entity_name = params[:shared_type].underscore.gsub('_',' ')
+    self.resource = resource_class.new(invitation_message: "Here's a #{entity_name} I found on RecipePower. Have a look and tell me what you think.")
     resource.shared_type = params[:shared_type]
     resource.shared_id = params[:shared_id]
     @shared = resource.shared

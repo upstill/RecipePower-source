@@ -171,7 +171,7 @@ class FilteredPresenter
     # If we have a FilteredPresenter subclass available
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
     if (Object.const_defined? classname) ||
-        (classname = 'EntityShowPresenter' if response_service.action == 'show')
+        (classname = 'EntityShowPresenter' if %w{ show associated}.include?(response_service.action))
       classname.constantize.new view_context, response_service, params, decorator
     end
   end

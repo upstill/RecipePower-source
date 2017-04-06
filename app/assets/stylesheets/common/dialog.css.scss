@@ -28,6 +28,11 @@ div.dialog {
   	margin: 10px;
     }
   }
+  div.form-group {
+    &.user_remember_me {
+      margin-bottom: 0;
+    }
+  }
   &.injector {
     font: 16px arial, sans-serif;
     font-weight: bold;
@@ -56,7 +61,7 @@ div.dialog {
     select.select {
       margin-left: 7px;
       margin-top: 4px;
-      vertical-align: top;
+      // vertical-align: top;
     }
   }
 }
@@ -139,6 +144,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
         }
         .prompt {
           margin: 5px 0px;
+          line-height: 1.5em;
           // font:20px arial,sans-serif;
           // font-weight:bold
         }
@@ -272,10 +278,6 @@ div.dialog.new-style.feed-dialog div.modal-dialog div.modal-content {
 
 div.dialog.new-style.list-dialog div.modal-dialog div.modal-content {
   @include dialog-color-scheme(list-dialog);
-}
-
-div.form-group.user_remember_me {
-  margin-bottom: 0;
 }
 
 div.pane {
