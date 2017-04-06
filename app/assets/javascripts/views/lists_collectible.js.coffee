@@ -8,12 +8,14 @@ token_input = () ->
 input_tokens = () ->
 	$('ul.token-input-list li.token-input-token')
 
+### What was this for?
 matching_tag = (tagspec) ->
 	taglist = token_input().data 'taglist'
 	for ts2 in taglist
 		if ts2.id == tagspec.id
 			return ts2
 	null
+###
 
 # When an item is added to the tokeninput
 RP.lists_collectible.onAdd = (tokeninput) ->
