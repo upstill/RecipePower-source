@@ -5,9 +5,9 @@ Rails.application.config.middleware.use OmniAuth::Builder do
     provider :facebook, ENV['FACEBOOK_ID'], ENV['FACEBOOK_SECRET']
     provider :google_oauth2, ENV['GOOGLE_ID'], ENV['GOOGLE_SECRET'], {access_type: 'online', approval_prompt: ''}
 
-    provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'yahoo', :identifier => 'yahoo.com'
-    provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'aol', :identifier => 'openid.aol.com'
-    provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'open_id'
+    # provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'yahoo', :identifier => 'yahoo.com'
+    # provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'aol', :identifier => 'openid.aol.com'
+    # provider :openid, :store => OpenID::Store::Filesystem.new('./tmp'), :name => 'open_id'
 end
 
 OmniAuth.config.on_failure = Proc.new { |env|
