@@ -67,9 +67,18 @@ class CollectibleController < ApplicationController
           @decorator.glean! # Wait for gleaning to complete
           @decorator.gleaning
         end
-    if @pageurl.present? && @gleaning && @gleaning.images.blank?
-      flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
-      render :errors
+    if @gleaning
+      if @gleaning.errors.any?
+        flash.now[:error] = "Can't extract images from there: #{@gleaning.errors.messages}"
+        render :errors
+      elsif @gleaning.images.blank?
+        flash.now[:error] = 'Sorry, we couldn\'t get any images from that page.'
+        render :errors
+      else
+        flash.now[:success] = 'Images found! Click on an image from the list below to select it.'
+      end
+    else
+      flash.now[:error] = "Gleaning can't be done on #{@decorator.model_name.collection.gsub '_', ''}"
     end
   end
 

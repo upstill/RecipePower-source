@@ -11,7 +11,7 @@ class UserPresenter < CollectiblePresenter
   # Present the user's avatar, optionally with a form for uploading the image (if they're the viewer)
   def card_avatar options={}
     (is_viewer? && !@decorator.imgdata(false).present?) ?
-        super + collectible_upload_button(@decorator, 'lg', label: 'Get a Picture', class: 'upload-button') :
+        super + collectible_editpic_button(@decorator, 'lg', label: 'Get a Picture', class: 'upload-button') :
         super
   end
 

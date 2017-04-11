@@ -1,4 +1,4 @@
-RP = RP || {}
+RP = RP || {};
 
 function doFitImage(evt) {
     fitImage(evt.target)
@@ -16,7 +16,7 @@ function onImageErrorEvent(event) {
 function onImageError(image) {
     if (!$(image).hasClass('empty')) { // Failure on original load
         if (image.alt && (image.alt.match(/\.(jpg|tif|tiff|gif|png)$/) != null)) {
-            image.src = image.alt
+            image.src = image.alt;
             image.alt = ""
         } else {
             image.src = $(image).data("bogusurlfallback") || "";
@@ -69,7 +69,7 @@ function fitImage(img) {
         // $(img).css("padding-top", 0);
         // $(img).css("padding-left", (frameWidth-newWidth)/2);
     }
-    $(img).addClass("loaded")
+    $(img).addClass("loaded");
     return true;
 }
 
@@ -79,8 +79,8 @@ function get_image(imageSel) {
 
 // Set the source for the preview image, only loading the URL into the form field when the image is successfully loaded
 // NB: an empty image url is valid, and substituted in the image (but not in the form) with a fallback url
-function set_image_safely(imageElmt, url, formsel) {
-    $(formsel).attr('value', url || "")
+function set_image_safely(imageElmt, url, formsel, callback) {
+    $(formsel).attr('value', url || "");
     if (url.length < 1) {  // Substitute empty url with placeholder for display purposes only
         url = $(imageElmt).data('emptyurlfallback') || ""
     }
@@ -89,9 +89,10 @@ function set_image_safely(imageElmt, url, formsel) {
     } else {
         $(imageElmt).removeClass('empty')
     }
-    $(imageElmt).removeClass('bogus') // Pending load attempt
+    $(imageElmt).removeClass('bogus'); // Pending load attempt
+    var oldsrc = $(imageElmt).attr('src');
     // Apply the display url to the preview, and save the form selector and actual URL pending successful load
-    $(imageElmt).removeClass("loaded").attr("src", url).data("formsel", formsel)
+    $(imageElmt).removeClass("loaded").attr("src", url).data("formsel", formsel);
     imgLoad = imagesLoaded(imageElmt);
     imgLoad.on('progress', function (instance, image) {
         var img = image.img;
@@ -101,10 +102,12 @@ function set_image_safely(imageElmt, url, formsel) {
             fitImage($(img)[0]);
         } else {
             $(img).addClass("bogus").removeClass("loaded");
-            img.src = $(img).data("bogusurlfallback") || "";
+            if(!(callback && callback(img, oldsrc))) {
+                img.src = $(img).data("bogusurlfallback") || "";
+            }
         }
         $(image.img).trigger('ready')
-    })
+    });
 //	}
     return false;
 }
@@ -123,7 +126,7 @@ function previewImg(inputsel, imagesel, formsel) {
 //
 // Place an image URL into both a preview image  and an accompanying input field, if any
 function imagePreviewWidgetSet(imgID, inputID, url) {
-    set_image_safely("img#" + imgID, url, "input#" + inputID)
+    set_image_safely("img#" + imgID, url, "input#" + inputID);
     return false;
 }
 
@@ -136,5 +139,5 @@ RP.validate_img = function (event) {
             img.src = $(img).data('bogusurlfallback') || "";
         }
     }
-}
+};
 

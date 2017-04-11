@@ -361,7 +361,7 @@ class CollectibleDecorator < Draper::Decorator
 
   # Here's how Collectibles render their panes into a dialog
   def dialog_panes f
-    result = ''.html_safe  # :lists, :tag, :editpic
+    result = ''.html_safe  
     result << h.render('pane_comment_collectible', decorator: self, f: f) if object.is_a?(Collectible)
     result << h.render('pane_tag', decorator: self, f: f) if object.is_a?(Taggable) && user_can?(:tag)
     result << h.render('pane_edit', decorator: self, f: f) if dialog_edit_button.first && user_can?(:admin)

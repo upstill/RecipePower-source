@@ -16,8 +16,20 @@ do_paste = (url) ->
 				matcher = this
 		if !matcher
 			txt = "<img src='" + prior + "' class='pic-pickee'>"
-			$(txt).insertAfter "div.pic-pickees span.prompt"
-	set_image_safely preview_selector, url, 'input#pic-picker-url'
+			# $(txt).insertAfter "div.pic-pickees span.prompt"
+			$('div.pic-pickees').prepend $(txt)
+		$(preview_selector).data "bogusurlfallback", $(preview_selector).attr('src')
+	set_image_safely preview_selector, url, 'input#pic-picker-url', (img, oldsrc) ->
+		# If the image load fails, try the url as a gleaner
+		$('input#pic-picker-url').attr('value', oldsrc); # ...but first, restore the old src
+		console.log "...trying text as URL"
+		# Fire the pic-picker's URL, with the addition of the given URL
+		target_div = $('div#pic-picker-magic')[0]
+		if !matcher # Remove the stashed image from the stack
+			$('div.pic-pickees').find('img').first().remove()
+		if (gleaning_url = $(target_div).data('gleaning-url')) && url && url.match(/^\s*https?:/) # A URL
+			request = RP.build_request gleaning_url, { url: url }
+			RP.submit.enqueue request, target_div
 
 focus_selector = 'div.preview' # input#pic-picker-magic'
 
@@ -34,7 +46,7 @@ RP.pic_picker.activate = (dlog_or_pane) ->
 	console.log "Pic-picker pane activated"
 	RP.pic_picker.invoke_magic dlog_or_pane
 
-# When the pic_picker is activated in a dialog...
+# When the pic_picker's dialog becomes visible...
 RP.pic_picker.shown = (dlog_or_pane) ->
 	console.log "Pic-picker pane shown"
 	RP.pic_picker.invoke_magic dlog_or_pane
@@ -69,7 +81,6 @@ RP.pic_picker.open = (dlog) ->
 			url: ->
 				console.log "...trying text as URL"
 				# Fire the url-extract-button's URL, with the addition of the given URL
-				elmt = event.target # $('a.url-extract-button')[0]
 				request = RP.build_request $(target_div).data('gleaning-url'), { url: contents }
 				RP.submit.enqueue request, target_div
 				event.preventDefault()
@@ -127,8 +138,6 @@ parse_actions = (contents, options) ->
 	if contents && contents.length > 0
 		console.log "...text pasted: " + contents
 		if contents.match(/^\s*https?:/) # A URL
-			do_request_headers contents, (type) ->
-				console.log '...yielded' + type
 			parser.href = contents;
 			if true || parser.pathname.match /\.(jpg|jpeg|tif|tiff|gif|png)$/ # The input is an image URL
 				(typeof options.imgsrc == 'function') && options.imgsrc()
@@ -138,24 +147,3 @@ parse_actions = (contents, options) ->
 			(typeof options.imgsrc == 'function') && options.imgsrc()
 		else
 			(typeof options.error == 'function') && options.error()
-
-# https://static1.squarespace.com/static/5138ebc6e4b069cf933aa05d/t/5857eea82994ca87d4a7b333/1491747100733/?format=750w
-# Use a vanilla httprequest to ping the server, bypassing jQuery
-do_request_headers = (url, action) ->
-# Send the request using minimal Javascript
-	if window.XMLHttpRequest
-		xmlhttp=new XMLHttpRequest()
-	else
-		try
-			xmlhttp = new ActiveXObject "Msxml2.XMLHTTP"
-		catch e
-			try
-				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
-			catch e
-				xmlhttp = null
-	if xmlhttp != null
-		xmlhttp.onreadystatechange = () ->
-			if xmlhttp.readyState==4
-				contentLength = xmlhttp.getResponseHeader('Content-Type');
-		xmlhttp.open "HEAD", url, true
-		xmlhttp.send()
