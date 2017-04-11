@@ -31,6 +31,8 @@ RP::Application.routes.draw do
       get 'touch'
       get 'associated'
       patch 'collect'
+      get 'card' # Provide a card for display via JSON
+      # get 'cardlet' # Provide a cardlet for display via JSON
     end
   end
 

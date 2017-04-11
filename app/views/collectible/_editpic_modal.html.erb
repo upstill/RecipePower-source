@@ -4,8 +4,11 @@ Expecting the following local variables:
     * imgdata: data suitable for filling the href field of an image
     * pageurl: the URL of the page where the choices will be sourced
 -->
-<%= modal_dialog 'pic_picker new-style green', dialog_class: 'modal-lg' do %>
-    <div class="content">
-      <%= render 'form_editpic' %>
-    </div>
+<%= modal_dialog 'pic_picker new-style green' do %>
+    <%= form_for @decorator.object do |f| %>
+        <%# render 'pane_editpic', decorator: @decorator, f: f %>
+        <%= render 'form_content_editpic', decorator: @decorator, f: f %>
+        <%= dialog_submit_button %>
+        <%= dialog_cancel_button %>
+    <% end %>
 <% end %>

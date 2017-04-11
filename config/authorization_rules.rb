@@ -9,6 +9,7 @@ authorization do
   role :user do
     includes :guest
     has_permission_on [:recipes, :lists, :feeds, :feed_entries, :sites, :users], :to => [ :lists, :tag, :editpic, :glean ]
+    has_permission_on [:users], :to => [ :edit, :update ] # BUT ONLY FOR ONESELF
     has_permission_on [:recipes], :to => [ :subscribe, :update, :delete, :touch ]
     has_permission_on [:tags], :to => [:read]
     has_permission_on [:feeds], :to => [:index, :show, :subscribe]

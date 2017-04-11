@@ -1,0 +1,14 @@
+<div class="col-xs-12 col-sm-6 col-md-5">
+  <%= pic_picker_magic decorator, f, uploadable: true %>
+</div>
+<div class="col-xs-12 col-sm-6 col-md-7">
+  <p>
+    <% if decorator.object.is_a?(Recipe) || decorator.object.is_a?(Site) %>
+        Hint: You can paste an image (or another web page) here, or you can
+        <%= link_to ' go to the webpage', decorator.url, :target => '_blank', style: 'text-decoration: underline;' %>
+        , hit the Cookmark button, and pick a picture from there.
+    <% else %>
+        Hint: You can paste an image here.
+    <% end %>
+  </p>
+</div>

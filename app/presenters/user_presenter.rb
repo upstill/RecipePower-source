@@ -146,7 +146,10 @@ class UserPresenter < CollectiblePresenter
       if val.present?
         user.about.html_safe # + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs', :mode => :modal)
       else
-        card_aspect_editor which
+        'We have no description on file for you. '.html_safe +
+            link_to_submit('Click Here', edit_user_path, button_size: 'xs', :mode => :modal) +
+        ' to let us know who you are!'
+        # card_aspect_editor which
       end
     else
       val if val.present?

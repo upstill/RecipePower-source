@@ -30,9 +30,14 @@ RP.pic_picker.invoke_magic = (dlog_or_pane) ->
 		$('div.pic-pickees span.prompt').hide()
 
 # When the pic_picker is activated in a dialog...
-RP.pic_picker.activate = (pane) ->
+RP.pic_picker.activate = (dlog_or_pane) ->
 	console.log "Pic-picker pane activated"
-	RP.pic_picker.invoke_magic pane
+	RP.pic_picker.invoke_magic dlog_or_pane
+
+# When the pic_picker is activated in a dialog...
+RP.pic_picker.shown = (dlog_or_pane) ->
+	console.log "Pic-picker pane shown"
+	RP.pic_picker.invoke_magic dlog_or_pane
 
 # Respond to a link by bringing up a dialog for picking among the image fields of a page
 # -- the pic_picker div is ready to be a diaog
@@ -122,8 +127,10 @@ parse_actions = (contents, options) ->
 	if contents && contents.length > 0
 		console.log "...text pasted: " + contents
 		if contents.match(/^\s*https?:/) # A URL
+			do_request_headers contents, (type) ->
+				console.log '...yielded' + type
 			parser.href = contents;
-			if parser.pathname.match /\.(jpg|jpeg|tif|tiff|gif|png)$/ # The input is an image URL
+			if true || parser.pathname.match /\.(jpg|jpeg|tif|tiff|gif|png)$/ # The input is an image URL
 				(typeof options.imgsrc == 'function') && options.imgsrc()
 			else
 				(typeof options.url == 'function') && options.url()
@@ -131,3 +138,24 @@ parse_actions = (contents, options) ->
 			(typeof options.imgsrc == 'function') && options.imgsrc()
 		else
 			(typeof options.error == 'function') && options.error()
+
+# https://static1.squarespace.com/static/5138ebc6e4b069cf933aa05d/t/5857eea82994ca87d4a7b333/1491747100733/?format=750w
+# Use a vanilla httprequest to ping the server, bypassing jQuery
+do_request_headers = (url, action) ->
+# Send the request using minimal Javascript
+	if window.XMLHttpRequest
+		xmlhttp=new XMLHttpRequest()
+	else
+		try
+			xmlhttp = new ActiveXObject "Msxml2.XMLHTTP"
+		catch e
+			try
+				xmlhttp = new ActiveXObject("Microsoft.XMLHTTP")
+			catch e
+				xmlhttp = null
+	if xmlhttp != null
+		xmlhttp.onreadystatechange = () ->
+			if xmlhttp.readyState==4
+				contentLength = xmlhttp.getResponseHeader('Content-Type');
+		xmlhttp.open "HEAD", url, true
+		xmlhttp.send()

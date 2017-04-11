@@ -179,6 +179,14 @@ module DialogsHelper
         data: { method: options[:method] || 'post' }
   end
 
+  # Present an 'X' close button at the top right of a dialog
+  def dialog_close_button do_cancel = true, options={}
+    # <button type="button" class="select-content close dialog-x-box rollup" data-activate="waiting">×</button>
+    content_tag :button,
+                'x',
+                options.merge(class: "#{options[:class]} close dialog-x-box #{'dialog-cancel-button' if do_cancel}")
+  end
+
   def dialog_cancel_button label = nil, options={}
     if label.is_a? Hash
       options, label = label, nil
