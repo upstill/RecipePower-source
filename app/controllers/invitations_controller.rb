@@ -12,13 +12,16 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    entity_name = params[:shared_type].underscore.gsub('_',' ')
-    self.resource = resource_class.new(invitation_message: "Here's a #{entity_name} I found on RecipePower. Have a look and tell me what you think.")
-    resource.shared_type = params[:shared_type]
-    resource.shared_id = params[:shared_id]
-    @shared = resource.shared
+    if params[:shared_type].present?
+      entity_name = params[:shared_type].underscore.gsub('_',' ')
+      self.resource = resource_class.new invitation_message: "Here's a #{entity_name} I found on RecipePower. Have a look and tell me what you think."
+      resource.shared_type = params[:shared_type]
+      resource.shared_id = params[:shared_id]
+      @shared = resource.shared
+    else
+      self.resource = resource_class.new
+    end
     self.resource.invitation_issuer = current_user.polite_name
-    # dialog_boilerplate(@shared ? :share : :new)
     if @shared
       smartrender :action => :share
     else

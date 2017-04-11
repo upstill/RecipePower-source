@@ -2,8 +2,7 @@
 <%= simple_form_for resource, :as => 'user', :url => invitation_path('user', :mode => response_service.mode), :html => {:method => :put} do |f| %>
     <div class="row">
       <div class="col-md-12">
-        <p>Welcome to RecipePower!</p>
-        <p>Now, just quickly confirming your details...</p>
+        <p class="prompt">Just quickly confirming your details:</p>
         <%= form_errors_helper f %>
       </div>
     </div>
@@ -20,7 +19,7 @@
 -->
     <div class="row">
       <div class="col-md-12">
-        <%= f.input :username, label: 'User name' %>
+        <%= f.input :username, label: 'User name (handle)' %>
       </div>
     </div>
     <div class="row">

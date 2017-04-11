@@ -98,7 +98,7 @@ class UsersController < CollectibleController
     label = (params[:result_type] || 'recipe').pluralize
     if response_service.user.id == current_user_or_guest_id
       response_service.title = "My #{label}"
-      @empty_msg = 'Nothing here yet. Click the Suggest button above to get some ideas.'.html_safe
+      @empty_msg = "Nothing here yet. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some?".html_safe
       @active_menu = :collections
     else
       response_service.title = "#{response_service.user.handle}'s #{label}"

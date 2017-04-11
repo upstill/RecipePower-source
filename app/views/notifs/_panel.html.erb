@@ -5,15 +5,31 @@
     <div class="modal-content">
       <div class="modal-header">
         <% if resource %>
-            <a class="select-content signup" data-activate="accept"><%= invitation_acceptance_label %></a>
-            <a class="select-content rollup none glyphicon glyphicon-remove"><%# sprite_glyph(:'vote-up', 'xl') %></a>
-            <br><a class="select-content signin" data-activate="signin">Sign In Otherwise</a>
+            <div class="header-links waiting">
+              <a class="select-content signup" data-activate="accept"><%= invitation_acceptance_label %></a>
+              <a class="select-content rollup none glyphicon glyphicon-remove"><%# sprite_glyph(:'vote-up', 'xl') %></a>
+              <br><a class="select-content signin" data-activate="signin">Sign In Otherwise</a>
+            </div>
+            <div class="header-links accept" style="display: none">
+              <div style="display: table; margin: 0 auto">
+                <span>Welcome!&nbsp;&nbsp;</span>
+                <a class="select-content signin" data-activate="signin">Sign in</a>
+              </div>
+              <%= dialog_close_button false, class: 'select-content rollup', data: { activate: 'waiting' } %>
+            </div>
+            <div class="header-links signin" style="display: none">
+              <div style="display: table; margin: 0 auto">
+                <span>Sign&nbsp;In</span>
+                <a class="select-content signin" data-activate="accept">Accept</a>
+              </div>
+              <%= dialog_close_button false, class: 'select-content rollup', data: { activate: 'waiting' } %>
+            </div>
         <% else %>
-            <div class="header-links waiting" >
+            <div class="header-links waiting">
               <a class="select-content signup" data-activate="signup">Sign&nbsp;Up</a>
               <span class="separator">&nbsp;|&nbsp;</span>
               <a class="select-content signin" data-activate="signin">Sign&nbsp;In</a>
-             </div>
+            </div>
             <div class="header-links signup" style="display: none">
               <div style="display: table; margin: 0 auto">
                 <span>Sign&nbsp;Up</span>

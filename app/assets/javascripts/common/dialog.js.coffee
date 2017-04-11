@@ -8,6 +8,7 @@ jQuery ->
 	$(document).on 'shown.bs.modal', (event) ->
 		# When a dialog is invoked, focus on the first autofocus item, or a string item or a text item
 		RP.dialog.focus event.target
+		RP.dialog.notify "shown", event.target
 	# On hiding a modal, we wait until it's actually hidden to muck with its classes
 	$(document).on 'hidden.bs.modal', (event) ->
 		dlog = event.target
