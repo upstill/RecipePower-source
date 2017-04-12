@@ -1,10 +1,10 @@
 table {
   font-size: 1em;
   thead {
-    font-size: 1.1em;
+    font-size: 1.3em;
   }
   tbody {
-    font-size: 0.9em;
+    font-size: 1.2em;
     tr {
       td {
         hr {
@@ -12,10 +12,13 @@ table {
           margin-bottom: 3px;
         }
         &.avatar-column {
-          width: 100px;
+          width: 200px;
         }
         &.description-column {
           // width: 300px;
+          span.homelink-item {
+            font-size: 1.3em;
+          }
         }
         &.actions-column {
           width: 50px;
