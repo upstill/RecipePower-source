@@ -900,7 +900,7 @@ class ListsIndexCache < ResultsCache
       when 'all'
         List.unscoped
       else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        ListServices.visible_lists( viewer, true).where.not(name_tag_id: [16310,16311,16312]).order(owner_id: :desc)
+        ListServices.visible_lists( viewer, true).where.not(name_tag_id: [16310,16311,16312]) # .order(owner_id: :desc)
     end
   end
 end

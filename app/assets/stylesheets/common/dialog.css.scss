@@ -205,6 +205,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
   div.item-enclosure {
     width: 97%;
     margin: auto;
+    margin-bottom: 20px;
     &.boolean-item {
       margin-bottom: 20px;
       div.boolean label.boolean input.boolean {
