@@ -97,7 +97,7 @@ module CollectibleHelper
                                    title: entity.private ? 'Reveal to Others' : 'Hide from Others')
         end
 
-        items << collectible_upload_button(decorator, size, styling.merge(label: 'Get Picture'))
+        items << collectible_editpic_button(decorator, size, styling.merge(label: 'Get Picture'))
 
         items << collectible_destroy_button(decorator, 'xs', styling.merge(title: 'The Nuclear Option', style: 'margin-left: 3.8em;'))
       end
@@ -145,7 +145,7 @@ module CollectibleHelper
   end
 
   # Provide the button for uploading an image
-  def collectible_upload_button entity, size=nil, styling={}
+  def collectible_editpic_button entity, size=nil, styling={}
     entity = entity.object if entity.is_a? Draper::Decorator
     if permitted_to? :update, entity
       if size.is_a? Hash
