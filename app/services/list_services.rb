@@ -4,8 +4,8 @@ class ListServices
 
   delegate :owner, :ordering, :name, :name_tag, :tags, :notes, :availability, :owner_id, :to => :list
 
-  def initialize list
-    self.list = list
+  def initialize list_or_decorator
+    self.list = list_or_decorator.is_a?(Draper::Decorator) ? list_or_decorator.object : list_or_decorator
   end
 
   # Get the lists on which the entity appears, as visible to the user
@@ -122,7 +122,7 @@ class ListServices
     (ntags - otags).each { |list_tag| decorator.assert_tagging list_tag, uid }
     (otags - ntags).each do |list_tag|
       if owned_list = list_tag.dependent_lists.where(owner_id: uid).first
-        ListServices.new(owned_list).exclude decorator, uid
+        ListServices.new(owned_list).exclude decorator.object, uid
       else
         decorator.refute_tagging list_tag, uid
       end

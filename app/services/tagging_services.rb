@@ -1,7 +1,7 @@
 class TaggingServices
 
   def initialize taggable_entity
-    @taggable_entity = taggable_entity
+    @taggable_entity = taggable_entity.is_a?(Draper::Decorator) ? taggable_entity.object : taggable_entity
   end
 
   # Shop for taggings according to various criteria
