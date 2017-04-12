@@ -18,7 +18,7 @@ do_paste = (url) ->
 			txt = "<img src='" + prior + "' class='pic-pickee'>"
 			# $(txt).insertAfter "div.pic-pickees span.prompt"
 			$('div.pic-pickees').prepend $(txt)
-		$(preview_selector).data "bogusurlfallback", $(preview_selector).attr('src')
+	$(preview_selector).data "bogusurlfallback", $(preview_selector).attr('src')
 	set_image_safely preview_selector, url, 'input#pic-picker-url', (img, oldsrc) ->
 		# If the image load fails, try the url as a gleaner
 		$('input#pic-picker-url').attr('value', oldsrc); # ...but first, restore the old src
@@ -95,21 +95,11 @@ RP.pic_picker.open = (dlog) ->
 				RP.notifications.post "Sorry, but '" + contents + "' doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
 				event.preventDefault()
 		}
-	if !$(dlog).hasClass 'pane' # Wait until the pane is activated to arm it
-		RP.pic_picker.invoke_magic dlog
 	# When the 'src' for the preview image is set and things settle down (for better or worse),
 	# check the status and report as necessary.
 	$(preview_selector).on 'ready', (event) ->
 		if $(this).hasClass 'bogus'
-			$('.dialog-submit-button', dlog).addClass 'disabled'
 			RP.notifications.post "Sorry, but that address doesn't lead to an image. If you point your browser at it, does the image load?", 'flash-error'
-		else
-			$('.dialog-submit-button', dlog).removeClass 'disabled'
-			if $(this).hasClass 'empty'
-				prompt = 'to leave the recipe without an image.'
-			else
-				prompt = 'to use this image.'
-			# RP.notifications.post 'Click Save '+prompt, 'flash-alert'
 
 	# When an image in the select-list gets clicked, move it to the preview
 	$(dlog).on 'click','img.pic-pickee', (event) ->

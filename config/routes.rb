@@ -17,11 +17,6 @@ RP::Application.routes.draw do
   concern :picable do
     member do
       get 'editpic' # Open dialog to acquire an image from various sources
-    end
-  end
-
-  concern :linkable do
-    member do
       get 'glean/:what', :action => 'glean', :what => /titles|descriptions|images|feeds/, :as => 'glean'
     end
   end
@@ -134,14 +129,13 @@ RP::Application.routes.draw do
     member do
       post 'pin' # Add an entity to a list
       # We allow lists to do gleaning to get an image
-      get 'glean/:what', :action => 'glean', :what => 'images', :as => 'glean'
       get 'contents'
     end
   end
   match 'lists', :controller => 'lists', :action => 'index', :via => [:get, :post]
 
   post '/site' => 'sites#create', :as => 'create_site'
-  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable, :linkable] do
+  resources :sites, except: [:index, :create], :concerns => [:picable, :collectible, :taggable] do
     member do
       post 'absorb'
       get 'feeds'
@@ -215,7 +209,7 @@ RP::Application.routes.draw do
   resources :ratings
   resources :scales
 
-  resources :recipes, :concerns => [:picable, :collectible, :taggable, :linkable] do
+  resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
     end
