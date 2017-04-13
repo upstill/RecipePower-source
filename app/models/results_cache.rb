@@ -944,11 +944,28 @@ class FeedsIndexCache < ResultsCache
 
   # Declare a different default org
   def self.params_needed
-    super + [ [:org, :newest] ]
+    super + [ [ :org, :newest ], :approved ]
   end
 
   def max_window_size
     10
+  end
+
+  def approved
+    if defined?(@approved)
+      case @approved
+        when 'invisible'
+          [ nil, false ]
+        when 'true'
+          true
+        when 'false'
+          false
+        when '', 'nil'
+          nil
+      end
+    else
+      true
+    end
   end
 
   def itemscope
@@ -965,7 +982,7 @@ class FeedsIndexCache < ResultsCache
       when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
         Feed.where approved: true
       else
-        admin_view ? Feed.unscoped : Feed.where(approved: true)
+        Feed.where approved: (admin_view ? approved : true)
     end
   end
 
@@ -974,7 +991,7 @@ class FeedsIndexCache < ResultsCache
       when :updated
         uniqueitemscope.order('"feeds"."last_post_date" ' + (@sort_direction || 'DESC'))
       when :approved
-        uniqueitemscope.order('"feeds"."approved" ' + (@sort_direction || 'ASC'))
+        uniqueitemscope.order('"feeds"."approved" ' + (@sort_direction || 'DESC'))
       else
         super
     end

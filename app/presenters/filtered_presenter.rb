@@ -576,7 +576,7 @@ class FeedsIndexPresenter < FilteredPresenter
     block.call 'latest post', { :org => :updated, sort_direction: 'DESC', active: (@org == :updated) },
                title: 'Feeds with most recent posts'
     if admin_view
-      block.call 'unapproved', { :org => :approved, sort_direction: 'ASC' },
+      block.call 'unapproved', { :approved => nil },
                  title: 'Show feeds needing (dis)approval'
     end
     '' # No label
