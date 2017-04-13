@@ -157,7 +157,7 @@ module LinkHelper
                                 merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
                                 except(:action, :truncate).
                                 compact
-      if decorator.respond_to?(:external_link)
+      unless options[:local_only] || !decorator.respond_to?(:external_link)
         link << '&nbsp;'.html_safe +
             link_to('', decorator.external_link,
                     {

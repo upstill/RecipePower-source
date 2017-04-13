@@ -93,6 +93,7 @@ class List < ActiveRecord::Base
   def self.strscopes matcher
     onscope = block_given? ? yield() : self.unscoped
     [
+        onscope.where('"lists"."description" ILIKE ?', matcher)
     ] +
     Tag.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:name_tag => inward} : :name_tag

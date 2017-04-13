@@ -1,6 +1,5 @@
 <% item ||= @tag %>
 <% @tagserv = TagServices.new item %>
-<tr id="<%= dom_id item %>">
   <td class="tag_type"><%= item.id.to_s %></td>
   <td><strong>'</strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>'</td>
   <td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
@@ -26,10 +25,12 @@
       <td>
         <%= link_to_submit 'Edit', edit_tag_path(item), mode: 'modal' %>
         <br>
-        <%= button_to 'Destroy', item,
-                      data: { confirm: 'Are you sure?' },
-                      method: :delete,
-                      class: 'btn btn-xs btn-danger' if response_service.admin_view? %>
+        <%= button_to_submit 'Destroy',
+                             tag_path(item, format: :json),
+                             'danger',
+                             'xs',
+                             with_form: true,
+                      data: { confirm: 'Are you sure you want to destroy this tag...for good?' },
+                      method: :delete if response_service.admin_view? %>
       </td>
   <% end %>
-</tr>
