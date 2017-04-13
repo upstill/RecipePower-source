@@ -6,6 +6,7 @@
     </td>
     <td class="description-column" style="width: 30%">
       <%= presenter.card_homelink class: 'title-link' %>
+      <%= presenter.edit_button if decorator.user_can? :edit %>
       <%= collectible_collect_button decorator, 'lg'  %>
       <%# collectible_destroy_button decorator, 'xs', title: 'The Nuclear Option', style: 'margin-left: 3.8em;' %>
       <br><%= site.description.html_safe if site.description.present? %>
