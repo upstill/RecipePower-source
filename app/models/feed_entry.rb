@@ -37,7 +37,7 @@ class FeedEntry < ActiveRecord::Base
   def self.add_entries(entries, feed)
     # Identify the guids of entries that already exist
     existing_guids = feed.feed_entries.where(guid: (entries.map &:id)).pluck(:guid)
-    last_posted =
+    return unless last_posted =
     entries.map { |entry|
       unless existing_guids.include?(entry.id) # Create a new entry only if its guid doesn't already exist
         entry.published = Time.current if !entry.published || (entry.published > Time.current) # No post-dated post dates
@@ -51,7 +51,7 @@ class FeedEntry < ActiveRecord::Base
         )
         entry.published
       end
-    }.compact.sort.last || Time.current
+    }.compact.sort.last
     # Update the last_post_date of the feed if there's a new entry
     if feed.last_post_date.nil? || (last_posted > feed.last_post_date)
       feed.last_post_date = last_posted

@@ -17,4 +17,8 @@ class FeedDecorator < CollectibleDecorator
     (img = @object.imgdata).present? ? img : @object.site.imgdata
   end
 
+  def eligible_tagtypes
+    ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
+  end
+
 end
