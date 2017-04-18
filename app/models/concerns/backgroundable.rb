@@ -150,6 +150,16 @@ module Backgroundable
     good?
   end
 
+  # Cancel the job nicely, i.e. if it's running wait till it completes
+  def bkg_kill with_extreme_prejudice=false
+    while processing? && !with_extreme_prejudice
+      sleep 1
+      reload
+    end
+    dj.destroy
+    update_attribute :dj_id, nil
+  end
+
   # bkg_go(refresh=false) runs the job synchronously, using DelayedJob appropriately if the job is queued.
   #
   # 'refresh' flag overrides the status attribute so that the job runs even if previously complete.

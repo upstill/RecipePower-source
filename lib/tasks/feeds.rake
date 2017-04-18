@@ -9,4 +9,16 @@ namespace :feeds do
     }
   end
 
+  # Make sure all visible feeds are queued for updates, and conversely
+  task launch: :environment do
+    Feed.where.not(approved: true, dj_id: nil).each { |feed|
+      puts "Killing updates for Feed ##{feed.id}: '#{feed.title}'"
+      feed.bkg_kill
+    }
+    Feed.where(approved: true, dj_id: nil).each { |feed|
+      puts "Launching updates for Feed ##{feed.id}: '#{feed.title}'"
+      feed.launch_update true
+    }
+  end
+
 end
