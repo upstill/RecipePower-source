@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170207015431) do
+ActiveRecord::Schema.define(version: 20170418231836) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -123,6 +123,7 @@ ActiveRecord::Schema.define(version: 20170207015431) do
     t.integer  "feed_entries_count",             default: 0
     t.integer  "status",                         default: 0
     t.integer  "dj_id"
+    t.string   "home"
   end
 
   create_table "finders", force: :cascade do |t|
@@ -262,6 +263,7 @@ ActiveRecord::Schema.define(version: 20170207015431) do
     t.integer  "total_time_high",             default: 0
     t.string   "yield"
     t.integer  "page_ref_id"
+    t.text     "snaps",                       default: "--- []\n"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree

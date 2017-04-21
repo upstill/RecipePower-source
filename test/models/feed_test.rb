@@ -91,4 +91,68 @@ class FeedTest < ActiveSupport::TestCase
     assert (ct-1), Delayed::Job.count
   end
 
+  test 'setting home with garbage fails' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
+    assert_not_nil test_feed.id
+    test_feed.home = 'garbage'
+    refute test_feed.save
+    assert_not_empty test_feed.errors[:home]
+  end
+
+  test 'setting home to empty string succeeds' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
+    assert_not_nil test_feed.id
+    test_feed.home = ''
+    assert test_feed.save
+    assert_empty test_feed.errors[:home]
+  end
+
+  test 'setting home with valid but failing URL fails' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
+    assert_not_nil test_feed.id
+    test_feed.home = 'http://www.potatochipsarenotdinner'
+    refute test_feed.save
+    assert_not_empty test_feed.errors[:site]
+  end
+
+  test 'setting home with valid, successful URL succeeds' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
+    assert_not_nil test_feed.id
+    test_feed.home = 'http://www.potatochipsarenotdinner.com'
+    assert test_feed.save
+    refute test_feed.errors.any?
+    assert test_feed.site.id
+    refute test_feed.site.errors.any?
+    assert test_feed.site.page_ref.id
+    refute test_feed.site.page_ref.errors.any?
+  end
+
+  test 'creating with garbage in home fails' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes", home: 'garbage'
+    assert_nil test_feed.id
+    assert_not_empty test_feed.errors[:home]
+  end
+
+  test 'creating with empty string in home succeeds' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes", home: ''
+    assert_not_nil test_feed.id
+    refute test_feed.errors.any?
+  end
+
+  test 'creating with valid but failing URL in home fails' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes", home: 'http://www.potatochipsarenotdinner'
+    assert_nil test_feed.id
+    assert_not_empty test_feed.errors[:site]
+  end
+
+  test 'creating with valid, successful URL in home succeeds' do
+    test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes", home: 'http://www.potatochipsarenotdinner.com'
+    assert_not_nil test_feed.id
+    refute test_feed.errors.any?
+    assert test_feed.site.id
+    refute test_feed.site.errors.any?
+    assert test_feed.site.page_ref.id
+    refute test_feed.site.page_ref.errors.any?
+  end
+
 end

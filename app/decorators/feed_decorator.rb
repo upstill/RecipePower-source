@@ -9,6 +9,10 @@ class FeedDecorator < CollectibleDecorator
   #     end
   #   end
 
+  def pageurl
+    (home if home.present?) || (site && site.home)
+  end
+
   def typename
     (name = object.feedtypename) == :Misc ? nil : name.downcase
   end

@@ -7,11 +7,14 @@ class Feed < ActiveRecord::Base
   backgroundable :status
 
   picable :picurl, :picture
-  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date
+  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date, :home
   
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed|
+    if feed.home_changed? && cleanpath(feed.home).present?
+      feed.site = Site.find_or_initialize feed.home
+    end
     if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
       feed.follow_url
     else
@@ -28,15 +31,40 @@ class Feed < ActiveRecord::Base
     end
   }
 
-  belongs_to :site
-  validates :site, :presence => true
+  belongs_to :site, :autosave => true
+  # validates :site, :presence => true
   validates :url, :presence => true, :uniqueness => true
+  # validates_with HomeUrlValidator, fields: [:home]
+  validates_each :home, :site do |feed, attr, value|
+    case attr
+      when :home # Home throws an error if it's a syntactically invalid link
+        feed.errors.add :home, "has a bad link (#{value})" if cleanpath(feed.home).blank? && feed.errors[:home].blank?
+      when :site
+        return unless feed.errors[:site].blank?
+        if value
+          # If the home link is nominally good, we assume that site errors come from that
+          err_source = cleanpath(feed.home).blank? ? :site : :home
+          if value.page_ref && value.page_ref.good?
+            value.save if value.new_record?
+            feed.errors.add err_source, "isn't legit (#{value.errors.messages})" if value.errors.present?
+          else
+            feed.errors.add err_source, "isn't legit (can't access the home page)"
+          end
+        else
+          feed.errors.add :site, "can't be empty"
+        end
+    end if feed.home_changed? && feed.home.present?
+  end
+
+=begin
+  def valid_url?(uri)
+    uri = URI.parse(uri) && !uri.host.nil?
+  rescue URI::InvalidURIError
+    false
+  end
+=end
 
   has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
-
-  def self.fix_counters
-    Feed.find_each { |feed| Feed.reset_counters(feed.id, :feed_entries) }
-  end
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also
   # alias to the url of an already-extant feed (no good). We also need to extract the title and description 
@@ -58,7 +86,7 @@ class Feed < ActiveRecord::Base
       false
     end
   end
-    
+
   def self.correct
     Feed.all.each { |feed|
       begin
@@ -133,23 +161,6 @@ class Feed < ActiveRecord::Base
     end
     @fetched
   end
-  
-  def self.evaluate
-    prevurl = ''
-    feedcount = 0
-    File.open('/Users/upstill/dev/rss_rejects3.txt', 'w') do |outfile|
-      File.open('/Users/upstill/dev/rss_rejects2.txt').each do |line|
-        fields = line.split(' ')
-        feedurl = fields[0]
-        pageurl = fields[2].sub(/\)$/, '')
-        if(pageurl != prevurl)
-          feedcount = (site = Site.find_or_create_for pageurl) ? site.feeds.count : 0
-          prevurl = pageurl
-        end
-        outfile.puts line unless feedcount > 0
-      end
-    end
-  end
 
   @@feedtypes = [
     [:Misc, 0], 
@@ -185,8 +196,9 @@ class Feed < ActiveRecord::Base
       orig_save options
     else
       Feed.record_timestamps = false
-      orig_save options
+      result = orig_save options
       Feed.record_timestamps = true
+      result
     end
   end
 

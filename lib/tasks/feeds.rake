@@ -21,4 +21,12 @@ namespace :feeds do
     }
   end
 
+  # Ensure that the entry count is correct for each feed
+  task count: :environment do
+    Feed.all.pluck(:id).each { |id|
+      puts "Resetting counters for Feed #{id}"
+      Feed.reset_counters(id, :feed_entries)
+    }
+  end
+
 end

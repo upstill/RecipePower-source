@@ -278,7 +278,8 @@ public
   end
 
   # Produce a Site for a given url(s) whether one already exists or not
-  def self.find_or_create homelink, options={}
+  def self.find_or_create homelink, do_glean = true, options={}
+    do_glean, options = true, do_glean if do_glean.is_a?(Hash)
     if uri = options[:root] || cleanpath(homelink) # URL parses
       # Find a site, if any, based on the longest subpath of the URL
       if site = Site.find_by(root: uri)
@@ -298,6 +299,31 @@ public
         end
         site.glean # Grab page in background
         site.save
+        return site
+      end
+    end
+  end
+
+  # Produce a Site for a given url(s) whether one already exists or not,
+  # WITHOUT SAVING IT
+  def self.find_or_initialize homelink, options={}
+    if uri = options[:root] || cleanpath(homelink) # URL parses
+      # Find a site, if any, based on the longest subpath of the URL
+      if site = Site.find_by(root: uri)
+        return site
+      else
+        site = Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
+        # TODO: Should be eliminable with switchover to pagerefable
+        unless site.page_ref
+          spr = PageRef::SitePageRef.fetch homelink
+          site.page_ref = spr unless spr.errors.any?
+        end
+        unless site.referent # Could have been generated with the :name option
+          # Need to give it a name
+          if (spr = site.page_ref) && spr.title.present?
+            site.name = spr.title
+          end
+        end
         return site
       end
     end

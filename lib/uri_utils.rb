@@ -82,7 +82,7 @@ end
 
 # Fix errant characters without re-escaping '%'
 def sanitize_url url
-  URI.encode(url).gsub(/\%23/, '#' ).gsub(/\%25/, '%' )
+  URI.encode(url).gsub(/\%23/, '#' ).gsub(/\%25/, '%' ) if url
 
 =begin
   url.strip.
