@@ -10,10 +10,11 @@ def validate_link link, protocols=nil
 end
 
 # Try to make sense out of a given path in the context of another url.
+# If strong is true, ping the server to test the path
 # Return either a valid URL or nil
-def valid_url path, url
+def valid_url path, url, strong=true
   path ||= ""  # Could happen
-  if validate_link(path) && good = test_link(path) # either the original URL or a replacement are good
+  if validate_link(path) && (good = strong ? test_link(path) : path) # either the original URL or a replacement are good
     return (good.class == String) ? good : path
   elsif url
     # The path may be relative. In fact, it may have backup characters
