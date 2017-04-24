@@ -105,6 +105,7 @@ module DialogsHelper
          render('form', decorator: decorator, in_panes: true)
 
     modal_dialog "pane_runner new-style #{colorscheme}",
+                 "Edit #{decorator.object.class}",
                  header_contents: decorator.dialog_pane_buttons,
                  dialog_class: 'modal-lg',
                  body_contents: bc

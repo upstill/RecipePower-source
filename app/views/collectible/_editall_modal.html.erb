@@ -1,4 +1,4 @@
-<%= modal_dialog 'edit_recipe new-style green', dialog_class: 'modal-lg' do %>
+<%= modal_dialog 'edit_recipe new-style green', "Edit #{@decorator.object.class}", dialog_class: 'modal-lg' do %>
     <%# render 'form' %>
     <%= pane_buttons [ [ 'Title & Description', 'edit-pane' ] ] %>
     <%= form_for @recipe do |f| %>

@@ -25,7 +25,10 @@ module GleaningsHelper
           when 'Title', 'Description'
             options = decorator.gleaning.options_for label
             target = "#{decorator.param_key}[#{decorator.attribute_for label}]"
-            if label == 'Title' && decorator.respond_to?(:page_ref) && decorator.page_ref.title.present?
+            if label == 'Title' &&
+                decorator.respond_to?(:page_ref) &&
+                decorator.page_ref.title.present? &&
+                !options.include?(decorator.page_ref.title)
               options << decorator.page_ref.title
             end
             if options.empty?
