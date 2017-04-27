@@ -362,8 +362,10 @@ RP.process_response = (responseData, odlog) ->
 		if state = responseData.pushState
 			if window.history.state == null # If we're leaving an original page, define a state vbl. so we can reload
 				window.history.replaceState { title: document.title }, document.title
-			window.history.pushState state[0], state[1], state[2]
-			document.title = state[1]
+			state_with_title = state[0]
+			state_with_title.title = RP.state.title state[1]
+			window.history.pushState state_with_title, state_with_title.title, state[2]
+			document.title = state_with_title.title
 
 		if deletions = responseData.deletions
 			for deletion in deletions

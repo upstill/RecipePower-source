@@ -1,5 +1,11 @@
 RP.state = RP.state || {}
 
+RP.state.title = (subsite) ->
+	if subsite && subsite.length > 0
+		'RecipePower' + ' | ' + subsite
+	else
+		'RecipePower'
+
 jQuery ->
 	# $(window).on 'window.onpopstate', RP.state.check_pop
 	# window.onpopstate = RP.state.check_hash
@@ -27,8 +33,8 @@ RP.state.check_hash = (event) ->
 			RP.submit.submit_and_process url 
 
 RP.state.onDialogOpen = (dlog) ->
-	dlog_title = dlog.title || dlog.innerText
-	history.replaceState (history.state || document.title), dlog_title, window.location
+	dlog_title = RP.state.title dlog.title
+	history.replaceState { title: (history.state && history.state.title) || document.title}, dlog_title, window.location
 	document.title = dlog_title
 
 # If a dialog has been acquired via AJAX, modify history accordingly
@@ -38,11 +44,11 @@ RP.state.onAJAXSuccess = (event, responseData, status, xhr) ->
 
 # Make the window title and history reflect an incoming dialog
 RP.state.postDialog = (dlog, href, target_title) ->
-	target_title ||= dlog.title || dlog.innerText
+	target_title ||= RP.state.title dlog.title
 	window_url = window.location.pathname+window.location.search+"#dialog:"+getEncodedPathFromURL(href)
 	#  if !$(event.result).hasClass 'historic'
 	RP.state.ignorePopEvent = true
-	history.replaceState (history.state || document.title), target_title, window_url
+	history.replaceState { title: (history.state && history.state.title) || document.title}, target_title, window_url
 	document.title = target_title
 
 # When a dialog is closed, it's either recoverable (can be backed down to) or transient (traces
@@ -50,9 +56,9 @@ RP.state.postDialog = (dlog, href, target_title) ->
 # We simply remove the hashtag from the current state.
 RP.state.onCloseDialog = (dlog) ->
 	window_url = window.location.pathname+window.location.search  # No hashtag
-	saved_title = history.state
+	saved_title = history.state.title
 	if $(dlog).hasClass 'historic' # A transient dialog leaves no trace on the history stack
-		history.pushState null, saved_title, window_url
+		history.pushState {title: saved_title}, saved_title, window_url
 	else
-		history.replaceState null, saved_title, window_url
+		history.replaceState {title: saved_title}, saved_title, window_url
 	document.title = saved_title || "Collection"

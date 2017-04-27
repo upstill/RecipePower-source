@@ -69,7 +69,7 @@ class ResponseServices
   # 2) when popping the state, reload only those portions that need to be reloaded (via JSON request)
   def push_state action=nil
     # TODO: modify originator according to action
-    [ { format: 'json', queryparams: { nopush: true } }, page_title, originator ] unless @nopush
+    [ { format: 'json', queryparams: { nopush: true } }, @title, originator ] unless @nopush
   end
 
   def omniauth_pending clear = false
@@ -84,6 +84,10 @@ class ResponseServices
     query_params = query_str.empty? ? {} : Hash[ CGI.parse(query_str).map { |elmt| [elmt.first.to_sym, elmt.last.first] } ]
     # Format refers to how to present the content: within a dialog, or on a page
     @mode = query_params[:mode]
+  end
+
+  def title=t
+    @title = t
   end
 
   def dialog?
@@ -157,10 +161,6 @@ class ResponseServices
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
     @mode == :modal ? "div.dialog" : "div.pagelet"
-  end
-
-  def page_title
-    "RecipePower | #{@title}"
   end
 
   # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on

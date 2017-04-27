@@ -57,7 +57,7 @@ RP.pic_picker.shown = (dlog_or_pane) ->
 # formerly PicPicker
 RP.pic_picker.open = (dlog) ->
 	# Here's how we handle image blobs (if the paste handler didn't handle it b/c it's not text)
-	$('input[type="text"]', dlog).pasteImageReader (results) ->
+	$(focus_selector, dlog).pasteImageReader (results) ->
 		{filename, dataURL} = results
 		do_paste dataURL
 	# To handle pasting of page URLs, image URLS (including data:) and image blobs, we intercept the paste event
