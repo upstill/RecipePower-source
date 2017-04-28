@@ -206,7 +206,7 @@ class PageRef < ActiveRecord::Base
 
   # Provide a relation for entities that match a string
   def self.strscopes matcher
-    ar = self.arel_table[:domain].matches "%#{matcher}%"
+    ar = self.arel_table[:domain].matches matcher
     [
         (block_given? ? yield() : self).where(ar)
     ]

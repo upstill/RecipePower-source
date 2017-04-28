@@ -22,7 +22,8 @@ class Tag < ActiveRecord::Base
            List: ['List', 16],
            Epitaph: ['Epitaph', 17],
            Course: ['Course', 18],
-           Time: ['Time', 19]
+           Time: ['Time', 19],
+           Hidden: ['Hidden', 20]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -114,19 +115,18 @@ class Tag < ActiveRecord::Base
     # methstr = meth
     # methstr = ":#{methstr}" if meth.is_a? Symbol
     # puts "Tag method '#{methstr}' missing"
-    begin
-      taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
-      proof_method = :tag_with
-      # puts "Extracted taggable_class '#{taggable_class}'"
-      # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
-      if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+    taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
+    proof_method = :tag_with
+    # puts "Extracted taggable_class '#{taggable_class}'"
+    # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
+    if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+      begin
         self.method(meth).call *args, &block
-      else
-        # puts "Failed to define method '#{methstr}'"
+      rescue Exception => e
+        # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
         super
       end
-    rescue Exception => e
-      # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
+    else
       super
     end
   end

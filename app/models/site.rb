@@ -153,7 +153,8 @@ public
   def self.strscopes matcher
     onscope = block_given? ? yield() : self.unscoped
     a1 = [
-        onscope.where(%q{"sites"."description" ILIKE ?}, matcher)
+        onscope.where(%q{"sites"."description" ILIKE ?}, matcher),
+        # onscope.where(%q{"sites"."root" ILIKE ?}, matcher)
     ]
     a2 = SitePageRef.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:page_ref => inward} : :page_ref
