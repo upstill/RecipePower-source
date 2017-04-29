@@ -199,15 +199,19 @@ BLOCK_END
        end
        
    # Helper to define a selection menu for tag type
-   def type_selections val=nil
-       if val.kind_of? Tag
-           options_for_select(Tag.type_selections, val.typenum )
-       elsif val.nil?
-           options_for_select(Tag.type_selections )
-       else
-           options_for_select(Tag.type_selections, val )
-       end
-   end
+  def type_selections val=nil
+    rmv = [Tag.typenum(:Course), Tag.typenum(:List), Tag.typenum(:Epitaph)]
+    selections = Tag.type_selections(val.kind_of? Tag).keep_if { |sel| !rmv.include? sel.last }
+    selections.insert 3, ['Course', 18]
+    selections.first[0] = 'No Type'
+    if val.kind_of? Tag
+      options_for_select selections, val.typenum
+    elsif val.nil?
+      options_for_select selections
+    else
+      options_for_select selections, val
+    end
+  end
 
   # Provide a Bootstrap selection menu of a set of tags
   def tag_select alltags, curtags
