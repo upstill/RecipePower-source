@@ -1,15 +1,15 @@
 <%# TODO: move this stuff into the tag presenter %>
 <div class="container">
-  <%= summarize_tag_synonyms %>
-  <%= summarize_meaning %>
-  <%= summarize_tag_owners %>
-  <%= summarize_tag_similars %>
-  <%= summarize_tag_referents %>
-  <%= summarize_tag_parents %>
-  <%= summarize_tag_children %>
+  <%= present_tag_synonyms %>
+  <%= present_tag_meaning %>
+  <%= present_tag_owners %>
+  <%= present_tag_similars %>
+  <%= present_tag_referents %>
+  <%= present_tag_parents %>
+  <%= present_tag_children %>
 </div>
-<%= summarize_tag_references %>
-<%= summarize_tag_relations %>
+<%= present_tag_references %>
+<%= present_tag_relations %>
 <%# summarize_tag_recipes %>
 <br>
 <% if response_service.admin_view? && permitted_to?(:edit, @tag) %>

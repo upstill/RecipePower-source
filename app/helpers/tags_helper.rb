@@ -5,20 +5,20 @@ module TagsHelper
   end
 
   # TODO: These should be part of the tag presenter
-  def summarize_tag withtype = false, do_link = true, with_id=false
+  def present_tag_name withtype = false, do_link = true
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
       "'<strong>#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
   end
   
-  def summarize_meaning
+  def present_tag_meaning
     @tagserv ||= TagServices.new(@tag)
     if (meaning = @tagserv.primary_meaning) && !meaning.description.blank?
       "<p class=\"airy\"><strong>...described as</strong> '#{@tagserv.primary_meaning.description}'</p>".html_safe
     end
   end
   
-  def summarize_tag_owners
+  def present_tag_owners
     @tagserv ||= TagServices.new(@tag)
     return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
     ownerstrs = owners.collect { |owner| owner.handle }
@@ -27,7 +27,7 @@ module TagsHelper
   
   # Helper for showing the tags which are potentially redundant wrt. this tag:
   # They match in the normalized_name field
-  def summarize_tag_similars args={} 
+  def present_tag_similars args={}
     @tagserv ||= TagServices.new(@tag)
     others = Tag.where(normalized_name: @tagserv.normalized_name).to_a.delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
     label= args[:label] || 'Similar tags: '
@@ -38,17 +38,17 @@ module TagsHelper
     # tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }, label: label, joinstr: joiner
   end
   
-  def summarize_tag_parents label = "Categorized Under: "
+  def present_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
     tag_info_section @tagserv.parents.collect { |parent| tag_homelink parent }, label: label
   end
 	
-  def summarize_tag_children label = "Examples: "
+  def present_tag_children label = "Examples: "
     @tagserv ||= TagServices.new(@tag)
     tag_info_section @tagserv.children.collect { |child| tag_homelink child }, label: label
   end
   
-  def summarize_tag_referents
+  def present_tag_referents
     @tagserv ||= TagServices.new(@tag)
     tag_info_section(
       @tagserv.referents.to_a.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
@@ -56,7 +56,7 @@ module TagsHelper
       }, label: "Referents: ")
   end
   
-  def summarize_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
+  def present_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
     recipes =
       @tagserv.recipes(true).uniq.collect { |rcp| 
@@ -68,7 +68,7 @@ module TagsHelper
   end
 
   # Return HTML for the links associated with this tag
-  def summarize_tag_references label = "See "
+  def present_tag_references label = "See "
     @tagserv ||= TagServices.new(@tag)
     unless (refstrs = present_tag_definitions @tagserv).empty?
       (content_tag( :h3, "References")+
@@ -85,7 +85,7 @@ module TagsHelper
 
   # Return HTML for the links related to a given tag (i.e., the links for 
   # all tags related to this one)
-  def summarize_tag_relations label = 'See Also'
+  def present_tag_relations label = 'See Also'
     @tagserv ||= TagServices.new(@tag)
     links =
       Referent.related(@tagserv, false, true).collect { |rel|
@@ -99,7 +99,7 @@ module TagsHelper
     (content_tag(:h3, label)+links.html_safe) if links
   end
 
-  def summarize_tag_synonyms label='Synonyms: ', options={}
+  def present_tag_synonyms label='Synonyms: ', options={}
     if label.is_a?(Hash)
       label, options = 'Synonyms: ', label
     end
@@ -112,6 +112,20 @@ module TagsHelper
     # tag_info_section synstrs, label: label, joinstr: '<br>'
   end
 
+  def tag_table_summaries tagserv, admin_on
+    # summarize_tag_owners
+    ## summarize_tag_similars
+    # summarize_tag_parents
+    # summarize_tag_children
+    # summarize_tag_referents
+    # summarize_tag_recipes
+    # summarize_tag_references
+    ## summarize_tag_definitions
+    # summarize_tag_relations
+    ## summarize_tag_synonyms
+  end
+
+=begin
   def summarize_tag_definition_count
     @tagserv ||= TagServices.new(@tag)
     ((ct = @tagserv.definition_page_ref_count) > 0) ? (pluralize(ct, 'Reference').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
@@ -151,19 +165,14 @@ module TagsHelper
         (pluralize(sites.count, 'Site').sub(/\s/, ' ')+'<br>').html_safe
     end
   end
-      
+
   def summarize_tag_owner_count
     @tagserv ||= TagServices.new(@tag)
       ct = @tagserv.user_ids.size
       (ct > 0) ? (pluralize(ct, 'Owner').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
-
-=begin
-  def summarize_tags(tags)
-  	tags.collect{|tag| summarize_tag tag }.join(', ')
-  end
 =end
-    
+
 # ----------------------------------
     
     # Return HTML for each tag of the given type

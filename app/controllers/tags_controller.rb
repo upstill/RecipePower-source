@@ -140,7 +140,7 @@ class TagsController < ApplicationController
     # return if need_login true, true
     @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
     # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @taglist = Tag.strmatch('', userid: current_user_id, tagtype: Tag.index_to_type(@tabindex) )
+    @taglist = Tag.strmatch('', userid: current_user.id, tagtype: Tag.index_to_type(@tabindex) )
     session[:tabindex] = @tabindex
     render partial: 'editor'
   end
