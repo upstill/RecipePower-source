@@ -176,6 +176,11 @@ class TagServices
     end
     results
   end
+
+# Return tags that match the tag lexically, regardless of type
+  def lexical_similars
+    Tag.where(normalized_name: normalized_name).where.not(id: id).to_a
+  end
   
   def similar_ids
     relation_or_array = Tag.strmatch tag.name

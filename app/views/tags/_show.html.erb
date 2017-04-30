@@ -1,16 +1,16 @@
 <%# TODO: move this stuff into the tag presenter %>
 <div class="container">
-  <%= present_tag_synonyms %>
-  <%= present_tag_meaning %>
-  <%= present_tag_owners %>
-  <%= present_tag_similars %>
-  <%= present_tag_referents %>
-  <%= present_tag_parents %>
-  <%= present_tag_children %>
+  <%= presenter.synonyms %>
+  <%= presenter.meaning %>
+  <%= presenter.owners %>
+  <%= presenter.similars %>
+  <%= presenter.referents %>
+  <%= presenter.parents %>
+  <%= presenter.children %>
 </div>
-<%= present_tag_references %>
-<%= present_tag_relations %>
-<%# summarize_tag_recipes %>
+<%= presenter.references %>
+<%= presenter.relations %>
+<%= presenter.recipes %>
 <br>
 <% if response_service.admin_view? && permitted_to?(:edit, @tag) %>
     <%= link_to_submit 'Edit', edit_tag_path(@tag), :mode => :modal %>

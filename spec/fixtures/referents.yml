@@ -1,0 +1,14 @@
+dessert:
+  id: 1
+  tag_id: 4
+  type: IngredientReferent
+
+pie:
+  id: 2
+  tag_id: 6
+  type: IngredientReferent
+
+cake:
+  id: 3
+  tag_id: 10
+  type: IngredientReferent

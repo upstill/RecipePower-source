@@ -4,20 +4,20 @@ module TagsHelper
     homelink tag, options
   end
 
-  # TODO: These should be part of the tag presenter
+=begin
   def present_tag_name withtype = false, do_link = true
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
       "'<strong>#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
   end
-  
+
   def present_tag_meaning
     @tagserv ||= TagServices.new(@tag)
     if (meaning = @tagserv.primary_meaning) && !meaning.description.blank?
       "<p class=\"airy\"><strong>...described as</strong> '#{@tagserv.primary_meaning.description}'</p>".html_safe
     end
   end
-  
+
   def present_tag_owners
     @tagserv ||= TagServices.new(@tag)
     return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
@@ -33,11 +33,11 @@ module TagsHelper
     label= args[:label] || 'Similar tags: '
     joiner = args[:joiner] || ' ' #  ', '
     ("<span>#{label}"+
-        others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
+        others.collect { |other| similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
     "</span>").html_safe
     # tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }, label: label, joinstr: joiner
   end
-  
+
   def present_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
     tag_info_section @tagserv.parents.collect { |parent| tag_homelink parent }, label: label
@@ -55,7 +55,7 @@ module TagsHelper
       	summarize_referent ref, label: "Other Meaning(s)"
       }, label: "Referents: ")
   end
-  
+
   def present_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
     recipes =
@@ -112,20 +112,6 @@ module TagsHelper
     # tag_info_section synstrs, label: label, joinstr: '<br>'
   end
 
-  def tag_table_summaries tagserv, admin_on
-    # summarize_tag_owners
-    ## summarize_tag_similars
-    # summarize_tag_parents
-    # summarize_tag_children
-    # summarize_tag_referents
-    # summarize_tag_recipes
-    # summarize_tag_references
-    ## summarize_tag_definitions
-    # summarize_tag_relations
-    ## summarize_tag_synonyms
-  end
-
-=begin
   def summarize_tag_definition_count
     @tagserv ||= TagServices.new(@tag)
     ((ct = @tagserv.definition_page_ref_count) > 0) ? (pluralize(ct, 'Reference').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
@@ -234,35 +220,7 @@ BLOCK_END
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
   
-  # Present one section of the tag info using a label, a (possibly empty) collection
-  # of descriptive strings, and a classname for a span summarizing the section (presumably
-  # because the individual entries are meant to show on a line). 
-  # If the collection is empty, we return nil; if the contentclass is blank we don't wrap it in a span
-  def tag_info_section contentstrs, options
-    contentclass = options[:contentclass] || "tag_info_section_content"
-    label = options[:label] || ""
-    joinstr = options[:joinstr] || ", "
-    if contentstrs && !contentstrs.empty?
-      contentstr = contentclass.blank? ?
-                   contentstrs.join('').html_safe :
-                   content_tag(:span, contentstrs.join(joinstr).html_safe, class: contentclass)
-      # content_tag( :div,
-      #   (label+contentstr).html_safe,
-      #  class: "tag_info_section"
-      # )
-      result =
-      content_tag :div,
-        content_tag( :div,
-                     content_tag(:p, "<strong>#{label}</strong>".html_safe, class: "pull-right"),
-                     class: "col-md-4")+
-        content_tag( :div,
-                     content_tag(:p, contentstr.html_safe, class: "pull-left"),
-                     class: "col-md-8"),
-        class: "row"
-      result.html_safe
-    end
-  end
-  
+
   def summarize_tag_similar other, absorb_btn = false
       content_tag :span,
         tag_homelink(other) + "(#{other.typename})".html_safe +

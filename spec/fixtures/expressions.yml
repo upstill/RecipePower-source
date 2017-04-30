@@ -1,0 +1,35 @@
+
+dessert:
+  id: 4
+  tag_id: 4
+  referent_id: 1
+
+desserts:
+  id: 5
+  tag_id: 5
+  referent_id: 1
+
+pie:
+  id: 6
+  tag_id: 6
+  referent_id: 2
+
+pies:
+  id: 7
+  tag_id: 7
+  referent_id: 2
+
+cake:
+  id: 8
+  tag_id: 8
+  referent_id: 3
+
+cakes:
+  id: 9
+  tag_id: 9
+  referent_id: 3
+
+gateau:
+  id: 10
+  tag_id: 10
+  referent_id: 3
