@@ -1,5 +1,6 @@
 rcp:
   title: Just another recipe for testing
+  id: 3
 
 badpicrcp:
   title: Recipe with Bad Picture URL
@@ -13,5 +14,6 @@ inaccessiblepicrcp:
   
 goodpicrcp:
   title: Recipe with Good Picture
+  id: 4
   # url: http://www.recipepower.com/rcp2
   # picurl: assets/MissingPicture.png

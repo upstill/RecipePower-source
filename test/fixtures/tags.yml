@@ -10,6 +10,12 @@ jal2:
     tagtype: 4
     isGlobal: false
     
+jal3:
+    id: 11
+    name: chipotle -Chiles
+    tagtype: 4
+    isGlobal: false
+
 chilibean:
     id: 3
     name: chili bean

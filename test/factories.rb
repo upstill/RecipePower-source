@@ -1,6 +1,13 @@
 FactoryGirl.define do
   factory :tag
 
+  factory :admin do
+    email { 'fake@bogus.com' }
+    password "password"
+    password_confirmation "password"
+    confirmed_at Date.today
+  end
+
   factory :user do
     username "foo"
     password "foobar"
@@ -39,9 +46,11 @@ FactoryGirl.define do
     # title "#{description}"
   end
 
+=begin
   factory :page_ref, class: PageRef::ReferrablePageRef do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end
+=end
 
   sequence :rcptitle do |n|
     "dish#{n}"

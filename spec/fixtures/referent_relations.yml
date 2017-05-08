@@ -1,0 +1,9 @@
+dessert_parent_of_pie:
+  id: 1
+  parent_id: 1
+  child_id: 2
+
+dessert_parent_of_cake:
+  id: 2
+  parent_id: 1
+  child_id: 3

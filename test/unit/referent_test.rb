@@ -290,6 +290,30 @@ class ReferentTest < ActiveSupport::TestCase
     assert_not r1.absorb(r2), "Bad referent merge returned successfully"
   end
 
+  test "Referent successfully drops tag" do
+    ref = referents(:dessert)
+    dessert_tag = tags(:dessert)
+    desserts_tag = tags(:desserts)
+    assert_equal ref.canonical_expression.id, dessert_tag.id
+    assert_equal ref.tag_id, dessert_tag.id
+    ref.drop dessert_tag
+    assert_equal 1, ref.tag_ids.count
+    assert_equal 1, ref.tags.count
+    assert_equal ref.tag_id, desserts_tag.id # 'desserts' replaces canonical_expression
+    ref.drop desserts_tag
+    assert_equal ref.tag_id, desserts_tag.id # Should retain the last expression
+  end
+
+  test "Referent successfully drops nonexistent tag by id" do
+    ref = referents(:bogus)
+    assert_equal 1, ref.expressions.count
+    assert_nil ref.canonical_expression
+    assert_equal 0, ref.tag_id
+    ref.drop 0
+    assert ref.expressions.empty?
+    assert_equal nil, ref.tag_id
+  end
+
   test "Merge of two referents with overlapping parents has the right parents" do
 
   end

@@ -10,5 +10,14 @@ pie:
 
 cake:
   id: 3
-  tag_id: 10
+  tag_id: 8
+  type: IngredientReferent
+
+empty:
+  id: 4
+  type: IngredientReferent
+
+bogus: # Has a non-existent tag
+  id: 5
+  tag_id: 0
   type: IngredientReferent

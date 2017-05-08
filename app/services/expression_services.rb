@@ -8,41 +8,47 @@ class ExpressionServices
     Expression.where(tag_id: tag_ids).pluck :referent_id
   end
   
-  def self.expression_ids(ref_ids)
-    Expression.where(referent_id: ref_ids).pluck :tag_id
+  def self.expression_ids ref_ids, unique=false
+    unique ?
+        Referent.where(id: ref_ids).pluck(:tag_id) :
+        Expression.where(referent_id: ref_ids).pluck(:tag_id)
   end
 
-  def self.expression_tags_from_ids(ref_ids)
-    Expression.includes(:tag).where(referent_id: ref_ids).map(&:tag)
+  def self.expression_tags_from_ids ref_ids, unique=false
+    unique ?
+        Tag.where(id: Referent.where(id: ref_ids).pluck(:tag_id)) :
+        Expression.includes(:tag).where(referent_id: ref_ids).map(&:tag)
   end
   
   # Collect all the synonyms of all the tags denoted by id, excluding those
   # already in the set
-  def self.synonym_ids_of_tags(tag_ids)
+  def self.synonym_ids_of_tags(tag_ids, unique=false)
     # Get all the referents of all the tags
     refids = ExpressionServices.meaning_ids tag_ids
     # Return all the tags referred to by those
-    ExpressionServices.expression_ids refids
+    result = ExpressionServices.expression_ids refids
+    unique ? result - ((tag_ids.is_a? Fixnum) ? [tag_ids] : tag_id) : result
   end
   
   # Return all the semantic children of the tag(s) as an array of arrays
-  def self.child_ids_of_tags(tag_ids)
+  # 'unique' stipulates that there should only be one expression--one tag--per referent
+  def self.child_ids_of_tags(tag_ids, unique=false)
     # Get all the referents of all the tags
     refids = ExpressionServices.meaning_ids tag_ids
     child_refids = ReferentServices.direct_child_ids refids
-    ExpressionServices.expression_ids child_refids
+    ExpressionServices.expression_ids child_refids, unique
   end
 
   # Return all the semantic parents of the tag(s) as an array of arrays
-  def self.parent_ids_of_tags(tag_ids)
+  def self.parent_ids_of_tags(tag_ids, unique=false)
     # Get all the referents of all the tags
-    ExpressionServices.expression_ids ReferentServices.direct_parent_ids(ExpressionServices.meaning_ids tag_ids)
+    ExpressionServices.expression_ids ReferentServices.direct_parent_ids(ExpressionServices.meaning_ids tag_ids), unique
   end
 
   # Return all the semantic parents of the tag(s) as an array of arrays
-  def self.parent_tags_of_tags(tag_ids)
+  def self.parent_tags_of_tags(tag_ids, unique=false)
     # Get all the referents of all the tags
-    ExpressionServices.expression_tags_from_ids ReferentServices.direct_parent_ids(ExpressionServices.meaning_ids tag_ids)
+    ExpressionServices.expression_tags_from_ids ReferentServices.direct_parent_ids(ExpressionServices.meaning_ids tag_ids), unique
   end
 
   # Return all the semantic siblings of the tag(s)

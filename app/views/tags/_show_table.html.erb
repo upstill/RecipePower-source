@@ -1,5 +1,5 @@
 <% item ||= @tag %>
-<% tp = TagPresenter.new item.decorate, self, current_user %>
+<% presenter = TagPresenter.new item.decorate, self, current_user %>
 <% @tagserv = TagServices.new item %>
   <td class="tag_type"><%= item.id.to_s %></td>
   <td><strong>'</strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>'</td>
@@ -11,17 +11,15 @@
                             querydata: {tagid: item.id}} %></td>
   <td>
     <%= presenter.table_summaries response_service.admin_view? %>
-    <%# [ summarize_tag_site_count, summarize_tag_recipe_count, summarize_tag_owner_count,
-          summarize_tag_parents_count, summarize_tag_children_count, summarize_tag_definition_count ].compact.join('<br>').html_safe %>
   </td>
   <td>
     <%= @tagserv.isGlobal ? 'Y' : 'N' %>
   </td>
   <td>
-    <%= presenter.similars label: '', absorb_btn: true, joiner: '<br>' %>
+    <%= presenter.similars_summary label: '', absorb_btn: true, joiner: '<br>' %>
   </td>
   <td>
-    <%= presenter.synonyms '', absorb_btn: true %>
+    <%= presenter.synonyms_summary label: '', absorb_btn: true %>
   </td>
   <% if permitted_to? :edit, item %>
       <td>

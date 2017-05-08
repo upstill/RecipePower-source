@@ -9,7 +9,15 @@ jal2:
     name: Chipotle  -chiles
     tagtype: 4
     isGlobal: false
-    
+    normalized_name: 'chipotle -chiles'
+
+jal3:
+    id: 11
+    name: chipotle -Chiles
+    tagtype: 4
+    isGlobal: false
+    normalized_name: 'chipotle -chiles'
+
 chilibean:
     id: 3
     name: chili bean

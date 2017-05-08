@@ -71,13 +71,17 @@ module Backgroundable
       rescue
         return
       end
-      enum status_attribute => [
-               :virgin, # Hasn't been executed or queued
-               :obs_pending, # Queued but not executed (Obsolete with dj attribute)
-               :processing, # Set during execution
-               :good, # Executed successfully
-               :bad # Executed unsuccessfully
-           ]
+      if method_defined? :"#{status_attribute}="
+        x=2
+      else
+        enum status_attribute => [
+                 :virgin, # Hasn't been executed or queued
+                 :obs_pending, # Queued but not executed (Obsolete with dj attribute)
+                 :processing, # Set during execution
+                 :good, # Executed successfully
+                 :bad # Executed unsuccessfully
+             ]
+      end
     end
 
   end

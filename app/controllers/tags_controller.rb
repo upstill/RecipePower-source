@@ -4,7 +4,7 @@ class TagsController < ApplicationController
   # GET /tags
   # GET /tags.xml
   def index
-    response_service.title = "Tags"
+    response_service.title = 'Tags'
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
     # -1 stands for any type
     params.delete :tagtype if params[:tagtype] == "-1"

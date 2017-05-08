@@ -1,36 +1,73 @@
-require 'rails-i18n'
-require TagPresenter
+require 'spec_helper'
+# require TagPresenter
 
 describe TagPresenter do
   fixtures :tags
   fixtures :referents
   fixtures :expressions
 
+  include Devise::TestHelpers
+
+  def setup
+    @admin = FactoryGirl.create(:admin)
+    @request.env["devise.mapping"] = Devise.mappings[:admin]
+    sign_in @admin
+  end
+
   before do
-    load_rails_i18n :fr
-    I18n.default_locale = :fr
-
-    @presenter = FastPresenter.new 10
+    # setup
+    @presenter = TagPresenter.new tags(:pie), view, @admin
+    @admin = FactoryGirl.create(:user)
   end
 
-  it "decorates as a percentage
-          with 2 digits after the decimal separator (locallized!)" do
-    expect(@presenter.decorate).to eq("10,00%")
+  it "presents name" do
+    #expect(@presenter.name false, false).to eq("desserts")
+    # subject { Capybara.string(@presenter.name(false, false)) }
+    # it { should have_css('strong', text: "desserts") }
+    Capybara.string(@presenter.name(false, false)).should have_css('strong', text: "pie")
+    # @presenter.name(false, false).to_s.should have_css('strong', text: "desserts")
   end
 
-  # Helpers: move these to a support file
-  def load_rails_i18n(pattern)
-    RailsI18n::Railtie.add("rails/locale/#{pattern}.yml")
-    RailsI18n::Railtie.add("rails/pluralization/#{pattern}.rb")
-    RailsI18n::Railtie.add("rails/transliteration/#{pattern}.{rb,yml}")
-
-    RailsI18n::Railtie.init_pluralization_module
+  it 'presents owners' do
+    pres = TagPresenter.new tags(:jal2), view, @admin
+    pres.tag.admit_user @admin.id  # Add an owner
+    Capybara.string(pres.owners_summary).should have_css('div div p.pull-left span', text: @admin.name)
   end
 
-  def load_rails_app_config_locales
-    # /!\ RAILS root is a relative path
-    rails_root = Pathname.new(File.expand_path("../../..", __FILE__))
-    I18n.load_path += Dir[rails_root.join('config', 'locales', '*.{rb,yml}')]
+  it 'presents similars' do
+    j2 = tags(:jal2)
+    j3 = tags(:jal3)
+    pres = TagPresenter.new j2, view, @admin
+    expect(pres.tagserv.lexical_similars).to eq [j3]
+    cs = Capybara.string(pres.similars_summary label: 'Similars', absorb_btn: true)
+    cs.should have_css('span span', text: j3.name)
+    cs.should have_css("form input[value='Absorb']")
+  end
+
+  it 'presents children' do
+    tpstring = TagPresenter.new(tags(:dessert), view, @admin).children unique: true
+    Capybara.string(tpstring).should have_css('a.submit', text: 'pie')
+    Capybara.string(tpstring).should have_css('a.submit', text: 'cake')
+  end
+
+  it 'presents parents' do
+    tpstring = TagPresenter.new(tags(:cake), view, @admin).parents_summary unique: true
+    Capybara.string(tpstring).should have_css('a.submit', text: 'dessert')
+  end
+
+  it 'presents referents' do
+    tpstring = @presenter.referents false
+    Capybara.string(tpstring).should have_css('a.submit', text: 'pie')
+    Capybara.string(tpstring).should have_css('a.submit', text: 'pies')
+  end
+
+  it 'presents references' do
+    Capybara.string(@presenter.references_summary).should have_css('strong', text: 'desserts')
+  end
+
+  it 'presents synonyms' do
+    tp = TagPresenter.new tags(:dessert), view, @admin
+    Capybara.string(tp.synonyms_summary).should have_css('a', text: "desserts")
   end
 
 end

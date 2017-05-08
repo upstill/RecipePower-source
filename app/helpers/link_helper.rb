@@ -170,7 +170,7 @@ module LinkHelper
             )
       end
     end
-    if options[:nuke_button] && response_service.admin_view?
+    if options[:nuke_button] && defined?(response_service) && response_service.admin_view?
       link << link_to_submit('',
                              decorator.object,
                              class: 'glyphicon glyphicon-remove',

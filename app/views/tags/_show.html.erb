@@ -1,16 +1,11 @@
-<%# TODO: move this stuff into the tag presenter %>
+<%# TODO: delete after confirming it's okay wrt tag presenter %>
+<h3>ERROR: tags/_show.html should never be called!!</h3>
 <div class="container">
-  <%= presenter.synonyms %>
-  <%= presenter.meaning %>
-  <%= presenter.owners %>
-  <%= presenter.similars %>
-  <%= presenter.referents %>
-  <%= presenter.parents %>
-  <%= presenter.children %>
+  <% presenter.card_aspects do |label, content| %>
+      <h4><%= label %></h4>
+      <p><%= content %></p>
+  <% end %>
 </div>
-<%= presenter.references %>
-<%= presenter.relations %>
-<%= presenter.recipes %>
 <br>
 <% if response_service.admin_view? && permitted_to?(:edit, @tag) %>
     <%= link_to_submit 'Edit', edit_tag_path(@tag), :mode => :modal %>

@@ -2,8 +2,12 @@ t1:
     id: 1
     tag_id: 1
     user_id: 1
-    
+    entity_type: 'Recipe'
+    entity_id: 3
+
 t2:
     id: 2
     tag_id: 2
     user_id: 1
+    entity_type: 'Recipe'
+    entity_id: 4

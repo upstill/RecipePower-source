@@ -2,12 +2,16 @@ class TagServices
   
   attr_accessor :tag
   
-  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, 
-    :users, :user_ids, :owners, :owner_ids, :referents, :can_absorb, :to => :tag
+  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, :taggings,
+    :users, :user_ids, :owners, :owner_ids, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
     self.tag = tag
     @user = user || User.super_id
+  end
+
+  def referents exclude_self=false
+    exclude_self ? tag.referents.where.not(id: tag.referent_id) : tag.referents
   end
 # -----------------------------------------------
   def sites
@@ -16,12 +20,29 @@ class TagServices
 # -----------------------------------------------
   def recipe_ids with_synonyms=false
     with_synonyms ?
-      Tag.where(id: ([id] + synonym_ids) ).collect { |tag| tag.recipe_ids }.flatten.uniq :
-      tag.recipe_ids
+        Tag.where(id: ([id] + synonym_ids) ).collect { |tag| tag.recipe_ids }.flatten.uniq :
+        tag.recipe_ids
   end
-  
+
   def recipes with_synonyms=false
     Recipe.where(id: recipe_ids(with_synonyms) )
+  end
+
+# -----------------------------------------------
+  def taggee_ids with_synonyms=false
+    id_or_ids = with_synonyms ? synonym_ids : id
+    taggings.where(tag_id: id_or_ids).pluck(:entity_type, :entity_id).inject({}) { |memo, pair|
+      (memo[pair.first] ||= []) << pair.last
+      memo
+    }
+  end
+
+  def taggees with_synonyms=false
+    taggee_ids.inject({}) { |memo, keyval|
+      klass = keyval.first.constantize
+      memo[klass] = klass.where(id: keyval.last)
+      memo
+    }
   end
 # -----------------------------------------------
 
@@ -40,40 +61,42 @@ class TagServices
     definition_page_ref_ids.count
   end
 # -----------------------------------------------
-  def synonym_ids
-    ExpressionServices.synonym_ids_of_tags(id) - [id]
+  def synonym_ids unique=false
+    ids = ExpressionServices.synonym_ids_of_tags(id, unique)
+    unique ? ids - [id] : ids
   end
   
   def self.synonym_ids(ids)
-    ExpressionServices.synonym_ids_of_tags(ids) - [ids].flatten
+    ids = ExpressionServices.synonym_ids_of_tags(ids)
+    unique ? ids - [ids].flatten : ids
   end
   
-  def synonyms
-    Tag.where id: synonym_ids
+  def synonyms unique=false
+    Tag.where id: synonym_ids(unique)
   end
 # -----------------------------------------------  
-  def child_ids
-    ExpressionServices.child_ids_of_tags(id) - [id]
+  def child_ids unique=false
+    ExpressionServices.child_ids_of_tags(id, unique) - [id]
   end
   
   def self.child_ids(ids)
     ExpressionServices.child_ids_of_tags(ids) - [ids].flatten
   end
   
-  def children
-    Tag.where id: child_ids
+  def children unique=false
+    Tag.where id: child_ids(unique)
   end
 # -----------------------------------------------    
-  def parent_ids
-    ExpressionServices.parent_ids_of_tags(id)
+  def parent_ids unique=false
+    ExpressionServices.parent_ids_of_tags id, unique
   end
   
-  def self.parent_ids(ids)
-    ExpressionServices.parent_ids_of_tags(ids)
+  def self.parent_ids ids, unique=false
+    ExpressionServices.parent_ids_of_tags ids, unique
   end
 
-  def parents
-    ExpressionServices.parent_tags_of_tags id
+  def parents unique=false
+    ExpressionServices.parent_tags_of_tags id, unique
     # Tag.where id: parent_ids
     # pi.collect { |parent_set| Tag.where id: parent_set }
     # Tag.where id: parent_ids

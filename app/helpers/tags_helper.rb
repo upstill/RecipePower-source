@@ -192,7 +192,7 @@ BLOCK_END
 BLOCK_END
          s.html_safe
        end
-       
+
    # Helper to define a selection menu for tag type
   def type_selections val=nil
     rmv = [Tag.typenum(:Course), Tag.typenum(:List), Tag.typenum(:Epitaph)]
@@ -221,11 +221,11 @@ BLOCK_END
   end
   
 
-  def summarize_tag_similar other, absorb_btn = false
+  def summarize_tag_similar this, other, absorb_btn = false
       content_tag :span,
         tag_homelink(other) + "(#{other.typename})".html_safe +
         (absorb_btn ? button_to_submit('Absorb',
-                                       "tags/#{@tag.id}/absorb?victim=#{other.id}",
+                                       "tags/#{this.id}/absorb?victim=#{other.id}",
                                        :xs,
                                        mode: :modal,
                                        with_form: true,
