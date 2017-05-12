@@ -31,7 +31,7 @@ describe TagPresenter do
   it 'presents owners' do
     pres = TagPresenter.new tags(:jal2), view, @admin
     pres.tag.admit_user @admin.id  # Add an owner
-    new = pres.summarize_aspect :owners, converter: :homelink
+    new = pres.summarize_aspect :owners, helper: :homelink
     Capybara.string(new).should have_css('div div p.pull-left span', text: @admin.name)
   end
 
@@ -54,7 +54,7 @@ describe TagPresenter do
 
   it 'presents children' do
     tp = TagPresenter.new(tags(:dessert), view, @admin)
-    presentation = tp.summarize_aspect :children, converter: :tag_homelink, label: 'Category Includes: '
+    presentation = tp.summarize_aspect :children, label: 'Category Includes: '
     if @presenter.respond_to? :children_summary
       old = tp.children_summary unique: true
       old.should eq(presentation)
@@ -65,7 +65,7 @@ describe TagPresenter do
 
   it 'presents parents' do
     tp = TagPresenter.new(tags(:cake), view, @admin)
-    presentation = tp.summarize_aspect :parents, converter: :tag_homelink, label: 'Categorized Under: '
+    presentation = tp.summarize_aspect :parents, label: 'Categorized Under: '
     if @presenter.respond_to? :parents_summary
       old = tp.parents_summary unique: true
       old.should eq(presentation)
@@ -76,7 +76,6 @@ describe TagPresenter do
   it 'presents referents' do
     presentation = @presenter.summarize_aspect :referents,
                                       :helper => :summarize_referent,
-                                      :converter => :tag_homelink,
                                       label: 'All Meaning(s)'
     if @presenter.respond_to? :referents_summary
       old = @presenter.referents_summary unique: false
@@ -87,12 +86,14 @@ describe TagPresenter do
   end
 
   it 'presents references' do
-    Capybara.string(@presenter.references_summary).should have_css('strong', text: 'desserts')
+    probe = @presenter.summarize_aspect(:definition_page_refs, :helper => :present_definition, :label => 'reference')
+    Capybara.string(probe).should have_css('strong', text: 'desserts')
   end
 
   it 'presents synonyms' do
     tp = TagPresenter.new tags(:dessert), view, @admin
-    Capybara.string(tp.synonyms_summary).should have_css('a', text: "desserts")
+    probe = tp.summarize_aspect :synonyms, helper: :summarize_tag_similar, absorb_btn: true, joiner: '<br>'
+    Capybara.string(probe).should have_css('a', text: "desserts")
   end
 
 end

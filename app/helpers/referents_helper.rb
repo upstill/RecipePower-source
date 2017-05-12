@@ -31,7 +31,10 @@ module ReferentsHelper
   end
 
   def summarize_ref_expressions referent, options={}
-    summarize_set labelled_quantity(referent.expressions.count, 'Expression'),
+    label = 'Expression'
+    ct = referent.expressions.count
+    label = labelled_quantity(ct, label) if ct > 1
+    summarize_set label,
                   referent.expressions.limit(8).collect { |expr|
                     tag_homelink(expr.tag, nuke_button: referent.expressions.count > 1)
                   },

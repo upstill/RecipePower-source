@@ -300,6 +300,7 @@ class Referent < ActiveRecord::Base
   # ...all the parents (if required) of
   # ...all the children (if required) of
   # ...all the referents of this tag
+  # TODO: currently unused; should be optimized and employed in searching by tags
   def self.related tag, doSynonyms = false, doParents = false, doChildren = false
     unique_referents = tag.referents.collect { |ref|
       [(ref.parents if doParents), (ref.children if doChildren)]
