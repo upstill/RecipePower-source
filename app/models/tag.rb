@@ -28,7 +28,7 @@ class Tag < ActiveRecord::Base
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
 
   has_many :taggings, :dependent => :destroy
-  has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id'
+  has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id', :dependent => :restrict_with_error
   has_many :dependent_referents, :class_name => 'Referent', foreign_key: 'tag_id', :dependent => :nullify
   has_many :public_lists, -> { where(availability: 0) }, :class_name => 'List', foreign_key: 'name_tag_id'
 
@@ -187,6 +187,7 @@ class Tag < ActiveRecord::Base
     self.referent_ids = (other.referent_ids+self.referent_ids).uniq
     self.primary_meaning ||= other.primary_meaning
 
+    # TODO Need to move any lists named by the other
     # Take on all owners of the absorbee unless one of them is global
     if self.isGlobal ||= other.isGlobal
       self.owners.clear
