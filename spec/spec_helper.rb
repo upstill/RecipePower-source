@@ -62,4 +62,9 @@ RSpec.configure do |config|
   # Make a view available to presenters
   config.include ActionView::TestCase::Behavior, example_group:
                                                    {file_path: %r{spec/presenters}}
+
+  config.include ApplicationHelper
+  config.include TableHelper
+  config.include TagsHelper
+  config.include LinkHelper
 end

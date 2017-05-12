@@ -148,32 +148,20 @@ class TagsController < ApplicationController
   # GET /id/absorb
   # Merge two tags together, returning a list of DOM elements to nuke as a result
   def absorb
-    absorber = Tag.find params[:id].to_i
-    victim = Tag.find params[:victim].to_i
-    survivor = absorber.absorb victim
-    if survivor.errors.empty?
-      victimidstr = ((survivor == victim) ? absorber : victim).id.to_s
-      @tag = survivor
-      @jsondata = {
-          deletions: [
-              "tr#tag_#{victimidstr}", "tr#tagrow_#{victimidstr}HR"
-          ],
-          replacements: [
-             [ "tr#tag_#{@tag.id.to_s}", with_format('html') { render_to_string partial: 'tags/show_table', locals: { item: @tag } } ]
-          ]
-      }
-    else
-      @jsondata = { errors: survivor.errors }
+    if !(@absorber = Tag.find params[:id])
+      flash[:error] = 'Couldn\'t find tag to absorb into'
+    elsif !(victim = Tag.find_by id: params[:victim])
+      flash[:error] = 'Couldn\'t find tag to absorb'
+    elsif (survivor = @absorber.absorb victim) && !(resource_errors_to_flash survivor, preface: "Couldn\'t absorb '#{victim.name}.")
+      @to_delete = victim
     end
     respond_to do |format|
-      format.html # absorb.html.erb
-      format.json  {
-        render :json => @jsondata
-      }
+      format.html {}
+      format.json {}
       format.js { render 'shared/get_content' }
     end
   end
-  
+
   # GET /typify
   # move the listed keys from one type to another
   def typify

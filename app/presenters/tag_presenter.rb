@@ -14,21 +14,28 @@ class TagPresenter < BasePresenter
   def table_summaries admin_view_on
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
     set = self.taggees_table_summary
+    set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
+=begin
     set << self.owners_summary(limit: 5) do |ownerstrs, options|
       h.format_table_summary ownerstrs, labelled_quantity(options[:count] || ownerstrs.count, 'owner')
     end
+=end
+    set << self.summarize_aspect(:parents, :for => :table, :helper => :tag_homelink, limit: 5)
     set << self.parents_summary do |scope, options|
-      h.format_table_summary scope.limit(5).collect { |tag| h.tag_homelink entity },
+      h.format_table_summary scope.limit(5).collect { |tag| h.tag_homelink tag },
                              labelled_quantity(scope.count, 'parent')
     end
+    set << self.summarize_aspect(:children, :for => :table, :helper => :tag_homelink, limit: 5)
     set << self.children_summary do |scope, options|
-      h.format_table_summary scope.limit(5).collect { |tag| h.tag_homelink entity },
+      h.format_table_summary scope.limit(5).collect { |tag| h.tag_homelink tag },
                              labelled_quantity(scope.count, 'child')
     end
+    set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     set << self.referents_summary do |scope, options|
       h.format_table_summary scope.limit(5).collect { |entity| h.tag_homelink entity },
                              labelled_quantity(scope.count, 'definition')
     end
+    set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition)
     set << self.references_summary do |scope, options|
       h.format_table_summary scope.collect { |definition| h.present_definition(definition) }.compact,
                              labelled_quantity(scope.count, 'reference')
@@ -71,7 +78,7 @@ class TagPresenter < BasePresenter
       yield simlinks, label
     else
       simlinks.unshift(label) unless label.blank?
-      h.safe_join simlinks, (options[:joiner] || ' ')
+      h.safe_join simlinks, (options[:joiner] || ' ').html_safe
     end
   end
 
@@ -87,6 +94,59 @@ class TagPresenter < BasePresenter
     h.format_card_summary scope.collect { |owner| owner.handle }, label: '...private to '
   end
 =end
+
+  # Present a summary of one aspect of a tag (specified as a symbol in 'what'). Possibilities:
+  # :owners - Users who own a private tag
+  # :parents - Tags for the semantic parents of a tag
+  # :children - Tags for the semantic offspring of a tag
+  # :referents - The meaning(s) attached to a tag
+  # :definition_page_refs - Any definitions using the tag
+  # :synonyms - Tags for the semantic siblings of a tag
+  # :similars - Tags for the lexical of a tag (those which have the same normalized_name )
+  # 'format' declares a destination, one of:
+  # :table - for dumping in a column of a row for the tag
+  # :card - for including on a card
+  # :raw - return just the strings for the elements
+  def summarize_aspect what, options={}
+    helper = (options.delete :helper) || :tag_homelink
+    format = (options.delete :for) || :card
+    scope =
+        if block_given?
+          yield
+        else
+          case what
+            when :parents
+              tagserv.parents true
+            when :children
+              tagserv.children true
+            when :synonyms
+              tagserv.synonyms true
+            else
+              tagserv.public_send what
+          end
+        end
+    return if scope.empty?
+    options[:count] = scope.count
+    scope = scope.limit(options[:limit]) if options[:limit] && (options[:limit] < options[:count])
+    strs = scope.collect { |entity|
+      case helper
+        when :summarize_tag_similar
+          h.summarize_tag_similar tag, entity, (options[:absorb_btn] && tagserv.can_absorb(entity))
+        else
+          h.public_send helper, entity
+      end
+    }
+    case format.to_sym
+      when :card
+        h.format_card_summary strs, { label: what.to_s }.merge(options)
+      when :table
+        label = options[:label] || what.to_s.singularize
+        counted_label = (labelled_quantity(options[:count] || strs.count, label) if label.present?)
+        h.format_table_summary strs, counted_label
+      when :raw
+        strs
+    end
+  end
 
   def owners_summary options = {}
     return if tagserv.isGlobal || (scope = tagserv.owners).empty?
@@ -110,7 +170,7 @@ class TagPresenter < BasePresenter
 
   def parents_summary options={}
     label = options[:label] || 'Categorized Under: '
-    unique = options[:unique] || false
+    unique = !(options[:unique] == false)
     return if (scope = tagserv.parents(unique)).empty?
     if block_given?
       yield scope, options
@@ -129,7 +189,7 @@ class TagPresenter < BasePresenter
 
   def children_summary options={}
     label = options[:label] || 'Category Includes: '
-    unique = options[:unique] || true
+    unique = !(options[:unique] == false)
     return if (scope = tagserv.children(unique)).empty?
     if block_given?
       yield scope, options
@@ -149,11 +209,11 @@ class TagPresenter < BasePresenter
 =end
 
   def referents_summary options={}
-    unique = options[:unique] || true
+    unique = !(options[:unique] == false)
     label = options[:label] || (unique ? 'Other Meaning(s)' : 'All Meaning(s)')
     return if (scope = tagserv.referents(unique)).empty?
     h.format_card_summary(
-        scope.collect { |ref| h.summarize_referent ref, label: label },
+        scope.collect { |ref| h.summarize_referent ref },
         label: label)
   end
 
@@ -294,16 +354,14 @@ NB: The relations method has no information not provided by
   end
 
   def card_aspect which
-    label = content = nil
+    label = label_singular = content = nil
     itemstrs =
     (case which
        when :description
          return ['', "... for tagging by #{decorator.typename}"]
        when :tag_synonyms
-         label = 'synonyms'
-         synonyms_summary do |synlinks, found_label|
-           synlinks
-         end
+         label_singular = 'synonym'
+         summarize_aspect :synonyms, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
       when :meaning
         label = 'described as'
         # content = h.summarize_meaning
@@ -314,31 +372,15 @@ NB: The relations method has no information not provided by
       when :tag_owners
         label = 'private to'
         # content = h.summarize_tag_owners
-        tagserv.owners.collect { |owner| h.user_homelink owner } unless tagserv.isGlobal
-      when :tag_similars
-        label = 'similar tags'
-        # content = h.summarize_tag_similars
-        # TODO: The elimination should be done in the query
-        Tag.where(normalized_name: tagserv.normalized_name).
-            to_a.
-            delete_if { |other|
-              other.id == tagserv.id
-            }.
-            collect { |other|
-              # h.summarize_tag_similar other, (args[:absorb_btn] && tagserv.can_absorb(other))
-              tagidstr = other.id.to_s
-              link = h.tag_homelink other
-              link = link + h.link_to_submit( "Absorb",
-                                      "tags/#{other.id.to_s}/absorb?victim=#{tagidstr}",
-                                      class: "absorb_button",
-                                      id: "absorb_button_#{tagidstr}") if tagserv.can_absorb(other)
-              h.content_tag :span,
-                          link,
-                          class: 'absorb_'+tagidstr
-            }
+        summarize_aspect(:owners, :for => :raw, :helper => :user_homelink) unless tagserv.isGlobal
+       when :tag_similars
+         label_singular = 'similar tag'
+         summarize_aspect :lexical_similars, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
       when :tag_referents
-        label = 'meanings'
+        label_singular = 'meaning'
+        summarize_aspect :referents, :for => :raw, :helper => :referent_homelink
         # content = h.summarize_tag_referents
+=begin
         tagserv.
         referents.
         to_a.
@@ -346,8 +388,9 @@ NB: The relations method has no information not provided by
           # summarize_referent ref, "Other Meaning(s)"
           h.referent_homelink ref if ref != tagserv.primary_meaning
         }
-      when :tag_parents
-        label = 'under categories'
+=end
+       when :tag_parents
+         label_singular = 'under category'
         # content = h.summarize_tag_parents
         tagserv.parents.collect { |parent| h.tag_homelink parent }
       when :tag_children
@@ -355,7 +398,7 @@ NB: The relations method has no information not provided by
         # content = h.summarize_tag_children
         tagserv.children.collect { |child| h.tag_homelink child }
       when :tag_references
-        label = 'references'
+        label_singular = 'reference'
         # content = h.summarize_tag_references
         tagserv.definition_page_refs.collect { |definition| h.present_definition(definition) }.compact
 =begin
@@ -368,6 +411,7 @@ NB: The relations method has no information not provided by
 =end
      end || []).compact
     content = safe_join(itemstrs, ', ') unless itemstrs.empty?
+    label = (itemstrs.count > 1 ? label_singular.pluralize : label_singular) if label_singular
     [label, content]
   end
 

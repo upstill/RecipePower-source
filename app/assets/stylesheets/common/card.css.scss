@@ -368,6 +368,10 @@ div.card-item {
       }
       form {
         width: 100%;
+        &.inline {
+          width: inherit;
+          display: inline-block;
+        }
         div.inline-text-field {
           width: 100%;
           div.form-group {

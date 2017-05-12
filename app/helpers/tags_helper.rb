@@ -219,19 +219,21 @@ BLOCK_END
     ).join.html_safe
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
-  
+
 
   def summarize_tag_similar this, other, absorb_btn = false
-      content_tag :span,
-        tag_homelink(other) + "(#{other.typename})".html_safe +
-        (absorb_btn ? button_to_submit('Absorb',
-                                       "tags/#{this.id}/absorb?victim=#{other.id}",
-                                       :xs,
-                                       mode: :modal,
-                                       with_form: true,
-                                       class: 'absorb_button',
-                                       id: "absorb_button_#{other.id}") : ''),
-        class: "absorb_#{other.id}"
+    contents = [
+        tag_homelink(other),
+        "(#{other.typename})"
+    ]
+    contents << button_to_submit('Absorb',
+                                 absorb_tag_path(this, victim: other.id, format: 'json'),
+                                 :xs,
+                                 mode: :modal,
+                                 with_form: true,
+                                 class: 'absorb_button',
+                                 id: "absorb_button_#{other.id}") if absorb_btn
+    content_tag :span, safe_join(contents, ' '), class: "absorb_#{other.id}"
   end
 
   def tag_filter_header locals={}

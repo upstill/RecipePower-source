@@ -16,9 +16,11 @@
     <%= @tagserv.isGlobal ? 'Y' : 'N' %>
   </td>
   <td>
+    <%= presenter.summarize_aspect :lexical_similars, :for => :table, helper: :summarize_tag_similar, label: '', absorb_btn: true, joiner: '<br>' %>
     <%= presenter.similars_summary label: '', absorb_btn: true, joiner: '<br>' %>
   </td>
   <td>
+    <%= presenter.summarize_aspect :synonyms, :for => :table, helper: :summarize_tag_similar, label: '', absorb_btn: true, joiner: '<br>' %>
     <%= presenter.synonyms_summary label: '', absorb_btn: true %>
   </td>
   <% if permitted_to? :edit, item %>

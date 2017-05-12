@@ -66,7 +66,8 @@ module TableHelper
   def format_table_summary strlist, label, options={}
     separator = summary_separator options[:separator]
     inward_separator = summary_separator separator
-    safe_join ([label] + strlist), inward_separator
+    strlist.unshift label.html_safe if label.present?
+    safe_join strlist, inward_separator
   end
 
 end
