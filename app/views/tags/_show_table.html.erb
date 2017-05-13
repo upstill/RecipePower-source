@@ -33,7 +33,14 @@
                              'danger',
                              'xs',
                              with_form: true,
-                      data: { confirm: 'Are you sure you want to destroy this tag...for good?' },
-                      method: :delete if response_service.admin_view? %>
+                             data: { confirm: 'Are you sure you want to destroy this tag...for good?' },
+                             method: :delete if response_service.admin_view? %>
+        <%= button_to_submit 'Ban',
+                             tag_path(item, format: :json, ban: true),
+                             'danger',
+                             'xs',
+                             with_form: true,
+                             data: { confirm: 'Are you sure you want to ban this tag?' },
+                             method: :delete if response_service.admin_view? %>
       </td>
   <% end %>

@@ -216,4 +216,12 @@ class TagsController < ApplicationController
     end
   end
 
+  def destroy
+    if params[:ban]
+      nn = Tag.where(id: params[:id]).pluck(:normalized_name).first
+      BannedTag.create(normalized_name: nn) unless BannedTag.where(normalized_name: nn).exists?
+    end
+    super
+  end
+
 end

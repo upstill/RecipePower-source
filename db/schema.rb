@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170418231836) do
+ActiveRecord::Schema.define(version: 20170513063621) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -33,6 +33,14 @@ ActiveRecord::Schema.define(version: 20170418231836) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  create_table "banned_tags", force: :cascade do |t|
+    t.string   "normalized_name"
+    t.datetime "created_at",      null: false
+    t.datetime "updated_at",      null: false
+  end
+
+  add_index "banned_tags", ["normalized_name"], name: "index_banned_tags_on_normalized_name", unique: true, using: :btree
 
   create_table "channels_referents", id: false, force: :cascade do |t|
     t.integer "channel_id"
@@ -263,7 +271,6 @@ ActiveRecord::Schema.define(version: 20170418231836) do
     t.integer  "total_time_high",             default: 0
     t.string   "yield"
     t.integer  "page_ref_id"
-    t.text     "snaps",                       default: "--- []\n"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
