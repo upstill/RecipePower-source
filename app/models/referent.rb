@@ -300,6 +300,7 @@ class Referent < ActiveRecord::Base
   # ...all the parents (if required) of
   # ...all the children (if required) of
   # ...all the referents of this tag
+  # TODO: currently unused; should be optimized and employed in searching by tags
   def self.related tag, doSynonyms = false, doParents = false, doChildren = false
     unique_referents = tag.referents.collect { |ref|
       [(ref.parents if doParents), (ref.children if doChildren)]
@@ -412,14 +413,16 @@ class Referent < ActiveRecord::Base
   end
 
   # Remove uses of this tag by this referent
-  def drop tag
-    if self.tag_id == tag.id
-      # Need to find another tag to use for canonical string
-      return nil unless replacement_tag = self.tags.detect { |candidate| candidate.id != tag.id }
-      self.canonical_expression = replacement_tag
+  # A tagid may be passed
+  def drop tag_or_id
+    id_to_drop = (tag_or_id.is_a? Tag) ? tag_or_id.id : tag_or_id
+    if !tag_id || (tag_id == id_to_drop)
+      # Need to find another tag to use for canonical string; reuse the dropped tag iff it's valid
+      self.tag_id = (tag_ids - [id_to_drop]).first || (id_to_drop if tags.map(&:id).include?(id_to_drop))
     end
-    self.tags.delete tag
-    self.save
+    expr_to_nuke = expressions.find_by(tag_id: id_to_drop) unless self.tag_id == id_to_drop
+    self.expressions.destroy expr_to_nuke if expr_to_nuke
+    save if changed?
   end
 
   # Return the tag expressing this referent according to the given form and locale, if any
@@ -467,6 +470,11 @@ class Referent < ActiveRecord::Base
   def suggests? target_ref
     referments.exists? referee_type: target_ref.type, referee_id: target_ref.id
   end
+
+  # Can the referent be destroyed, ie., is it empty of all connections?
+  def detached?
+    expressions.empty? && referments.empty? && parents.empty? && children.empty?
+  end
 end
 
 # Subclases for different types of referents
@@ -486,6 +494,11 @@ class SourceReferent < Referent
   def associate
     self.site
   end
+
+  def detached?
+    super && !site
+  end
+
 end
 
 class InterestReferent < Referent

@@ -25,7 +25,10 @@ module LinkHelper
     path = link_options.delete :path
     if with_form
       link_options[:class].sub! /\bsubmit\b/, '' # Remove the 'submit' class from the button
-      button_to label, path_or_options, link_options.merge(:remote => true, :form_class => 'ujs-submit')
+      button_to label,
+                path_or_options,
+                link_options.merge(:remote => true,
+                                   :form_class => 'inline ujs-submit')
     else # If the submission isn't a simple get request, we use a (secure) form
       link_to label, path, link_options
     end
@@ -170,7 +173,7 @@ module LinkHelper
             )
       end
     end
-    if options[:nuke_button] && response_service.admin_view?
+    if options[:nuke_button] && defined?(response_service) && response_service.admin_view?
       link << link_to_submit('',
                              decorator.object,
                              class: 'glyphicon glyphicon-remove',

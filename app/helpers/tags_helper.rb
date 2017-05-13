@@ -4,21 +4,21 @@ module TagsHelper
     homelink tag, options
   end
 
-  # TODO: These should be part of the tag presenter
-  def summarize_tag withtype = false, do_link = true, with_id=false
+=begin
+  def present_tag_name withtype = false, do_link = true
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
       "'<strong>#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
   end
-  
-  def summarize_meaning
+
+  def present_tag_meaning
     @tagserv ||= TagServices.new(@tag)
     if (meaning = @tagserv.primary_meaning) && !meaning.description.blank?
       "<p class=\"airy\"><strong>...described as</strong> '#{@tagserv.primary_meaning.description}'</p>".html_safe
     end
   end
-  
-  def summarize_tag_owners
+
+  def present_tag_owners
     @tagserv ||= TagServices.new(@tag)
     return if @tagserv.isGlobal || (owners = @tagserv.owners).empty?
     ownerstrs = owners.collect { |owner| owner.handle }
@@ -27,36 +27,36 @@ module TagsHelper
   
   # Helper for showing the tags which are potentially redundant wrt. this tag:
   # They match in the normalized_name field
-  def summarize_tag_similars args={} 
+  def present_tag_similars args={}
     @tagserv ||= TagServices.new(@tag)
     others = Tag.where(normalized_name: @tagserv.normalized_name).to_a.delete_if { |other| other.id == @tagserv.id } #  @tagserv.lexical_similars
     label= args[:label] || 'Similar tags: '
     joiner = args[:joiner] || ' ' #  ', '
     ("<span>#{label}"+
-        others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
+        others.collect { |other| similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }.join(joiner)+
     "</span>").html_safe
     # tag_info_section others.collect { |other| summarize_tag_similar other, (args[:absorb_btn] && @tagserv.can_absorb(other)) }, label: label, joinstr: joiner
   end
-  
-  def summarize_tag_parents label = "Categorized Under: "
+
+  def present_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
     tag_info_section @tagserv.parents.collect { |parent| tag_homelink parent }, label: label
   end
 	
-  def summarize_tag_children label = "Examples: "
+  def present_tag_children label = "Examples: "
     @tagserv ||= TagServices.new(@tag)
     tag_info_section @tagserv.children.collect { |child| tag_homelink child }, label: label
   end
   
-  def summarize_tag_referents
+  def present_tag_referents
     @tagserv ||= TagServices.new(@tag)
     tag_info_section(
       @tagserv.referents.to_a.keep_if { |ref| ref != @tagserv.primary_meaning }.each { |ref|
       	summarize_referent ref, label: "Other Meaning(s)"
       }, label: "Referents: ")
   end
-  
-  def summarize_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
+
+  def present_tag_recipes header="<h4>Used as Tag on Recipe(s)</h4>"
     @tagserv ||= TagServices.new(@tag)
     recipes =
       @tagserv.recipes(true).uniq.collect { |rcp| 
@@ -68,7 +68,7 @@ module TagsHelper
   end
 
   # Return HTML for the links associated with this tag
-  def summarize_tag_references label = "See "
+  def present_tag_references label = "See "
     @tagserv ||= TagServices.new(@tag)
     unless (refstrs = present_tag_definitions @tagserv).empty?
       (content_tag( :h3, "References")+
@@ -85,7 +85,7 @@ module TagsHelper
 
   # Return HTML for the links related to a given tag (i.e., the links for 
   # all tags related to this one)
-  def summarize_tag_relations label = 'See Also'
+  def present_tag_relations label = 'See Also'
     @tagserv ||= TagServices.new(@tag)
     links =
       Referent.related(@tagserv, false, true).collect { |rel|
@@ -99,7 +99,7 @@ module TagsHelper
     (content_tag(:h3, label)+links.html_safe) if links
   end
 
-  def summarize_tag_synonyms label='Synonyms: ', options={}
+  def present_tag_synonyms label='Synonyms: ', options={}
     if label.is_a?(Hash)
       label, options = 'Synonyms: ', label
     end
@@ -151,19 +151,14 @@ module TagsHelper
         (pluralize(sites.count, 'Site').sub(/\s/, ' ')+'<br>').html_safe
     end
   end
-      
+
   def summarize_tag_owner_count
     @tagserv ||= TagServices.new(@tag)
       ct = @tagserv.user_ids.size
       (ct > 0) ? (pluralize(ct, 'Owner').sub(/\s/, '&nbsp;')+'<br>').html_safe : ''
   end
-
-=begin
-  def summarize_tags(tags)
-  	tags.collect{|tag| summarize_tag tag }.join(', ')
-  end
 =end
-    
+
 # ----------------------------------
     
     # Return HTML for each tag of the given type
@@ -197,17 +192,21 @@ BLOCK_END
 BLOCK_END
          s.html_safe
        end
-       
+
    # Helper to define a selection menu for tag type
-   def type_selections val=nil
-       if val.kind_of? Tag
-           options_for_select(Tag.type_selections, val.typenum )
-       elsif val.nil?
-           options_for_select(Tag.type_selections )
-       else
-           options_for_select(Tag.type_selections, val )
-       end
-   end
+  def type_selections val=nil
+    rmv = [Tag.typenum(:Course), Tag.typenum(:List), Tag.typenum(:Epitaph)]
+    selections = Tag.type_selections(val.kind_of? Tag).keep_if { |sel| !rmv.include? sel.last }
+    selections.insert 3, ['Course', 18]
+    selections.first[0] = 'No Type'
+    if val.kind_of? Tag
+      options_for_select selections, val.typenum
+    elsif val.nil?
+      options_for_select selections
+    else
+      options_for_select selections, val
+    end
+  end
 
   # Provide a Bootstrap selection menu of a set of tags
   def tag_select alltags, curtags
@@ -220,47 +219,21 @@ BLOCK_END
     ).join.html_safe
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
-  
-  # Present one section of the tag info using a label, a (possibly empty) collection
-  # of descriptive strings, and a classname for a span summarizing the section (presumably
-  # because the individual entries are meant to show on a line). 
-  # If the collection is empty, we return nil; if the contentclass is blank we don't wrap it in a span
-  def tag_info_section contentstrs, options
-    contentclass = options[:contentclass] || "tag_info_section_content"
-    label = options[:label] || ""
-    joinstr = options[:joinstr] || ", "
-    if contentstrs && !contentstrs.empty?
-      contentstr = contentclass.blank? ?
-                   contentstrs.join('').html_safe :
-                   content_tag(:span, contentstrs.join(joinstr).html_safe, class: contentclass)
-      # content_tag( :div,
-      #   (label+contentstr).html_safe,
-      #  class: "tag_info_section"
-      # )
-      result =
-      content_tag :div,
-        content_tag( :div,
-                     content_tag(:p, "<strong>#{label}</strong>".html_safe, class: "pull-right"),
-                     class: "col-md-4")+
-        content_tag( :div,
-                     content_tag(:p, contentstr.html_safe, class: "pull-left"),
-                     class: "col-md-8"),
-        class: "row"
-      result.html_safe
-    end
-  end
-  
-  def summarize_tag_similar other, absorb_btn = false
-      content_tag :span,
-        tag_homelink(other) + "(#{other.typename})".html_safe +
-        (absorb_btn ? button_to_submit('Absorb',
-                                       "tags/#{@tag.id}/absorb?victim=#{other.id}",
-                                       :xs,
-                                       mode: :modal,
-                                       with_form: true,
-                                       class: 'absorb_button',
-                                       id: "absorb_button_#{other.id}") : ''),
-        class: "absorb_#{other.id}"
+
+
+  def summarize_tag_similar this, other, absorb_btn = false
+    contents = [
+        tag_homelink(other),
+        "(#{other.typename})"
+    ]
+    contents << button_to_submit('Absorb',
+                                 absorb_tag_path(this, victim: other.id, format: 'json'),
+                                 :xs,
+                                 mode: :modal,
+                                 with_form: true,
+                                 class: 'absorb_button',
+                                 id: "absorb_button_#{other.id}") if absorb_btn
+    content_tag :span, safe_join(contents, ' '), class: "absorb_#{other.id}"
   end
 
   def tag_filter_header locals={}

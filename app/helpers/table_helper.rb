@@ -2,7 +2,7 @@ module TableHelper
   def table_collection_selector
     'tbody.collection_list'
   end
-  
+
   def table_out(list, headers, &block)
     hdrlist = headers.collect { |ttl| "<th>#{ttl}</th>" unless ttl.blank? }.compact.join("\n")
     bodylist = list.collect { |object| "<tr>"+block.call(object)+"</tr>" }.join("\n")
@@ -43,11 +43,11 @@ module TableHelper
     body =
         display_table.rows.collect { |row|
           content_tag :tr, display_table.fields.collect { |field|
-            field_sym = field[:sym]
-            row_matter = yield( row, field_sym ) || row[field_sym]
-            row_text = row_matter.class == Float ? format("%.2f", row_matter) : row_matter.to_s
-            content_tag :td, row_text.html_safe
-          }.join("\n").html_safe
+                           field_sym = field[:sym]
+                           row_matter = yield(row, field_sym) || row[field_sym]
+                           row_text = row_matter.class == Float ? format("%.2f", row_matter) : row_matter.to_s
+                           content_tag :td, row_text.html_safe
+                         }.join("\n").html_safe
         }.join("\n").html_safe
 
     %Q{
@@ -63,4 +63,11 @@ module TableHelper
 
   end
 
+  def format_table_summary strlist, label, options={}
+    separator = summary_separator options[:separator]
+    inward_separator = summary_separator separator
+    strlist.unshift label.html_safe if label.present?
+    safe_join strlist, inward_separator
   end
+
+end

@@ -20,6 +20,8 @@ gem "simple_form", '~> 3.1' # https://github.com/plataformatec/simple_form
 gem 'draper', '~> 1.3'
 # Easily and efficiently make your ActiveRecord models support hierarchies
 gem 'closure_tree' # https://github.com/mceachen/closure_tree
+# TODO Cache bit in each tag, for each taggable entity class, indicating that the tag is used.
+# gem 'attr_bitwise' # https://github.com/wittydeveloper/attr_bitwise/
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 gem 'arel', '~> 6.0' # https://github.com/rails/arel

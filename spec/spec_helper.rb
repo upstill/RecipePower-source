@@ -58,4 +58,13 @@ RSpec.configure do |config|
   # The different available types are documented in the features, such as in
   # https://relishapp.com/rspec/rspec-rails/v/3-0/docs
   config.infer_spec_type_from_file_location!
+
+  # Make a view available to presenters
+  config.include ActionView::TestCase::Behavior, example_group:
+                                                   {file_path: %r{spec/presenters}}
+
+  config.include ApplicationHelper
+  config.include TableHelper
+  config.include TagsHelper
+  config.include LinkHelper
 end

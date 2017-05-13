@@ -1,5 +1,5 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
-<% @tag = decorator.object %>
-<%= modal_dialog :show_tag, "What We Know About #{summarize_tag true, false}" do %>
-  <%= render 'show', decorator: decorator, viewparams: viewparams %>
+<% presenter = TagPresenter.new decorator, viewparams, current_user %>
+<%= modal_dialog :show_tag, "What We Know About #{presenter.name true, false}" do %>
+  <%= render 'show', presenter: presenter, viewparams: viewparams %>
 <% end %>

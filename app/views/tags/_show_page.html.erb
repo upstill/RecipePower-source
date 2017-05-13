@@ -1,3 +1,3 @@
-<% @tagserv = TagServices.new @tag %>
-<h3>What We Know About <%= summarize_tag true, false %></h3>
-<%= render 'show' %>
+<% presenter = TagPresenter.new @tag, self, current_user %>
+<h3>What We Know About <%= presenter.name true, false %></h3>
+<%= render 'show', presenter: presenter %>

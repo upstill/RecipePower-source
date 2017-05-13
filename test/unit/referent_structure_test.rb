@@ -169,6 +169,46 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_nil rfc1.referents.first, "Reference has dangling referent after merge"
   end
 
+  test "Referent reports children by single tag" do
+    child_tags = TagServices.new(tags(:dessert)).children true
+    assert_equal 2, child_tags.count
+  end
+
+  test "Referent reports children by all tags" do
+    child_tags = TagServices.new(tags(:dessert)).children
+    assert_equal 5, child_tags.count
+  end
+
+  test "Referent reports parents by single tag" do
+    parent_tags = TagServices.new(tags(:cake)).parents true
+    assert_equal 1, parent_tags.count
+  end
+
+  test "Referent reports parents by all tags" do
+    parent_tags = TagServices.new(tags(:cake)).parents
+    assert_equal 2, parent_tags.count
+  end
+
+  test "Tag reports referents excluding self" do
+    tag_ids = TagServices.new(tags(:cake)).referents true
+    assert_equal 0, tag_ids.count
+  end
+
+  test "Tag reports referents including self" do
+    tag_ids = TagServices.new(tags(:cake)).referents
+    assert_equal 1, tag_ids.count
+  end
+
+  test "Tag reports synonyms excluding self" do
+    tag_ids = TagServices.new(tags(:cake)).synonyms true
+    assert_equal 2, tag_ids.count
+  end
+
+  test "Tag reports synonyms including self" do
+    tag_ids = TagServices.new(tags(:cake)).synonyms
+    assert_equal 3, tag_ids.count
+  end
+
   test "Destroying referent doesn't leave elements dangling" do
     # Check that user of a channel referent is gone
   end

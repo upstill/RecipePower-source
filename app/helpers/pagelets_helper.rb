@@ -12,7 +12,7 @@ module PageletsHelper
         render_template response_service.controller, response_service.action
       else
         if to_delete
-          selector << '.' + entity_or_decorator.dom_id
+          selector << '.' + (entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate).dom_id
           link_to_submit '', current_user, trigger: true
         else
           controller = (entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator.object : entity_or_decorator).class.to_s.underscore.pluralize

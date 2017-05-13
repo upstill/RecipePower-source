@@ -122,7 +122,7 @@ class UserDecorator < CollectibleDecorator
     # define method to add to the results array
     def assert_tag tag, user=nil, status=nil
       user, status = nil, user if !user.is_a?(User)
-      return if @results[tag.id]
+      return if !tag || @results[tag.id]
       result = {
           tag: tag,
           id: tag.id,
