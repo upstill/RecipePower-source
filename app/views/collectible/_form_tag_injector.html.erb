@@ -29,7 +29,7 @@
           </div>
       </div>
 
-      <%= taggable_div f,
+      <%= token_input_div f,
                        :attribute_name => :editable_tags,
                        :label => 'Tag(s)',
                        :data => { type: Tag.typenum(@decorator.eligible_tagtypes) }

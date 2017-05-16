@@ -164,7 +164,7 @@ RP::Application.routes.draw do
   post '/tag' => 'tags#create', :as => 'create_tag'
   resources :tags, except: [:index, :create] do
     member do
-      post 'absorb'
+      post 'associate'
       get 'owned'
       get 'associated'
     end

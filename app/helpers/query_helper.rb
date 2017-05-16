@@ -1,9 +1,9 @@
 module QueryHelper
 
   # Define a query item using a tagging interface
-  def token_input_query opt_param={}
-    options = opt_param.dup
-    data = options.slice :hint, :placeholder, :'no-results-text', :"min-chars"
+  def token_input_query options={}
+=begin
+    data = options.slice :hint, :placeholder, :'no-results-text', :'min-chars'
 
     # Assert defaults for data fields
     data[:hint] ||= 'Narrow down the list'
@@ -30,6 +30,8 @@ module QueryHelper
     qt = text_field_tag 'querytags',
                         querytags.map(&:id).join(','),
                         options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)
+=end
+    qt = token_input_tag 'querytags', (options[:querytags] || []), options.except(:type_selector, :glyphicon, :batch_select, :batch, :querytags)
     qt += content_tag(:div,
                       content_tag(:span, '', class: "glyphicon glyphicon-#{options[:glyphicon]}"),
                       class: 'search-glyph'
@@ -40,14 +42,14 @@ module QueryHelper
           select_tag(:tagtype,
                      options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
                      :include_blank => false,
-                     :onchange => 'RP.tagger.select_type(event);')  # RP.submit.onselect( event );') +
+                     :onchange => 'RP.tagger.select_type(event);') # RP.submit.onselect( event );') +
       batch_select = options[:batch_select] ? ('  ...from batch #&nbsp;'.html_safe +
           select_tag(:batch, options_for_select((1..(options[:batch_select].to_i)).to_a, options[:batch]),
                      :include_blank => true,
                      :onchange => 'RP.tagger.select_batch( event );')) : ''.html_safe
 
       content_tag :div, type_select+batch_select,
-              style: 'display:inline-block; vertical-align:bottom; margin:5px 10px'
+                  style: 'display:inline-block; vertical-align:bottom; margin:5px 10px'
     else
       ''.html_safe
     end +

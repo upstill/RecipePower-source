@@ -1,0 +1,5 @@
+<!--<label class="string optional">Child of</label>-->
+<%= form_tag(associate_tag_path(presenter.tag, how: 'child'), method: "post") do %>
+    <%= label_tag :child, 'Child of' %>
+    <%= token_input_tag :other, :tokenLimit => 1 %>
+<% end %>

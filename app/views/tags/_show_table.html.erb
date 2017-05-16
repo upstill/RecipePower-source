@@ -6,12 +6,16 @@
     <strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
     <br><%= presenter.meaning %>
   </td>
-  <td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
+  <td>
+    <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
                      class: 'tag_type_selector',
                      onchange: 'RP.change(event);',
                      data: {request: '/tags/typify',
                             valueparam: 'typenum',
-                            querydata: {tagid: item.id}} %></td>
+                            querydata: {tagid: item.id}} %><br>
+    <%= render 'form_parent', presenter: presenter %>
+  </td>
+<%# render 'form_synonym' %>
   <td>
     <%= presenter.table_summaries response_service.admin_view? %>
   </td>

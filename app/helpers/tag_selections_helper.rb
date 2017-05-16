@@ -8,34 +8,6 @@ module TagSelectionsHelper
     [ 'form.new_tag_selection', tag_selection_form(tag_selection)]
   end
 
-=begin
-            <div class="control-group">
-              <label class="string optional">Tag(s)<br><span class="locked-tags"><%= decorator.locked_untyped_culinaryterm_tags.map(&:name).join ' | ' %></span></label>
-              <input id="<%= decorator.element_id :tagging_user_id %>" name="<%= decorator.field_name :tagging_user_id %>" type="hidden" value="<%= decorator.tagging_user_id %>">
-              <input type="text"
-                     class="token-input-field-pending"
-                     id="editable_untyped_culinaryterm_tag_tokens"
-                     name="<%= decorator.field_name :editable_untyped_culinaryterm_tag_tokens %>"
-                     rows="2"
-                     size="30"
-                     placeholder="Tags"
-                     data-tagtype_x="7"
-                     data-pre="<%= decorator.editable_untyped_culinaryterm_tags.map(&:attributes).to_json %>"/>
-            </div>
-            <div class="control-group">
-              <label class="string optional"><%= label %>(s)<br><span class="locked-tags"><%= locked_tags %></span></label>
-              <input id="<%= decorator.element_id :tagging_user_id %>" name="<%= decorator.field_name :tagging_user_id %>" type="hidden" value="<%= decorator.tagging_user_id %>">
-              <input type="text"
-                     class="token-input-field-pending"
-                     id="<%= tokens_id %>"
-                     name="<%= decorator.field_name tokens_id %>"
-                     rows="2"
-                     size="30"
-                     placeholder="<%= label.pluralize %>"
-                     data-tagtype="7"
-                     data-pre="<%= data_pre %>"/>
-            </div>
-=end
   def tagging_fields decorator
     results =
         decorator.editable_tagtypes.collect do |type|

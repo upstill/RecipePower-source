@@ -61,7 +61,7 @@ privileges do
     includes :remove
   end  
   privilege :manage do
-    includes :create, :read, :update, :delete, :editor, :typify, :absorb
+    includes :create, :read, :update, :delete, :editor, :typify, :associate
   end
   
 #   privilege :read, :pages, :includes => [:home, :contact, :about, :FAQ, :welcome]

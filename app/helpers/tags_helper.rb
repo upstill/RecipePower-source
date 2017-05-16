@@ -227,7 +227,7 @@ BLOCK_END
         "(#{other.typename})"
     ]
     contents << button_to_submit('Absorb',
-                                 absorb_tag_path(this, victim: other.id, format: 'json'),
+                                 associate_tag_path(this, other: other.id, how: 'absorb', format: 'json'),
                                  :xs,
                                  mode: :modal,
                                  with_form: true,

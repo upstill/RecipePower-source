@@ -53,7 +53,7 @@ module TaggableHelper
     end
   end
 
-  def taggable_div(f, classname='edit_recipe_field', options={})
+  def token_input_div(f, classname='edit_recipe_field', options={})
     if classname.is_a? Hash
       classname, options = 'edit_recipe_field', classname
     end
@@ -65,9 +65,4 @@ module TaggableHelper
       false
   end
 
-  # OBSOLETE: replaced by decorator.extract('tags')
-  def taggable_list taggable, with_type=false
-    taggable.tags.collect { |tag| "<span>#{tag.typedname(with_type)}</span>" }.join('<br>').html_safe
-  end
-	
 end

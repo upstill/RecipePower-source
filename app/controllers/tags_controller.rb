@@ -145,7 +145,8 @@ class TagsController < ApplicationController
     render partial: 'editor'
   end
   
-  # GET /id/absorb
+=begin
+  # POST /id/absorb
   # Merge two tags together, returning a list of DOM elements to nuke as a result
   def absorb
     if !(@absorber = Tag.find params[:id])
@@ -154,6 +155,34 @@ class TagsController < ApplicationController
       flash[:error] = 'Couldn\'t find tag to absorb'
     elsif (survivor = @absorber.absorb victim) && !(resource_errors_to_flash survivor, preface: "Couldn\'t absorb '#{victim.name}.")
       @to_delete = victim
+    end
+    respond_to do |format|
+      format.html {}
+      format.json {}
+      format.js { render 'shared/get_content' }
+    end
+  end
+=end
+
+  # POST /id/associate
+  # Associate the tag with another, according to params[:how]:
+  #  -- 'synonym' means to make the tag a synonym of the other
+  #  -- 'child' means to make the other a parent of the tag
+  #  -- 'absorb' means to make the other vanish into the tag
+  def associate
+    if !(@tag = Tag.find params[:id])
+      flash[:error] = 'Couldn\'t find tag to associate'
+    elsif !(other = Tag.find_by id: params[:other])
+      flash[:error] = 'Couldn\'t find tag to associate with'
+    else
+      case params[:how]
+        when 'absorb'
+          if (survivor = @tag.absorb other) && !(resource_errors_to_flash survivor, preface: "Couldn\'t absorb '#{other.name}.")
+            @to_delete = other
+          end
+        when 'child' # Make the tag a child of the other
+        when 'synonym' # Make the tag a synonym of the other
+      end
     end
     respond_to do |format|
       format.html {}
