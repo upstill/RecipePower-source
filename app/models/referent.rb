@@ -94,6 +94,10 @@ class Referent < ActiveRecord::Base
     ]
   end
 
+  def affiliates
+    referments.map &:referee
+  end
+
   def absorb other, nuke_it=true
     return false if type != other.type
     return true if other.id == id
@@ -497,6 +501,10 @@ class SourceReferent < Referent
 
   def detached?
     super && !site
+  end
+
+  def affiliates
+    super + [ site ]
   end
 
 end

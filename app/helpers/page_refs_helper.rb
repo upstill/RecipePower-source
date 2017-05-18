@@ -9,7 +9,11 @@ module PageRefsHelper
       ref_link << ' on '.html_safe unless ref_link.blank?
       ref_link << link_to(site.name, site.home, :target => '_blank')
     end
-    ref_link
+    if options[:label].present?
+      "#{options[:label]}: ".html_safe + ref_link
+    else
+      ref_link
+    end
   end
 
   def summarize_page_ref pr, options={}

@@ -115,7 +115,7 @@ module LinkHelper
         (polymorphic_path([:collection, object]) rescue nil) ||
         (polymorphic_path([:contents, object]) rescue nil) ||
         (polymorphic_path([:associated, object]) rescue nil) ||
-        polymorphic_path(object)
+        (polymorphic_path(object) rescue nil)
   end
 
   def touchpath decorator
@@ -131,7 +131,7 @@ module LinkHelper
 
     cssclass = "#{options[:class]} entity #{classname}"
 
-    title = options[:title] || decorator.title
+    title = options[:title] || (decorator.title rescue "Untitled #{decorator.model_name.human}")
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end
@@ -153,13 +153,18 @@ module LinkHelper
             content_tag :span, title, class: cssclass
           end
     else
-      link = link_to_submit title,
-                            linkpath(decorator.object, options[:action]),
-                            {mode: :partial, title: 'Open Locally' }.
-                                merge(options).
-                                merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
-                                except(:action, :truncate).
-                                compact
+      link =
+          if lp = linkpath(decorator.object, options[:action])
+            link_to_submit title,
+                           lp,
+                           {mode: :partial, title: 'Open Locally'}.
+                               merge(options).
+                               merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
+                               except(:action, :truncate).
+                               compact
+          else
+            title.html_safe
+          end
       unless options[:local_only] || !decorator.respond_to?(:external_link)
         link << '&nbsp;'.html_safe +
             link_to('', decorator.external_link,

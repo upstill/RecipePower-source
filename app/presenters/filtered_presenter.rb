@@ -28,7 +28,7 @@ end
 module TagsTable
   @item_mode = :table
   def table_headers
-    [ 'Type', 'Name', 'Usages', 'Similar Tags' ]
+    [ 'Type', 'Name', 'Usages', 'Meanings', 'Similar Tags' ]
   end
 end
 

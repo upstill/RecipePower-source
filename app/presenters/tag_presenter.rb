@@ -20,12 +20,12 @@ class TagPresenter < BasePresenter
 
   def table_summaries admin_view_on
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
-    set = self.taggees_table_summary
+    set = []
     set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
     set << self.summarize_aspect(:parents, :for => :table, :helper => :tag_homelink, limit: 5)
     set << self.summarize_aspect(:children, :for => :table, :helper => :tag_homelink, limit: 5)
     set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
-    set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'reference')
+    # set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'Reference')
     summarize_set '', set
   end
 
@@ -95,7 +95,7 @@ class TagPresenter < BasePresenter
       klass, scope = *keyval
       ct = scope.count
       label = (ct > 1) ? labelled_quantity(ct, klass.model_name.human) : klass.model_name.human
-      h.format_table_summary scope.limit(5).collect { |entity| h.homelink entity }, label, options
+      h.format_table_summary scope.limit(5).collect { |entity| h.homelink entity, truncate: 20 }, label, options
     }
   end
 
