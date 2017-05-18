@@ -1,4 +1,5 @@
 module TokenInputHelper
+  require 'rack'
 
   # Provide a text field that will be used by tokeninput
   # -- name: the name and id that the text element will have
@@ -25,25 +26,40 @@ module TokenInputHelper
     end
 
     ####### We suss out the tagtype query for matching tags
-    # The type(s) of tag (dis)allowed may be specified in an option, according to the paramter convention in TagsController
-    tagtype_x = convert_tagtype(options.delete :tagtype_x) || Tag.typenum(:List)
-    tagtype = convert_tagtype(options.delete :tagtype)
+    query =
+        case (q = options.delete(:query))
+          when String
+            Rack::Utils.parse_query(URI.unescape q)
+          when Hash
+            q
+          when nil
+            {}
+        end
+    if tagtype = convert_tagtype(options.delete :tagtype)
+      query[:tagtype] = tagtype
+    elsif tagtype_x = convert_tagtype(options.delete :tagtype_x)
+      query[:tagtype_x] = tagtype_x
+    elsif !(query[:tagtype] || query[:tagtype_x])
+      query[:tagtype_x] = Tag.typenum(:List)
+    end
     # Set up the tokeninput data
     tokeninput_options = {
         :hint => 'Narrow down the list',
         :placeholder => 'Seek and ye shall find...',
         :minChars => 2,
-        :'no-results-text' => 'No matching tag found; hit Enter to search with text',
+        :noResultsText => 'No matching tag found; hit Enter to search with text',
         # JS for how to invoke the search on tag completion:
         # querify (tagger.js) for standard tag handling;
         # submit (tagger.js) for results enclosures (which maintain and accumulate query data)
         :onAdd => options[:handler] || 'submit',
         :onDelete => options[:handler] || 'submit',
         # The tag matching query gets parameterized with the acceptable tag types
-        :query => (tagtype ? "tagtype=#{tagtype}" : "tagtype_x=#{tagtype_x}"),
+        :query => query.to_query, # (tagtype ? "tagtype=#{tagtype}" : "tagtype_x=#{tagtype_x}"),
         # The tokeninput starts with the querytags collection, if any
         :pre => querytags.collect { |tag| tag.attributes.slice('id', 'name') }.to_json,
-        :tokenLimit => nil
+        :tokenLimit => nil,
+        :allowFreeTagging => true,
+        :allowCustomEntry => true
     }
     # Let any declared options override the defaults above
     tokeninput_options = tokeninput_options.merge(options.slice(*tokeninput_options.keys)).compact
@@ -55,7 +71,11 @@ module TokenInputHelper
 
     option_overrides = {
         :class => "token-input-field-pending #{options[:class]}",
-        :data => tokeninput_options
+        # The data parameters need to be made JSON-friendly by converting camelized names to '-' format
+        :data => tokeninput_options.inject({}) { |memo, obj|
+          memo[obj.first.to_s.underscore.gsub('_', '-')] = obj.last
+          memo
+        }
     }
 
     text_field_tag name,

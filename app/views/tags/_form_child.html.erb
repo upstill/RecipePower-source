@@ -1,0 +1,11 @@
+<!--<label class="string optional">Child of</label>-->
+<%= form_tag(associate_tag_path(presenter.tag, as: 'synonym'), class: 'submit', method: 'post') do %>
+    Make child of:<br>
+    <%= token_input_tag :other,
+                        :tokenLimit => 1,
+                        :noResultsText => 'No such tag found',
+                        :query => { all: true },
+                        :allowFreeTagging => false,
+                        :allowCustomEntry => false
+    %>
+<% end %>
