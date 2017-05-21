@@ -27,7 +27,7 @@ class UserPresenter < CollectiblePresenter
   end
 
   def card_homelink options={}
-    user_homelink @decorator, options
+    homelink @decorator, options
   end
 
   def member_since

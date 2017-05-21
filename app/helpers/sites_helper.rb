@@ -57,7 +57,7 @@ module SitesHelper
   end
 
   def site_tags_summary site, options={}
-    summarize_set 'Tagged With', site.tags.collect { |tag| tag_homelink tag }, summary_separator
+    summarize_set 'Tagged With', site.tags.collect { |tag| homelink tag }, summary_separator
   end
 
   def site_nuke_button site, options={}

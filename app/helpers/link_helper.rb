@@ -125,11 +125,19 @@ module LinkHelper
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
   def homelink decorator, options={}
     decorator = decorator.decorate unless decorator.is_a?(Draper::Decorator)
+    #### Special processing for various models
+    action = options[:action]
+    cssclass = "#{options[:class]} entity #{decorator.object.class.to_s.underscore}"
+    case decorator.object
+      when User
+        # homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
+        action = :collection
+        cssclass << ' ' + user_subclass(decorator.object)
+      when is_a?(Referent)
+        decorator.object = decorator.object.becomes(Referent)
+    end
     data = options[:data] || {}
     data[:report] = touchpath decorator
-    classname = decorator.object.class.to_s.underscore
-
-    cssclass = "#{options[:class]} entity #{classname}"
 
     title = options[:title] || decorator.title
     if options[:truncate]
@@ -153,13 +161,18 @@ module LinkHelper
             content_tag :span, title, class: cssclass
           end
     else
-      link = link_to_submit title,
-                            linkpath(decorator.object, options[:action]),
-                            {mode: :partial, title: 'Open Locally' }.
-                                merge(options).
-                                merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
-                                except(:action, :truncate).
-                                compact
+      link =
+          if lp = linkpath(decorator.object, action)
+            link_to_submit title,
+                           lp,
+                           {mode: :partial, title: 'Open Locally'}.
+                               merge(options).
+                               merge(data: (data unless data.compact.empty?), class: cssclass + ' clicker').
+                               except(:action, :truncate).
+                               compact
+          else
+            title.html_safe
+          end
       unless options[:local_only] || !decorator.respond_to?(:external_link)
         link << '&nbsp;'.html_safe +
             link_to('', decorator.external_link,

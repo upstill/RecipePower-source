@@ -1,14 +1,14 @@
 module TagsHelper
 
+=begin
   def tag_homelink tag, options={}
     homelink tag, options
   end
 
-=begin
   def present_tag_name withtype = false, do_link = true
     @tagserv ||= TagServices.new(@tag)
     ((withtype ? "<i>#{@tagserv.typename}</i> " : "" )+
-      "'<strong>#{do_link ? tag_homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
+      "'<strong>#{do_link ? homelink(@tagserv.tag) : @tagserv.name}</strong>'").html_safe
   end
 
   def present_tag_meaning
@@ -40,12 +40,12 @@ module TagsHelper
 
   def present_tag_parents label = "Categorized Under: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.parents.collect { |parent| tag_homelink parent }, label: label
+    tag_info_section @tagserv.parents.collect { |parent| homelink parent }, label: label
   end
 	
   def present_tag_children label = "Examples: "
     @tagserv ||= TagServices.new(@tag)
-    tag_info_section @tagserv.children.collect { |child| tag_homelink child }, label: label
+    tag_info_section @tagserv.children.collect { |child| homelink child }, label: label
   end
   
   def present_tag_referents
@@ -106,7 +106,7 @@ module TagsHelper
     @tagserv ||= TagServices.new(@tag)
     # The synonyms are the other expressions of this tag's referents
     return if (syns = @tagserv.synonyms).empty?
-    synstrs = syns.collect { |syn| # tag_homelink syn
+    synstrs = syns.collect { |syn| # homelink syn
       summarize_tag_similar syn, (options[:absorb_btn] && @tagserv.can_absorb(syn))
     }.join('<br>').html_safe
     # tag_info_section synstrs, label: label, joinstr: '<br>'
@@ -223,7 +223,7 @@ BLOCK_END
 
   def summarize_tag_similar this, other, absorb_btn = false
     contents = [
-        tag_homelink(other),
+        homelink(other),
         "(#{other.typename})"
     ]
     contents << button_to_submit('Absorb',

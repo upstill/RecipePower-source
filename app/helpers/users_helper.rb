@@ -1,5 +1,11 @@
 module UsersHelper
 
+=begin
+  def user_homelink user, options={}
+    homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
+  end
+=end
+
   # NB Currently out of use
   def followees_list f, me
     # followee_tokens is a virtual attribute, an array of booleans for checking and unchecking followees
@@ -97,10 +103,6 @@ module UsersHelper
 
   def user_subclass user
     user.id == current_user_or_guest_id ? 'viewer' : 'friend'
-  end
-
-  def user_homelink user, options={}
-    homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
   end
 
   # Operate on a set of tag specifications as defined in UserDecorator for directing a list search

@@ -1,10 +1,12 @@
 module ReferentsHelper
 
+=begin
   def referent_homelink ref, options={}
     homelink ref.becomes(Referent), options
   end
+=end
 
-	def summarize_ref_name referent, long=false
+  def summarize_ref_name referent, long=false
     extra = long ? 'going by the name of ' : ''
     "<i>#{referent.typename}</i> #{extra}<strong>'#{referent.name}'</strong> ".html_safe
   end
@@ -15,7 +17,7 @@ module ReferentsHelper
     if options[:header] || options[:label]
       header = safe_join([
                              (options[:label] || 'Meaning'),
-                             referent_homelink(ref)
+                             homelink(ref.becomes(Referent))
                          ], ': '.html_safe,
       )
     end
@@ -43,20 +45,20 @@ module ReferentsHelper
 
   def summarize_ref_parents ref, options={}
     summarize_set (options[:label] || 'Categorized under'),
-                  ref.parents.limit(8).collect { |parent| referent_homelink parent.becomes(Referent) },
+                  ref.parents.limit(8).collect { |parent| homelink parent.becomes(Referent) },
                   options[:separator]
   end
 
   def summarize_ref_children ref, options={}
     summarize_set (options[:label] || 'Category includes'),
-                  ref.children.limit(8).collect { |child| referent_homelink child.becomes(Referent) },
+                  ref.children.limit(8).collect { |child| homelink child.becomes(Referent) },
                   options[:separator]
   end
 
   def list_children referent, do_tag=true
     ("Children: "+
         (referent.child_tags.collect { |tag|
-          (do_tag ? tag_homelink(tag) : tag.name)+
+          (do_tag ? homelink(tag) : tag.name)+
               "(id #{tag.id.to_s})"
         }.join(', ') || "none")).html_safe
   end

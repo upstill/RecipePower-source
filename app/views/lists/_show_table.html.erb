@@ -11,13 +11,13 @@
       <hr><%= list.notes %>
     </td>
     <td>
-      <%= user_homelink list.owner %>
+      <%= homelink list.owner %>
       <br>
     </td>
     <td>
       <%= decorator.extract 'tags' %>
       <%# list.included_tags.each do |tag| %>
-          <%# tag_homelink tag, :mode => :modal %><br>
+          <%# homelink tag, :mode => :modal %><br>
       <%# end %>
     </td>
     <td>

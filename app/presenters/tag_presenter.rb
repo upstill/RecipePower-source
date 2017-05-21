@@ -8,7 +8,7 @@ class TagPresenter < BasePresenter
 
   def name withtype = false, do_link = true
     ((withtype ? "<i>#{decorator.typename}</i> " : '' )+
-        "'<strong>#{do_link ? h.tag_homelink(tag) : tag.name}</strong>'").html_safe
+        "'<strong>#{do_link ? h.homelink(tag) : tag.name}</strong>'").html_safe
   end
 
   # Provide a text meaning of a tag by getting a description from one of its referent(s), if any--preferentially the primary meaning
@@ -22,8 +22,8 @@ class TagPresenter < BasePresenter
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
     set = self.taggees_table_summary
     set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
-    set << self.summarize_aspect(:parents, :for => :table, :helper => :tag_homelink, limit: 5)
-    set << self.summarize_aspect(:children, :for => :table, :helper => :tag_homelink, limit: 5)
+    set << self.summarize_aspect(:parents, :for => :table, :helper => :homelink, limit: 5)
+    set << self.summarize_aspect(:children, :for => :table, :helper => :homelink, limit: 5)
     set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'reference')
     summarize_set '', set
@@ -45,7 +45,7 @@ class TagPresenter < BasePresenter
 
   # options[:helper] prescribes the name of a helper to name and possibly link to an instance of the aspect
   def summarize_aspect what, options={}
-    helper = (options.delete :helper) || :tag_homelink
+    helper = (options.delete :helper) || :homelink
     format = (options.delete :for) || :card
     scope =
         if block_given?
@@ -100,7 +100,7 @@ class TagPresenter < BasePresenter
   end
 
   def card_homelink options={}
-    h.tag_homelink tag, options
+    h.homelink tag, options
   end
 
   def is_viewer?
@@ -148,22 +148,22 @@ class TagPresenter < BasePresenter
            when :tag_owners
              label = 'private to'
              # content = h.summarize_tag_owners
-             summarize_aspect(:owners, :for => :raw, :helper => :user_homelink) unless tagserv.isGlobal
+             summarize_aspect(:owners, :for => :raw, :helper => :homelink) unless tagserv.isGlobal
            when :tag_similars
              label_singular = 'similar tag'
              summarize_aspect :lexical_similars, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
            when :tag_referents
              label_singular = 'meaning'
-             summarize_aspect :referents, :for => :raw, :helper => :referent_homelink
+             summarize_aspect :referents, :for => :raw, :helper => :homelink
            # content = h.summarize_tag_referents
            when :tag_parents
              label_singular = 'under category'
-             # tagserv.parents.collect { |parent| h.tag_homelink parent }
-             summarize_aspect :parents, :for => :raw, :helper => :tag_homelink
+             # tagserv.parents.collect { |parent| h.homelink parent }
+             summarize_aspect :parents, :for => :raw, :helper => :homelink
            when :tag_children
              label = 'includes'
-             # tagserv.children.collect { |child| h.tag_homelink child }
-             summarize_aspect :children, :for => :raw, :helper => :tag_homelink
+             # tagserv.children.collect { |child| h.homelink child }
+             summarize_aspect :children, :for => :raw, :helper => :homelink
            when :tag_references
              label_singular = 'see also'
              # content = h.summarize_tag_references

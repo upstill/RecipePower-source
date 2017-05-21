@@ -81,7 +81,7 @@ module ListsHelper
         list, status = list_or_list_with_status, nil
       end
       name = link_to_submit(list.name_tag.name.truncate(50).downcase, linkpath(list), :mode => :partial, :class => 'taglink' )
-      name << " (#{user_homelink list.owner})".html_safe if list.owner_id != list.tagging_user_id
+      name << " (#{homelink list.owner})".html_safe if list.owner_id != list.tagging_user_id
       name << "--#{status}" if Rails.env.development? && status
       name
     }.compact, '&nbsp;<span class="tagsep">|</span> '.html_safe
