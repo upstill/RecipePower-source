@@ -1,0 +1,13 @@
+<!--<label class="string optional">Child of</label>-->
+<%= form_tag(associate_tag_path(presenter.tag, as: 'synonym'), class: 'submit', method: 'post') do %>
+    Make synonym of:<br>
+    <%= token_input_tag :other,
+                        :tokenLimit => 1,
+                        :noResultsText => 'No such tag found',
+                        :tagtype => (presenter.tag.tagtype if presenter.tag.tagtype > 0),
+                        :tagtype_x => [0, :List],
+                        :query => { all: true, except: presenter.tag.id, verbose: true }, # See TagsController#match
+                        :allowFreeTagging => false,
+                        :allowCustomEntry => false
+    %>
+<% end %>

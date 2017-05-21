@@ -1,23 +1,23 @@
 dessert:
   id: 1
   tag_id: 4
-  type: IngredientReferent
+  type: DishReferent
 
 pie:
   id: 2
   tag_id: 6
-  type: IngredientReferent
+  type: DishReferent
 
 cake:
   id: 3
   tag_id: 8
-  type: IngredientReferent
+  type: DishReferent
 
 empty:
   id: 4
-  type: IngredientReferent
+  type: DishReferent
 
 bogus: # Has a non-existent tag
   id: 5
   tag_id: 0
-  type: IngredientReferent
+  type: DishReferent

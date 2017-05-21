@@ -6,7 +6,7 @@
     <%= f.select :tagtype, options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, @tagset.tagtype) || 0,
                    :include_blank => false %>
                    <%# :onchange => %Q{RP.submit.onselect( event ); } %>
-    <%= taggable_div f %>
+    <%= token_input_div f %>
   </div>
 
   <div class="form-actions">

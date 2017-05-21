@@ -115,7 +115,7 @@ module LinkHelper
         (polymorphic_path([:collection, object]) rescue nil) ||
         (polymorphic_path([:contents, object]) rescue nil) ||
         (polymorphic_path([:associated, object]) rescue nil) ||
-        polymorphic_path(object)
+        (polymorphic_path(object) rescue nil)
   end
 
   def touchpath decorator
@@ -139,7 +139,7 @@ module LinkHelper
     data = options[:data] || {}
     data[:report] = touchpath decorator
 
-    title = options[:title] || decorator.title
+    title = options[:title] || (decorator.title rescue "Untitled #{decorator.model_name.human}")
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end

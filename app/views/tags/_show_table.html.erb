@@ -1,46 +1,61 @@
 <% item ||= @tag %>
 <% presenter = TagPresenter.new item.decorate, self, current_user %>
 <% @tagserv = TagServices.new item %>
-  <td class="tag_type"><%= item.id.to_s %></td>
-  <td>
-    <strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
-    <br><%= presenter.meaning %>
-  </td>
-  <td><%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
+<td class="tag_type">
+  <% if permitted_to?(:edit, item) && response_service.admin_view? %>
+      <%= item.id.to_s %>
+      <br>
+      <% if @tagserv.isGlobal %>
+          <span style="color: green">Public</span>
+      <% else %>
+          <span style="color: red">Private</span>
+      <% end %>
+      <br>
+      <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
                      class: 'tag_type_selector',
                      onchange: 'RP.change(event);',
                      data: {request: '/tags/typify',
                             valueparam: 'typenum',
-                            querydata: {tagid: item.id}} %></td>
-  <td>
-    <%= presenter.table_summaries response_service.admin_view? %>
-  </td>
-  <td>
-    <%= @tagserv.isGlobal ? 'Y' : 'N' %>
-  </td>
-  <td>
-    <%= presenter.summarize_aspect :lexical_similars, :for => :table, helper: :summarize_tag_similar, label: '', absorb_btn: true, joiner: '<br>' %>
-  </td>
-  <td>
-    <%= presenter.summarize_aspect :synonyms, :for => :table, helper: :summarize_tag_similar, label: '', absorb_btn: true, joiner: '<br>' %>
-  </td>
-  <% if permitted_to? :edit, item %>
-      <td>
-        <%= link_to_submit 'Edit', edit_tag_path(item), mode: 'modal' %>
-        <br>
-        <%= button_to_submit 'Destroy',
-                             tag_path(item, format: :json),
-                             'danger',
-                             'xs',
-                             with_form: true,
-                             data: { confirm: 'Are you sure you want to destroy this tag...for good?' },
-                             method: :delete if response_service.admin_view? %>
-        <%= button_to_submit 'Ban',
-                             tag_path(item, format: :json, ban: true),
-                             'danger',
-                             'xs',
-                             with_form: true,
-                             data: { confirm: 'Are you sure you want to ban this tag?' },
-                             method: :delete if response_service.admin_view? %>
-      </td>
+                            querydata: {tagid: item.id}} %><br>
+      <br>
+      <%= link_to_submit 'Edit', edit_tag_path(item), mode: 'modal' %>
+      <br>
+      <%= button_to_submit 'Destroy',
+                           tag_path(item, format: :json),
+                           'danger',
+                           'xs',
+                           with_form: true,
+                           data: {confirm: 'Are you sure you want to destroy this tag...for good?'},
+                           method: :delete %>
+      <%= button_to_submit 'Ban',
+                           tag_path(item, format: :json, ban: true),
+                           'danger',
+                           'xs',
+                           with_form: true,
+                           data: {confirm: 'Are you sure you want to ban this tag?'},
+                           method: :delete %>
+  <% else %>
+      <%= item.typename %>
   <% end %>
+</td>
+<td>
+  <strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
+  <br><%= presenter.meaning %>
+</td>
+<td>
+  <%= summarize_set '', presenter.taggees_table_summary %>
+</td>
+<td>
+  <%= presenter.table_summaries response_service.admin_view? %>
+  <% if permitted_to?(:edit, item) && response_service.admin_view? %>
+      <%= render 'form_synonym', presenter: presenter %>
+  <% end %>
+</td>
+<td>
+  <%= presenter.summarize_aspect :lexical_similars,
+                                 :for => :table,
+                                 helper: :summarize_tag_similar,
+                                 label: '',
+                                 absorb_btn: (permitted_to?(:edit, item) && response_service.admin_view?),
+                                 joiner: '<br>' %>
+</td>

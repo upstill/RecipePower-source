@@ -120,9 +120,6 @@ gem 'letter_opener_web', '~> 1.2.0', :group => :staging
 gem 'rails-perftest' # https://github.com/rails/rails-perftest
 gem 'ruby-prof' # https://github.com/ruby-prof/ruby-prof
 
-# TODO: Used in Development?
-gem 'rspec-rails', '2.99', :group => [ :development, :test ]
-
 group :test do
   # gem 'minitest-rails' # , "~> 1.0" # gem 'minitest', '~> 4.2'
   # gem "minitest-rails-capybara" # ...for simulating user interaction
@@ -133,6 +130,8 @@ group :test do
   gem 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
+  gem 'rspec-rails', '2.99'
+  gem 'rspec-html-matchers'
 end
 
 ###### TODO are these even being used?

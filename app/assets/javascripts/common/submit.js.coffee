@@ -89,7 +89,7 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 		RP.submit.block_on elmt
 		ajdata =
 			dataType: "json",
-			contentType: "application/json",
+			# contentType: "application/json",
 			url: request,
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user

@@ -9,12 +9,6 @@ jal2:
     name: Chipotle  -chiles
     tagtype: 4
     isGlobal: false
-    
-jal3:
-    id: 11
-    name: chipotle -Chiles
-    tagtype: 4
-    isGlobal: false
 
 chilibean:
     id: 3
@@ -25,50 +19,68 @@ chilibean:
 dessert:
   id: 4
   name: dessert
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 1
 
 desserts:
   id: 5
   name: desserts
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 1
 
 pie:
   id: 6
   name: pie
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 2
 
 pies:
   id: 7
   name: pies
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 2
 
 cake:
   id: 8
   name: cake
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 3
 
 cakes:
   id: 9
   name: cakes
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 3
 
 gateau:
   id: 10
   name: gateau
-  tagtype: 1
+  tagtype: 2
   isGlobal: true
   referent_id: 3
-  
+
+jal3:
+    id: 11
+    name: chipotle -Chiles
+    tagtype: 4
+    isGlobal: false
+
+chilibean_free:
+    id: 12
+    name: chili bean
+    tagtype: 0
+    isGlobal: true
+
+cakes_free:
+  id: 13
+  name: cakes
+  tagtype: 0
+  isGlobal: true
+
   

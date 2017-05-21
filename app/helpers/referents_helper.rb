@@ -27,7 +27,8 @@ module ReferentsHelper
                       header,
                       summarize_ref_expressions(ref, separator: inward_separator),
                       summarize_ref_parents(ref, separator: inward_separator),
-                      summarize_ref_children(ref, separator: inward_separator)
+                      summarize_ref_children(ref, separator: inward_separator),
+                      summarize_ref_affiliates(ref, separator: inward_separator)
                   ],
                   separator
   end
@@ -52,6 +53,23 @@ module ReferentsHelper
   def summarize_ref_children ref, options={}
     summarize_set (options[:label] || 'Category includes'),
                   ref.children.limit(8).collect { |child| homelink child.becomes(Referent) },
+                  options[:separator]
+  end
+
+  def summarize_ref_affiliates ref, options={}
+    affiliate_descriptors =
+        ref.affiliates.collect { |affil|
+          case affil
+            when Referent
+              summarize_referent affil, options.merge(label: affil.model_name.human.split(' ').first)
+            when PageRef
+              present_definition affil, options.merge(label: 'About') # affil.model_name.human.sub(/ ref$/,''))
+            else
+              safe_join [affil.model_name.human.split(' ').first.html_safe, homelink(affil)], ': '
+          end
+        }.compact
+    summarize_set (options[:label] || 'Associated with'),
+                  affiliate_descriptors,
                   options[:separator]
   end
 

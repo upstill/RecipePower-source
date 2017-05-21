@@ -22,7 +22,8 @@ class Tag < ActiveRecord::Base
            List: ['List', 16],
            Epitaph: ['Epitaph', 17],
            Course: ['Course', 18],
-           Time: ['Time', 19]
+           Time: ['Time', 19],
+           Hidden: ['Hidden', 20]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -114,19 +115,18 @@ class Tag < ActiveRecord::Base
     # methstr = meth
     # methstr = ":#{methstr}" if meth.is_a? Symbol
     # puts "Tag method '#{methstr}' missing"
-    begin
-      taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
-      proof_method = :tag_with
-      # puts "Extracted taggable_class '#{taggable_class}'"
-      # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
-      if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+    taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
+    proof_method = :tag_with
+    # puts "Extracted taggable_class '#{taggable_class}'"
+    # puts "#{taggable_class} "+(taggable_class.method_defined?(proof_method) ? "has " : "does not have ")+"'#{proof_method}' method"
+    if taggable_class.method_defined?(proof_method) && Tag.method_defined?(meth)
+      begin
         self.method(meth).call *args, &block
-      else
-        # puts "Failed to define method '#{methstr}'"
+      rescue Exception => e
+        # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
         super
       end
-    rescue Exception => e
-      # puts "D'OH! Couldn't create association between Tag and #{taggable_class}"
+    else
       super
     end
   end
@@ -178,7 +178,9 @@ class Tag < ActiveRecord::Base
     end
   end
 
-  def absorb other
+  # Use this tag instead of 'other', i.e., absorb its taggings, referents, etc.
+  # Either delete the other, or make it a synonym, according to 'keep'
+  def absorb other, delete=true
     return other if other.id == id
     # Normal procedure:
     TaggingServices.change_tag(other.id, self.id)
@@ -198,12 +200,25 @@ class Tag < ActiveRecord::Base
       # Failure: copy errors into the original record and return it
       self.errors.each { |k, v| other.errors[k] = v }
       other
-    else
+    elsif delete
       Tag.transaction do
         other.destroy
         self.save
       end
       self
+    else
+      # The other may clash with an existing tag of the target type,
+      # So get either the other, or its equivalent
+      other = other.project tagtype
+      if other != self
+        # No need to monkey with referents if the projection devolved on us
+        Referent.express self unless primary_meaning || referent_ids.present?
+        # Leave the other as a synonym
+        other.referent_ids = other.referent_ids + self.referent_ids
+        other.primary_meaning ||= self.primary_meaning
+        other.save
+      end
+      other
     end
   end
 
@@ -225,8 +240,8 @@ class Tag < ActiveRecord::Base
 
   # Return the tag's name with a marker of its type, to clear up ambiguities
   def typedname include_type=false, include_ref=false
-    return name unless include_type && (typenum > 0)
-    referent_str = (include_ref && referent_id && (' '+referent_id.to_s)) || ''
+    return name unless include_type
+    referent_str = "#{primary_meaning.model_name.human}##{primary_meaning.id}" if include_ref && referent_id
     %Q{#{name} [#{typename}#{referent_str}]}
   end
 
