@@ -7,6 +7,7 @@ class TagsController < ApplicationController
     response_service.title = 'Tags'
     # seeker_result Tag, 'div.tag_list' # , clear_tags: true
     # -1 stands for any type
+    params[:tagtype] ||= 0 if response_service.admin_view?
     params.delete :tagtype if params[:tagtype] == "-1"
     smartrender
   end
@@ -181,7 +182,7 @@ class TagsController < ApplicationController
 =end
 
   # POST /id/associate
-  # Associate the tag with another, according to params[:how]:
+  # Associate the tag with another, according to params[:as]:
   #  -- 'synonym' means to make the tag a synonym of the other
   #  -- 'child' means to make the other a parent of the tag
   #  -- 'absorb' means to make the other vanish into the tag
@@ -197,6 +198,7 @@ class TagsController < ApplicationController
             reporter = @tag.absorb other
             resource_errors_to_flash reporter, preface: "Couldn\'t absorb '#{other.name}."
           when 'child' # Make the tag a child of the other
+            reporter = TagServices.new(other).make_parent_of @tag
           when 'synonym' # Make the tag a synonym of the other
             reporter = other.absorb @tag, false
             resource_errors_to_flash reporter, preface: "Couldn\'t make a synonym of '#{@tag.name}."

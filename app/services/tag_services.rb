@@ -2,7 +2,7 @@ class TagServices
   
   attr_accessor :tag
   
-  delegate :id, :typename, :name, :normalized_name, :primary_meaning, :isGlobal, :taggings,
+  delegate :id, :typename, :name, :normalized_name, :meaning, :primary_meaning, :isGlobal, :taggings,
     :users, :user_ids, :owners, :owner_ids, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
@@ -102,8 +102,25 @@ class TagServices
     # Tag.where id: parent_ids
   end
 
-  def make_parent_of child_tag
-    Referent.express(tag).make_parent_of Referent.express(child_tag)
+  # Ensure that the child tag has a referent that is a child of our referent
+  def make_parent_of child_tag, move=true
+    # NB: In the child needs to change type, and if there is a name clash with an existing type,
+    # Tag.assert WILL RETURN A TAG DIFFERENT THAN THAT PROVIDED. Thus,
+    # THE RETURN VALUE OF THIS METHOD NEEDS TO BE ATTENDED TO
+    if child_tag == tag
+      tag.errors.add :id, 'refers to the same tag'
+      return tag
+    end
+    child_tag = Tag.assert child_tag, tagtype: tag.tagtype
+    parent_ref = Referent.express tag
+    child_ref = Referent.express child_tag
+    if parent_ref == child_ref # Synonyms of the same referent => split off a new referent to establish the child
+      child_ref = Referent.express child_tag, force: true
+    end
+    parent_ref.make_parent_of child_ref, move
+    parent_ref.save
+    child_ref.save
+    child_tag
   end
 # -----------------------------------------------
   def suggests target_tag

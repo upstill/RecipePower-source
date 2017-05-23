@@ -271,7 +271,6 @@ ActiveRecord::Schema.define(version: 20170513063621) do
     t.integer  "total_time_high",             default: 0
     t.string   "yield"
     t.integer  "page_ref_id"
-    t.text     "snaps",                       default: "--- []\n"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree

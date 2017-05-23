@@ -11,5 +11,5 @@ if flash.empty?
       # followup: pagelet_followup(@decorator)
   }.to_json
 else
-  flash_notify.to_json
+  flash_notify(true).to_json
 end

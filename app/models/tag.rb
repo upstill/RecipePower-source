@@ -23,7 +23,8 @@ class Tag < ActiveRecord::Base
            Epitaph: ['Epitaph', 17],
            Course: ['Course', 18],
            Time: ['Time', 19],
-           Hidden: ['Hidden', 20]
+           Hidden: ['Hidden', 20],
+           Dual: ['Dual', 21]
   )
 
   attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
@@ -50,6 +51,10 @@ class Tag < ActiveRecord::Base
 
   validates_presence_of :name
   before_validation :tagqa
+
+  def meaning
+    primary_meaning || referents.first
+  end
 
   # Delete this tag only if it's safe to do so
   def safe_destroy
@@ -182,6 +187,7 @@ class Tag < ActiveRecord::Base
   # Either delete the other, or make it a synonym, according to 'keep'
   def absorb other, delete=true
     return other if other.id == id
+    return other.absorb(self, delete) if !self.meaning && other.meaning # Make it easy for an unbound tag
     # Normal procedure:
     TaggingServices.change_tag(other.id, self.id)
     ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
@@ -203,7 +209,7 @@ class Tag < ActiveRecord::Base
     elsif delete
       Tag.transaction do
         other.destroy
-        self.save
+        save
       end
       self
     else
@@ -218,6 +224,7 @@ class Tag < ActiveRecord::Base
         other.primary_meaning ||= self.primary_meaning
         other.save
       end
+      save
       other
     end
   end
@@ -241,8 +248,13 @@ class Tag < ActiveRecord::Base
   # Return the tag's name with a marker of its type, to clear up ambiguities
   def typedname include_type=false, include_ref=false
     return name unless include_type
-    referent_str = "#{primary_meaning.model_name.human}##{primary_meaning.id}" if include_ref && referent_id
-    %Q{#{name} [#{typename}#{referent_str}]}
+    type_label =
+    if include_ref && referent_id
+      "#{primary_meaning.model_name.human} ##{primary_meaning.id}"
+    else
+      typename
+    end
+    %Q{#{name} [#{type_label}]}
   end
 
   def typenum=(tt)
@@ -283,9 +295,17 @@ class Tag < ActiveRecord::Base
     end
     # Now we've found/created a tag, we need to ensure it's the right type (if we care)
     unless tag.typematch opts[:tagtype]
-      # Clone the tag for another type, but if it's a free tag, just change types
-      tag = tag.dup if tag.tagtype != 0 # If free tag, just change type
-      tag.tagtype = opts[:tagtype].kind_of?(Array) ? opts[:tagtype].first : opts[:tagtype]
+      target_type = opts[:tagtype].kind_of?(Array) ? opts[:tagtype].first : opts[:tagtype]
+      # We have to be wary of a clash with an existing tag of the target type
+      if t = Tag.find_by(name: tag.name, tagtype: target_type)
+        # Resolve the clash by using the existing one, absorbing the original if it's untyped
+        t.absorb tag if tag.tagtype == 0
+        tag = t
+      else
+        # Clone the tag for another type, but if it's a free tag, just change types
+        tag = tag.dup if tag.tagtype != 0
+        tag.tagtype = target_type
+      end
       tag.isGlobal = opts[:userid].nil? # If userid not asserted, globalize it
       tag.save
     end

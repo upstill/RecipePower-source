@@ -39,7 +39,7 @@
   <% end %>
 </td>
 <td>
-  <strong><%= tag_homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
+  <strong><%= homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
   <br><%= presenter.meaning %>
 </td>
 <td>
@@ -49,6 +49,7 @@
   <%= presenter.table_summaries response_service.admin_view? %>
   <% if permitted_to?(:edit, item) && response_service.admin_view? %>
       <%= render 'form_synonym', presenter: presenter %>
+      <%= render 'form_child', presenter: presenter %>
   <% end %>
 </td>
 <td>

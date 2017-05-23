@@ -246,18 +246,20 @@ class Referent < ActiveRecord::Base
   # WARNING: while some effort is made to find an existing referent and use that,
   #  this procedure lends itself to redundancy in the dictionary
   def self.express (tag, tagtype = nil, args = {})
+    if tagtype.is_a? Hash
+      tagtype, args = nil, tagtype
+    end
     if tag.class == Tag # Creating it if need be, and/or making it global
       tagtype = tag.tagtype
     else
       tag = Tag.assert(tag, tagtype: tagtype)
     end
-    ref = tag.primary_meaning ||
-        tag.referents.first ||
-        # We don't immediately have a referent for this tag
-        #...but there may already be one as a plural or a singular
-        tag.aliases.collect { |tag| tag.primary_meaning || tag.referents.first }.compact.first ||
-        # Tag doesn't have an existing referent, so need to make one
-        Referent.referent_class_for_tagtype(tag.tagtype).constantize.create(tag_id: tag.id)
+    # We may not immediately have a referent for this tag
+    #...but there may already be one as a plural or a singular
+    ref = (tag.meaning ||
+        tag.aliases.map(&:meaning).find(&:'present?')) unless args.delete(:force)
+    # Tag doesn't have an existing referent (or we're forcing), so need to make one
+    ref ||= Referent.referent_class_for_tagtype(tag.tagtype).constantize.create(tag_id: tag.id)
     if ref.id # Successfully created
       ref.express tag, args
       ref
@@ -287,7 +289,7 @@ class Referent < ActiveRecord::Base
     # or form aren't specified, match any expression
     args[:form] = Expression.formnum(:generic) unless args[:form]
     if self.id
-      Expression.find_or_create self.id, tag.id, args
+      Expression.find_or_create self.id, tag.id # , args
     elsif self.expressions.empty? # We're not saved, so have no id
       args[:tag_id] = tag.id
       expr = Expression.new(args)
@@ -460,15 +462,38 @@ class Referent < ActiveRecord::Base
     result
   end
 
-  def make_parent_of child_ref
-    children << child_ref unless children.include?(child_ref)
+  # Assert a parent-child relationship in the tree, taking care not to introduce cycles
+  # If 'move' is true, we're unplugging before moving within the tree, otherwise copying the ref into a new place.
+  def make_parent_of child_ref, move=true
+    if self == child_ref # Synonyms of the same referent => split off a new referent to establish the child
+      errors.add :children, "can't make them parent and child: they're the same!"
+      return
+    end
+
+    if self.descends_from? child_ref
+      # Decouple from the tree
+      self.parent_ids -= self.parents.collect { |grandparent|
+        grandparent.id if (grandparent == child_ref) || grandparent.descends_from?(child_ref) }
+    end
+    unless children.include? child_ref
+      if move
+        child_ref.parents = [self]
+       else
+        child_ref.parents << self
+      end
+      children << child_ref
+    end
+  end
+
+  # Test whether a referent is higher in the semantic hierarchy
+  def descends_from? other
+    parents.include?(other) || parents.any? { |parent| parent.descends_from? other }
   end
 
   def suggests target_ref
     target_ref.save unless target_ref.id
     # author_referents << target_ref unless author_referents.include?(target_ref)
     referments.create(referee_type: target_ref.class.to_s, referee_id: target_ref.id) unless referments.where(referee_type: target_ref.class.to_s, referee_id: target_ref.id).exists?
-    x=2
   end
 
   def suggests? target_ref

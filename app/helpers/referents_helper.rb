@@ -39,7 +39,7 @@ module ReferentsHelper
     label = labelled_quantity(ct, label) if ct > 1
     summarize_set label,
                   referent.expressions.limit(8).collect { |expr|
-                    tag_homelink(expr.tag, nuke_button: referent.expressions.count > 1)
+                    homelink(expr.tag, nuke_button: referent.expressions.count > 1)
                   },
                   options[:separator]
   end

@@ -56,7 +56,10 @@ RP.state.postDialog = (dlog, href, target_title) ->
 # We simply remove the hashtag from the current state.
 RP.state.onCloseDialog = (dlog) ->
 	window_url = window.location.pathname+window.location.search  # No hashtag
-	saved_title = history.state.title
+	if history.state
+		saved_title = history.state.title
+	else
+		saved_title = 'Unrecorded State'
 	if $(dlog).hasClass 'historic' # A transient dialog leaves no trace on the history stack
 		history.pushState {title: saved_title}, saved_title, window_url
 	else
