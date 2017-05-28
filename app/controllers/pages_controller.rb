@@ -21,6 +21,8 @@ class PagesController < ApplicationController
                         '4m8wHPRxHIS0VTHNlfLnbQQsRADL5NIo3tNL7sOer4Y.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                       when 'CDj4kOT-bki-69A1niXmEWctBlbWt-YG3FbpkQb5gZ4'
                         'CDj4kOT-bki-69A1niXmEWctBlbWt-YG3FbpkQb5gZ4.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                      when 'o7MKhIgfvh8ZubzK9SSZlGHlz9RCSoQXAMSMEZ73guw'
+                        'o7MKhIgfvh8ZubzK9SSZlGHlz9RCSoQXAMSMEZ73guw.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                     end
     render :text => response_text
   end
