@@ -189,8 +189,10 @@ class Tag < ActiveRecord::Base
     return other if other.id == id
     return other.absorb(self, delete) if !self.meaning && other.meaning # Make it easy for an unbound tag
     # Normal procedure:
-    TaggingServices.change_tag(other.id, self.id)
-    ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
+    if delete
+      TaggingServices.change_tag(other.id, self.id)
+      ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
+    end
     # Merge the general uses of other as an expression into those of the target
     self.referent_ids = (other.referent_ids+self.referent_ids).uniq
     self.primary_meaning ||= other.primary_meaning

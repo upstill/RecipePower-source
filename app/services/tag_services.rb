@@ -115,6 +115,7 @@ class TagServices
     parent_ref = Referent.express tag
     child_ref = Referent.express child_tag
     if parent_ref == child_ref # Synonyms of the same referent => split off a new referent to establish the child
+      child_tag.referents.delete child_ref
       child_ref = Referent.express child_tag, force: true
     end
     parent_ref.make_parent_of child_ref, move
