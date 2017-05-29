@@ -25,6 +25,8 @@ class PagesController < ApplicationController
                         '3h63WxFM9fwR_235EyJVCsM0VqeeztM6yNUPb0htHAo.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                       when '6z2bHMy_PfWNvbfW3wS79KgeFZgTVSlgq8IbZjBXHcA'
                         '6z2bHMy_PfWNvbfW3wS79KgeFZgTVSlgq8IbZjBXHcA.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+                      else
+                        params[:id] + '.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
                     end
     render :text => response_text
   end
