@@ -187,10 +187,12 @@ class ApplicationController < ActionController::Base
 
   def report_session
     logger.info "COOKIES:"
+    logger.info ">>>>>>>>"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
+    logger.info "<<<<<<<<"
     begin
       sessid = if session
-        (session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))) || '<NO id for SESSION>'
+        (session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))) || '<SESSION with no id>'
       else
         '<NO SESSION>'
       end
@@ -199,7 +201,9 @@ class ApplicationController < ActionController::Base
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
     logger.info "SESSION Contents:"
+    logger.info ">>>>>>>>"
     env['rack.session'].keys.each { |key| logger.info "\t#{key}: '#{env['rack.session'][key]}'"}
+    logger.info "<<<<<<<<"
     logger.info "UUID: #{response_service.uuid}"
   end
 

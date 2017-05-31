@@ -43,6 +43,7 @@
                     autofocus: !resource.login.blank?,
                     placeholder: 'password',
                     input_html: { class: 'unlabelled' } %></p>
+        <%= f.check_box :remember_me, value: 1 %> <%= f.label :remember_me %>
         <%= f.submit 'SIGN IN', class: 'dialog-submit-button btn btn-xl dialog-button free' %>
         <p style="text-align: right; margin-bottom: 0px; margin-top: 10px;">
           <%= link_to_submit 'Forgot Password', new_user_password_path, mode: :modal %>

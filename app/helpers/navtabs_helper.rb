@@ -168,8 +168,8 @@ module NavtabsHelper
             link_to_submit('Review Hidden Sites', sites_path(approved: false), :format => :json),
             link_to_submit('Review Free Tags', tags_path(tagtype: 0), :format => :json),
             link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil'), :format => :json),
-            link_to_submit('Scrape', scraper_new_path, :format => :json, :mode => :modal),
-            (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post, :format => :json) if Rails.env.development? || Rails.env.staging?)
+            link_to_submit('Scrape', scraper_new_path, :format => :json, :mode => :modal)
+            # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post, :format => :json) if Rails.env.development? || Rails.env.staging?)
           ].compact
         else
           item_list += [

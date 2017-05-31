@@ -12,23 +12,7 @@ class PagesController < ApplicationController
   end
 
   def letsencrypt
-    response_text = case params[:id]
-                      when 'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI'
-                        'uc80IX9nl0-Qnw-DMtjP5gi44K3HgjNZacjLY02Q4nI.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      when '4m8wHPRxHIS0VTHNlfLnbQQsRADL5NIo3tNL7sOer4Y'
-                        '4m8wHPRxHIS0VTHNlfLnbQQsRADL5NIo3tNL7sOer4Y.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      when 'CDj4kOT-bki-69A1niXmEWctBlbWt-YG3FbpkQb5gZ4'
-                        'CDj4kOT-bki-69A1niXmEWctBlbWt-YG3FbpkQb5gZ4.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      when 'o7MKhIgfvh8ZubzK9SSZlGHlz9RCSoQXAMSMEZ73guw'
-                        'o7MKhIgfvh8ZubzK9SSZlGHlz9RCSoQXAMSMEZ73guw.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      when '3h63WxFM9fwR_235EyJVCsM0VqeeztM6yNUPb0htHAo'
-                        '3h63WxFM9fwR_235EyJVCsM0VqeeztM6yNUPb0htHAo.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      when '6z2bHMy_PfWNvbfW3wS79KgeFZgTVSlgq8IbZjBXHcA'
-                        '6z2bHMy_PfWNvbfW3wS79KgeFZgTVSlgq8IbZjBXHcA.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                      else
-                        params[:id] + '.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
-                    end
-    render :text => response_text
+    render :text => params[:id] + '.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
   end
 
   def home
