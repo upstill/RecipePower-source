@@ -30,6 +30,11 @@ gem 'arel', '~> 6.0' # https://github.com/rails/arel
 gem 'pg'
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
+# gem 'pg_search' # For full-text search https://robots.thoughtbot.com/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
+#### Full-text search with Elasticsearch: https://github.com/elastic/elasticsearch-rails
+# See also https://18f.gsa.gov/2016/04/08/how-we-get-high-availability-with-elasticsearch-and-ruby-on-rails/
+# gem 'elasticsearch-model', github: 'elastic/elasticsearch-rails', branch: '5.x'
+# gem 'elasticsearch-rails', github: 'elastic/elasticsearch-rails', branch: '5.x'
 
 # Makes running your Rails app easier. Based on the ideas behind http://12factor.net/
 gem 'rails_12factor', :group => [ :production, :staging ] # https://github.com/heroku/rails_12factor
