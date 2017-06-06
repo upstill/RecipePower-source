@@ -21,10 +21,10 @@ class PagesController < ApplicationController
     @home_page = true
     if current_user
       redirect_to collection_user_path(current_user)
-    elsif params[:live]
-      render
     else
-      render 'statichome'
+      cache version: '1' do
+        render
+      end
     end
   end
 
