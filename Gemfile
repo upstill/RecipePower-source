@@ -98,6 +98,10 @@ gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
 
 # gem 'letsencrypt_plugin'
 
+group :production do
+  gem 'dalli'
+end
+
 group :development do
   # gem 'minitest', '~> 4.2'
   gem 'annotate', '2.5.0'
