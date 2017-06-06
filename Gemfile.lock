@@ -132,6 +132,7 @@ GEM
       addressable
     curb (0.8.8)
     daemons (1.2.2)
+    dalli (2.7.6)
     debug_inspector (0.0.2)
     declarative_authorization (0.5.7)
     derailed (0.1.0)
@@ -450,6 +451,7 @@ DEPENDENCIES
   content_for_in_controllers
   counter_culture (~> 0.1.23)
   daemons
+  dalli
   declarative_authorization (~> 0.5.7)
   delayed_job!
   delayed_job_active_record!
