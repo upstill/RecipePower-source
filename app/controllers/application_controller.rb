@@ -414,9 +414,9 @@ class ApplicationController < ActionController::Base
     else
       if current_user.sign_in_count < 2
         flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
-        deferred_request(path: collection_user_path(current_user, flash: flash), :format => :html)
+        deferred_request path: collection_user_path(current_user, flash: flash), :format => :html
       else
-        deferred_request(path: collection_user_path(current_user), :format => :html)
+        deferred_request path: collection_user_path(current_user), :format => :html
       end
     end || super
   end
@@ -428,12 +428,6 @@ class ApplicationController < ActionController::Base
     # Process any pending notifications
     view_context.issue_notifications current_user
     stored_location_for(resource_or_scope)
-  end
-
-  # This overrides the method for returning to a request after logging in. Formerly, session[:return_to]
-  # handled this recovery
-  def redirect_to_target_or_default(default, *args)
-    redirect_to deferred_request path: default
   end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order

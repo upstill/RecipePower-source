@@ -1,4 +1,6 @@
-<%= modal_dialog 'cookmark new-style salmon', dialog_class: 'dialog-sm' do %>
+<%= modal_dialog 'cookmark new-style salmon',
+                 (current_user.sign_in_count < 2) ? 'Heads-up for newbies' : 'Install the Cookmark Button',
+                 dialog_class: 'dialog-sm' do %>
     <div class="bm-pic" ><%= bookmarklet %></div>
     <div class="instructions_header">
       <p class="bm-text">With this <em>Cookmark Button</em> you can send recipes to

@@ -18,7 +18,6 @@
 module ControllerAuthentication
   def self.included(controller)
       controller.send :helper_method, :current_user_or_guest_id, :logged_in?
-      # controller.send :helper_method, :current_user, :logged_in?, :redirect_to_target_or_default
   end
   
   def current_user_or_guest

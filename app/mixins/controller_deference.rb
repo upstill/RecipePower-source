@@ -13,40 +13,39 @@ module ControllerDeference
   #  we have to redirect to a request that will serve this one, as follows:
   # -- if the current request is for JSON and the earlier one was for a page, we send back JSON instructing that page load
   # -- if the current request is for a page and the earlier one was for JSON, we can send back a page that spring-loads
-  #!  the JSON request
+  #     the JSON request
+  # 'specs' denote a proposed request that hasn't been deferred. It should be serviced regardless of the current request
+  #   mode and format.
   def deferred_request specs=nil
     # The input specs denote a default path that CAN help with this one, but may be replaced from deferred requests
-    requested = unpack_path path: request.fullpath, format: request.format.symbol
-    if pending = request_matching(requested.slice(:format, :mode))
-      defer_request specs if specs
-      return pending
-    end
+    current_request = unpack_path path: request.fullpath, format: request.format.symbol
     if specs
-      needed = unpack_path specs  # Derive format and mode from the 'needed' spec, if not already specified
-      out_path = pack_path needed  # Put the derived specs back into the path
+      speced_request = unpack_path specs # Derive format and mode from the 'speced_request' spec, if not already specified
+      speced_path = pack_path speced_request # Put the derived specs back into the path
       # Now we just find a way to answer the request with the provided request
-      case requested[:format]
-        when needed[:format] # && requested[:format] == needed[:format]
-          # The provided spec will do nicely, thank you
-          out_path
+      return speced_path if speced_request[:format] == current_request[:format] # The provided spec will do nicely, thank you
+      case current_request[:format]
         when :html
           # Need a page but it's not a page
-          page_with_trigger out_path
+          page_with_trigger speced_path
         when :json
           # Need JSON but not JSON
-          goto_url to: %Q{"#{out_path}"} # the redirect#go JSON response will get the client to request page
+          goto_url to: %Q{"#{speced_path}"} # the redirect#go JSON response will get the client to request page
         else
           x=2
       end
+    else
+      request_matching current_request.slice(:format, :mode)
     end
   end
 
   # If there's a deferred request that can be expressed as a trigger, do so.
   def pending_modal_trigger
     # A modal dialog has been embedded in the USL as the trigger param
-    if req = response_service.trigger || current_user &&
-        (request_matching(:format => :json, :mode => :modal) ||
-        request_matching(:format => :json, :mode => :injector))
+    if req = response_service.trigger ||
+        current_user &&
+             (request_matching(:format => :json, :mode => :modal) ||
+              request_matching(:format => :json, :mode => :injector))
       assert_query req, mode: :modal
     end
   end
