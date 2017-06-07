@@ -1,3 +1,6 @@
 <%# Render a Rcpref by rendering its entity %>
-<% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
-<%= render_item_unwrapped decorator.object.entity.decorate, :slider, viewparams: viewparams, comment: decorator.object.comment %>
+<% cache [decorator.object.entity, decorator.object.comment, :slider] do %>
+    <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
+    <%# Template Dependency: collectible/show_slider %>
+    <%= render_item_unwrapped decorator.object.entity.decorate, :slider, viewparams: viewparams, comment: decorator.object.comment %>
+<% end %>

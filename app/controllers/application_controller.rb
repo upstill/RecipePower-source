@@ -275,7 +275,13 @@ class ApplicationController < ActionController::Base
       when :items # Stream items into the stream's container
         renderings = [ { deletions: [".stream-tail.#{fp.stream_id}"] } ]
         while item = fp.next_item do
-          renderings << { elmt: with_format("html") { view_context.render_item item, fp.item_mode } }
+          renderings << {
+              elmt: with_format("html") {
+                cache [item, fp.item_mode] do
+                  view_context.render_item item, fp.item_mode
+                end
+              }
+          }
         end
         renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { decorator: @decorator, viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings

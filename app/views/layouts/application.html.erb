@@ -74,7 +74,8 @@
 </div>
 <% end %>
 <% if current_user %>
-    <% cache [current_user, :menu] do %>
+<!-- Caching the navbar doesn't seem to do much good. -->
+    <%# cache [current_user, :menu] do %>
         <div class="menu">
           <ul class="nav navbar-nav main-menu">
             <%= collections_navtab %>
@@ -87,7 +88,7 @@
             <%= home_navtab %>
           </ul>
         </div>
-    <% end %>
+    <%# end %>
 <% end %>
 <%= render 'layouts/navbar' %>
 <%= do_notifs %>
