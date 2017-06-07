@@ -161,6 +161,11 @@ class ListServices
     # owner.touch entity
   end
 
+  # Return an array of the entities in the list, visible to the given viewer
+  def entities viewerid=nil
+    tagging_scope(viewerid).to_a.map(&:entity)
+  end
+
   # Add an entity to the list based on parameters
   def include_by entity_type, entity_id, user_id
     if entity = entity_type.singularize.camelize.constantize.find(entity_id)

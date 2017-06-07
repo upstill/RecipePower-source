@@ -1,6 +1,6 @@
 <div class="slider pano">
   <div class="track">
-    <% ListServices.new(list).tagging_scope(3).to_a.map(&:entity).each do |member| %>
+    <% ListServices.new(list).entities(3).each do |member| %>
         <%= render_item member, :slider %>
     <% end if list %>
   </div>
