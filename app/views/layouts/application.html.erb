@@ -73,7 +73,24 @@
   <span class="wide" >wide</span>
 </div>
 <% end %>
-<%= render 'layouts/navbar_experimental' %>
+<% if current_user %>
+    <% cache [current_user, :menu] do %>
+        <div class="menu">
+          <ul class="nav navbar-nav main-menu">
+            <%= collections_navtab %>
+            <%= friends_navtab %>
+            <%= my_lists_navtab %>
+            <%# other_lists_navtab %>
+            <%= feeds_navtab %>
+            <%# news_navtab %>
+            <%# more_navtab %>
+            <%= home_navtab %>
+          </ul>
+        </div>
+    <% end %>
+<% end %>
+<%= render 'layouts/navbar' %>
+<%= do_notifs %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>
     <p>
