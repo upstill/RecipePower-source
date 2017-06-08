@@ -242,18 +242,8 @@ BLOCK_END
   end
 
   def tag_list tags
-=begin
-    names = tags.collect { |tag|
-      link_to_submit tag.name, tag_path(tag), :mode => :modal
-    }
-    if names.count > 1
-      (names[0..-3] << "#{names[-2]} and #{names[-1]}").join(', ').html_safe
-    else
-      names[0]
-    end
-=end
     strjoin( tags.collect { |tag|
-      link_to_submit tag.name, tag_path(tag), :mode => :modal
+      link_to_dialog tag.name, tag_path(tag)
     }).html_safe
   end
 

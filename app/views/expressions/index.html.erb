@@ -17,8 +17,8 @@
     <td><%= expression.referent_id %></td>
     <td><%= expression.form %></td>
     <td><%= expression.locale %></td>
-    <td><%= link_to_submit 'Show', expression, mode: :modal %></td>
-    <td><%= link_to_submit 'Edit', edit_expression_path(expression), mode: :modal %></td>
+    <td><%= link_to_dialog 'Show', expression %></td>
+    <td><%= link_to_dialog 'Edit', edit_expression_path(expression) %></td>
     <td><%= link_to_submit 'Destroy', expression, data: { confirm: 'Are you sure?' }, method: :delete %></td>
   </tr>
 <% end %>

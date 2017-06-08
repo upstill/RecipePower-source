@@ -1,5 +1,5 @@
 <h3>Show Reference #<%= @reference.id %></h3>
 <%= render "show" %>
 <hr>
-<%= link_to_submit 'Edit', edit_reference_path(@reference), mode: :modal %> |
+<%= link_to_dialog 'Edit', edit_reference_path(@reference) %> |
 <%= link_to 'References List', references_path %>

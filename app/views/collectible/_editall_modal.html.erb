@@ -120,11 +120,10 @@
                    style="width: 100%; margin-left: 0; margin-top: 10px"
                    />
           </div>
-          <%= link_to_submit 'Extract Images',
+          <%= link_to_dialog 'Extract Images',
                              polymorphic_path([:editpic, @decorator]),
                              class: 'btn btn-info url-extract-button float-right-button',
-                             data: { :'wait-msg' => 'Give us a sec to crack that page...' },
-                             mode: :modal
+                             data: { :'wait-msg' => 'Give us a sec to crack that page...' }
           %>
         </div>
       </div>

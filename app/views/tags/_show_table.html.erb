@@ -18,7 +18,7 @@
                             valueparam: 'typenum',
                             querydata: {tagid: item.id}} %><br>
       <br>
-      <%= link_to_submit 'Edit', edit_tag_path(item), mode: 'modal' %>
+      <%= link_to_dialog 'Edit', edit_tag_path(item) %>
       <br>
       <%= button_to_submit 'Destroy',
                            tag_path(item, format: :json),

@@ -41,6 +41,11 @@ module LinkHelper
     link_to label, path, link_options
   end
 
+  # Provide a link to run a dialog
+  def link_to_dialog label, path, options={}
+    link_to_submit label, path, options.merge(:format => :json, :mode => :modal)
+  end
+
   # Provide a hash of options for link_to to hit a URL using the RP.submit javascript module,
   # with options for confirmation (:confirm_msg) and waiting (:wait_msg)
   # NB: options are used as follows:

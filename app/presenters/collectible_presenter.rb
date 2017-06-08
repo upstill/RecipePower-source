@@ -113,9 +113,8 @@ class CollectiblePresenter < BasePresenter
                       class: 'clicker'
                   }.compact) if decorator.respond_to?(:external_link)
       img <<
-          link_to_submit('',
+          link_to_dialog('',
                          polymorphic_path([:editpic, decorator.object]),
-                         mode: 'modal',
                          class: 'dblclicker') if permitted_to?(:update, decorator.object)
       content_tag :div, img, class: 'onlinks'
     else

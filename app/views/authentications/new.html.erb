@@ -1,6 +1,6 @@
 <% if response_service.injector? %>
     <% prompt = "needs you to sign in to collect this cookmark. Not a member? " %>
-    <% prompt << link_to_submit("Sign up!", new_user_registration_path, :mode => :modal) %>
+    <% prompt << link_to_dialog("Sign up!", new_user_registration_path) %>
     <%= injector_dialog :sign_in, prompt.html_safe, dismiss_button: false do %>
         <%= render 'sessions/new_injector' %>
     <% end %>

@@ -17,7 +17,7 @@ module TriggersHelper
   # THIS INCLUDES DIALOG REQUESTS EMBEDDED IN THE URL
   def trigger_pending_modal delete_after=true
     if trigger = pending_modal_trigger
-      link_to_submit "", trigger, :mode => :modal, trigger: true, class: "hide"
+      link_to_dialog "", trigger, trigger: true, class: "hide"
     end
   end
 
