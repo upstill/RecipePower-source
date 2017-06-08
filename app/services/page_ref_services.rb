@@ -6,6 +6,24 @@ class PageRefServices
     # @current_user = current_user
   end
 
+  # Provide an array of label/type pairs for selecting the type of a pageref
+  def self.type_selections
+    [
+        ['Recipe', 'Recipe'],
+        ['Site', 'Site'],
+        # ['Referrable', 'Referrable'],
+        ['Reference', 'Definition'],
+        ['Article', 'Article'],
+        ['News Item', 'Newsitem'],
+        ['Tip', 'Tip'],
+        ['Video', 'Video'],
+        ['Home Page', 'Homepage'],
+        ['Product', 'Product'],
+        ['Offering', 'Offering'],
+        ['Event', 'Event']
+    ]
+  end
+
   # Eliminate redundancy in the PageRefs by folding two into one
   def absorb other, force=false
     return if page_ref == other
@@ -49,6 +67,10 @@ class PageRefServices
 
     other.destroy if other.id # May not have been saved
     page_ref.save
+  end
+
+  def self.assert type, uri
+    "#{type}PageRef".constantize.fetch uri
   end
 
   # Assert a reference to the given URL, linking back to a referent

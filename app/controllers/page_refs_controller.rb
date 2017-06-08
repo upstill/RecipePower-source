@@ -23,12 +23,20 @@ class PageRefsController < ApplicationController
 
   # POST /page_refs
   def create
-    page_ref = PageRef.new(page_ref_params)
+    @page_ref = PageRefServices.assert params[:page_ref][:type], params[:page_ref][:url]
 
-    if page_ref.save
-      redirect_to page_ref, notice: 'Mercury page was successfully created.'
+    if @page_ref.errors.any?
+      resource_errors_to_flash @page_ref
+      smartrender :new
     else
-      render :new
+      case @page_ref.class
+        when RecipePageRef
+          # TODO: Ensure existence of recipe, and go there
+        when SitePageRef
+          # TODO: Ensure existence of site, and go there
+        else
+          smartrender :action => :edit
+      end
     end
   end
 

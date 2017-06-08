@@ -1,0 +1,10 @@
+<%= simple_form_for(page_ref.becomes(PageRef)) do |f| %>
+    <%= form_errors_helper f %>
+
+    <div class="form-inputs">
+      <%= f.input :title %>
+    </div>
+
+    <%= dialog_submit_button %>
+    <%= dialog_cancel_button %>
+<% end %>
