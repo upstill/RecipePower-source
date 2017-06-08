@@ -160,15 +160,15 @@ module NavtabsHelper
             # link_to('Address Bar Magic', '#', onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             # link_to('Bookmark Magic', '#', onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             # link_to('Stream Test', '#', onclick: 'RP.stream.buffer_test();'),
-            # (link_to_submit('Page', current_user, :format => :json) if current_user),
+            # (link_to_submit('Page', current_user) if current_user),
             # (link_to_dialog('Modal', current_user) if current_user),
-            link_to_submit('Review Pending Sites', sites_path(approved: 'nil'), :format => :json),
-            link_to_submit('Review Hidden Sites', sites_path(approved: false), :format => :json),
-            link_to_submit('Review Free Tags', tags_path(tagtype: 0), :format => :json),
-            link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil'), :format => :json),
+            link_to_submit('Review Pending Sites', sites_path(approved: 'nil')),
+            link_to_submit('Review Hidden Sites', sites_path(approved: false)),
+            link_to_submit('Review Free Tags', tags_path(tagtype: 0)),
+            link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil')),
             link_to_dialog('Scrape', scraper_new_path),
             link_to_dialog('New Reference', page_ref_new_path)
-            # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post, :format => :json) if Rails.env.development? || Rails.env.staging?)
+            # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post) if Rails.env.development? || Rails.env.staging?)
           ].compact
         else
           item_list += [
