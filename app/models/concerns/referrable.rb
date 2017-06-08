@@ -1,5 +1,5 @@
 # A Referrable class can be linked to a Referent. 
-# Referrable classes include (or should) Reference, Recipe, Feed, Feed Entry, Site, Offering, Image, DefinitionPageRef
+# Referrable classes are subclasses of PageRef, not including Recipe and Site (which have their own semantics)
 module Referrable
   extend ActiveSupport::Concern
 

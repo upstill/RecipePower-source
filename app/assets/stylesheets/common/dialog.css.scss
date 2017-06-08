@@ -32,6 +32,9 @@ div.dialog {
     &.user_remember_me {
       margin-bottom: 0;
     }
+    label.required abbr {
+      text-decoration: none;
+    }
   }
   &.injector {
     font: 16px arial, sans-serif;

@@ -1,5 +1,5 @@
 <h3>Expression <%= @expression.id.to_s %></h3>
 <%= render "show" %>
 <hr>
-<%= link_to_submit 'Edit This Expression', edit_expression_path(@expression), mode: :modal %> |
+<%= link_to_dialog 'Edit This Expression', edit_expression_path(@expression) %> |
 <%= link_to 'Expressions List', expressions_path %>

@@ -277,7 +277,8 @@ class ApplicationController < ActionController::Base
         while item = fp.next_item do
           renderings << {
               elmt: with_format("html") {
-                cache [item, fp.item_mode] do
+                admin_sensitive = [:table, :card].include? fp.item_mode
+                cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
                   view_context.render_item item, fp.item_mode
                 end
               }

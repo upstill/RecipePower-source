@@ -17,38 +17,6 @@ module ListsHelper
 
   end
 
-=begin
-  # Offer to let the user save the item in their collection and any list they own, plus a new list
-  # NB Obsolete: now supplanted by list-manager dialog
-  def collectible_list_menu decorator, user, styling, options={}
-    if user
-      entity = decorator.object
-      hover_menu sprite_glyph(:"list-add"), styling.merge(class: dom_id(decorator)) do
-        already_collected = entity.collectible_collected? current_user_or_guest_id
-        cl = collection_link decorator,
-                             checkbox_menu_item_label("Collection", already_collected),
-                             styling,
-                             :in_collection => !already_collected,
-                             :class => "checkbox-menu-item collection"
-        [ content_tag(:li, cl),
-          user.owned_lists.collect { |l| content_tag :li, (list_menu_item l, entity, styling.merge(class: dom_id(l))) },
-          "<hr class='menu'>".html_safe,
-          content_tag(:li,
-                      link_to_submit("Start a List...",
-                                     new_list_path(entity_type: entity.class.to_s, entity_id: entity.id),
-                                     mode: :modal,
-                                     class: "transient"))
-        ].flatten
-      end
-    else
-      link_to_submit "",
-                     new_user_registration_path(flash: { alert: "You can collect things and make lists once you're logged in"},
-                                                header: "Join RecipePower"),
-                     styling.merge( class: "glyphicon glyphicon-pushpin" )
-    end
-  end
-=end
-
   def list_menu_item l, entity, styling
     already_collected = ListServices.new(l).include? entity, current_user_or_guest_id
     link_to_submit checkbox_menu_item_label(l.name.truncate(20), already_collected),

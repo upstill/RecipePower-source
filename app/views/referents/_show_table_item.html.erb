@@ -3,8 +3,8 @@
   <td valign="top">
     <hr>
     <%= summarize_ref_name item %>
-    <br><%= link_to_submit 'Show', item.becomes(Referent), mode: :modal %>
-    <%= link_to_submit 'Edit', edit_referent_path(item.becomes(Referent)), mode: :modal %>
+    <br><%= link_to_dialog 'Show', item.becomes(Referent) %>
+    <%= link_to_dialog 'Edit', edit_referent_path(item.becomes(Referent)) %>
     <%# link_to_submit 'Destroy', item.becomes(Referent), confirm: 'Are you sure?', method: :delete %>
   </td>
   <td><%= item.isCountable ? "C" : "NC" %><td>

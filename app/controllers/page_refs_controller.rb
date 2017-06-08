@@ -1,4 +1,5 @@
 class PageRefsController < ApplicationController
+  require 'page_ref.rb'
   before_action :set_page_ref, only: [:show, :edit, :update, :destroy]
 
   # GET /page_refs
@@ -14,7 +15,8 @@ class PageRefsController < ApplicationController
 
   # GET /page_refs/new
   def new
-    page_ref = PageRef.new
+    @page_ref = DefinitionPageRef.new
+    smartrender
   end
 
   # GET /page_refs/1/edit

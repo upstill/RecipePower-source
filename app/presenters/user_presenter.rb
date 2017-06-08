@@ -21,7 +21,7 @@ class UserPresenter < CollectiblePresenter
           latest = latestrr.entity
           collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user
-          "No recipes yet—so install the #{link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some!".html_safe
+          "No recipes yet—so install the #{link_to_dialog 'Cookmark Button', '/cookmark.json'} and go get some!".html_safe
         end
     card_aspect_enclosure :latest_recipe, contents, 'Latest Cookmark'
   end
@@ -39,7 +39,7 @@ class UserPresenter < CollectiblePresenter
   end
 
   def card_header_content
-    mail_link = link_to_submit('Send email', mailto_user_path(user, mode: :modal), button_size: 'xs') unless is_viewer?
+    mail_link = link_to_dialog('Send email', mailto_user_path(user), button_size: 'xs') unless is_viewer?
     uhandle = content_tag :span, "(aka #{username})", class: 'user-handle'
     ("#{fullname.downcase}&nbsp;#{uhandle}&nbsp;#{mail_link}").html_safe
   end
@@ -135,7 +135,7 @@ class UserPresenter < CollectiblePresenter
         if latest = user.decorate.owned_lists(current_user_or_guest).order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else
-          contents = "To create your first list, click #{link_to_submit "here", new_list_path, :mode => :modal}.".html_safe
+          contents = "To create your first list, click #{link_to_dialog "here", new_list_path}.".html_safe
         end
     end
     [ label, contents ]
@@ -144,10 +144,10 @@ class UserPresenter < CollectiblePresenter
   def show_or_edit which, val
     if is_viewer?
       if val.present?
-        user.about.html_safe # + link_to_submit('Edit', edit_user_path(section: which), button_size: 'xs', :mode => :modal)
+        user.about.html_safe # + link_to_dialog('Edit', edit_user_path(section: which), button_size: 'xs')
       else
         'We have no description on file for you. '.html_safe +
-            link_to_submit('Click Here', edit_user_path, button_size: 'xs', :mode => :modal) +
+            link_to_dialog('Click Here', edit_user_path, button_size: 'xs') +
         ' to let us know who you are!'
         # card_aspect_editor which
       end

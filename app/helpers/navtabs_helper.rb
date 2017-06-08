@@ -60,7 +60,7 @@ module NavtabsHelper
         link_to_submit u.handle, user_path(u), id: dom_id(u)
       } + [
           '<hr class="menu">'.html_safe,
-          link_to_submit('Invite Someone to RecipePower!', new_user_invitation_path(:mode => :modal) ),
+          link_to_dialog('Invite Someone to RecipePower!', new_user_invitation_path ),
           link_to_submit('Browse for friends...', users_path(:select => :relevant))
       ]
     end
@@ -72,7 +72,7 @@ module NavtabsHelper
         link_to_submit l.name, list_path(l), id: dom_id(l)
       } + [
           '<hr class=\'menu\'>'.html_safe,
-          link_to_submit('Start a Treasury...', new_list_path, mode: :modal, class: 'transient'),
+          link_to_dialog('Start a Treasury...', new_list_path, class: 'transient'),
           link_to_submit('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
@@ -95,7 +95,7 @@ module NavtabsHelper
         link_to_submit l.name, list_path(l), id: dom_id(l)
       } + [
           '<hr class="menu">'.html_safe,
-          link_to_submit('Start a new Treasury...', new_list_path(mode: 'modal')),
+          link_to_dialog('Start a new Treasury...', new_list_path),
           link_to_submit('Hunt for Treasuries...', lists_path(item_mode: 'table'))
       ]
     end
@@ -124,7 +124,7 @@ module NavtabsHelper
       }
       result + [
           '<hr class="menu">'.html_safe,
-          link_to_submit('Add a Feed...', new_feed_path(mode: 'modal')),
+          link_to_dialog('Add a Feed...', new_feed_path),
           link_to_submit('Browse for More Feeds...', feeds_path(item_mode: 'table', access: (response_service.admin_view? ? 'all' : 'approved')))
       ]
     end
@@ -145,10 +145,9 @@ module NavtabsHelper
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [
-          # link_to_submit( 'Profile', users_profile_path( section: 'profile' ), :mode => :modal),
-          link_to_submit('Sign-in Services', authentications_path, :mode => :modal, class: 'transient'),
-          link_to_submit('Profile', users_profile_path, :mode => :modal),
-          link_to_submit('Invite', new_user_invitation_path, :mode => :modal, class: 'transient'),
+          link_to_dialog('Sign-in Services', authentications_path, class: 'transient'),
+          link_to_dialog('Profile', users_profile_path),
+          link_to_dialog('Invite', new_user_invitation_path, class: 'transient'),
           link_to_submit('Sign Out', destroy_user_session_path, :method => 'delete')
       ].compact
       if permitted_to? :admin, :pages
@@ -156,20 +155,20 @@ module NavtabsHelper
           item_list += [
             '<hr class="menu">'.html_safe,
             link_to_submit( 'Admin View Off', admin_toggle_path(on: false), class: 'transient'),
-            # link_to_submit('Add Cookmark', new_recipe_path, :mode => :modal, class: 'transient'),
             link_to('Admin', admin_path),
-            # link_to_submit('Upload Picture', getpic_user_path(current_user), :mode => :modal),
+            # link_to_dialog('Upload Picture', getpic_user_path(current_user), :mode => :modal),
             # link_to('Address Bar Magic', '#', onclick: "RP.getgo('#{home_path}', 'http://local.recipepower.com:3000/bar.html##{bookmarklet_script}')"),
             # link_to('Bookmark Magic', '#', onclick: "RP.bm('Cookmark', '#{bookmarklet_script}')"),
             # link_to('Stream Test', '#', onclick: 'RP.stream.buffer_test();'),
-            # (link_to_submit('Page', current_user, :format => :json) if current_user),
-            # (link_to_submit('Modal', current_user, :format => :json, :mode => :modal) if current_user),
-            link_to_submit('Review Pending Sites', sites_path(approved: 'nil'), :format => :json),
-            link_to_submit('Review Hidden Sites', sites_path(approved: false), :format => :json),
-            link_to_submit('Review Free Tags', tags_path(tagtype: 0), :format => :json),
-            link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil'), :format => :json),
-            link_to_submit('Scrape', scraper_new_path, :format => :json, :mode => :modal)
-            # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post, :format => :json) if Rails.env.development? || Rails.env.staging?)
+            # (link_to_submit('Page', current_user) if current_user),
+            # (link_to_dialog('Modal', current_user) if current_user),
+            link_to_submit('Review Pending Sites', sites_path(approved: 'nil')),
+            link_to_submit('Review Hidden Sites', sites_path(approved: false)),
+            link_to_submit('Review Free Tags', tags_path(tagtype: 0)),
+            link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil')),
+            link_to_dialog('Scrape', scraper_new_path),
+            link_to_dialog('New Reference', new_page_ref_path)
+            # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post) if Rails.env.development? || Rails.env.staging?)
           ].compact
         else
           item_list += [

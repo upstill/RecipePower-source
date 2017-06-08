@@ -33,7 +33,7 @@ module RecipesHelper
   def collectible_source_link decorator
     if decorator.object.class == List
       label = 'a list by '
-      link = link_to_submit decorator.owner.handle, user_path(decorator.owner, :mode => :modal)
+      link = link_to_dialog decorator.owner.handle, user_path(decorator.owner)
     else
       label = 'from '
       link = link_to decorator.sourcename, decorator.sourcehome, class: 'tablink'
@@ -61,7 +61,7 @@ module RecipesHelper
                 '',
                 class: 'recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open',
                 data: { title: decorator.title, tags: tags, description: decorator.description || '' }
-    link_to_submit span, polymorphic_path(entity), :mode => :modal
+    link_to_dialog span, polymorphic_path(entity)
   end
 
   def recipe_tags_div recipe
