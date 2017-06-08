@@ -6,6 +6,24 @@ class PageRefServices
     # @current_user = current_user
   end
 
+  # Provide an array of label/type pairs for selecting the type of a pageref
+  def self.type_selections
+    [
+        ['Recipe', 'RecipePageRef'],
+        ['Site', 'SitePageRef'],
+        ['Referrable', 'ReferrablePageRef'],
+        ['Reference', 'DefinitionPageRef'],
+        ['Article', 'ArticlePageRef'],
+        ['News Item', 'NewsitemPageRef'],
+        ['Tip', 'TipPageRef'],
+        ['Video', 'VideoPageRef'],
+        ['Home Page', 'HomepagePageRef'],
+        ['Product', 'ProductPageRef'],
+        ['Offering', 'OfferingPageRef'],
+        ['Event', 'EventPageRef']
+    ]
+  end
+
   # Eliminate redundancy in the PageRefs by folding two into one
   def absorb other, force=false
     return if page_ref == other

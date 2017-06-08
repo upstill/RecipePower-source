@@ -167,7 +167,7 @@ module NavtabsHelper
             link_to_submit('Review Free Tags', tags_path(tagtype: 0)),
             link_to_submit('Review Pending Feeds', feeds_path(approved: 'nil')),
             link_to_dialog('Scrape', scraper_new_path),
-            link_to_dialog('New Reference', page_ref_new_path)
+            link_to_dialog('New Reference', new_page_ref_path)
             # (button_to_submit('Initialize DB for scraping', scraper_init_path, :method => :post) if Rails.env.development? || Rails.env.staging?)
           ].compact
         else
