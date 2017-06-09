@@ -218,7 +218,7 @@ class PageRef < ActiveRecord::Base
   # Glean info from the page in background as a DelayedJob job
   # force => do the job even if it was priorly complete
   def glean refresh=false
-    create_gleaning entity: self unless gleaning
+    create_gleaning unless gleaning
     # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
     gleaning.bkg_enqueue refresh
   end
@@ -226,7 +226,7 @@ class PageRef < ActiveRecord::Base
   # Glean info synchronously, i.e. don't return until it's done
   # force => do the job even if it was priorly complete
   def glean! refresh=false
-    create_gleaning entity: self unless gleaning
+    create_gleaning unless gleaning
     gleaning.bkg_go refresh
   end
 

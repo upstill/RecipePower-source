@@ -129,9 +129,7 @@ public
     return unless attrhash
     if value_or_values = attrhash['RSS Feed']
       # The 'value(s)' are a list of feeds
-      [value_or_values].flatten.map { |url|
-        assert_feed url, true
-      }
+      [value_or_values].flatten.map { |url| assert_feed url, true }
     end
   end
 

@@ -55,25 +55,6 @@ module Pagerefable
 
       self.instance_eval do
 
-=begin
-        if options[:gleanable]
-          # Glean info from the page in background as a DelayedJob job
-          # force => do the job even if it was priorly complete
-          define_method 'glean' do |refresh=false|
-            create_gleaning entity: self unless gleaning
-            # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
-            gleaning.bkg_enqueue refresh
-          end
-
-          # Glean info synchronously, i.e. don't return until it's done
-          # force => do the job even if it was priorly complete
-          define_method 'glean!' do |refresh=false|
-            create_gleaning entity: self unless gleaning
-            gleaning.bkg_go refresh
-          end
-        end
-=end
-
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
@@ -89,7 +70,7 @@ module Pagerefable
           end
           # errors.add(:url, pr.errors[url_attribute]) if pr.errors[url_attribute].present?
           self.page_ref = pr
-          glean(true) if !self.errors.any? && respond_to?(:gleaning) && gleaning # Update the gleaning data, if any
+          pr.glean unless self.errors.any? # Update the gleaning data, if any
           url
         end
 
@@ -141,9 +122,7 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    gleaning.hit_on_attributes attrhash do |label, selector, attribute_name|
-      site.hit_on_finder label, selector, attribute_name if site
-    end if gleaning && attrhash
+    gleaning.hit_on_attributes attrhash, site if gleaning && attrhash
   end
 
 end

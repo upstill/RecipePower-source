@@ -6,8 +6,9 @@ class Gleaning < ActiveRecord::Base
   backgroundable :status
 
   require 'finder_services.rb'
-  # belongs_to :entity, :polymorphic => true
+
   has_one :page_ref
+  has_one :site, :through => :page_ref
 
   attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id # , :decorator # Decorator corresponding to entity
 
@@ -28,8 +29,7 @@ class Gleaning < ActiveRecord::Base
   end
 
   def perform
-    # go entity.decorate.url, (entity.site if entity.respond_to?(:site))
-    go page_ref.url, page_ref.site
+    go page_ref.url, site
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
@@ -110,27 +110,27 @@ class Gleaning < ActiveRecord::Base
     end
   end
 
-  def hit_on_attributes attrhash
-    return unless results.present?
+  def hit_on_attributes attrhash, site
+    return unless results.present? && site
     attrhash.each do |label, value_or_set|
       if value_or_set.is_a? Hash
         (value_or_set = value_or_set.values).map { |value|
-          if value.present? && results[label].present?
-            # Vote up each finder that produces this value
-            results[label].each do |result|
-              yield *result.finderdata.slice(:label, :selector, :attribute_name).values if result.out.include? value
-            end
-          end
+          hit_on_attribute label, value, site
         }
       else
-        if value_or_set.present? && results[label].present?
-          # Vote up each finder that produces this value
-          results[label].each do |result|
-            yield *result.finderdata.slice(:label, :selector, :attribute_name).values if result.out.include? value_or_set
-          end
-        end
+        hit_on_attribute label, value_or_set, site
       end
     end
   end
 
+  private
+
+  def hit_on_attribute label, value, site
+    if value.present? && results[label].present?
+      # Vote up each finder that produces this value
+      results[label].each { |result|
+        site.hit_on_finder *result.finderdata.slice(:label, :selector, :attribute_name).values if result.out.include? value
+      }
+    end
+  end
 end

@@ -142,7 +142,7 @@ module Linkable
         # IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.
         define_method "#{url_attribute}=" do |pu|
           # If we're changing the url, any gleanings need to be refreshed
-          glean(true) if respond_to?(:gleaning) && gleaning && (pu != self.method(:"#{url_attribute}").call) # Update the gleaning data, if any
+          glean(true) if respond_to?(:gleaning) && gleaning && ((self.method(:"#{url_attribute}").call || '') != (pu || '')) # Update the gleaning data, if any
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
           # Get the existing reference
