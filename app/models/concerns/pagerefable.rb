@@ -120,16 +120,12 @@ module Pagerefable
 
   # Return the human-readable name for the recipe's source
   def sourcename
-    if respond_to?(:site) && site
-      site.name
-    else
-      "Entity #{self.class.to_s} ##{id} has no site"
-    end
+    site ? site.name : "Entity #{self.class.to_s} ##{id} has no site"
   end
 
   # Return the URL for the recipe's source's home page
   def sourcehome
-    (respond_to?(:site) && site) ? site.home : '#'
+    site ? site.home : '#'
   end
 
   # One linkable is being merged into another => transfer PageRefs
@@ -145,27 +141,9 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    return unless page_ref && page_ref.site && attrhash
-    # Declare success on a label/value pair by voting up the corresponding finder
-    def hit_on site, label, value
-      if value.present? && results && results[label].present?
-        # Vote up each finder that produces this value
-        results[label].each do |result|
-          if result.out.include? value
-            site.hit_on_finder *result.finderdata.slice(:label, :selector, :attribute_name).values
-          end
-        end
-      end
-    end
-    site = page_ref.site
-    attrhash.each do |label, value_or_set|
-      if value_or_set.is_a? Hash
-        (value_or_set = value_or_set.values).map { |value| hit_on site, label, value }
-      else
-        hit_on site, label, value_or_set
-      end
-      yield label, value_or_set if block_given?
-    end
+    gleaning.hit_on_attributes attrhash do |label, selector, attribute_name|
+      site.hit_on_finder label, selector, attribute_name if site
+    end if gleaning && attrhash
   end
 
 end

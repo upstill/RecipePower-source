@@ -110,6 +110,27 @@ class Gleaning < ActiveRecord::Base
     end
   end
 
-  private
+  def hit_on_attributes attrhash
+    return unless results.present?
+    attrhash.each do |label, value_or_set|
+      if value_or_set.is_a? Hash
+        (value_or_set = value_or_set.values).map { |value|
+          if value.present? && results[label].present?
+            # Vote up each finder that produces this value
+            results[label].each do |result|
+              yield *result.finderdata.slice(:label, :selector, :attribute_name).values if result.out.include? value
+            end
+          end
+        }
+      else
+        if value_or_set.present? && results[label].present?
+          # Vote up each finder that produces this value
+          results[label].each do |result|
+            yield *result.finderdata.slice(:label, :selector, :attribute_name).values if result.out.include? value_or_set
+          end
+        end
+      end
+    end
+  end
 
 end

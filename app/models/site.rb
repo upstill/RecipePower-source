@@ -119,49 +119,21 @@ public
     finder.save
   end
 
-  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
-  def gleaning_attributes= attrhash
-    super attrhash do |label, value|
-      case label
-        when 'RSS Feed'
-          # The 'value' is a list of feeds
-          [value].flatten.map { |url|
-            object.assert_feed url, true
-          }
-      end
-    end
+  def site
+    self
   end
 
-=begin
-  # Make sure that a url(s) map(s) to this site, returning true if any references were added
-  def include_url url_or_urls, in_full=false
-    (url_or_urls.is_a?(String) ? [url_or_urls] : url_or_urls).any? do |url|
-      url = normalize_url url
-      # Reject urls that already reference a site
-      if (other = SiteReference.lookup_site(url)) && (other != self) # Don't change references
-        errors.add :home, "That url is already associated with the site '#{other.name}'."
-        return
-      end
-      # Ensure that 1) this url gets back to this site, and 2) it has the longest possible subpath in common with the other references
-      target_uri = URI(url)
-      target_uri.query = target_uri.fragment = nil # Queries and fragments are ignored in site mappings
-      target_path = target_uri.path
-      existing_urls = references.map(&:url)
-      # Of all the urls in the extant references, determine the longest subpath of the target
-      target_uri.path = existing_urls.inject('') { |memo, ref_url|
-        ref_path = URI(ref_url).path
-        (ref_path.length > memo.length) && target_path.match(/^#{ref_path}/) ? ref_path : memo
-      } unless in_full
-      # Add the new references to those of the site, eliminating redundant ones
-      new_refs = SiteReference.find_or_initialize(target_uri.to_s, true).to_a.keep_if { |candidate|
-        !existing_urls.include?(candidate.url)
+  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
+  def gleaning_attributes= attrhash
+    super
+    return unless attrhash
+    if value_or_values = attrhash['RSS Feed']
+      # The 'value(s)' are a list of feeds
+      [value_or_values].flatten.map { |url|
+        assert_feed url, true
       }
-      unless new_refs.empty?
-        self.references = self.references + new_refs
-      end
     end
   end
-=end
 
   def self.strscopes matcher
     onscope = block_given? ? yield() : self.unscoped
