@@ -12,10 +12,13 @@ class PageRef < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
+  # Has an associated Gleaning record for a more frontal attack
+  belongs_to :gleaning
+
   @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode
+  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode, :gleaning
 
   attr_accessor :extant_pr
 
@@ -211,6 +214,22 @@ class PageRef < ActiveRecord::Base
         (block_given? ? yield() : self).where(ar)
     ]
   end
+
+  # Glean info from the page in background as a DelayedJob job
+  # force => do the job even if it was priorly complete
+  def glean refresh=false
+    create_gleaning entity: self unless gleaning
+    # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
+    gleaning.bkg_enqueue refresh
+  end
+
+  # Glean info synchronously, i.e. don't return until it's done
+  # force => do the job even if it was priorly complete
+  def glean! refresh=false
+    create_gleaning entity: self unless gleaning
+    gleaning.bkg_go refresh
+  end
+
 
 end
 

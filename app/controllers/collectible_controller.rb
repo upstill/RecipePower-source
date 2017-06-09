@@ -141,7 +141,7 @@ class CollectibleController < ApplicationController
     if resource_errors_to_flash @decorator.object
       render :edit
     else
-      @decorator.gleaning.attributes = params[@decorator.object.class.to_s.underscore][:gleaning_attributes] if @decorator.object.respond_to?(:gleaning)
+      @decorator.gleaning_attributes = params[@decorator.model_name.param_key][:gleaning_attributes] if @decorator.object.is_a?(Pagerefable)
       flash[:popup] = "#{@decorator.human_name} is saved"
       render :update
     end
@@ -177,8 +177,10 @@ class CollectibleController < ApplicationController
 
   def edit
     update_and_decorate
-    if @decorator.object.respond_to?(:gleaning)
-      @decorator.glean unless @decorator.gleaning
+    entity = @decorator.object
+    # if entity.respond_to?(:page_ref) && (pr = entity.page_ref) && !pr.gleaning
+    if entity.respond_to?(:gleaning)
+      entity.glean unless entity.gleaning
       # @image_list = (@decorator.gleaning && @decorator.gleaning.images) ? @decorator.gleaning.images : []
     end
     smartrender

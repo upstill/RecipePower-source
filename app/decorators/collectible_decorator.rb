@@ -179,10 +179,6 @@ class CollectibleDecorator < Draper::Decorator
     object.tags User.super_id
   end
 
-  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
-  def assert_gleaning_attribute label, value
-  end
-
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #

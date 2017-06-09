@@ -104,15 +104,4 @@ class SiteDecorator < CollectibleDecorator
     gleaning.extract1 'Description' do |value| object.description = value end
   end
 
-  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
-  def assert_gleaning_attribute label, value
-    case label
-      when 'RSS Feed'
-        # The 'value' is a list of feeds
-        [value].flatten.map { |url|
-          object.assert_feed url, true
-        }
-    end
-  end
-
 end

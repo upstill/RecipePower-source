@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170513063621) do
+ActiveRecord::Schema.define(version: 20170609003222) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -214,6 +214,7 @@ ActiveRecord::Schema.define(version: 20170513063621) do
     t.datetime "updated_at",                                    null: false
     t.text     "aliases",                   default: [],                     array: true
     t.integer  "http_status"
+    t.integer  "gleaning_id"
   end
 
   add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree

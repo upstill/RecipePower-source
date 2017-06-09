@@ -6,11 +6,10 @@ class Gleaning < ActiveRecord::Base
   backgroundable :status
 
   require 'finder_services.rb'
-  belongs_to :entity, :polymorphic => true
+  # belongs_to :entity, :polymorphic => true
+  has_one :page_ref
 
-  attr_accessible :entity, :results, :http_status, :err_msg
-
-  attr_accessor :decorator # Decorator corresponding to entity
+  attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id # , :decorator # Decorator corresponding to entity
 
   serialize :results
 
@@ -29,7 +28,8 @@ class Gleaning < ActiveRecord::Base
   end
 
   def perform
-    go entity.decorate.url, (entity.site if entity.respond_to?(:site))
+    # go entity.decorate.url, (entity.site if entity.respond_to?(:site))
+    go page_ref.url, page_ref.site
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
@@ -43,7 +43,8 @@ class Gleaning < ActiveRecord::Base
         # We assume the first three-digit number is the HTTP status code
         self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
       }
-      entity.decorate.after_gleaning(self) if entity && entity.decorate.respond_to?(:after_gleaning)
+      # TODO: Restore this Site functionality:
+      # entity.decorate.after_gleaning(self) if entity && entity.decorate.respond_to?(:after_gleaning)
       self.results # Returning success indicator
     end
   end
@@ -56,20 +57,6 @@ class Gleaning < ActiveRecord::Base
 
   def options_for label
     (results && results[label]) ? results[label].map(&:out).flatten.uniq : []
-  end
-
-  def attributes= attrhash
-    return unless entity.respond_to? :site
-    site = entity.site
-    decorator = entity.decorate
-    (attrhash || {}).each do |label, value_or_set|
-      if value_or_set.is_a? Hash
-        (value_or_set = value_or_set.values).map { |value| hit_on site, label, value }
-      else
-        hit_on site, label, value_or_set
-      end
-      decorator.assert_gleaning_attribute label, value_or_set
-    end
   end
 
   # Access the results by label; singular => return first result, plural => return all
@@ -125,15 +112,4 @@ class Gleaning < ActiveRecord::Base
 
   private
 
-  # Declare success on a label/value pair by voting up the corresponding finder
-  def hit_on site, label, value
-    if value.present? && results && results[label].present?
-      # Vote up each finder that produces this value
-      results[label].each do |result|
-        if result.out.include? value
-          site.hit_on_finder *result.finderdata.slice(:label, :selector, :attribute_name).values
-        end
-      end
-    end
-  end
 end

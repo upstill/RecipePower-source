@@ -12,7 +12,7 @@ class Recipe < ActiveRecord::Base
   include Referrable
   # linkable :url, :reference, gleanable: true
   include Pagerefable
-  pagerefable :url, gleanable: true # belongs_to :page_ref #
+  pagerefable :url
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 

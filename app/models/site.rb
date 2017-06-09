@@ -9,7 +9,7 @@ class Site < ActiveRecord::Base
   # linkable :home, :reference, gleanable: true
   include Pagerefable
   picable :logo, :thumbnail, 'MissingLogo.png'
-  pagerefable :home, gleanable: true # belongs_to :page_ref #
+  pagerefable :home
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
@@ -117,6 +117,19 @@ public
     finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
     finder.hits += 1
     finder.save
+  end
+
+  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
+  def gleaning_attributes= attrhash
+    super attrhash do |label, value|
+      case label
+        when 'RSS Feed'
+          # The 'value' is a list of feeds
+          [value].flatten.map { |url|
+            object.assert_feed url, true
+          }
+      end
+    end
   end
 
 =begin

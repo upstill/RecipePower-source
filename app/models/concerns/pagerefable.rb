@@ -8,27 +8,30 @@ module Pagerefable
 
   module ClassMethods
 
-    def pagerefable(url_attribute, reference_association=:page_ref, options = {})
-      reference_association, options = :page_ref, reference_association if reference_association.is_a? Hash
-      reference_association = reference_association.to_sym
+    def pagerefable(url_attribute, options = {})
       ref_type = "#{self.to_s}PageRef"
 
       # The url attribute is accessible, but access is through an instance method that
       # defers to a Reference
-      attr_accessible url_attribute, reference_association
+      attr_accessible url_attribute, :page_ref
 
-      # has_one reference_association, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
-      belongs_to reference_association, class_name: 'PageRef', foreign_key: 'page_ref_id', validate: true
+      # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
+      belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true
+      delegate :glean, :'glean!', :to => :page_ref
 
-      has_one :site, :through => reference_association
+      has_one :site, :through => :page_ref
+      # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
+      # peg successful hits on finders. (Sites have an associated set of finders, on which they
+      # remember successful hits)
+      has_one :gleaning, :through => :page_ref
+      accepts_nested_attributes_for :gleaning
 
+=begin
       if options[:gleanable]
-        # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
-        # peg successful hits on finders. (Sites have an associated set of finders, on which they
-        # remember successful hits)
         has_one :gleaning, :as => :entity
         accepts_nested_attributes_for :gleaning
       end
+=end
 
       self.class_eval do
         # For the one attribute used to index the entity, provide access to its name for use in class and instance methods
@@ -40,18 +43,19 @@ module Pagerefable
         # Locate an entity by its url. This could be the canonical url or any alias
         define_singleton_method :find_by_url do |url|
           page_ref_class = (self.to_s + 'PageRef').constantize
-          self.joins(reference_association).find_by(page_ref_class.url_query url)
+          self.joins(:page_ref).find_by(page_ref_class.url_query url)
         end
 
         # Find entitites whose url matches the given path (which includes the host)
         define_singleton_method :query_on_path do |urpath|
           page_ref_class = (self.to_s + 'PageRef').constantize
-          self.joins(reference_association).where(page_ref_class.url_path_query urpath)
+          self.joins(:page_ref).where(page_ref_class.url_path_query urpath)
         end
       end
 
       self.instance_eval do
 
+=begin
         if options[:gleanable]
           # Glean info from the page in background as a DelayedJob job
           # force => do the job even if it was priorly complete
@@ -68,6 +72,7 @@ module Pagerefable
             gleaning.bkg_go refresh
           end
         end
+=end
 
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
@@ -137,6 +142,30 @@ module Pagerefable
       self.page_ref = other.page_ref
     end
     super if defined? super
+  end
+
+  def gleaning_attributes= attrhash
+    return unless page_ref && page_ref.site && attrhash
+    # Declare success on a label/value pair by voting up the corresponding finder
+    def hit_on site, label, value
+      if value.present? && results && results[label].present?
+        # Vote up each finder that produces this value
+        results[label].each do |result|
+          if result.out.include? value
+            site.hit_on_finder *result.finderdata.slice(:label, :selector, :attribute_name).values
+          end
+        end
+      end
+    end
+    site = page_ref.site
+    attrhash.each do |label, value_or_set|
+      if value_or_set.is_a? Hash
+        (value_or_set = value_or_set.values).map { |value| hit_on site, label, value }
+      else
+        hit_on site, label, value_or_set
+      end
+      yield label, value_or_set if block_given?
+    end
   end
 
 end
