@@ -200,55 +200,98 @@ div.dialog.injector {
     }
   }
   &.tag_collectible {
-    width: 750px;
+    width: 730px;
     div.left {
       float: left;
       width: 140px;
       height: auto;
-      margin: 10px;
+      margin-right: 10px;
       // border:1px solid red
       p {
         display: block;
         font: 12px arial, sans-serif;
         font-weight: bold;
         text-align: center;
-        margin: 10px 3px;
+        margin-bottom: 0;
       }
     }
     div.middle {
       float: left;
-      width: 500px;
+      width: 430px;
       height: auto;
-      padding-bottom: 10px;
+      // padding-bottom: 10px;
     }
     div.right {
       float: left;
-      width: 100px;
+      width: 113px;
       height: auto;
       position: absolute;
       right: 10px;
-      bottom: 10px;
+      label {
+        display: block;
+        margin-bottom: 5px;
+        &.checkbox {
+          display: inline-block;
+        }
+      }
+      // bottom: 10px;
       // border:1px solid blue
+    }
+    input[type="submit"] {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      margin: 20px;
     }
     div.edit_recipe_element {
       height: 40px;
       padding-bottom: 0.2em
     }
-    div.edit_recipe_field {
-      width: 95%;
-      margin-left: auto;
-      margin-right: auto;
-      label {
-        display: inline-block;
-        vertical-align: top;
-        width: 50px;
-        margin-top: 5px
+    div.pic_picker_field {
+      width: 100%;
+      div.pic_preview {
+        width: 100%;
+        // height: 90px;
+        margin-left: auto;
+        margin-right: auto;
+        text-align: center;
+        img {
+          // width: 100%;
+          // height: 100%;
+          width:auto;
+          height:auto;
+          max-width:100%;
+          max-height:100%;
+        }
+        input {
+          display: none
+        }
+        p {
+          font: 12px arial, sans-serif;
+          font-weight: bold;
+          text-align: center;
+          margin: 3px
+        }
       }
-      textarea {
+    }
+    div.edit_recipe_field {
+      width: 375px;
+      // height: 40px;
+      margin-bottom: 8px;
+      margin-left: 55px;
+      position: relative;
+      label, select {
+        // display: inline-block;
+        position: absolute;
+        left: -45px;
+        vertical-align: top;
+        margin-top: 2px
+      }
+      &.tags, &.text {
+        // width: 100%;
         display: inline-block;
         vertical-align: top;
         resize: none;
-        width: 460px
       }
       ul {
         display: inline-block;
@@ -260,38 +303,19 @@ div.dialog.injector {
         display: inline-block;
         margin: 5px
       }
+      input[type='checkbox'] {
+        margin-top: 7px;
+      }
       &.tags {
         textarea {
-          width: 430px;
+          width: 94%;
+          margin: 0;
         }
         ul {
-          width: 430px;
+          width: 94%;
+          margin: 0;
         }
       }
-        div.pic_preview {
-          width: 100%;
-          // height: 90px;
-          margin-left: auto;
-          margin-right: auto;
-          text-align: center;
-	  img {
-	    // width: 100%;
-	    // height: 100%;
-	    width:auto;
-	    height:auto;
-	    max-width:100%;
-	    max-height:100%;
-	  }
-          input {
-            display: none
-          }
-          p {
-            font: 12px arial, sans-serif;
-            font-weight: bold;
-            text-align: center;
-            margin: 3px
-          }
-        }
     }
     // Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/
     textarea,
@@ -302,9 +326,12 @@ div.dialog.injector {
       border: 0;
     }
     .expandingArea {
+      width: 100%;
       position: relative;
       border: 1px solid #888;
       background: #fff;
+      display: inline-block;
+      float: right;
     }
     .expandingArea > textarea,
     .expandingArea > pre {

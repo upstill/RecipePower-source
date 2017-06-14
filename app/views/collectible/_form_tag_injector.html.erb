@@ -3,14 +3,14 @@
     <%= form_errors_helper f, @entity, false %>
 
     <div class="left">
-      <div class="edit_recipe_field pic_picker_field">
+      <div class="pic_picker_field">
         <%= pic_field f,
                       :decorator => @decorator,
                       :fallback_img => image_path('PickPicture.png'),
                       :nopicker => true %>
       </div>
       <% if @decorator.image.blank? %>
-          <p>Click a picture to file it with the recipe.</p>
+          <p>Click a picture to attach it.</p>
       <% else %>
           <p>Prefer another picture?<br/>Click one!</p>
       <% end %>
@@ -20,7 +20,7 @@
       <div class="notifications-panel">
         <%= flash_notifications_div 'flash_notifications', false %>
       </div>
-      <div class="edit_recipe_field" >
+      <div class="edit_recipe_field text" >
         <%= f.label @decorator.attribute_for(:title), 'Title' -%>
         <% @decorator.title %>
           <div class="expandingArea">
@@ -30,12 +30,12 @@
       </div>
 
       <%= token_input_div f,
-                       :attribute_name => :editable_tags,
-                       :label => 'Tag(s)',
-                       :data => { type: Tag.typenum(@decorator.eligible_tagtypes) }
+                          :attribute_name => :editable_tags,
+                          :label => 'Tag(s)',
+                          :data => {type: Tag.typenum(@decorator.eligible_tagtypes)}
       %>
 
-      <div class="edit_recipe_field" >
+      <div class="edit_recipe_field text" >
         <%= f.label :comment, 'Notes' -%>
           <div class="expandingArea">
             <pre><span></span><br></pre>
@@ -45,12 +45,17 @@
     </div>
 
     <div class="right">
-      <div class="edit_recipe_field ">
-        <%= f.check_box :collectible_private %>
-        <%= f.label :collectible_private, 'Private' %>
-      </div>
-      <%= f.submit 'Save', class: 'btn btn-success' %>
+      <%= f.label "Collect As" %>
+      <%= collection_select :recipe,
+                            :becomes,
+                            PageRefServices.type_selections,
+                            :last,
+                            :first,
+                            selected: PageRefServices.type_selections.find { |ts| ts.last == @decorator.model_name }.first %>
+      <br><br><%= f.check_box :collectible_private %>
+      <%= f.label :collectible_private, 'Private', class: 'checkbox' %>
       <%# button_to "Forget It", remove_recipe_path(@entity), class: "btn btn-sm btn-success" %>
       <%= hidden_field_tag 'layout', 'injector' %>
     </div>
+    <%= f.submit 'Save', class: 'btn btn-success' %>
 <% end %>
