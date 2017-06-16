@@ -5,7 +5,6 @@
 
 RP::Application.routes.draw do
 
-  resources :page_refs
   get 'scraper/new'
 
   post 'scraper/create'
@@ -42,6 +41,8 @@ RP::Application.routes.draw do
   end
 
   get 'search/index'
+
+  resources :page_refs, :concerns => [:taggable, :collectible, :picable]
 
   resources :tagsets
 

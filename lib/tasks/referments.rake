@@ -1,12 +1,13 @@
 namespace :referments do
   desc "Manage the Referments class"
 
+  # Remove all referments with non-existent Reference pointers
   task :cleanup => :environment do
     bogus_refs = Reference.where.not(type: 'ImageReference')
     puts "#{bogus_refs.count} references to delete."
     bogus_refs.delete_all
-    Referment.where(referee_type: 'Reference').each { |rfm|
-      unless Reference.where(id: rfm.referee_id).exists?
+    Referment.includes(:referent).where(referee_type: 'Reference').each { |rfm|
+      unless Reference.where(id: rfm.referee_id).exists? && rfm.referent
         rfm.referee_id = nil
         rfm.save
       end
@@ -16,9 +17,11 @@ namespace :referments do
     bogus_rfms.delete_all
   end
 
+  # Remove redundant referments, i.e. those with identical referent and referee
   task :purge => :environment do
     specs = Referment.all.pluck :referent_id, :referee_id, :referee_type
     counts = {}
+
     specs.each { |spec|
       specstr = spec.map(&:to_s).join ';'
       counts[specstr] ||= 0

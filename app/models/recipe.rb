@@ -7,12 +7,10 @@ require 'htmlentities'
 
 class Recipe < ActiveRecord::Base
   include Collectible
-  # TODO: pull the switch by making recipes pagerefable rather than linkable
-  # The url attribute is handled by a reference of type RecipeReference
-  include Referrable
-  # linkable :url, :reference, gleanable: true
-  include Pagerefable
+  include Referrable # Is associated with a Referent
+  include Pagerefable # Has a PageRef linking to and reporting on the content
   pagerefable :url
+  include Backgroundable
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -85,10 +83,18 @@ class Recipe < ActiveRecord::Base
       fe.recipe = self
       fe.save
     }
-    super other if defined? super
+    super other if defined?(super)
     other.reload
     other.destroy if destroy
     save
+  end
+
+  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
+  def perform
+    bkg_execute do
+      page_ref.bkg_sync true
+    end
+    good?
   end
 
 end

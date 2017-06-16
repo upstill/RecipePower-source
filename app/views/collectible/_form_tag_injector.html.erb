@@ -46,8 +46,8 @@
 
     <div class="right">
       <%= f.label "Collect As" %>
-      <%= collection_select :recipe,
-                            :becomes,
+      <%= collection_select @decorator.object.model_name.param_key,
+                            :type,
                             PageRefServices.type_selections,
                             :last,
                             :first,

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170609003222) do
+ActiveRecord::Schema.define(version: 20170614192550) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -215,6 +215,7 @@ ActiveRecord::Schema.define(version: 20170609003222) do
     t.text     "aliases",                   default: [],                     array: true
     t.integer  "http_status"
     t.integer  "gleaning_id"
+    t.integer  "picture_id"
   end
 
   add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
@@ -272,6 +273,8 @@ ActiveRecord::Schema.define(version: 20170609003222) do
     t.integer  "total_time_high",             default: 0
     t.string   "yield"
     t.integer  "page_ref_id"
+    t.integer  "dj_id"
+    t.integer  "status"
   end
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
@@ -384,6 +387,8 @@ ActiveRecord::Schema.define(version: 20170609003222) do
     t.boolean  "approved"
     t.integer  "page_ref_id"
     t.string   "root"
+    t.integer  "dj_id"
+    t.integer  "status"
   end
 
   add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree

@@ -4,6 +4,9 @@ require 'net/http'
 # the class deals with multiple URLs leading to the same page. That is, since Mercury extracts a
 # canonical URL, many URLs could lead to that single referent.
 class PageRef < ActiveRecord::Base
+  include Collectible
+  # The picurl attribute is handled by the :picture reference of type ImageReference
+  picable :picurl, :picture
 
   validates_each :url do |pr, attr, value|
     pr.errors.add :url, "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL" unless pr.good? || validate_link(pr.url, %w{ http https }) # Is it a valid URL?
@@ -42,6 +45,11 @@ class PageRef < ActiveRecord::Base
 
   def self.types
     @@prtypes ||= %w{ recipe definition article newsitem tip video homepage product offering event }
+  end
+
+  # When a PageRef (or its other) is tagged, the user may change its type
+  def type= newtype
+    super
   end
 
   def perform
@@ -229,7 +237,6 @@ class PageRef < ActiveRecord::Base
     create_gleaning unless gleaning
     gleaning.bkg_go refresh
   end
-
 
 end
 

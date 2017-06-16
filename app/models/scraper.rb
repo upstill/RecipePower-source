@@ -191,7 +191,7 @@ class Scraper < ActiveRecord::Base
     Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
     extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
     Rails.logger.info ''
-    recipe.decorate.findings = FinderServices.findings(extractions) if extractions
+    recipe.decorate.findings = FinderServices.from_extractions(extractions) if extractions
     recipe
   end
 end
@@ -600,7 +600,7 @@ class Www_bbc_co_uk_Scraper < Scraper
 
       r = propose_recipe url, extractions.compact
       # Apply the findings, in case the recipe already existed
-      r.decorate.findings = FinderServices.findings extractions
+      r.decorate.findings = FinderServices.from_extractions extractions
     end
   end
 

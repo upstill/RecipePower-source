@@ -244,17 +244,32 @@ class CollectibleController < ApplicationController
   end
 
   def capture # Collect URL from foreign site, asking whether to re-direct to edit
+    require 'page_ref.rb'
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
+=begin
+    uri = URI params[:recipe][:url]
+    url = uri.to_s
+    params[:recipe][:title] = "Recipe from #{uri.host}" if params[:recipe][:title].blank?
+    if current_user
+      @resource = CollectibleServices.find_or_create params[:recipe], params[:extractions]
+      # The resource doesn't have to be a recipe
+      # -- If there's a site matching this url, that gets returned
+      # -- If there's a Tip, Video, etc. (anything with a PageRef), then that gets returned
+      update_and_decorate @resource, true if @resource
+      page_ref = @resource.page_ref
+    else
+      # Pending login
+    end
+    page_ref = PageRef.fetch url
+    url = page_ref.url
+=end
     respond_to do |format|
+=begin
       format.html { # This is for capturing a new recipe and tagging it using a new page.
         if current_user
-          @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
-                                                         params[:extractions],
-                                                         response_service.controller_model_class
-          update_and_decorate @resource, true
           if @resource.id
             current_user.collect @resource
             if response_service.injector?
@@ -275,10 +290,6 @@ class CollectibleController < ApplicationController
       }
       format.json {
         if current_user
-          @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
-                                                         params[:extractions],
-                                                         response_service.controller_model_class
-          update_and_decorate @resource, true
           if @resource.id && @resource.errors.empty?
             current_user.collect @resource
             # Recipe all captured and everything. Let's go tag it.
@@ -287,33 +298,42 @@ class CollectibleController < ApplicationController
             render :errors, locals: { entity: @resource }
           end
         else
+          # Not logged in => have to store recipe parameters (url, title, comment) in a safe place pending login
+          # session[:pending_recipe] = params[:recipe].merge page_ref_id: page_ref.id
+          # After login, we'll be returned to this request to complete tagging
           login_required
         end
       }
+=end
       format.js {
         # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
-        uri = URI(params[:recipe][:url])
-        sourcehome = "#{uri.scheme}://#{uri.host}"
-        url = uri.to_s
-        msg = %Q{"Sorry, but RecipePower won't make sense of the cookmark '#{url}'"}
-        begin
+        # begin
+          uri = URI params[:recipe][:url]
+          url = uri.to_s
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
-          elsif !(@site = Site.find_or_create_for(url))
-            # If we couldn't even get the site from the domain, we just bail entirely
-            render js: %Q{alert(#{msg});}
           else
-            params[:recipe][:title] = 'Recipe from '+@site.name if params[:recipe][:title].blank?
-            @url = capture_recipes_url response_service.redirect_params( params.slice(:recipe).merge sourcehome: sourcehome)
-            render
+            page_ref = RecipePageRef.fetch url
+            if page_ref.errors.any?
+              render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{page_ref.errors.messages})") ; }
+            else
+              page_ref.save
+              # @url = capture_recipes_url response_service.redirect_params(params.slice(:recipe).merge sourcehome: "#{uri.scheme}://#{uri.host}")
+              # Building the PageRef may lead to a different url than that passed in
+              edit_params = response_service.redirect_params.merge sourcehome: "#{uri.scheme}://#{uri.host}",
+                                                                   page_ref: { url: page_ref.url, type: page_ref.type }
+              @url = tag_page_ref_url page_ref, edit_params
+              @site = page_ref.site
+              render
+            end
           end
-        rescue Exception => e
-          render js: %Q{alert(#{msg});}
-        end
+        # rescue Exception => e
+        #   render js: %Q{alert("Sorry, but RecipePower can't make sense of the cookmark '#{url}'");}
+        # end
       }
     end
   end

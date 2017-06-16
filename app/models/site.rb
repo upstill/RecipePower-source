@@ -6,10 +6,12 @@ class Site < ActiveRecord::Base
   include Collectible
   # TODO: pull the switch by making sites pagerefable rather than linkable
   include Referrable
-  # linkable :home, :reference, gleanable: true
+
   include Pagerefable
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
+  include Backgroundable
+  backgroundable
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
@@ -22,7 +24,7 @@ class Site < ActiveRecord::Base
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
   attr_accessible :finders_attributes, :oldname, :ttlcut, :finders, :approved, :approved_feeds_count, :feeds_count,
-                  :description, :reference, :references, :name, :gleaning
+                  :description, :reference, :references, :name
 
   attr_accessible :sample, :root
 
@@ -69,11 +71,29 @@ class Site < ActiveRecord::Base
           pr.save
         }
       end
+      bkg_enqueue priority: 10, run_at: Time.now
       reload
     end
   end
 
-  # Most collectibles refer back to their host site; not necessary here
+  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously),
+  #  then taking on extractions from the page_ref (or its fallback, the gleaning)
+  def perform
+    bkg_execute do
+      page_ref.bkg_sync true
+    end
+    if good?
+      # Extract elements from the page_ref
+      page_ref.extract1 'Image' do |value| logo = value end unless logo.present?
+      # page_ref.extract1 'URI' do |value| object.home = value end
+      page_ref.extract_all 'RSS Feed' do |value| object.assert_feed value end
+      page_ref.extract1 'Title' do |value| name = value end unless name.present?
+      page_ref.extract1 'Description' do |value| object.description = value end unless description.present?
+    end
+    good?
+  end
+
+  # Most collectibles refer back to their host site via its page_ref; not necessary here
   def site
     self
   end
@@ -266,25 +286,10 @@ public
     do_glean, options = true, do_glean if do_glean.is_a?(Hash)
     if uri = options[:root] || cleanpath(homelink) # URL parses
       # Find a site, if any, based on the longest subpath of the URL
-      if site = Site.find_by(root: uri)
-        return site
-      else
-        site = Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
-        # TODO: Should be eliminable with switchover to pagerefable
-        unless site.page_ref
-          spr = PageRef::SitePageRef.fetch homelink
-          site.page_ref = spr unless spr.errors.any?
-        end
-        unless site.referent # Could have been generated with the :name option
-          # Need to give it a name
-          if (spr = site.page_ref) && spr.title.present?
-            site.name = spr.title
-          end
-        end
-        site.glean # Grab page in background
-        site.save
-        return site
+      unless site = Site.find_by(root: uri)
+        site = Site.create( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
       end
+      site
     end
   end
 
@@ -293,23 +298,8 @@ public
   def self.find_or_initialize homelink, options={}
     if uri = options[:root] || cleanpath(homelink) # URL parses
       # Find a site, if any, based on the longest subpath of the URL
-      if site = Site.find_by(root: uri)
-        return site
-      else
-        site = Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
-        # TODO: Should be eliminable with switchover to pagerefable
-        unless site.page_ref
-          spr = PageRef::SitePageRef.fetch homelink
-          site.page_ref = spr unless spr.errors.any?
-        end
-        unless site.referent # Could have been generated with the :name option
-          # Need to give it a name
-          if (spr = site.page_ref) && spr.title.present?
-            site.name = spr.title
-          end
-        end
-        return site
-      end
+      Site.find_by(root: uri) ||
+      Site.new( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
     end
   end
 

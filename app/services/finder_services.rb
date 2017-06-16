@@ -10,19 +10,30 @@ class FinderServices
     @finder = finder
   end
 
+  # Build a finder using controller params and an optional set of extractions derived from the page
+  def self.from_extractions params, extractions=nil
+    # Translate the extractions into Finder results
+    findings = Results.new *(extractions ? extractions.keys : [])
+    findings.assert_result 'URI', params[:url] if params[:url]
+    findings.assert_result 'Title', params[:url] if params[:title]
+    # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
+    extractions.each { |key, value|
+      findings.assert_result key, value
+    } if extractions
+    findings
+  end
+
+=begin
   # Return a Results structure, either using the given extractions, or by examining the page
   def self.findings extractions, url=nil
     if extractions
-      # Translate the extractions into Finder results
-      findings = Results.new *extractions.keys
-      # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
-      extractions.each { |key, value| findings.assert_result key, value }
-      findings
+      self.from_extractions extractions
     elsif url
       findings = FinderServices.glean url
       findings if findings.present?
     end
   end
+=end
 
   # Return the raw mapping from finders to arrays of hits
   def self.glean url, site=nil, *finders_or_labels

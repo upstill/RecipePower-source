@@ -269,7 +269,7 @@ class SiteTest < ActiveSupport::TestCase
 
   test "gleaning" do
     url = 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
-    recipe = CollectibleServices.find_or_create( { url: url } )
+    recipe = CollectibleServices.find_or_create url: url
     site = recipe.site
     assert_equal 'Barbecuebible.com', site.name
   end
