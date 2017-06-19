@@ -321,12 +321,17 @@ class CollectibleController < ApplicationController
             if page_ref.errors.any?
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{page_ref.errors.messages})") ; }
             else
-              page_ref.save
+              # Apply picurl and title from capture to the page_ref
+              # page_ref.save
               # @url = capture_recipes_url response_service.redirect_params(params.slice(:recipe).merge sourcehome: "#{uri.scheme}://#{uri.host}")
-              # Building the PageRef may lead to a different url than that passed in
+              # Building the PageRef may lead to a different url than what was passed in
               edit_params = response_service.redirect_params.merge sourcehome: "#{uri.scheme}://#{uri.host}",
-                                                                   page_ref: { url: page_ref.url, type: page_ref.type }
-              @url = tag_page_ref_url page_ref, edit_params
+                                                                   page_ref: {
+                                                                       url: page_ref.url,
+                                                                       type: page_ref.type,
+                                                                       title: params[:recipe][:title]
+                                                                   }.compact
+              @url = page_ref.id ? tag_page_ref_url(page_ref, edit_params) : tag_page_refs_url(edit_params)
               @site = page_ref.site
               render
             end

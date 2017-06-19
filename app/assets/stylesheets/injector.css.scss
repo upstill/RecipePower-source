@@ -291,7 +291,19 @@ div.dialog.injector {
         // width: 100%;
         display: inline-block;
         vertical-align: top;
-        resize: none;
+      }
+      &.text {
+        resize: vertical;
+      }
+      &.tags {
+        textarea {
+          width: 94%;
+          margin: 0;
+        }
+        ul {
+          width: 94%;
+          margin: 0;
+        }
       }
       ul {
         display: inline-block;
@@ -305,16 +317,6 @@ div.dialog.injector {
       }
       input[type='checkbox'] {
         margin-top: 7px;
-      }
-      &.tags {
-        textarea {
-          width: 94%;
-          margin: 0;
-        }
-        ul {
-          width: 94%;
-          margin: 0;
-        }
       }
     }
     // Cribbed from http://www.alistapart.com/articles/expanding-text-areas-made-elegant/

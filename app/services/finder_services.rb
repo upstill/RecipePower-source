@@ -15,7 +15,7 @@ class FinderServices
     # Translate the extractions into Finder results
     findings = Results.new *(extractions ? extractions.keys : [])
     findings.assert_result 'URI', params[:url] if params[:url]
-    findings.assert_result 'Title', params[:url] if params[:title]
+    findings.assert_result 'Title', params[:title] if params[:title]
     # tagstrings = tagstring.sub(/\[(.*)\]$/, '\1').sub(/"(.*)"$/, '\1').split( '","').map(&:strip).join ','
     extractions.each { |key, value|
       findings.assert_result key, value

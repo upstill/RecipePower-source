@@ -27,7 +27,7 @@ class PageRefServices
   # Get a collectible entity for the PageRef, which may be the PageRef itself
   # If the pageref has an entity_id, lookup with that
   def entity params
-    prid = params[:entity_id]
+    entity = nil
     klass =
     case page_ref.type
       when 'RecipePageRef'
@@ -35,29 +35,25 @@ class PageRefServices
       when 'SitePageRef'
         Site
       else
-        return page_ref
+        entity = page_ref
     end
-    (klass.find_by(id: prid) if prid) ||
-    CollectibleServices.find_or_create({ url: page_ref.url }, (params[:extractions] || {}), klass)
+    unless entity ||= klass.find_by(id: params[:entity_id])
+      # Initialize the entity from parameters and extractions, as needed
+      defaults = params[:page_ref].slice(:title)
+      defaults.merge! params[:extractions] if params[:extractions]
+      entity = CollectibleServices.find_or_create({url: page_ref.url}, defaults, klass)
+      # entity.decorate.findings = FinderServices.from_extractions(params[:page_ref], params[:extractions])
+    end
+    entity
   end
 
-  # Provide the PageRef referenced by the parameters, informed by the extractions
-  def self.find_or_create params, extractions=nil
-    findings = FinderServices.from_extractions(params, extractions)
-    unless findings = FinderServices.from_extractions(params, extractions)
-      pr = PageRef.new params
-      pr.errors[:url] = 'Doesn\'t appear to be a working URL'
-      return pr
+  # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
+  def adopt other, force=false
+    @page_ref.bkg_sync true # Wait until the gleanings come in
+    if other && (other.id != @page_ref.id)
+      @page_ref.title = other.title if force || @page_ref.title.blank?
     end
-    url = params[:url]
-    # Construct a valid URL from the given url and the extracted URI or href
-    url = valid_url(findings.result_for('URI'), url) || valid_url(findings.result_for('href'), url) || url
-    pr_class = params[:type].present? ? params[:type].constantize : PageRef
-    pr = params[:type].constantize.fetch(url).becomes(PageRef)
-    pr.decorate.findings = findings # Now set the title, description, etc.
-    pr
   end
-
 
   # Eliminate redundancy in the PageRefs by folding two into one
   def absorb other, force=false
@@ -105,7 +101,7 @@ class PageRefServices
   end
 
   def self.assert type, uri
-    "#{type}PageRef".constantize.fetch uri
+    (type.present? ? type.constantize : PageRef).fetch uri
   end
 
   # Assert a reference to the given URL, linking back to a referent

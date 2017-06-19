@@ -42,7 +42,11 @@ RP::Application.routes.draw do
 
   get 'search/index'
 
-  resources :page_refs, :concerns => [:taggable, :collectible, :picable]
+  resources :page_refs, :concerns => [:taggable, :collectible, :picable] do
+    collection do
+      get 'tag'
+    end
+  end
 
   resources :tagsets
 

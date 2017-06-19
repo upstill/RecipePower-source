@@ -25,7 +25,7 @@
         <% @decorator.title %>
           <div class="expandingArea">
             <pre><span></span><br></pre>
-            <%= f.text_area @decorator.attribute_for(:title), rows: '1' -%>
+            <%= f.text_area @decorator.attribute_for(:title) -%>
           </div>
       </div>
 
@@ -47,14 +47,13 @@
     <div class="right">
       <%= f.label "Collect As" %>
       <%= collection_select @decorator.object.model_name.param_key,
-                            :type,
+                            :page_ref_type,
                             PageRefServices.type_selections,
                             :last,
                             :first,
-                            selected: PageRefServices.type_selections.find { |ts| ts.last == @decorator.model_name }.first %>
+                            selected: PageRefServices.type_selections.find { |ts| ts.last == @decorator.page_ref.type }.first %>
       <br><br><%= f.check_box :collectible_private %>
       <%= f.label :collectible_private, 'Private', class: 'checkbox' %>
-      <%# button_to "Forget It", remove_recipe_path(@entity), class: "btn btn-sm btn-success" %>
       <%= hidden_field_tag 'layout', 'injector' %>
     </div>
     <%= f.submit 'Save', class: 'btn btn-success' %>

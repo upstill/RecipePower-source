@@ -23,7 +23,8 @@ class PageRef < ActiveRecord::Base
 
   attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode, :gleaning
 
-  attr_accessor :extant_pr
+  attr_accessor :extant_pr,
+                :entity # Currently (transiently) designated collectible entity (which may be self)
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
@@ -50,6 +51,10 @@ class PageRef < ActiveRecord::Base
   # When a PageRef (or its other) is tagged, the user may change its type
   def type= newtype
     super
+  end
+
+  def page_ref
+    self
   end
 
   def perform
