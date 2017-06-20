@@ -110,7 +110,15 @@ class CollectibleController < ApplicationController
       else
         misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
       end
-      update_and_decorate
+      objclass = response_service.controller_model_class
+      entity = objclass.find_by id: params[:id]
+      if params[modelname].page_ref_type && (entity.page_ref.type != params[modelname].page_ref_type)
+        # Save as a different type of entity
+        entity = PageRefServices.new(@decorator.page_ref).convert_to(params[modelname].page_ref_type, entity: @decorator.entity)
+      else
+        update_and_decorate
+      end
+
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
@@ -209,7 +217,7 @@ class CollectibleController < ApplicationController
       report_entity( default_next_path, truncate( @resource.decorate.title, :length => 100)+' now appearing in your collection.', formats)
     else
       response_service.title = 'Cookmark a Recipe'
-      update_and_decorate (@resource || response_service.controller_model_class.new), true
+      update_and_decorate (@resource || response_service.controller_model_class.new), touch: true
       smartrender
     end
   end
@@ -220,7 +228,7 @@ class CollectibleController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @resource = CollectibleServices.find_or_create params[response_service.controller_model_name],
                                                  response_service.controller_model_class
-    update_and_decorate @resource, true
+    update_and_decorate @resource, touch: true
     if @resource.errors.empty? # Success (valid recipe, either created or fetched)
       current_user.collect @resource if current_user  # Add to collection
       respond_to do |format|
@@ -249,69 +257,14 @@ class CollectibleController < ApplicationController
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
-=begin
-    uri = URI params[:recipe][:url]
-    url = uri.to_s
-    params[:recipe][:title] = "Recipe from #{uri.host}" if params[:recipe][:title].blank?
-    if current_user
-      @resource = CollectibleServices.find_or_create params[:recipe], params[:extractions]
-      # The resource doesn't have to be a recipe
-      # -- If there's a site matching this url, that gets returned
-      # -- If there's a Tip, Video, etc. (anything with a PageRef), then that gets returned
-      update_and_decorate @resource, true if @resource
-      page_ref = @resource.page_ref
-    else
-      # Pending login
-    end
-    page_ref = PageRef.fetch url
-    url = page_ref.url
-=end
     respond_to do |format|
-=begin
-      format.html { # This is for capturing a new recipe and tagging it using a new page.
-        if current_user
-          if @resource.id
-            current_user.collect @resource
-            if response_service.injector?
-              smartrender :action => :tag
-            else
-              # If we're collecting a recipe outside the context of the iframe, redirect to
-              # the collection page with an embedded modal dialog invocation
-              tag_path = polymorphic_path [:tag, @resource]
-              redirect_to_modal tag_path
-            end
-          else
-            render 'pages/resource_errors', response_service.render_params
-          end
-        else
-          # Defer request, redirecting it for JSON
-          login_required :json
-        end
-      }
-      format.json {
-        if current_user
-          if @resource.id && @resource.errors.empty?
-            current_user.collect @resource
-            # Recipe all captured and everything. Let's go tag it.
-            smartrender :action => :tag
-          else
-            render :errors, locals: { entity: @resource }
-          end
-        else
-          # Not logged in => have to store recipe parameters (url, title, comment) in a safe place pending login
-          # session[:pending_recipe] = params[:recipe].merge page_ref_id: page_ref.id
-          # After login, we'll be returned to this request to complete tagging
-          login_required
-        end
-      }
-=end
       format.js {
         # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
-        # begin
+        begin
           uri = URI params[:recipe][:url]
           url = uri.to_s
           if host_forbidden url # Compare the host to the current domain (minus the port)
@@ -336,9 +289,9 @@ class CollectibleController < ApplicationController
               render
             end
           end
-        # rescue Exception => e
-        #   render js: %Q{alert("Sorry, but RecipePower can't make sense of the cookmark '#{url}'");}
-        # end
+        rescue Exception => e
+          render js: %Q{alert("Sorry, but RecipePower can't make sense of the cookmark '#{url}'");}
+        end
       }
     end
   end

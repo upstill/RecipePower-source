@@ -22,6 +22,7 @@ module Collectible
     # attr_accessor :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
     # attr_accessible :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
     attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
+    attr_accessor :page_ref_type
   end
 
   # Prepare for editing the model by setting the collectible attributes

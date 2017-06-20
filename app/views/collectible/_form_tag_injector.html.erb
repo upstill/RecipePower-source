@@ -46,12 +46,13 @@
 
     <div class="right">
       <%= f.label "Collect As" %>
+      <!-- Use the virtual attribute for the page_ref type to arm the type selector -->
+      <% @entity.page_ref_type = @entity.page_ref.type %>
       <%= collection_select @decorator.object.model_name.param_key,
                             :page_ref_type,
                             PageRefServices.type_selections,
                             :last,
-                            :first,
-                            selected: PageRefServices.type_selections.find { |ts| ts.last == @decorator.page_ref.type }.first %>
+                            :first %>
       <br><br><%= f.check_box :collectible_private %>
       <%= f.label :collectible_private, 'Private', class: 'checkbox' %>
       <%= hidden_field_tag 'layout', 'injector' %>

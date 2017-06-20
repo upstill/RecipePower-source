@@ -27,7 +27,6 @@ class PageRefServices
   # Get a collectible entity for the PageRef, which may be the PageRef itself
   # If the pageref has an entity_id, lookup with that
   def entity params
-    entity = nil
     klass =
     case page_ref.type
       when 'RecipePageRef'
@@ -35,16 +34,15 @@ class PageRefServices
       when 'SitePageRef'
         Site
       else
-        entity = page_ref
+        page_ref.class
     end
-    unless entity ||= klass.find_by(id: params[:entity_id])
+    klass.find_by(id: params[:entity_id]) || begin
       # Initialize the entity from parameters and extractions, as needed
       defaults = params[:page_ref].slice(:title)
       defaults.merge! params[:extractions] if params[:extractions]
-      entity = CollectibleServices.find_or_create({url: page_ref.url}, defaults, klass)
+      CollectibleServices.find_or_create({url: page_ref.url}, defaults, klass)
       # entity.decorate.findings = FinderServices.from_extractions(params[:page_ref], params[:extractions])
     end
-    entity
   end
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
