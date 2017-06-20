@@ -70,11 +70,9 @@ class ApplicationController < ActionController::Base
   # We also setup an instance variable for the entity according to its class,
   #  and also set up a decorator (@decorator) on the entity
   # Return value: true if all is well
-  def update_and_decorate entity=nil, do_touch=false
-    if entity.class == TrueClass or entity.class == FalseClass
-      entity, do_touch = nil, entity
-    else
-      do_touch = entity.nil? # An entity is given => assume we don't touch
+  def update_and_decorate entity=nil, options={}
+    if entity.is_a? Hash
+      entity, options = nil, entity
     end
     if entity.is_a? Draper::Decorator
       @decorator = entity
@@ -93,7 +91,7 @@ class ApplicationController < ActionController::Base
     entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
-      current_user.touch(entity) if do_touch
+      current_user.touch(entity) if options[:touch]
       if attribute_params
         entity.incoming_attributes attribute_params.keys if entity.is_a? Taggable
         entity.update_attributes attribute_params # There are parameters to update

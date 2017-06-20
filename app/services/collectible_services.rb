@@ -76,5 +76,4 @@ class CollectibleServices
     entity
   end
 
-
 end

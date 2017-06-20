@@ -28,7 +28,7 @@ class ListsController < CollectibleController
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
-    update_and_decorate List.assert( params[:list][:name], current_user), true
+    update_and_decorate List.assert( params[:list][:name], current_user), touch: true
 
     if @list.id
       flash[:popup] = "Found list '#{@list.name}'."
@@ -73,7 +73,7 @@ class ListsController < CollectibleController
   end
 
   def destroy
-    update_and_decorate false
+    update_and_decorate
     name = @list.name
     selector = "tr##{@decorator.dom_id}"
     @list.destroy
@@ -86,7 +86,7 @@ class ListsController < CollectibleController
 
   def new
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
-    update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id), true
+    update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id), touch: true
     smartrender
   end
 

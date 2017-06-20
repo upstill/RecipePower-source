@@ -20,7 +20,7 @@ class RecipesController < CollectibleController
           @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
                                                          params[:extractions],
                                                          response_service.controller_model_class
-          update_and_decorate @resource, true
+          update_and_decorate @resource, touch: true
           if @resource.id
             current_user.collect @resource
             if response_service.injector?
@@ -44,7 +44,7 @@ class RecipesController < CollectibleController
           @resource = CollectibleServices.find_or_create params[response_service.controller_model_name]||{},
                                                          params[:extractions],
                                                          response_service.controller_model_class
-          update_and_decorate @resource, true
+          update_and_decorate @resource, touch: true
           if @resource.id && @resource.errors.empty?
             current_user.collect @resource
             # Recipe all captured and everything. Let's go tag it.
