@@ -20,6 +20,37 @@ namespace :sites do
     }
   end
 
+  task :elide_slash => :environment do
+    PageRef.where(type: 'SitePageRef').each { |spr|
+      begin
+        uri = URI spr.url
+        uri.path = '' if uri.path == '/'
+        url = uri.to_s
+      rescue
+        puts "Bad URL on ##{spr.id}: '#{spr.url}'"
+        next
+      end
+      unless spr.url == url
+        puts "Fixing ##{spr.id}: '#{spr.url}'"
+        spr.aliases -= [url]
+        spr.aliases |= [spr.url]
+        spr.url = url
+      end
+    }
+  end
+
+  # Confirm that a site can be looked up via its PageRef's url
+  task :lookup_url => :environment do
+    PageRef.where(type: 'SitePageRef').each { |spr|
+      found = SitePageRef.find_by_url(spr.url)
+      if !found
+        "#{spr.url} (#{spr.id}) not findable"
+      elsif found.id != spr.id
+        "'#{spr.url}' (#{spr.id}) finds '#{spr.url}' (#{spr.id})"
+      end
+    }
+  end
+
   task :convert_references => :environment do
     reports = [ '***** rake sites:convert_references ********']
     (s = Site.find_by(id: 3463)) && s.destroy
