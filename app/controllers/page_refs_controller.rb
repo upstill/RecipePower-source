@@ -16,7 +16,7 @@ class PageRefsController < CollectibleController
 
   # GET /page_refs/new
   def new
-    @page_ref = DefinitionPageRef.new
+    @page_ref = RecipePageRef.new
     smartrender
   end
 

@@ -130,7 +130,12 @@ div.control-group {
 
   div.form-group {
     margin-bottom: 25px; // A little more breathing room, if you please...
+    &.page_ref_type {
+      display: inline-block;
+    }
     &.actions {
+      display: inline-block;
+      float: right;
       margin-top: 5px;
       height: 20px;
     }

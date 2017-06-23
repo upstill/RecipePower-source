@@ -49,6 +49,7 @@ module NavtabsHelper
           link_to_submit('The RecipePower Collection', search_path()),
           '<hr class="menu">'.html_safe,
         link_to_submit('Add to Collection...', new_recipe_path, :mode => :modal),
+        link_to_submit('New PageRef...', new_page_ref_path, :mode => :modal),
         link_to_submit('Install Cookmark Button...', cookmark_path, :mode => :modal)
       ]
     end

@@ -1,3 +1,6 @@
-<%= modal_dialog 'new_ref new-style green', 'Add a Cookmark' do %>
-    <%= render 'form_new', page_ref: @page_ref %>
+<%= modal_dialog 'new_recipe new-style salmon',
+                 'Add a Cookmark the Hard Way',
+                 dialog_class: 'modal-lg',
+                 data: { focus: 'input#page_ref_url'} do %>
+    <%= render 'form_new' %>
 <% end %>
