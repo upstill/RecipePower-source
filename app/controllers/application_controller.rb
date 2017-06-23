@@ -82,6 +82,7 @@ class ApplicationController < ActionController::Base
     if entity
       # If the entity is provided, ignore parameters
       modelname = entity.class.to_s.underscore
+      attribute_params = params[modelname.to_sym] if options[:update_attributes]
     else # If entity not provided, find/build it and update attributes
       modelname = response_service.controller_model_name # params[:controller].sub(/_controller$/, '').singularize
       objclass = response_service.controller_model_class

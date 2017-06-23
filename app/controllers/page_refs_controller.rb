@@ -27,22 +27,15 @@ class PageRefsController < CollectibleController
   end
 
   # GET /page_refs/1/tag
-  def tag # Collect URL from foreign site, asking whether to re-direct to edit
-    # return if need_login true
-    # Here is where we take a hit on the "Add to RecipePower" widget,
-    # and also invoke the 'new cookmark' dialog. The difference is whether
-    # parameters are supplied for url, title and note (though only URI is required).
-    # Either get the pageref directly, via ID, or by creating one anew
+  # This is the followup to Recipes#capture, taking a url and a collection of extracted data,
+  # producing a page_ref to match, then finding/creating a collectible entity from that
+  # In the case of Recipes and Sites, that entity is different from the PageRef; otherwise
+  # it's the same.
+  # Regardless, we throw up the tagging dialog, which returns to the #tag method for setting
+  # the appropriate attributes.
+  def tag
     return super unless request.method == 'GET' # We have exclusive responsibility for setting up tagging
-    original = PageRef.find_by id: params[:id]
-    url = params[:page_ref][:url]
-    if params[:extractions]
-      url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
-    end
-    # Construct a valid URL from the given url and the extracted URI or href
-    page_ref = (PageRefServices.assert((params[:type] || 'RecipePageRef'), url) || original)
-    page_ref.bkg_sync true # Wait until the gleanings come in
-    unless current_user
+    unless current_user # Have to be logged in!
       respond_to do |format|
         format.html {# This is for capturing a new recipe and tagging it using a new page.
           # Defer request, redirecting it for JSON
@@ -56,35 +49,56 @@ class PageRefsController < CollectibleController
         }
       end
     else
+      # Either get the pageref directly, via ID, or by creating one anew
+      original = PageRef.find_by id: params[:id]
+      url = params[:page_ref][:url]
+      if params[:extractions]
+        url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
+      end
+      uri = URI url
+      type = params[:page_ref][:type] || 'RecipePageRef'
+      # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
+      if type == 'RecipePageRef' && (uri.path.length < 2) && !(page_ref = RecipePageRef.find_by_url(url))
+        type = 'SitePageRef'
+      end
+      # Construct a valid URL from the given url and the extracted URI or href
+      page_ref ||= PageRefServices.assert(type, url) || original
+      page_ref.bkg_sync true # Wait until the gleanings come in before proceeding
       # Ensure there's an associated collectible entity
       # NB: it's safe to build one now that we've got a logged-in user
-      # The @presenting_resource is what we're "really" tagging, even though
+      # The entity is what we're "really" tagging, even though
       # the dialog keys on a page_ref.
       # This means we need to
       # 1) ensure the existence of the resource
       # 2) copy and save any parameters or extractions for it
       # 3) ensure that the user has collected it
-      update_and_decorate PageRefServices.new(page_ref).entity(params)
+
+      # Initialize the entity from parameters and extractions, as needed
+      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
+      entity = PageRefServices.new(page_ref).entity params
+      # Translate the :page_ref parameters to a collection aimed at this entity
+      params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref], entity
+      update_and_decorate entity
       current_user.collect @decorator.object
       respond_to do |format|
-          format.html {# This is for capturing a new recipe and tagging it using a new page.
-              if response_service.injector?
-                smartrender
-              else
-                # If we're collecting a recipe outside the context of the iframe, redirect to
-                # the collection page with an embedded modal dialog invocation
-                # tag_path = polymorphic_path [:tag, @entity]
-                redirect_to_modal polymorphic_path(:tag, @decorator.object)
-              end
-          }
-          format.json {
-              if @decorator.object.errors.any?
-                render :errors, locals: {entity: @decorator.object}
-              else
-                smartrender
-              end
-          }
-        end
+        format.html {# This is for capturing a new recipe and tagging it using a new page.
+          if response_service.injector?
+            smartrender
+          else
+            # If we're collecting a recipe outside the context of the iframe, redirect to
+            # the collection page with an embedded modal dialog invocation
+            # tag_path = polymorphic_path [:tag, @entity]
+            redirect_to_modal polymorphic_path(:tag, @decorator.object)
+          end
+        }
+        format.json {
+          if @decorator.object.errors.any?
+            render :errors, locals: {entity: @decorator.object}
+          else
+            smartrender
+          end
+        }
+      end
     end
   end
 

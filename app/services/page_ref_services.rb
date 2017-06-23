@@ -34,14 +34,19 @@ class PageRefServices
       when 'SitePageRef'
         Site
       else
-        page_ref.class
+        return page_ref.becomes(PageRef)
     end
     klass.find_by(id: params[:entity_id]) || begin
       # Initialize the entity from parameters and extractions, as needed
-      defaults = params[:page_ref].slice(:title)
+      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
+      defaults = {
+          'Title' => params[:page_ref][:title],
+          'href' => page_ref.url,
+          'Image' => params[:page_ref][:picurl]
+      }
       defaults.merge! params[:extractions] if params[:extractions]
-      CollectibleServices.find_or_create({url: page_ref.url}, defaults, klass)
-      # entity.decorate.findings = FinderServices.from_extractions(params[:page_ref], params[:extractions])
+      # Produce a set of initializers for the target class
+      CollectibleServices.find_or_create(page_ref, defaults, klass)
     end
   end
 
@@ -97,6 +102,34 @@ class PageRefServices
     other.destroy if other.id # May not have been saved
     page_ref.save
   end
+
+  # Convert a PageRef (and its associated entity, if any) to a new type
+  def convert entity_params={}, options={}
+    type = entity_params[:page_ref_type]
+    entity = options[:entity]
+    convertible = case page_ref
+                    when RecipePageRef
+                      options[:convert_recipe]
+                    when SitePageRef
+                      false
+                    else
+                      true
+                  end
+    typeclass = type.constantize
+    if newpr = typeclass.find_by_url(page_ref.url, false)
+      # TODO What attributes do we impose on an existing page_ref?
+      page_ref.destroy if convertible
+    elsif convertible
+      page_ref.becomes typeclass
+      page_ref.type = type
+      newpr = page_ref
+    else
+      (newpr = page_ref.dup.becomes typeclass).type = type
+    end
+    # Now that we have a PageRef, build and initialize a corresponding Recipe or Site as necessary
+    PageRefServices.new(newpr).entity page_ref: entity_params.except(:id, :page_ref_id)
+  end
+
 
   def self.assert type, uri
     (type.present? ? type.constantize : PageRef).fetch uri

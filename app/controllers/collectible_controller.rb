@@ -105,19 +105,37 @@ class CollectibleController < ApplicationController
   def tag
     if current_user
       modelname = response_service.controller_model_name
+      modelparams = params[modelname]
       if request.method == 'GET' # We're not saving anything otherwise
         params.delete modelname
       else
-        misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
+        misc_tag_tokens = modelparams.delete :editable_misc_tag_tokens
       end
       objclass = response_service.controller_model_class
       entity = objclass.find_by id: params[:id]
-      if params[modelname].page_ref_type && (entity.page_ref.type != params[modelname].page_ref_type)
+      decorator = entity.decorate
+      # Detect and act upon a proposed change of type
+      if (prtype = modelparams[:page_ref_type]) && (entity.page_ref.type != prtype)
+        # If all of the recipes associated with the pr can be destroyed
+        # (because they are uncollected), then we can just retype the original
+        convert_recipe = (entity.model_name == 'Recipe') &&
+            entity.page_ref.recipes.all? { |recipe|
+              # Remove any uncollected recipes
+              if (recipe.user_ids - [current_user.id]).present?
+                false
+              else
+                recipe.destroy
+                true
+              end
+            }
         # Save as a different type of entity
-        entity = PageRefServices.new(@decorator.page_ref).convert_to(params[modelname].page_ref_type, entity: @decorator.entity)
-      else
-        update_and_decorate
+        entity = PageRefServices.new(entity.page_ref).convert(modelparams, entity: entity, convert_recipe: convert_recipe)
+        entity = entity.becomes(PageRef) if entity.is_a? PageRef
+        params[entity.model_name.param_key] = decorator.translate_params modelparams, entity
+      elsif entity.is_a? PageRef
+        entity = entity.becomes PageRef
       end
+      update_and_decorate entity, update_attributes: true
 
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain
@@ -265,20 +283,18 @@ class CollectibleController < ApplicationController
         # This gets extracted from the href passed as a parameter
         response_service.is_injector
         begin
-          uri = URI params[:recipe][:url]
-          url = uri.to_s
+          url = params[:recipe][:url]
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           else
-            page_ref = RecipePageRef.fetch url
+            page_ref = PageRef.find_by_url(url) || RecipePageRef.fetch(url)  # Default is recipe, unless another exists
             if page_ref.errors.any?
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{page_ref.errors.messages})") ; }
             else
               # Apply picurl and title from capture to the page_ref
               # page_ref.save
-              # @url = capture_recipes_url response_service.redirect_params(params.slice(:recipe).merge sourcehome: "#{uri.scheme}://#{uri.host}")
               # Building the PageRef may lead to a different url than what was passed in
-              edit_params = response_service.redirect_params.merge sourcehome: "#{uri.scheme}://#{uri.host}",
+              edit_params = response_service.redirect_params.merge sourcehome: host_url(url),
                                                                    page_ref: {
                                                                        url: page_ref.url,
                                                                        type: page_ref.type,

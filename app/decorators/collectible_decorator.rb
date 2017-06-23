@@ -8,6 +8,11 @@ class CollectibleDecorator < Draper::Decorator
     what.to_s.downcase.to_sym
   end
 
+  def attribute_represents what
+    what = what.to_sym
+    what if what != :page_ref_type
+  end
+
   # ##### Extract various forms of the model's name
   # Recipe => 'Recipe'
   # FeedEntry => 'FeedEntry'
@@ -172,6 +177,16 @@ class CollectibleDecorator < Draper::Decorator
       tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Ingredient' }
     end
 =end
+  end
+
+  def translate_params params, entity
+    ed = entity.decorate
+    params.inject(HashWithIndifferentAccess.new) { |memo, item|
+      if attr = attribute_represents(item.first)
+        memo[ed.attribute_for(attr)] = item.last
+      end
+      memo
+    }
   end
 
   # The robotags are those owned by super

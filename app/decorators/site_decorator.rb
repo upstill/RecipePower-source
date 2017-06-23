@@ -18,6 +18,20 @@ class SiteDecorator < CollectibleDecorator
     end
   end
 
+  # What the attributes of a site "really" represent
+  def attribute_represents what
+    case what.to_sym
+      when :name
+        :title
+      when :logo
+        :image
+      when :home
+        :url
+      else
+        super
+    end
+  end
+
   def title
     object.name
   end
@@ -36,6 +50,10 @@ class SiteDecorator < CollectibleDecorator
 
   def url
     object.home
+  end
+
+  def url= url
+    object.home = url
   end
 
   def site
@@ -102,6 +120,10 @@ class SiteDecorator < CollectibleDecorator
     gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value end
     gleaning.extract1 'Title' do |value| object.name = value end
     gleaning.extract1 'Description' do |value| object.description = value end
+  end
+
+  def eligible_tagtypes
+    ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
   end
 
 end

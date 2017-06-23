@@ -74,7 +74,7 @@ module Pagerefable
           url
         end
 
-        define_method(url_attribute) do
+        define_method url_attribute do
           # This will cause an exception for entities without a corresponding reference
           page_ref ? page_ref.url : (super() if self.has_attribute?(url_attribute))
         end

@@ -195,6 +195,7 @@ class PageRef < ActiveRecord::Base
 
   # Lookup a PageRef. We undergo two queries, on the theory that a direct lookup is faster
   def self.find_by_url url, single_query=true
+    url = indexing_url(url)
     single_query ?
         self.find_by(url_query url) :
         (self.find_by(url: url) || self.find_by(self.arel_table[:aliases].overlap [url]))
@@ -205,9 +206,8 @@ class PageRef < ActiveRecord::Base
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
   def self.fetch url
-    url.sub! /\#[^#]*$/, '' # Elide the target for purposes of finding
     unless mp = self.find_by_url(url)
-      mp = self.new url: url
+      mp = self.new url: indexing_url(url)
       mp.sync
       if !mp.errors.any? || mp.extant_pr
         if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL

@@ -19,7 +19,12 @@ class CollectibleServices
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
-  def self.find_or_create params, extractions = nil, klass=Recipe
+  def self.find_or_create params_or_page_ref, extractions = nil, klass=Recipe
+    if params_or_page_ref.is_a?(Hash)
+      params, page_ref = params_or_page_ref, nil
+    else
+      params, page_ref = { url: params_or_page_ref.url }, params_or_page_ref
+    end
     # Recipe (or whatever) exists and we're just touching it for the user
     return klass.find(params[:id]) if params[:id]
     if extractions.is_a? Class
@@ -43,7 +48,7 @@ class CollectibleServices
     uri = URI url
     if uri.blank?
       entity = klass.new
-    elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new recipe
+    elsif (id = params[:id].to_i) && (id > 0) # id of 0 means create a new entity
       begin
         entity = klass.find id
       rescue => e
@@ -57,20 +62,14 @@ class CollectibleServices
       entity = klass.new
       if uri.to_s.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
         entity.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
-      elsif entity.is_a? Pagerefable
-        entity.url = url # Defines a page_ref on the url
-        # If this url is to the home of a site, return that Site object instead
-        if site = entity.page_ref.site # ...which should have been created in the course of assigning the url
-          site_uri = URI site.home
-          # We assume that if the host and path of the two entities match, it's a site
-          if (uri.host == site_uri.host) &&
-              # Ignore leading and trailing slashes in comparing paths
-              uri.path.sub(/^\//, '').sub(/\/$/, '') == site_uri.path.sub(/^\//, '').sub(/\/$/, '')
-            site.decorate.findings = findings
-            return site
-          end
+      else
+        decorator = entity.decorate
+        if page_ref
+          decorator.page_ref ||= page_ref
+        else
+          decorator.url = url
         end
-        entity.decorate.findings = findings # Now set the title, description, etc.
+        decorator.findings = findings # Now set the title, description, etc.
       end
     end
     entity
