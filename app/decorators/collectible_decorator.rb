@@ -179,9 +179,11 @@ class CollectibleDecorator < Draper::Decorator
 =end
   end
 
+  # Translate params for one class to those for another.
+  # NB: generally speaking, only common parameters (e.g., title, url, description) work properly
   def translate_params params, entity
     ed = entity.decorate
-    params.inject(HashWithIndifferentAccess.new) { |memo, item|
+    (params || {}).inject(HashWithIndifferentAccess.new) { |memo, item|
       if attr = attribute_represents(item.first)
         memo[ed.attribute_for(attr)] = item.last
       end

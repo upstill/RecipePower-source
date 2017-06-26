@@ -243,6 +243,11 @@ class PageRef < ActiveRecord::Base
     gleaning.bkg_go refresh
   end
 
+  # Will this page_ref be found when looking for a page_ref of the given type and url?
+  def answers_to? qtype, qurl
+    type == qtype && (url == qurl || aliases.include?(qurl))
+  end
+
 end
 
 class RecipePageRef < PageRef

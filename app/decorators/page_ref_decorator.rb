@@ -34,6 +34,12 @@ class PageRefDecorator < CollectibleDecorator
     end
   end
 
+  def human_name plural=false, capitalize=true
+    name = PageRefServices.type_to_name object.type
+    name = name.pluralize if plural
+    capitalize ? name : name.downcase
+  end
+
   def title
     name || url
   end

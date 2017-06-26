@@ -50,19 +50,31 @@ class PageRefsController < CollectibleController
       end
     else
       # Either get the pageref directly, via ID, or by creating one anew
-      original = PageRef.find_by id: params[:id]
-      url = params[:page_ref][:url]
+      # Either way, establish the desired type and url for the page_ref
+      if page_ref = PageRef.find_by(id: params[:id])
+        type, url = page_ref.type, page_ref.url
+      elsif params[:page_ref]
+        type, url = (params[:page_ref][:type] || 'RecipePageRef'), params[:page_ref][:url]
+      else
+        type, url = 'RecipePageRef', nil
+      end
+      # Construct a valid URL from the given url and the extracted URI or href
+      # Prefer the url from the extractions
       if params[:extractions]
         url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
       end
       uri = URI url
-      type = params[:page_ref][:type] || 'RecipePageRef'
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
-      if type == 'RecipePageRef' && (uri.path.length < 2) && !(page_ref = RecipePageRef.find_by_url(url))
+      if type == 'RecipePageRef' &&
+          (uri.path.length < 2) &&
+          !((page_ref && page_ref.answers_to?('RecipePageRef', url)) || (page_ref = RecipePageRef.find_by_url(url)))
+        # There is no extant recipe ref on a URL with no path => fetch/create a site instead
         type = 'SitePageRef'
       end
-      # Construct a valid URL from the given url and the extracted URI or href
-      page_ref ||= PageRefServices.assert(type, url) || original
+      # Now we compare the submitted page_ref, if any, to the requisite type and URL
+      page_ref = page_ref ?
+          PageRefServices.new(page_ref).make_match(type, url) :
+          PageRefServices.assert(type, url)
       page_ref.bkg_sync true # Wait until the gleanings come in before proceeding
       # Ensure there's an associated collectible entity
       # NB: it's safe to build one now that we've got a logged-in user
@@ -105,18 +117,12 @@ class PageRefsController < CollectibleController
   # POST /page_refs
   def create
     @page_ref = PageRefServices.assert params[:page_ref][:type], params[:page_ref][:url]
+    @page_ref.save if @page_ref.changed?
     if @page_ref.errors.any?
       resource_errors_to_flash @page_ref
       smartrender :new
     else
-      case @page_ref.class
-        when RecipePageRef
-          # TODO: Ensure existence of recipe, and go there
-        when SitePageRef
-          # TODO: Ensure existence of site, and go there
-        else
-          smartrender :action => :edit
-      end
+      redirect_to tag_page_ref_path(@page_ref.becomes(PageRef), :mode => :modal)
     end
   end
 

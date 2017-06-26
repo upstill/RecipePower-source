@@ -13,13 +13,14 @@ class CollectibleServices
     Rcpref.where(entity: entity, private: false, in_collection: true).includes(:user).map &:user
   end
 
-  # Either fetch an existing recipe record or make a new one, based on the
+  # Either fetch an existing object or make a new one, of the given klass, based on the
   # params. If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. If there are no params, just return a new recipe
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
   def self.find_or_create params_or_page_ref, extractions = nil, klass=Recipe
+    extractions, klass = nil, extractions if extractions.is_a?(Class)
     if params_or_page_ref.is_a?(Hash)
       params, page_ref = params_or_page_ref, nil
     else

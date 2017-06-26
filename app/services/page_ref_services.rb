@@ -24,6 +24,12 @@ class PageRefServices
     ]
   end
 
+  def self.type_to_name type
+    self.type_selections.each { |ts|
+      return ts.first if type == ts.last
+    }
+  end
+
   # Get a collectible entity for the PageRef, which may be the PageRef itself
   # If the pageref has an entity_id, lookup with that
   def entity params
@@ -130,7 +136,6 @@ class PageRefServices
     PageRefServices.new(newpr).entity page_ref: entity_params.except(:id, :page_ref_id)
   end
 
-
   def self.assert type, uri
     (type.present? ? type.constantize : PageRef).fetch uri
   end
@@ -155,6 +160,24 @@ class PageRefServices
     if rft && !page_ref.referent_ids.include?(rft.id)
       page_ref.referents << rft
       page_ref.save
+    end
+  end
+
+  def make_match type, url
+    return page_ref if page_ref.answers_to?(type, url)
+    typeclass = (type.present? ? type.constantize : PageRef)
+    if page_ref.type == type
+      # The given page_ref is of the appropriate type.
+      # If there is no other page_ref of that type with this url, we can just add the url
+      if other = typeclass.find_by_url(type, url)
+        other
+      else
+        # We can adopt this url for ourselves
+        page_ref.aliases << url
+        page_ref
+      end
+    else
+      typeclass.fetch url
     end
   end
 
