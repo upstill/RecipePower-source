@@ -179,7 +179,7 @@ module CollectibleHelper
             label = '&nbsp;In Collection' if do_label
             content_tag :span,
                         sprite_glyph(:check, size, title: 'In Collection') + label.html_safe,
-                        class: "collection-state #{dom_id decorator}"
+                        class: "collection-state #{dom_id decorator.object}"
           end
         else
           label = '&nbsp;Add to Collection' if do_label

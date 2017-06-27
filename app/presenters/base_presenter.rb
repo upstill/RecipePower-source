@@ -15,6 +15,13 @@ class BasePresenter
     # @display_services = DisplayServices.new viewer, @object
   end
 
+  def ribbon ribbon_class=nil, name=@decorator.human_name
+    return unless name.present?
+    h.content_tag :div,
+                  h.content_tag(:span, name),
+                  class: "ribbon #{ribbon_class}"
+  end
+
 private
 
   def self.presents(name)

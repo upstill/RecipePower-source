@@ -78,7 +78,7 @@ class CollectibleController < ApplicationController
         flash.now[:success] = 'Images found! Click on an image from the list below to select it.'
       end
     else
-      flash.now[:error] = "Gleaning can't be done on #{@decorator.model_name.collection.gsub '_', ''}"
+      flash.now[:error] = "Gleaning can't be done on #{@decorator.collection_name.gsub '_', ''}"
     end
   end
 

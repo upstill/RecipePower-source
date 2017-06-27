@@ -22,25 +22,25 @@ class CollectibleDecorator < Draper::Decorator
 
   # Recipe => 'recipe'
   # FeedEntry => 'feed_entry'
-  def singular
+  def singular_name
     model_name.singular
   end
 
   # Recipe => 'recipes'
   # FeedEntry => 'feed_entries'
-  def plural
+  def plural_name
     model_name.plural
   end
 
   # Recipe => 'recipe'
   # FeedEntry => 'feed_entry'
-  def element
+  def element_name
     model_name.element
   end
 
   # Recipe => 'Recipe'
   # FeedEntry => 'Feed entry'
-  def human
+  def human_name
     model_name.human
   end
 
@@ -52,7 +52,7 @@ class CollectibleDecorator < Draper::Decorator
 
   # Recipe => 'recipes'
   # FeedEntry => 'feed_entries'
-  def collection
+  def collection_name
     model_name.collection
   end
 

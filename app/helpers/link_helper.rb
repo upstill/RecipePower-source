@@ -144,7 +144,7 @@ module LinkHelper
     data = options[:data] || {}
     data[:report] = touchpath decorator
 
-    title = options[:title] || (decorator.title rescue "Untitled #{decorator.model_name.human}")
+    title = options[:title] || (decorator.title rescue "Untitled #{decorator.human_name}")
     if options[:truncate]
       title = title.truncate(options[:truncate])
     end

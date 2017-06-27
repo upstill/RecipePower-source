@@ -48,7 +48,7 @@
       <%= f.label "Collect As" %>
       <!-- Use the virtual attribute for the page_ref type to arm the type selector -->
       <% @entity.page_ref_type = @entity.page_ref.type %>
-      <%= collection_select @decorator.object.model_name.param_key,
+      <%= collection_select @decorator.param_key,
                             :page_ref_type,
                             PageRefServices.type_selections,
                             :last,

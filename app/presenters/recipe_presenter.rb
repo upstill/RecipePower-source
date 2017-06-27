@@ -17,6 +17,10 @@ class RecipePresenter < CollectiblePresenter
     end || ''
   end
 
+  # Recipes don't have a ribbon on their card
+  def ribbon
+  end
+
 =begin
   def card_avatar?
     card_video.present? || super

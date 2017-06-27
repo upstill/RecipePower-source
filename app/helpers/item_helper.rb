@@ -56,11 +56,11 @@ module ItemHelper
     if item_mode == :comments
       "show_comments" if [Recipe, List].include?(item.class)
     else
-      tail = item_or_decorator_or_specs ? "show" : "index"
+      tail = item_or_decorator_or_specs ? 'show' : 'index'
       tail << "_#{item_mode}" if item_mode
       if item
         item_class = item.class.to_s.pluralize
-        ctrl_class = (item_class+"Controller").constantize rescue nil
+        ctrl_class = (item_class+'Controller').constantize rescue nil
         view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
         view.sub('/_', '/')
       else

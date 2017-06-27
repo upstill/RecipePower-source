@@ -23,6 +23,7 @@ class PageRefDecorator < CollectibleDecorator
     end
   end
 
+=begin
   def name
     # The name by which the reference is referred to is either
     # 1) the link_text of the reference (preferred), or
@@ -33,6 +34,7 @@ class PageRefDecorator < CollectibleDecorator
       object.referents.first.name
     end
   end
+=end
 
   def human_name plural=false, capitalize=true
     name = PageRefServices.type_to_name object.type
@@ -41,7 +43,7 @@ class PageRefDecorator < CollectibleDecorator
   end
 
   def title
-    name || url
+    (object.title if object.title.present?) || (url if url.present?) || '<unknown title>'
   end
 
   def image
@@ -56,9 +58,9 @@ class PageRefDecorator < CollectibleDecorator
     url
   end
 
-  # The model_name for the decorator devolves to the PageRef's type, since
+  # The name for the decorator devolves to the PageRef's type, since
   # we may be dealing with a subclass of PageRef
-  def model_name
+  def name
     type
   end
 

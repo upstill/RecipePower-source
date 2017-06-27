@@ -15,6 +15,10 @@ class UserPresenter < CollectiblePresenter
         super
   end
 
+  # Users don't have a ribbon on their card
+  def ribbon
+  end
+
   def card_avatar_accompaniment
     contents =
         if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], current_user_or_guest).order(created_at: :desc).first

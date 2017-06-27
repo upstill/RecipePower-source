@@ -1,4 +1,9 @@
 class ListPresenter < CollectiblePresenter
+
+  # Lists don't have a ribbon on their card
+  def ribbon
+  end
+
   def card_subhead_content
     "A list by #{@object.owner.handle}."
   end

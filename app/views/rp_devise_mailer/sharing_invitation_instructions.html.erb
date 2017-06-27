@@ -167,7 +167,7 @@
 		<div class="header_content">
 			<div class="message_banner">
 				<strong><%= (inviter_name || "Someone").split(/\s/).first %></strong> sez:
-              Check out this <%= @decorator.object.model_name.human.downcase %> I found on
+              Check out this <%= @decorator.human_name.downcase %> I found on
 				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %>.
 			</div>
 			<% unless @recipient.invitation_message.blank? %>
