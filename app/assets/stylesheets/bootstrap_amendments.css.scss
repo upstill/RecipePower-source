@@ -160,6 +160,9 @@ div.control-group {
 
   div.dialog.modal {
     div.modal-dialog {
+      abbr[title] {
+        border: none;
+      }
     }
   }
 

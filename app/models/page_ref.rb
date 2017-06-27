@@ -21,7 +21,7 @@ class PageRef < ActiveRecord::Base
   @@mercury_attributes = [:url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :error_message, :http_status, :link_text, :errcode, :gleaning
+  attr_accessible *@@mercury_attributes, :type, :description, :error_message, :http_status, :link_text, :errcode, :gleaning
 
   attr_accessor :extant_pr,
                 :entity # Currently (transiently) designated collectible entity (which may be self)
@@ -34,6 +34,10 @@ class PageRef < ActiveRecord::Base
       puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
       pr.site = Site.find_or_create_for(pr.url)
     end
+  end
+
+  after_save do |pr|
+    glean unless title.present? && lead_image_url.present? && description.present? && author.present?
   end
 
   # serialize :aliases
@@ -61,6 +65,17 @@ class PageRef < ActiveRecord::Base
     bkg_execute {
       begin
         sync
+        # Pick up any attributes from the gleaning
+        unless title.present? && lead_image_url.present? && description.present? && author.present?
+          glean! # Don't come back without a gleaning
+          self.title = gleaning.results.results_for('Title').first unless title.present?
+          if picurl.blank? && (pu = gleaning.results_for('Image').first || lead_image_url).present?
+            self.picurl = pu
+          end
+          self.author = gleaning.results.results_for('Author').first unless author.present?
+          self.description = gleaning.results.results_for('Description').first unless description.present?
+        end
+        good?
       rescue Exception => err
         # Failed to complete properly
         err = ([err] + errors.full_messages).join "\n\t"
@@ -143,6 +158,7 @@ class PageRef < ActiveRecord::Base
       self.extraneity = data.slice(*(@@extraneous_attribs.map(&:to_s)))
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
       self.assign_attributes data.slice(*(@@mercury_attributes.map(&:to_s)))
+      glean unless title.present? && lead_image_url.present? && description.present? && author.present?
     rescue Exception => e
       self.errors.add :url, "Bad URL '#{url}': #{e}"
       self.http_status = 400
@@ -153,16 +169,21 @@ class PageRef < ActiveRecord::Base
   end
 
   def try_mercury url
-    uri = URI.parse 'https://mercury.postlight.com/parser?url=' + url
+    uri = URI.parse 'http://mercury.postlight.com/parser?url=' + url
     http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
+    # http.use_ssl = true
 
     req = Net::HTTP::Get.new uri.to_s
     req['x-api-key'] = ENV['MERCURY_API_KEY']
 
     response = http.request req
-
-    data = JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+    data =
+    case response.code
+      when '401'
+        HashWithIndifferentAccess.new(url: url, content: '', errorMessage: '401 Unauthorized')
+      else
+        JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+    end
 
     # Do QA on the reported URL
     uri = data['url'].present? ? URI.join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
