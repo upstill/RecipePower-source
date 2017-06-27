@@ -33,7 +33,7 @@ div.card-item {
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   font-family: $archivo;
   position: relative;
-  top: 15px;
+  // top: 15px;
   margin-bottom: 2em;
   color: #909090;
   @include card-color-scheme(generic);
