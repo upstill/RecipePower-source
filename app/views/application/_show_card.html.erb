@@ -1,6 +1,7 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+         style="min-height: 200px"
          onload="RP.card.onload(event)"
          data-masonry-options='{
             "gutter": 10,
@@ -8,10 +9,11 @@
             "stamp": ".stamp" }'>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
+      <%= presenter.card_label %>
       <%= presenter.card_avatar_column %>
       <div class="stamp title">
         <%= presenter.vote_buttons %>
-        <%= presenter.card_homelink link_direct: true, class: 'title-link' %>
+        <%= presenter.card_homelink link_direct: false, class: 'title-link' %>
         <%= presenter.edit_button if decorator.user_can? :edit %>
         <%# presenter.tag_button %>
         <%= presenter.collect_button %>
@@ -28,4 +30,5 @@
         <%= presenter.share_button %>
       </div>
     </div>
+    <%= presenter.content %>
 <% end %>

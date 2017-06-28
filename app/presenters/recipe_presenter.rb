@@ -21,6 +21,10 @@ class RecipePresenter < CollectiblePresenter
   def ribbon
   end
 
+  # Recipes don't have a tab on their card
+  def card_label
+  end
+
 =begin
   def card_avatar?
     card_video.present? || super

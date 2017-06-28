@@ -22,6 +22,16 @@ class BasePresenter
                   class: "ribbon #{ribbon_class}"
   end
 
+  # Recipes don't have a tab on their card
+  def card_label
+    label = content_tag :div,
+                        @decorator.human_name,
+                        class: 'card-label'
+    content_tag :div,
+        label,
+        class: 'label-rotator rotate'
+  end
+
   def content
     # Individual presenters may override to present content
   end

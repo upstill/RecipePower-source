@@ -31,12 +31,15 @@ div.card-item {
   -webkit-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   -moz-box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
   box-shadow: 5px 6px 10px -5px rgba(0, 0, 0, 0.75);
+  outline: 1px solid  $card-outline-color;
   font-family: $archivo;
   position: relative;
   // top: 15px;
   margin-bottom: 2em;
+  // margin-left: 4em;
   color: #909090;
   @include card-color-scheme(generic);
+  z-index: 1000;
   /*
   color: $generic-card-color;
   background-color: $generic-card-background-color;
@@ -44,6 +47,47 @@ div.card-item {
     color: $generic-card-title-color;
   }
   */
+  div.label-rotator {
+    width: 180px;
+    height: 51px;
+    position: absolute;
+    left: -115px;
+    top: 63px;
+    div.card-label {
+      -webkit-box-shadow: -5px -1px 10px -5px rgba(0, 0, 0, 0.75);
+      -moz-box-shadow: -5px -1px 10px -5px rgba(0, 0, 0, 0.75);
+      box-shadow: -5px -1px 10px -5px rgba(0, 0, 0, 0.75);
+      padding: 0 17px;
+      width: auto;
+      float: right;
+      height: 51px;
+      font-size: 32px;
+      font-family: $oswald-light;
+      font-weight: 400;
+      text-align: center;
+      color: #b6b6b6;
+      background-color: $generic-card-background-color;
+      border-left: 1px solid $card-outline-color;
+      border-top: 1px solid  $card-outline-color;
+      border-right: 1px solid  $card-outline-color;
+      &.cookmarks {
+        color: $recipes-panel-label-color;
+        font-size: 57px;
+      }
+      &.feeds {
+        color: $feeds-panel-label-color;
+      }
+      &.friends {
+        color: $friends-panel-label-color;
+      }
+      &.lists {
+        top: 88px;
+        font-size: 59px;
+        color: $list-panel-label-color;
+      }
+      // border: 1px solid green;
+    }
+  }
   div.title-glyph {
     color: #ea8a7a;
     height: 2em;

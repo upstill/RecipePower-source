@@ -12,7 +12,7 @@ class PageRefServices
         ['Recipe', 'RecipePageRef'],
         ['Site', 'SitePageRef'],
         # ['Referrable', 'ReferrablePageRef'],
-        ['Dictionary Entry', 'DefinitionPageRef'],
+        ['Definition', 'DefinitionPageRef'],
         ['Article', 'ArticlePageRef'],
         ['News Item', 'NewsitemPageRef'],
         ['Tip', 'TipPageRef'],

@@ -10,24 +10,29 @@
   z-index: 1;
   overflow: hidden;
   width: 75px; height: 75px;
+  // width: 115px; height: 115px;
   text-align: right;
 }
 .ribbon span {
   font-size: 10px;
+  // font-size: 14px;
   font-weight: bold;
   color: #FFF;
   text-transform: uppercase;
   text-align: center;
   line-height: 20px;
+  // line-height: 30px;
   transform: rotate(-45deg);
   -webkit-transform: rotate(-45deg);
   width: 100px;
+  // width: 155px;
   display: block;
   background: #79A70A;
   background: linear-gradient(#9BC90D 0%, #79A70A 100%);
   box-shadow: 0 3px 10px -5px rgba(0, 0, 0, 1);
   position: absolute;
   top: 19px; left: -21px;
+  // top: 30px; left: -32px;
 }
 .ribbon span::before {
   content: "";

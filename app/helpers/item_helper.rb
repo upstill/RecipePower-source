@@ -59,7 +59,8 @@ module ItemHelper
       tail = item_or_decorator_or_specs ? 'show' : 'index'
       tail << "_#{item_mode}" if item_mode
       if item
-        item_class = (@decorator ? @decorator.base_class_name : item.model_name.name).pluralize
+        # Prefer the decorator b/c the item's model_name may be for a subclass of an STI model
+        item_class = (@decorator || item).model_name.to_s.pluralize
         ctrl_class = (item_class+'Controller').constantize rescue nil
         view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
         view.sub('/_', '/')

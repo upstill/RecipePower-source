@@ -19,6 +19,10 @@ class UserPresenter < CollectiblePresenter
   def ribbon
   end
 
+  # Users don't have a tab on their card
+  def card_label
+  end
+
   def card_avatar_accompaniment
     contents =
         if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], current_user_or_guest).order(created_at: :desc).first

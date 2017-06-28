@@ -11,12 +11,6 @@ class ModelDecorator < Draper::Decorator
     model_name.name
   end
 
-  alias_method :base_class_name, :class_name
-
-  def as_base_class
-    base_class_name == class_name ? object : object.becomes(base_class_name.constantize)
-  end
-
   # Recipe => 'recipe'
   # FeedEntry => 'feed_entry'
   def singular_name
@@ -37,8 +31,10 @@ class ModelDecorator < Draper::Decorator
 
   # Recipe => 'Recipe'
   # FeedEntry => 'Feed entry'
-  def human_name
-    model_name.human
+  def human_name plural=false, capitalize=true
+    name = model_name.human
+    name = name.pluralize if plural
+    capitalize ? name : name.downcase
   end
 
   # Recipe => 'recipe'
