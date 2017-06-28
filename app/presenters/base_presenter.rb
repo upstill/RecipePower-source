@@ -22,6 +22,10 @@ class BasePresenter
                   class: "ribbon #{ribbon_class}"
   end
 
+  def content
+    # Individual presenters may override to present content
+  end
+
 private
 
   def self.presents(name)

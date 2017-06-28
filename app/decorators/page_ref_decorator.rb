@@ -60,7 +60,7 @@ class PageRefDecorator < CollectibleDecorator
 
   # The name for the decorator devolves to the PageRef's type, since
   # we may be dealing with a subclass of PageRef
-  def name
+  def class_name
     type
   end
 

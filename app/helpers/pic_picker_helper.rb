@@ -21,7 +21,7 @@ module PicPickerHelper
         contenteditable: true
     }
     do_glean = (options[:gleanable] != false) && @decorator.object.respond_to?(:gleaning)
-    divopts[:data] = { :'gleaning-url' => polymorphic_path( [:glean, decorator.object], what: 'images') } if do_glean
+    divopts[:data] = { :'gleaning-url' => polymorphic_path( [:glean, decorator], what: 'images') } if do_glean
     image = image_with_error_recovery decorator,
                                       id: 'rcpPic',
                                       fallback_img: true,
@@ -75,7 +75,7 @@ module PicPickerHelper
 
   # The link to the picture-picking dialog preloads the dialog, extracting picture links from the recipe's page
   def pic_picker_go_button decorator, picker_fallback_img=nil
-    golink = polymorphic_path [:editpic, decorator.object],
+    golink = polymorphic_path [:editpic, decorator],
                               golinkid: pic_picker_golinkid(decorator),
                               fallback_img: (picker_fallback_img || 'NoPictureOnFile.png')
     button_to_submit decorator.pageurl ? 'Pick Picture...' : 'Picture from Web...',

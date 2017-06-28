@@ -1,4 +1,4 @@
-class TagSelectionDecorator < Draper::Decorator
+class TagSelectionDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

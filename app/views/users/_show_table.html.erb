@@ -1,7 +1,7 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <td class="avatar-column">
       <%# image_enclosure decorator, fill_mode: 'fixed-width' %>
-      <%# link_to_submit decorator.handle, polymorphic_path(decorator.object) %>
+      <%# link_to_submit decorator.handle, polymorphic_path(decorator) %>
       <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
     </td>
     <td class="description-column">

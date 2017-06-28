@@ -16,9 +16,9 @@ class NotificationPresenter < BasePresenter
   def action_path
     case typesym
       when :share
-        polymorphic_path [:collect, shared]
+        polymorphic_path [:collect, shared.decorate]
       when :make_friend
-        polymorphic_path [:collect, source]
+        polymorphic_path [:collect, source.decorate]
     end
   end
 
@@ -26,9 +26,9 @@ class NotificationPresenter < BasePresenter
   def post_action_path
     case typesym
       when :share
-        polymorphic_path shared
+        polymorphic_path shared.decorate
       when :make_friend
-        polymorphic_path source
+        polymorphic_path source.decorate
     end
   end
 

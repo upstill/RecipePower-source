@@ -47,12 +47,12 @@ module PageletsHelper
   end
 
   # Return the followup after updating or destroying an entity: replace its pagelet with either an update, or the list of such entities
-  def pagelet_followup entity, destroyed=false
-    entity = entity.object if entity.is_a? Draper::Decorator
+  def pagelet_followup decorator, destroyed=false
+    entity = decorator.object 
     request =
         destroyed ?
             collection_user_path(current_user) :
-            polymorphic_path(entity, :nocache => true)
+            polymorphic_path(decorator, :nocache => true)
     {
         request: request,
         target: pagelet_body_selector(entity)

@@ -1,5 +1,5 @@
 <form accept-charset="UTF-8"
-      action="<%= polymorphic_path [:lists, @decorator.object ] %>"
+      action="<%= polymorphic_path [:lists, @decorator ] %>"
       class="form-inline lists_collectible"
       data-remote="true"
       data-type="json"
@@ -43,7 +43,7 @@
       <!-- Get the list of candidates in a followup request -->
       <div id="lists-collectible-suggested">
         <%= link_to_submit 'Sugs',
-                           polymorphic_path([:lists, decorator.object]), # gleaning_path(decorator.gleaning),
+                           polymorphic_path([:lists, decorator]), # gleaning_path(decorator.gleaning),
                            class: 'trigger hide' %>
       </div>
     </div>

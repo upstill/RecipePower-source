@@ -1,5 +1,5 @@
 <% @entity = @decorator.object %>
-<%= form_for @entity, :url => polymorphic_path([:tag, @entity], :mode => :injector), :html => { style: 'width:auto;height:auto'} do |f| %>
+<%= form_for @entity, :url => polymorphic_path([:tag, @decorator], :mode => :injector), :html => { style: 'width:auto;height:auto'} do |f| %>
     <%= form_errors_helper f, @entity, false %>
 
     <div class="left">

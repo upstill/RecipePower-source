@@ -61,7 +61,7 @@ module RecipesHelper
                 '',
                 class: 'recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open',
                 data: { title: decorator.title, tags: tags, description: decorator.description || '' }
-    link_to_dialog span, polymorphic_path(entity)
+    link_to_dialog span, polymorphic_path(decorator)
   end
 
   def recipe_tags_div recipe

@@ -1,4 +1,4 @@
-class FinderDecorator < Draper::Decorator
+class FinderDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

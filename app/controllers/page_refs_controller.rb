@@ -99,8 +99,7 @@ class PageRefsController < CollectibleController
           else
             # If we're collecting a recipe outside the context of the iframe, redirect to
             # the collection page with an embedded modal dialog invocation
-            # tag_path = polymorphic_path [:tag, @entity]
-            redirect_to_modal polymorphic_path(:tag, @decorator.object)
+            redirect_to_modal polymorphic_path(:tag, @decorator)
           end
         }
         format.json {

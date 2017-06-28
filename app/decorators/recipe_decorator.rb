@@ -1,6 +1,6 @@
 require 'string_utils.rb'
 require 'templateer.rb'
-class RecipeDecorator < CollectibleDecorator
+class RecipeDecorator < ModelDecorator
   include Templateer
 
   def attribute_for label

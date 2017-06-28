@@ -28,7 +28,7 @@
     </div>
     <div id="lists-collectible-suggested">
       <%= link_to_submit 'Sugs',
-                         polymorphic_path([:lists, decorator.object]), # gleaning_path(decorator.gleaning),
+                         polymorphic_path([:lists, decorator]), # gleaning_path(decorator.gleaning),
                          class: 'trigger hide' %>
     </div>
     <%# render 'lists_collectible_suggested', decorator: @decorator %>

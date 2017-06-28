@@ -115,16 +115,16 @@ module LinkHelper
     link_options
   end
 
-  def linkpath object, action=nil
-    (action && polymorphic_path([action, object]) rescue nil) ||
-        (polymorphic_path([:collection, object]) rescue nil) ||
-        (polymorphic_path([:contents, object]) rescue nil) ||
-        (polymorphic_path([:associated, object]) rescue nil) ||
-        (polymorphic_path(object) rescue nil)
+  def linkpath object_or_decorator, action=nil
+    (action && polymorphic_path([action, object_or_decorator]) rescue nil) ||
+        (polymorphic_path([:collection, object_or_decorator]) rescue nil) ||
+        (polymorphic_path([:contents, object_or_decorator]) rescue nil) ||
+        (polymorphic_path([:associated, object_or_decorator]) rescue nil) ||
+        (polymorphic_path(object_or_decorator) rescue nil)
   end
 
   def touchpath decorator
-    (polymorphic_path([:touch, decorator.object]) rescue nil) if current_user
+    (polymorphic_path([:touch, decorator]) rescue nil) if current_user
   end
 
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
@@ -167,7 +167,7 @@ module LinkHelper
           end
     else
       link =
-          if lp = linkpath(decorator.object, action)
+          if lp = linkpath(decorator, action)
             link_to_submit title,
                            lp,
                            {mode: :partial, title: 'Open Locally'}.

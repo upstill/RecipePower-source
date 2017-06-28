@@ -17,7 +17,7 @@
     <td><%= feed_status_summary feed %></td>
     <% if response_service.admin_view? %>
         <td>
-          <%= entity_approval feed %>
+          <%= entity_approval decorator %>
           <br>
            <%= collectible_destroy_button decorator,
                                           'xs',

@@ -1,4 +1,4 @@
-class ReferenceDecorator < Draper::Decorator
+class ReferenceDecorator < ModelDecorator
   delegate_all
 
   def name

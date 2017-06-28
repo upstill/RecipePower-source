@@ -49,7 +49,7 @@ module CollectibleHelper
         size, styling = nil, size
       end
       button = button_to_submit styling.delete(:label),
-                                polymorphic_path([:edit, entity], styling: styling),
+                                polymorphic_path([:edit, decorator], styling: styling),
                                 'glyph-edit-red',
                                 size,
                                 styling.merge(mode: :modal, title: 'Edit Me')
@@ -64,7 +64,7 @@ module CollectibleHelper
         size, styling = nil, size
       end
       button = button_to_submit options.delete(:label),
-                                polymorphic_path([:lists, entity], :mode => :modal),
+                                polymorphic_path([:lists, decorator], :mode => :modal),
                                 'glyph-list-add',
                                 size,
                                 :title => 'Manage treasuries on which this appears'
@@ -145,14 +145,14 @@ module CollectibleHelper
   end
 
   # Provide the button for uploading an image
-  def collectible_editpic_button entity, size=nil, styling={}
-    entity = entity.object if entity.is_a? Draper::Decorator
+  def collectible_editpic_button decorator, size=nil, styling={}
+    entity = decorator.object
     if permitted_to? :update, entity
       if size.is_a? Hash
         size, options = nil, size
       end
       button = button_to_submit styling.delete(:label),
-                                polymorphic_path( [:editpic, entity], styling: styling),
+                                polymorphic_path( [:editpic, decorator], styling: styling),
                                 'glyph-upload',
                                 size,
                                 styling.merge(mode: :modal, title: 'Get Picture')
@@ -242,7 +242,7 @@ module CollectibleHelper
     options = query_options.slice! :in_collection, :comment, :private
     query_options[:styling] = styling
     link_to_submit label,
-                   polymorphic_path([:collect, decorator.object], query_options),
+                   polymorphic_path([:collect, decorator], query_options),
                    {title: 'Add to My Collection'}.
                        merge(options).
                        merge(method: 'PATCH',

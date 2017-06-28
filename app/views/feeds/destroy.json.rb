@@ -1,5 +1,5 @@
 {
-    followup: pagelet_followup(@feed, true),
+    followup: pagelet_followup(@decorator, true),
     replacements: [
         feed_table_row_nuker(@feed)
     ]

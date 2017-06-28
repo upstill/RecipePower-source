@@ -7,7 +7,7 @@ module GleaningsHelper
       gleaning_field_declaration decorator, what, gleaning
     elsif decorator.object.is_a?(Linkable)
       trigger = link_to_submit 'Scrape',
-                               polymorphic_path([:glean, decorator.object], what: what), # gleaning_path(decorator.gleaning),
+                               polymorphic_path([:glean, decorator], what: what), # gleaning_path(decorator.gleaning),
                                class: 'trigger hide'
       gleaning_field_enclosure what,
                                trigger+image_tag('ajax-loader.gif', class: 'beachball', style: 'height: 15px;')

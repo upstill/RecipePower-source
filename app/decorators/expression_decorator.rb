@@ -1,4 +1,4 @@
-class ExpressionDecorator  < Draper::Decorator
+class ExpressionDecorator  < ModelDecorator
   delegate_all
 
   def self.ref_check

@@ -1,5 +1,5 @@
 require "templateer.rb"
-class TagDecorator < Draper::Decorator
+class TagDecorator < ModelDecorator
   include Templateer
   delegate_all
 

@@ -1,4 +1,4 @@
-class ReferentDecorator < Draper::Decorator
+class ReferentDecorator < ModelDecorator
   include Templateer
   delegate_all
 

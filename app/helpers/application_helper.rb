@@ -273,7 +273,8 @@ module ApplicationHelper
     end
   end
 
-  def entity_approval entity
+  def entity_approval decorator
+    entity = decorator.object
     labels =
     case entity
       when Site
@@ -293,13 +294,13 @@ module ApplicationHelper
           end
     # NB: entities can have nil approval status, in which case both buttons should show
     str << link_to_submit(labels[0],
-                          polymorphic_path( [:approve, entity], approve: 'Y'),
+                          polymorphic_path( [:approve, decorator], approve: 'Y'),
                           button_style: 'success',
                           button_size: 'xs',
                           method: 'POST'
     ) unless entity.approved == true
     str << link_to_submit(labels[2],
-                          polymorphic_path( [:approve, entity], approve: 'N'),
+                          polymorphic_path( [:approve, decorator], approve: 'N'),
                           button_style: 'danger',
                           button_size: 'xs',
                           method: 'POST'
@@ -307,8 +308,8 @@ module ApplicationHelper
     content_tag :span, str.html_safe, :id => dom_id(entity)
   end
 
-  def entity_approval_replacement entity
-    [ "span##{dom_id entity}", entity_approval(entity) ]
+  def entity_approval_replacement decorator
+    [ "span##{dom_id decorator.entity}", entity_approval(decorator) ]
   end
 
 end

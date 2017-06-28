@@ -1,4 +1,4 @@
-class VoteDecorator < Draper::Decorator
+class VoteDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

@@ -1,5 +1,5 @@
 require "templateer.rb"
-class RcprefDecorator < Draper::Decorator
+class RcprefDecorator < ModelDecorator
   include Templateer
   delegate_all
 

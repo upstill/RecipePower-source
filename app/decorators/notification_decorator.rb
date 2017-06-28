@@ -1,4 +1,4 @@
-class NotificationDecorator < Draper::Decorator
+class NotificationDecorator < ModelDecorator
   include Templateer
   delegate_all
 

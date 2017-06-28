@@ -1,4 +1,4 @@
-class SuggestionDecorator < Draper::Decorator
+class SuggestionDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

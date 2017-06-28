@@ -159,8 +159,7 @@ module CardPresentation
   def entity_links entities, options={}
     safe_join entities.collect { |entity|
       decorator = entity.decorate
-      homelink = decorator.respond_to?(:homelink) ? decorator.homelink : linkpath(entity)
-      link_to_submit decorator.title, homelink, :mode => (options[:mode] || :partial)
+      link_to_submit decorator.title, linkpath(decorator), :mode => (options[:mode] || :partial)
     }, (options[:joinstr] || ', ').html_safe
   end
 

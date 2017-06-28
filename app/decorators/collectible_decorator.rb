@@ -1,4 +1,4 @@
-class CollectibleDecorator < Draper::Decorator
+class CollectibleDecorator < ModelDecorator
   # include Draper::LazyHelpers
   include Templateer
   delegate_all
@@ -11,49 +11,6 @@ class CollectibleDecorator < Draper::Decorator
   def attribute_represents what
     what = what.to_sym
     what if what != :page_ref_type
-  end
-
-  # ##### Extract various forms of the model's name
-  # Recipe => 'Recipe'
-  # FeedEntry => 'FeedEntry'
-  def name
-    model_name.name
-  end
-
-  # Recipe => 'recipe'
-  # FeedEntry => 'feed_entry'
-  def singular_name
-    model_name.singular
-  end
-
-  # Recipe => 'recipes'
-  # FeedEntry => 'feed_entries'
-  def plural_name
-    model_name.plural
-  end
-
-  # Recipe => 'recipe'
-  # FeedEntry => 'feed_entry'
-  def element_name
-    model_name.element
-  end
-
-  # Recipe => 'Recipe'
-  # FeedEntry => 'Feed entry'
-  def human_name
-    model_name.human
-  end
-
-  # Recipe => 'recipe'
-  # FeedEntry => 'feed_entry'
-  def param_key
-    model_name.param_key
-  end
-
-  # Recipe => 'recipes'
-  # FeedEntry => 'feed_entries'
-  def collection_name
-    model_name.collection
   end
 
   # Check permissions for current user to access controller method

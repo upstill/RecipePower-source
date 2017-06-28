@@ -1,4 +1,4 @@
-class ScraperDecorator < Draper::Decorator
+class ScraperDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

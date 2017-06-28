@@ -22,7 +22,7 @@
       <% end %>
       <% if response_service.admin_view? %>
           <%= summarize_set '', [
-                                      entity_approval(site),
+                                      entity_approval(decorator),
                                       site_similars(site),
                                       site_nuke_button(site)# , site_glean_button(site)
                               ] %>
