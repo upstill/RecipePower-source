@@ -6,6 +6,10 @@
           <%# collectible_list_menu decorator, response_service.user, {} %>
         </div>
         <div class="title-box">
+          <% presenter.ribbon do |content| %>
+              <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
+              <%= content %>
+          <% end %>
           <%= presenter.card_homelink class: "title-link" %>
         </div>
         <% if decorator.description.present? %>

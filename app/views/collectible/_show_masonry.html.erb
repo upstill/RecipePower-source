@@ -1,6 +1,5 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
-      <%= presenter.ribbon %>
       <table class="cardlet-table">
         <tr>
           <% if decorator.imgdata.present? %>
@@ -9,12 +8,18 @@
               </td>
           <% end %>
           <td valign="top">
-            <div class="title-glyph top-right">
-              <%= collectible_collect_button decorator %>
-              <%# collectible_list_menu decorator, response_service.user, {} %>
-            </div>
-            <div class="title-box">
-              <%= presenter.card_homelink class: "title-link" %>
+            <div style="width:100%">
+              <div class="title-glyph top-right">
+                <%= collectible_collect_button decorator %>
+                <%# collectible_list_menu decorator, response_service.user, {} %>
+              </div>
+              <div class="title-box">
+                <% presenter.ribbon do |content| %>
+                    <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
+                    <%= content %>
+                <% end %>
+                <%= presenter.card_homelink class: "title-link" %>
+              </div>
             </div>
             <div class="source">
               <%= collectible_source decorator, class: 'source-link' %>

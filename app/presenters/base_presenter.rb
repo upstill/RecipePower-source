@@ -17,9 +17,10 @@ class BasePresenter
 
   def ribbon ribbon_class=nil, name=@decorator.human_name
     return unless name.present?
-    h.content_tag :div,
+    content = h.content_tag :div,
                   h.content_tag(:span, name),
                   class: "ribbon #{ribbon_class}"
+    block_given? ? yield(content) : content
   end
 
   # Recipes don't have a tab on their card

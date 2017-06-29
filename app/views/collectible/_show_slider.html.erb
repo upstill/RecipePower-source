@@ -1,5 +1,5 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <%= presenter.ribbon %>
+    <%# presenter.ribbon %>
     <div class='slider-left'>
       <div class='slider-pic onlinks'>
         <%= image_enclosure decorator,
@@ -10,6 +10,10 @@
         %>
         <%= homelink decorator %>
       </div>
+      <% presenter.ribbon do |content| %>
+          <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
+          <%= content %>
+      <% end %>
       <p class="slider-title">
         <%= homelink decorator, local_only: true %>
       </p>

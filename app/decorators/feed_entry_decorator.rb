@@ -4,7 +4,7 @@ class FeedEntryDecorator < CollectibleDecorator
   delegate_all
 
   def description
-    object.summary
+    object.summary.html_safe
   end
 
   # Define presentation-specific methods here. Helpers are accessed through
