@@ -75,7 +75,6 @@ class PageRefsController < CollectibleController
       page_ref = page_ref ?
           PageRefServices.new(page_ref).make_match(type, url) :
           PageRefServices.assert(type, url)
-      page_ref.bkg_sync true # Wait until the gleanings come in before proceeding
       # Ensure there's an associated collectible entity
       # NB: it's safe to build one now that we've got a logged-in user
       # The entity is what we're "really" tagging, even though
@@ -88,6 +87,7 @@ class PageRefsController < CollectibleController
       # Initialize the entity from parameters and extractions, as needed
       # defaults = page_ref.decorate.translate_params params[:page_ref], entity
       entity = PageRefServices.new(page_ref).entity params
+      entity.glean! # Wait until the gleanings come in before proceeding
       # Translate the :page_ref parameters to a collection aimed at this entity
       params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref], entity
       update_and_decorate entity

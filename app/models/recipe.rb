@@ -11,6 +11,7 @@ class Recipe < ActiveRecord::Base
   include Pagerefable # Has a PageRef linking to and reporting on the content
   pagerefable :url
   include Backgroundable
+  backgroundable
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -89,12 +90,11 @@ class Recipe < ActiveRecord::Base
     save
   end
 
-  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
-  def perform
-    bkg_execute do
-      page_ref.bkg_sync true
-    end
-    good?
+  # This is called when a gleaning is complete
+  def adopt_gleaning
+    self.title = page_ref.title if page_ref.title.present?
+    self.picurl = page_ref.picurl if page_ref.picurl.present?
+    self.description = page_ref.description if page_ref.description.present?
   end
 
 end

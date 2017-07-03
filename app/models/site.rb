@@ -76,21 +76,13 @@ class Site < ActiveRecord::Base
     end
   end
 
-  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously),
-  #  then taking on extractions from the page_ref (or its fallback, the gleaning)
-  def perform
-    bkg_execute do
-      page_ref.bkg_sync true
-    end
-    if good?
-      # Extract elements from the page_ref
-      page_ref.extract1 'Image' do |value| logo = value end unless logo.present?
-      # page_ref.extract1 'URI' do |value| object.home = value end
-      page_ref.extract_all 'RSS Feed' do |value| object.assert_feed value end
-      page_ref.extract1 'Title' do |value| name = value end unless name.present?
-      page_ref.extract1 'Description' do |value| object.description = value end unless description.present?
-    end
-    good?
+  def adopt_gleaning
+    # Extract elements from the page_ref
+    self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
+    self.name = page_ref.title unless name.present? || page_ref.title.blank?
+    self.description = page_ref.description unless description.present? || page_ref.description.blank?
+    gleaning.extract_all 'RSS Feed' do |value| assert_feed value end
+    save if changed?
   end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here
@@ -105,19 +97,6 @@ class Site < ActiveRecord::Base
     sibling_sites = Site.where(referent_id: site.referent_id)
     site.referent.destroy if site.referent && (sibling_sites.count == 1) && (sibling_sites.first.id == site.id)
   end
-
-=begin
-  # When a site is first created, it needs to have a SiteReference built from its sample attribute
-  def post_init
-    unless id
-      self.sample = normalize_url sample # Normalize the sample
-      # Attach relevant references if they haven't been mass-assigned
-      self.home = page_ref.url # sample if self.references.empty?
-      # Give the site a provisional name, the host name minus 'www.', if any
-      self.name = domain.sub(/www\./, '') if domain # Creates a corresponding referent
-    end
-  end
-=end
 
 public
 
@@ -288,6 +267,7 @@ public
       # Find a site, if any, based on the longest subpath of the URL
       unless site = Site.find_by(root: uri)
         site = Site.create( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
+        site.glean
       end
       site
     end

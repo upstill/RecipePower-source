@@ -174,6 +174,7 @@ module Backgroundable
       processing!
       perform
     end
+    good?
   end
 
   # bkg_asynch() waits for the worker process to complete the job

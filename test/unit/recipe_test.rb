@@ -2,15 +2,34 @@ require 'test_helper'
 require 'list'
 class RecipeTest < ActiveSupport::TestCase
 
+  test "gleaning does not happen redundantly" do
+    url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
+    recipe = Recipe.new url: url, title: 'placeholder'
+    assert_equal 'placeholder', recipe.title
+    recipe.glean!
+    assert recipe.good?
+    assert_not_equal 'placeholder', recipe.title
+    recipe.title = 'replacement'
+    recipe.glean!
+    assert_equal 'replacement', recipe.title
+    recipe.glean! true
+    # Since we forced the gleaning, the title should be replaced
+    assert_not_equal 'replacement', recipe.title
+  end
+
   test "url assigned" do
     url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
-    recipe = Recipe.new url: url
+    recipe = Recipe.new url: url, title: 'placeholder'
     assert_nil recipe.reference if recipe.respond_to?(:reference)
     assert !recipe.errors.any?
-    assert recipe.page_ref.good?
-    assert_equal url, recipe.url
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
+    recipe.glean # Set up the gleaning
+    recipe.glean! # Ensure it's executed
+    assert_equal url, recipe.url
+    assert recipe.site.virgin?
+    recipe.site.glean!
+    assert recipe.site.good?
   end
 
   test "url assigned with successful redirect" do
@@ -18,20 +37,20 @@ class RecipeTest < ActiveSupport::TestCase
     recipe = Recipe.new url: url
     assert_nil recipe.reference if recipe.respond_to?(:reference)
     assert !recipe.errors.any?
-    assert recipe.page_ref.good?
-    assert recipe.page_ref.aliases.include?(url) || recipe.url == url
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
+    # assert recipe.page_ref.good?
+    assert recipe.page_ref.aliases.include?(url) || recipe.url == url
   end
 
   test "url assigned with unsuccessful redirect" do
     url = 'http://patismexicantable.com/2012/05/creamy-poblano-soup.html'
     recipe = Recipe.new url: url
     assert_nil recipe.reference if recipe.respond_to?(:reference)
-    assert recipe.page_ref.bad?
-    assert recipe.page_ref.aliases.include?(url) || recipe.url == url
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
+    # assert recipe.page_ref.bad?
+    assert recipe.page_ref.aliases.include?(url) || recipe.url == url
   end
 
   test "blank url rejected" do

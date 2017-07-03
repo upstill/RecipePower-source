@@ -17,7 +17,7 @@ module Pagerefable
 
       # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
       belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true
-      delegate :glean, :'glean!', :to => :page_ref
+      # delegate :glean, :'glean!', :to => :page_ref
 
       has_one :site, :through => :page_ref
       # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
@@ -51,9 +51,36 @@ module Pagerefable
           page_ref_class = (self.to_s + 'PageRef').constantize
           self.joins(:page_ref).where(page_ref_class.url_path_query urpath)
         end
+
       end
 
       self.instance_eval do
+
+        # Glean info from the page in background as a DelayedJob job
+        # force => do the job even if it was priorly complete
+        define_method :glean do |force=false|
+          return if dj
+          if (force || !good?)
+            page_ref.glean force
+            bkg_enqueue true # Do the processing no matter what
+          end
+        end
+
+        # Glean info synchronously, i.e. don't return until it's done
+        # force => do the job even if it was priorly complete
+        define_method :'glean!' do |force=false|
+          bkg_go force
+        end
+
+        # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
+        define_method :perform do
+          bkg_execute do
+            page_ref.glean!
+            adopt_gleaning
+            true
+          end
+          good?
+        end
 
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
@@ -62,15 +89,17 @@ module Pagerefable
           klass = ref_type.constantize
           pr = klass.fetch url
           # Now we have a pageref which has the url, either in the attribute or the aliases
+=begin
           unless (pr.url == url) || pr.good?
             # The given url must be among the aliases => take it out and fetch on its own
             pr.aliases -= [ url ]
             pr.save
             pr = klass.fetch url
           end
+=end
           # errors.add(:url, pr.errors[url_attribute]) if pr.errors[url_attribute].present?
           self.page_ref = pr
-          pr.glean unless self.errors.any? # Update the gleaning data, if any
+          # pr.glean unless self.errors.any? # Update the gleaning data, if any
           url
         end
 
