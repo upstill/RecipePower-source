@@ -36,9 +36,9 @@ class PageRef < ActiveRecord::Base
     end
   end
 
-  after_save do |pr|
-    # When a page_ref is saved, check for needed gleaning
-    glean unless dj
+  after_create do |pr|
+    # When a page_ref is first saved, check for needed gleaning
+    glean
   end
 
   # serialize :aliases
@@ -62,10 +62,30 @@ class PageRef < ActiveRecord::Base
     self
   end
 
+  # Glean info from the page in background as a DelayedJob job
+  # force => do the job even if it was priorly complete
+  def glean force=false
+    return if dj
+    if force || virgin? # Once we've executed once, don't do it again unless forced
+      # Enqueue the gleaning as necessary and set up to process if so
+      bkg_enqueue enqueue_gleaning_as_necessary || try_mercury? || force
+    end
+  end
+
+  # Glean info synchronously, i.e. don't return until it's done
+  # force => do the job even if it was priorly complete
+  def glean! force=false
+    if dj
+      bkg_go # ...and don't come back until it's done
+    elsif force || virgin? || try_gleaning?
+      bkg_go enqueue_gleaning_as_necessary(true) || try_mercury? || force
+    end
+  end
+
   def perform
     bkg_execute {
       begin
-        sync if needs_mercury?
+        sync if try_mercury?
         # Pick up any attributes from the gleaning
         if enqueue_gleaning_as_necessary(true) # Ensure the gleaning has happened
           self.title = gleaning.results.results_for('Title').first unless title.present?
@@ -76,7 +96,7 @@ class PageRef < ActiveRecord::Base
           self.description = gleaning.results.results_for('Description').first unless description.present?
         end
         save if changed?
-        true # !(needs_gleaning? || needs_mercury?)
+        !(needs_gleaning? || needs_mercury?) # Set the status
       rescue Exception => err
         # Failed to complete properly
         err = ([err] + errors.full_messages).join "\n\t"
@@ -101,10 +121,8 @@ class PageRef < ActiveRecord::Base
     extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
-      if data['error']
-        self.errors.add :url, (self.error_message = data['messages'])
-      else
-        self.error_message = data['errorMessage']
+      if self.error_message = data['message'].if_present || data['error'].if_present || data['errorMessage'].if_present || data['messages']
+        self.errors.add :url, error_message
       end
       if data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
@@ -163,6 +181,7 @@ class PageRef < ActiveRecord::Base
       self.errors.add :url, "Bad URL '#{url}': #{e}"
       self.http_status = 400
     end
+    self.status = (errors.any? || error_message.present?) ? :bad : :good
   end
 
   def try_mercury url
@@ -246,23 +265,6 @@ class PageRef < ActiveRecord::Base
     ]
   end
 
-  # Glean info from the page in background as a DelayedJob job
-  # force => do the job even if it was priorly complete
-  def glean refresh=false
-    if needs_mercury? || needs_gleaning? || refresh
-      save unless id
-      # Enqueue the gleaning as necessary
-      enqueue_gleaning_as_necessary
-      bkg_enqueue true
-    end
-  end
-
-  # Glean info synchronously, i.e. don't return until it's done
-  # force => do the job even if it was priorly complete
-  def glean! refresh=false
-    bkg_go true if needs_mercury? || needs_gleaning? || refresh
-  end
-
   # Will this page_ref be found when looking for a page_ref of the given type and url?
   def answers_to? qtype, qurl
     type == qtype && (url == qurl || aliases.include?(qurl))
@@ -271,20 +273,21 @@ class PageRef < ActiveRecord::Base
   private
 
   # We have not extracted information to the full extent needed
-  def needs_mercury?
-    errors.any? || error_message.present?
+  def try_mercury?
+    errors.any? || error_message.present? || (http_status != 200)
   end
 
-  def needs_gleaning?
+  def try_gleaning?
     # Pick up any attributes from the gleaning
     title.blank? || lead_image_url.blank? || description.blank? || author.blank?
   end
 
+  # Ensure that a supporting gleaning is present, if required
+  # Return an indicator that the gleaning will need attending to (either good or in-process)
   def enqueue_gleaning_as_necessary synchronously=false
-    if needs_gleaning?
+    if try_gleaning? # Don't bother if the requisite attributes are already okay
       create_gleaning unless gleaning
       synchronously ? gleaning.bkg_go : gleaning.bkg_enqueue
-      true
     end
   end
 

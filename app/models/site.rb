@@ -42,6 +42,10 @@ class Site < ActiveRecord::Base
   #...and associate with recipes via the recipe_page_refs that refer back here
   has_many :recipes, :through => :recipe_page_refs, :dependent=>:restrict_with_error
 
+  after_create do |site|
+    glean # Start a job going to extract title, etc. from the home page
+  end
+
   before_validation do |site|
     if site.root.blank? && site.page_ref
       site.root =
@@ -267,7 +271,6 @@ public
       # Find a site, if any, based on the longest subpath of the URL
       unless site = Site.find_by(root: uri)
         site = Site.create( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
-        site.glean
       end
       site
     end

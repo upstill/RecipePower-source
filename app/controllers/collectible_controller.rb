@@ -206,7 +206,7 @@ class CollectibleController < ApplicationController
     entity = @decorator.object
     # if entity.respond_to?(:page_ref) && (pr = entity.page_ref) && !pr.gleaning
     if entity.respond_to?(:gleaning)
-      entity.glean unless entity.gleaning
+      entity.glean # Set gleaning process in motion
       # @image_list = (@decorator.gleaning && @decorator.gleaning.images) ? @decorator.gleaning.images : []
     end
     smartrender

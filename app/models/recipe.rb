@@ -27,6 +27,10 @@ class Recipe < ActiveRecord::Base
   validates :title, length: { minimum: 2 }
   # private
 
+  after_create do |recipe|
+    glean # Start a job going to extract title, etc. from the home page
+  end
+
   # has_many :ratings, :dependent => :destroy
   # has_many :scales, :through => :ratings, :autosave => true
   # attr_reader :ratings_attributes

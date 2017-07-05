@@ -82,23 +82,6 @@ module Linkable
 
       self.instance_eval do
 
-        if options[:gleanable]
-          # Glean info from the page in background as a DelayedJob job
-          # force => do the job even if it was priorly complete
-          define_method 'glean' do |force=false|
-            create_gleaning unless gleaning
-            # force ? gleaning.bkg_requeue : gleaning.bkg_enqueue
-	          gleaning.bkg_enqueue force
-          end
-
-          # Glean info synchronously, i.e. don't return until it's done
-          # force => do the job even if it was priorly complete
-          define_method 'glean!' do |force=false|
-            create_gleaning unless gleaning
-            gleaning.bkg_sync force
-          end
-        end
-
         # Whenever a reference is added, we ensure that it gets to the same site
         define_method "#{reference_association_pl}_ensure_site" do |reference|
           if (self.class != Site) && site && reference
@@ -141,8 +124,6 @@ module Linkable
         #  to the object by creating a new Reference bound to the object.
         # IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.
         define_method "#{url_attribute}=" do |pu|
-          # If we're changing the url, any gleanings need to be refreshed
-          glean(true) if respond_to?(:gleaning) && gleaning && ((self.method(:"#{url_attribute}").call || '') != (pu || '')) # Update the gleaning data, if any
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
           # Get the existing reference

@@ -56,32 +56,6 @@ module Pagerefable
 
       self.instance_eval do
 
-        # Glean info from the page in background as a DelayedJob job
-        # force => do the job even if it was priorly complete
-        define_method :glean do |force=false|
-          return if dj
-          if (force || !good?)
-            page_ref.glean force
-            bkg_enqueue true # Do the processing no matter what
-          end
-        end
-
-        # Glean info synchronously, i.e. don't return until it's done
-        # force => do the job even if it was priorly complete
-        define_method :'glean!' do |force=false|
-          bkg_go force
-        end
-
-        # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
-        define_method :perform do
-          bkg_execute do
-            page_ref.glean!
-            adopt_gleaning
-            true
-          end
-          good?
-        end
-
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
@@ -119,6 +93,35 @@ module Pagerefable
   end
 
   public
+
+  # Glean info from the page in background as a DelayedJob job
+  # force => do the job even if it was priorly complete
+  def glean force=false
+    return if dj # Already queued
+    # Only update the page_ref as necessary
+    bkg_enqueue page_ref.glean(force) || force # Do the processing no matter what
+  end
+
+  # Glean info synchronously, i.e. don't return until it's done
+  # force => do the job even if it was priorly complete
+  def glean! force=false
+    if dj
+      bkg_go
+    elsif force || virgin?
+      page_ref.glean! force
+      bkg_go true
+    end
+  end
+
+  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
+  def perform
+    bkg_execute do
+      page_ref.glean! # Finish doing any necessary gleaning of the page_ref
+      true
+    end
+    adopt_gleaning if good?
+    good?
+  end
 
   def ensure_site
     (page_ref.site ||= Site.find_or_create_for(page_ref.url)) if page_ref

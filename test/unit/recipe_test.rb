@@ -7,6 +7,7 @@ class RecipeTest < ActiveSupport::TestCase
     recipe = Recipe.new url: url, title: 'placeholder'
     assert_equal 'placeholder', recipe.title
     recipe.glean!
+    recipe.site.decorate
     assert recipe.good?
     assert_not_equal 'placeholder', recipe.title
     recipe.title = 'replacement'
