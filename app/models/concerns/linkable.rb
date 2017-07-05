@@ -40,7 +40,7 @@ module Linkable
 
     # options[:as]: the class which the referent keeps as an affiliate
     def linkable(url_attribute, reference_association, options = {})
-      reference_association_pl = reference_association.to_s.pluralize.to_sym
+      # reference_association_pl = reference_association.to_s.pluralize.to_sym
       reference_association = reference_association.to_sym
       ref_type = options[:as] || "#{self.to_s}Reference"
 
@@ -49,20 +49,21 @@ module Linkable
       attr_accessible url_attribute, reference_association
 
       # Can get back to references this way:
-      if options[:as]
+#      if options[:as]
         # References for ancillary attributes (e.g., thumbnails) belong to their affiliates
         belongs_to reference_association, class_name: ref_type
-      else
-        # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
-        has_one reference_association, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
-        has_many reference_association_pl, -> { where type: ref_type },
-                 foreign_key: 'affiliate_id',
-                 class_name: ref_type,
-                 after_add: :"#{reference_association_pl}_ensure_site",
-                 dependent: :destroy
-        attr_accessible reference_association_pl
-      end
+      # else
+      #   # References that define the location of their affiliates have a many-to-one relationship (i.e. many URLs can refer to the same entity)
+      #   has_one reference_association, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
+      #   has_many reference_association_pl, -> { where type: ref_type },
+      #            foreign_key: 'affiliate_id',
+      #            class_name: ref_type,
+      #            after_add: :"#{reference_association_pl}_ensure_site",
+      #            dependent: :destroy
+      #   attr_accessible reference_association_pl
+      # end
 
+=begin
       if options[:gleanable]
         # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
         # peg successful hits on finders. (Sites have an associated set of finders, on which they
@@ -79,9 +80,11 @@ module Linkable
           end
         end
       end
+=end
 
       self.instance_eval do
 
+=begin
         # Whenever a reference is added, we ensure that it gets to the same site
         define_method "#{reference_association_pl}_ensure_site" do |reference|
           if (self.class != Site) && site && reference
@@ -93,7 +96,6 @@ module Linkable
             end
           end
         end
-
         # Ensure that all the linkable's references refer to the same site
         define_method "#{reference_association_pl}_qa" do
           self.method(:"#{reference_association_pl}").call.each { |other_ref|
@@ -115,6 +117,7 @@ module Linkable
             end
           }
         end
+=end
 
         # Define singleton getter and setter methods for the URL by using a Reference object.
         # Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it
@@ -127,19 +130,19 @@ module Linkable
           # Since we can't modify references once created, we can only assert a new
           # URL by resort to a new reference
           # Get the existing reference
-          if options[:as]
+#          if options[:as]
             # The reference is to another entity type: we just index by URL and assign the reference association
             ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
             self.method(:"#{reference_association}=").call ref
-          elsif pu.blank?
-            self.errors.add(url_attribute, 'can\'t be blank')
-          else
-            # Create a new reference (or references, if there's a redirect involved) as necessary
-            refs = ref_type.constantize.find_or_initialize(pu)
-            # Give me the new references
-            self.method(:"#{reference_association}=").call refs.first
-            self.method(:"#{reference_association_pl}=").call refs
-          end
+          # elsif pu.blank?
+          #   self.errors.add(url_attribute, 'can\'t be blank')
+          # else
+          #   # Create a new reference (or references, if there's a redirect involved) as necessary
+          #   refs = ref_type.constantize.find_or_initialize(pu)
+          #   # Give me the new references
+          #   self.method(:"#{reference_association}=").call refs.first
+          #   # self.method(:"#{reference_association_pl}=").call refs
+          # end
           if self.has_attribute? url_attribute
             # Set the old url attribute--if it still exists
             super pu
@@ -153,12 +156,14 @@ module Linkable
           (super() if self.has_attribute?(url_attribute))
         end
 
+=begin
         unless options[:as]
           # The site for a referenced object
           define_method :site do
             @site ||= Site.find_or_create_for self.method(reference_association_pl).call.map(&:url)
           end
         end
+=end
 
       end
     end # Linkable
