@@ -96,9 +96,15 @@ class Recipe < ActiveRecord::Base
 
   # This is called when a gleaning is complete
   def adopt_gleaning
-    self.title = page_ref.title if page_ref.title.present?
-    self.picurl = page_ref.picurl if page_ref.picurl.present?
-    self.description = page_ref.description if page_ref.description.present?
+    if page_ref
+      self.title = page_ref.title if page_ref.title.present?
+      self.picurl = page_ref.picurl if page_ref.picurl.present?
+      self.description = page_ref.description if page_ref.description.present?
+      save if persisted? && changed?
+      true
+    else
+      false
+    end
   end
 
 end

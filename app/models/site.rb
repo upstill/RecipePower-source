@@ -82,11 +82,16 @@ class Site < ActiveRecord::Base
 
   def adopt_gleaning
     # Extract elements from the page_ref
-    self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
-    self.name = page_ref.title unless name.present? || page_ref.title.blank?
-    self.description = page_ref.description unless description.present? || page_ref.description.blank?
-    gleaning.extract_all 'RSS Feed' do |value| assert_feed value end
-    save if changed?
+    if page_ref
+      self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
+      self.name = page_ref.title unless name.present? || page_ref.title.blank?
+      self.description = page_ref.description unless description.present? || page_ref.description.blank?
+      gleaning.extract_all 'RSS Feed' do |value| assert_feed value end
+      save if persisted? && changed?
+      true
+    else
+      false
+    end
   end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here

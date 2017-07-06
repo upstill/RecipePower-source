@@ -90,6 +90,39 @@ module Backgroundable
     belongs_to :dj,
                :class_name => 'Delayed::Backend::ActiveRecord::Job',
                :dependent => :destroy
+
+    # These overrides provide for setting status before a backgroundable has been saved
+    def virgin!
+      if persisted?
+        super
+      else
+        self.status = 0
+      end
+    end
+
+    def processing!
+      if persisted?
+        super
+      else
+        self.status = 2
+      end
+    end
+
+    def good!
+      if persisted?
+        super
+      else
+        self.status = 3
+      end
+    end
+
+    def bad!
+      if persisted?
+        super
+      else
+        self.status = 4
+      end
+    end
   end
 
   def self.included(base)

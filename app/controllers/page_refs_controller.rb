@@ -87,7 +87,6 @@ class PageRefsController < CollectibleController
       # Initialize the entity from parameters and extractions, as needed
       # defaults = page_ref.decorate.translate_params params[:page_ref], entity
       entity = PageRefServices.new(page_ref).entity params
-      entity.glean! # Wait until the gleanings come in before proceeding
       # Translate the :page_ref parameters to a collection aimed at this entity
       params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref], entity
       update_and_decorate entity

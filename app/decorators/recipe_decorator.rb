@@ -5,6 +5,7 @@ class RecipeDecorator < CollectibleDecorator
 
   def initialize object, options={}
     object.glean!
+    super
   end
 
   def attribute_for label

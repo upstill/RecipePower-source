@@ -7,6 +7,7 @@ class SiteDecorator < CollectibleDecorator
 
   def initialize object, options={}
     object.glean!
+    super
   end
 
   def attribute_for what

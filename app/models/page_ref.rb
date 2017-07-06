@@ -68,7 +68,7 @@ class PageRef < ActiveRecord::Base
     return if dj
     if force || virgin? # Once we've executed once, don't do it again unless forced
       # Enqueue the gleaning as necessary and set up to process if so
-      bkg_enqueue enqueue_gleaning_as_necessary || try_mercury? || force
+      bkg_enqueue enqueue_gleaning_as_necessary || needs_mercury? || force
     end
   end
 
@@ -77,15 +77,15 @@ class PageRef < ActiveRecord::Base
   def glean! force=false
     if dj
       bkg_go # ...and don't come back until it's done
-    elsif force || virgin? || try_gleaning?
-      bkg_go enqueue_gleaning_as_necessary(true) || try_mercury? || force
+    elsif force || virgin? || needs_gleaning?
+      bkg_go enqueue_gleaning_as_necessary(true) || needs_mercury? || force
     end
   end
 
   def perform
     bkg_execute {
       begin
-        sync if try_mercury?
+        sync if needs_mercury?
         # Pick up any attributes from the gleaning
         if enqueue_gleaning_as_necessary(true) # Ensure the gleaning has happened
           self.title = gleaning.results.results_for('Title').first unless title.present?
@@ -121,15 +121,12 @@ class PageRef < ActiveRecord::Base
     extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
-      if self.error_message = data['message'].if_present || data['error'].if_present || data['errorMessage'].if_present || data['messages']
-        self.errors.add :url, error_message
-      end
       if data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
         data['url'] = url
       end
       self.http_status =
-          if self.error_message.blank?
+          if data['mercury_error'].blank? # All good from Mercury
             200
           else
             # Check the header for the url from the server.
@@ -137,7 +134,12 @@ class PageRef < ActiveRecord::Base
             # otherwise, it's an HTTP code
             puts "Checking direct access of PageRef ##{id} at '#{url}'"
             redirected_from = nil
+            # Loop over the redirects from the link, adding each to the record.
+            # Stop when we get to the final page or an error occurs
             while hr = header_result(data['url'])
+              # header_result returns either
+              # an integer result code (final result), or
+              # a string url for redirection
               if hr.is_a?(Fixnum)
                 if (hr == 404) && redirected_from
                   # Got a redirect via Mercury, but the target failed
@@ -147,12 +149,12 @@ class PageRef < ActiveRecord::Base
                 break;
               end
               hr = URI.join(data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
-              break if aliases.include?(hr)
+              break if aliases.include?(hr) # Time to give up when the url has been tried (it already appears among the aliases)
               puts "Redirecting from #{data['url']} to #{hr}"
               begin
                 self.aliases |= [redirected_from = data['url']] # Stash the redirection source in the aliases
                 data = try_mercury hr
-                if (self.error_message = data['errorMessage']).blank? # Success on redirect
+                if (self.error_message = data['mercury_error']).blank? # Success on redirect
                   hr = 200
                   break;
                 end
@@ -166,11 +168,10 @@ class PageRef < ActiveRecord::Base
           end
       # Did the url change to a collision with an existing PageRef of the same type?
       if (data['url'] != url) && (extant_pr = self.class.find_by_url(data['url']))
-        self.error_message = "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
-        puts error_message
+        puts "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
         self.http_status = 666
         data['url'] = url
-        errors.add :url, "has already been taken by #{self.class} ##{extant_pr.id}"
+        self.error_message = "URL has already been taken by #{self.class} ##{extant_pr.id}"
       end
       data['content'] ||= ''
       data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
@@ -178,10 +179,19 @@ class PageRef < ActiveRecord::Base
       self.aliases << url if (data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
       self.assign_attributes data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
-      self.errors.add :url, "Bad URL '#{url}': #{e}"
+      self.error_message = "Bad URL '#{url}': #{e}"
       self.http_status = 400
     end
-    self.status = (errors.any? || error_message.present?) ? :bad : :good
+    # Set the status to indicate whether the job should be tried again
+    # :bad simply means to rerun the job
+    # :good means not to, WHETHER OR NOT THE RESULTS ARE VALID
+    self.status =
+        if data['mercury_error'].present?
+          :bad
+        else
+          errors.add :url, error_message if http_status != 200
+          :good
+        end
   end
 
   def try_mercury url
@@ -205,6 +215,11 @@ class PageRef < ActiveRecord::Base
     uri = data['url'].present? ? URI.join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
     data['url'] = uri.to_s
     data['domain'] ||= uri.host
+    data['response_code'] = response.code
+    # Merge different error states into a mercury_error
+    data['mercury_error'] = data['errorMessage'].if_present || data['error'].if_present
+    data.delete :errorMessage
+    data.delete :error
     data
   end
 
@@ -273,11 +288,11 @@ class PageRef < ActiveRecord::Base
   private
 
   # We have not extracted information to the full extent needed
-  def try_mercury?
-    errors.any? || error_message.present? || (http_status != 200)
+  def needs_mercury?
+    http_status != 200
   end
 
-  def try_gleaning?
+  def needs_gleaning?
     # Pick up any attributes from the gleaning
     title.blank? || lead_image_url.blank? || description.blank? || author.blank?
   end
@@ -285,7 +300,7 @@ class PageRef < ActiveRecord::Base
   # Ensure that a supporting gleaning is present, if required
   # Return an indicator that the gleaning will need attending to (either good or in-process)
   def enqueue_gleaning_as_necessary synchronously=false
-    if try_gleaning? # Don't bother if the requisite attributes are already okay
+    if needs_gleaning? # Don't bother if the requisite attributes are already okay
       create_gleaning unless gleaning
       synchronously ? gleaning.bkg_go : gleaning.bkg_enqueue
     end

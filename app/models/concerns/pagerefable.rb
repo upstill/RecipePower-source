@@ -97,7 +97,7 @@ module Pagerefable
   # Glean info from the page in background as a DelayedJob job
   # force => do the job even if it was priorly complete
   def glean force=false
-    return if dj # Already queued
+    return if dj || !id # Already queued or not yet saved
     # Only update the page_ref as necessary
     bkg_enqueue page_ref.glean(force) || force # Do the processing no matter what
   end
@@ -108,7 +108,7 @@ module Pagerefable
     if dj
       bkg_go
     elsif force || virgin?
-      page_ref.glean! force
+      page_ref.glean! force if page_ref
       bkg_go true
     end
   end
@@ -116,10 +116,10 @@ module Pagerefable
   # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
   def perform
     bkg_execute do
-      page_ref.glean! # Finish doing any necessary gleaning of the page_ref
+      page_ref.glean! if page_ref # Finish doing any necessary gleaning of the page_ref
       true
     end
-    adopt_gleaning if good?
+    good! if good? && adopt_gleaning
     good?
   end
 
