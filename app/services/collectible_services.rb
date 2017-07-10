@@ -64,13 +64,12 @@ class CollectibleServices
       if uri.to_s.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
         entity.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
       else
-        decorator = entity.decorate
         if page_ref
-          decorator.page_ref ||= page_ref
+          entity.page_ref ||= page_ref
         else
-          decorator.url = url
+          entity.url = url
         end
-        decorator.findings = findings # Now set the title, description, etc.
+        entity.decorate.findings = findings # Now set the title, description, etc.
       end
     end
     entity

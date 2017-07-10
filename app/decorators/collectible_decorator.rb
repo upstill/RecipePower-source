@@ -58,13 +58,6 @@ class CollectibleDecorator < ModelDecorator
     end
   end
 
-  # Process the results of a gleaning
-  def assert_gleaning gleaning
-    gleaning.extract1 'Title' do |value| self.title = value end
-    gleaning.extract1 'Image' do |value| self.image = value end
-    gleaning.extract1 'Description' do |value| self.description = value end
-  end
-
   # Here's where we incorporate findings from a page into the corresponding entity
   def findings= findings
     self.title = findings.result_for('Title') if findings.result_for('Title').present?
@@ -83,7 +76,7 @@ class CollectibleDecorator < ModelDecorator
       self.image = findings.result_for('Image')
       image_changed = image.present?
     end
-    save if id.nil? || changed? || image_changed # No other extractions need apply until saved
+    # save if id.nil? || changed? || image_changed # No other extractions need apply until saved
     ts = nil
     {
         'Author' => 'Author',

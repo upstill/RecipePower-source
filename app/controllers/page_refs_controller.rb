@@ -91,6 +91,7 @@ class PageRefsController < CollectibleController
       params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref], entity
       update_and_decorate entity
       current_user.collect @decorator.object
+      @decorator.save # Finally! Save the object
       respond_to do |format|
         format.html {# This is for capturing a new recipe and tagging it using a new page.
           if response_service.injector?

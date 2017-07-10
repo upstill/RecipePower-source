@@ -28,11 +28,6 @@ class UserDecorator < CollectibleDecorator
     super << 'Image'
   end
 
-  def assert_gleaning gleaning
-    super
-    gleaning.extract1 'Image' do |value| object.image = value end
-  end
-
   def first_collector
   end
 

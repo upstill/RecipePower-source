@@ -449,13 +449,6 @@ class RecipeServices
           recipe_urls.each { |url|
             ref = RecipeReference.find_or_initialize url: url
           }
-        when 2
-          label = "Recipe via Reference"
-          index_name = "references_index_by_url_and_type"
-          index_table = :references
-          RecipeReference.lookup(recipe_urls).each { |ref|
-            recipe = ref.recipe
-          }
         when 3
           label = "Recipe via ID-no ref"
           index_name = "recipes_index_by_id"

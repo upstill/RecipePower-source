@@ -33,11 +33,6 @@ class RecipeDecorator < CollectibleDecorator
     super << 'URI'
   end
 
-  def assert_gleaning gleaning
-    super if defined? super
-    gleaning.extract1 'URI' do |value| object.url = value end
-  end
-
   def eligible_tagtypes
     ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
   end

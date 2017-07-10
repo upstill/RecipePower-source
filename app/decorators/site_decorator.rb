@@ -119,14 +119,6 @@ class SiteDecorator < CollectibleDecorator
     object.save if object.changed?
   end
 
-  def assert_gleaning gleaning
-    gleaning.extract1 'Image' do |value| object.logo = value end
-    gleaning.extract1 'URI' do |value| object.home = value end
-    gleaning.extract_all 'RSS Feed' do |value| object.assert_feed value end
-    gleaning.extract1 'Title' do |value| object.name = value end
-    gleaning.extract1 'Description' do |value| object.description = value end
-  end
-
   def eligible_tagtypes
     ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq # , :Dish, :Process, :Tool, :Course, :Diet
   end
