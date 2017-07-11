@@ -66,7 +66,7 @@ class PageRef < ActiveRecord::Base
   # force => do the job even if it was priorly complete
   def glean force=false
     return if dj
-    if force || virgin? # Once we've executed once, don't do it again unless forced
+    if force || virgin? || needs_gleaning? # Once we've executed once, don't do it again unless forced
       # Enqueue the gleaning as necessary and set up to process if so
       bkg_enqueue enqueue_gleaning_as_necessary || needs_mercury? || force
     end

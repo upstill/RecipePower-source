@@ -5,12 +5,9 @@ module GleaningsHelper
     return unless gleaning ||= decorator.glean
     if gleaning.good?
       gleaning_field_declaration decorator, what, gleaning
-    elsif decorator.object.is_a?(Linkable)
-      trigger = link_to_submit 'Scrape',
-                               polymorphic_path([:glean, decorator], what: what), # gleaning_path(decorator.gleaning),
-                               class: 'trigger hide'
-      gleaning_field_enclosure what,
-                               trigger+image_tag('ajax-loader.gif', class: 'beachball', style: 'height: 15px;')
+    elsif glean_path = polymorphic_path([:glean, decorator], what: what) rescue nil
+      glean_trigger = link_to_submit 'Scrape', glean_path, class: 'trigger hide'
+      gleaning_field_enclosure what, glean_trigger+image_tag('ajax-loader.gif', class: 'beachball', style: 'height: 15px;')
     end
   end
 
