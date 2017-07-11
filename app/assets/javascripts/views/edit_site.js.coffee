@@ -11,13 +11,6 @@ fix_buttons = (dlog) ->
 	visible_rows = $('div.finder-fields div.row.finder-field:visible', dlog)
 	$('a.move-finder-up', visible_rows.first()).attr('disabled', true);
 	$('a.move-finder-down', visible_rows.last()).attr('disabled', true);
-
-RP.edit_site.onopen = (dlog) ->
-	fix_buttons dlog
-
-# When dialog is loaded, activate its functionality
-RP.edit_site.onload = (dlog) ->
-	dlog = me()
 	# Only proceed if the dialog has children
 	if $('.edit_site > *').length > 0
 		$(dlog).on 'click', '.add_fields', (event) ->
@@ -54,6 +47,13 @@ RP.edit_site.onload = (dlog) ->
 			$('.required', my_row).removeClass('required').removeAttr('required')
 			fix_buttons dlog
 			event.preventDefault()
+
+RP.edit_site.onopen = (dlog) ->
+	fix_buttons dlog
+
+# When dialog is loaded, activate its functionality
+RP.edit_site.onload = (dlog) ->
+	dlog = me()
 
 jQuery ->
 	if dlog = me()[0]

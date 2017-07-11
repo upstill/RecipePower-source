@@ -23,7 +23,7 @@ class CollectibleDecorator < ModelDecorator
   def glean force=false
     if object.respond_to?(:glean)
       object.glean force
-      object.gleaning unless object.gleaning.bad?
+      object.gleaning unless (object.gleaning && object.gleaning.bad?)
     end
   end
 

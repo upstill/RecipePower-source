@@ -1148,7 +1148,7 @@ class SitesIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= Site.where(approved: approved)
+    @itemscope ||= admin_view ? Site.unscoped : Site.where(approved: approved)
   end
 
   def ordereditemscope

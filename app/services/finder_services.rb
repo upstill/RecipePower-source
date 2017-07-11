@@ -91,9 +91,11 @@ class FinderServices
         children = (ou.name == 'ul') ? ou.css('li') : [ou]
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
-          if attribute_value = attribute_name && child.attributes[attribute_name].to_s
+          if attribute_value = attribute_name && child.attributes[attribute_name].to_s.if_present
             attribute_value = URI.join(pagehome, attribute_value).to_s if(%w{ href src}.include? attribute_name)
             result.push attribute_value
+          elsif attribute_name == 'content'
+            result.push child.content.strip
           elsif child.name == 'a'
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'
@@ -103,7 +105,7 @@ class FinderServices
           elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             result.glean_atag finder[:linkpath], atag, pagehome
           else # Otherwise, it's just vanilla content
-            result.push child.content
+            result.push child.content.strip
           end
         end
       end

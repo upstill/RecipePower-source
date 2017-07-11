@@ -100,6 +100,12 @@ class Recipe < ActiveRecord::Base
       self.title = page_ref.title if page_ref.title.present?
       self.picurl = page_ref.picurl if page_ref.picurl.present?
       self.description = page_ref.description if page_ref.description.present?
+      if page_ref.gleaning && (tagstrings = page_ref.gleaning.results_for('Tags'))
+        ts = TaggingServices.new self
+        tagstrings.each { |tagstring|
+          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
+        }
+      end
       save if persisted? && changed?
       true
     else

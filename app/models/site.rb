@@ -4,9 +4,7 @@ require 'referent.rb'
 
 class Site < ActiveRecord::Base
   include Collectible
-  # TODO: pull the switch by making sites pagerefable rather than linkable
   include Referrable
-
   include Pagerefable
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
