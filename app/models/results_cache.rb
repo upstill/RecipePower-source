@@ -1113,7 +1113,7 @@ class TagsAssociatedCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= tag.taggings
+    @itemscope ||= tag.taggings.where.not(entity_type: 'PageRef')
   end
 
 end
