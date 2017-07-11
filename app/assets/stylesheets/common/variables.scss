@@ -627,7 +627,14 @@ $lists-panel-label-color: #e9eeea;
     color: map-get($card-colors, unquote("#{$cardType}-card-title-color"));
   }
   a {
-    color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));
+    color: mix(map-get($card-colors, unquote("#{$cardType}-card-link-color")),
+            black,
+            70%);
+    &.site {
+      color: mix(map-get($card-colors, unquote("#{$cardType}-card-link-color")),
+              black,
+              80%);
+    }
   }
   svg#vote-up, svg#vote-down {
     // color: map-get($card-colors, unquote("#{$cardType}-card-link-color"));

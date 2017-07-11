@@ -63,7 +63,7 @@ module ReferentsHelper
             when Referent
               summarize_referent affil, options.merge(label: affil.model_name.human.split(' ').first)
             when PageRef
-              present_definition affil, options.merge(label: 'About') # affil.model_name.human.sub(/ ref$/,''))
+              present_page_ref affil, options.merge(label: 'About') # affil.model_name.human.sub(/ ref$/,''))
             else
               safe_join [affil.model_name.human.split(' ').first.html_safe, homelink(affil)], ': '
           end

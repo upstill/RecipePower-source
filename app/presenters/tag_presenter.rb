@@ -3,7 +3,7 @@ class TagPresenter < BasePresenter
   presents :tag
 
   def tagserv
-    tagserv ||= TagServices.new tag
+    @tagserv ||= TagServices.new tag
   end
 
   def name withtype = false, do_link = true
@@ -35,6 +35,7 @@ class TagPresenter < BasePresenter
   # :children - Tags for the semantic offspring of a tag
   # :referents - The meaning(s) attached to a tag
   # :definition_page_refs - Any definitions using the tag
+  # :page_refs -- A set of page Refs selected using an entry from TagServices.type_selections
   # :synonyms - Tags for the semantic siblings of a tag
   # :similars - Tags for the lexical of a tag (those which have the same normalized_name )
 
@@ -59,6 +60,8 @@ class TagPresenter < BasePresenter
               tagserv.children true
             when :synonyms
               tagserv.synonyms true
+            when Array
+              tagserv.taggees_of_class what.last, true
             else
               tagserv.public_send what
           end
@@ -126,8 +129,8 @@ class TagPresenter < BasePresenter
         :tag_referents,
         :tag_parents,
         :tag_children,
-        :tag_references,
-    ]
+        # :tag_references,
+    ] + PageRefServices.type_selections[2..-1]
     if block_given?
       aspects.each { |aspect|
         yield *presenter.card_aspect(aspect)
@@ -141,7 +144,8 @@ class TagPresenter < BasePresenter
     itemstrs =
         (case which
            when :description
-             return ['', self.meaning || "... for tagging by #{decorator.typename}"]
+             return ['', "... for tagging by #{decorator.typename}"]
+             # return ['', self.meaning || "... for tagging by #{decorator.typename}"]
            when :tag_synonyms
              label_singular = 'synonym'
              summarize_aspect :synonyms, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
@@ -152,10 +156,13 @@ class TagPresenter < BasePresenter
            when :tag_similars
              label_singular = 'similar tag'
              summarize_aspect :lexical_similars, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
+           # Only when a tag's referent can be usefully described...
+=begin
            when :tag_referents
              label_singular = 'meaning'
              summarize_aspect :referents, :for => :raw, :helper => :homelink
            # content = h.summarize_tag_referents
+=end
            when :tag_parents
              label_singular = 'under category'
              # tagserv.parents.collect { |parent| h.homelink parent }
@@ -164,11 +171,17 @@ class TagPresenter < BasePresenter
              label = 'includes'
              # tagserv.children.collect { |child| h.homelink child }
              summarize_aspect :children, :for => :raw, :helper => :homelink
+=begin
            when :tag_references
              label_singular = 'see also'
              # content = h.summarize_tag_references
-             summarize_aspect :definition_page_refs, :for => :raw, :helper => :present_definition
+             summarize_aspect :definition_page_refs, :for => :raw, :helper => :present_page_ref
              # tagserv.definition_page_refs.collect { |definition| h.present_definition(definition) }.compact
+=end
+           when Array
+             label_singular = which.first
+             # The remaining "aspects" are entries from TagServices.type_selections
+             summarize_aspect which, :for => :raw, :helper => :present_page_ref
          end || []).compact
     content = safe_join(itemstrs, ', ') unless itemstrs.empty?
     label = (itemstrs.count > 1 ? label_singular.pluralize : label_singular) if label_singular

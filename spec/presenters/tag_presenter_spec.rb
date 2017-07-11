@@ -86,7 +86,7 @@ describe TagPresenter do
   end
 
   it 'presents references' do
-    probe = @presenter.summarize_aspect(:definition_page_refs, :helper => :present_definition, :label => 'reference')
+    probe = @presenter.summarize_aspect(:definition_page_refs, :helper => :present_page_ref, :label => 'reference')
     Capybara.string(probe).should have_css('strong', text: 'desserts')
   end
 

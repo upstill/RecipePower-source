@@ -60,6 +60,33 @@ class TagServices
   def definition_page_ref_count
     definition_page_ref_ids.count
   end
+
+# Return the definitions associated with the tag. This includes all the definitions from synonyms of the tag
+  def referred_page_ref_ids type
+    #   has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
+    tag.referents(true).collect { |referent| referent.page_refs.where(type: type).pluck :id }.flatten.uniq
+  end
+
+# Return the references associated with the tag. This includes all the references from synonyms of the tag
+  def referred_page_refs type
+    tag.referents(true).collect { |referent| referent.page_refs.where type: type }.flatten.uniq
+  end
+
+# Just return the count of references
+  def referred_page_ref_count type
+    referred_page_ref_ids(type).count
+  end
+
+  def taggees_of_class entity_class_name, with_synonyms=false
+    # entity_class = entity_class_name.constantize
+    # id_or_ids = with_synonyms ? synonym_ids : id
+    if with_synonyms
+      assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id in (#{synonym_ids.join(',')})")
+    else
+      assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id = #{id}")
+    end
+    (assoc.to_a + referred_page_refs(entity_class_name)).compact
+  end
 # -----------------------------------------------
   def synonym_ids unique=false
     ids = ExpressionServices.synonym_ids_of_tags(id, unique)

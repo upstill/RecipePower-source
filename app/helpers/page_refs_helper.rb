@@ -1,13 +1,13 @@
 module PageRefsHelper
 
   # Show a reference, using as text the name of the related site
-  def present_definition def_page_ref, options={}
-    ref_link = (ref_name = def_page_ref.decorate.name).present? ?
-        link_to(ref_name, def_page_ref.url, :target => '_blank') :
+  def present_page_ref page_ref, options={}
+    ref_link = (ref_name = page_ref.title).present? ?
+        link_to(ref_name, page_ref.url, :target => '_blank', class: 'page') :
         "".html_safe
-    if site = def_page_ref.site
+    if site = page_ref.site
       ref_link << ' on '.html_safe unless ref_link.blank?
-      ref_link << link_to(site.name, site.home, :target => '_blank')
+      ref_link << link_to(site.name, site.home, :target => '_blank', class: 'site')
     end
     if options[:label].present?
       "#{options[:label]}: ".html_safe + ref_link
