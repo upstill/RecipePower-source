@@ -11,12 +11,13 @@ class Result
   def push (str_in, uri=nil)
     unless str_in.nil?
       begin
-        str_out = str_in.
+        # Somehow, str_in can be a URI, so need to ensure it's a string
+        str_out = str_in.to_s.
             # encode('ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace).
             encode('UTF-8').gsub(/ ,/, ',')
       rescue Exception => e
         logger.debug "STRING ENCODING ERROR on #{str_in}"
-        str_out = str_in.encode('ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace)
+        str_out = str_in.to_s.encode('ASCII-8BIT', 'binary', :invalid => :replace, :undef => :replace)
       end
     end
     unless str_out.blank?

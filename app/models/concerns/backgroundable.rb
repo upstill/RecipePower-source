@@ -84,6 +84,11 @@ module Backgroundable
       end
     end
 
+    # Need to record the AR subclass so DelayedJob isn't confused by STI subclasses
+    def self.base_class
+      self
+    end
+
   end
 
   included do
@@ -125,6 +130,11 @@ module Backgroundable
     end
   end
 
+  # STI subclasses need to appear to DelayedJob as their base class for retrieval
+  def as_base
+    self.becomes self.class.base_class
+  end
+
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -156,7 +166,7 @@ module Backgroundable
       return pending?
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       save if new_record? # Just in case (so DJ gets a retrievable record)
-      self.dj = Delayed::Job.enqueue self, djopts
+      self.dj = Delayed::Job.enqueue as_base, djopts
       save
     end
     pending?
