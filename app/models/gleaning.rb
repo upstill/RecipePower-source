@@ -14,7 +14,20 @@ class Gleaning < ActiveRecord::Base
 
   serialize :results
 
-  delegate :result_for, :results_for, :labels, :to => :results
+  # delegate :result_for, :results_for, :labels, :to => :results
+
+  # ------------- safe delegation to (potentially non-existent) results
+  def result_for label
+    results.result_for(label) if results
+  end
+
+  def results_for label
+    results.results_for(label) if results
+  end
+
+  def labels
+    results ? results.labels : []
+  end
 
   # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
   def self.glean url_or_decorator, *labels
@@ -43,6 +56,7 @@ class Gleaning < ActiveRecord::Base
         # We assume the first three-digit number is the HTTP status code
         self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
       }
+      save if persisted?
       # TODO: Restore this Site functionality:
       # entity.decorate.after_gleaning(self) if entity && entity.decorate.respond_to?(:after_gleaning)
       self.results # Returning success indicator
