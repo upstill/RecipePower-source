@@ -160,6 +160,11 @@ class Reference < ActiveRecord::Base
     end
   end
 
+  # Decoy so DelayedJob will queue the job
+  def perform
+
+  end
+
 end
 
 class ImageReference < Reference
@@ -175,7 +180,6 @@ class ImageReference < Reference
   has_many :referments, :as => :referee
   has_many :referents, :through => :referments
   # has_many :referments, :foreign_key => :referee_id, :dependent => :nullify
-
 
   # Since the URL is never written once established, this method uniquely handles both
   # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)

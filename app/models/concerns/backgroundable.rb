@@ -84,11 +84,6 @@ module Backgroundable
       end
     end
 
-    # Need to record the AR subclass so DelayedJob isn't confused by STI subclasses
-    def self.base_class
-      self
-    end
-
   end
 
   included do
