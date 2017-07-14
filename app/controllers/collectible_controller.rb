@@ -287,9 +287,10 @@ class CollectibleController < ApplicationController
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           else
-            page_ref = PageRef.find_by_url(url) || RecipePageRef.fetch(url)  # Default is recipe, unless another exists
+            page_ref = PageRef.find_by_url(url) || RecipePageRef.build_by_url(url)  # Default is recipe, unless another exists
             if page_ref.errors.any?
-              render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{page_ref.errors.messages})") ; }
+              msg = page_ref.errors.messages.gsub /\"/, '\''
+              render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
             else
               # Apply picurl and title from capture to the page_ref
               # page_ref.save

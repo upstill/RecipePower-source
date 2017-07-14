@@ -118,7 +118,7 @@ class PageRef < ActiveRecord::Base
   # The purpose of http_status is a positive indication that the page can be reached
   # The purpose of errors are to show that the URL is ill-formed and the record should not (probably cannot) be saved.
   def sync
-    extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
+    self.extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
       data = try_mercury url
       if data['domain'] == 'www.answers.com'
@@ -167,7 +167,7 @@ class PageRef < ActiveRecord::Base
             hr.is_a?(String) ? 666 : hr
           end
       # Did the url change to a collision with an existing PageRef of the same type?
-      if (data['url'] != url) && (extant_pr = self.class.find_by_url(data['url']))
+      if (data['url'] != url) && (self.extant_pr = self.class.find_by_url(data['url']))
         puts "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{data['url']}'"
         self.http_status = 666
         data['url'] = url
@@ -258,15 +258,20 @@ class PageRef < ActiveRecord::Base
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
   def self.fetch url
-    unless mp = self.find_by_url(url)
-      mp = self.new url: indexing_url(url)
-      mp.sync
-      if !mp.errors.any? || mp.extant_pr
-        if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
-          # Found => fold the extracted page data into the existing page
-          extant.aliases |= mp.aliases - [extant.url]
-          mp = extant
-        end
+    self.find_by_url(url) || self.build_by_url(url)
+  end
+
+  # Make a new PageRef (poss. of some subclass), carefully avoiding any extant URL
+  def self.build_by_url url
+    mp = self.new url: indexing_url(url)
+    mp.sync
+    # The sync process follows redirects, accumulating aliases along the way.
+    # It may turn up a URL used by another object, in which case we return that instead
+    if !mp.errors.any? || mp.extant_pr
+      if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
+        # Found => fold the extracted page data into the existing page
+        extant.aliases |= mp.aliases - [extant.url]
+        mp = extant
       end
     end
     mp
