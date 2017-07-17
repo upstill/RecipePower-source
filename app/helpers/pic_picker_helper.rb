@@ -77,7 +77,7 @@ module PicPickerHelper
   def pic_picker_go_button decorator, picker_fallback_img=nil
     golink = polymorphic_path [:editpic, decorator],
                               golinkid: pic_picker_golinkid(decorator),
-                              fallback_img: (picker_fallback_img || 'NoPictureOnFile.png')
+                              fallback_img: (picker_fallback_img || image_path('NoPictureOnFile.png'))
     button_to_submit decorator.pageurl ? 'Pick Picture...' : 'Picture from Web...',
                      golink,
                      'default',

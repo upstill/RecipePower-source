@@ -9,9 +9,7 @@
                       :fallback_img => image_path('PickPicture.png'),
                       :nopicker => true %>
       </div>
-      <% if @decorator.image.blank? %>
-          <p>Click a picture to attach it.</p>
-      <% else %>
+      <% if @decorator.image.present? %>
           <p>Prefer another picture?<br/>Click one!</p>
       <% end %>
     </div>
