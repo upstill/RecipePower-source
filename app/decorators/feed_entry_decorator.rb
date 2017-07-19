@@ -7,6 +7,10 @@ class FeedEntryDecorator < CollectibleDecorator
     object.summary.html_safe
   end
 
+  def external_link
+    object.url
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #
