@@ -54,8 +54,11 @@ div.collection-header {
     &.friend-card {
       background-color: $friends-card-background-color;
     }
-    td.pic-box {
-      width: 35%;
+    div.pic-box {
+      padding: 10px 0px;
+      img {
+        width: 100%;
+      }
     }
     div.nav-top {
       margin-top: 0.1em;
@@ -68,86 +71,89 @@ div.collection-header {
         font-size: 0.9em;
       }
     }
-    td.lower-content {
-      padding-bottom: 0;
-      div.nav-bottom {
-        //  style="position: absolute; bottom: 0px;"
-        position: relative;
-        bottom: 0px;
-        font-size: 0.5em;
-        margin-left: auto;
-        margin-right: 1.5em;
-        width: 11em;
-        height: 5em;
-        .result-link {
-          &.collection {
-            color: #d0d0d0;
-          }
-          &.cookmarks {
-            color: $recipes-navtab-color;
-          }
-          &.lists {
-            color: $lists-navtab-color;
-          }
-          &.friends {
-            color: $friends-navtab-color; // #dfca6a;
-          }
-          &.feeds {
-            color: $feeds-navtab-color;
-          }
+    div.nav-bottom {
+      //  style="position: absolute; bottom: 0px;"
+      //position: relative;
+      //bottom: 0px;
+      position: absolute;
+      bottom: 0px;
+      right: 0px;
+      font-size: 1.1em;
+      // margin-left: auto;
+      // margin-right: 1.5em;
+      width: 16.5em;
+      height: 4em;
+      .result-link {
+        &.collection {
+          color: #d0d0d0;
         }
-        div.ul {
-          position: absolute;
-          right: 45%;
-          bottom: 50%;
-          padding-right: 0.3em;
-          padding-bottom: 0.2em;
-          // margin-top: -0.5em;
-          // margin-left: -0.5em;
-          // border-right: 1px solid black;
-          // border-bottom: 1px solid black;
+        &.cookmarks {
+          color: $recipes-navtab-color;
         }
-        div.bl {
-          position: absolute;
-          right: 45%;
-          top: 50%;
-          padding-right: 0.3em;
-          padding-top: 0.2em;
-          // margin-bottom: -0.5em;
-          // border-right: 1px solid black;
+        &.lists {
+          color: $lists-navtab-color;
         }
-        div.ur {
-          position: absolute;
-          left: 55%;
-          bottom: 50%;
-          padding-left: 0.3em;
-          padding-bottom: 0.2em;
-          // margin-right: -0.5em;
-          // border-bottom: 1px solid black;
+        &.friends {
+          color: $friends-navtab-color; // #dfca6a;
         }
-        div.br {
-          position: absolute;
-          left: 55%;
-          top: 50%;
-          padding-left: 0.3em;
-          padding-top: 0.2em;
-        }
-        div.half-width {
-          position: absolute;
-          top: 20%;
-          bottom: 20%;
-          width: 55%;
-          border-right: 2px solid white;
-        }
-        div.half-height {
-          position: absolute;
-          left: 5%;
-          right: 5%;
-          top: 0;
-          height: 50%;
-          border-bottom: 2px solid white;
+        &.feeds {
+          color: $feeds-navtab-color;
         }
       }
+      div.ul {
+        position: absolute;
+        right: 45%;
+        bottom: 50%;
+        padding-right: 0.3em;
+        padding-bottom: 0.2em;
+        // margin-top: -0.5em;
+        // margin-left: -0.5em;
+        // border-right: 1px solid black;
+        // border-bottom: 1px solid black;
+      }
+      div.bl {
+        position: absolute;
+        right: 45%;
+        top: 50%;
+        padding-right: 0.3em;
+        padding-top: 0.2em;
+        // margin-bottom: -0.5em;
+        // border-right: 1px solid black;
+      }
+      div.ur {
+        position: absolute;
+        left: 55%;
+        bottom: 50%;
+        padding-left: 0.3em;
+        padding-bottom: 0.2em;
+        // margin-right: -0.5em;
+        // border-bottom: 1px solid black;
+      }
+      div.br {
+        position: absolute;
+        left: 55%;
+        top: 50%;
+        padding-left: 0.3em;
+        padding-top: 0.2em;
+      }
+      div.half-width {
+        position: absolute;
+        top: 20%;
+        bottom: 20%;
+        width: 55%;
+        border-right: 2px solid white;
+      }
+      div.half-height {
+        position: absolute;
+        left: 5%;
+        right: 5%;
+        top: 0;
+        height: 50%;
+        border-bottom: 2px solid white;
+      }
+    }
+    td.lower-content {
+      padding-bottom: 0;
     }
   }
 }

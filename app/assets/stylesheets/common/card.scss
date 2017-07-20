@@ -224,7 +224,7 @@ div.card-item {
   }
   &.cardlet-item {
     width: 350px;
-    overflow: auto;
+    overflow: hidden; // auto;
     @include respond-to(phone) {
       width: 300px;
     }
@@ -286,6 +286,9 @@ div.card-item {
       height: auto;
       float: left;
       clear: left;
+      img {
+        width: 100%;
+      }
     }
     div.share-button.glyph-button {
       /* display: inline-block; */

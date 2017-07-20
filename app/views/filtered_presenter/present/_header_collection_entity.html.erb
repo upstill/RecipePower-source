@@ -30,38 +30,30 @@
         </div>
       </div>
       <div class="col-md-4 user-nav <%= viewparams.display_style %>-card">
-        <table style="width: 100%">
-          <tr>
-            <td rowspan="2" class="pic-box">
-              <div class="pic-inset">
-                <%= presenter.card_avatar %>
+        <div class="row">
+          <div class="col-lg-5 col-md-4 col-sm-3">
+            <div class="pic-box">
+              <%= presenter.card_avatar %>
+            </div>
+          </div>
+            <div class="nav-top">
+              <%= collectible_collect_button(decorator, 'xl', class: 'friend-color') unless decorator.object == response_service.user %>
+              <%= user_follower_count decorator %>
+            </div>
+            <div class="nav-bottom">
+              <div class="half-height"></div>
+              <div class="half-width"></div>
+              <div class="ul">
+                <%= link_to_submit "COLLECTION", response_service.decorate_path(result_type: nil), class: "result-link collection" %>
               </div>
-            </td>
-            <td valign="top">
-              <div class="nav-top">
-                <%= collectible_collect_button(decorator, 'xl', class: 'friend-color') unless decorator.object == response_service.user %>
-                <%= user_follower_count decorator %>
-              </div>
-            </td>
-          </tr>
-          <tr>
-            <td valign="bottom" class="lower-content">
-              <div class="nav-bottom">
-                <div class="half-height"></div>
-                <div class="half-width"></div>
-                <div class="ul">
-                  <%= link_to_submit "COLLECTION", response_service.decorate_path(result_type: nil), class: "result-link collection" %>
-                </div>
-                <% divs = %w{ bl ur br } %>
-                <% viewparams.sibling_views.each do |viewparams| %>
-                    <div class="<%= divs.shift %>">
-                      <%= link_to_submit viewparams.panel_label.upcase, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
-                    </div>
-                <% end %>
-              </div>
-            </td>
-          </tr>
-        </table>
+              <% divs = %w{ bl ur br } %>
+              <% viewparams.sibling_views.each do |viewparams| %>
+                  <div class="<%= divs.shift %>">
+                    <%= link_to_submit viewparams.panel_label.upcase, viewparams.link_address, class: "result-link #{viewparams.result_type}" %>
+                  </div>
+              <% end %>
+            </div>
+        </div>
       </div>
     </div>
 <% end %>
