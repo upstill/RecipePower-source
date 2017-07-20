@@ -90,12 +90,16 @@ div.card-item {
   }
   div.title-glyph {
     color: #ea8a7a;
-    height: 2em;
+    // height: 2em;
     &.top-right {
       font-size: 2.5em;
-      position: absolute;
-      top: 0.1em;
-      right: 0.2em;
+      float:right;
+      position: relative;
+      top: -10px;
+      right: -5px;
+      // position: absolute;
+      // top: 0.1em;
+      // right: 0.2em;
     }
   }
   div.pic-box {
@@ -251,11 +255,13 @@ div.card-item {
       font-size: 1.8em;
     }
     div.source {
+      line-break: loose;
+      -webkit-line-break: loose;
       border-bottom: 0.3em solid #b95454;
       margin-bottom: 0.5em;
     }
     div.title-box {
-      margin-right: 1em;
+      // margin-right: 1em;
       font-size: 1.4em;
       font-family: $archivo;
       font-weight: 700;
