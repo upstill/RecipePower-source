@@ -1,40 +1,41 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
-          <% if decorator.imgdata.present? %>
-              <div style="margin-right: 15px; height: auto; float: left;">
-                <%= image_with_error_recovery(decorator, class: 'pic-box', fill_mode: 'fixed-width') %>
-              </div>
+      <% if decorator.imgdata.present? %>
+          <div class='pic-box' >
+            <%= image_with_error_recovery(decorator, class: 'pic-box', fill_mode: 'fixed-width') %>
+          </div>
+      <% end %>
+      <div style="width:100%">
+        <div class="title-glyph top-right">
+          <%= collectible_collect_button decorator %>
+          <%# collectible_list_menu decorator, response_service.user, {} %>
+        </div>
+        <div class="title-box">
+          <% presenter.ribbon do |content| %>
+              <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
+              <%= content %>
           <% end %>
-            <div style="width:100%">
-              <div class="title-glyph top-right">
-                <%= collectible_collect_button decorator %>
-                <%# collectible_list_menu decorator, response_service.user, {} %>
-              </div>
-              <div class="title-box">
-                <% presenter.ribbon do |content| %>
-                    <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
-                    <%= content %>
-                <% end %>
-                <%= presenter.card_homelink class: "title-link" %>
-              </div>
-            </div>
-            <div class="source">
-              <%= collectible_source decorator, class: 'source-link' %>
-            </div>
-            <div class="tags">
-              <%= presenter.present_field "tags" %>
-            </div>
-            <p class="description">
-              <%= presenter.present_field "description" %>
-            </p>
-            <% if params[:accept_invitation_link] %>
-                <div style="width: 400px; margin: 0 auto;">
-                  <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
-                  <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
-                </div>
-            <% end %>
-            <%= collectible_share_button decorator %>
-            <%# collectible_vote_buttons decorator.object %>
+          <%= presenter.card_homelink class: "title-link" %>
+        </div>
+      </div>
+      <div class="source">
+        <%= collectible_source decorator, class: 'source-link' %>
+      </div>
+      <hr>
+      <div class="tags">
+        <%= presenter.present_field "tags" %>
+      </div>
+      <p class="description">
+        <%= presenter.present_field "description" %>
+      </p>
+      <% if params[:accept_invitation_link] %>
+          <div style="width: 400px; margin: 0 auto;">
+            <%= link_to "Save on RecipePower", params[:accept_invitation_link], class: "btn btn-lg btn-success", style: "margin-right:40px; margin-top:30px" %>
+            <%= link_to "Go to Recipe", decorator.url, class: "btn btn-lg btn-info", style: "margin-top: 30px" %>
+          </div>
+      <% end %>
+      <%= collectible_share_button decorator %>
+      <%# collectible_vote_buttons decorator.object %>
     </div>
 <% end %>
 

@@ -224,6 +224,7 @@ div.card-item {
   }
   &.cardlet-item {
     width: 350px;
+    overflow: auto;
     @include respond-to(phone) {
       width: 300px;
     }
@@ -242,7 +243,7 @@ div.card-item {
     @include respond-to(wide) {
       width: 373px; // 306px; // ($break-wide - (30+20))/3;
     }
-    padding: 1em 1em 0 1em;
+    padding: 1em 1em 1em 1em;
     font-family: $archivo;
     margin-top: 0;
     font-size: 80%;
@@ -257,8 +258,19 @@ div.card-item {
     div.source {
       line-break: loose;
       -webkit-line-break: loose;
-      border-bottom: 0.3em solid #b95454;
+      // border-bottom: 0.3em solid #b95454;
+      // margin-bottom: 0.5em;
+    }
+    hr {
+      border-color: #b95454;
+      background-color: #b95454;
+      color: #b95454;
+      border: none;
+      height: 0.3em;
+      margin-top: 0.5em;
+      margin-right: -11px;
       margin-bottom: 0.5em;
+      margin-left: -11px;
     }
     div.title-box {
       // margin-right: 1em;
@@ -268,9 +280,18 @@ div.card-item {
       letter-spacing: 0.9px;
       line-height: 1.2em;
     }
-    td.pic-box {
-      width: 165px;
-      padding-right: 8px;
+    div.pic-box {
+      margin-right: 12px;
+      margin-bottom: 7px;
+      height: auto;
+      float: left;
+      clear: left;
+    }
+    div.share-button.glyph-button {
+      /* display: inline-block; */
+      position: absolute;
+      left:  7px;
+      bottom: 1px;
     }
   }
   div.pic-inset {
