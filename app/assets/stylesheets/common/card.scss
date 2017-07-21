@@ -256,8 +256,9 @@ div.card-item {
       font-size: 1.8em;
     }
     div.source {
-      line-break: loose;
-      -webkit-line-break: loose;
+      overflow-wrap: break-word; // word-break: break-all;
+      // line-break: loose;
+      // -webkit-line-break: loose;
       // border-bottom: 0.3em solid #b95454;
       // margin-bottom: 0.5em;
     }
