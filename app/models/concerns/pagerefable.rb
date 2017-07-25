@@ -16,7 +16,7 @@ module Pagerefable
       attr_accessible url_attribute, :page_ref
 
       # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
-      belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true
+      belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true, autosave: true
       # delegate :glean, :'glean!', :to => :page_ref
 
       has_one :site, :through => :page_ref

@@ -84,7 +84,7 @@ class Site < ActiveRecord::Base
       self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
       self.name = page_ref.title unless name.present? || page_ref.title.blank?
       self.description = page_ref.description unless description.present? || page_ref.description.blank?
-      gleaning.extract_all 'RSS Feed' do |value| assert_feed value end
+      gleaning.extract_all 'RSS Feed' do |value| assert_feed value end if gleaning
       save if persisted? && changed?
       true
     else

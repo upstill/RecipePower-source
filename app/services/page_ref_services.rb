@@ -126,9 +126,7 @@ class PageRefServices
       # TODO What attributes do we impose on an existing page_ref?
       page_ref.destroy if convertible
     elsif convertible
-      page_ref.becomes typeclass
-      page_ref.type = type
-      newpr = page_ref
+      (newpr = page_ref.becomes typeclass).type = type
     else
       (newpr = page_ref.dup.becomes typeclass).type = type
     end

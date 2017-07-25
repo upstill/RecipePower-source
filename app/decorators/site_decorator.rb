@@ -14,7 +14,7 @@ class SiteDecorator < CollectibleDecorator
     case default = super
       when :title
         :name
-      when :image
+      when :image, :picurl
         :logo
       when :url
         :home

@@ -463,6 +463,7 @@ div.card-item {
     }
     div.stamp { // Marked for clearance by Masonry
       &.found-by {
+        max-width: 200px;
         width: auto;
         height: auto;
         margin-right: 10px;
