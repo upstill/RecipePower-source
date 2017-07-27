@@ -2,7 +2,7 @@
 <% presenter = TagPresenter.new item.decorate, self, current_user %>
 <% @tagserv = TagServices.new item %>
 <td class="tag_type">
-  <% if permitted_to?(:edit, item) && response_service.admin_view? %>
+  <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= item.id.to_s %>
       <br>
       <% if @tagserv.isGlobal %>
@@ -47,7 +47,7 @@
 </td>
 <td>
   <%= presenter.table_summaries response_service.admin_view? %>
-  <% if permitted_to?(:edit, item) && response_service.admin_view? %>
+  <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= render 'form_synonym', presenter: presenter %>
       <%= render 'form_child', presenter: presenter %>
   <% end %>
@@ -57,6 +57,6 @@
                                  :for => :table,
                                  helper: :summarize_tag_similar,
                                  label: '',
-                                 absorb_btn: (permitted_to?(:edit, item) && response_service.admin_view?),
+                                 absorb_btn: (presenter.decorator.user_can?(:edit) && response_service.admin_view?),
                                  joiner: '<br>' %>
 </td>

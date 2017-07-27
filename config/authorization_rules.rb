@@ -35,7 +35,7 @@ authorization do
     # :sessions, :users
     has_permission_on :scrapers, :to => [ :new, :create, :init ]
     has_permission_on [:pages, :lists, :recipes, :feeds, :sites, :users, :finders ], :to => [:admin]
-    has_permission_on [:tags, :lists, :recipes, :feeds, :sites, :finders ], :to => [:destroy]
+    has_permission_on [:tags, :lists, :recipes, :feeds, :sites, :finders, :page_refs ], :to => [:destroy]
     has_permission_on [:feeds, :sites, :finders], :to => [:approve]
     has_permission_on [:users, :expressions, :links, :pages, :ratings, :recipes, :referents, :scales, :sites], :to => :manage
   end

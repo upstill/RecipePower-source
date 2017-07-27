@@ -7,7 +7,7 @@
     <%= (defined?(in_panes) && in_panes) ? decorator.dialog_panes(f) : render('form_content', decorator: decorator, f: f) %>
     <div class="modal-footer">
       <% mn = decorator.human_name %>
-      <% if permitted_to?(:admin, decorator.class_name.to_sym) && response_service.admin_view? %>
+      <% if decorator.user_can?(:destroy) && response_service.admin_view? %>
           <%= link_to_submit "Destroy This #{mn}",
                             decorator.object_path,
                             :class => "pull-left",

@@ -35,9 +35,9 @@
     </div>
 <% end %>
 <br class="clear">
-<% if permitted_to? :remove, @recipe %>
+<% if @decorator.user_can? :remove %>
     <%= button_to "Remove From My Collection", remove_recipe_path(@recipe), class: "save-tags-button" %>
 <% end %>
-<% if permitted_to? :destroy, @recipe %>
+<% if @decorator.user_can? :destroy %>
     <%= button_to "Destroy this Recipe", recipe_path(@recipe), :method => :delete, class: "save-tags-button", :confirm => "This will remove the recipe from RecipePower and EVERY collection in which it appears. Are you sure this is appropriate?" %>
 <% end %>

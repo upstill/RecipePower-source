@@ -11,6 +11,10 @@ class ModelDecorator < Draper::Decorator
     model_name.name
   end
 
+  def base_class_name
+    object.class.base_class.to_s
+  end
+
   # Recipe => 'recipe'
   # FeedEntry => 'feed_entry'
   def singular_name
@@ -47,6 +51,11 @@ class ModelDecorator < Draper::Decorator
   # FeedEntry => 'feed_entries'
   def collection_name
     model_name.collection
+  end
+
+  # Check permissions for current user to access controller method
+  def user_can? what
+    h.permitted_to? what.to_sym, collection_name.to_sym
   end
 
   # Present an STI subclass as the base class

@@ -44,7 +44,7 @@ class ListsController < CollectibleController
   def contents
     update_and_decorate
     response_service.title = "About #{@list.name}"
-    @empty_msg = "This list is empty now, but you can add any item that has an 'Add to...' button"
+    @empty_msg = 'This list is empty now, but you can add any item by editing that item'
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
     smartrender 
   end

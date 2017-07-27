@@ -13,11 +13,6 @@ class CollectibleDecorator < ModelDecorator
     what if what != :page_ref_type
   end
 
-  # Check permissions for current user to access controller method
-  def user_can? what
-    h.permitted_to? what.to_sym, collection_name.to_sym
-  end
-
   # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
   # Also, launch the gleaning as necessary
   def glean force=false
