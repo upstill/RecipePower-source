@@ -49,5 +49,8 @@ class ModelDecorator < Draper::Decorator
     model_name.collection
   end
 
-
+  # Present an STI subclass as the base class
+  def base_object
+    object.class == object.class.base_class ? object : object.becomes(object.class.base_class)
+  end
 end

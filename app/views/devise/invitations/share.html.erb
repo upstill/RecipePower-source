@@ -26,8 +26,9 @@
                     } %>
         <%= f.input :invitation_issuer, label: "How to identify you in the message" %>
         <%= f.input :invitation_message, label: "Invitation Message (optional)", :input_html => {:rows => "4"} %></p>
-        <%= f.hidden_field(:shared_type) if resource.shared_type %>
+        <%= f.hidden_field(:shared_class) if resource.shared_class %>
         <%= f.hidden_field(:shared_id) if resource.shared_id %>
+        <%= f.hidden_field(:shared_name) if resource.shared_name.present? %>
         <%= modal_footer do %>
             <%= f.submit "Share the Love", class: "btn btn-lg btn-success dialog-submit-button", disabled: true %>
         <% end %>

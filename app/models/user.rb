@@ -21,13 +21,13 @@ class User < ActiveRecord::Base
   # Setup accessible (or protected) attributes for your model
   attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
                 :email, :password, :password_confirmation, :invitee_tokens, :avatar_url, # :image,
-                :invitation_token, :invitation_message, :invitation_issuer, :shared_type, :shared_id,
+                :invitation_token, :invitation_message, :invitation_issuer, :shared_class, :shared_name, :shared_id,
                 :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
                 :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
   attr_accessor :invitee_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
-                :shared_type, :shared_id # Kept temporarily during sharing operations
+                :shared_class, :shared_name, :shared_id # Kept temporarily during sharing operations
   
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
@@ -124,7 +124,9 @@ class User < ActiveRecord::Base
   def touch entity=nil, collect=false
     return super unless entity
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
-    ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id, entity_type: entity.class.to_s, entity_id: entity.id
+    ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id,
+                                                                                     entity_type: entity.class.base_class.to_s,
+                                                                                     entity_id: entity.id
     if ref.created_at # Existed prior
       if collect && !ref.in_collection
         # We use the created_at time as "time of collection"
@@ -136,15 +138,13 @@ class User < ActiveRecord::Base
       else  # Just touch if previously saved
         ref.touch
       end
-    else # Just save the reference
-      ref.save
+    else # A new rcpref needs to be added to the entity
+      entity.toucher_pointers << ref unless entity.toucher_pointers.include?(ref)
+      entity.user_pointers << ref if collect && !entity.user_pointers.include?(ref)
+      ref.save if entity.id # Save the reference if it's safe
     end
   end
 
-  # TODO: remove collections after they've been migrated to lists
-#  has_many :private_subscriptions, -> { order 'priority ASC' }, :dependent=>:destroy
-#  has_many :collection_tags, :through => :private_subscriptions, :source => :tag, :class_name => 'Tag'
-  
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
 
@@ -540,13 +540,11 @@ public
 
   # Provide the resource being shared, stored (but not saved) as a polymorphic object description
   def shared
-    if !@shared_type.blank? && @shared_id
-      @shared_type.constantize.find( @shared_id.to_i) rescue nil
-    end
+    @shared_class.find_by(id: @shared_id) if @shared_class
   end
 
   def shared= entity
-    @shared_type, @shared_id = entity ? [ entity.class.to_s, entity.id ] : []
+    @shared_class, @shared_id = entity ? [ entity.class, entity.id ] : []
   end
 
   private

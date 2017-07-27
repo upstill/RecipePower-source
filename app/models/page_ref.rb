@@ -186,7 +186,7 @@ class PageRef < ActiveRecord::Base
     # :bad simply means to rerun the job
     # :good means not to, WHETHER OR NOT THE RESULTS ARE VALID
     self.status =
-        if data['mercury_error'].present?
+        if !data || data['mercury_error'].present?
           :bad
         else
           errors.add :url, error_message if http_status != 200

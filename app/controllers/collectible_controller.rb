@@ -167,7 +167,11 @@ class CollectibleController < ApplicationController
     if resource_errors_to_flash @decorator.object
       render :edit
     else
-      @decorator.gleaning_attributes = params[@decorator.model_name.param_key][:gleaning_attributes] if @decorator.object.is_a?(Pagerefable)
+      # Record gleaning attributes, if available and relevant
+      if (model_params = params[@decorator.model_name.param_key]) &&
+          @decorator.object.respond_to?(:'gleaning_attributes=')
+        @decorator.gleaning_attributes = model_params[:gleaning_attributes]
+      end
       flash[:popup] = "#{@decorator.human_name} is saved"
       render :update
     end

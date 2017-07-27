@@ -44,7 +44,7 @@ module CollectibleHelper
   ################## Standardized glyph buttons for collectibles ##########################
   def collectible_edit_button decorator, size=nil, styling={}
     entity = decorator.object
-    if permitted_to? :update, entity
+    if permitted_to? :update, decorator.collection_name.to_sym
       if size.is_a? Hash
         size, styling = nil, size
       end
@@ -59,7 +59,7 @@ module CollectibleHelper
 
   def collectible_lists_button decorator, size=nil, options={}
     entity = decorator.object
-    if permitted_to? :lists, entity
+    if permitted_to? :lists, decorator.collection_name.to_sym
       if size.is_a? Hash
         size, styling = nil, size
       end
@@ -136,7 +136,7 @@ module CollectibleHelper
       end
       entity = decorator.object
       button = button_to_submit '',
-                                new_user_invitation_path(shared_type: entity.class.to_s, shared_id: entity.id),
+                                new_user_invitation_path(shared_class: entity.class.to_s, shared_id: entity.id),
                                 'glyph-share',
                                 size,
                                 options.merge(mode: :modal, title: 'Share This')
@@ -147,7 +147,7 @@ module CollectibleHelper
   # Provide the button for uploading an image
   def collectible_editpic_button decorator, size=nil, styling={}
     entity = decorator.object
-    if permitted_to? :update, entity
+    if permitted_to? :update, decorator.collection_name.to_sym
       if size.is_a? Hash
         size, options = nil, size
       end

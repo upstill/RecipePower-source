@@ -12,11 +12,12 @@ class InvitationsController < Devise::InvitationsController
 
   # GET /resource/invitation/new
   def new
-    if params[:shared_type].present?
-      entity_name = params[:shared_type].underscore.gsub('_',' ')
-      self.resource = resource_class.new invitation_message: "Here's a #{entity_name} I found on RecipePower. Have a look and tell me what you think."
-      resource.shared_type = params[:shared_type]
-      resource.shared_id = params[:shared_id]
+    if (classname = params[:shared_class]).present?
+      entity_name = params[:shared_name].if_present || PageRefServices.type_to_name(params[:shared_class]) || classname.underscore.gsub('_',' ')
+      self.resource = resource_class.new invitation_message: "Here's an interesting #{entity_name} I found on RecipePower. Have a look and tell me what you think."
+      resource.shared_class = classname.constantize
+      resource.shared_id = params[:shared_id].to_i
+      resource.shared_name = entity_name
       @shared = resource.shared
     else
       self.resource = resource_class.new

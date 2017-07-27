@@ -1,4 +1,4 @@
-<%= simple_form_for(page_ref.becomes(PageRef)) do |f| %>
+<%= simple_form_for(@decorator.base_object) do |f| %>
     <%= form_errors_helper f %>
 
     <div class="form-inputs">

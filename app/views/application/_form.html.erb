@@ -1,20 +1,20 @@
 <!-- Generic form for a dialog editing a single entity (perhaps a new one) -->
-<%= form_for decorator.object,
+<%= form_for decorator.base_object,
              remote: true,
              url: { action: (decorator.id ? 'update' : 'create'), format: 'json', mode: :modal } do |f| %>
     <%# form_errors_helper f, decorator.object %>
     <!--The form_content partial is specific to each entity type-->
     <%= (defined?(in_panes) && in_panes) ? decorator.dialog_panes(f) : render('form_content', decorator: decorator, f: f) %>
     <div class="modal-footer">
-      <% mn = decorator.model_name %>
-      <% if permitted_to?(:admin, mn.collection.to_sym) && response_service.admin_view? %>
+      <% mn = decorator.human_name %>
+      <% if permitted_to?(:admin, decorator.class_name.to_sym) && response_service.admin_view? %>
           <%= link_to_submit "Destroy This #{mn}",
                             decorator.object_path,
                             :class => "pull-left",
                             :style => 'color: #dddddd;',
                             :button_style => :danger,
                             :method => :delete,
-                            confirm: "This will permanently remove the #{mn.singular} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
+                            confirm: "This will permanently remove the #{mn} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
       <% end %>
       <%= dialog_submit_button %>
       <%= dialog_cancel_button %>

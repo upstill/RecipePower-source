@@ -124,7 +124,9 @@ class PageRefsController < CollectibleController
     end
   end
 
+=begin
   # PATCH/PUT /page_refs/1
+  # Handled in CollectibleController
   def update
     if page_ref.update(page_ref_params)
       redirect_to page_ref, notice: 'Mercury page was successfully updated.'
@@ -132,6 +134,7 @@ class PageRefsController < CollectibleController
       render :edit
     end
   end
+=end
 
   # DELETE /page_refs/1
 =begin
