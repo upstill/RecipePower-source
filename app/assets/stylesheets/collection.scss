@@ -146,6 +146,17 @@ div.slider-item {
   max-height: 2.8em;
 }
 
+// A fixed-width(height) image within a pic-box is fit with CSS
+div.pic-box {
+  img.fixed-width {
+    width: 100%;
+  }
+  img.fixed-height {
+    height: 100%;
+    width: auto;
+  }
+}
+
 img.fixed-width {
   // width: 100%;
   // height: auto;
