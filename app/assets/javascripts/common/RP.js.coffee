@@ -414,7 +414,7 @@ RP.process_response = (responseData, odlog) ->
 	return supplanted
 
 RP.replaceElmt = (oldElmt, newElmt) ->
-	if RP.masonry.replaceItem oldElmt, newElmt
+	if RP.hasOwnProperty('masonry') && RP.masonry.replaceItem(oldElmt, newElmt)
 		RP.loadElmt newElmt
 	else
 		RP.loadElmt $(newElmt).replaceAll($(oldElmt))

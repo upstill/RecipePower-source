@@ -17,7 +17,7 @@ module ErrorsHelper
           resource.errors.full_messages.to_sentence
         end + base_errors
     preface = "<strong>#{preface}</strong>: " unless preface.blank?
-    preface+details
+    (preface+details).html_safe
   end
 
 end
