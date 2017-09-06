@@ -29,50 +29,6 @@ function onImageError(image) {
     return true;
 }
 
-function fitImage(img) {
-
-    if (!img) return false;
-
-    var parent = img.parentElement, frameWidth, frameHeight, picWidth, picHeight;
-
-    if (!(img.complete &&
-        (img.width > 5) &&
-        (img.height > 5) &&
-        ((picWidth = img.naturalWidth) > 5) &&
-        ((picHeight = img.naturalHeight) > 5) &&
-        ((frameWidth = $(parent).width()) > 5) &&
-        ((frameHeight = $(parent).height()) > 5)
-        )) return false;
-
-    var frameAR = frameWidth / frameHeight;
-    var imgAR = picWidth / picHeight;
-    if ($(img).hasClass("fixed-width")) {
-        // Size image to fit parent's width
-        $(img).css("width", frameWidth);
-        $(img).css("height", frameWidth / imgAR);
-    } else if ($(img).hasClass("fixed-height")) {
-        // Size image to fit parent's height
-        $(img).css("height", frameHeight);
-        $(img).css("width", frameHeight * imgAR);
-    } else if (imgAR > frameAR) {
-        var newHeight = frameWidth / imgAR;
-        $(img).css("width", frameWidth);
-        $(img).css("height", newHeight);
-        // $(img).css("padding-left", 0);
-        // $(img).css("padding-top", (frameHeight-newHeight)/2);
-        // $(img).css("left", 0);
-    } else {
-        var newWidth = frameHeight * imgAR;
-        $(img).css("width", newWidth);
-        $(img).css("height", frameHeight);
-        // $(img).css("top", 0);
-        // $(img).css("padding-top", 0);
-        // $(img).css("padding-left", (frameWidth-newWidth)/2);
-    }
-    $(img).addClass("loaded");
-    return true;
-}
-
 function get_image(imageSel) {
     return $(imageSel).attr('src');
 }
@@ -99,7 +55,6 @@ function set_image_safely(imageElmt, url, formsel, callback) {
         var fallback;
         if (image.isLoaded) {
             $(img).addClass("loaded");
-            fitImage($(img)[0]);
         } else {
             $(img).addClass("bogus").removeClass("loaded");
             if(!(callback && callback(img, oldsrc))) {
@@ -121,12 +76,6 @@ function previewImg(inputsel, imagesel, formsel) {
     // var imageElmt = $(imagesel)[0] || $('img', inputElmt.parentElement)[0];
     // For display purposes we use a no-picture picture
     set_image_safely(imagesel, url, formsel);
-    return false;
-}
-//
-// Place an image URL into both a preview image  and an accompanying input field, if any
-function imagePreviewWidgetSet(imgID, inputID, url) {
-    set_image_safely("img#" + imgID, url, "input#" + inputID);
     return false;
 }
 
