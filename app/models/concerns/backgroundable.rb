@@ -82,6 +82,7 @@ module Backgroundable
                  :bad # Executed unsuccessfully
              ]
       end
+      self.where(status: 2, dj_id: nil).update_all status: 0 # Mark all executing objects as virgin to prevent processing deadlock
     end
 
   end
