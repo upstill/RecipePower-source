@@ -34,7 +34,6 @@ RP::Application.configure do
   # config.assets.initialize_on_precompile = false
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
-  # TODO When we're sure that SSL works
   config.force_ssl = true
 
   # Precompile additional assets (application.js, application.css, and all non-JS/CSS are already added)
