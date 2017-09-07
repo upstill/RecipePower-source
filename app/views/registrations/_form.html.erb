@@ -1,9 +1,7 @@
 <% if response_service.injector? %>
-    <%= form_for(resource,
+    <%= submit_form_for(resource,
                  :as => resource_name,
-                 :url => registration_path(resource_name, response_service.redirect_params),
-                 :html => {'data-type' => 'json',
-                           onload: 'RP.submit.form_onload(event);'}) do |f| %>
+                 :url => registration_path(resource_name, response_service.redirect_params)) do |f| %>
         <div class="signin">
           <p style="margin: 0 0 10px 0;"><strong>Open an account with just an email:</strong><br></p>
           <%= form_errors_helper f, resource %>
@@ -21,11 +19,9 @@
         </div>
     <% end %>
 <% else %>
-    <%= simple_form_for(resource,
+    <%= simple_submit_form_for(resource,
                         :as => resource_name,
-                        :url => registration_path(resource_name),
-                        :html => {'data-type' => 'json',
-                                  onload: 'RP.submit.form_onload(event);'}) do |f| %>
+                        :url => registration_path(resource_name)) do |f| %>
         <%# devise_error_messages! %>
         <%# form_errors_helper f, resource %>
         <%# f.input :username, label: "Username (Handle)", placeholder: "CoolBeans" %>

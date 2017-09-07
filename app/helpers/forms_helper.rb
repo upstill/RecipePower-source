@@ -5,4 +5,26 @@ module FormsHelper
     render "shared/triggered_form", form_id: form_id, query: query, contents: with_output_buffer(&block)
   end
 
+  # Override of form_for which adds options to make RP.submit happy
+  def submit_form_for resource, options=nil, &block
+    form_for resource, merge_submit_options(options) do |f| block.call f end
+  end
+
+  # Override of simple_form_for which adds options to make RP.submit happy
+  def simple_submit_form_for resource, options=nil, &block
+    simple_form_for resource, merge_submit_options(options) do |f| block.call f end
+  end
+
+private
+  # Define options for RP.submit to function properly
+  def merge_submit_options options
+    options = options ? options.deep_dup : {}
+    # form_for answer, remote: true, html: { onload: "RP.submit.form_onload(event);" }, data: {type: 'json'}
+    (options[:data] ||= {})[:type] = 'json'
+    (options[:html] ||= {})[:onload] = 'RP.submit.form_onload(event);'
+    options[:html].delete 'data-type'
+    options[:remote] = true
+    options
+  end
+
 end
