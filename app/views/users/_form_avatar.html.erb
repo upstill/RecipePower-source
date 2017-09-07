@@ -1,4 +1,4 @@
-<%= form_for @decorator, remote: true, method: :patch, html: {class: "user_image", onload: "RP.submit.form_onload(event);"}, data: {type: 'json'} do |f| %>
+<%= submit_form_for @decorator, method: :patch, html: { class: "user_image" } do |f| %>
     <div class="media-object fixed-width" >
       <%= pic_field f, 
                     :nopicker => true,

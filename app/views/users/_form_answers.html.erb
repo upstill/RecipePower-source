@@ -1,5 +1,5 @@
 <% answer = @answer unless defined? answer %>
-<%= form_for answer, remote: true, html: { onload: "RP.submit.form_onload(event);" }, data: {type: 'json'} do |f| %>
+<%= submit_form_for answer do |f| %>
     <%= form_errors_helper f %>
 
     <div class="form-inputs inline-text-field">

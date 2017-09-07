@@ -1,12 +1,5 @@
 <% tag_selection = @tag_selection unless defined? tag_selection %>
-<%= simple_form_for tag_selection,
-                    html: {
-                            data: {
-                                    :type => :json,
-                                    :remote => true
-                            },
-                            onload: "RP.submit.form_onload(event);"
-                    } do |f| %>
+<%= simple_submit_form_for tag_selection do |f| %>
     <div class="inline-text-field">
       <%= token_input_field f, "tag", label: "" %>
     </div>

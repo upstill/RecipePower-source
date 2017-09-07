@@ -1,4 +1,4 @@
-<%= form_for user, method: :patch, html: { class: "user_fullname", onload: "RP.submit.form_onload(event);" }, data: {type: 'json'} do |f| %>
+<%= submit_form_for user, method: :patch, html: { class: "user_fullname" } do |f| %>
     <div class="form-inputs inline-text-area">
       <%= f.text_field :fullname, label: false %>
       <%= hidden_field_tag :form, "fullname" %>
