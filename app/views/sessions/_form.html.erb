@@ -1,5 +1,5 @@
 <% if response_service.injector? %>
-    <%= form_for(resource, :as => resource_name, :url => session_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
+    <%= submit_form_for(resource, :as => resource_name, :url => session_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
         <div class="signin">
           <strong>Sign in with a password:</strong><br>
           <%# form_errors_helper f, resource %>
@@ -25,10 +25,7 @@
     <% end %>
 <% else %>
     <%# logger.debug "(in sessions form) CSRF tag: #{form_authenticity_token}" %>
-    <%= simple_form_for resource,
-                        :as => resource_name,
-                        :url => session_path(resource_name),
-                        :html => { onload: 'RP.submit.form_prep(event)' } do |f| %>
+    <%= simple_submit_form_for resource, :as => resource_name, :url => session_path(resource_name) do |f| %>
         <%= form_errors_helper f %>
         <%= flash_notifications_div %>
         <%= f.input :login,
