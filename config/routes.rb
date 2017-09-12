@@ -4,6 +4,7 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }
 
   get 'scraper/new'
 
