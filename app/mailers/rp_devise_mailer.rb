@@ -10,10 +10,7 @@ class RPDeviseMailer < Devise::Mailer
     @sender = record.invited_by
     # opts[:from] = "Ignatz from RecipePower <ignatz@recipepower.com>"
     # optional arguments introduced in Devise 2.2.0, remove check once support for < 2.2.0 is dropped.
-    @invitation_event = RpEvent.post @sender,
-                                     :invitation_sent,
-                                     @recipient.shared,
-                                     @recipient
+    @invitation_event = InvitationSentEvent.post @sender, @recipient, @recipient.shared
     # Add an attachment for the shared entity's image, if available
     if (imgdata = @recipient.shared && @recipient.shared.imgdata).present?
       attachments['collectible_image'] = Base64.decode64(imgdata.sub(/^data:image\/[^;]*;base64,/,''))

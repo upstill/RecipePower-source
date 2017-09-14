@@ -1,7 +1,7 @@
 <% inviter_name = @resource.invitation_issuer %>
 <% accept_str = link_to("accept the invitation", 
 		accept_user_invitation_url(
-                :rpevent => RpEvent.event_trigger_data(@resource, :invitation_responded, @invitation_event, @resource.invited_by),
+                :rpevent => InvitationAcceptedEvent.event_trigger_data(@resource, @resource.invited_by, @invitation_event),
                 :invitation_token => @resource.raw_invitation_token
         )) %>
 		

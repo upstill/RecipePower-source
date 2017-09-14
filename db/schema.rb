@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170630030721) do
+ActiveRecord::Schema.define(version: 20170909125943) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -337,7 +337,6 @@ ActiveRecord::Schema.define(version: 20170630030721) do
   add_index "results_caches", ["session_id", "type", "result_typestr"], name: "index_results_caches_on_session_id_and_type_and_result_typestr", unique: true, using: :btree
 
   create_table "rp_events", force: :cascade do |t|
-    t.integer  "verb"
     t.integer  "subject_id"
     t.string   "direct_object_type",   limit: 255
     t.integer  "direct_object_id"
@@ -347,6 +346,9 @@ ActiveRecord::Schema.define(version: 20170630030721) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "subject_type",                     default: "User"
+    t.string   "type"
+    t.integer  "status",                           default: 0
+    t.integer  "dj_id"
   end
 
   create_table "scales", force: :cascade do |t|

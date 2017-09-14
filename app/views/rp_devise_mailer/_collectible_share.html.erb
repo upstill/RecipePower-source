@@ -10,14 +10,10 @@
                                     polymorphic_url(@decorator.object, mode: :modal, :accept_invitation_link => accept_invitation_link) :
                                     @decorator.url),
             class: "share_recipe_title" %>
-<% if @decorator.sourcename.present? %>
+<% if @decorator.sourcename.present? && defined?(divert_invitation_link)%>
     <p>from&nbsp;
       <%= link_to @decorator.sourcename,
-                  divert_user_invitation_url(
-                          rpevent: RpEvent.event_trigger_data(@recipient, :invitation_diverted, @invitation_event, @sender),
-                          url: CGI::escape(@decorator.sourcehome),
-                          sender: @sender.id,
-                          recipient: @recipient.id),
+                  divert_invitation_link,
                   class: "share_recipe_source" %>
     </p>
 <% end %>

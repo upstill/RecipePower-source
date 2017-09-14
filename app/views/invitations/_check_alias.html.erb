@@ -5,8 +5,8 @@
                              accept_user_invitation_url(
                                      :make_alias => true,
                                      :mode => :modal,
-                                     :invitation_token => invitation_token
-                                     # :rpevent => RpEvent.event_trigger_data(invitee, :invitation_responded, @invitation_event, invitee.invited_by),
+                                     :invitation_token => invitation_token,
+                                     :rpevent => InvitationRespondedEvent.event_trigger_data(invitee, invitee.invited_by, @invitation_event),
                              ) %>
         <%= dialog_cancel_button 'No' %>
     <% end %>

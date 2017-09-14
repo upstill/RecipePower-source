@@ -247,8 +247,8 @@ class InvitationsController < Devise::InvitationsController
       if resource.password == resource.email
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
-      invitation_event = RpEvent.where(subject_id: resource.invited_by_id, indirect_object_id: resource.id, indirect_object_type: resource.class.to_s).first
-      RpEvent.post resource, :invitation_accepted, invitation_event, resource.invited_by
+      invitation_event = InvitationSentEvent.find_by_invitee resource
+      InvitationAcceptedEvent.post resource, resource.invited_by, invitation_event
       response_service.user = resource
       RpMailer.welcome_email(resource).deliver
       RpMailer.invitation_accepted_email(resource).deliver if resource.invited_by
@@ -263,13 +263,7 @@ class InvitationsController < Devise::InvitationsController
 
   # When the user gets distracted by the recipe link in a sharing notice
   def divert
-=begin
-    RpEvent.post 
-      resource_class.find(params[:recipient]), 
-	:invitation_diverted, 
-      nil, 
-      resource_class.find(params[:sender])
-=end
+    InvitationDivertedEvent.post resource_class.find(params[:recipient]), resource_class.find(params[:sender])
     redirect_to CGI::unescape(params[:url])
   end
 

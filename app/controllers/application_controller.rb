@@ -136,8 +136,9 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
   # Track the session, saving session events when the session goes stale
+=begin
+  # When we decide it's useful to track sessions, this needs to be updated for new RpEvent
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
     # Call RpEvent to heed the passback data for an event trigger
@@ -161,6 +162,7 @@ class ApplicationController < ActionController::Base
     session[:serve_count] = 1
     session[:start_time] = session[:last_time] = last_serve.created_at
   end
+=end
 
   # Get a presenter for the object from within a controller
   def present object

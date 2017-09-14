@@ -37,21 +37,21 @@ class AnalyticsServices
     @data = {}
 
     # Calculate # active users and sessions per active user
-    time_scope = RpEvent.where created_at: time_range
-    sessions = time_scope.session.pluck :subject_id
-    active_user_ids = sessions.uniq
-    @data[:sessions_per_active_user] = divide sessions.count, (@data[:active_users] = active_user_ids.count)
+    # time_scope = InvitationSentEvent.where created_at: time_range
+    session_uids = LoginEvent.during(time_range).pluck :who_id
+    active_user_ids = session_uids.uniq
+    @data[:sessions_per_active_user] = divide session_uids.count, (@data[:active_users] = active_user_ids.count)
 
     # Get # of dropouts in prior interval
     @data[:dropouts] = if prior_interval
-                         prior_active = RpEvent.session.where(created_at: (prior_interval.min)..time_range.min).pluck(:subject_id).uniq
+                         prior_active = LoginEvent.during((prior_interval.min)..time_range.min).pluck(:who_id).uniq
                          (prior_active - active_user_ids).count
                        else
                          "n/a"
                        end
 
     # Get new successful invitees (signed up in interval)
-    @data[:accepted_invitations] = time_scope.invitation_accepted.count
+    @data[:accepted_invitations] = InvitationAcceptedEvent.during(time_range).count
     @data[:cold_signups] = User.where(invitation_token:nil, created_at: time_range).count
 
     # Get new users of all kinds (accepted invitations + uninvited signups)
@@ -61,20 +61,21 @@ class AnalyticsServices
 
     @data[:viral_coefficient] = @data[:accepted_invitations].to_f / User.all.count
 
-    @data[:invitations_issued] = time_scope.invitation_sent.count
-    @data[:invitations_clicked] = time_scope.invitation_responded.count
-    @data[:invitations_converted] = time_scope.invitation_accepted.count
-    @data[:invitations_diverted] = time_scope.invitation_diverted.count
+    @data[:invitations_issued] = InvitationSentEvent.during(time_range).count
+    @data[:invitations_clicked] = InvitationRespondedEvent.during(time_range).count
+    @data[:invitations_converted] = InvitationAcceptedEvent.during(time_range).count
+    @data[:invitations_diverted] = InvitationDivertedEvent.during(time_range).count
 
     @data[:invitation_conversion_rate] = divide @data[:invitations_converted], @data[:invitations_issued]
     @data[:invitation_click_rate] = divide @data[:invitations_clicked], @data[:invitations_issued]
     @data[:invitation_response_conversion_rate] = divide @data[:invitations_converted], @data[:invitations_clicked]
 
-    shares_issued_by_id = time_scope.invitation_sent.where('direct_object_id IS NOT NULL').map(&:id)
+    # A Share is an invitation whose indirect object is an entity
+    shares_issued_by_id = InvitationSentEvent.during(time_range).where.not(invitation_event_id: nil).pluck :id
     @data[:shares_issued] = shares_issued_by_id.count
-    @data[:shares_clicked] = time_scope.invitation_responded.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
-    @data[:shares_converted] = time_scope.invitation_accepted.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
-    @data[:shares_diverted] = time_scope.invitation_diverted.where(direct_object_type: "RpEvent", direct_object_id: shares_issued_by_id).count
+    @data[:shares_clicked] = InvitationRespondedEvent.during(time_range).where(invitation_event_id: shares_issued_by_id).count
+    @data[:shares_converted] = InvitationAcceptedEvent.during(time_range).where(invitation_event_id: shares_issued_by_id).count
+    @data[:shares_diverted] = InvitationDivertedEvent.during(time_range).where(invitation_event_id: shares_issued_by_id).count
 
     @data[:share_conversion_rate] = divide @data[:shares_converted], @data[:shares_issued]
     @data[:share_click_rate] = divide @data[:shares_clicked], @data[:shares_issued]

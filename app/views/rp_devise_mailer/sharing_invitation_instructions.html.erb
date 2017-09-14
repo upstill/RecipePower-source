@@ -176,13 +176,21 @@
 				</div>
 			<% end %>
 		</div>
-        <% accept_invitation_link = accept_user_invitation_url(
-                :rpevent => RpEvent.event_trigger_data(@recipient, :invitation_responded, @invitation_event, @recipient.invited_by),
+        <% divert_invitation_link = divert_user_invitation_url(
+                rpevent: InvitationDivertedEvent.event_trigger_data(@recipient, @sender, @invitation_event),
+                url: CGI::escape(@decorator.sourcehome),
+                sender: @sender.id,
+                recipient: @recipient.id) %>
+       <% accept_invitation_link = accept_user_invitation_url(
+                :rpevent => InvitationAcceptedEvent.event_trigger_data(@recipient, @recipient.invited_by, @invitation_event),
                 :invitation_token => @recipient.raw_invitation_token,
                 :notification_token => @notification_token) %>
 		<div class="message_box">
-			<%= render "rp_devise_mailer/collectible_share", accept_invitation_link: accept_invitation_link %>
-		</div>
+			<%= render "rp_devise_mailer/collectible_share",
+                       accept_invitation_link: accept_invitation_link,
+                       divert_invitation_link: divert_invitation_link %>
+
+        </div>
 		<br>
 
         <div class="message_box">
