@@ -99,6 +99,7 @@ class InvitationsController < Devise::InvitationsController
         pr[:skip_invitation] = true # Hold off on invitation so we can re-direct to share, as nec.
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
+        InvitationSentEvent.post current_inviter, @resource, @shared
         if @shared
           @notification = @resource.post_notification(:share, current_inviter, what: @shared)
           @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
@@ -192,6 +193,7 @@ class InvitationsController < Devise::InvitationsController
         @resource = self.resource = resource_class.invite!(pr, current_inviter)
         @resource.invitation_sent_at = Time.now.utc
         @resource.save(validate: false) # ...because the invitee doesn't have a handle yet
+        InvitationSentEvent.post current_inviter, @resource, @shared
         @resource.issue_instructions(:share_instructions)
       rescue Exception => e
         self.resource = nil

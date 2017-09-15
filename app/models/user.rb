@@ -15,6 +15,7 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable #, :validatable,
          :lockable
+
   after_invitation_accepted :initial_setup
   # before_save :serialize_browser
 
@@ -232,8 +233,13 @@ private
       (@@leasts[str] = User.where('email like ?', "%#{str}%").collect { |match| match.id }.min)
   end
 
+  def post_invitation
+    InvitationSentEvent.post invited_by, self, shared
+  end
+
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
+    InvitationAcceptedEvent.post self, invited_by, InvitationSentEvent.find_by_invitee(self)
       # Give him friends
       f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id ]
       f << self.invited_by_id if self.invited_by_id
@@ -540,7 +546,9 @@ public
 
   # Provide the resource being shared, stored (but not saved) as a polymorphic object description
   def shared
-    @shared_class.find_by(id: @shared_id) if @shared_class
+    @shared_class = @shared_class.constantize if @shared_class.is_a?(String)
+    @shared_id = @shared_id.to_i if @shared_id.is_a?(String)
+    @shared_class.find_by(id: @shared_id) if @shared_class && @shared_id
   end
 
   def shared= entity
