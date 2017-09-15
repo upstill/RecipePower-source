@@ -284,7 +284,7 @@ class CollectibleController < ApplicationController
         # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
-        # This gets extracted from the href passed as a parameter
+        # This gets extracted from the request referrer or, failing that, the href passed as a parameter
         response_service.is_injector
         begin
           url = params[:recipe][:url]
@@ -299,7 +299,9 @@ class CollectibleController < ApplicationController
               # Apply picurl and title from capture to the page_ref
               # page_ref.save
               # Building the PageRef may lead to a different url than what was passed in
-              edit_params = response_service.redirect_params.merge sourcehome: host_url(url),
+              sourcehome = response_service.referer.if_present || url
+              sourcehome = host_url(sourcehome).sub /^https?:/, sourcehome.match(/^https?:/)[0]
+              edit_params = response_service.redirect_params.merge sourcehome: sourcehome,
                                                                    page_ref: {
                                                                        url: page_ref.url,
                                                                        type: page_ref.type,
