@@ -119,6 +119,12 @@ end
 # <User> logged in
 class LoginEvent < RpEvent
   alias_attribute :who, :subject
+  attr_accessible :who
+
+  # Login events accumulate for a given user
+  def self.post who
+    self.create who: who
+  end
 end
 
 # <User> listed <Entity> [in] <Treasury>
