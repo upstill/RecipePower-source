@@ -24,9 +24,10 @@ class PageRefServices
     ]
   end
 
+  # Try to translate a PageRef type into English
   def self.type_to_name type
-    self.type_selections.each { |ts|
-      return ts.first if type == ts.last
+    self.type_selections.find { |ts|
+      ts.first if type == ts.last
     }
   end
 

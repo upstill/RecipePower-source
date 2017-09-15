@@ -540,7 +540,9 @@ public
 
   # Provide the resource being shared, stored (but not saved) as a polymorphic object description
   def shared
-    @shared_class.find_by(id: @shared_id) if @shared_class
+    @shared_class = @shared_class.constantize if @shared_class.is_a?(String)
+    @shared_id = @shared_id.to_i if @shared_id.is_a?(String)
+    @shared_class.find_by(id: @shared_id) if @shared_class && @shared_id
   end
 
   def shared= entity
