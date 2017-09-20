@@ -1,6 +1,7 @@
 RP.notifs ||= { }
 
 jQuery ->
+	$('div.notifs-holder').on 'submit', "form", RP.submit.filter_submit
 	$('a.notification-ack').on 'click', (event) ->
 		$(event.currentTarget).closest('div.notification').hide()
 		if $('div.notifs div.notification').length == 1 # This is the last notification extant
