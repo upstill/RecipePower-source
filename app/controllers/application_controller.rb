@@ -381,7 +381,11 @@ class ApplicationController < ActionController::Base
         response_service.uuid = session.id
       end
       if session.id || true
-        defer_request path: request.fullpath, format: format||request.format.symbol
+        defer_request path: request.fullpath, format: if response_service.mode == :injector
+                                                        :json
+                                                      else
+                                                        format||request.format.symbol
+                                                      end
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert
                       new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))

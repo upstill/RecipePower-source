@@ -245,6 +245,7 @@ RP.dialog.notify = (what, dlog) ->
 		# rather than do a full page reload.
 			$(dlog).on 'shown', ->
 				$('textarea', dlog).focus()
+			$(dlog).on 'submit', "form", RP.submit.filter_submit
 			RP.submit.form_prep dlog
 	return
 ###

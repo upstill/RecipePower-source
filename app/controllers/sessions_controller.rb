@@ -1,5 +1,11 @@
 class SessionsController < Devise::SessionsController
   before_filter :allow_iframe, only: :new
+  before_filter :require_no_authentication, only: :create
+
+  # Somehow require_no_authentication redirects to after_sign_in_path_for when the user is already logged in
+  def require_no_authentication
+    super unless current_user
+  end
 
   # GET /resource/sign_in
   def new
@@ -28,8 +34,12 @@ class SessionsController < Devise::SessionsController
       result = sign_in_and_redirect(resource_name, resource)
       return result
     rescue Exception => e
-      flash[:error] = 'Oops! Can\'t find those credentials in our records.'
-      render :errors
+      if current_user
+        render nil
+      else
+        flash[:error] = 'Oops! Can\'t find those credentials in our records.' unless current_user
+        render :errors
+      end
     end
   end
   

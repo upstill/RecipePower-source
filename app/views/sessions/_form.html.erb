@@ -1,5 +1,8 @@
 <% if response_service.injector? %>
-    <%= submit_form_for(resource, :as => resource_name, :url => session_path(resource_name, response_service.redirect_params), :html => {'data-type' => 'json'}) do |f| %>
+    <%= submit_form_for resource,
+                        :as => resource_name,
+                        :url => session_path(resource_name, response_service.redirect_params),
+                        :html => {'data-type' => 'json'} do |f| %>
         <div class="signin">
           <strong>Sign in with a password:</strong><br>
           <%# form_errors_helper f, resource %>
@@ -18,8 +21,12 @@
             <% if devise_mapping.rememberable? -%>
                 <%= f.check_box :remember_me %> <%= f.label :remember_me %>
             <% end -%>
-            <div style="width:100%;height:40px;"><%= f.submit "Sign In", class: "btn btn-success dialog-submit-button" %></div>
-            <div style="width:100%"><%= link_to_submit "Forgot Password", new_user_password_path(response_service.redirect_params), mode: :injector, class: "get_password" %></div>
+            <div style="width:100%;height:40px;"><%= f.submit "Sign In",
+                                                              class: "btn btn-success dialog-submit-button" %></div>
+            <div style="width:100%"><%= link_to_submit "Forgot Password",
+                                                       new_user_password_path(response_service.redirect_params),
+                                                       mode: :injector,
+                                                       class: "get_password" %></div>
           </div>
         </div>
     <% end %>
