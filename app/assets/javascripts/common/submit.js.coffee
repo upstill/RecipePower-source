@@ -138,11 +138,6 @@ RP.submit.open_or_launch = (event) ->
 # Make a form ready for our special handling
 RP.submit.form_prep = (context) ->
 	context ||= document
-	# Forms submissions that expect JSON structured data will be handled here:
-	if context.tagName == "FORM"
-		$(context).submit RP.submit.filter_submit
-	else
-		$('form', context).submit RP.submit.filter_submit
 	# Turn a Bootstrap button group into radio buttons
 	$("input[type=submit]", context).click ->
 		# Here is where we enable multiple submissions buttons with different routes
