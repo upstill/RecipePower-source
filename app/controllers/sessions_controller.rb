@@ -34,6 +34,7 @@ class SessionsController < Devise::SessionsController
       result = sign_in_and_redirect(resource_name, resource)
       return result
     rescue Exception => e
+      # It's an error to get a login twice, but if there's already a user, we can just proceed as normal
       if current_user
         render nil
       else
