@@ -1,4 +1,5 @@
 require 'type_map.rb'
+require 'rp_event.rb'
 
 class User < ActiveRecord::Base
   # Class variable @@Guest_user saves the guest User
@@ -511,6 +512,7 @@ public
       case notification_type
       when :share
         self.shared = notification.shared
+        SharedEvent.post source_user, notification.shared, self
         msg = RpMailer.sharing_notice(notification)
         msg.deliver
       when :make_friend

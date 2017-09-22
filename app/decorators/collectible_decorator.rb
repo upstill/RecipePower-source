@@ -8,6 +8,10 @@ class CollectibleDecorator < ModelDecorator
     what.to_s.downcase.to_sym
   end
 
+  def sourcename
+
+  end
+
   def attribute_represents what
     what = what.to_sym
     what if what != :page_ref_type

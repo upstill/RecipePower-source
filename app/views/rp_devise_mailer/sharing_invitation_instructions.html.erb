@@ -163,8 +163,9 @@
 		}
 	</style>
   </head>
+  <% @decorator = @recipient.shared.decorate %>
   <body>
-		<div class="header_content">
+         <div class="header_content">
 			<div class="message_banner">
 				<strong><%= (inviter_name || "Someone").split(/\s/).first %></strong> sez:
               Check out this <%= @decorator.human_name.downcase %> I found on

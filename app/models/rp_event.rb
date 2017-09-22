@@ -176,6 +176,11 @@ end
 
 # <User> shared <Entity> [with] <User>
 class SharedEvent < RpEvent
+  alias_attribute :sharer, :subject
+  alias_attribute :shared, :direct_object
+  alias_attribute :sharee, :indirect_object
+  attr_accessible :sharer, :shared, :sharee
+
 end
 
 # <User> accepted <Entity> [from] <User>

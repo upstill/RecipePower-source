@@ -1,4 +1,5 @@
 class FeedsController < CollectibleController
+  before_filter :login_required, :except => [:index, :show, :associated, :capture, :contents, :card, :collect ]
 
   # GET /feeds
   # GET /feeds.json

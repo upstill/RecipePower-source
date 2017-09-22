@@ -1,5 +1,5 @@
 class CollectibleController < ApplicationController
-  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect ]
+  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect, :card ]
   before_filter :allow_iframe, only: :capture
 #  protect_from_forgery except: :capture
 
