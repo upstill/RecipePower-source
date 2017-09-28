@@ -1,0 +1,11 @@
+# Additional translations of ActivityNotification
+en:
+  notification:
+    default:
+      shared_event:
+        default:
+          mail_subject: 'Something tasty for you'
+    user:
+      shared_event:
+        default:
+          mail_subject: 'Something tasty for you'

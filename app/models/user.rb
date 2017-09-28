@@ -2,6 +2,11 @@ require 'type_map.rb'
 require 'rp_event.rb'
 
 class User < ActiveRecord::Base
+#  acts_as_notifier :printable_notifier_name => :username,
+#                   :printable_name => :salutation
+
+  acts_as_target email: :email, batch_email_allowed: :confirmed_at  # ...for ActivityNotifications
+
   # Class variable @@Guest_user saves the guest User
   @@Guest_user = nil
   @@Guest_user_id = 4
@@ -450,6 +455,10 @@ public
   def salutation
     (first_name unless first_name.blank?) ||
     (fullname.split(/\b/).first unless fullname.blank?) ||
+    username
+  end
+
+  def printable_notifier_name
     username
   end
 

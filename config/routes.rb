@@ -6,8 +6,14 @@
 RP::Application.routes.draw do
   match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
-  get 'scraper/new'
 
+  authenticate do
+    # Integrated with devise
+    notify_to :users, with_devise: :users, controller: 'users/notifications_with_devise'
+    x=2
+  end
+
+  get 'scraper/new'
   post 'scraper/create'
   post 'scraper/init'
 

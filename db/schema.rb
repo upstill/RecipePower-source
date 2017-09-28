@@ -11,10 +11,52 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170909125943) do
+ActiveRecord::Schema.define(version: 20170922231036) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "activ_notifications", force: :cascade do |t|
+    t.integer  "target_id",       null: false
+    t.string   "target_type",     null: false
+    t.integer  "notifiable_id",   null: false
+    t.string   "notifiable_type", null: false
+    t.string   "key",             null: false
+    t.integer  "group_id"
+    t.string   "group_type"
+    t.integer  "group_owner_id"
+    t.integer  "notifier_id"
+    t.string   "notifier_type"
+    t.text     "parameters"
+    t.datetime "opened_at"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "activ_notifications", ["group_owner_id"], name: "index_activ_notifications_on_group_owner_id", using: :btree
+  add_index "activ_notifications", ["group_type", "group_id"], name: "index_activ_notifications_on_group_type_and_group_id", using: :btree
+  add_index "activ_notifications", ["notifiable_type", "notifiable_id"], name: "index_activ_notifications_on_notifiable_type_and_notifiable_id", using: :btree
+  add_index "activ_notifications", ["notifier_type", "notifier_id"], name: "index_activ_notifications_on_notifier_type_and_notifier_id", using: :btree
+  add_index "activ_notifications", ["target_type", "target_id"], name: "index_activ_notifications_on_target_type_and_target_id", using: :btree
+
+  create_table "activ_subscriptions", force: :cascade do |t|
+    t.integer  "target_id",                               null: false
+    t.string   "target_type",                             null: false
+    t.string   "key",                                     null: false
+    t.boolean  "subscribing",              default: true, null: false
+    t.boolean  "subscribing_to_email",     default: true, null: false
+    t.datetime "subscribed_at"
+    t.datetime "unsubscribed_at"
+    t.datetime "subscribed_to_email_at"
+    t.datetime "unsubscribed_to_email_at"
+    t.text     "optional_targets"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "activ_subscriptions", ["key"], name: "index_activ_subscriptions_on_key", using: :btree
+  add_index "activ_subscriptions", ["target_type", "target_id", "key"], name: "index_activ_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
+  add_index "activ_subscriptions", ["target_type", "target_id"], name: "index_activ_subscriptions_on_target_type_and_target_id", using: :btree
 
   create_table "answers", force: :cascade do |t|
     t.string   "answer",      default: ""

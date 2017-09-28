@@ -19,6 +19,7 @@ module RP
       #{config.root}/app/services
       #{config.root}/app/presenters
       #{config.root}/app/mixins
+      #{config.root}/lib
       #{config.root}/app/controllers/cmods
     )
     # require class extensions right now

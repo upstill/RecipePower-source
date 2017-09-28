@@ -1,4 +1,6 @@
 class SessionsController < Devise::SessionsController
+  include Rails.application.routes.url_helpers
+
   before_filter :allow_iframe, only: :new
   before_filter :require_no_authentication, only: :create
 
@@ -13,7 +15,19 @@ class SessionsController < Devise::SessionsController
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     elsif response_service.format == :html && !response_service.injector?
-      redirect_to home_path # Page display not an option
+      if blocked_request = params[:blocked]
+        # This code is nasty, because recognize_path dies horribly on notifications
+        begin
+          controller = Rails.application.routes.recognize_path blocked_request
+        rescue Exception => e
+          uri = URI(blocked_request)
+          if match = uri.path.match(%r{^/users/(\d*)/notifications/(\d*)/(\w*)$})
+            controller = Users::NotificationsWithDeviseController
+          end
+        end
+      end
+      redir = controller.show_page rescue home_path
+      redirect_to redir
     else
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)
       if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])

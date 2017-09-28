@@ -46,6 +46,9 @@ gem 'unicorn-rails'
 # Server
 gem 'thin'
 
+# Activity Notification
+gem 'activity_notification'
+
 ####### JQuery, Coffeescript and Bootstrap
 gem 'jquery-rails', '~> 4.0.3' # '2.2.1' to get jQuery 1.9.1
 # gem 'jquery-rails-google-cdn'

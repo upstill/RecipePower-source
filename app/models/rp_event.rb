@@ -181,6 +181,18 @@ class SharedEvent < RpEvent
   alias_attribute :sharee, :indirect_object
   attr_accessible :sharer, :shared, :sharee
 
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) {  [evt.sharee] },
+#                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifiable_path: :share_path,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: { only: [:create] }
+
+  def share_path
+    polymorphic_path shared
+  end
+
 end
 
 # <User> accepted <Entity> [from] <User>
