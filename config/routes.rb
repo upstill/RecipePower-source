@@ -4,6 +4,20 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  get 'rp_events/show'
+
+  get 'rp_events/show_page'
+
+  get 'rp_events/index'
+
+  get 'rp_events/new'
+
+  get 'rp_events/create'
+
+  get 'rp_events/update'
+
+  get 'rp_events/destroy'
+
   match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
 

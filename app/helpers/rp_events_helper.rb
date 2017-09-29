@@ -1,0 +1,2 @@
+module RpEventsHelper
+end
