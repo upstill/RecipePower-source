@@ -230,11 +230,11 @@ class PageRef < ActiveRecord::Base
   # Use arel to generate a query (suitable for #where or #find_by) to match the url
   def self.url_query url
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
+    urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
     url_node = self.arel_table[:url]
     aliases_node = self.arel_table[:aliases]
-    aliases_query = aliases_node.overlap [url]
-    url_query = url_node.eq(url)
-    aliases_query = aliases_node.overlap [url]
+    url_query = url_node.eq(urlpair.first).or url_node.eq(urlpair.last)
+    aliases_query = aliases_node.overlap urlpair # [url]
     url_query.or aliases_query
   end
 
