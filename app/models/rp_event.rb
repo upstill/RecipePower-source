@@ -32,8 +32,8 @@ class RpEvent < ActiveRecord::Base
   belongs_to :subject, polymorphic: true
   belongs_to :direct_object, polymorphic: true
   belongs_to :indirect_object, polymorphic: true
-  has_many :event_notices
-  has_many :users, :through => :event_notices
+  has_many :event_notices, class_name: 'ActivityNotification::Notification', as: :notifiable
+  has_many :users, :through => :event_notices, source: :target, source_type: 'User'
 
   belongs_to :user
 
@@ -59,7 +59,8 @@ class RpEvent < ActiveRecord::Base
     elsif indirect_object.is_a? Hash
       data, indirect_object = indirect_object, nil
     end
-    posted = self.where(self.assemble_attributes(subject, direct_object, indirect_object)).first_or_create
+    args = self.assemble_attributes(subject, direct_object, indirect_object)
+    posted = self.where(args).first_or_create
     if (posted.data != data)
       posted.data = data
       posted.save
@@ -151,6 +152,15 @@ class InvitationSentEvent < RpEvent
   alias_attribute :shared, :indirect_object
   attr_accessible :inviter, :invitee, :shared
 
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) {  [evt.invitee] },
+                     #                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: { only: [:create] } # , send_later: false }
+
   def self.find_by_invitee invitee
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
     self.find_by direct_object: invitee, subject_type: 'User', subject_id: invitee.invited_by_id
@@ -160,7 +170,26 @@ end
 # <User> responded to invitation <InvitationSentEvent>
 class InvitationResponseEvent < RpEvent
   alias_attribute :invitee, :subject
-  alias_attribute :invitation_event, :direct_object
+  alias_attribute :inviter, :direct_object
+  alias_attribute :invitation_event, :indirect_object
+  attr_accessible :inviter, :invitee, :invitation_event
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) {
+                       case key.sub(/^.*\./, '')
+                         when 'create'
+                           [evt.inviter]
+                         when 'welcome'
+                           [evt.invitee]
+                       end
+                     },
+                     #                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: { only: [:create] } # , send_later: false }
+
 end
 
 class InvitationRespondedEvent < InvitationResponseEvent
@@ -185,9 +214,10 @@ class SharedEvent < RpEvent
                      targets: ->(evt, key) {  [evt.sharee] },
 #                     notifier: ->(evt, key) {  [evt.sharer] },
                      notifiable_path: :share_path,
+                     email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] }
+                     tracked: { only: [:create] } # , send_later: false }
 
   def share_path
     polymorphic_path shared

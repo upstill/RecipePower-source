@@ -1,4 +1,6 @@
-<!--Moved to activity_notification/mailer/users/invitation_accepted_event/create.html.erb-->
+<!--The former rp_mailer/invitation_accepted_email.html.erb-->
+<% event = @notification.notifiable %>
+<% @invitee = event.invitee %>
 <!DOCTYPE html>
 <html>
   <head>

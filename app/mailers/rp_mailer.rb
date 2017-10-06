@@ -11,14 +11,16 @@ class RpMailer < ActionMailer::Base
     @feedback = feedback
     mail :to => recipients, :from => @feedback.email, :subject => subject
   end
-  
+
+  # TODO: Replace with ActivityNotification
   def welcome_email(user)
     @inviter = user.invited_by
     @invitee = user
     @login_url  = rp_url '/login'
     mail :to => user.email, :from => 'support@recipepower.com', :subject => 'Welcome to RecipePower'
   end
-    
+
+  # TODO: Replace with ActivityNotification
   def invitation_accepted_email invitee
     return unless invitee.invited_by
     @invitee = invitee
@@ -26,6 +28,8 @@ class RpMailer < ActionMailer::Base
     mail to: invitee.invited_by.email, :from => 'support@recipepower.com', :subject => 'Your invitation was accepted'
   end
   
+=begin
+  # Supplanted by ActivityNotification
   # Notify the user via email of a recipe share
   def sharing_notice(notification, opts={})
     @notification = notification
@@ -41,6 +45,7 @@ class RpMailer < ActionMailer::Base
       from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
       subject: @sender.polite_name+" has something tasty for you"
   end
+=end
 
   def user_to_user(from, to)
     @sender = from

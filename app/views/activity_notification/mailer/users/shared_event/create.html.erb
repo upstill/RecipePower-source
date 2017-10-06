@@ -1,3 +1,4 @@
+<!--Formerly rp_devise_mailer/sharing_invitation_instructions.html.erb-->
 <!DOCTYPE html>
 <html>
 <head>
@@ -178,7 +179,8 @@
 </div>
 <div class="message_box">
     <%= render "rp_devise_mailer/collectible_share",
-    accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token)
+               accept_invitation_link: move_notification_url_for(@notification, open: true)
+        # accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token)
     %>
 </div>
 <br>
@@ -186,7 +188,8 @@
     <div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
     <div style="width:90%; margin: 0px;float: left;">
         <%= link_to "Save It To RecipePower",
-        notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
+                    move_notification_url_for(@notification, open: true),
+        # notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
         class: "get_button btn-lg btn-success" %>
     </div>
     <div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>

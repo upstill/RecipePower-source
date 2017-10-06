@@ -22,6 +22,7 @@ class UserServices
     'Users Converted'
   end
 
+=begin
   def analyze_invitees(sender)
     result = {
       redundancies:  [], # Current friends (member's share notice sent)
@@ -62,6 +63,7 @@ class UserServices
     
     result
   end
+=end
 
   # Called on signup to initialize the user
   def sign_up

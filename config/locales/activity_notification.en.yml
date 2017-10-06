@@ -3,9 +3,12 @@ en:
   notification:
     default:
       shared_event:
-        default:
+        create:
           mail_subject: 'Something tasty for you'
     user:
+      invitation_sent_event:
+        create:
+          mail_subject: 'Someone wants to get you cooking'
       shared_event:
-        default:
+        create:
           mail_subject: 'Something tasty for you'

@@ -5,7 +5,7 @@ class User < ActiveRecord::Base
 #  acts_as_notifier :printable_notifier_name => :username,
 #                   :printable_name => :salutation
 
-  acts_as_target email: :email, batch_email_allowed: :confirmed_at  # ...for ActivityNotifications
+  acts_as_target email: :email, email_allowed: true, batch_email_allowed: :confirmed_at  # ...for ActivityNotifications
 
   # Class variable @@Guest_user saves the guest User
   @@Guest_user = nil
@@ -487,6 +487,7 @@ public
     }
   end
 
+=begin
   def issue_instructions(what = :invitation_instructions, opts={})
     # send_devise_notification(what, opts)
     self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
@@ -544,6 +545,7 @@ public
     self.notifications_received << notification
     notification
   end
+=end
 
   # Absorb another user into self
   def absorb other
