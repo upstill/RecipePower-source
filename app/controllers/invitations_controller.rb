@@ -144,7 +144,7 @@ class InvitationsController < Devise::InvitationsController
           end
           %Q{Yay! #{subj_verb} to #{users}}
         }
-    alerts = [
+    alerts = @shared ? [] : [ # Invitations only
         breakdown.report(:extant_friends, :handle) { |names, count|
           "You're already friends with #{names}." },
         breakdown.report(:reinvited, :email) { |names, count|
@@ -153,14 +153,13 @@ class InvitationsController < Devise::InvitationsController
         },
         breakdown.report(:new_friends, :handle) { |names, count|
           %Q{#{names} #{count > 1 ? 'are' : 'is'} already on RecipePower, so we've added them to your friends.}
-        } ].compact if !@shared # Invitations only
+        } ].compact
 
     respond_to { |format|
       format.json {
         response = {done: true}
-        if alerts.present? || popup.present?
-          response_type = alerts.blank? ? :popup : :alert
-          response[response_type] = (alerts << popup).compact.join('<br>').html_safe
+        if (msgs = ((alerts || []) << popup.if_present).compact).present?
+          response[alerts.present? ?  :alert : :popup] = msgs.join('<br>').html_safe
         end
         render json: response
       }

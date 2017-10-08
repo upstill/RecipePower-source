@@ -1,4 +1,7 @@
 <!--The former rp_mailer/welcome_email.html.erb-->
+<% event = @notification.notifiable %>
+<% @invitee = event.invitee %>
+<% @inviter = event.inviter %>
 <!DOCTYPE html>
 <html>
 <head>

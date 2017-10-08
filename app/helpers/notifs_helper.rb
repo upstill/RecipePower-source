@@ -2,11 +2,6 @@ module NotifsHelper
 
   # To go with any page: present pending notifications (and invitations) in a modal atop
   def do_notifs
-    handle_invitation_and_login
-  end
-
-  # Any pending invitation gets handled here, and also getting login credentials w/o an invitation
-  def handle_invitation_and_login
     if current_user
       # User logged in: check for notifications
       if notif = notifiable_notification
