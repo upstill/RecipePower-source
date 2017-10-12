@@ -34,12 +34,6 @@ class InvitationsController < Devise::InvitationsController
   # GET /resource/invitation/accept?invitation_token=abcdef
   # Accept an invitation
   def edit
-    if (response_service.notification_token = params[:notification_token]) &&
-        response_service.pending_notification &&
-        params[:autosave] # If any
-      response_service.pending_notification.autosave = true
-      response_service.pending_notification.save
-    end
     respond_to do |format|
       format.json {
         unless response_service.dialog?

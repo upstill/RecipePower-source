@@ -255,7 +255,6 @@ class CollectibleController < ApplicationController
       current_user.collect @resource if current_user  # Add to collection
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page.
-          session[:recipe_pending] = @resource.id
           redirect_to default_next_path
         }
         format.json {

@@ -129,18 +129,6 @@ module ApplicationHelper
     link_to image_tag('RPlogo.png', :alt => 'RecipePower', :id => 'logo_img'+(small ? '_small' : '')), root_path
   end
 
-  def enumerate_strs strs
-    case strs.count
-      when 0
-        ''
-      when 1
-        strs[0]
-      else
-        last = strs.pop
-        strs.join(', ')+' and ' + last
-    end
-  end
-
   def bookmarklet_script
     "javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27#{rp_url}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&recipe[title]=%27+encodeURIComponent(document.title)+%27&recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&v=6&jump=yes%27);document.body.appendChild(s);}())"
   end
@@ -165,18 +153,6 @@ module ApplicationHelper
                 class: 'template',
                 id: id,
                 :'data-template' => { string: template }.to_json
-  end
-
-  def invitation_acceptance_label
-    if response_service.pending_invitee
-      response_service.pending_invitee.notifications_received.where(accepted: false).empty? ? 'Accept Invitation' : 'Take Share'
-    end
-  end
-
-  # Pump pending notifications into flash notices
-  def issue_notifications user
-    notices = user.notifications_received.where(accepted: false).map(&:accept).join('<br>'.html_safe)
-    flash[:success] = notices unless notices.blank?
   end
 
   def debug_dump(params)

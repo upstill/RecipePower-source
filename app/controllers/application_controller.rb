@@ -29,7 +29,6 @@ class ApplicationController < ActionController::Base
   helper_method :default_next_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
-  helper_method :notifiable_notification
 
   # From ControllerUtils
   helper_method :express_error_context
@@ -62,6 +61,11 @@ class ApplicationController < ActionController::Base
       flash[:alert] = "Can't locate #{params[:controller].singularize} ##{params[:id] || '<unknown>'}"
       render :errors
     end
+  end
+
+  # Simple path to remove a pending invitation (can still be re-invoked later)
+  def defer_invitation
+    response_service.invitation_token = nil
   end
 
   # Set up a model for editing or rendering. The parameters are orthogonal:
@@ -114,30 +118,12 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    if (notif = response_service.pending_notification) && notif.shared
-      return view_context.linkpath notif.shared
-    end
-      (current_user ? collection_user_path(current_user) : home_path)
+    current_user ? collection_user_path(current_user) : home_path
   end
 
-  def notifiable_notification
-    # Check for a pending notification. If it's to be autosaved, do that and simply set a flash notice. Otherwise, return it
-    if response_service.notification_token && (notif = response_service.pending_notification)
-      if notif.autosave
-        if msg = notif.decorate.act
-          # All is well; clear the pending notification
-          response_service.notification_token = nil
-          flash.now[:notice] = msg
-        end
-        nil
-      else
-        notif
-      end
-    end
-  end
+=begin
 
   # Track the session, saving session events when the session goes stale
-=begin
   # When we decide it's useful to track sessions, this needs to be updated for new RpEvent
   def log_serve
     logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
@@ -433,6 +419,7 @@ class ApplicationController < ActionController::Base
     end || super
   end
 
+=begin
   # This is an override of the Devise method to determine where to go after login.
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
@@ -441,6 +428,7 @@ class ApplicationController < ActionController::Base
     view_context.issue_notifications current_user
     stored_location_for(resource_or_scope)
   end
+=end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs

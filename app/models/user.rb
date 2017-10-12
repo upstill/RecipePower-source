@@ -36,8 +36,10 @@ class User < ActiveRecord::Base
   attr_accessor :invitee_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
                 :shared_class, :shared_name, :shared_id # Kept temporarily during sharing operations
   
+=begin
   has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
   has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
+=end
 
   # has_one :inviter, :class_name => 'User'  Defined by Devise
   has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'

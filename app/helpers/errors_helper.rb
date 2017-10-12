@@ -12,7 +12,7 @@ module ErrorsHelper
     base_errors = options[:with_base] ? express_base_errors(resource) : ""
     details =
         if attribute = options[:attribute]
-          (attribute.to_s.upcase+" "+enumerate_strs(resource.errors[attribute])+".")
+          (attribute.to_s.upcase+" "+liststrs(resource.errors[attribute])+".")
         else
           resource.errors.full_messages.to_sentence
         end + base_errors

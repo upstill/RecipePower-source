@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath, :referer
+  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token
   attr_writer :user
 
   def initialize params, session, request
@@ -36,6 +36,12 @@ class ResponseServices
     # :page to render the whole page (for an html request)
     @mode = (params[:mode] || :page).to_sym
         # (@format == :html ? :page : :modal)).to_sym
+
+    # The presence of notification and invitation tokens persists them in the session until cleared
+    @invitation_token = session[:notification_token]
+    @notification_token = params[:notification_token] if params[:notification_token].present?
+    @invitation_token = session[:invitation_token]
+    @invitation_token = params[:invitation_token] if params[:invitation_token].present?
 
     # Save the parameters we might want to pass back
     @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
@@ -179,17 +185,14 @@ class ResponseServices
         end
   end
 
+  # Lookup the user to whom the current invitation token pertains
   def pending_invitee
     unless @pending_invitee
       @pending_invitee = User.find_by_invitation_token(invitation_token, false) if invitation_token
       # If the invitation is to the current user, we can safely clear the pending invitation
-      self.invitation_token = nil if @pending_invitee && user && (@pending_invitee == user)
+      invitation_token = nil if @pending_invitee && user && (@pending_invitee == user)
     end
     @pending_invitee
-  end
-
-  def invitation_token
-    @invitation_token ||= @session[:invitation_token]
   end
 
   # Set the invitation_token and store it in the @session
@@ -201,17 +204,17 @@ class ResponseServices
     end
   end
 
-  def notification_token
-    @notification_token ||= @session[:notification_token]
+  def pending_notification
+    @notification ||= Notification.find_by_notification_token(@notification_token) if notification_token
   end
 
   # Set the notification_token and store it in the @session
   def notification_token= it
-    @notification_token = @session[:notification_token] = it
-  end
-
-  def pending_notification
-    @notification ||= Notification.find_by_notification_token(@notification_token) if notification_token
+    if @notification_token = it
+      @session[:notification_token] = it
+    else
+      @session.delete :notification_token
+    end
   end
 
 end

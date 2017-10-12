@@ -1,7 +1,19 @@
 module NotifsHelper
 
+=begin
+  # Pump pending notifications into flash notices
+  def issue_notifications user
+    notices = user.notifications_received.where(accepted: false).map(&:accept).join('<br>'.html_safe)
+    flash[:success] = notices unless notices.blank?
+  end
+=end
+
+  def invitation_acceptance_label
+    response_service.pending_notification ? 'Accept Invitation' : 'Take Share'
+  end
+
   # To go with any page: present pending notifications (and invitations) in a modal atop
-  def do_notifs
+  def due_notifs
     if current_user
       # User logged in: check for notifications
       if notif = notifiable_notification
@@ -15,6 +27,96 @@ module NotifsHelper
       # Simply present login options
       render 'notifs/panel'
     end
+  end
+
+  def notifs_replacement
+    [ 'div.notifs-holder', do_notifs ]
+  end
+
+  # To go with any page: provide the SignIn/SignUp/AcceptInvitation floater
+  def do_notifs
+    sections = [] # Accumulates the sections to be shown
+    invitee = response_service.pending_invitee
+    notif = response_service.pending_notification
+    if @target = current_user
+      # If there's a pending invitation
+      if invitee
+        # If it's for the current user
+        if current_user.id == invitee.id
+          # Invitation is redundant
+          flash[:now] = "No invitation required: you're already logged in!"
+          # Clear the invitation_token
+        else # Invitation is for some other user
+          # Post "please logout first" alert
+          sections << OpenStruct.new(
+                     is_vis: true,
+                     partial: 'sessions/logout_panel',
+                     partial_locals: { message: 'That invitation is for someone else. Just log out if you\'d like to use it' }
+                 )
+        end
+        return render('notifs/panel', sections: sections, as_alert: true, wide: true )
+      end
+
+      # If there's a pending notification
+      if notif
+        # If the notification matches the current user
+        if current_user.id == notif.target.id
+          # All is well; clear the pending notification
+          response_service.notification_token = nil # Clear the notification
+          flash.now[:notice] = msg
+        else # Notification is for some other user
+          sections << OpenStruct.new(
+                     is_vis: true,
+                     exclusive: true,
+                     partial: 'sessions/logout',
+                     partial_locals: { message: 'That notification is for someone else. Just log out if you\'d like to see it' }
+                 )
+        end
+      end # User is logged in, pending items disposed of
+      sections << OpenStruct.new(
+          signature: 'notifications',
+          title: 'Notifications',
+          partial: 'notifs/notifications'
+      )
+      # if no current user, but there's a pending invitation
+    elsif invitee
+      # Sort out a pending invitation
+      # Bad invitation token => nullify the invitation and incorporate into panel
+      invitee_error =
+      if invitee.errors.any?
+        flash.now[:alert] = 'Sorry, that invitation has expired. But do sign up!'
+      end
+      sections << OpenStruct.new(# Collect credentials
+          signature: 'accept',
+          is_vis: true,
+          is_main: true,
+          title: invitation_acceptance_label,
+          exclusive: true,
+          partial: 'devise/invitations/form', # 'notifs/accept_invitation',
+          partial_locals: { resource: invitee, resource_name: 'user', invitee_error: invitee_error }.compact
+      )
+      sections << OpenStruct.new(# Sign In
+          signature: 'signin',
+          title: 'Sign In Otherwise',
+          partial: 'notifs/signin'
+      )
+    else # No current user, no pending invitation
+      # The simplest case: no invitation token, no current user
+      # Simply present login options
+      sections << OpenStruct.new(# Sign Up
+          signature: 'signup',
+          is_main: true,
+          # is_vis: true,
+          title: 'Sign Up',
+          partial: 'registrations/options' # 'notifs/signup'
+      )
+      sections << OpenStruct.new(# Sign In
+          signature: 'signin',
+          title: 'Sign In',
+          partial: 'notifs/signin'
+      )
+    end
+    render 'notifs/panel', sections: sections
   end
 
   # Deal with an invitation, rendering it to the given partial if there's action to be taken.

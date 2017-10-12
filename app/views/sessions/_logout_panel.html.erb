@@ -1,0 +1,9 @@
+<div class="row">
+  <div class="col-md-12">
+    <p class="prompt"><%= message %></p>
+  </div>
+</div>
+<%= modal_footer do %>
+    <%= button_to_submit 'Logout', users_sign_out_path %>
+    <%= button_to_submit 'Cancel Invitation', defer_invitation_path %>
+<% end %>
