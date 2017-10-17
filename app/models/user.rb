@@ -33,7 +33,7 @@ class User < ActiveRecord::Base
                 :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :invitee_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
+  attr_accessor :invitee_tokens, :avatar_url, :mail_subject, :mail_body,
                 :shared_class, :shared_name, :shared_id # Kept temporarily during sharing operations
   
 =begin

@@ -9,7 +9,7 @@ to be invoked after the user verifies credentials
 <% accept_str = link_to('accept the invitation',
                         accept_user_invitation_url(
                                 :rpevent => InvitationAcceptedEvent.event_trigger_data(@target, @target.invited_by, @invitation_event),
-                                :invitation_token => @target.raw_invitation_token,
+                                :invitation_token => event.data[:raw_invitation_token],
                                 :notification_token => @notification.id # notification_token
                         )) %>
 

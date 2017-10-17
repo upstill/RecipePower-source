@@ -152,6 +152,10 @@ class InvitationSentEvent < RpEvent
   alias_attribute :shared, :indirect_object
   attr_accessible :inviter, :invitee, :shared
 
+  def self.post inviter, invitee, shared, raw_invitation_token
+    super inviter, invitee, shared, raw_invitation_token: raw_invitation_token
+  end
+
   acts_as_notifiable :users,
                      targets: ->(evt, key) {  [evt.invitee] },
                      #                     notifier: ->(evt, key) {  [evt.sharer] },
