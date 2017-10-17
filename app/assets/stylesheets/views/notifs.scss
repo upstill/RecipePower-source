@@ -1,6 +1,9 @@
 div.notifs {
   width: auto;
-  max-width: 330px;
+  max-width: 380px;
+  &.collapsed {
+    max-width: 330px;
+  }
   &.wide {
     max-width: 550px;
   }

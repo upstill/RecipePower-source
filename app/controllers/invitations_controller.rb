@@ -113,6 +113,7 @@ class InvitationsController < Devise::InvitationsController
       else
         # This is a new invitation/share to a new user
         u = resource_class.invite! resource_params.merge(email: invitee.downcase), current_user { |u| u.skip_invitation = true }
+        @raw_invitation_token = u.raw_invitation_token
         evt = InvitationSentEvent.post current_user, u, @shared
         evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
         :to_invite

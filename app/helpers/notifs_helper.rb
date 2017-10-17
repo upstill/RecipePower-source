@@ -9,7 +9,7 @@ module NotifsHelper
 =end
 
   def invitation_acceptance_label
-    response_service.pending_notification ? 'Accept Invitation' : 'Take Share'
+    response_service.pending_notification ? 'Take Share' : 'Accept Invite'
   end
 
   # To go with any page: present pending notifications (and invitations) in a modal atop

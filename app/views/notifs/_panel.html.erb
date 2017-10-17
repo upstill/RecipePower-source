@@ -4,7 +4,7 @@
       <% unless defined?(as_alert) && as_alert %>
           <div class="modal-header">
             <!--Define the wait state of the header-->
-            <div class="header-links waiting">
+            <div class="header-links waiting" style="display: <%= sections.any?(&:is_vis) ? 'none' : 'block' %>" >
               <% sections.each do |section| %>
                   <a class="select-content <%= section.signature %> <%= 'main' if section.is_main %>" data-activate="<%= section.signature %>"><%= section.title %></a>
                   <% if section != sections.last %>
@@ -15,11 +15,11 @@
             </div>
             <!--Define the headers for each alternative state-->
             <% sections.each do |section| %>
-                <div class="header-links <%= section.signature %>" style="display: none">
+                <div class="header-links <%= section.signature %>" style="display: <%= section.is_vis ? 'block' : 'none' %>">
                   <div style="display: table; margin: 0 auto">
                     <span><%= section.title %></span>
                     <% (sections - [section]).each do |othersection| %>
-                        <a class="select-content <%= section.signature %>" data-activate="<%= othersection.signature %>"><%= othersection.title %></a>
+                        <br><a class="select-content <%= section.signature %>" data-activate="<%= othersection.signature %>"><%= othersection.title %></a>
                     <% end %>
                   </div>
                 </div>

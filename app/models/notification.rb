@@ -40,5 +40,5 @@ class Notification < ActiveRecord::Base
       break random_token unless Notification.where(notification_token: random_token).exists?
     end
   end
-  
+
 end

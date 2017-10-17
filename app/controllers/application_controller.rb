@@ -13,9 +13,9 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_flash
   before_filter :report_cookie_string
-  before_filter { logger.info 'Before controller:'; report_session }
+  before_filter { report_session 'Before controller:' }
   # after_filter :log_serve
-  after_filter { logger.info 'After controller:'; report_session }
+  after_filter { report_session 'After controller:'  }
   before_filter :setup_response_service
 
   helper :all
@@ -172,7 +172,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def report_session
+  def report_session context
+    logger.info 'XXXXXXXXXXXXXXXX ' + context + ' XXXXXXXXXXXXXXXX'
     logger.info "COOKIES: >>>>>>>>"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     logger.info "<<<<<<<< COOKIES"
@@ -386,7 +387,7 @@ class ApplicationController < ActionController::Base
         )
       else
         report_cookie_string
-        report_session
+        report_session "Unauthorized Login:"
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end

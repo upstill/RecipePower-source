@@ -2,10 +2,15 @@
 <% event = @notification.notifiable %>
 <% inviter = event.subject %>
 <% inviter_name = @target.invitation_issuer %>
-<% accept_str = link_to("accept the invitation",
+<!--
+Link to the page for the shared item&#45;&#45;or the home page if none&#45;&#45;with embedded invitation and notification tokens
+to be invoked after the user verifies credentials
+-->
+<% accept_str = link_to('accept the invitation',
                         accept_user_invitation_url(
                                 :rpevent => InvitationAcceptedEvent.event_trigger_data(@target, @target.invited_by, @invitation_event),
-                                :invitation_token => @target.invitation_token
+                                :invitation_token => @target.raw_invitation_token,
+                                :notification_token => @notification.id # notification_token
                         )) %>
 
 <p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
