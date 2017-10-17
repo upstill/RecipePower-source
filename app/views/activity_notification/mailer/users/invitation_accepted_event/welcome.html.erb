@@ -15,7 +15,7 @@
   of the RecipePower community, all signed in and everything.
   Your collection awaits you at <%= link_to root_url, root_url %>. Of
   course, it's fairly empty at the moment--but if you install our
-  <%= link_to "Cookmark Button", page_with_trigger("/cookmark.json?mode=modal") %>,
+  <%= link_to "Cookmark Button", page_with_trigger(collection_user_url(@invitee),'/cookmark.json?mode=modal') %>,
   you can add to your collection from anywhere on the Web.
 </p>
 
@@ -28,7 +28,7 @@
 </ul>
 <p>If any of this (especially the password) doesn't suit, you can get to your
   Profile on the menu under your name--or
-  click <%= link_to "here", page_with_trigger(users_profile_path) %></p>
+  click <%= link_to "here", page_with_trigger(collection_user_url(@invitee),users_profile_path) %></p>
 <% if @inviter %>
     <p>Since <%= @inviter.handle %> invited you, you are Friends by default,
       so you will find their collection at "<%= @inviter.handle %>" under

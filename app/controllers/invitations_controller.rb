@@ -245,6 +245,7 @@ class InvitationsController < Devise::InvitationsController
 
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)
+      response_service.invitation_token = nil # Clear the invitation
       redirect_to after_accept_path_for(resource), status: 303
     else
       # respond_with_navigational(resource){ dialog_boilerplate :edit }
