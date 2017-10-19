@@ -205,7 +205,7 @@ class ResponseServices
   end
 
   def pending_notification
-    @notification ||= Notification.find_by(id: @notification_token) if @notification_token # find_by_notification_token(@notification_token) if notification_token
+    @notification ||= ActivityNotification::Notification.find_by(id: @notification_token) if @notification_token # find_by_notification_token(@notification_token) if notification_token
   end
 
   # Set the notification_token and store it in the @session

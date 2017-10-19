@@ -36,11 +36,6 @@ class User < ActiveRecord::Base
   attr_accessor :invitee_tokens, :avatar_url, :mail_subject, :mail_body,
                 :shared_class, :shared_name, :shared_id # Kept temporarily during sharing operations
   
-=begin
-  has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
-  has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
-=end
-
   # has_one :inviter, :class_name => 'User'  Defined by Devise
   has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'
 
@@ -494,66 +489,6 @@ public
       re.match(followee.username) || re.match(followee.fullname) || re.match(followee.email)
     }
   end
-
-=begin
-  def issue_instructions(what = :invitation_instructions, opts={})
-    # send_devise_notification(what, opts)
-    self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
-    generate_invitation_token! unless @raw_invitation_token
-    send_devise_notification(what, @raw_invitation_token, opts)
-  end
-
-  def headers_for(action)
-    case action
-    when :invitation, :invitation_instructions
-      {
-        :subject => invitation_issuer+' wants to get you cooking.',
-        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
-        :reply_to => invited_by.email
-      }
-    when :sharing_notice, :sharing_invitation_instructions
-      {
-        :subject => invitation_issuer+' has something tasty for you.',
-        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
-        :reply_to => invited_by.email
-      }
-    else
-      {}
-    end
-  end
-
-  # Notify self of an event, possibly (if profile allows) sending email
-  def notify( notification_type, source_user, options={})
-    notification = post_notification(notification_type, source_user, options)
-    if true # TODO: User's profile approves
-      # Mapping from notification types to email types
-      case notification_type
-      when :share
-        self.shared = notification.shared
-        SharedEvent.post source_user, notification.shared, self
-        msg = RpMailer.sharing_notice(notification)
-        msg.deliver
-      when :make_friend
-        :friend_notice
-      end
-    end
-  end
-
-  # Post a notification event without sending email
-  def post_notification( notification_type, from = nil, options={})
-    attributes = {
-      :info => options.except(:what),
-      :shared => options[:what],
-      :source_id => (from.id if from),
-      :target_id => id,
-      :typenum => notification_type,
-      :accepted => false
-    }.compact
-    notification = Notification.create attributes
-    self.notifications_received << notification
-    notification
-  end
-=end
 
   # Absorb another user into self
   def absorb other

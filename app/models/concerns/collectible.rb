@@ -3,7 +3,6 @@ module Collectible
   include Taggable
   include Voteable
   include Picable
-  include Sharable
 
   included do
     before_save do

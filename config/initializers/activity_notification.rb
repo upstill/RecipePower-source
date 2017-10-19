@@ -10,10 +10,10 @@ ActivityNotification.configure do |config|
   config.enabled = true
 
   # Configure table name to store notification data.
-  config.notification_table_name = "activ_notifications"
+  # config.notification_table_name = "activ_notifications"
 
   # Configure table name to store subscription data.
-  config.subscription_table_name = "activ_subscriptions"
+  # config.subscription_table_name = "activ_subscriptions"
 
   # Configure if email notification is enabled as default.
   # Note that you can configure them for each model by acts_as roles.

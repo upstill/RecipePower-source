@@ -222,8 +222,6 @@ RP::Application.routes.draw do
   get 'iframe/create'
   get 'admin/data'
   get 'admin/control'
-  get 'notifications/accept'
-  patch 'notifications/act'
 
   resources :feedback, :only => [:new, :create]
   resources :expressions
