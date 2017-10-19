@@ -116,6 +116,12 @@ class User < ActiveRecord::Base
     Vote.vote entity, up, self
   end
 
+  def comment_for entity
+    if rcpref = touched_pointers.find_by(entity: entity)
+      rcpref.comment
+    end
+  end
+
   # Include the entity in the user's collection
   def collect entity
     touch entity, true

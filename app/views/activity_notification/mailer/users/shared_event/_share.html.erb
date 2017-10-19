@@ -1,0 +1,24 @@
+<% @decorator = @notification.notifiable.shared.decorate %>
+<% if @decorator.imgdata.present? %>
+    <% attachments['collectible_image'] = Base64.decode64(@decorator.imgdata.sub(/^data:image\/[^;]*;base64,/,'')) %>
+    <div class="share_recipe_pic_box">
+      <%= image_tag attachments['collectible_image'].url -%>
+    </div>
+<% end %>
+<br>
+<%= link_to @decorator.title,
+            polymorphic_url(@decorator.object, mode: :modal, :notification_token => @notification.notification_token),
+            class: "share_recipe_title" %>
+<% if @decorator.sourcename.present? && defined?(divert_invitation_link)%>
+    <p>from&nbsp;
+      <%= link_to @decorator.sourcename,
+                  divert_invitation_link,
+                  class: "share_recipe_source" %>
+    </p>
+<% end %>
+<% if @decorator.description.present? %>
+    <p><%= @decorator.description %></p>
+<% end %>
+<% if comment = @notification.notifiable.sharer.comment_for(@decorator.object) %>
+    <p><%= comment %></p>
+<% end %>

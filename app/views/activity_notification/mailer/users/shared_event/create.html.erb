@@ -102,7 +102,7 @@
 
         .share_recipe_pic_box {
             width: 150px;
-            height: 150px;
+            /* height: 150px; */
             display: -webkit-box;
             display: -moz-box;
             display: box;
@@ -165,34 +165,46 @@
     </style>
 </head>
 <body>
+<% evt = @notification.notifiable %>
+<% shared = evt.shared %>
+<% @decorator = shared.decorate %>
+<% shared_name = shared.model_name.human %>
 <div class="header_content">
     <div class="message_banner">
-        <strong><%= @notification.notifiable.sharer.polite_name %></strong> sez:
+        <strong><%= evt.sharer.polite_name %></strong> sez:
         <%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %> has a
-        <%= @notification.notifiable.shared.model_name.human.downcase %> for you.
+        <%= shared_name.downcase %> for you.
     </div>
     <% unless @target.invitation_message.blank? %>
-    <div class="message_content">
+      <div class="message_content">
         <blockquote><%= @target.invitation_message %></blockquote>
-    </div>
+      </div>
     <% end %>
 </div>
 <div class="message_box">
-    <%= render "rp_devise_mailer/collectible_share",
-               accept_invitation_link: move_notification_url_for(@notification, open: true)
-        # accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token)
-    %>
+    <%= render 'activity_notification/mailer/users/shared_event/share' %>
 </div>
 <br>
 <div class="message_box">
-    <div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
-    <div style="width:90%; margin: 0px;float: left;">
-        <%= link_to "Save It To RecipePower",
-                    move_notification_url_for(@notification, open: true),
-        # notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
-        class: "get_button btn-lg btn-success" %>
-    </div>
-    <div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
+  <div style="display: inline-block; margin: 10px;float: left;">
+    <%= link_to "Show on RecipePower",
+                shared,
+                class: "get_button btn-lg btn-success" %>
+  </div>
+  <div style="display: inline-block; margin: 10px;float: left;">
+    <%= link_to "Save to My Collection",
+                polymorphic_path(shared, notification_token: @notification.notification_token),
+                # move_notification_url_for(@notification, open: true),
+                # notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
+                class: "get_button btn-lg btn-success" %>
+  </div>
+  <% if @decorator.url.present? %>
+      <div style="display: inline-block; margin: 10px;float: left;">
+        <%= link_to "Go To #{shared_name}",
+                    @decorator.url,
+                    class: "get_button btn-lg btn-success" %>
+      </div>
+  <% end %>
 </div>
 <div class="footer">
     <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>

@@ -15,11 +15,10 @@ class InvitationsController < Devise::InvitationsController
   def new
     if (classname = params[:shared_class]).present?
       entity_name = params[:shared_name].if_present || PageRefServices.type_to_name(params[:shared_class]) || classname.underscore.gsub('_',' ')
-      self.resource = resource_class.new invitation_message: "Here's an interesting #{entity_name} I found on RecipePower. Have a look and tell me what you think."
-      resource.shared_class = classname.constantize
-      resource.shared_id = params[:shared_id].to_i
+      @shared = classname.constantize.find_by id: params[:shared_id].to_i
+      self.resource = resource_class.new invitation_message: current_user.comment_for(@shared) || "Here's an interesting #{entity_name} I found on RecipePower. Have a look and tell me what you think."
       resource.shared_name = entity_name
-      @shared = resource.shared
+      resource.shared = @shared
     else
       self.resource = resource_class.new
     end
@@ -96,6 +95,7 @@ class InvitationsController < Devise::InvitationsController
       category =
       if u = invitee.is_a?(Fixnum) ? User.find(invitee) : User.find_by(email: invitee.downcase)
         # Existing user, whether signed up or not, friend or not
+        u.invitation_message = resource_params[:invitation_message]
         if current_user.followee_ids.include? u.id # Existing friend: redundant
           evt = SharedEvent.post(current_user, @shared, u) if @shared
           evt.notify :users, key: 'shared_event.create', send_later: false  ## XXX Should be automatic with event creation
