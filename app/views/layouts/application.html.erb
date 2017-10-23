@@ -91,8 +91,9 @@
     <%# end %>
 <% end %>
 <%= render 'layouts/navbar' %>
-<%= do_notifs %>
+<%= response_service.do_notification %>
 <%= render 'layouts/pagelet' %>
+<%= do_notifs %>
 <% if false && Rails.env.development? %>
     <p>
       Archivo:

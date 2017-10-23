@@ -95,6 +95,11 @@ class RpEvent < ActiveRecord::Base
     self.where 'created_at > :time', :time => time
   end
 
+  # The target user of the notification responds to the event. Do something...
+  def act notification, options={}
+    # ...or nothing
+  end
+
 private
   def self.assemble_attributes subject, direct_object = nil, indirect_object = nil
     attrs = {
@@ -225,6 +230,13 @@ class SharedEvent < RpEvent
 
   def share_path
     polymorphic_path shared
+  end
+
+  # Act on a Shared event by adding the entity to the collection of the user shared with
+  # Return a string reporting on the action
+  def act notification, options={}
+    sharee.collect shared
+    I18n.t 'notification.user.shared_event.act', shared: shared.decorate.title
   end
 
 end

@@ -10,5 +10,6 @@ en:
         create:
           mail_subject: 'Someone wants to get you cooking'
       shared_event:
+        act: "'%{shared}' now appearing in your collection"
         create:
           mail_subject: 'Something tasty for you'

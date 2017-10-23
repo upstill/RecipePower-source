@@ -24,7 +24,6 @@ RP::Application.routes.draw do
   authenticate do
     # Integrated with devise
     notify_to :users, with_devise: :users, controller: 'users/notifications_with_devise'
-    x=2
   end
 
   get 'scraper/new'

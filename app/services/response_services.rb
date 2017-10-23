@@ -208,6 +208,18 @@ class ResponseServices
     @notification ||= ActivityNotification::Notification.find_by(id: @notification_token) if @notification_token # find_by_notification_token(@notification_token) if notification_token
   end
 
+  # Process the current notification and provide an alert
+  def do_notification
+    if (notif = pending_notification) && (@controller_instance.current_user.id == notif.target.id)
+      # A pending notification gets accepted, with any side effects
+      # All is well; clear the notification
+      notif.open!
+      event = notif.notifiable
+      @controller_instance.flash.now[:notice] = event.act notif  # Invoke the event's action-on-open
+      notification_token = nil # Clear the notification
+    end
+  end
+
   # Set the notification_token and store it in the @session
   def notification_token= it
     if @notification_token = it

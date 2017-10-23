@@ -51,28 +51,24 @@ module NotifsHelper
           sections << OpenStruct.new(
               is_vis: true,
               partial: 'sessions/logout_panel',
-              partial_locals: {message: 'That invitation is for someone else. Just log out if you\'d like to use it'}
+              partial_locals: {message: 'That invitation is for someone else. Just sign out if you\'d like to use it'}
           )
         end
         return render('notifs/panel', sections: sections, as_alert: true, wide: true)
       end
 
       # If there's a pending notification
-      if notif
-        # If the notification matches the current user
-        if current_user.id == notif.target.id
-          # All is well; clear the pending notification
-          response_service.notification_token = nil # Clear the notification
-          flash.now[:notice] = msg
-        else # Notification is for some other user
-          sections << OpenStruct.new(
-              is_vis: true,
-              exclusive: true,
-              partial: 'sessions/logout',
-              partial_locals: {message: 'That notification is for someone else. Just log out if you\'d like to see it'}
-          )
-        end
+      if notif && (current_user.id != notif.target.id)
+        # If the notification doesn't match the current user
+        # Notification is for some other user
+        sections << OpenStruct.new(
+            is_vis: true,
+            exclusive: true,
+            partial: 'sessions/logout',
+            partial_locals: {message: 'That notification is for someone else. Just sign out if you\'d like to see it'}
+        )
       end # User is logged in, pending items disposed of
+
       sections << OpenStruct.new(
           signature: 'notifications',
           title: 'Notifications',

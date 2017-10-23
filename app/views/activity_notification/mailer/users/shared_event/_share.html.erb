@@ -7,7 +7,7 @@
 <% end %>
 <br>
 <%= link_to @decorator.title,
-            polymorphic_url(@decorator.object, mode: :modal, :notification_token => @notification.notification_token),
+            polymorphic_url(@decorator.object, mode: :modal, :notification_token => @notification.id),
             class: "share_recipe_title" %>
 <% if @decorator.sourcename.present? && defined?(divert_invitation_link)%>
     <p>from&nbsp;
