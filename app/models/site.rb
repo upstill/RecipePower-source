@@ -133,9 +133,9 @@ public
   def gleaning_attributes= attrhash
     super
     return unless attrhash
-    if value_or_values = attrhash['RSS Feed']
-      # The 'value(s)' are a list of feeds
-      [value_or_values].flatten.map { |url| assert_feed url, true }
+    if value_hash = attrhash['RSS Feed']
+      # The 'value(s)' are a hash of feeds
+      value_hash.values.map { |url| assert_feed url, true }
     end
   end
 
