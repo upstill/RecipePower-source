@@ -5,7 +5,7 @@
     <div class="list_text_wrapper">
       <p class="list_text">
         <strong><%= notification.notifier.present? ? notification.notifier.printable_notifier_name : 'Someone' %></strong>
-        <% if notification.group_member_notifier_exists? %>
+        <% if false && notification.group_member_notifier_exists? %>
           <%= " and #{notification.group_member_notifier_count} other" %>
           <%= notification.notifier.present? ? notification.notifier.printable_type.pluralize.downcase : 'people' %>
         <% end %>
@@ -40,7 +40,7 @@
         <p class="unopned_description">Open</p>
       </div>
     <% end %>
-    <%= link_to open_notification_path_for(notification, move: true), method: :post do %>
+    <%= link_to open_notification_path_for(notification, move: true, format: :json), method: :post do %>
       <%= yield :notification_content %>
     <% end %>
     <div class="unopened_wrapper"></div>

@@ -164,7 +164,7 @@ class InvitationSentEvent < RpEvent
   acts_as_notifiable :users,
                      targets: ->(evt, key) {  [evt.invitee] },
                      #                     notifier: ->(evt, key) {  [evt.sharer] },
-                     notifiable_path: :share_path,
+                     # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
@@ -193,7 +193,7 @@ class InvitationResponseEvent < RpEvent
                        end
                      },
                      #                     notifier: ->(evt, key) {  [evt.sharer] },
-                     notifiable_path: :share_path,
+                     # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
@@ -222,7 +222,7 @@ class SharedEvent < RpEvent
   acts_as_notifiable :users,
                      targets: ->(evt, key) {  [evt.sharee] },
 #                     notifier: ->(evt, key) {  [evt.sharer] },
-                     notifiable_path: :share_path,
+                     # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.

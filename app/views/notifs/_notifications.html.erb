@@ -1,2 +1,7 @@
 Any notifications here?
+<%# current_user.notification_index_with_attributes.each do |notification| %>
+    <%# @notification = notification %>
+    <%# notification.render self, locals: { notification: notification } %>
+<%# end %>
 <%# render_notifications_of current_user, index_content: :with_attributes %>
+<%= render_notifications_of current_user %>

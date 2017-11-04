@@ -6,6 +6,11 @@ en:
         create:
           mail_subject: 'Something tasty for you'
     user:
+      invitation_accepted_event:
+        create:
+          mail_subject: 'Your invitation was accepted'
+        welcome:
+          mail_subject: 'Welcome to RecipePower!'
       invitation_sent_event:
         create:
           mail_subject: 'Someone wants to get you cooking'

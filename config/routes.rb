@@ -254,6 +254,7 @@ RP::Application.routes.draw do
   get '/share', :to => 'pages#share'
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
+  get '/mission', :to => 'pages#mission'
   get '/welcome', :to => 'pages#welcome'
   get '/faq', :to => "pages#faq"
   get '/admin', :to => "pages#admin"
