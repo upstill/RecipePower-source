@@ -1,4 +1,4 @@
-<div class="notifs-holder" style="position: absolute; width: 100%">
+<div class="notifs-holder" style="position: absolute; width: 100%; top: 50px;">
   <div class="new-style notifs <%= 'collapsed' unless sections.any?(&:is_vis) %> <%= 'wide' if defined?(wide) %>">
     <div class="modal-content">
       <% unless defined?(as_alert) && as_alert %>
