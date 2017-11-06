@@ -1,5 +1,5 @@
 <div class="notification_wrapper <%= 'open opened' if parameters[:opened] %>">
-  <a class="dropdown_notification">
+  <a class="dropdown_notification" onclick="RP.navbar.toggleNotifications(event);">
     <p class="notification_count" id="notification_count">
       <span class="<%= 'unopened' if @target.has_unopened_notifications?(parameters) %>">
         <%= @target.unopened_notification_count(parameters) %>
@@ -30,19 +30,3 @@
     <% end %>
   </div>
 </div>
-
-<script>
-  $(document).click(function(e){
-      if( !$(e.target).is(".notification_list_cover") && !$(e.target).is(".notification_wrapper a") ){
-        if($(".notification_wrapper").hasClass("open") && !$(".notification_wrapper").hasClass("opened")){
-          $(".notification_wrapper").addClass("opened");
-        }else if($(".notification_wrapper").hasClass("opened")){
-          $(".notification_wrapper").removeClass("open").removeClass("opened");
-        }
-      }
-  });
-
-  $(".dropdown_notification").click(function(){
-    $(this).parent().toggleClass("open");
-  });
-</script>
