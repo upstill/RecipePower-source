@@ -1,4 +1,4 @@
-<div class="notification_wrapper">
+<div class="notification_wrapper <%= 'open opened' if parameters[:opened] %>">
   <a class="dropdown_notification">
     <p class="notification_count" id="notification_count">
       <span class="<%= 'unopened' if @target.has_unopened_notifications?(parameters) %>">

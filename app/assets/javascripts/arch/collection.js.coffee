@@ -43,7 +43,7 @@ collection_onload = () ->
 		event.stopImmediatePropagation() # event.preventDefault()
 
 	# Arm the dropdown menus for selecting collection
-	$('ul.nav li.dropdown').hover ->
+	$('ul.nav li.master-navtab div.dropdown').hover ->
 		$(this).find('.dropdown-menu').stop(true, true).delay(200).fadeIn(500)
 	, ->
 		$(this).find('.dropdown-menu').stop(true, true).delay(200).fadeOut(500)

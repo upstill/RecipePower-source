@@ -20,7 +20,6 @@ module NavtabsHelper
                       class: 'dropdown-menu scrollable-menu',
                       id: navmenu_id(which)
       menu_label << content_tag(:span, '', class: 'caret')
-      class_str << ' dropdown'
     end
 
     return itemlist if menu_only
@@ -31,9 +30,11 @@ module NavtabsHelper
                             mode: :partial,
                             data: {toggle: 'dropdown'},
                             title: "Go To #{menu_label}"
-    header += booger if booger
+
+    content = content_tag(:div, header+itemlist, class: 'dropdown')
+    content += booger if booger
     content_tag :li,
-                header+itemlist,
+                content,
                 id: navtab_id(which),
                 class: class_str
   end

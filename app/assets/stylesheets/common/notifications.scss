@@ -2,14 +2,14 @@
   font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
   font-size: 14px;
   line-height: 1.42857143;
-  color: #333333;
-  background-color: #fff;
+  // color: #333333;
+  // background-color: #fff;
   text-align: left;
 
   margin: 3px;
   position: absolute;
-  top: 0;
-  right: 0;
+  top: 4px;
+  right: 2px;
 }
 .notification_wrapper .dropdown_notification{
   cursor: pointer;
@@ -18,14 +18,14 @@
   margin: 0;
 }
 .notification_wrapper .dropdown_notification .notification_count span{
-  color: #fff;
-  background-color: #e5e5e5;
-  border-radius: 4px;
+  background-color: mix(#ecdad7, black, 80%);
+  color: #75615c;
+  border-radius: 6px;
+  border: 1px solid darkolivegreen;
   font-size: 12px;
   padding: 4px 8px;
 }
 .notification_wrapper .dropdown_notification .notification_count span.unopened{
-  background-color: #f87880;
 }
 .notification_wrapper.open .notification_list_wrapper {
   display: block;
