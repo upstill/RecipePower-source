@@ -20,12 +20,6 @@ RP::Application.routes.draw do
 
   match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
-
-  authenticate do
-    # Integrated with devise
-    notify_to :users, with_devise: :users, controller: 'users/notifications_with_devise'
-  end
-
   get 'scraper/new'
   post 'scraper/create'
   post 'scraper/init'
@@ -127,6 +121,11 @@ RP::Application.routes.draw do
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
 
+  end
+
+  authenticate do
+    # Integrated with devise
+    notify_to :users, with_devise: :users, controller: 'users/notifications_with_devise'
   end
 
   # Calling 'profile' action in 'users' controller edits the current user

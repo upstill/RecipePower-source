@@ -140,9 +140,10 @@ module NavtabsHelper
   end
 
   def home_navtab menu_only = false
+    notifications = render_notifications_of current_user
     navtab :home,
            content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
-               content_tag(:span, '', class: 'measuring-spoons'),
+               content_tag(:span, '', class: 'measuring-spoons') + notifications,
            user_path(current_user, :mode => :partial),
            menu_only do
       item_list = [

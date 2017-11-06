@@ -35,6 +35,12 @@ module LinkHelper
 
   end
 
+  def block_to_submit path_or_options, options={}, &block
+    link_options = linkto_options path_or_options, options
+    path = link_options.delete :path
+    link_to path, link_options, &block
+  end
+
   def link_to_submit label, path_or_options, options={}
     link_options = linkto_options path_or_options, options
     path = link_options.delete :path

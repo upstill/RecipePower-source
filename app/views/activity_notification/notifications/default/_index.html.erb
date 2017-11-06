@@ -32,84 +32,84 @@
 </div>
 
 <style>
-  .notification_wrapper {
-    margin-left: 20px;
-    margin-right: 10px;
-    float: left;
-    position: relative;
-  }
-  .notification_wrapper .dropdown_notification{
-    cursor: pointer;
-  }
-  .notification_wrapper .dropdown_notification .notification_count span{
-    color: #fff;
-    background-color: #e5e5e5;
-    border-radius: 4px;
-    font-size: 12px;
-    padding: 4px 8px;
-  }
-  .notification_wrapper .dropdown_notification .notification_count span.unopened{
-    background-color: #f87880;
-  }
-  .notification_wrapper.open .notification_list_wrapper {
-    display: block;
-  }
-  .notification_wrapper .notification_list_wrapper {
-    display: none;
-    z-index: 999;
-    width: 330px;
-    height: 500px;
-    border: 1px solid #e5e5e5;
-    position: absolute;
-    top: calc(100% + 20px);
-    right: -10px;
-    background-color: #fff;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_header_wrapper {
-    position: relative;
-    width: 330px;
-    height: 37px;
-    border-bottom: 1px solid #e5e5e5;
-    box-sizing: border-box;
-    background-color: #fff;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_title {
-    position: absolute;
-    top: 4px;
-    left: 10px;
-    font-size: 14px;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_menu {
-    position: absolute;
-    top: 4px;
-    right: 10px;
-    font-size: 14px;
-  }
+    .notification_wrapper {
+        margin-left: 20px;
+        margin-right: 10px;
+        float: left;
+        position: relative;
+    }
+    .notification_wrapper .dropdown_notification{
+        cursor: pointer;
+    }
+    .notification_wrapper .dropdown_notification .notification_count span{
+        color: #fff;
+        background-color: #e5e5e5;
+        border-radius: 4px;
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    .notification_wrapper .dropdown_notification .notification_count span.unopened{
+        background-color: #f87880;
+    }
+    .notification_wrapper.open .notification_list_wrapper {
+        display: block;
+    }
+    .notification_wrapper .notification_list_wrapper {
+        display: none;
+        z-index: 999;
+        width: 330px;
+        height: 500px;
+        border: 1px solid #e5e5e5;
+        position: absolute;
+        top: calc(100% + 20px);
+        right: -10px;
+        background-color: #fff;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_header_wrapper {
+        position: relative;
+        width: 330px;
+        height: 37px;
+        border-bottom: 1px solid #e5e5e5;
+        box-sizing: border-box;
+        background-color: #fff;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_title {
+        position: absolute;
+        top: 4px;
+        left: 10px;
+        font-size: 14px;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_menu {
+        position: absolute;
+        top: 4px;
+        right: 10px;
+        font-size: 14px;
+    }
 
-  .notification_wrapper .notification_list_wrapper .notifications {
-    position: relative;
-    width: 330px;
-    height: calc(500px - 37px - 37px);
-    overflow: scroll;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_link_wrapper{
-    position: absolute;
-    bottom: 0;
-    width: 330px;
-    height: 26px;
-    border-top: 1px solid #e5e5e5;
-    padding: 4px 0 8px 0;
-    text-align: center;
-    background-color: #fff;
-    z-index: 2;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_link_wrapper:hover{
-    background-color: #f8f9fb;
-  }
-  .notification_wrapper .notification_list_wrapper .notification_link_wrapper .notification_link{
-    text-align: center;
-    font-size: 14px;
-  }
+    .notification_wrapper .notification_list_wrapper .notifications {
+        position: relative;
+        width: 330px;
+        height: calc(500px - 37px - 37px);
+        overflow: scroll;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_link_wrapper{
+        position: absolute;
+        bottom: 0;
+        width: 330px;
+        height: 26px;
+        border-top: 1px solid #e5e5e5;
+        padding: 4px 0 8px 0;
+        text-align: center;
+        background-color: #fff;
+        z-index: 2;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_link_wrapper:hover{
+        background-color: #f8f9fb;
+    }
+    .notification_wrapper .notification_list_wrapper .notification_link_wrapper .notification_link{
+        text-align: center;
+        font-size: 14px;
+    }
 </style>
 
 <script>

@@ -69,13 +69,14 @@ module NotifsHelper
         )
       end # User is logged in, pending items disposed of
 
+=begin
       sections << OpenStruct.new(
           signature: 'notifications',
           title: 'Notifications',
           partial: 'notifs/notifications'
       )
-      # if no current user, but there's a pending invitation
-    else
+=end
+    else # if no current user, but there's a pending invitation
       invitee_error =
       if invitee && invitee.errors.any?
         # Sort out a pending invitation

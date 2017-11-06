@@ -54,16 +54,25 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
   #   super
   # end
 
-  # GET /:target_type/:target_id/notifications/:id/move
-  # def move
-  #   begin
-  #     super
-  #   rescue Exception => e
-  #     # Handle Warden exception for not having the right user logged in
-  #     x=2
-  #   end
+  # Moves to notifiable_path of the notification.
   #
-  # end
+  # GET /:target_type/:target_id/notifications/:id/move
+  # @overload open(params)
+  #   @param [Hash] params Request parameters
+  #   @option params [String] :open    ('false') Whether the notification will be opened
+  #   @option params [String] :filter  (nil)     Filter option to load notification index (Nothing as auto, 'opened' or 'unopened')
+  #   @option params [String] :limit   (nil)     Limit to query for notifications
+  #   @option params [String] :reload  ('true')  Whether notification index will be reloaded
+  #   @return [Responce] JavaScript view for ajax request or redirects to back as default
+  def move
+    begin
+      @notification.open! if params[:open].to_s.to_boolean
+    rescue Exception => e
+      # Handle Warden exception for not having the right user logged in
+      x=2
+    end
+
+  end
 
   # No action routing
   # This method needs to be public since it is called from view helper
