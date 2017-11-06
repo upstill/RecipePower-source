@@ -4,7 +4,7 @@ module NotificationsHelper
       rendering = with_format 'html' do
         render_notifications_of target, options
       end
-      [ 'div.selectable.modal-body.notifications div.notification_wrapper', rendering ]
+      [ 'div.notification_wrapper', rendering ]
   end
 
 end
