@@ -107,14 +107,14 @@ class InvitationsController < Devise::InvitationsController
         else # User exists but hasn't signed in -> invitation is pending
           u.invite!(current_inviter) { |u| u.skip_invitation = true }
           evt = InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
-          evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
+          # evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
           :reinvited
         end
       else
         # This is a new invitation/share to a new user
         u = resource_class.invite!(resource_params.merge(email: invitee.downcase), current_user) { |u| u.skip_invitation = true }
         evt = InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
-        evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
+        # evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
         :to_invite
       end
       breakdown[category] << u
@@ -236,11 +236,9 @@ class InvitationsController < Devise::InvitationsController
 
       invitation_event = InvitationSentEvent.find_by_invitee resource
       accepted_event = InvitationAcceptedEvent.post resource, resource.invited_by, invitation_event
-      RpMailer.welcome_email(resource).deliver # XXX Should be supplanted by 'welcome' email
-      accepted_event.notify :users, key: 'invitation_accepted_event.welcome', send_later: false  ## XXX Should be automatic with event creation
-
-      RpMailer.invitation_accepted_email(resource).deliver if resource.invited_by # XXX Should be supplanted by event notification
-      accepted_event.notify :users, key: 'invitation_accepted_event.create', send_later: false  ## XXX Should be automatic with event creation
+      # accepted_event.notify :users, key: 'invitation_accepted_event.create', send_later: false  ## XXX Should be automatic with event creation
+      # RpMailer.welcome_email(resource).deliver # XXX Should be supplanted by 'welcome' email
+      # RpMailer.invitation_accepted_email(resource).deliver if resource.invited_by # XXX Should be supplanted by event notification
 
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)

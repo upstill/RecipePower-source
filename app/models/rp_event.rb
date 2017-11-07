@@ -60,7 +60,7 @@ class RpEvent < ActiveRecord::Base
       data, indirect_object = indirect_object, nil
     end
     args = self.assemble_attributes(subject, direct_object, indirect_object)
-    posted = self.where(args).first_or_create
+    posted = self.create_with(data: data).where(args).first_or_create
     if (posted.data != data)
       posted.data = data
       posted.save
@@ -163,12 +163,12 @@ class InvitationSentEvent < RpEvent
 
   acts_as_notifiable :users,
                      targets: ->(evt, key) {  [evt.invitee] },
-                     #                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifier: ->(evt, key) { evt.invitee },
                      # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] } # , send_later: false }
+                     tracked: { only: [:create], send_later: false }
 
   def self.find_by_invitee invitee
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
@@ -192,12 +192,14 @@ class InvitationResponseEvent < RpEvent
                            [evt.invitee]
                        end
                      },
-                     #                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifier: ->(evt, key) {
+                       evt.invitee
+                     },
                      # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] } # , send_later: false }
+                     tracked: {only: [:create]} # , send_later: false }
 
 end
 
@@ -221,7 +223,7 @@ class SharedEvent < RpEvent
 
   acts_as_notifiable :users,
                      targets: ->(evt, key) {  [evt.sharee] },
-#                     notifier: ->(evt, key) {  [evt.sharer] },
+                     notifier: ->(evt, key) {  evt.sharer },
                      # notifiable_path: :share_path,
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.

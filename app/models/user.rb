@@ -242,10 +242,6 @@ private
       (@@leasts[str] = User.where('email like ?', "%#{str}%").collect { |match| match.id }.min)
   end
 
-  def post_invitation
-    InvitationSentEvent.post invited_by, self, shared
-  end
-
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
     InvitationAcceptedEvent.post self, invited_by, InvitationSentEvent.find_by_invitee(self)
