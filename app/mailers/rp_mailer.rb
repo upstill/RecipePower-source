@@ -28,25 +28,6 @@ class RpMailer < ActionMailer::Base
     mail to: invitee.invited_by.email, :from => 'support@recipepower.com', :subject => 'Your invitation was accepted'
   end
   
-=begin
-  # Supplanted by ActivityNotification
-  # Notify the user via email of a recipe share
-  def sharing_notice(notification, opts={})
-    @notification = notification
-    @recipe = notification.shared
-    @sender = notification.source
-    @recipient = notification.target
-    @recipient.shared = notification.shared
-    # Add an attachment for the shared entity's image, if available
-    if (imgdata = @recipe.imgdata).present?
-      attachments['collectible_image'] = Base64.decode64(imgdata.sub(/^data:image\/png;base64,/,''))
-    end
-    mail to: @recipient.email,
-      from: @sender.polite_name+" on RecipePower <#{@sender.email}>",
-      subject: @sender.polite_name+" has something tasty for you"
-  end
-=end
-
   def user_to_user(from, to)
     @sender = from
     @recipient = to

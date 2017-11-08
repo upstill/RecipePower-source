@@ -121,35 +121,6 @@ class ApplicationController < ActionController::Base
     current_user ? collection_user_path(current_user) : home_path
   end
 
-=begin
-
-  # Track the session, saving session events when the session goes stale
-  # When we decide it's useful to track sessions, this needs to be updated for new RpEvent
-  def log_serve
-    logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
-    # Call RpEvent to heed the passback data for an event trigger
-    RpEvent.trigger_event(params[:rpevent]) if params[:rpevent]
-    return unless current_user
-    if session[:start_time] && session[:last_time]
-      time_now = Time.now
-      elapsed_time = time_now - session[:last_time]
-      if (elapsed_time < 10.minutes)
-        session[:last_time] = time_now
-        session[:serve_count] += 1
-        return
-      elsif last_serve = RpEvent.serve.last(current_user)
-        # Close out and update the previous session to record serve count and last time
-        last_serve.data = {serve_count: session[:serve_count]}
-        last_serve.updated_at = session[:last_time]
-        last_serve.save
-      end
-    end
-    last_serve = RpEvent.post current_user, :serve, nil, nil, :serve_count => 1
-    session[:serve_count] = 1
-    session[:start_time] = session[:last_time] = last_serve.created_at
-  end
-=end
-
   # Get a presenter for the object from within a controller
   def present object
     "#{object.class}Presenter".constantize.new object, view_context

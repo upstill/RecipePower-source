@@ -168,7 +168,7 @@ class InvitationSentEvent < RpEvent
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create], send_later: false }
+                     tracked: { only: [:create] }
 
   def self.find_by_invitee invitee
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
@@ -199,7 +199,7 @@ class InvitationResponseEvent < RpEvent
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: {only: [:create]} # , send_later: false }
+                     tracked: {only: [:create] }
 
 end
 
@@ -228,7 +228,7 @@ class SharedEvent < RpEvent
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] } # , send_later: false }
+                     tracked: { only: [:create] }
 
   def share_path
     polymorphic_path shared

@@ -97,24 +97,20 @@ class InvitationsController < Devise::InvitationsController
         # Existing user, whether signed up or not, friend or not
         u.invitation_message = resource_params[:invitation_message]
         if current_user.followee_ids.include? u.id # Existing friend: redundant
-          evt = SharedEvent.post(current_user, @shared, u) if @shared
-          evt.notify :users, key: 'shared_event.create', send_later: false  ## XXX Should be automatic with event creation
+          SharedEvent.post(current_user, @shared, u) if @shared
           :extant_friends
         elsif u.last_sign_in_at # The user needs no invitation (already signed in)
-          evt = SharedEvent.post(current_user, @shared, u) if @shared
-          evt.notify :users, key: 'shared_event.create', send_later: false  ## XXX Should be automatic with event creation
+          SharedEvent.post(current_user, @shared, u) if @shared
           :new_friends
         else # User exists but hasn't signed in -> invitation is pending
           u.invite!(current_inviter) { |u| u.skip_invitation = true }
-          evt = InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
-          # evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
+          InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
           :reinvited
         end
       else
         # This is a new invitation/share to a new user
         u = resource_class.invite!(resource_params.merge(email: invitee.downcase), current_user) { |u| u.skip_invitation = true }
-        evt = InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
-        # evt.notify :users, key: 'invitation_sent_event.create', send_later: false  ## XXX Should be automatic with event creation
+        InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
         :to_invite
       end
       breakdown[category] << u
@@ -233,12 +229,7 @@ class InvitationsController < Devise::InvitationsController
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
       response_service.user = resource
-
-      invitation_event = InvitationSentEvent.find_by_invitee resource
-      accepted_event = InvitationAcceptedEvent.post resource, resource.invited_by, invitation_event
-      # accepted_event.notify :users, key: 'invitation_accepted_event.create', send_later: false  ## XXX Should be automatic with event creation
-      # RpMailer.welcome_email(resource).deliver # XXX Should be supplanted by 'welcome' email
-      # RpMailer.invitation_accepted_email(resource).deliver if resource.invited_by # XXX Should be supplanted by event notification
+      InvitationAcceptedEvent.post resource, resource.invited_by, InvitationSentEvent.find_by_invitee(resource)
 
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)

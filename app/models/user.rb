@@ -244,26 +244,26 @@ private
 
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
-    InvitationAcceptedEvent.post self, invited_by, InvitationSentEvent.find_by_invitee(self)
-      # Give him friends
-      f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id ]
-      f << self.invited_by_id if self.invited_by_id
-      self.followee_ids = f
+    # Give him friends
+    f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id]
+    f << self.invited_by_id if self.invited_by_id
+    self.followee_ids = f
 
-      # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
-      List.assert 'Keepers', self, create: true
-      List.assert 'To Try', self, create: true
-      List.assert 'Now Cooking', self, create: true
+    # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
+    List.assert 'Keepers', self, create: true
+    List.assert 'To Try', self, create: true
+    List.assert 'Now Cooking', self, create: true
 
-      self.save
+    self.save
 
-      # Make the inviter follow the newbie.
-      if invited_by
-        invited_by.followees << self
-        invited_by.save
-      end
+    # Make the inviter follow the newbie.
+    if invited_by
+      invited_by.followees << self
+      invited_by.save
+    end
   end
-public
+
+  public
 
   def follows? (user)
     if self.class == user.class
