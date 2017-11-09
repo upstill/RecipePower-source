@@ -2,30 +2,6 @@ class RpEvent < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
-=begin
-
-  include Typeable
-
-  typeable( :verb,
-            Untyped: ["Untyped", 0 ],
-            session: ["Session", 1],
-            invitation_sent: ["Send Invitation", 2],
-            invitation_responded: ["Respond to Invitation", 3],
-            invitation_accepted: ["Accepted Invitation", 4],
-            invitation_diverted: ["Invitation Diverted", 5]
-  )
-
-  attr_accessible :verb
-  enum :verb => [
-           :untyped,
-           :session,
-           :invitation_sent,
-           :invitation_responded,
-           :invitation_accepted,
-           :invitation_diverted
-       ]
-=end
-
   serialize :data
 
   # belongs_to :source, class_name: "User"
@@ -100,7 +76,40 @@ class RpEvent < ActiveRecord::Base
     # ...or nothing
   end
 
-private
+  def expression target
+    subj_name = user_reference subject, target
+    do_name = user_reference direct_object, target, true
+    io_name = (indirect_object.name if indirect_object)
+    if block_given?
+      yield subj_name, verb, do_name, io_name
+    else
+      sentence subj_name, verb, do_name, io_name
+    end
+  end
+
+  def sentence *parts
+    parts.compact.join(' ').capitalize
+  end
+
+  # Override the verb for a coherent expression
+  def verb
+    '<your verb here>'
+  end
+
+  # How to name a user, substituting 'you' when the viewer and the user are the same
+  def user_reference user, target, possessive = false
+    if user
+      if possessive
+        user.id == target.id ? 'your' : (user.name+"'s")
+      else
+        user.id == target.id ? 'you' : user.name
+      end
+    else
+      possessive ? 'your' : 'you'
+    end
+  end
+
+  private
   def self.assemble_attributes subject, direct_object = nil, indirect_object = nil
     attrs = {
         type: self.to_s,
@@ -174,6 +183,27 @@ class InvitationSentEvent < RpEvent
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
     self.find_by direct_object: invitee, subject_type: 'User', subject_id: invitee.invited_by_id
   end
+
+  def expression target
+    subject = user_reference(inviter, target)
+    verb = 'invited'
+    object = user_reference(invitee, target)
+    indirect_object = (shared.name if shared)
+    if block_given?
+      yield subject, verb, object, indirect_object
+    else
+      complete_sentence subject, verb, object, indirect_object
+    end
+  end
+
+  def complete_sentence subject, verb, object, indirect_object
+    "#{subject} #{verb} #{object} to join RecipePower".html_safe
+  end
+
+  def verb
+    'invited'
+  end
+
 end
 
 # <User> responded to invitation <InvitationSentEvent>

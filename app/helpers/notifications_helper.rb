@@ -7,4 +7,11 @@ module NotificationsHelper
       [ 'div.notification_wrapper', rendering ]
   end
 
+  def notifications_format_subject notification, subject
+    subject << ( " and #{notification.group_member_notifier_count} other" +
+        (source.present? ? source.printable_type.pluralize.downcase : 'people')
+    ) if false && notification.group_member_notifier_exists?
+    content_tag :strong, subject
+  end
+
 end
