@@ -5,8 +5,7 @@
       <div class="list_text_wrapper">
         <p class="list_text">
           <% if defined?(articulator) && articulator %>
-              <% articulator.subject = notifications_format_subject notification, articulator.subject %>
-              <%= articulator.sentence %>
+              <%= articulator.summary subject: notifications_format_subject(notification, articulator.subject) %>
               <% if notification.group_member_exists? %>
                   <%= " #{notification.group_notification_count} #{notification.notifiable_type.humanize.pluralize.downcase} including" %>
               <% end %>

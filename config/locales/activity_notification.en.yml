@@ -1,4 +1,4 @@
-# Additional translations of ActivityNotification
+% Additional translations of ActivityNotification
 en:
   notification:
     default:
@@ -9,11 +9,13 @@ en:
       invitation_accepted_event:
         create:
           mail_subject: 'Your invitation was accepted'
+          summary: "%{subject} %{verb} %{direct_object} invitation to RecipePower"
         welcome:
           mail_subject: 'Welcome to RecipePower!'
       invitation_sent_event:
         create:
           mail_subject: 'Someone wants to get you cooking'
+          summary: "%{subject} %{verb} %{direct_object} to join RecipePower"
       shared_event:
         act: "'%{shared}' now appearing in your collection"
         create:

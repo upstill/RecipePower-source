@@ -44,8 +44,10 @@ class Articulator < Object
     }
   end
 
-  def sentence
-    [ subject, verb, direct_object, indirect_object ].compact.join ' '
+  def summary forcements = {}
+    finals = extract forcements
+    (I18n.t('notification.user.'+notification.key+'.summary', finals.compact).if_present ||
+    [:subject, :verb, :direct_object, :indirect_object].collect { |key| finals[key] }.compact.join(' ')).html_safe
   end
 
   def method_missing namesym, *args, &block
@@ -62,7 +64,7 @@ class Articulator < Object
     end
   end
 
-  # How to name a user, substituting 'you' when the viewer and the user are the same
+  # How to name a user, substituting 'you' when the viewer and the user are the same, optionally making it possessive
   def user_reference user, possessive = false
     if user
       if possessive
@@ -80,6 +82,20 @@ class Articulator < Object
     '<your verb here>'
   end
 
+  private
+
+  # Produce a hash of the specified instance variables, merged with values in a forcing hash
+  def extract *args
+    result = args.last.is_a?(Hash) ? args.pop : {}
+    if args.empty?
+      args = [ :subject, :verb, :direct_object, :indirect_object ]
+    else
+      args |= result.keys
+    end
+    args.each { |arg| result[arg] = self.public_send(arg) unless result.has_key?(arg) } # Allows nil to be forced
+    result
+  end
+
 end
 
 class InvitationSentEventCreateArticulator < Articulator
@@ -93,10 +109,6 @@ class InvitationSentEventCreateArticulator < Articulator
     @direct_object ||= user_reference notification.notifiable.direct_object
   end
 
-  def sentence
-    "#{subject} #{verb} #{direct_object} to join RecipePower".html_safe
-  end
-
   def verb
     'invited'
   end
@@ -104,10 +116,6 @@ end
 
 class InvitationAcceptedEventCreateArticulator < Articulator
   articulates 'invitation_accepted_event.create'
-
-  def sentence
-    "#{subject} #{verb} #{direct_object} invitation to RecipePower".html_safe
-  end
 
   def direct_object
     @direct_object ||= user_reference notification.notifiable.direct_object, true
