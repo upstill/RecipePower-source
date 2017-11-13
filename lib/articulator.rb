@@ -2,6 +2,7 @@
 class Articulator < Object
   attr_writer :subject, :direct_object, :indirect_object
   attr_reader :notification
+  @@summary_uses = [ :subject, :verb, :direct_object, :indirect_object ]
 
   # Determine the class that articulates the given notifiable/key pair
   def self.make notification
@@ -45,9 +46,9 @@ class Articulator < Object
   end
 
   def summary forcements = {}
-    finals = extract forcements
-    (I18n.t('notification.user.'+notification.key+'.summary', finals.compact).if_present ||
-    [:subject, :verb, :direct_object, :indirect_object].collect { |key| finals[key] }.compact.join(' ')).html_safe
+    finals = extract *(@@summary_uses + [forcements])
+    finals[:default] = @@summary_uses.collect { |key| finals[key] }.compact.join ' '
+    I18n.t('notification.user.'+notification.key+'.summary', finals).html_safe
   end
 
   def method_missing namesym, *args, &block
@@ -100,6 +101,7 @@ end
 
 class InvitationSentEventCreateArticulator < Articulator
   articulates 'invitation_sent_event.create'
+  @@summary_uses = [ :subject, :verb, :direct_object ]
 
   def subject
     @subject ||= user_reference notification.notifiable.subject
@@ -116,6 +118,7 @@ end
 
 class InvitationAcceptedEventCreateArticulator < Articulator
   articulates 'invitation_accepted_event.create'
+  @@summary_uses = [ :subject, :verb, :direct_object ]
 
   def direct_object
     @direct_object ||= user_reference notification.notifiable.direct_object, true
