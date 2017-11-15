@@ -1,7 +1,8 @@
 # Migration responsible for creating a table with notifications
 class CreateActivityNotificationTables < ActiveRecord::Migration
   # Create tables
-  def change
+  def up
+    drop_table(:notifications) if ActiveRecord::Base.connection.table_exists?("notifications")
     create_table :notifications do |t|
       t.belongs_to :target,     polymorphic: true, index: true, null: false
       t.belongs_to :notifiable, polymorphic: true, index: true, null: false
@@ -16,6 +17,7 @@ class CreateActivityNotificationTables < ActiveRecord::Migration
       t.timestamps
     end
 
+    drop_table(:subscriptions) if ActiveRecord::Base.connection.table_exists?("subscriptions")
     create_table :subscriptions do |t|
       t.belongs_to :target,     polymorphic: true, index: true, null: false
       t.string     :key,                           index: true, null: false
@@ -30,5 +32,10 @@ class CreateActivityNotificationTables < ActiveRecord::Migration
       t.timestamps
     end
     add_index :subscriptions, [:target_type, :target_id, :key], unique: true
+  end
+  def down
+    drop_table :notifications
+    # remove_index(:subscriptions, name: "references_index_by_id")
+    drop_table :subscriptions
   end
 end

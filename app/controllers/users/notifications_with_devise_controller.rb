@@ -30,9 +30,17 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
 =end
 
   # GET /:target_type/:target_id/notifications
-  # def index
-  #   super
-  # end
+  def index
+    # super
+    set_index_options
+    load_index if params.has_key?(:reload) ? params[:reload].to_s.to_boolean : true
+
+    smartrender
+    # respond_to do |format|
+    #   format.html # index.html.erb
+    #   format.json { render json: @notifications.to_json(include: [:target, :notifiable, :group]) }
+    # end
+  end
 
   # POST /:target_type/:target_id/notifications/open_all
   # def open_all
@@ -100,6 +108,7 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
 
   # def controller_path
   #   super
+  #   Users::NotificationsController.controller_path
   # end
 
   # def set_view_prefixes

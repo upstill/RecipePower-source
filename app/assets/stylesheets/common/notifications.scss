@@ -1,104 +1,105 @@
-.notification_wrapper {
-  font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-  font-size: 14px;
-  line-height: 1.42857143;
-  // color: #333333;
-  // background-color: #fff;
-  text-align: left;
-
+div.menu div.notification_wrapper {
   margin: 3px;
   position: absolute;
   top: 4px;
   right: 2px;
 }
-.notification_wrapper .dropdown_notification{
-  cursor: pointer;
-}
-.notification_wrapper .dropdown_notification p.notification_count {
-  margin: 0;
-}
-.notification_wrapper .dropdown_notification .notification_count span{
-  background-color: mix(#ecdad7, white, 80%);
-  color: #75615c;
-  border-radius: 6px;
-  border: 1px solid darkolivegreen;
-  font-size: 12px;
-  padding: 4px 8px;
-}
-.notification_wrapper .dropdown_notification .notification_count span.unopened{
-}
-.notification_wrapper.open .notification_list_wrapper {
-  display: block;
-}
-.notification_wrapper .notification_list_wrapper {
-  display: none;
-  z-index: 999;
-  width: 330px;
-  height: 500px;
-  border: 1px solid #e5e5e5;
-  position: absolute;
-  top: calc(100% + 20px);
-  right: -10px;
-  background-color: #fff;
-}
-.notification_wrapper .notification_list_wrapper .notification_header_wrapper {
-  position: relative;
-  width: 330px;
-  height: 37px;
-  border-bottom: 1px solid #e5e5e5;
-  box-sizing: border-box;
-  background-color: #fff;
-}
-.notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_title {
-  position: absolute;
-  top: 4px;
-  left: 10px;
-  font-size: 14px;
-  color: #ECE6CD;
-}
-.notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_menu {
-  position: absolute;
-  top: 4px;
-  right: 10px;
-  font-size: 14px;
-  color: #9AB3A0;
-}
+.notification_wrapper {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-size: 14px;
+    line-height: 1.42857143;
+    // color: #333333;
+    // background-color: #fff;
+    text-align: left;
+  }
+  .notification_wrapper .dropdown_notification{
+    cursor: pointer;
+  }
+  .notification_wrapper .dropdown_notification p.notification_count {
+    margin: 0;
+  }
+  .notification_wrapper .dropdown_notification .notification_count span{
+    background-color: mix(#ecdad7, white, 80%);
+    color: #75615c;
+    border-radius: 6px;
+    border: 1px solid darkolivegreen;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .notification_wrapper .dropdown_notification .notification_count span.unopened{
+  }
+  .notification_wrapper.open .notification_list_wrapper {
+    display: block;
+  }
+  .notification_wrapper .notification_list_wrapper {
+    display: none;
+    z-index: 999;
+    width: 330px;
+    height: 500px;
+    border: 1px solid #e5e5e5;
+    position: absolute;
+    top: calc(100% + 20px);
+    right: -10px;
+    background-color: #fff;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_header_wrapper {
+    position: relative;
+    width: 330px;
+    height: 37px;
+    border-bottom: 1px solid #e5e5e5;
+    box-sizing: border-box;
+    background-color: #fff;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_title {
+    position: absolute;
+    top: 4px;
+    left: 10px;
+    font-size: 14px;
+    color: #ECE6CD;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_menu {
+    position: absolute;
+    top: 4px;
+    right: 10px;
+    font-size: 14px;
+    color: #9AB3A0;
+  }
 
-.notification_wrapper .notification_list_wrapper .notifications {
-  position: relative;
-  width: 330px;
-  height: calc(500px - 37px - 37px);
-  overflow: scroll;
-}
-.notification_wrapper .notification_list_wrapper .notification_link_wrapper{
-  position: absolute;
-  bottom: 0;
-  width: 330px;
-  height: 26px;
-  border-top: 1px solid #e5e5e5;
-  padding: 4px 0 8px 0;
-  text-align: center;
-  background-color: #fff;
-  z-index: 2;
-}
-.notification_wrapper .notification_list_wrapper .notification_link_wrapper:hover{
-  background-color: #f8f9fb;
-}
-.notification_wrapper .notification_list_wrapper .notification_link_wrapper .notification_link{
-  color: #9AB3A0;
-  text-align: center;
-  font-size: 14px;
-}
-.notification_wrapper .notification_header h1 span span{
-  color: #fff;
-  background-color: #e5e5e5;
-  border-radius: 4px;
-  font-size: 12px;
-  padding: 4px 8px;
-}
-.notification_wrapper .notification_header h1 span span.unopened{
-  background-color: #f87880;
-}
+  .notification_wrapper .notification_list_wrapper .notifications {
+    position: relative;
+    width: 330px;
+    height: calc(500px - 37px - 37px);
+    overflow: scroll;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_link_wrapper{
+    position: absolute;
+    bottom: 0;
+    width: 330px;
+    height: 26px;
+    border-top: 1px solid #e5e5e5;
+    padding: 4px 0 8px 0;
+    text-align: center;
+    background-color: #fff;
+    z-index: 2;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_link_wrapper:hover{
+    background-color: #f8f9fb;
+  }
+  .notification_wrapper .notification_list_wrapper .notification_link_wrapper .notification_link{
+    color: #9AB3A0;
+    text-align: center;
+    font-size: 14px;
+  }
+  .notification_wrapper .notification_header h1 span span{
+    color: #fff;
+    background-color: #e5e5e5;
+    border-radius: 4px;
+    font-size: 12px;
+    padding: 4px 8px;
+  }
+  .notification_wrapper .notification_header h1 span span.unopened{
+    background-color: #f87880;
+  }
 
   /* unopned_circle */
   .unopened_wrapper{

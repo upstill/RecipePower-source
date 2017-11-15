@@ -5,7 +5,10 @@ class User < ActiveRecord::Base
 #  acts_as_notifier :printable_notifier_name => :username,
 #                   :printable_name => :salutation
 
-  acts_as_target email: :email, email_allowed: true, batch_email_allowed: :confirmed_at  # ...for ActivityNotifications
+  acts_as_target email: :email,
+                 email_allowed: true,
+                 batch_email_allowed: :confirmed_at,  # ...for ActivityNotifications
+                 printable_name: ->(user) { user.handle }
 
   # Class variable @@Guest_user saves the guest User
   @@Guest_user = nil

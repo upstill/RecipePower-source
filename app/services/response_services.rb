@@ -149,11 +149,8 @@ class ResponseServices
   def find_view ctrl_class=nil, file=nil
     ctrl_class ||= controller_instance.class
     file ||= action.to_s
-    ctrl_class.ancestors.each { |anc|
-      if path = anc.instance_variable_get(:@controller_path)
-        return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
-        break if path == "application"
-      end
+    ctrl_class._prefixes.each { |path|
+      return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
     }
     "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
   end
