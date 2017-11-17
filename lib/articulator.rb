@@ -129,3 +129,21 @@ class InvitationAcceptedEventCreateArticulator < Articulator
   end
 end
 
+class SharedEventCreateArticulator < Articulator
+  articulates 'shared_event.create'
+  @@summary_uses = [ :subject, :verb, :direct_object, :indirect_object ]
+
+  def indirect_object
+    @indirect_object ||= user_reference notification.notifiable.indirect_object
+  end
+
+  # what was shared
+  def direct_object
+    notification.notifiable.shared.decorate.title
+  end
+
+  def verb
+    'shared'
+  end
+end
+

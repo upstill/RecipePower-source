@@ -33,11 +33,8 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
   def index
     set_index_options
     load_index if params.has_key?(:reload) ? params[:reload].to_s.to_boolean : true
-    if (params[:filter] || '') == 'unopened' # Render for menu bar
-      render :open, locals: { opened_only: false }
-    else
-      smartrender
-    end
+    smartrender unless (params[:for] || '') == 'counter'
+    # By default, goes to index.json.rb to replace the counter in the menu bar.
   end
 
   # POST /:target_type/:target_id/notifications/open_all

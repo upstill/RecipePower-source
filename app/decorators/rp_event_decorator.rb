@@ -10,4 +10,8 @@ class RpEventDecorator < Draper::Decorator
   #     end
   #   end
 
+  def name
+    'wha..???'
+  end
+
 end
