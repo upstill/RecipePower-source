@@ -51,7 +51,7 @@ module NotifsHelper
           sections << OpenStruct.new(
               is_vis: true,
               partial: 'sessions/logout_panel',
-              partial_locals: {message: 'That invitation is for someone else.<br>Just sign out if you\'d like to use it'}
+              partial_locals: {message: 'That invitation is for someone else.<br>Just sign out if you\'d like to use it'.html_safe}
           )
         end
         return render('notifs/panel', sections: sections, as_alert: true, wide: true)

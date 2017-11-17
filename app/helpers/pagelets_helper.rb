@@ -20,6 +20,8 @@ module PageletsHelper
           with_format('html') { render_template(controller, :show) }
         end
     end
+    # Add script code to update the notifications
+    content += check_for_notifications if current_user
     [ selector,
       content_tag(:div,
                   (flash_notifications_div+content).html_safe,

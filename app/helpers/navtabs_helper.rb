@@ -142,7 +142,8 @@ module NavtabsHelper
   end
 
   def home_navtab menu_only = false
-    notifications = render_notifications_of current_user
+    # Include a placeholder for the notifications, which will be rendered in a subsequent call
+    notifications = content_tag :div, ''.html_safe, class: 'notification_wrapper' # render_notifications_of current_user
     navtab :home,
            content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
                content_tag(:span, '', class: 'measuring-spoons'),

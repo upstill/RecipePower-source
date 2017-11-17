@@ -159,12 +159,12 @@ class ResponseServices
 
   # Return the class specifier for styling according to the mode
   def format_class
-    @mode == :modal ? "floating" : @mode.to_s
+    @mode == :modal ? 'floating' : @mode.to_s
   end
 
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
-    @mode == :modal ? "div.dialog" : "div.pagelet"
+    @mode == :modal ? 'div.dialog' : 'div.pagelet'
   end
 
   # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on

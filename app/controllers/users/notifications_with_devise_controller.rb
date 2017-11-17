@@ -31,15 +31,13 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
 
   # GET /:target_type/:target_id/notifications
   def index
-    # super
     set_index_options
     load_index if params.has_key?(:reload) ? params[:reload].to_s.to_boolean : true
-
-    smartrender
-    # respond_to do |format|
-    #   format.html # index.html.erb
-    #   format.json { render json: @notifications.to_json(include: [:target, :notifiable, :group]) }
-    # end
+    if (params[:filter] || '') == 'unopened' # Render for menu bar
+      render :open, locals: { opened_only: false }
+    else
+      smartrender
+    end
   end
 
   # POST /:target_type/:target_id/notifications/open_all
