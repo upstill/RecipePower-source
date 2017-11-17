@@ -1,1 +1,1 @@
-RP.submit.submit_and_process('<%= user_notifications_path(current_user, :for => 'counter') %>', $('<%= notifications_locator %>'));
+RP.submit.submit_and_process('<%= user_notifications_path(current_user, :for => 'counter', :filter => :unopened) %>', $('<%= notifications_locator %>'));

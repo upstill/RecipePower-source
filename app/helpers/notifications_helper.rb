@@ -6,7 +6,9 @@ module NotificationsHelper
 
   def notifications_replacement target, options={}
       # Relist the notifications
-      rendering = with_format('html') { render_notifications_of target, options }
+      rendering = with_format('html') {
+        render_notifications_of target, options
+      }
       [ notifications_locator, rendering ]
   end
 

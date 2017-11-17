@@ -21,7 +21,11 @@
       </p>
     </div>
     <div class="notifications">
-      <%= yield :notification_index %>
+      <% if content = yield(:notification_index).if_present %>
+          <%= content %>
+      <% else %>
+          <div style="margin:10px">No pending notifications</div>
+      <% end %>
     </div>
     <div class="notification_link_wrapper">
       <p class="notification_link">
