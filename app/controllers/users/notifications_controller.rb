@@ -25,13 +25,13 @@ class Users::NotificationsController < ActivityNotification::NotificationsContro
   # end
 
   # GET /:target_type/:target_id/notifications/:id/move
-  def move
-    begin
-      super
-    rescue Exception => e
-      x=2
-    end
-  end
+  # def move
+  #   begin
+  #     super
+  #   rescue Exception => e
+  #     x=2
+  #   end
+  # end
 
   # No action routing
   # This method needs to be public since it is called from view helper
