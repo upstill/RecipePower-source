@@ -26,7 +26,10 @@
               but the notifiable is not found. It may have been deleted.
           <% end %>
           <br>
-          <span><%= notification.created_at.strftime("%b %d %H:%M") %></span>
+          <span>
+            <%= notification.created_at.strftime("%b %d %H:%M") %>
+            <%= button_to_submit( 'Ack', open_notification_path_for(notification, move: true, format: :json), method: :post) unless notification.opened_at %>
+          </span>
         </p>
       </div>
     </div>
@@ -40,9 +43,7 @@
             <p class="unopned_description">Open</p>
           </div>
       <% end %>
-      <%= block_to_submit open_notification_path_for(notification, move: true, format: :json), method: :post do %>
-          <%= yield :notification_content %>
-      <% end %>
+      <%= yield :notification_content %>
       <div class="unopened_wrapper"></div>
   <% else %>
       <%= block_to_submit move_notification_path_for(notification) do %>
