@@ -81,6 +81,12 @@ class RpEvent < ActiveRecord::Base
     nil
   end
 
+  # Return a string for
+  def title_of attribute, &block
+    decorator = self.method(attribute).call.decorate
+    block_given? ? (yield decorator) : decorator.title
+  end
+
   private
   def self.assemble_attributes subject, direct_object = nil, indirect_object = nil
     attrs = {
@@ -216,6 +222,10 @@ class SharedEvent < RpEvent
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
                      tracked: {only: [:create]}
 
+  def self.post subject, direct_object=nil, indirect_object=nil, data={}
+    super subject, direct_object, indirect_object, message: indirect_object.invitation_message
+  end
+
   def notifiable_path event, key
     polymorphic_path([:associated, shared]) rescue polymorphic_path(shared)
   end
@@ -225,6 +235,15 @@ class SharedEvent < RpEvent
   def act notification, options={}
     sharee.collect shared
     I18n.t 'notification.user.shared_event.act', shared: shared.decorate.title
+  end
+
+  def title_of what, &block
+    case what
+      when :message
+        data[:message]
+      else
+        super
+    end
   end
 
 end

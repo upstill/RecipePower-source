@@ -48,16 +48,13 @@ class Articulator < Object
   def summary forcements = {}
     finals = extract *(self.class::SUMMARY_USES + [forcements])
     finals[:default] = self.class::SUMMARY_USES.collect { |key| finals[key] }.compact.join ' '
-    I18n.t('notification.user.'+notification.key+'.summary', finals).html_safe
+    I18n.t(message_key(finals), finals).html_safe
   end
 
   def method_missing namesym, *args, &block
     if self.class::SUMMARY_USES.include? namesym
-      instance_variable_get(:"@#{namesym}") ||
-          if entity = notification.notifiable.respond_to?(namesym) && notification.notifiable.method(namesym).call(*args)
-            decorator = entity.decorate
-            instance_variable_set :"@#{namesym}", block_given? ? (yield decorator) : decorator.title
-          end
+      instance_variable_get(:"@#{namesym}") || instance_variable_set(:"@#{namesym}",
+                                                                     notification.notifiable.title_of(namesym, &block))
     end
   end
 
@@ -79,6 +76,13 @@ class Articulator < Object
     '<your verb here>'
   end
 
+  protected
+
+  # message_key specifies the place in the locale table where the message is found
+  def message_key finals
+    'notification.user.'+notification.key+'.summary'
+  end
+
   private
 
   # Produce a hash of the specified instance variables, merged with values in a forcing hash
@@ -89,7 +93,9 @@ class Articulator < Object
     else
       args |= result.keys
     end
-    args.each { |arg| result[arg] = self.public_send(arg) unless result.has_key?(arg) } # Allows nil to be forced
+    (args - result.keys).each { |arg|
+      result[arg] = self.public_send(arg)
+    }
     result
   end
 
@@ -127,7 +133,7 @@ end
 
 class SharedEventCreateArticulator < Articulator
   articulates 'shared_event.create'
-  SUMMARY_USES = [ :subject, :verb, :direct_object, :indirect_object, :topic ]
+  SUMMARY_USES = [ :subject, :verb, :direct_object, :indirect_object, :topic, :message ]
 
   def indirect_object
     @indirect_object ||= user_reference notification.notifiable.indirect_object
@@ -140,6 +146,11 @@ class SharedEventCreateArticulator < Articulator
 
   def verb
     'shared'
+  end
+
+  # Our message key discriminates depending on whether there's a message or not
+  def message_key contents
+    super + "_with#{'out' unless contents[:message].present?}_message"
   end
 end
 

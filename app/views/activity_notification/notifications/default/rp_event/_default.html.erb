@@ -35,15 +35,16 @@
     </div>
 <% end %>
 
-<div class='<%= "notification_#{notification.id}" %>'>
+<div class='<%= "notification_#{notification.id}" %>' style="position:relative">
   <% if notification.unopened? %>
-      <div class="unopned_circle"></div>
-      <div class="unopned_description_wrapper">
-        <p class="unopned_description">Open</p>
+      <div class="unopened_wrapper">
+        <div class="unopned_circle"></div>
       </div>
-  <% end %>
+      <%= yield :notification_content %>
+  <% else %>
   <%# block_to_submit open_notification_path_for(notification, move: true, format: :json), method: :post do %>
-  <%= yield :notification_content %>
+    <%= yield :notification_content %>
+  <% end %>
 
   <%#= link_to "Move", move_notification_path_for(notification) %>
   <%# if notification.unopened? %>

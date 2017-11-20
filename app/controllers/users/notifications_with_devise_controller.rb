@@ -53,9 +53,11 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
   # end
 
   # POST /:target_type/:target_id/notifications/:id/open
-  # def open
-  #   super
-  # end
+  def open
+    with_members = !(params[:with_group_members].to_s.to_boolean || params[:without_grouping].to_s.to_boolean)
+    @notification.open!(with_members: with_members)
+    move if params[:move].to_s.to_boolean
+  end
 
   # Moves to notifiable_path of the notification.
   #
