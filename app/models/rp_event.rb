@@ -76,6 +76,11 @@ class RpEvent < ActiveRecord::Base
     # ...or nothing
   end
 
+  # notifiable path defaults to nil, subject to override
+  def notifiable_path event, key
+    nil
+  end
+
   private
   def self.assemble_attributes subject, direct_object = nil, indirect_object = nil
     attrs = {
@@ -196,19 +201,23 @@ class SharedEvent < RpEvent
   alias_attribute :sharer, :subject
   alias_attribute :shared, :direct_object
   alias_attribute :sharee, :indirect_object
-  attr_accessible :sharer, :shared, :sharee
+  alias_attribute :topic, :direct_object
+  attr_accessible :sharer, :shared, :sharee, :topic
 
   acts_as_notifiable :users,
-                     targets: ->(evt, key) {  [evt.sharee] },
-                     notifier: ->(evt, key) {  evt.sharer },
-                     # notifiable_path: :share_path,
+                     targets: ->(evt, key) { [evt.sharee] },
+                     notifier: ->(evt, key) { evt.sharer },
+                     # : :show_path,
                      email_allowed: true,
+                     # notifiable_path: ->(event, key) {
+                     #   polymorphic_path([:associated, shared], format: :json, method: :get)
+                     # },
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] }
+                     tracked: {only: [:create]}
 
-  def share_path
-    polymorphic_path shared
+  def notifiable_path event, key
+    polymorphic_path([:associated, shared]) rescue polymorphic_path(shared)
   end
 
   # Act on a Shared event by adding the entity to the collection of the user shared with

@@ -69,7 +69,7 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
   #   @return [Responce] JavaScript view for ajax request or redirects to back as default
   def move
     begin
-      @notification.open! if params[:open].to_s.to_boolean
+      super
     rescue Exception => e
       # Handle Warden exception for not having the right user logged in
       x=2

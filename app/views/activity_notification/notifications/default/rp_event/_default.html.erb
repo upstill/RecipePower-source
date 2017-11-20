@@ -1,11 +1,11 @@
 <% content_for :notification_content, flush: true do %>
     <div class='notification_list <%= notification.opened? ? "opened" : "unopened" %>'>
-      <div class="notification_list_cover"></div>
+      <!--<div class="notification_list_cover"></div>-->
       <div class="list_image"></div>
       <div class="list_text_wrapper">
         <p class="list_text">
           <% if defined?(articulator) && articulator %>
-              <%= articulator.summary subject: notifications_format_subject(notification, articulator.subject) %>
+              <%= articulator.summary notifications_format(articulator) %>
               <% if notification.group_member_exists? %>
                   <%= " #{notification.group_notification_count} #{notification.notifiable_type.humanize.pluralize.downcase} including" %>
               <% end %>
@@ -28,7 +28,7 @@
           <br>
           <span>
             <%= notification.created_at.strftime("%b %d %H:%M") %>
-            <%= button_to_submit( 'Ack', open_notification_path_for(notification, move: true, format: :json), 'info', 'xs', method: :post) if notification.unopened? %>
+            <%= button_to_submit('Ack', open_notification_path_for(notification, format: :json), 'info', 'xs', method: :post) if notification.unopened? %>
           </span>
         </p>
       </div>
@@ -37,21 +37,13 @@
 
 <div class='<%= "notification_#{notification.id}" %>'>
   <% if notification.unopened? %>
-      <%= block_to_submit open_notification_path_for(notification, reload: false), method: :post, remote: true, class: "unopened_wrapper" do %>
-          <div class="unopned_circle"></div>
-          <div class="unopned_description_wrapper">
-            <p class="unopned_description">Open</p>
-          </div>
-      <% end %>
-      <%# block_to_submit open_notification_path_for(notification, move: true, format: :json), method: :post do %>
-          <%= yield :notification_content %>
-      <%# end %>
-      <div class="unopened_wrapper"></div>
-  <% else %>
-      <%= block_to_submit move_notification_path_for(notification) do %>
-          <%= yield :notification_content %>
-      <% end %>
+      <div class="unopned_circle"></div>
+      <div class="unopned_description_wrapper">
+        <p class="unopned_description">Open</p>
+      </div>
   <% end %>
+  <%# block_to_submit open_notification_path_for(notification, move: true, format: :json), method: :post do %>
+  <%= yield :notification_content %>
 
   <%#= link_to "Move", move_notification_path_for(notification) %>
   <%# if notification.unopened? %>

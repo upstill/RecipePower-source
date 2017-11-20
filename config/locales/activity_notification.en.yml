@@ -19,4 +19,4 @@ en:
         act: "'%{shared}' now appearing in your collection"
         create:
           mail_subject: 'Something tasty for you'
-          summary: '%{subject} %{verb} "%{direct_object}" with %{indirect_object}'
+          summary: '%{subject} %{verb} "%{topic}" with %{indirect_object}'

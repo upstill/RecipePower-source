@@ -12,6 +12,19 @@ module NotificationsHelper
       [ notifications_locator, rendering ]
   end
 
+  # Given a notification, return a hash of attribute replacements for the articulator's summary
+  def notifications_format articulator
+    notification = articulator.notification
+    topiclink =
+    if articulator.topic.present? && notification.notifiable.notifiable_path('User', notification.key).present?
+      link_to_submit articulator.topic, open_notification_path_for(notification, move: true), method: :post
+    end
+    {
+        subject: notifications_format_subject(notification, articulator.subject),
+        topic: topiclink
+    }.compact
+  end
+
   def notifications_format_subject notification, subject
     subject << ( " and #{notification.group_member_notifier_count} other" +
         (source.present? ? source.printable_type.pluralize.downcase : 'people')

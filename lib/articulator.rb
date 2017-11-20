@@ -2,7 +2,7 @@
 class Articulator < Object
   attr_writer :subject, :direct_object, :indirect_object
   attr_reader :notification
-  @@summary_uses = [ :subject, :verb, :direct_object, :indirect_object ]
+  SUMMARY_USES = [ :subject, :verb, :direct_object, :indirect_object ]
 
   # Determine the class that articulates the given notifiable/key pair
   def self.make notification
@@ -46,22 +46,18 @@ class Articulator < Object
   end
 
   def summary forcements = {}
-    finals = extract *(@@summary_uses + [forcements])
-    finals[:default] = @@summary_uses.collect { |key| finals[key] }.compact.join ' '
+    finals = extract *(self.class::SUMMARY_USES + [forcements])
+    finals[:default] = self.class::SUMMARY_USES.collect { |key| finals[key] }.compact.join ' '
     I18n.t('notification.user.'+notification.key+'.summary', finals).html_safe
   end
 
   def method_missing namesym, *args, &block
-    if [:subject, :direct_object, :indirect_object].include? namesym
+    if self.class::SUMMARY_USES.include? namesym
       instance_variable_get(:"@#{namesym}") ||
-          if entity = notification.notifiable.method(namesym).call(*args)
+          if entity = notification.notifiable.respond_to?(namesym) && notification.notifiable.method(namesym).call(*args)
             decorator = entity.decorate
-            instance_variable_set :"@#{namesym}", block_given? ? (yield decorator) : decorator.name
-          else
-            return super
+            instance_variable_set :"@#{namesym}", block_given? ? (yield decorator) : decorator.title
           end
-    else
-      super
     end
   end
 
@@ -89,7 +85,7 @@ class Articulator < Object
   def extract *args
     result = args.last.is_a?(Hash) ? args.pop : {}
     if args.empty?
-      args = [ :subject, :verb, :direct_object, :indirect_object ]
+      args = self.class::SUMMARY_USES
     else
       args |= result.keys
     end
@@ -101,7 +97,7 @@ end
 
 class InvitationSentEventCreateArticulator < Articulator
   articulates 'invitation_sent_event.create'
-  @@summary_uses = [ :subject, :verb, :direct_object ]
+  SUMMARY_USES = [ :subject, :verb, :direct_object ]
 
   def subject
     @subject ||= user_reference notification.notifiable.subject
@@ -118,7 +114,7 @@ end
 
 class InvitationAcceptedEventCreateArticulator < Articulator
   articulates 'invitation_accepted_event.create'
-  @@summary_uses = [ :subject, :verb, :direct_object ]
+  SUMMARY_USES = [ :subject, :verb, :direct_object ]
 
   def direct_object
     @direct_object ||= user_reference notification.notifiable.direct_object, true
@@ -131,7 +127,7 @@ end
 
 class SharedEventCreateArticulator < Articulator
   articulates 'shared_event.create'
-  @@summary_uses = [ :subject, :verb, :direct_object, :indirect_object ]
+  SUMMARY_USES = [ :subject, :verb, :direct_object, :indirect_object, :topic ]
 
   def indirect_object
     @indirect_object ||= user_reference notification.notifiable.indirect_object
