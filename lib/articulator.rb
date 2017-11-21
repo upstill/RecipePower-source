@@ -40,7 +40,6 @@ class Articulator < Object
 
   def self.articulates *keys
     keys.each { |key|
-      puts self.to_s + ' articulates ' + key
       Articulator.register key, self
     }
   end

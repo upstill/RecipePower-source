@@ -56,7 +56,11 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
   def open
     with_members = !(params[:with_group_members].to_s.to_boolean || params[:without_grouping].to_s.to_boolean)
     @notification.open!(with_members: with_members)
-    move if params[:move].to_s.to_boolean
+    if params[:move].to_s.to_boolean
+      move
+    elsif (params[:for] || '') != 'counter'
+      redirect_to :action => :index
+    end
   end
 
   # Moves to notifiable_path of the notification.
