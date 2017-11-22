@@ -33,6 +33,11 @@ class PagesController < ApplicationController
     smartrender
   end
 
+  def tell_me_more
+    response_service.title = 'Cookmark'
+    smartrender
+  end
+
   def cookmark
     response_service.title = 'Cookmark'
     smartrender

@@ -251,6 +251,7 @@ RP::Application.routes.draw do
   get '/popup/:name', :to => 'pages#popup'
   get '/popup', :to => 'pages#popup'
   get '/share', :to => 'pages#share'
+  get '/tell_me_more', :to => 'pages#tell_me_more'
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
   get '/mission', :to => 'pages#mission'

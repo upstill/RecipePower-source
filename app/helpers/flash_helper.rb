@@ -5,7 +5,10 @@ module FlashHelper
 
   # Emit the flash_notifications for the page in a div.
   def flash_notifications_div cssclass = 'flash_notifications', for_bootstrap = true
-    content_tag :div, flash_all(for_bootstrap), class: cssclass
+    content = flash_all(for_bootstrap)
+    styles = { class: cssclass }
+    styles[:style] = 'display:none;' if content.blank?
+    content_tag :div, content, styles
   end
   
 	# Returns a selector-value pair for replacing the notifications panel due to an update event
