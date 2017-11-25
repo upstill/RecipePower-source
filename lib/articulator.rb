@@ -100,6 +100,10 @@ class Articulator < Object
 
 end
 
+class SignupEventArticulator < Articulator
+  SUMMARY_USES = [ :subject ]
+end
+
 class InvitationSentEventCreateArticulator < Articulator
   articulates 'invitation_sent_event.create'
   SUMMARY_USES = [ :subject, :verb, :direct_object ]
@@ -117,9 +121,12 @@ class InvitationSentEventCreateArticulator < Articulator
   end
 end
 
-class InvitationAcceptedEventCreateArticulator < Articulator
-  articulates 'invitation_accepted_event.create'
+class InvitationAcceptedEventArticulator < Articulator
   SUMMARY_USES = [ :subject, :verb, :direct_object ]
+
+  def subject
+    @subject ||= user_reference notification.notifiable.subject
+  end
 
   def direct_object
     @direct_object ||= user_reference notification.notifiable.direct_object, true

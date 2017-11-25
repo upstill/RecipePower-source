@@ -110,9 +110,40 @@ end
 ## And now, one subclass for each verb (type)
 
 # <User> logged in
+class SignupEvent < RpEvent
+  alias_attribute :who, :subject
+  attr_accessible :who
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) { [evt.who] },
+                     notifier: ->(evt, key) { evt.who },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: {only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
+
+  # Login events accumulate for a given user
+  def self.post who
+    self.create who: who
+  end
+end
+
+# <User> logged in
 class LoginEvent < RpEvent
   alias_attribute :who, :subject
   attr_accessible :who
+
+=begin
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) { [evt.who] },
+                     notifier: ->(evt, key) { evt.who },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: {only: [:create] } # , send_later: !Rails.env.development? }
+=end
 
   # Login events accumulate for a given user
   def self.post who
@@ -155,7 +186,7 @@ class InvitationSentEvent < RpEvent
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: { only: [:create] }
+                     tracked: { only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
 
   def self.find_by_invitee invitee
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
@@ -171,13 +202,21 @@ class InvitationResponseEvent < RpEvent
   alias_attribute :invitation_event, :indirect_object
   attr_accessible :inviter, :invitee, :invitation_event
 
+end
+
+class InvitationRespondedEvent < InvitationResponseEvent
+end
+
+# <User> accepted invitation <InvitationSentEvent>
+class InvitationAcceptedEvent < InvitationResponseEvent
+
   acts_as_notifiable :users,
                      targets: ->(evt, key) {
                        case key.sub(/^.*\./, '')
                          when 'create'
-                           [evt.inviter]
-                         when 'welcome'
                            [evt.invitee]
+                         when 'feedback'
+                           [evt.inviter]
                        end
                      },
                      notifier: ->(evt, key) {
@@ -187,15 +226,7 @@ class InvitationResponseEvent < RpEvent
                      email_allowed: true,
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: {only: [:create] }
-
-end
-
-class InvitationRespondedEvent < InvitationResponseEvent
-end
-
-# <User> accepted invitation <InvitationSentEvent>
-class InvitationAcceptedEvent < InvitationResponseEvent
+                     tracked: { only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
 end
 
 # <User> diverted invitation <InvitationSentEvent>
@@ -220,7 +251,7 @@ class SharedEvent < RpEvent
                      # },
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
-                     tracked: {only: [:create]}
+                     tracked: {only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
 
   def self.post subject, direct_object=nil, indirect_object=nil, data={}
     super subject, direct_object, indirect_object, message: indirect_object.invitation_message

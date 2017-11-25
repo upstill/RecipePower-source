@@ -229,7 +229,8 @@ class InvitationsController < Devise::InvitationsController
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
       response_service.user = resource
-      InvitationAcceptedEvent.post resource, resource.invited_by, InvitationSentEvent.find_by_invitee(resource)
+      evt = InvitationAcceptedEvent.post resource, resource.invited_by, InvitationSentEvent.find_by_invitee(resource)
+      evt.notify :users, key: 'invitation_accepted_event.feedback', send_later: ResponseServices.has_worker? # !Rails.env.development?
 
       set_flash_message :notice, :updated
       sign_in(resource_name, resource)

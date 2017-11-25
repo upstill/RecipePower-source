@@ -348,7 +348,7 @@ class ApplicationController < ActionController::Base
                                                       end
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert
-                      new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
+                      defer_invitation_path(response_service.redirect_params(params.slice(:sourcehome)).merge(notif: 'signup'))
                     elsif response_service.mode == :injector
                       new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
                     else

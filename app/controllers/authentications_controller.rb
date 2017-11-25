@@ -72,7 +72,7 @@ class AuthenticationsController < ApplicationController
           @authentication = user.authentications.create!(authparams) # Link authorization to user
           sign_in user, :event => :authentication
           response_service.user = user
-          RpMailer.welcome_email(user).deliver
+          SignupEvent.post user # RpMailer.welcome_email(user).deliver
           flash[:notice] =
               %Q{Welcome to RecipePower, #{user.polite_name}! Introductory email is on its way. }
           url_to = after_sign_in_path_for(user)

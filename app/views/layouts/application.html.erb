@@ -64,14 +64,14 @@
 </head>
 <body class="<%= response_service.controller %> <%= response_service.action %> <%= 'logged-in' if current_user %>" >
 <% if Rails.env.development? %>
-<div class="booger">
-  <span class="phone" >phone</span>
-  <span class="small" >small</span>
-  <span class="medium" >medium</span>
-  <span class="largish" >largish</span>
-  <span class="large" >large</span>
-  <span class="wide" >wide</span>
-</div>
+    <div class="booger">
+      <span class="phone" >phone</span>
+      <span class="small" >small</span>
+      <span class="medium" >medium</span>
+      <span class="largish" >largish</span>
+      <span class="large" >large</span>
+      <span class="wide" >wide</span>
+    </div>
 <% end %>
 <% if current_user %>
 <!-- Caching the navbar doesn't seem to do much good. -->
@@ -92,8 +92,8 @@
 <% end %>
 <%= render 'layouts/navbar' %>
 <%= response_service.do_notification %>
-<%= render 'layouts/pagelet' %>
 <%= do_notifs %>
+<%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>
     <p>
       Archivo:

@@ -1,32 +1,8 @@
 module NotifsHelper
 
-=begin
-  # Pump pending notifications into flash notices
-  def issue_notifications user
-    notices = user.notifications_received.where(accepted: false).map(&:accept).join('<br>'.html_safe)
-    flash[:success] = notices unless notices.blank?
-  end
-=end
 
   def invitation_acceptance_label
     response_service.pending_notification ? 'Take Share' : 'Accept Invite'
-  end
-
-  # To go with any page: present pending notifications (and invitations) in a modal atop
-  def due_notifs
-    if current_user
-      # User logged in: check for notifications
-      if notif = notifiable_notification
-        render 'notifications/present', presenter: present(notif, current_user)
-      end
-    elsif response_service.invitation_token
-      # Sort out a pending invitation, whether anyone is logged in or not
-      handle_invitation 'notifs/panel', !response_service.notification_token
-    else
-      # The simplest case: no invitation token, no current user
-      # Simply present login options
-      render 'notifs/panel'
-    end
   end
 
   def notifs_replacement
@@ -99,13 +75,14 @@ module NotifsHelper
         sections << OpenStruct.new(# Sign Up
             signature: 'signup',
             is_main: true,
-            is_vis: !invitee_error.nil?,
+            is_vis: (!invitee_error.nil?) || params[:notif] == 'signup',
             title: 'Sign Up',
             partial: 'registrations/options' # 'notifs/signup'
         )
         sections << OpenStruct.new(# Sign In
             signature: 'signin',
             title: 'Sign In',
+            is_vis: params[:notif] == 'signin',
             partial: 'notifs/signin'
         )
       end

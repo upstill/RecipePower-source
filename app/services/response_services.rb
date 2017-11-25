@@ -11,6 +11,10 @@ class ResponseServices
   attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token
   attr_writer :user
 
+  def self.has_worker?
+    Rails.env.development? ? false : true #
+  end
+
   def initialize params, session, request
     @request = request
     @requestpath = request.fullpath
@@ -165,6 +169,10 @@ class ResponseServices
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
     @mode == :modal ? 'div.dialog' : 'div.pagelet'
+  end
+
+  def home_page?
+    controller == 'pages' && action == 'home'
   end
 
   # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on

@@ -12,22 +12,6 @@ class RpMailer < ActionMailer::Base
     mail :to => recipients, :from => @feedback.email, :subject => subject
   end
 
-  # TODO: Replace with ActivityNotification
-  def welcome_email(user)
-    @inviter = user.invited_by
-    @invitee = user
-    @login_url  = rp_url '/login'
-    mail :to => user.email, :from => 'support@recipepower.com', :subject => 'Welcome to RecipePower'
-  end
-
-  # TODO: Replace with ActivityNotification
-  def invitation_accepted_email invitee
-    return unless invitee.invited_by
-    @invitee = invitee
-    @profile_url = rp_url '/users/profile'
-    mail to: invitee.invited_by.email, :from => 'support@recipepower.com', :subject => 'Your invitation was accepted'
-  end
-  
   def user_to_user(from, to)
     @sender = from
     @recipient = to

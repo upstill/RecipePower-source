@@ -22,6 +22,11 @@ module ControllerUtils
           when "new"
             return "invite someone else"
         end
+      when 'lists'
+        case action
+          when 'contents'
+            return 'inspect a treasury'
+        end
     end
     "#{action} #{controller}"
   end
