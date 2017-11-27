@@ -435,7 +435,7 @@ div.card-item {
   &.card-grid {
     position: relative;
     padding-top: 1em;
-    padding-bottom: 3em;
+    // padding-bottom: 3em;
     div.grid-item {
       ul.token-input-list, ul.token-input-list-facebook {
         min-width: 100px;
@@ -462,7 +462,7 @@ div.card-item {
       }
     }
     div.stamp { // Marked for clearance by Masonry
-      &.found-by {
+      div.found-by {
         max-width: 200px;
         width: auto;
         height: auto;
@@ -470,11 +470,13 @@ div.card-item {
         float: left;
         clear: left;
       }
-      &.avatar {
-        margin-right: 15px;
+      div.avatar {
         height: auto;
         float: left;
         clear: left;
+      }
+      &.avatar-column {
+        margin-right: 15px;
       }
       &.title {
         // padding-right: 35px;
@@ -490,14 +492,27 @@ div.card-item {
       }
     }
     div.card-column {
+      float: left;
       @include respond-to(phone) {
         width: $col-width-phone;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-phone;
+        }
       }
       @include respond-to(small) {
         width: $col-width-small;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-small;
+        }
       }
       @include respond-to(medium) {
         width: $col-width-medium;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-medium;
+        }
         &.found_by {
           width: $col-width-medium * 0.7;
         }
@@ -507,6 +522,10 @@ div.card-item {
       }
       @include respond-to(largish) {
         width: $col-width-largish;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-largish;
+        }
         &.found_by {
           width: $col-width-largish * 0.7;
         }
@@ -516,6 +535,10 @@ div.card-item {
       }
       @include respond-to(large) {
         width: $col-width-large;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-large;
+        }
         &.found_by {
           width: $col-width-large * 0.7;
         }
@@ -525,6 +548,10 @@ div.card-item {
       }
       @include respond-to(wide) {
         width: $col-width-wide;
+        &.flexor {
+          width: initial;
+          max-width: $col-width-wide;
+        }
         &.found_by {
           width: $col-width-wide * 0.7;
         }

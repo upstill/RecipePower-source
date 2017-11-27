@@ -15,12 +15,6 @@ class UserPresenter < CollectiblePresenter
         super
   end
 
-  # Present the card column in which is embedded the avatar for the entity, and that of is first collector, if any
-  def card_avatar_column
-    content_tag(:div, card_avatar(onlinks: true), class: 'stamp avatar') +
-        content_tag(:div, card_avatar_accompaniment || ''.html_safe, class: 'stamp found-by')
-  end
-
   # Users don't have a ribbon on their card
   def ribbon
   end

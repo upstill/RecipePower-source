@@ -137,8 +137,14 @@ class CollectiblePresenter < BasePresenter
 
   # Present the card column in which is embedded the avatar for the entity, and that of is first collector, if any
   def card_avatar_column
-    content_tag(:div, card_avatar(onlinks: true), class: 'stamp avatar card-column') +
-    content_tag(:div, card_avatar_accompaniment || ''.html_safe, class: 'stamp found-by')
+    # content_tag(:div, card_avatar(onlinks: true), class: 'stamp avatar card-column') +
+    # content_tag(:div, card_avatar_accompaniment || ''.html_safe, class: 'stamp found-by')
+    content_tag :div,
+                (content_tag(:div, card_avatar(onlinks: true)+tag(:br, style: 'clear: both'), class: 'avatar') +
+                    content_tag(:div, (card_avatar_accompaniment || ''.html_safe)+tag(:br, style: 'clear: both'), class: 'found-by') +
+                    tag(:br, style: 'clear: both')),
+                class: 'stamp card-column flexor avatar-column'
+
   end
 
   # Entities are editable, sharable, votable and collectible from the card by default
