@@ -9,7 +9,7 @@ en:
         create:
           mail_subject: 'Welcome to RecipePower!'
           summary: '%{subject} %{verb} %{direct_object} invitation to RecipePower'
-        welcome:
+        feedback:
           mail_subject: 'Your invitation was accepted'
           summary: '%{subject} %{verb} %{direct_object} invitation to RecipePower'
       signup_event:
