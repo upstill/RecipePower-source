@@ -81,7 +81,7 @@ module ImagesHelper
   def labelled_avatar decorator, options={}
     content_tag(:div,
                 image_from_decorator(decorator, options),
-                class: 'owner-pic') +
+                class: 'owner-pic pic-box') +
     content_tag(:span, homelink(decorator), class: 'owner-name')
   end
 

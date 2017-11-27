@@ -116,7 +116,7 @@ class CollectiblePresenter < BasePresenter
           link_to_dialog('',
                          polymorphic_path([:editpic, decorator]),
                          class: 'dblclicker') if decorator.user_can? :update
-      content_tag :div, img, class: 'onlinks'
+      content_tag :div, img, class: 'onlinks pic-box'
     else
       img
     end
