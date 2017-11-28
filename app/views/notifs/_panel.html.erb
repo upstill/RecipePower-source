@@ -22,8 +22,8 @@
                         <br><a class="select-content <%= section.signature %>" data-activate="<%= othersection.signature %>"><%= othersection.title %></a>
                     <% end %>
                   </div>
+                  <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
                 </div>
-                <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
             <% end %>
           </div>
       <% end %>

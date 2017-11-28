@@ -1,9 +1,6 @@
 div.notifs {
   width: auto;
   max-width: 380px;
-  &.collapsed {
-    max-width: 330px;
-  }
   &.wide {
     max-width: 550px;
   }
@@ -18,6 +15,7 @@ div.notifs {
     display: none;
   }
   &.collapsed {
+    max-width: 330px;
     position: fixed;
     right: 4px;
     top: 4px;
@@ -38,6 +36,9 @@ div.notifs {
       }
     }
     div.modal-header {
+      button.rollup {
+        display: none;
+      }
       @include respond-to(phone) {
         padding: 3px;
         font-size: 0.4em;
