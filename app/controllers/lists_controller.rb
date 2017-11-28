@@ -29,9 +29,10 @@ class ListsController < CollectibleController
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
     response_service.title = "New List"
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
-    update_and_decorate List.assert( params[:list][:name], current_user), touch: true
+    l = List.assert( params[:list][:name], current_user)
+    update_and_decorate l, touch: true, update_attributes: !l.persisted?
 
-    if @list.id
+    if l.persisted?
       flash[:popup] = "Found list '#{@list.name}'."
     else
       flash[:popup] ="Successfully created '#{@list.name}'."
