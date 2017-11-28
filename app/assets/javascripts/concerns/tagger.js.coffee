@@ -19,7 +19,7 @@ jQuery ->
 	$('div.stream-body').on "load", '.token-input-field-pending', (event) ->
 		c=3
 		false
-	$('div.header').resize adjustHeader
+	# $('div.header').resize adjustHeader
 
 # Set up an input element for tagging by populating the data of the element as specified
 RP.tagger.init = (selector, data) ->
@@ -73,7 +73,7 @@ handlerFor = (what, op) ->
 
 adjustHeader = ->
 	hdr = $('div.header')
-	if formitem = $('div.form-group.triggered-form', hdr)[0]
+	if formitem = $('body.logged-in div.form-group.triggered-form', hdr)[0]
 		formbottom = formitem.getBoundingClientRect().bottom
 		# ## Find the padding-top style for the pagelet body, to shift it down--for now and for subsequent loads
 		$('div.pagelet-body').css 'padding-top', (formbottom + 'px')

@@ -11,6 +11,7 @@
 @import 'common/filtered_presenter';
 @import 'common/masonry';
 @import 'common/navbar';
+@import 'common/notifications';
 @import 'common/panel';
 @import 'common/ribbon';
 @import 'common/slider';
@@ -35,7 +36,19 @@ body {
   padding: 0;
   font-size: 150%;
   letter-spacing: 1px;
+  &.logged-in {
+    div.pagelet-body {
+      padding-top: 200px;
+    }
+  }
+  &.home {
+    div.pagelet-body {
+      padding-top: 52px;
+    }
+  }
   div.pagelet-body {
+    // When not logged in, we keep the pagelet body at the top
+    padding-top: 68px;
     div.flash_notifications {
       margin-top: 25px;
       font-size: 18px;

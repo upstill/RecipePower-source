@@ -1,6 +1,9 @@
 class SessionsController < Devise::SessionsController
+  include Rails.application.routes.url_helpers
+
   before_filter :allow_iframe, only: :new
   before_filter :require_no_authentication, only: :create
+  after_filter :restore_tokens, only: :destroy
 
   # Somehow require_no_authentication redirects to after_sign_in_path_for when the user is already logged in
   def require_no_authentication
@@ -13,7 +16,21 @@ class SessionsController < Devise::SessionsController
       # flash[:notice] = "All signed in. Welcome back, #{current_user.handle}!"
       redirect_to after_sign_in_path_for(current_user), notice: "All signed in. Welcome back, #{current_user.handle}!"
     elsif response_service.format == :html && !response_service.injector?
-      redirect_to home_path # Page display not an option
+      if blocked_request = params[:blocked]
+        # This code is nasty, because recognize_path dies horribly on notifications
+        begin
+          controller = Rails.application.routes.recognize_path blocked_request
+        rescue Exception => e
+          uri = URI(blocked_request)
+          if match = uri.path.match(%r{^/users/(\d*)/notifications/(\d*)/(\w*)$})
+            controller = Users::NotificationsWithDeviseController
+          end
+        end
+      end
+      redir = controller.show_page(blocked_request) do |entity, args={}|
+        polymorphic_path entity, args if entity
+      end if controller.respond_to(:show_page)
+      redirect_to redir.if_present || home_path
     else
       self.resource = resource_class.new # build_resource(nil, :unsafe => true)
       if u = params[:user] && params[:user][:id] && User.find_by_id(params[:user][:id])
@@ -68,7 +85,17 @@ class SessionsController < Devise::SessionsController
       }
     end
   end
-  
+
+  # When a user signs out, maintain pending invitation and notification tokens
+  def restore_tokens
+    response_service.restore_tokens
+  end
+
+  # Normally we go back to the home page, but if a notification is waiting, we go to its target (if any)
+  def after_sign_out_path_for(resource)
+    ((notification = response_service.pending_notification) && notification.present.referral_path.if_present) || super
+  end
+
   def sign_in_and_redirect(resource_or_scope, resource=nil)
     logger.debug "sign_in_and_redirect: Signing in #{(resource||resource_or_scope).handle}; redirecting with..."
     scope = Devise::Mapping.find_scope!(resource_or_scope)

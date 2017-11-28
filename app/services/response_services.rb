@@ -8,8 +8,12 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath, :referer
+  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token
   attr_writer :user
+
+  def self.has_worker?
+    Rails.env.development? ? false : true #
+  end
 
   def initialize params, session, request
     @request = request
@@ -36,6 +40,12 @@ class ResponseServices
     # :page to render the whole page (for an html request)
     @mode = (params[:mode] || :page).to_sym
         # (@format == :html ? :page : :modal)).to_sym
+
+    # The presence of notification and invitation tokens persists them in the session until cleared
+    @invitation_token = session[:notification_token]
+    @notification_token = params[:notification_token] if params[:notification_token].present?
+    @invitation_token = session[:invitation_token]
+    @invitation_token = params[:invitation_token] if params[:invitation_token].present?
 
     # Save the parameters we might want to pass back
     @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
@@ -143,11 +153,8 @@ class ResponseServices
   def find_view ctrl_class=nil, file=nil
     ctrl_class ||= controller_instance.class
     file ||= action.to_s
-    ctrl_class.ancestors.each { |anc|
-      if path = anc.instance_variable_get(:@controller_path)
-        return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
-        break if path == "application"
-      end
+    ctrl_class._prefixes.each { |path|
+      return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
     }
     "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
   end
@@ -156,12 +163,16 @@ class ResponseServices
 
   # Return the class specifier for styling according to the mode
   def format_class
-    @mode == :modal ? "floating" : @mode.to_s
+    @mode == :modal ? 'floating' : @mode.to_s
   end
 
   # Used for targeting a stream to either the page or part of a dialog
   def container_selector
-    @mode == :modal ? "div.dialog" : "div.pagelet"
+    @mode == :modal ? 'div.dialog' : 'div.pagelet'
+  end
+
+  def home_page?
+    controller == 'pages' && action == 'home'
   end
 
   # Used in templates for standard actions (e.g., new, edit, show) to choose a partial depending on
@@ -179,17 +190,14 @@ class ResponseServices
         end
   end
 
+  # Lookup the user to whom the current invitation token pertains
   def pending_invitee
     unless @pending_invitee
       @pending_invitee = User.find_by_invitation_token(invitation_token, false) if invitation_token
       # If the invitation is to the current user, we can safely clear the pending invitation
-      self.invitation_token = nil if @pending_invitee && user && (@pending_invitee == user)
+      invitation_token = nil if @pending_invitee && user && (@pending_invitee == user)
     end
     @pending_invitee
-  end
-
-  def invitation_token
-    @invitation_token ||= @session[:invitation_token]
   end
 
   # Set the invitation_token and store it in the @session
@@ -201,17 +209,35 @@ class ResponseServices
     end
   end
 
-  def notification_token
-    @notification_token ||= @session[:notification_token]
+  def pending_notification
+    @notification ||= ActivityNotification::Notification.find_by(id: @notification_token) if @notification_token # find_by_notification_token(@notification_token) if notification_token
+  end
+
+  # Process the current notification and provide an alert
+  def do_notification
+    if (notif = pending_notification) && (@controller_instance.current_user.id == notif.target.id)
+      # A pending notification gets accepted, with any side effects
+      # All is well; clear the notification
+      notif.open!
+      event = notif.notifiable
+      @controller_instance.flash.now[:notice] = event.act notif  # Invoke the event's action-on-open
+      notification_token = nil # Clear the notification
+    end
   end
 
   # Set the notification_token and store it in the @session
   def notification_token= it
-    @notification_token = @session[:notification_token] = it
+    if @notification_token = it
+      @session[:notification_token] = it
+    else
+      @session.delete :notification_token
+    end
   end
 
-  def pending_notification
-    @notification ||= Notification.find_by_notification_token(@notification_token) if notification_token
+  # When a user signs out, maintain pending invitation and notification tokens
+  def restore_tokens
+    @session[:invitation_token] = @invitation_token if @invitation_token
+    @session[:notification_token] = @notification_token if @notification_token
   end
 
 end

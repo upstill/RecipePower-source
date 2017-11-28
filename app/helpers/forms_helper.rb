@@ -15,7 +15,7 @@ module FormsHelper
     options = merge_submit_options options
     options[:html][:data] = (options[:html][:data] || {}).merge options.delete(:data)
     options[:html][:remote] = options.delete :remote
-    simple_form_for resource, options do |f| block.call f end
+    simple_form_for resource, merge_submit_options(options) do |f| block.call f end
   end
 
 private
@@ -24,6 +24,7 @@ private
     options = options ? options.deep_dup : {}
     (options[:data] ||= {})[:type] = 'json'
     (options[:html] ||= {})[:onload] = 'RP.submit.form_onload(event);'
+    # (options[:html][:class] ||= '') << ' submit'
     options[:html].delete 'data-type'
     options[:remote] = true
     options

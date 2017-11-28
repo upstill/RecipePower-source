@@ -1,0 +1,28 @@
+en:
+  notification:
+    default:
+      shared_event:
+        create:
+          mail_subject: 'Something tasty for you'
+    user:
+      invitation_accepted_event:
+        create:
+          mail_subject: 'Welcome to RecipePower!'
+          summary: '%{subject} %{verb} %{direct_object} invitation to RecipePower'
+        feedback:
+          mail_subject: 'Your invitation was accepted'
+          summary: '%{subject} %{verb} %{direct_object} invitation to RecipePower'
+      signup_event:
+        create:
+          mail_subject: 'Welcome to RecipePower!'
+          summary: 'RecipePower welcomes you, %{subject}!'
+      invitation_sent_event:
+        create:
+          mail_subject: 'Someone wants to get you cooking'
+          summary: '%{subject} %{verb} %{direct_object} to join RecipePower'
+      shared_event:
+        act: "'%{shared}' now appearing in your collection"
+        create:
+          mail_subject: 'Something tasty for you'
+          summary_without_message: '%{subject} %{verb} "%{topic}" with %{indirect_object}'
+          summary_with_message: '%{subject} %{verb} "%{topic}" with %{indirect_object}, saying "%{message}"'

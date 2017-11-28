@@ -209,7 +209,7 @@ body.logged-in {
         &#home-navtab {
           @include menu-color-scheme(home);
           @include respond-to(large-up) {
-            padding: 0;
+            padding-top: 30px;
           }
           position: absolute;
           top: 0;

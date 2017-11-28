@@ -5,6 +5,6 @@ module RatingsHelper
   end
 
   def summarize_ratings(ratings)
-    enumerate_strs ratings.collect { |r| "<strong>#{r.value_as_text}</strong>" }
+    liststrs ratings.collect { |r| "<strong>#{r.value_as_text}</strong>" }
   end
 end

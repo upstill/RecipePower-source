@@ -764,9 +764,16 @@ class SearchIndexCache < ResultsCache
 
   def ordereditemscope
     # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    ois =
     if org == :viewed
       uniqueitemscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
     end || super
+    if result_type == 'lists'
+      # Eliminate empty lists
+      ois.where.not(name_tag_id: [16310, 16311, 16312])
+    else
+      ois
+    end
   end
 
 end

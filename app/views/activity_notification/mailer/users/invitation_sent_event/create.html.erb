@@ -1,0 +1,34 @@
+<!--Formerly rp_devise_mailer/invitation_instructions.html.erb-->
+<% event = @notification.notifiable %>
+<% inviter = event.subject %>
+<% inviter_name = @target.invitation_issuer %>
+<!--
+Link to the page for the shared item&#45;&#45;or the home page if none&#45;&#45;with embedded invitation and notification tokens
+to be invoked after the user verifies credentials
+-->
+<% accept_str = link_to('accept the invitation',
+                        accept_user_invitation_url(
+                                :rpevent => InvitationAcceptedEvent.event_trigger_data(@target, @target.invited_by, @invitation_event),
+                                :invitation_token => event.data[:raw_invitation_token],
+                                :notification_token => @notification.id # notification_token
+                        )) %>
+
+<p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
+<%= inviter_name || "Someone" %> is inviting you to join
+<%= link_to("RecipePower", root_url)+(@target.invitation_message.blank? ? "." : ", saying") %>
+<% unless @target.invitation_message.blank? %>
+    <% if(@target.invitation_message.length > 20) %>
+        <blockquote><%= @target.invitation_message %></blockquote>
+    <% else %>
+        <q><%= @target.invitation_message %></q><p>
+    <% end %>
+<% end %>
+--<br>
+<%= link_to "RecipePower", root_url %> is the place to save your cooking inspirations from
+across the Web and share them with others. Join <%= inviter_name || "us" %> and keep your
+kitchen brain sharp and keen. Getting started takes just a few seconds, then
+you'll find what an amazing cooking tool the Web can be.
+<p>
+  --<br>
+  Steve Upstill
+  <br>RecipePower Founder</p>

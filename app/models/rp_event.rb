@@ -2,38 +2,14 @@ class RpEvent < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
-=begin
-
-  include Typeable
-
-  typeable( :verb,
-            Untyped: ["Untyped", 0 ],
-            session: ["Session", 1],
-            invitation_sent: ["Send Invitation", 2],
-            invitation_responded: ["Respond to Invitation", 3],
-            invitation_accepted: ["Accepted Invitation", 4],
-            invitation_diverted: ["Invitation Diverted", 5]
-  )
-
-  attr_accessible :verb
-  enum :verb => [
-           :untyped,
-           :session,
-           :invitation_sent,
-           :invitation_responded,
-           :invitation_accepted,
-           :invitation_diverted
-       ]
-=end
-
   serialize :data
 
   # belongs_to :source, class_name: "User"
   belongs_to :subject, polymorphic: true
   belongs_to :direct_object, polymorphic: true
   belongs_to :indirect_object, polymorphic: true
-  has_many :event_notices
-  has_many :users, :through => :event_notices
+  has_many :event_notices, class_name: 'ActivityNotification::Notification', as: :notifiable
+  has_many :users, :through => :event_notices, source: :target, source_type: 'User'
 
   belongs_to :user
 
@@ -59,7 +35,8 @@ class RpEvent < ActiveRecord::Base
     elsif indirect_object.is_a? Hash
       data, indirect_object = indirect_object, nil
     end
-    posted = self.where(self.assemble_attributes(subject, direct_object, indirect_object)).first_or_create
+    args = self.assemble_attributes(subject, direct_object, indirect_object)
+    posted = self.create_with(data: data).where(args).first_or_create
     if (posted.data != data)
       posted.data = data
       posted.save
@@ -94,7 +71,23 @@ class RpEvent < ActiveRecord::Base
     self.where 'created_at > :time', :time => time
   end
 
-private
+  # The target user of the notification responds to the event. Do something...
+  def act notification, options={}
+    # ...or nothing
+  end
+
+  # notifiable path defaults to nil, subject to override
+  def notifiable_path event, key
+    nil
+  end
+
+  # Return a string for
+  def title_of attribute, &block
+    decorator = self.method(attribute).call.decorate
+    block_given? ? (yield decorator) : decorator.title
+  end
+
+  private
   def self.assemble_attributes subject, direct_object = nil, indirect_object = nil
     attrs = {
         type: self.to_s,
@@ -117,9 +110,40 @@ end
 ## And now, one subclass for each verb (type)
 
 # <User> logged in
+class SignupEvent < RpEvent
+  alias_attribute :who, :subject
+  attr_accessible :who
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) { [evt.who] },
+                     notifier: ->(evt, key) { evt.who },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: {only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
+
+  # Login events accumulate for a given user
+  def self.post who
+    self.create who: who
+  end
+end
+
+# <User> logged in
 class LoginEvent < RpEvent
   alias_attribute :who, :subject
   attr_accessible :who
+
+=begin
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) { [evt.who] },
+                     notifier: ->(evt, key) { evt.who },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: {only: [:create] } # , send_later: !Rails.env.development? }
+=end
 
   # Login events accumulate for a given user
   def self.post who
@@ -151,16 +175,33 @@ class InvitationSentEvent < RpEvent
   alias_attribute :shared, :indirect_object
   attr_accessible :inviter, :invitee, :shared
 
+  def self.post inviter, invitee, shared, raw_invitation_token
+    super inviter, invitee, shared, raw_invitation_token: raw_invitation_token
+  end
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) {  [evt.invitee] },
+                     notifier: ->(evt, key) { evt.invitee },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: { only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
+
   def self.find_by_invitee invitee
     # invitation_event = InvitationSentEvent.find_by_inviter_id resource.invited_by_id, invitee: resource
     self.find_by direct_object: invitee, subject_type: 'User', subject_id: invitee.invited_by_id
   end
+
 end
 
 # <User> responded to invitation <InvitationSentEvent>
 class InvitationResponseEvent < RpEvent
   alias_attribute :invitee, :subject
-  alias_attribute :invitation_event, :direct_object
+  alias_attribute :inviter, :direct_object
+  alias_attribute :invitation_event, :indirect_object
+  attr_accessible :inviter, :invitee, :invitation_event
+
 end
 
 class InvitationRespondedEvent < InvitationResponseEvent
@@ -168,6 +209,24 @@ end
 
 # <User> accepted invitation <InvitationSentEvent>
 class InvitationAcceptedEvent < InvitationResponseEvent
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) {
+                       case key.sub(/^.*\./, '')
+                         when 'create'
+                           [evt.invitee]
+                         when 'feedback'
+                           [evt.inviter]
+                       end
+                     },
+                     notifier: ->(evt, key) {
+                       evt.invitee
+                     },
+                     # notifiable_path: :share_path,
+                     email_allowed: true,
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: { only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
 end
 
 # <User> diverted invitation <InvitationSentEvent>
@@ -179,7 +238,44 @@ class SharedEvent < RpEvent
   alias_attribute :sharer, :subject
   alias_attribute :shared, :direct_object
   alias_attribute :sharee, :indirect_object
-  attr_accessible :sharer, :shared, :sharee
+  alias_attribute :topic, :direct_object
+  attr_accessible :sharer, :shared, :sharee, :topic
+
+  acts_as_notifiable :users,
+                     targets: ->(evt, key) { [evt.sharee] },
+                     notifier: ->(evt, key) { evt.sharer },
+                     # : :show_path,
+                     email_allowed: true,
+                     # notifiable_path: ->(event, key) {
+                     #   polymorphic_path([:associated, shared], format: :json, method: :get)
+                     # },
+                     # Set true to :tracked option to generate automatic tracked notifications.
+                     # It adds required callbacks to generate notifications for creation and update of the notifiable model.
+                     tracked: {only: [:create], send_later: ResponseServices.has_worker? } # , send_later: !Rails.env.development? }
+
+  def self.post subject, direct_object=nil, indirect_object=nil, data={}
+    super subject, direct_object, indirect_object, message: indirect_object.invitation_message
+  end
+
+  def notifiable_path event, key
+    polymorphic_path([:associated, shared]) rescue polymorphic_path(shared)
+  end
+
+  # Act on a Shared event by adding the entity to the collection of the user shared with
+  # Return a string reporting on the action
+  def act notification, options={}
+    sharee.collect shared
+    I18n.t 'notification.user.shared_event.act', shared: shared.decorate.title
+  end
+
+  def title_of what, &block
+    case what
+      when :message
+        data[:message]
+      else
+        super
+    end
+  end
 
 end
 

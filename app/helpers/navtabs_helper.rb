@@ -4,7 +4,7 @@ module NavtabsHelper
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
-  def navtab which, menu_label, go_path=nil, menu_only = false
+  def navtab which, menu_label, go_path, menu_only, booger=nil
     options={}
     class_str = 'master-navtab'
     if which == (@active_menu || response_service.active_menu)
@@ -20,7 +20,6 @@ module NavtabsHelper
                       class: 'dropdown-menu scrollable-menu',
                       id: navmenu_id(which)
       menu_label << content_tag(:span, '', class: 'caret')
-      class_str << ' dropdown'
     end
 
     return itemlist if menu_only
@@ -31,8 +30,11 @@ module NavtabsHelper
                             mode: :partial,
                             data: {toggle: 'dropdown'},
                             title: "Go To #{menu_label}"
+
+    content = content_tag(:div, header+itemlist, class: 'dropdown')
+    content += booger if booger
     content_tag :li,
-                "#{header} #{itemlist}".html_safe,
+                content,
                 id: navtab_id(which),
                 class: class_str
   end
@@ -140,11 +142,13 @@ module NavtabsHelper
   end
 
   def home_navtab menu_only = false
+    # Include a placeholder for the notifications, which will be rendered in a subsequent call
+    notifications = content_tag :div, ''.html_safe, class: 'notification_wrapper' # render_notifications_of current_user
     navtab :home,
            content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
                content_tag(:span, '', class: 'measuring-spoons'),
            user_path(current_user, :mode => :partial),
-           menu_only do
+           menu_only, notifications.html_safe do
       item_list = [
           link_to_dialog('Sign-in Services', authentications_path, class: 'transient'),
           link_to_dialog('Profile', users_profile_path),

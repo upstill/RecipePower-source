@@ -2,6 +2,14 @@ require 'type_map.rb'
 require 'rp_event.rb'
 
 class User < ActiveRecord::Base
+#  acts_as_notifier :printable_notifier_name => :username,
+#                   :printable_name => :salutation
+
+  acts_as_target email: :email,
+                 email_allowed: true,
+                 batch_email_allowed: :confirmed_at,  # ...for ActivityNotifications
+                 printable_name: ->(user) { user.handle }
+
   # Class variable @@Guest_user saves the guest User
   @@Guest_user = nil
   @@Guest_user_id = 4
@@ -28,12 +36,9 @@ class User < ActiveRecord::Base
                 :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
-  attr_accessor :invitee_tokens, :raw_invitation_token, :avatar_url, :mail_subject, :mail_body,
+  attr_accessor :invitee_tokens, :avatar_url, :mail_subject, :mail_body,
                 :shared_class, :shared_name, :shared_id # Kept temporarily during sharing operations
   
-  has_many :notifications_sent, :foreign_key => :source_id, :class_name => 'Notification', :dependent => :destroy
-  has_many :notifications_received, :foreign_key => :target_id, :class_name => 'Notification', :dependent => :destroy
-
   # has_one :inviter, :class_name => 'User'  Defined by Devise
   has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'
 
@@ -107,6 +112,12 @@ class User < ActiveRecord::Base
 
   def vote entity, up=true
     Vote.vote entity, up, self
+  end
+
+  def comment_for entity
+    if rcpref = touched_pointers.find_by(entity: entity)
+      rcpref.comment
+    end
   end
 
   # Include the entity in the user's collection
@@ -234,32 +245,28 @@ private
       (@@leasts[str] = User.where('email like ?', "%#{str}%").collect { |match| match.id }.min)
   end
 
-  def post_invitation
-    InvitationSentEvent.post invited_by, self, shared
-  end
-
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
-    InvitationAcceptedEvent.post self, invited_by, InvitationSentEvent.find_by_invitee(self)
-      # Give him friends
-      f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id ]
-      f << self.invited_by_id if self.invited_by_id
-      self.followee_ids = f
+    # Give him friends
+    f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id]
+    f << self.invited_by_id if self.invited_by_id
+    self.followee_ids = f
 
-      # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
-      List.assert 'Keepers', self, create: true
-      List.assert 'To Try', self, create: true
-      List.assert 'Now Cooking', self, create: true
+    # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
+    List.assert 'Keepers', self, create: true
+    List.assert 'To Try', self, create: true
+    List.assert 'Now Cooking', self, create: true
 
-      self.save
+    self.save
 
-      # Make the inviter follow the newbie.
-      if invited_by
-        invited_by.followees << self
-        invited_by.save
-      end
+    # Make the inviter follow the newbie.
+    if invited_by
+      invited_by.followees << self
+      invited_by.save
+    end
   end
-public
+
+  public
 
   def follows? (user)
     if self.class == user.class
@@ -453,6 +460,10 @@ public
     username
   end
 
+  def printable_notifier_name
+    username
+  end
+
   # 'name' is just an alias for handle, for use by Channel referents
   alias_method :name, :handle
 
@@ -476,64 +487,6 @@ public
     followees.select { |followee|
       re.match(followee.username) || re.match(followee.fullname) || re.match(followee.email)
     }
-  end
-
-  def issue_instructions(what = :invitation_instructions, opts={})
-    # send_devise_notification(what, opts)
-    self.update_attribute :invitation_sent_at, Time.now.utc unless self.invitation_sent_at
-    generate_invitation_token! unless @raw_invitation_token
-    send_devise_notification(what, @raw_invitation_token, opts)
-  end
-
-  def headers_for(action)
-    case action
-    when :invitation, :invitation_instructions
-      {
-        :subject => invitation_issuer+' wants to get you cooking.',
-        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
-        :reply_to => invited_by.email
-      }
-    when :sharing_notice, :sharing_invitation_instructions
-      {
-        :subject => invitation_issuer+' has something tasty for you.',
-        :from => invitation_issuer+" on RecipePower <#{invited_by.email}>",
-        :reply_to => invited_by.email
-      }
-    else
-      {}
-    end
-  end
-
-  # Notify self of an event, possibly (if profile allows) sending email
-  def notify( notification_type, source_user, options={})
-    notification = post_notification(notification_type, source_user, options)
-    if true # TODO: User's profile approves
-      # Mapping from notification types to email types
-      case notification_type
-      when :share
-        self.shared = notification.shared
-        SharedEvent.post source_user, notification.shared, self
-        msg = RpMailer.sharing_notice(notification)
-        msg.deliver
-      when :make_friend
-        :friend_notice
-      end
-    end
-  end
-
-  # Post a notification event without sending email
-  def post_notification( notification_type, from = nil, options={})
-    attributes = {
-      :info => options.except(:what),
-      :shared => options[:what],
-      :source_id => (from.id if from),
-      :target_id => id,
-      :typenum => notification_type,
-      :accepted => false
-    }.compact
-    notification = Notification.create attributes
-    self.notifications_received << notification
-    notification
   end
 
   # Absorb another user into self

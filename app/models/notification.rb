@@ -1,6 +1,7 @@
-class Notification < ActiveRecord::Base
+=begin
+class Notification
   attr_accessible :info, :source_id, :target_id,
-                  :notification_type, :typenum, :typesym, :notification_token,
+                  :notification_type,
                   :accepted, :shared, :autosave
   serialize :info
   
@@ -40,5 +41,25 @@ class Notification < ActiveRecord::Base
       break random_token unless Notification.where(notification_token: random_token).exists?
     end
   end
-  
+
 end
+
+  class ActivityNotification::Notification
+    alias_attribute :notification_token, :id
+    attr_accessible :notification_token
+    before_create :generate_token
+
+    def self.find_by_notification_token token
+      self.find_by id: token
+    end
+#    protected
+
+    # Generate a unique random token for accepting a notification sent via email
+    def generate_token
+      self.notification_token = loop do
+        random_token = Digest::SHA1.hexdigest([Time.now, rand].join)
+        break random_token unless self.where(notification_token: random_token).exists?
+      end
+    end
+  end
+=end

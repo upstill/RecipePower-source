@@ -15,7 +15,7 @@ class Feed < ActiveRecord::Base
     if feed.home_changed? && cleanpath(feed.home).present?
       feed.site = Site.find_or_initialize feed.home
     end
-    if ((feed.new_record? && feed.url.present?) || feed.url_changed?)
+    if (feed.new_record? && feed.url.present?) || feed.url_changed?
       feed.follow_url
     else
       true

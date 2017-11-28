@@ -13,9 +13,9 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_flash
   before_filter :report_cookie_string
-  before_filter { logger.info 'Before controller:'; report_session }
+  before_filter { report_session 'Before controller:' }
   # after_filter :log_serve
-  after_filter { logger.info 'After controller:'; report_session }
+  after_filter { report_session 'After controller:'  }
   before_filter :setup_response_service
 
   helper :all
@@ -29,7 +29,6 @@ class ApplicationController < ActionController::Base
   helper_method :default_next_path
   # Supplied by ControllerDeference
   helper_method :pending_modal_trigger
-  helper_method :notifiable_notification
 
   # From ControllerUtils
   helper_method :express_error_context
@@ -62,6 +61,11 @@ class ApplicationController < ActionController::Base
       flash[:alert] = "Can't locate #{params[:controller].singularize} ##{params[:id] || '<unknown>'}"
       render :errors
     end
+  end
+
+  # Simple path to remove a pending invitation (can still be re-invoked later)
+  def defer_invitation
+    response_service.invitation_token = nil
   end
 
   # Set up a model for editing or rendering. The parameters are orthogonal:
@@ -114,55 +118,8 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    if (notif = response_service.pending_notification) && notif.shared
-      return view_context.linkpath notif.shared
-    end
-      (current_user ? collection_user_path(current_user) : home_path)
+    current_user ? collection_user_path(current_user) : home_path
   end
-
-  def notifiable_notification
-    # Check for a pending notification. If it's to be autosaved, do that and simply set a flash notice. Otherwise, return it
-    if response_service.notification_token && (notif = response_service.pending_notification)
-      if notif.autosave
-        if msg = notif.decorate.act
-          # All is well; clear the pending notification
-          response_service.notification_token = nil
-          flash.now[:notice] = msg
-        end
-        nil
-      else
-        notif
-      end
-    end
-  end
-
-  # Track the session, saving session events when the session goes stale
-=begin
-  # When we decide it's useful to track sessions, this needs to be updated for new RpEvent
-  def log_serve
-    logger.info %Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}
-    # Call RpEvent to heed the passback data for an event trigger
-    RpEvent.trigger_event(params[:rpevent]) if params[:rpevent]
-    return unless current_user
-    if session[:start_time] && session[:last_time]
-      time_now = Time.now
-      elapsed_time = time_now - session[:last_time]
-      if (elapsed_time < 10.minutes)
-        session[:last_time] = time_now
-        session[:serve_count] += 1
-        return
-      elsif last_serve = RpEvent.serve.last(current_user)
-        # Close out and update the previous session to record serve count and last time
-        last_serve.data = {serve_count: session[:serve_count]}
-        last_serve.updated_at = session[:last_time]
-        last_serve.save
-      end
-    end
-    last_serve = RpEvent.post current_user, :serve, nil, nil, :serve_count => 1
-    session[:serve_count] = 1
-    session[:start_time] = session[:last_time] = last_serve.created_at
-  end
-=end
 
   # Get a presenter for the object from within a controller
   def present object
@@ -186,7 +143,8 @@ class ApplicationController < ActionController::Base
     end
   end
 
-  def report_session
+  def report_session context
+    logger.info 'XXXXXXXXXXXXXXXX ' + context + ' XXXXXXXXXXXXXXXX'
     logger.info "COOKIES: >>>>>>>>"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     logger.info "<<<<<<<< COOKIES"
@@ -390,7 +348,7 @@ class ApplicationController < ActionController::Base
                                                       end
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert
-                      new_user_registration_url(response_service.redirect_params params.slice(:sourcehome))
+                      defer_invitation_path(response_service.redirect_params(params.slice(:sourcehome)).merge(notif: 'signup'))
                     elsif response_service.mode == :injector
                       new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
                     else
@@ -400,7 +358,7 @@ class ApplicationController < ActionController::Base
         )
       else
         report_cookie_string
-        report_session
+        report_session "Unauthorized Login:"
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end
@@ -433,6 +391,7 @@ class ApplicationController < ActionController::Base
     end || super
   end
 
+=begin
   # This is an override of the Devise method to determine where to go after login.
   # If there was a redirect to the login page, we go back to the source of the redirect.
   # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
@@ -441,6 +400,7 @@ class ApplicationController < ActionController::Base
     view_context.issue_notifications current_user
     stored_location_for(resource_or_scope)
   end
+=end
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs

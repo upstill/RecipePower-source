@@ -30,7 +30,7 @@ class RegistrationsController < Devise::RegistrationsController
               # set_flash_message :notice, :signed_up if is_navigational_format?
               sign_up(resource_name, resource)
               response_service.user = resource
-              RpMailer.welcome_email(resource).deliver unless Rails.env.staging?
+              SignupEvent.post resource # RpMailer.welcome_email(resource).deliver unless Rails.env.staging?
               redirect_to after_sign_up_path_for(resource)
             else
               set_flash_message :notice, :"signed_up_but_#{resource.inactive_message}" if is_navigational_format?

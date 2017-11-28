@@ -1,6 +1,8 @@
 <% unless query.blank? %>
     <div class="form-group triggered-form <%= defined?(form_id) && form_id %>">
-      <form class="form-search query_form submit" action="<%= assert_query query, "json" %>" >
+      <form class="form-search query_form <%= 'submit' unless response_service.home_page? %>"
+            action="<%= assert_query query, response_service.home_page? ? 'html' : 'json' %>" >
+        <!--<form class="form-search query_form submit" action="<%# assert_query query, "json" %>" >-->
         <input type="hidden" name="mode" value="partial"/>
         <div class="search-query form-group collection_query_tokens tags">
           <%= contents %>

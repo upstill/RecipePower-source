@@ -1,6 +1,12 @@
 div.notifs {
   width: auto;
-  max-width: 330px;
+  max-width: 380px;
+  &.collapsed {
+    max-width: 330px;
+  }
+  &.wide {
+    max-width: 550px;
+  }
   height: auto;
   z-index: $dialog-depth;
   position: relative;
@@ -114,13 +120,12 @@ div.notifs {
         }
       }
       &.waiting {
-        a.signup {
-          color: $green-color;
-          font-size: 2em;
-        }
-        a.signin {
+        a {
           color: $green-color;
           font-size: 1.2em;
+          &.main {
+            font-size: 2em;
+          }
         }
       }
     }

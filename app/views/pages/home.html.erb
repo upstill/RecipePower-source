@@ -4,22 +4,45 @@
     jQuery(function ($) {
         $('body').panelSnap( {
             panelSelector: 'section.snap-panel',
-        onActivate: function (a, b) {
-            RP.slider.startScroll($('div.track', a)[0])
-        }}) ;
-	$('body').panelSnap('snapTo', 'first');
+            offset: 52,
+            onActivate: function (a, b) {
+                RP.slider.startScroll($('div.track', a)[0])
+            }}) ;
     });
 </script>
 <div class="panels">
   <section class="snap-panel panel-one">
     <div class="panel-elements">
-      <p class="panel-title">RecipePower<br>is Here</p>
+      <p class="panel-title">The RecipePower<br>Project</p>
       <p class="panel-subtitle">Distilling the Web for Cooks</p>
-      <p class="panel-description">Keep your finds from anywhere and<br/>pool them with our community.</p>
+      <p class="panel-description">The Cream of the Web for Cooks<br/>...according to you.</p>
     </div>
     <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
   </section>
   <section class="snap-panel panel-two">
+    <div class="panel-elements">
+      <p class="panel-title">Recipes</p>
+      <p class="panel-subtitle">If it works, why throw it back? Pass it on!</p>
+      <p class="panel-description">Clip and save the best recipes you've found <br/>on the web, and share them around
+        here.</p>
+    </div>
+    <% cache [(list = List.find_by(id: 658)), { view: 'pano' } ] do %>
+        <%= render 'lists/pano', list: list %>
+    <% end %>
+   <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
+  </section>
+  <section class="snap-panel panel-three">
+    <div class="panel-elements">
+      <p class="panel-title">Cookmates</p>
+      <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
+      <p class="panel-description">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
+    </div>
+    <% cache [(list = List.find_by(id: 659)), { view: 'pano' } ] do %>
+        <%= render 'lists/pano', list: list %>
+    <% end %>
+    <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
+  </section>
+  <section class="snap-panel panel-three">
     <div class="panel-elements">
       <p class="panel-title">Treasuries</p>
       <p class="panel-subtitle">Browse and contribute to our favorites.</p>
@@ -31,36 +54,13 @@
     <% end %>
     <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
   </section>
-  <section class="snap-panel panel-three">
+  <section class="snap-panel panel-four">
     <div class="panel-elements">
       <p class="panel-title">Feeds</p>
       <p class="panel-subtitle">New ideas come to you.</p>
       <p class="panel-description">Subscribe to food blogs and columns <br/>from all over the world.</p>
     </div>
     <% cache [(list = List.find_by(id: 661)), { view: 'pano' } ] do %>
-        <%= render 'lists/pano', list: list %>
-    <% end %>
-    <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
-  </section>
-  <section class="snap-panel panel-three">
-    <div class="panel-elements">
-      <p class="panel-title">Recipes</p>
-      <p class="panel-subtitle">If it works, why throw it back?</p>
-      <p class="panel-description">Clip and save the best recipes you've found <br/>on the web, and share them around
-        here.</p>
-    </div>
-    <% cache [(list = List.find_by(id: 658)), { view: 'pano' } ] do %>
-        <%= render 'lists/pano', list: list %>
-    <% end %>
-    <div class="panel-scroller panel-button">MORE<br><span class="glyphicon glyphicon-arrow-down"></span></div>
-  </section>
-  <section class="snap-panel panel-four">
-    <div class="panel-elements">
-      <p class="panel-title">Cookmates</p>
-      <p class="panel-subtitle">Join our community of dessert<br/>bakers & dinner party makers.</p>
-      <p class="panel-description">Invite your real life sous chefs<br/>and hear about what they're cooking up.</p>
-    </div>
-    <% cache [(list = List.find_by(id: 659)), { view: 'pano' } ] do %>
         <%= render 'lists/pano', list: list %>
     <% end %>
     <div class="panel-button">SIGN ME UP!</div>

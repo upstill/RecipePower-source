@@ -4,10 +4,23 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  get 'rp_events/show'
+
+  get 'rp_events/show_page'
+
+  get 'rp_events/index'
+
+  get 'rp_events/new'
+
+  get 'rp_events/create'
+
+  get 'rp_events/update'
+
+  get 'rp_events/destroy'
+
   match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
   get 'scraper/new'
-
   post 'scraper/create'
   post 'scraper/init'
 
@@ -76,6 +89,7 @@ RP::Application.routes.draw do
   get "redirect/go", :as => "goto"
   put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
+  get 'defer_invitation' => 'application#defer_invitation'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
@@ -107,6 +121,11 @@ RP::Application.routes.draw do
 
     get "/users/invitation/divert" => "invitations#divert", :as => "divert_user_invitation"
 
+  end
+
+  authenticate do
+    # Integrated with devise
+    notify_to :users, with_devise: :users, controller: 'users/notifications_with_devise'
   end
 
   # Calling 'profile' action in 'users' controller edits the current user
@@ -201,8 +220,6 @@ RP::Application.routes.draw do
   get 'iframe/create'
   get 'admin/data'
   get 'admin/control'
-  get 'notifications/accept'
-  patch 'notifications/act'
 
   resources :feedback, :only => [:new, :create]
   resources :expressions
@@ -234,8 +251,10 @@ RP::Application.routes.draw do
   get '/popup/:name', :to => 'pages#popup'
   get '/popup', :to => 'pages#popup'
   get '/share', :to => 'pages#share'
+  get '/tell_me_more', :to => 'pages#tell_me_more'
   get '/contact', :to => 'pages#contact'
   get '/about', :to => 'pages#about'
+  get '/mission', :to => 'pages#mission'
   get '/welcome', :to => 'pages#welcome'
   get '/faq', :to => "pages#faq"
   get '/admin', :to => "pages#admin"

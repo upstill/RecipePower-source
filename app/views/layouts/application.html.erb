@@ -39,7 +39,7 @@
   <%= javascript_include_tag 'application' %>
   <%= csrf_meta_tag %>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <%= yield(:head) %>
+  <%= yield :head %>
 <!-- Google Analytics payload:
   <script type="text/javascript">
       var _gaq = _gaq || [];
@@ -58,20 +58,20 @@
 -->
   <style title="pagelet-padding">
       div.pagelet-body {
-          padding-top: 102px;
+          padding-top: 54px; // 102px;
       }
   </style>
 </head>
-<body <%= 'class=logged-in' if current_user %> >
+<body class="<%= response_service.controller %> <%= response_service.action %> <%= 'logged-in' if current_user %>" >
 <% if Rails.env.development? %>
-<div class="booger">
-  <span class="phone" >phone</span>
-  <span class="small" >small</span>
-  <span class="medium" >medium</span>
-  <span class="largish" >largish</span>
-  <span class="large" >large</span>
-  <span class="wide" >wide</span>
-</div>
+    <div class="booger">
+      <span class="phone" >phone</span>
+      <span class="small" >small</span>
+      <span class="medium" >medium</span>
+      <span class="largish" >largish</span>
+      <span class="large" >large</span>
+      <span class="wide" >wide</span>
+    </div>
 <% end %>
 <% if current_user %>
 <!-- Caching the navbar doesn't seem to do much good. -->
@@ -91,6 +91,7 @@
     <%# end %>
 <% end %>
 <%= render 'layouts/navbar' %>
+<%= response_service.do_notification %>
 <%= do_notifs %>
 <%= render 'layouts/pagelet' %>
 <% if false && Rails.env.development? %>
@@ -128,5 +129,6 @@
 <%= feedback_tab :position => 'left' %>
 <%# If there are any dialogs waiting, either in the session or the parameters %>
 <%= trigger_pending_modal %>
+<%= check_for_notifications %>
 </body>
 </html>

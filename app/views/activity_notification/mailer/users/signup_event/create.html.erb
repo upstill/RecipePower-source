@@ -1,0 +1,42 @@
+<!--The former rp_mailer/welcome_email.html.erb-->
+<% event = @notification.notifiable %>
+<% @who = event.who %>
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8" http-equiv="Content-Type" content="text/html"/>
+</head>
+<body style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+<h3>Welcome to RecipePower, <%= @who.handle %></h3>
+
+<p>
+  You are now a member in good standing (but behave yourself!)
+  of the RecipePower community, all signed in and everything.
+  Your collection awaits you at <%= link_to root_url, root_url %>. Of
+  course, it's fairly empty at the moment--but if you install our
+  <%= link_to "Cookmark Button", page_with_trigger(collection_user_url(@who),'/cookmark.json?mode=modal') %>,
+  you can add to your collection from anywhere on the Web.
+</p>
+
+<p>Right now, your settings go like this:</p>
+<ul>
+  <li><strong>Username: </strong><%= @who.username %></li>
+  <li><strong>Polite name: </strong><%= @who.polite_name %></li>
+  <li><strong>Email: </strong><%= @who.email %></li>
+</ul>
+<p>If any of this (especially the password) doesn't suit, you can get to your
+  Profile on the menu under your name--or
+  click <%= link_to "here", page_with_trigger(collection_user_url(@who),users_profile_path) %></p>
+</p><p>We've worked hard to keep RecipePower simple, but if you get confused, hit the <strong>Help</strong>
+  link at the bottom left of the page.</p>
+
+<p>Just one more thing: we're <strong>always</strong> keen to hear what you have to say, especially if something's
+  bugging you. Click the red <strong>Feedback</strong> tab and tell us how it's going. Response Guaranteed!</p>
+
+<p>We're glad you've joined us, <%= @who.handle %>. Happy Eating!</p>
+
+<p><br>Warm Regards,</p>
+
+<p>The RecipePower Team</p>
+</body>
+</html>
