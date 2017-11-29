@@ -1,27 +1,24 @@
 require './lib/querytags.rb'
 require 'rcpref.rb'
+require 'tagging.rb'
 require 'result_type.rb'
 
 # Object to put a uniform interface on a set of results, whether they
 # exist as a scope (if there is no search) or an array of Rcprefs (with search)
 class Counts < Hash
-  def incr key, incr=1
-    if key.is_a? ActiveRecord::Relation
+  def include key_or_keys, incr=1
+    case key_or_keys
+    when ActiveRecord::Relation
       # Late-breaking conversion of scope into items
-      modelname = key.model.to_s
-      key.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
-    elsif key.is_a? Array
-      key.each { |k| self.incr k, incr }
-    else
-      self[key] += incr
+      modelname = key_or_keys.model.to_s
+      key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr } if key_or_keys.present?
+    when Array
+      key_or_keys.each { |k| self.include k, incr }
+    when String
+      self[key_or_keys] += incr
+    when ActiveRecord::Base
+      self["#{key_or_keys.model_name.name}/#{key_or_keys.id}"] += incr
     end
-  end
-
-  # Bump the count of all hits across a scope using the id attribute
-  def incr_by_scope scope_or_scopes, incr=1
-    (scope_or_scopes.is_a?(Array) ? scope_or_scopes : [scope_or_scopes]).each { |scope|
-      incr scope, incr
-    }
   end
 
   def [](ix)
@@ -202,8 +199,8 @@ module EntitiesCache
 
     # We index using tags, for taggable models
     if model.reflect_on_association :tags
-      counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" ILIKE ?', "%#{tagname}%") # One extra point for matching in one field
-      counts.incr_by_scope itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
+      counts.include itemscope.joins(:tags).where('"tags"."normalized_name" ILIKE ?', "%#{tagname}%") # One extra point for matching in one field
+      counts.include itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
     end
 
     # Models can apply strings to a search using a self-declared strategy
@@ -211,11 +208,11 @@ module EntitiesCache
       strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
         joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
       end
-      counts.incr_by_scope strscope
+      counts.include strscope
       strscope = model.strscopes tag.name do |joinspec=nil|
         joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
       end
-      counts.incr_by_scope strscope, 10
+      counts.include strscope, 10
     end
   end
 
@@ -292,11 +289,11 @@ module CollectionCache
       scope = scope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
 
       # First, match on the comments using the rcpref
-      counts.incr_by_scope scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
+      counts.include scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
 
       # Now match on the entity's relevant string field(s), for which we defer to the class
-      strscopes("%#{tag.name}%", modelclass).each { |innerscope| counts.incr_by_scope innerscope }
-      strscopes(tag.name, modelclass).each { |innerscope| counts.incr_by_scope innerscope, 30 }
+      strscopes("%#{tag.name}%", modelclass).each { |innerscope| counts.include innerscope }
+      strscopes(tag.name, modelclass).each { |innerscope| counts.include innerscope, 30 }
 
       subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
 =begin
@@ -305,7 +302,7 @@ module CollectionCache
         subscope = subscope.where 'taggings.user_id = ?', @entity_id.to_s
       end
 =end
-      counts.incr_by_scope subscope, 1
+      counts.include subscope, 1
     end
   end
 
@@ -356,9 +353,9 @@ module TaggingCache
   # Apply the tag to the current set of result counts
   def count_tag tag, counts
     # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    counts.incr itemscope.where(tag_id: TagServices.new(tag).similar_ids) # One extra point for matching in one field
+    counts.include itemscope.where(tag_id: TagServices.new(tag).similar_ids) # One extra point for matching in one field
 
-    counts.incr TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
+    counts.include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
 
   end
 end
@@ -629,7 +626,9 @@ class ResultsCache < ActiveRecord::Base
     else
       # Convert the itemscope relation into a hash on entity types
       counts = Counts.new
-      @querytags.each { |tag| count_tag tag, counts }
+      @querytags.each { |tag|
+        count_tag tag, counts
+      }
 
       # Sort the scope by number of hits, descending
       self.cache = counts.itemstubs
@@ -1097,7 +1096,7 @@ class TagsIndexCache < ResultsCache
   # Tags don't go through Taggings, so we just use/count them directly
   def count_tag tag, counts
     super # Do the usual strscopes thing
-    counts.incr_by_scope itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
+    counts.include itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
   end
 
   def itemscope

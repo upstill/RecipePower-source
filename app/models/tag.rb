@@ -49,6 +49,9 @@ class Tag < ActiveRecord::Base
   has_many :tag_owners, :dependent => :destroy
   has_many :owners, :through => :tag_owners, :class_name => 'User', :foreign_key => 'user_id'
 
+  # Scope for tags that can be used in the usual sense (to apply to entities), as opposed to other unique strings
+  scope :taggables, -> { where(tagtype: ((0..14).to_a - [5]))}
+
   validates_presence_of :name
   before_validation :tagqa
 

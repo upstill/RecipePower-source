@@ -80,7 +80,7 @@ class TagServices
   def taggees_of_class entity_class_name, with_synonyms=false
     # entity_class = entity_class_name.constantize
     # id_or_ids = with_synonyms ? synonym_ids : id
-    if with_synonyms
+    if with_synonyms && synonym_ids.present?
       assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id in (#{synonym_ids.join(',')})")
     else
       assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id = #{id}")
@@ -236,6 +236,8 @@ class TagServices
 
 # -----------------------------------------------
   # Return tags that match any of the given tags lexically, regardless of type
+  # TODO: this should only address taggable tags
+=begin
   def self.lexical_similars(tags)
     results = tags
     tags.each do |tag| 
@@ -244,10 +246,11 @@ class TagServices
     end
     results
   end
+=end
 
 # Return tags that match the tag lexically, regardless of type
   def lexical_similars
-    Tag.where(normalized_name: normalized_name).where.not(id: id).to_a
+    Tag.taggables.where(normalized_name: normalized_name).where.not(id: id).to_a
   end
   
   def similar_ids
