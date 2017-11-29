@@ -1,4 +1,5 @@
 module CardPresentation
+  require 'truncato'
   extend ActiveSupport::Concern
 
   # Provide the card's title with a link to the entity involved
@@ -111,12 +112,6 @@ module CardPresentation
     [ label || which.to_s.capitalize.tr('_', ' ').to_sym, contents]
   end
 
-  def present_field_wrapped what=nil
-    h.content_tag :span,
-                  present_field(what),
-                  class: 'hide-if-empty'
-  end
-
   def field_value what=nil
     return form_authenticity_token if what && (what == 'authToken')
     if val = @decorator && @decorator.extract(what)
@@ -124,15 +119,23 @@ module CardPresentation
     end
   end
 
-  def present_field what=nil
-    field_value(what) || %Q{%%#{(what || '').to_s}%%}.html_safe
+  def present_field what, trunc=0
+    str = field_value(what) || %Q{%%#{what.to_s}%%}
+    # We want to keep the field from getting too long, but it may contain HTML tags
+    # that could be violated by simple string truncation. Truncato respects tag boundaries,
+    # and also can keep the tags themselves out of the length count.
+    # For the sake of efficiency, we only resort to Truncato based on the full length of the string
+    # including tags.
+    str = Truncato.truncate(str, max_length: trunc-10, count_tags: false) if trunc > 10 && str.length > trunc
+    str.html_safe
   end
 
   def field_count what
     @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
   end
 
-  def present_field_label what
+=begin
+  def present_field_label
     label = what.sub '_tags', ''
     case field_count(what)
       when nil, false
@@ -143,6 +146,13 @@ module CardPresentation
         label.pluralize
     end
   end
+
+  def present_field_wrapped what
+    h.content_tag :span,
+                  present_field(what),
+                  class: 'hide-if-empty'
+  end
+=end
 
   def field_label_counted what, count
     case count

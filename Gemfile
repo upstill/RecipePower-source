@@ -77,6 +77,7 @@ gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, creat
 gem "rmagick", "~> 2.13.2"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
+gem 'truncato'  # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 
 ###### Worker management
 gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'

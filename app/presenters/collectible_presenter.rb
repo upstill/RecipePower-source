@@ -34,14 +34,6 @@ class CollectiblePresenter < BasePresenter
     @buttons || h.collectible_buttons_panel(@decorator)
   end
 
-=begin
-  def present_field_wrapped what=nil
-    h.content_tag :span,
-                  present_field(what),
-                  class: 'hide-if-empty'
-  end
-=end
-
   def field_value what=nil
     return form_authenticity_token if what && (what == 'authToken')
     if val = @decorator && @decorator.extract(what)
@@ -49,14 +41,11 @@ class CollectiblePresenter < BasePresenter
     end
   end
 
-  def present_field what=nil
-    field_value(what) || %Q{%%#{(what || '').to_s}%%}.html_safe
-  end
-
   def field_count what
     @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
   end
 
+=begin
   def present_field_label what
     label = what.sub '_tags', ''
     case field_count(what)
@@ -68,6 +57,13 @@ class CollectiblePresenter < BasePresenter
         label.pluralize
     end
   end
+
+  def present_field_wrapped what=nil
+    h.content_tag :span,
+                  present_field(what),
+                  class: 'hide-if-empty'
+  end
+=end
 
   def card_aspects which_column=nil
     (super + [ :description, :title, :site, (:found_by if @decorator.first_collector) ]).compact.uniq

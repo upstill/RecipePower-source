@@ -397,6 +397,9 @@ GEM
     thread_safe (0.3.6)
     tilt (2.0.6)
     tins (1.5.2)
+    truncato (0.7.8)
+      htmlentities (~> 4.3.1)
+      nokogiri (~> 1.6.1)
     turn (0.9.6)
       ansi
     tzinfo (1.2.2)
@@ -508,6 +511,7 @@ DEPENDENCIES
   sshkit (~> 1.3.0)
   stackprof
   thin
+  truncato
   turn
   uglifier (>= 1.3.0)
   unicorn
@@ -520,4 +524,4 @@ RUBY VERSION
    ruby 2.2.0p0
 
 BUNDLED WITH
-   1.14.4
+   1.16.0

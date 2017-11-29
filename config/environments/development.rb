@@ -6,6 +6,7 @@ RP::Application.configure do
   # since you don't have to restart the web server when you make code changes.
   config.cache_classes = false
   # config.cache_store = :file_store, './tmp/cache'
+  config.cache_store = :null_store # No caching during development
 
   # See everything in the log (default is :info)
   config.log_level = :debug
