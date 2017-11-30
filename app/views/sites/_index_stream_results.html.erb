@@ -2,6 +2,6 @@
            headers: ['',
                      'Title<br>Description'.html_safe,
                      '',
-                     'Actions'
-           ]
+                     ('Actions' if response_service.admin_view?)
+           ].compact
 %>

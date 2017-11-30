@@ -38,15 +38,15 @@ class CollectibleController < ApplicationController
   def lists
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
-      msg = @decorator.title.truncate 50
       if request.method == 'GET'
         render :lists
       else
+        collectible_name = @decorator.title.present? ? @decorator.title.truncate(50) : @decorator.object.model_name.human
         @decorator.object.save
         if resource_errors_to_flash(@decorator.object)
           render :errors
         else
-          flash[:popup] = "'#{msg}' treasured."
+          flash[:popup] = "'#{collectible_name}' treasured."
           render 'collectible/update.json'
         end
       end

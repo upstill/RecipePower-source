@@ -7,7 +7,7 @@
     <td class="description-column" style="width: 30%">
       <%= presenter.card_homelink class: 'title-link' %>
       <%= presenter.edit_button if decorator.user_can? :edit %>
-      <%= collectible_collect_button decorator, 'lg'  %>
+      <%= collectible_collect_button decorator, 'lg' %>
       <%# collectible_destroy_button decorator, 'xs', title: 'The Nuclear Option', style: 'margin-left: 3.8em;' %>
       <br><%= site.description.html_safe if site.description.present? %>
     </td>
@@ -16,16 +16,14 @@
       <%= site_summaries site, response_service.admin_view? %>
       <%# site_pagerefs_summary site, separator: tag(:br) %>
     </td>
-    <td class="actions-column">
-      <%= collectible_buttons_panel @decorator, 'xl', :tools_menu => true, :tag_button => true do %>
-          <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) if response_service.admin_view? %>
-      <% end %>
-      <% if response_service.admin_view? %>
+    <% if response_service.admin_view? %>
+        <td class="actions-column">
           <%= summarize_set '', [
                                       entity_approval(decorator),
                                       site_similars(site),
-                                      site_nuke_button(site)# , site_glean_button(site)
+                                      site_nuke_button(site) # , site_glean_button(site)
                               ] %>
-      <% end %>
-    </td>
+          <%# link_to_submit "Scrape for feeds", scrape_site_path(@site), options.merge(:method => :post) %>
+        </td>
+    <% end %>
 <% end %>
