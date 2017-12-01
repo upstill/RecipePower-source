@@ -69,14 +69,12 @@ module SitesHelper
     SiteServices.new(site).nuke_message link_to_submit('DESTROY', site, options)
   end
 
-=begin
   def site_glean_button site, options={}
     options = {
         button_size: 'xs' #, method: 'POST'
     }.merge options
-    link_to_submit('GLEAN', glean_site_path(site, what: :basics), options)
+    link_to_submit('GLEAN', glean_site_path(site, :what => :table, :force => true), options)
   end
-=end
 
   def site_summaries site, admin_view
     set = [site_feeds_summary(site),

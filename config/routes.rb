@@ -30,7 +30,7 @@ RP::Application.routes.draw do
   concern :picable do
     member do
       get 'editpic' # Open dialog to acquire an image from various sources
-      get 'glean/:what', :action => 'glean', :what => /titles|descriptions|images|feeds/, :as => 'glean'
+      get 'glean/:what', :action => 'glean', :what => /titles|descriptions|images|feeds|table|card|masonry|slider/, :as => 'glean'
     end
   end
 

@@ -56,7 +56,7 @@ class CollectibleController < ApplicationController
     end
   end
 
-  # Extract images from a URL
+  # Extract images, etc from a URL
   def glean
     update_and_decorate
     @what = params[:what].to_sym
@@ -64,16 +64,14 @@ class CollectibleController < ApplicationController
         if @pageurl = params[:url] # To glean images from another page
           Gleaning.glean @pageurl, 'Image'
         elsif @decorator.object.respond_to?(:gleaning)
-          @decorator.glean! # Wait for gleaning to complete
+          @decorator.glean! (params[:force] && params[:force] == 'true') # Wait for gleaning to complete
           @decorator.gleaning
         end
     if @gleaning
       if @gleaning.errors.any?
         flash.now[:error] = "Can't extract images from there: #{@gleaning.errors.messages}"
-        render :errors
       elsif @gleaning.images.blank?
         flash.now[:error] = 'Sorry, we couldn\'t get any images from that page.'
-        render :errors
       else
         flash.now[:success] = 'Images found! Click on an image from the list below to select it.'
       end

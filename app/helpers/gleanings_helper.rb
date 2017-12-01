@@ -95,11 +95,4 @@ module GleaningsHelper
     content_tag :div, content, options
   end
 
-  def gleaning_replacements decorator, what, gleaning=nil
-    {
-        replacements: [
-            gleaning_field_replacement(decorator, what, gleaning)
-        ]
-    }
-  end
 end
