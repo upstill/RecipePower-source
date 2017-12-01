@@ -90,6 +90,7 @@ insert_flash = (message, level) ->
 	    message+
 	    "</div>"
 		$(target).html html
+		$(target).show()
 	target
 
 clear_flash = () ->

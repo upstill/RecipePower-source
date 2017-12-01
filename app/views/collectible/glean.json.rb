@@ -4,4 +4,4 @@
             item_replacement(@decorator, @what) :
             gleaning_field_replacement(@decorator, @what, @gleaning))
     ]
-}.merge(flash_notify).to_json
+}.merge(flash_notify @decorator.object).to_json
