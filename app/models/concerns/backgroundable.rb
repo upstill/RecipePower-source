@@ -135,6 +135,11 @@ module Backgroundable
     self.becomes self.class.base_class
   end
 
+  # Top of the class hierarchy:
+  def perform
+    (!has_attribute?(:type) || (self.model_name == type)) ? super : self.becomes(type.constantize).perform
+  end
+
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -165,7 +170,7 @@ module Backgroundable
       end
       return pending?
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
-      save if new_record? # Just in case (so DJ gets a retrievable record)
+      save if !id # Just in case (so DJ gets a retrievable record)
       self.dj = Delayed::Job.enqueue as_base, djopts
       save
     end
@@ -277,6 +282,10 @@ module Backgroundable
   # Before the job is performed, revise its status from pending to processing
   def before job
     processing!
+  end
+
+  def after job
+    virgin! if processing?
   end
 
 end

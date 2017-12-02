@@ -64,7 +64,9 @@ class CollectibleController < ApplicationController
         if @pageurl = params[:url] # To glean images from another page
           Gleaning.glean @pageurl, 'Image'
         elsif @decorator.object.respond_to?(:gleaning)
-          @decorator.glean! (params[:force] && params[:force] == 'true') # Wait for gleaning to complete
+          do_force = params[:force] && params[:force] == 'true'
+          @decorator.object.page_ref.gleaning = nil if do_force
+          @decorator.glean! do_force # Wait for gleaning to complete
           if (gl = @decorator.gleaning) && gl.bad?
             @decorator.errors.add :gleaning, "encountered HTTP #{gl.http_status} error: #{gl.err_msg}"
           end

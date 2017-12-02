@@ -50,32 +50,47 @@ class FinderServices
     end
 
     pagehome = "#{uri.scheme}://#{uri.host}"
-
-    normu = normalize_url url
-    errstr = "Couldn't open '#{url}"
-    begin
-      pagefile = open normu
-    rescue Exception => e
-      errstr = e.to_s
-      if redirection = errstr.sub( /[^:]*:/, '').strip
-        from, to = *redirection.split('->')
-        if (from.strip == normu) && to.present?
-          normu = normalize_url to.strip
-          begin
-            pagefile = open normu
-          rescue Exception => e
-            errstr = e.to_s
+    nkdoc = nil
+    loop do
+      normu = normalize_url url
+      errstr = "Couldn't open '#{url}"
+      pagefile = nil
+      begin
+        pagefile = open normu
+      rescue Exception => e
+        errstr = e.to_s
+        if redirection = errstr.sub(/[^:]*:/, '').strip
+          from, to = *redirection.split('->')
+          if (from.strip == normu) && to.present?
+            normu = normalize_url to.strip
+            begin
+              pagefile = open normu
+            rescue Exception => e
+              errstr = e.to_s
+            end
           end
         end
       end
-    end
-    unless pagefile
-      yield(errstr) if block_given?
-      return
-    end
+      unless pagefile
+        yield(errstr) if block_given?
+        return
+      end
 
-    # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
-    nkdoc = Nokogiri::HTML pagefile
+      # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
+      nkdoc = Nokogiri::HTML(pagefile)
+
+      # It's possible that the page returns a refresh with non-zero refresh time, tantamount to a redirect
+      # We should follow this to find the ultimate page
+      if (refresh_content = nkdoc.css("meta[http-equiv='refresh']")) && (refresh_content.count > 0)
+        spl = refresh_content.attr('content').to_s.split ';'
+        if (refresh_time = spl.first).present? && (refresh_time.match /^\s*\b0+\b\s*$/) # refresh_time == 0
+          path = spl.last.sub(/^\s*url=\s*\b/, '')
+          url = normalize_url URI.join(normu, path).to_s
+          next if url != normu
+        end
+      end
+      break
+    end
 
     # Initialize the results
     results = Results.new *finders.map(&:label)

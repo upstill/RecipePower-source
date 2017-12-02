@@ -160,11 +160,6 @@ class Reference < ActiveRecord::Base
     end
   end
 
-  # Decoy so DelayedJob will queue the job
-  def perform
-
-  end
-
 end
 
 class ImageReference < Reference
