@@ -130,16 +130,6 @@ module Backgroundable
     end
   end
 
-  # STI subclasses need to appear to DelayedJob as their base class for retrieval
-  def as_base
-    self.becomes self.class.base_class
-  end
-
-  # Top of the class hierarchy:
-  def perform
-    (!has_attribute?(:type) || (self.model_name == type)) ? super : self.becomes(type.constantize).perform
-  end
-
   def self.included(base)
     base.extend(ClassMethods)
   end
@@ -171,7 +161,7 @@ module Backgroundable
       return pending?
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       save if !id # Just in case (so DJ gets a retrievable record)
-      self.dj = Delayed::Job.enqueue as_base, djopts
+      self.dj = Delayed::Job.enqueue self, djopts
       save
     end
     pending?
@@ -204,12 +194,19 @@ module Backgroundable
 
   # Cancel the job nicely, i.e. if it's running wait till it completes
   def bkg_kill with_extreme_prejudice=false
-    while processing? && !with_extreme_prejudice
-      sleep 1
+    if with_extreme_prejudice
+      virgin!
+    else
       reload
+      while processing?
+        sleep 1
+        reload
+      end
     end
-    dj.destroy
-    update_attribute :dj_id, nil
+    if dj
+      dj.destroy
+      update_attribute :dj_id, nil
+    end
   end
 
   # bkg_go(refresh=false) runs the job synchronously, using DelayedJob appropriately if the job is queued.
