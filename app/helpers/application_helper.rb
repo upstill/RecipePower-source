@@ -260,9 +260,9 @@ module ApplicationHelper
     end
     str = case entity.approved
             when true
-              labels[1]
+              labels[1] + ' '
             when false
-              labels[3]
+              labels[3] + ' '
             else
               ''
           end
@@ -283,7 +283,7 @@ module ApplicationHelper
   end
 
   def entity_approval_replacement decorator
-    [ "span##{dom_id decorator.entity}", entity_approval(decorator) ]
+    [ "span##{dom_id decorator.object}", entity_approval(decorator) ]
   end
 
 end
