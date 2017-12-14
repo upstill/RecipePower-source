@@ -51,6 +51,10 @@ class Site < ActiveRecord::Base
   # after_initialize :post_init
   validates_uniqueness_of :root
 
+  after_create do |entity|
+    bkg_launch # Start a job going to extract title, etc. from the home page
+  end
+
   after_save do |site|
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
     # Reassign all of our pagerefs as necessary

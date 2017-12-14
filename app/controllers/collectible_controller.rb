@@ -301,8 +301,6 @@ class CollectibleController < ApplicationController
               msg = page_ref.errors.messages.gsub /\"/, '\''
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
             else
-              # Apply picurl and title from capture to the page_ref
-              page_ref.bkg_launch if current_user
               # Building the PageRef may lead to a different url than what was passed in
               sourcehome = response_service.referer.if_present || url
               sourcehome = host_url(sourcehome).sub /^https?:/, sourcehome.match(/^https?:/)[0]
