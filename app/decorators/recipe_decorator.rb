@@ -3,11 +3,6 @@ require 'templateer.rb'
 class RecipeDecorator < CollectibleDecorator
   include Templateer
 
-  def initialize object, options={}
-    object.glean!
-    super
-  end
-
   def attribute_for label
     case default = super
       when :image

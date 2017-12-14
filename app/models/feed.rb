@@ -216,26 +216,28 @@ class Feed < ActiveRecord::Base
 
   def perform 
     logger.debug "[#{Time.now}] Updating feed #{id}; approved=#{approved ? 'Y' : 'N'}"
-    Feed.record_timestamps = false
-    bkg_execute do FeedEntry.update_from_feed(self) || true end
-    Feed.record_timestamps = true
-    if good? # Record the last_updated_at time
+    begin
+      # Update the timestamps only if successful
+      Feed.record_timestamps = false
+      FeedEntry.update_from_feed self
+      Feed.record_timestamps = true
       touch
       reload
+    ensure
+      Feed.record_timestamps = true
     end
-    good?
   end
 
   # Launch an update as "necessary"
   def launch_update hard=false
-    bkg_enqueue hard, priority: 10, run_at: Time.now
+    bkg_launch hard, priority: 10, run_at: Time.now
   end
 
-  def success(job)
+  def after(job)
     # When the feed is updated successfully, re-queue it for one week hence
     super
     logger.debug "Successfully updated feed ##{id}"
-    bkg_enqueue true, run_at: (Time.now + 1.day)  # Launch the next update for one day hence
+    bkg_launch(true, run_at: (Time.now + 1.day))  # Launch the next update for one day hence
     logger.debug "Queued up feed ##{id}"
   end
 

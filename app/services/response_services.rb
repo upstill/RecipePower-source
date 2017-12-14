@@ -12,7 +12,8 @@ class ResponseServices
   attr_writer :user
 
   def self.has_worker?
-    Rails.env.development? ? false : true #
+    Rails.env.development? ? false : true
+    true
   end
 
   def initialize params, session, request

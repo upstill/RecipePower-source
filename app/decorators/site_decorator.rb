@@ -5,11 +5,6 @@ class SiteDecorator < CollectibleDecorator
 
   # Standard accessors for model attributes
 
-  def initialize object, options={}
-    object.glean!
-    super
-  end
-
   def attribute_for what
     case default = super
       when :title

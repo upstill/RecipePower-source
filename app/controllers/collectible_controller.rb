@@ -66,7 +66,7 @@ class CollectibleController < ApplicationController
         elsif @decorator.object.respond_to?(:gleaning)
           do_force = params[:force] && params[:force] == 'true'
           @decorator.object.page_ref.gleaning = nil if do_force
-          @decorator.glean! do_force # Wait for gleaning to complete
+          @decorator.bkg_land do_force # Wait for gleaning to complete
           if (gl = @decorator.gleaning) && gl.bad?
             @decorator.errors.add :gleaning, "encountered HTTP #{gl.http_status} error: #{gl.err_msg}"
           end
@@ -91,7 +91,7 @@ class CollectibleController < ApplicationController
     gleaning =
     if @pageurl = params[:url]
       Gleaning.glean @pageurl, 'Image'
-    elsif @decorator.object.respond_to?(:gleaning) && @decorator.glean!
+    elsif @decorator.object.is_a?(Backgroundable) && @decorator.bkg_land
       @decorator.gleaning
     else
       Gleaning.glean @decorator, 'Image'
@@ -208,16 +208,18 @@ class CollectibleController < ApplicationController
     end
   end
 
+=begin
   def edit
     update_and_decorate
     entity = @decorator.object
     # if entity.respond_to?(:page_ref) && (pr = entity.page_ref) && !pr.gleaning
     if entity.respond_to?(:gleaning)
-      entity.glean # Set gleaning process in motion
+      # entity.bkg_launch # Set gleaning process in motion
       # @image_list = (@decorator.gleaning && @decorator.gleaning.images) ? @decorator.gleaning.images : []
     end
     smartrender
   end
+=end
 
   def show
     update_and_decorate
@@ -276,13 +278,14 @@ class CollectibleController < ApplicationController
   end
 
   def capture # Collect URL from foreign site, asking whether to re-direct to edit
-    require 'page_ref.rb'
     # return if need_login true
     # Here is where we take a hit on the "Add to RecipePower" widget,
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
     respond_to do |format|
       format.js {
+        # The JS request comes from the bookmarklet. In response, we provide minimal JS to build the
+        # Injector dialog.
         # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
         # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
@@ -299,7 +302,7 @@ class CollectibleController < ApplicationController
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
             else
               # Apply picurl and title from capture to the page_ref
-              # page_ref.save
+              page_ref.bkg_launch if current_user
               # Building the PageRef may lead to a different url than what was passed in
               sourcehome = response_service.referer.if_present || url
               sourcehome = host_url(sourcehome).sub /^https?:/, sourcehome.match(/^https?:/)[0]

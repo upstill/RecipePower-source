@@ -38,7 +38,7 @@ class FeedServices
         content = candidates[href].truncate(250)
         begin
           # For some strange reason we've seen feed URLs starting with 'feed:http:'
-          url = URI.join( site.home, href).to_s.sub(/feed:http:/, "http:")
+          url = safe_uri_join( site.home, href).to_s.sub(/feed:http:/, "http:")
         rescue Exception => e
           url = nil
         end 

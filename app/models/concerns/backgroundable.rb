@@ -71,9 +71,7 @@ module Backgroundable
       rescue
         return
       end
-      if method_defined? :"#{status_attribute}="
-        x=2
-      else
+      unless method_defined? :"#{status_attribute}="
         enum status_attribute => [
                  :virgin, # Hasn't been executed or queued
                  :obs_pending, # Queued but not executed (Obsolete with dj attribute)
@@ -101,7 +99,7 @@ module Backgroundable
       if persisted?
         super
       else
-        self.status = 0
+        self.status = :virgin
       end
     end
 
@@ -109,7 +107,7 @@ module Backgroundable
       if persisted?
         super
       else
-        self.status = 2
+        self.status = :processing
       end
     end
 
@@ -117,7 +115,7 @@ module Backgroundable
       if persisted?
         super
       else
-        self.status = 3
+        self.status = :good
       end
     end
 
@@ -125,7 +123,7 @@ module Backgroundable
       if persisted?
         super
       else
-        self.status = 4
+        self.status = :bad
       end
     end
   end
@@ -144,25 +142,39 @@ module Backgroundable
     queued? && !processing?
   end
 
-  # bkg_enqueue(refresh, djopts={}) fires off a DelayedJob job. 'refresh' is a Boolean flag indicating that
-  # the job should be rerun if was already run. 'djopts' are options (run_time, etc.,) passed to Delayed::Job
-  def bkg_enqueue refresh=false, djopts = {}
+  def due?
+    (dj && (dj.run_at <= Time.now)) || processing?
+  end
+
+  # bkg_launch(refresh, djopts={}) fires off a DelayedJob job as necessary.
+  # NB: MUST NOT BE CALLED ON AN ENTITY WITH UNSAVED CHANGES, as it reloads
+  # Return: true if the job is actually queued, false otherwise (useful for launching dependent jobs)
+  # 'refresh': a Boolean flag indicating that the job should be rerun even if was already run.
+  # 'djopts': options (run_time, etc.,) passed to Delayed::Job
+  def bkg_launch refresh=false, djopts = {}
+    # We need to reload to ensure we're not stepping on existing processing.
+    # Therefore, it is an error to be called with a changed record
+    if dj
+      reload
+      return true if processing?
+    end
     if refresh.is_a?(Hash)
       refresh, djopts = false, refresh
     end
-    return true if processing?
     if dj # Job is already queued
-      if refresh && djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
+      djopts[:run_at] ||= Time.now if refresh # Acting as if the job is being queued afresh
+      if djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
         dj.with_lock do
           dj.update_attributes djopts
           dj.save if dj.changed?
         end
       end
-      return pending?
+      puts ">>>>>>>>>>> bkg_launch redundant on #{self} (dj #{self.dj})"
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       save if !id # Just in case (so DJ gets a retrievable record)
       self.dj = Delayed::Job.enqueue self, djopts
-      save
+      update_attribute :dj_id, dj.id
+      puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
     end
     pending?
   end
@@ -171,118 +183,101 @@ module Backgroundable
   # run_early => do the job even if it's not due
   # bkg_sync(run_early=false) checks on the status of a job. If the job is due (run_at <= Time.now), it forces the
   # job to run ('run_early' being a flag that forces it to run anyway), and if the job is not queued, it
-  # forces it to run synchronously. In all cases except a future job (when run_early is not set) bkg_sync doesn't return
+  # runs it synchronously. In all cases except a future job (when run_early is not set) bkg_sync doesn't return
   # until the job is complete.
-  def bkg_sync run_early=false
+  def bkg_land force=false
+    reload if persisted? # Sync with external version
     if processing? # Wait for worker to return
       until !processing?
         sleep 1
         reload
       end
     elsif dj # Job pending => run it now, as necessary
+      # There's an associated job. If it's due (dj.run_at <= Time.now), or never been run (virgin), run it now.
+      # If it HAS run, and it's due in the future, that's either because
+      # 1) it failed earlier and is awaiting rerun, or
+      # 2) it just needs to be rerun periodically
       # Force execution if it's never been completed, or it's due, or we force the issue
-      if virgin? || (dj.run_at <= Time.now) || run_early
-        Delayed::Worker.new.run(dj)
-        reload
+      begin
+        if virgin? || (dj.run_at <= Time.now)
+          dj.payload_object = self # ...ensuring that the two versions don't get out of sync
+          puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
+          Delayed::Worker.new.run dj
+        end
+          # status = :good
+      rescue Exception => e
+        status = :bad
       end
-    elsif virgin?
-      processing!
-      perform
+    elsif virgin? || force # No DJ
+      puts ">>>>>>>>>>> bkg_land #{self} (no dj)"
+      perform_without_dj
     end
     good?
+  end
+
+  # Run the job to completion (synchronously) whether it's due or not
+  def bkg_land! force=false
+    dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
+    bkg_land force
   end
 
   # Cancel the job nicely, i.e. if it's running wait till it completes
-  def bkg_kill with_extreme_prejudice=false
-    if with_extreme_prejudice
-      virgin!
-    else
-      reload
-      while processing?
-        sleep 1
-        reload
-      end
-    end
-    if dj
-      dj.destroy
-      update_attribute :dj_id, nil
-    end
-  end
-
-  # bkg_go(refresh=false) runs the job synchronously, using DelayedJob appropriately if the job is queued.
-  #
-  # 'refresh' flag overrides the status attribute so that the job runs even if previously complete.
-  def bkg_go refresh=false
-    if processing? || dj # Wait for worker to return
-      bkg_sync true
-    elsif virgin? || refresh
-      processing!
-      perform
-    end
-    good?
-  end
-
-  # bkg_asynch() waits for the worker process to complete the job
-  #
-  # NB: MUST HAVE A WORKER PROCESS DOING JOBS!
-  # ALSO, CAN TAKE A VERY LONG TIME
-  # Only call this if you REALLY want the job to be performed in the worker, and you're
-  # willing to wait for it.
-  #
-  def bkg_asynch
-    until !queued?
+  def bkg_kill
+    reload
+    while processing?
       sleep 1
       reload
     end
-  end
-
-  # Finally execute the block that will update the model (or whatever). This is intended to
-  # be called within the #perform method, with a block that does the real work and returns
-  # either true (for successful execution) or false (for failure). The instance will get status
-  # of 'good' or 'bad' thereby
-  # We check for the processing flag b/c the job may have been run before (ie., by bkg_sync)
-  def bkg_execute &block
-    if processing?
-      # In development, let errors fly
-      if Rails.env.development? || Rails.env.test?
-        if block.call
-          good!
-        else
-          bad!
-        end
-      else
-        begin
-          if block.call
-            good!
-          else
-            bad!
-          end
-        rescue Exception => e
-          error nil, e
-        end
-      end
+    if dj
+      dj.destroy
+      save
     end
-    good?
   end
 
-  # With success, the DelayedJob record is about to go away, so we remove our pointer
-  def success(job)
-    self.dj = nil
-    save
+  # Run the job, mimicking the hook calls of DJ
+  def perform_without_dj
+    begin
+      before
+      perform
+      success
+    rescue Exception => e # rubocop:disable RescueException
+      error nil, e
+    ensure
+      after
+    end
+    save if persisted? && changed?
   end
 
-  def error(job, exception)
-    bad!
-    errors.add :url, exception.to_s
-  end
-
-  # Before the job is performed, revise its status from pending to processing
-  def before job
+  # Before the job is performed, set the object's status to :processing to forestall redundant processing
+  def before job=nil
     processing!
   end
 
-  def after job
-    virgin! if processing?
+  # We get to success without throwing an error, throw one if appropriate so DJ doesn't think we're cool
+  def success job=nil
+    # ...could have gone error-free just because errors were reported only in the record
+    if self.errors.any?
+      raise Exception, self.errors.full_messages # Make sure DJ gets the memo
+    else # With success and no errors, the DelayedJob record--if any--is about to go away, so we remove our pointer to it
+      self.dj = nil
+    end
+  end
+
+  # When an unhandled error occurs, record it among the object's errors
+  # We get here EITHER because:
+  # 1) Normal processing threw an error
+  # 2) There were errors on the handler that didn't result in an error, and got thrown by #success
+  # NB: THIS IS THE PLACE FOR BACKGROUNDABLES TO RECORD ANY PERSISTENT ERROR STATE beyond :good or :bad status,
+  # because, by default, that's all that's left after saving the record
+  def error job, exception
+    errors.add :base, exception.to_s
+  end
+
+  # The #after hook is called after #success and #error
+  # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
+  def after job=nil
+    self.status = self.errors.any? ? :bad : :good
+    save # By this point, any error state should be part of the record
   end
 
 end

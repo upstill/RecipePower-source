@@ -43,7 +43,7 @@ class Result
   def glean_atag matchstr, atag, site_home
     if href = atag.attribute('href')
       uri = href.value
-      uri = URI.join(site_home, uri) if uri =~ /^\// # Prepend domain/site to path as nec.
+      uri = safe_uri_join(site_home, uri) if uri =~ /^\// # Prepend domain/site to path as nec.
       outstr = atag.content
       push outstr, uri if uri =~ /#{matchstr}/ # Apply subsite constraint
     end

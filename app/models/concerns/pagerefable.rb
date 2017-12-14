@@ -17,7 +17,6 @@ module Pagerefable
 
       # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
       belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true, autosave: true
-      # delegate :glean, :'glean!', :to => :page_ref
 
       has_one :site, :through => :page_ref
       # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
@@ -94,33 +93,20 @@ module Pagerefable
 
   public
 
-  # Glean info from the page in background as a DelayedJob job
-  # force => do the job even if it was priorly complete
-  def glean force=false
-    return if dj || !id # Already queued or not yet saved
-    # Only update the page_ref as necessary
-    bkg_enqueue page_ref.glean(force) || force # Do the processing no matter what
-  end
-
   # Glean info synchronously, i.e. don't return until it's done
   # force => do the job even if it was priorly complete
-  def glean! force=false
-    if dj
-      bkg_go
-    elsif force || virgin?
-      page_ref.glean! force if page_ref
-      bkg_go true
-    end
+  def bkg_land force=false
+    page_ref.bkg_land force if page_ref # finish the page_ref gleaning
+    super force
   end
 
   # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
   def perform
-    bkg_execute do
-      page_ref.glean! if page_ref # Finish doing any necessary gleaning of the page_ref
-      true
+    if page_ref # Finish doing any necessary gleaning of the page_ref
+      page_ref.bkg_land
+      adopt_gleaning if page_ref.good?
+      save if persisted? && changed?
     end
-    good! if good? && adopt_gleaning
-    good?
   end
 
   def ensure_site

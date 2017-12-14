@@ -24,14 +24,14 @@ class FeedTest < ActiveSupport::TestCase
     test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
     ua = test_feed.updated_at
     sleep 1
-    test_feed.bkg_enqueue
+    test_feed.bkg_launch
     dj = test_feed.dj
     assert_equal ua, test_feed.updated_at
     assert test_feed.pending?
-    test_feed.bkg_enqueue
+    test_feed.bkg_launch
     assert_equal dj, test_feed.dj # Calling enqueue a second time shouldn't affect the job
 
-    test_feed.bkg_sync
+    test_feed.bkg_land
     assert test_feed.pending? # Got requeued
     assert_not_equal ua, test_feed.updated_at
     assert_not_equal dj, test_feed.dj
@@ -42,20 +42,20 @@ class FeedTest < ActiveSupport::TestCase
     test_feed.launch_update true
     assert test_feed.pending?
     ua = test_feed.updated_at
-    test_feed.bkg_sync
+    test_feed.bkg_land
     assert_not_equal ua, test_feed.updated_at # Should have been updated
 
     # Launch_update should have no effect b/c the update is in the future
     test_feed.launch_update
     ua = test_feed.updated_at
-    test_feed.bkg_sync
+    test_feed.bkg_land
     assert_equal ua, test_feed.updated_at # Should not have been updated
 
     # Launch_update should bring the update time back to the present
     test_feed.launch_update true
     assert (test_feed.dj.run_at <= Time.now)
     ua = test_feed.updated_at
-    test_feed.bkg_sync
+    test_feed.bkg_land
     assert_not_equal ua, test_feed.updated_at # Should have been updated
   end
 
@@ -63,12 +63,12 @@ class FeedTest < ActiveSupport::TestCase
     test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes"
     ua = test_feed.updated_at
     sleep 1
-    test_feed.bkg_enqueue
+    test_feed.bkg_launch
     assert_equal ua, test_feed.updated_at
     assert test_feed.pending?
     assert_equal test_feed.dj, Delayed::Job.last
     dj_id = test_feed.dj.id
-    test_feed.bkg_sync
+    test_feed.bkg_land
     # test_feed.reload
     assert_equal test_feed.dj, Delayed::Job.last
     # When the job is executed, the feed should come back queued to a different job
@@ -77,13 +77,13 @@ class FeedTest < ActiveSupport::TestCase
     oj = test_feed.dj
     assert (oj.run_at > Time.now)
     # We're not forcing the sync so it doesn't actually execute
-    test_feed.bkg_sync
+    test_feed.bkg_land
     # test_feed.reload
     assert_equal test_feed.dj, oj
 
     # Force the sync to execute
-    test_feed.bkg_sync true
-    # test_feed.reload
+    test_feed.bkg_land!
+    # We should have removed the prior job and launched a new one for the next update
     assert_not_equal test_feed.dj, oj
 
     ct = Delayed::Job.count
@@ -112,7 +112,7 @@ class FeedTest < ActiveSupport::TestCase
     assert_not_nil test_feed.id
     test_feed.home = 'http://www.potatochipsarenotdinner'
     refute test_feed.save
-    assert_not_empty test_feed.errors[:site]
+    assert_not_empty test_feed.errors[:home]
   end
 
   test 'setting home with valid, successful URL succeeds' do
@@ -142,7 +142,7 @@ class FeedTest < ActiveSupport::TestCase
   test 'creating with valid but failing URL in home fails' do
     test_feed = Feed.create url: "http://feeds.feedburner.com/elise/simplyrecipes", home: 'http://www.potatochipsarenotdinner'
     assert_nil test_feed.id
-    assert_not_empty test_feed.errors[:site]
+    assert_not_empty test_feed.errors[:home]
   end
 
   test 'creating with valid, successful URL in home succeeds' do

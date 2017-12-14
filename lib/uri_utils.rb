@@ -19,7 +19,7 @@ def valid_url path, url, strong=true
   elsif url
     # The path may be relative. In fact, it may have backup characters
     begin
-      uri = URI.join( url, path ).to_s
+      uri = safe_uri_join( url, path ).to_s
       uri if validate_link(uri)
     rescue Exception => e
       return nil
@@ -30,7 +30,7 @@ end
 # Probe a URL with its server, returning the result code for a head request
 def header_result(link, resource=nil)
   begin
-    url = resource ? URI.join(link, resource) : URI.parse(link)
+    url = resource ? safe_uri_join(link, resource) : URI.parse(link)
     # Reject it right off the bat if the url isn't valid
     return 400 unless url.host && url.port
 
@@ -266,4 +266,11 @@ def analyze_request url, imposed_query={}
   uri.query = nil
   path = uri.to_s
   { path: path, query: qparams.merge(imposed_query) }
+end
+
+# Wrapper on URI.join which escapes the path if need be
+def safe_uri_join base, path
+  URI.join base, path
+rescue
+  URI.join base, URI.escape(path)
 end

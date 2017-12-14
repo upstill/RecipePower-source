@@ -59,7 +59,7 @@ class PageRefServices
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
   def adopt other, force=false
-    @page_ref.bkg_sync true # Wait until the gleanings come in
+    @page_ref.bkg_land # Wait until the gleanings come in
     if other && (other.id != @page_ref.id)
       @page_ref.title = other.title if force || @page_ref.title.blank?
     end
@@ -189,9 +189,9 @@ class PageRefServices
         # report << PageRefServices.new(pr).join_url
         if !(uri && uri.scheme.present? && uri.host.present?)
           report << "Rationalizing bad url '#{pr.url}' (PageRef ##{pr.id}) using '#{pr.aliases.first}'"
-          pr.url = URI.join(pr.aliases.shift, uri || pr.url)
+          pr.url = safe_uri_join(pr.aliases.shift, uri || pr.url)
           report << "\n\t...to #{pr.url}"
-          pr.bkg_go true
+          pr.bkg_land true
         elsif pr.domain.blank?
           pr.domain = uri.host
           pr.save
@@ -238,9 +238,9 @@ class PageRefServices
     end
     # Many circumstances under which we go out to check the reference, not nec. for the first time
     if (page_ref.http_status != 200) || !(page_ref.bad? || page_ref.good?) || page_ref.url_changed? || force
-      page_ref.becomes(PageRef).bkg_enqueue priority: 10 # Must be enqueued as a PageRef b/c subclasses aren't recognized by DJ
+      page_ref.bkg_launch priority: 10 # Must be enqueued as a PageRef b/c subclasses aren't recognized by DJ
       puts "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
-      page_ref.bkg_asynch
+      page_ref.bkg_land
       puts "...returned"
       sentences << "Ran #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' err_msg #{page_ref.error_message} to get status: now #{page_ref.http_status}"
     else

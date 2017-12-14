@@ -7,7 +7,7 @@ class RecipeThumbnailTest < ActiveSupport::TestCase
     bpr = recipes(:badpicrcp)
     bpr.url = "htp://www.recipepower.com/rcp1"
     bpr.picurl = "assets/absent.png"
-    bpr.picture.bkg_sync true
+    bpr.picture.bkg_land
     assert bpr.picture.bad?, "Recipe with bad pic url should come back bad"
   end
   
@@ -18,7 +18,7 @@ class RecipeThumbnailTest < ActiveSupport::TestCase
     assert_not_nil gpr.picture, "Should have a picture reference for valid URL"
     success = gpr.save
     assert success, "Recipe with pic should be saved"
-    gpr.picture.bkg_go
+    gpr.picture.bkg_land
     assert_not_nil gpr.picture.thumbdata, "Should get data for good image"
   end
   

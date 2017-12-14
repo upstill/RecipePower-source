@@ -26,17 +26,17 @@ class PageRefTest < ActiveSupport::TestCase
   test "try substitute" do
     url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
     mp = PageRef.fetch url
-    assert_not_equal 200, mp.http_status
+    assert_equal 200, mp.http_status
     new_mp = PageRefServices.new(mp).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
     assert_equal mp, new_mp
-    assert_equal [url], new_mp.aliases
-    assert_equal 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+    assert new_mp.aliases.include?(url)
+    assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
   end
 
   test "try substitute on patijinich" do
     url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
     mp = PageRef.new url: url
-    mp.bkg_go
+    mp.bkg_land
     assert mp.bad?
     new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
     assert_equal mp, new_mp
@@ -45,21 +45,21 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "try substitute absorbs" do
-    mpgood = PageRef::RecipePageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
-    mpgood.save
+    mpgood = RecipePageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
+    mpgood.bkg_land
     assert mpgood.good?
 
     url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
-    mpbad = PageRef::RecipePageRef.new url: url
-    mpbad.bkg_go
+    mpbad = RecipePageRef.new url: url
+    mpbad.bkg_land
     assert mpbad.bad?
     badid = mpbad.id
 
     new_mp = PageRefServices.new(mpbad).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
     assert_equal mpgood, new_mp
-    assert_equal [url], new_mp.aliases
+    assert new_mp.aliases.include?(url)
     assert_nil PageRef.find_by(id: badid)
-    assert_equal 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+    assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
   end
 
   test "initializes simple page" do
@@ -144,11 +144,11 @@ class PageRefTest < ActiveSupport::TestCase
   test "correctly handles HTTP 404 (missing URL)" do
     url = "http://honest-food.net/vejjie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
     pr = PageRef.fetch url
-    assert pr.bad?
+    assert pr.virgin?
     assert_nil pr.id
     # assert !pr.errors.any?
 
-    pr.bkg_go true
+    pr.bkg_land true
     assert pr.bad?
     assert_not_nil pr.id
     assert_equal url, pr.url
@@ -157,7 +157,8 @@ class PageRefTest < ActiveSupport::TestCase
   test "gets URL that can be opened, but not by Mercury" do
     url = "http://abcnews.go.com/GMA/recipe/mario-batalis-marinated-olives-15088486"
     pr = PageRef.fetch url
-    assert pr.bad?
+    pr.bkg_land
+    assert pr.good?
     # assert !pr.errors.any?
     assert_equal 200, pr.http_status
     assert_equal url, pr.url
@@ -165,16 +166,16 @@ class PageRefTest < ActiveSupport::TestCase
 
   test "follow redirects" do
     url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
-    pr = PageRef::RecipePageRef.fetch url
-    assert_equal 303, pr.http_status # The last redirect here is bad
-    assert pr.bad?
+    pr = RecipePageRef.fetch url
+    assert_equal 200, pr.http_status
+    assert pr.aliases.include? url
     x=2
   end
 
   test "funky direct" do
     url = "http://www.finecooking.com/recipes/spicy-red-pepper-cilantro-sauce.aspx"
-    pr = PageRef::RecipePageRef.fetch url
-    pr.bkg_go
+    pr = RecipePageRef.fetch url
+    pr.bkg_land
     x=2
   end
 

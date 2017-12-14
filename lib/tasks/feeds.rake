@@ -5,12 +5,12 @@ namespace :feeds do
   task update: :environment do
     Feed.where(approved: nil).order('last_post_date DESC').first(2).each { |feed|
       puts "******* Updating Feed ##{feed.id} '#{feed.title}' ****************"
-      feed.bkg_go true
+      feed.bkg_land true
     }
   end
 
   # Make sure all visible feeds are queued for updates, and conversely
-  task launch: :environment do
+  task scrape: :environment do
     Feed.where.not(approved: true, dj_id: nil).each { |feed|
       puts "Killing updates for Feed ##{feed.id}: '#{feed.title}'"
       feed.bkg_kill

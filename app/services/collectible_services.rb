@@ -71,6 +71,7 @@ class CollectibleServices
         end
         entity.decorate.findings = findings # Now set the title, description, etc.
       end
+      entity.save # after_save callback is invoked for new record, queueing background processing
     end
     entity
   end

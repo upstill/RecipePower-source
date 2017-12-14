@@ -5,11 +5,11 @@ require 'referent.rb'
 class Site < ActiveRecord::Base
   include Collectible
   include Referrable
+  include Backgroundable
+  backgroundable
   include Pagerefable
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
-  include Backgroundable
-  backgroundable
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
@@ -40,10 +40,6 @@ class Site < ActiveRecord::Base
   #...and associate with recipes via the recipe_page_refs that refer back here
   has_many :recipes, :through => :recipe_page_refs, :dependent=>:restrict_with_error
 
-  after_create do |site|
-    glean # Start a job going to extract title, etc. from the home page
-  end
-
   before_validation do |site|
     if site.root.blank? && site.page_ref
       site.root =
@@ -73,23 +69,19 @@ class Site < ActiveRecord::Base
           pr.save
         }
       end
-      bkg_enqueue priority: 10, run_at: Time.now
-      reload
     end
   end
 
+  # This is called when the page_ref finishes updating
   def adopt_gleaning
     # Extract elements from the page_ref
-    if page_ref
-      self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
-      self.name = page_ref.title unless name.present? || page_ref.title.blank?
-      self.description = page_ref.description unless description.present? || page_ref.description.blank?
-      gleaning.extract_all 'RSS Feed' do |value| assert_feed value end if gleaning
-      save if persisted? && changed?
-      true
-    else
-      false
-    end
+    self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
+    self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
+    self.description = page_ref.description unless description.present? || page_ref.description.blank?
+    gleaning.extract_all 'RSS Feed' do |value|
+      assert_feed value
+    end if gleaning
+    save if persisted? && changed?
   end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here
@@ -276,10 +268,7 @@ public
     do_glean, options = true, do_glean if do_glean.is_a?(Hash)
     if uri = options[:root] || cleanpath(homelink) # URL parses
       # Find a site, if any, based on the longest subpath of the URL
-      unless site = Site.find_by(root: uri)
-        site = Site.create( { sample: homelink }.merge(options).merge(root: uri, home: homelink) )
-      end
-      site
+      Site.find_by(root: uri) || Site.create({sample: homelink}.merge(options).merge(root: uri, home: homelink))
     end
   end
 

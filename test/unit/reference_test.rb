@@ -6,7 +6,9 @@ class ReferenceTest < ActiveSupport::TestCase
 
   test 'image reference gets joined properly' do
     site = Site.new home: 'http://www.dailybitesblog.com/'
-    site.glean
+    site.bkg_land
+    assert site.good?
+    refute site.errors.any?
     gl = site.gleaning
     # assert gl.good?, 'Gleaning isn\'t born good'
     gl.images.each { |img|

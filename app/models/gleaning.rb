@@ -5,12 +5,14 @@ class Gleaning < ActiveRecord::Base
 
   backgroundable :status
 
+  after_create { |gl| gl.bkg_launch }
+
   require 'finder_services.rb'
 
   has_one :page_ref
   has_one :site, :through => :page_ref
 
-  attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id # , :decorator # Decorator corresponding to entity
+  attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
   serialize :results
 
@@ -35,7 +37,7 @@ class Gleaning < ActiveRecord::Base
       (gleaning = self.new status: :processing).go url_or_decorator
     elsif url_or_decorator.object.respond_to? :gleaning
       url = url_or_decorator.pageurl
-      url_or_decorator.glean!
+      url_or_decorator.bkg_land
       (gleaning = url_or_decorator.gleaning).go url, (url_or_decorator.site if url_or_decorator.respond_to?(:site))
     end
     gleaning
@@ -47,26 +49,21 @@ class Gleaning < ActiveRecord::Base
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
   def go url, site=nil
-    bkg_execute do
+    # bkg_execute do
       self.err_msg = ''
       self.http_status = 200
-      self.results = FinderServices.glean(url, site)  { |msg|
+      begin
+        self.results = FinderServices.glean url, site
+      rescue Exception => msg
         # Handle errors
-        self.err_msg = msg
-        # We assume the first three-digit number is the HTTP status code
-        self.http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
-      }
-      save if persisted?
-      # TODO: Restore this Site functionality:
-      # entity.decorate.after_gleaning(self) if entity && entity.decorate.respond_to?(:after_gleaning)
-      self.results # Returning success indicator
-    end
-  end
-
-  def error(job, exception)
-    errors.add 'url', "analyzing page: #{exception}."
-    bad!
-    save
+        # msg.message
+        # msg.backtrace
+        breakdown = FinderServices.err_breakdown url, msg
+        self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
+        self.http_status = breakdown[:status]
+        # errors.add :url, " #{url} failed to glean (http_status #{http_status}): #{msg}"
+        raise msg
+      end
   end
 
   def options_for label
@@ -79,7 +76,7 @@ class Gleaning < ActiveRecord::Base
     namestr = namestr.singularize if is_plural = (namestr == namestr.pluralize)
     namestr.sub! /Rss/, 'RSS'
     puts namestr + ' results.'
-    bkg_sync true # Ensure that gleaning has occurred, whether synch. or asynch.
+    bkg_land # Ensure that gleaning has occurred, whether synch. or asynch.
     if results && results[namestr]
       list = results[namestr].collect(&:out).flatten.uniq || []
       is_plural ? list : list.first
@@ -94,9 +91,9 @@ class Gleaning < ActiveRecord::Base
       results_arr.each do |proposed|
         # Either modify an existing result in the gleaning, or append this one
         unless (results[key] ||= []).detect { |my_result|
-          my_result.finderdata.slice(:selector, :attribute_name).values ==
-          proposed.finderdata.slice(:selector, :attribute_name).values
-        }
+            my_result.finderdata.slice(:selector, :attribute_name).values ==
+            proposed.finderdata.slice(:selector, :attribute_name).values
+          }
           results[key] << proposed
           do_save = true
         end

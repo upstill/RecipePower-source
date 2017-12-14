@@ -24,7 +24,7 @@ class RecipeServices
       pr.perform unless pr.good? # Take another chance on a response
     end
 =end
-    pr.bkg_go(pr.bad?) # Take another chance on a response
+    pr.bkg_land(pr.bad?) # Take another chance on a response
     if pr.bad?
       # Try correcting the url via regexp
       prs = PageRefServices.new(pr)
@@ -73,7 +73,7 @@ class RecipeServices
           if new_page_ref != pr
             recipe.page_ref = new_page_ref
             recipe.save
-            recipe.glean! if new_page_ref.bad?
+            recipe.bkg_land if new_page_ref.bad?
           end
           return "Replaced PageRef ##{pr.id} '#{old_url}' with #{new_page_ref.id} '#{new_page_ref.url}'(#{new_page_ref.status}) http_status #{new_page_ref.http_status}"
         end
@@ -81,7 +81,7 @@ class RecipeServices
     end
     return nil unless pr.bad?
     # Still bad, after all that
-    recipe.glean!(true) unless recipe.gleaning # Presumably the gleaning matches the old url
+    recipe.bkg_land(true) unless recipe.gleaning # Presumably the gleaning matches the old url
     if recipe.gleaning.good?
       "Wouldn't destroy Recipe ##{recipe.id} (#{pr.url}): can be reached via gleaning"
     elsif ![400, 404, 410].include? recipe.gleaning.http_status
@@ -119,10 +119,14 @@ class RecipeServices
     puts "\tdescription: #{@recipe.description}"
     puts "\tpicurl: #{@recipe.picurl}"
     puts "\tExtractions:"
-    if results = FinderServices.glean(@recipe.url, @recipe.site)
+    begin
+      results = FinderServices.glean @recipe.url, @recipe.site
       results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
-    else
+    rescue Exception => msg
       puts '!!! Couldn\'t open the page for analysis!'
+      errmsg = FinderServices.err_breakdown(@recipe.url, msg)[:msg]
+      @recipe.errors.add :url, errmsg
+      puts errmsg
     end
     results
   end

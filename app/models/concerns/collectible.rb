@@ -9,6 +9,10 @@ module Collectible
       @cached_ref.save if cached_ref_valid? # It must have been set
     end
 
+    after_create do |entity|
+      bkg_launch # Start a job going to extract title, etc. from the home page
+    end
+
     # User_pointers refers to users who have the entity in their collection
     has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
     has_many :users, :through => :user_pointers, :autosave => true

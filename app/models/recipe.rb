@@ -8,10 +8,10 @@ require 'htmlentities'
 class Recipe < ActiveRecord::Base
   include Collectible
   include Referrable # Is associated with a Referent
-  include Pagerefable # Has a PageRef linking to and reporting on the content
-  pagerefable :url
   include Backgroundable
   backgroundable
+  include Pagerefable # Has a PageRef linking to and reporting on the content
+  pagerefable :url
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -26,10 +26,6 @@ class Recipe < ActiveRecord::Base
 
   validates :title, length: { minimum: 2 }
   # private
-
-  after_create do |recipe|
-    glean # Start a job going to extract title, etc. from the home page
-  end
 
   # has_many :ratings, :dependent => :destroy
   # has_many :scales, :through => :ratings, :autosave => true
@@ -94,22 +90,16 @@ class Recipe < ActiveRecord::Base
     save
   end
 
-  # This is called when a gleaning is complete
+  # This is called when the page_ref finishes updating
   def adopt_gleaning
-    if page_ref
-      self.title = page_ref.title if page_ref.title.present?
-      self.picurl = page_ref.picurl if page_ref.picurl.present?
-      self.description = page_ref.description if page_ref.description.present?
-      if page_ref.gleaning && (tagstrings = page_ref.gleaning.results_for('Tags'))
-        ts = TaggingServices.new self
-        tagstrings.each { |tagstring|
-          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
-        }
-      end
-      save if persisted? && changed?
-      true
-    else
-      false
+    self.title = page_ref.title if page_ref.title.present?
+    self.picurl = page_ref.picurl if page_ref.picurl.present?
+    self.description = page_ref.description if page_ref.description.present?
+    if page_ref.gleaning && (tagstrings = page_ref.gleaning.results_for('Tags'))
+      ts = TaggingServices.new self
+      tagstrings.each { |tagstring|
+        tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
+      }
     end
   end
 

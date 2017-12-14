@@ -92,7 +92,7 @@ class FeedsController < CollectibleController
   def refresh
     update_and_decorate
     n_before = @feed.feed_entries_count
-    @feed.bkg_go true
+    @feed.bkg_land true
     if @feed.good?
       if resource_errors_to_flash(@feed)
         render :errors

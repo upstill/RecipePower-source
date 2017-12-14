@@ -199,7 +199,7 @@ class ImageReference < Reference
           else
             candidates = super # Find by the url
             # Queue the refs up to get data for the url as necessary and appropriate
-            candidates.map &:launch
+            candidates.map &:bkg_launch
             # Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical
             candidates.find &:canonical || candidates.first
         end
@@ -209,37 +209,33 @@ class ImageReference < Reference
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata force=false
     # Provide good thumbdata if possible
-    bkg_sync true # Doesn't return until the job is done
+    bkg_land # Doesn't return until the job is done
     thumbdata.present? ? thumbdata : url
   end
 
   # Try to fetch thumbnail data for the record. Status code assigned in ImageReference#fetchable and Reference#fetch
   def perform
     logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
-    bkg_execute do
-      # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
-      (url =~ /^\d\d\d\d-/) ||
-      begin
-        self.errcode = 0 if self.errcode == -2
-        if response_body = fetch # Attempt to get data at the other end of the URL
-          begin
-            img = Magick::Image::from_blob(response_body).first
-            if img.columns > 200
-              scalefactor = 200.0/img.columns
-              thumb = img.scale(scalefactor)
-            else
-              thumb = img
-            end
-            thumb.format = 'PNG'
-            quality = 80
-            self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
-          rescue Exception => e
-            logger.debug "Failed to parse image data for ImageReference #{id}: #{url} (#{e})"
-            self.errcode = -2 # Bad data
+    # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
+    (url =~ /^\d\d\d\d-/) ||
+    begin
+      self.errcode = 0 if self.errcode == -2
+      if response_body = fetch # Attempt to get data at the other end of the URL
+        begin
+          img = Magick::Image::from_blob(response_body).first
+          if img.columns > 200
+            scalefactor = 200.0/img.columns
+            thumb = img.scale(scalefactor)
+          else
+            thumb = img
           end
+          thumb.format = 'PNG'
+          quality = 80
+          self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
+        rescue Exception => e
+          logger.debug "Failed to parse image data for ImageReference #{id}: #{url} (#{e})"
+          self.errcode = -2 # Bad data
         end
-        save # Save the errcode code, if nothing else
-        errcode == 200 # Let bkg_execute know how we did
       end
     end
   end
@@ -250,16 +246,29 @@ class ImageReference < Reference
     Time.new.to_s + randstr
   end
 
-  # Ensure the thumbdata is up to date, optionally forcing an update even if previously processed
-  def launch force=false
+  # Is the reference un-gleanable? No further attention need be paid
+  def definitive?
     if url =~ /^\d\d\d\d-/
       (good! && save) unless good?
+      true
     elsif url.blank?
       (bad! && save) unless bad?
-    else
-      # force ? bkg_requeue : bkg_enqueue
-	    bkg_enqueue force
+      true
     end
+  end
+
+  # Ensure the thumbdata is up to date, optionally forcing an update even if previously processed
+  def bkg_launch force=false
+    !definitive? && super
+  end
+
+  def bkg_land force=false
+    !definitive? && super
+  end
+
+  def after dj
+    self.status = (url =~ /^\d\d\d\d-/) || (errcode == 200) ? :good : :bad
+    save
   end
 
   def thumbdata

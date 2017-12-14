@@ -20,8 +20,8 @@ class CollectibleDecorator < ModelDecorator
   # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
   # Also, launch the gleaning as necessary
   def glean force=false
-    if object.respond_to?(:glean)
-      object.glean force
+    if object.is_a? Backgroundable
+      object.bkg_land force
       object.gleaning unless (object.gleaning && object.gleaning.bad?)
     end
   end

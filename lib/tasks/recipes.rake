@@ -28,9 +28,9 @@ namespace :recipes do
         # RecipeServices.new(rec).convert_references
         puts "Converting references for recipe #{rec.id}:"
         RecipeReference.where(affiliate_id: rec.id).each { |reference|
-          reference.bkg_enqueue # rec.page_ref = PageRefServices.convert_reference reference, rec.page_ref
+          reference.bkg_launch # rec.page_ref = PageRefServices.convert_reference reference, rec.page_ref
           puts "Enqueued RecipePageReference ##{reference.id} (#{reference.url})"
-          reference.bkg_asynch
+          reference.bkg_land
           puts "...returned"
         }
         rec.reload

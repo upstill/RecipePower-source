@@ -23,18 +23,6 @@ class FinderServices
     findings
   end
 
-=begin
-  # Return a Results structure, either using the given extractions, or by examining the page
-  def self.findings extractions, url=nil
-    if extractions
-      self.from_extractions extractions
-    elsif url
-      findings = FinderServices.glean url
-      findings if findings.present?
-    end
-  end
-=end
-
   # Return the raw mapping from finders to arrays of hits
   def self.glean url, site=nil, *finders_or_labels
     unless site.nil? || site.is_a?(Site)
@@ -42,42 +30,36 @@ class FinderServices
       site = nil
     end
     finders = finders_or_labels.first.is_a?(Finder) ? finders_or_labels : self.applicable_finders(site, *finders_or_labels)
-
-    begin
-      uri = URI url
-    rescue Exception => e
-      return nil
-    end
-
+    uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
     nkdoc = nil
     loop do
       normu = normalize_url url
+      uri = URI normu
       errstr = "Couldn't open '#{url}"
       pagefile = nil
+      tries = 3
       begin
-        pagefile = open normu
+        pagefile = uri.open redirect: false
+      rescue OpenURI::HTTPRedirect => redirect
+        uri = redirect.uri # assigned from the "Location" response header
+        retry if (tries -= 1) > 0
+        raise
       rescue Exception => e
         errstr = e.to_s
-        if redirection = errstr.sub(/[^:]*:/, '').strip
+        if ((tries -= 1) > 0) && (redirection = errstr.sub(/[^:]*:/, '').strip)
           from, to = *redirection.split('->')
           if (from.strip == normu) && to.present?
             normu = normalize_url to.strip
-            begin
-              pagefile = open normu
-            rescue Exception => e
-              errstr = e.to_s
-            end
+            uri = URI normu
+            retry
           end
         end
       end
-      unless pagefile
-        yield(errstr) if block_given?
-        return
-      end
+      raise(Exception, errstr) unless pagefile
 
       # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
-      nkdoc = Nokogiri::HTML(pagefile)
+      nkdoc = Nokogiri::HTML pagefile
 
       # It's possible that the page returns a refresh with non-zero refresh time, tantamount to a redirect
       # We should follow this to find the ultimate page
@@ -85,7 +67,7 @@ class FinderServices
         spl = refresh_content.attr('content').to_s.split ';'
         if (refresh_time = spl.first).present? && (refresh_time.match /^\s*\b0+\b\s*$/) # refresh_time == 0
           path = spl.last.sub(/^\s*url=\s*\b/, '')
-          url = normalize_url URI.join(normu, path).to_s
+          url = normalize_url safe_uri_join(normu, path).to_s
           next if url != normu
         end
       end
@@ -107,7 +89,7 @@ class FinderServices
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
           if attribute_value = attribute_name && child.attributes[attribute_name].to_s.if_present
-            attribute_value = URI.join(pagehome, attribute_value).to_s if(%w{ href src}.include? attribute_name)
+            attribute_value = safe_uri_join(pagehome, attribute_value).to_s if(%w{ href src}.include? attribute_name)
             result.push attribute_value
           elsif attribute_name == 'content'
             result.push child.content.strip
@@ -115,7 +97,7 @@ class FinderServices
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'
             outstr = child.attributes['src'].to_s
-            result.push URI.join(pagehome, outstr) unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
+            result.push safe_uri_join(pagehome, outstr) unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
             # If there's an enclosed link coextensive with the content, emit the link
           elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             result.glean_atag finder[:linkpath], atag, pagehome
@@ -132,6 +114,16 @@ class FinderServices
     results
   end
 
+  # Analyze the error coming from a gleaning
+  def self.err_breakdown url, msg
+    # We assume the first three-digit number is the HTTP status code
+    msg = msg.to_s
+    http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
+
+    errmsg = " #{url} failed to glean (http_status #{http_status}): #{msg}"
+    { status: http_status, msg: errmsg }
+  end
+
   # Canonicalize strings by collapsing whitespace into a single space character, and
   # eliminating spaces immediately preceding commas
   def cleanupstr (str)
@@ -140,8 +132,10 @@ class FinderServices
 
   # Check that the proposed finder actually does its job by running it on a linkable entity
   def testflight entity
-    if !(results = FinderServices.glean entity.decorate.url, @finder)
-      @finder.errors.add 'url', 'page can\'t be open for analysis: ' + errstr
+    begin
+      results = FinderServices.glean entity.decorate.url, @finder
+    rescue Exception => msg
+      @finder.errors.add :url, FinderServices.err_breakdown(entity.decorate.url, msg)[:msg]
       return
     end
     if results.result_for @finder.label # Found a result on the page!

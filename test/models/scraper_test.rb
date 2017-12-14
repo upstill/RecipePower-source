@@ -82,7 +82,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food'
     scraper = Scraper.assert url
     assert_equal :bbc_food_page, scraper.handler
-    scraper.bkg_sync true
+    scraper.bkg_land
 
     assert_equal 9, show_tags(:Diet).count
     assert_equal 9, Scraper.where(what: 'bbc_diet_home_page').count
@@ -94,14 +94,14 @@ class ScraperTest < ActiveSupport::TestCase
   test 'scrapers do not get requeued unless forced' do
     url = 'http://www.bbc.co.uk/food'
     scraper = Scraper.assert url
-    scraper.bkg_enqueue
+    scraper.bkg_launch
     assert scraper.dj.present?
-    scraper.bkg_sync
-    refute scraper.dj.present?
-    scraper.bkg_enqueue
-    refute scraper.dj.present?
-    scraper.bkg_enqueue true # Force the scraper to be requeued
-    assert scraper.dj.present?
+    scraper.bkg_land
+    refute scraper.pending?
+    scraper.bkg_launch
+    refute scraper.pending?
+    scraper.bkg_launch true # Force the scraper to be requeued
+    assert scraper.pending?
   end
 
   # Home page for a diet
@@ -109,7 +109,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/diets/dairy_free'
     scraper = Scraper.assert url, true
     assert_equal :bbc_diet_home_page, scraper.handler
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     diet_tags = show_tags :Diet
     diet_tag = diet_tags.first
@@ -154,23 +154,23 @@ class ScraperTest < ActiveSupport::TestCase
       scraper = Scraper.assert url, true
       assert_equal scraper.handler, "bbc_#{search_class}_recipes_page".to_sym
       scraper.save
-      scraper.bkg_sync(true)
+      scraper.bkg_land
 
       # check_recipes_result key, false
       assert (Recipe.count > 10), "Only #{Recipe.count} recipes found on #{key} page"
       assert Scraper.where('url LIKE ?', '%page=%').exists?, "No scraper for second page of results"
 
-      assert_equal 1, DefinitionReference.where(url: url).count
-      assert_equal values.last, DefinitionReference.where(url: url).first.link_text
+      assert_equal 1, DefinitionPageRef.where(url: url).count
+      assert_equal values.last, DefinitionPageRef.where(url: url).first.link_text
 
       url = "http://www.bbc.co.uk/food/recipes/search?#{search_class.pluralize}[]=#{id}&page=2"
       scraper = Scraper.assert url, true
       assert_equal scraper.handler, "bbc_#{search_class}_recipes_page".to_sym
       scraper.save
-      scraper.bkg_sync(true)
+      scraper.bkg_land
 
       # Make sure the second-page search isn't included in the definition
-      assert_equal 0, DefinitionReference.where(url: url).count
+      assert_equal 0, DefinitionPageRef.where(url: url).count
       setup
     }
   end
@@ -194,9 +194,9 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_programme_recipes_page
     scraper.save
-    scraper.bkg_sync(true)
-    assert_equal 1, DefinitionReference.where('url LIKE ?', '%b04gtx26%').count # Should only reference the first page
-    assert_equal 1, DefinitionReference.where(link_text: 'Recipes from A Taste of Britain').count
+    scraper.bkg_land
+    assert_equal 1, DefinitionPageRef.where('url LIKE ?', '%b04gtx26%').count # Should only reference the first page
+    assert_equal 1, DefinitionPageRef.where(link_text: 'Recipes from A Taste of Britain').count
     # check_recipes_result :Source
     assert (Recipe.count > 10), "Only #{Recipe.count} recipes found on Source page"
     assert Scraper.where('url LIKE ?', '%page=%').exists?, "No scraper for second page of results"
@@ -207,14 +207,14 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_chef_recipes_page
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     # Should have defined the author tag
     ats = Tag.where tagtype: Tag.typenum(:Author)
     at = ats.first
     assert_equal 'Antonio Carluccio', at.name
-    assert DefinitionReference.where(url: 'http://www.bbc.co.uk/food/chefs/antonio_carluccio').exists?
-    assert at.referents.first.references.to_a.include?(DefinitionReference.first)
+    assert DefinitionPageRef.where(url: 'http://www.bbc.co.uk/food/chefs/antonio_carluccio').exists?
+    assert at.referents.first.references.to_a.include?(DefinitionPageRef.first)
 
     assert_equal 15, Recipe.count
     assert_equal 'Slow-cooked family stew with polenta', Recipe.first.title
@@ -242,7 +242,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes/search?occasions[]=christmas'
     scraper = Scraper.assert url
     assert_equal 'bbc_occasion_recipes_page', scraper.handler.to_s
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert (occasion_tag = Tag.find_by( tagtype: Tag.typenum(:Occasion)))
     assert_equal 'Christmas', occasion_tag.name
     assert_equal 15, occasion_tag.recipes.count
@@ -271,7 +271,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes/search?diets[]=dairy_free'
     scraper = Scraper.assert url
     assert_equal :bbc_diet_recipes_page, scraper.handler
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert (diet_tag = Tag.find_by(name: 'dairy-free', tagtype: Tag.typenum(:Diet)))
 
 =begin
@@ -299,7 +299,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes/search?page=2&diets[]=dairy_free'
     scraper = Scraper.assert url
     assert_equal :bbc_diet_recipes_page, scraper.handler
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert (diet_tag = Tag.find_by( name: 'dairy-free', tagtype: Tag.typenum(:Diet)))
     assert_equal 15, diet_tag.recipes.count
 
@@ -313,7 +313,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes/search?occasions[]=fathers_day'
     scraper = Scraper.assert url, true, :bbc_occasion_recipes_page
     assert_equal :bbc_occasion_recipes_page, scraper.what.to_sym
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert Scraper.exists? what: 'bbc_course_recipes_page'
     assert Tag.available? 'desserts', :Course
@@ -337,15 +337,15 @@ class ScraperTest < ActiveSupport::TestCase
   end
 
   test 'bbc_cake_home_page' do
-    scraper = Scraper.assert 'http://www.bbc.co.uk/food/cake', false
+    scraper = Scraper.assert 'x', false
     assert_equal 'bbc_food_home_page', scraper.what
-    scraper.bkg_sync true
+    scraper.bkg_land
 
     assert dish_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'cake')
     assert_equal 11, dish_tag.recipes.count, "Recipe count for dish '#{dish_tag.name}'."
 
     assert ingred_tag = Tag.find_by(tagtype: Tag.typenum(:Ingredient), name: 'cake')
-    assert_equal 6, ingred_tag.recipes.count, "Recipe count for ingredient '#{ingred_tag.name}'."
+    assert_equal 5, ingred_tag.recipes.count, "Recipe count for ingredient '#{ingred_tag.name}'."
 
     assert baking_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'baking')
     assert TagServices.new(dish_tag).parent_ids.include?(baking_tag.id)
@@ -357,7 +357,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_langoustine_home_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/langoustine', false
     assert_equal 'bbc_food_home_page', scraper.what
-    scraper.bkg_sync true
+    scraper.bkg_land
 
     assert_nil dish_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'langoustine')
 
@@ -381,7 +381,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_beef_wellington_home_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/beef_wellington', false
     assert_equal 'bbc_food_home_page', scraper.what
-    scraper.bkg_sync true
+    scraper.bkg_land
 
     assert dish_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'beef wellington')
 
@@ -398,7 +398,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_seafood_home_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/seafood', false
     assert_equal 'bbc_food_home_page', scraper.what
-    scraper.bkg_sync true
+    scraper.bkg_land
 
     assert dish_tag = Tag.find_by(tagtype: Tag.typenum(:Dish), name: 'seafood')
     assert_equal 16, dish_tag.recipes.count, "Recipe count for dish '#{dish_tag.name}'."
@@ -413,7 +413,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_ingredient_home_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', false
     assert_equal 'bbc_food_home_page', scraper.what
-    scraper.bkg_sync true
+    scraper.bkg_land
     # After scraping the page, there should be a SINGLE 'candied peel' tag, with corresponding expression, referent and ImageReference
     ing_tags = show_tags(:Ingredient)
     ing_tag = ing_tags.first
@@ -432,7 +432,7 @@ class ScraperTest < ActiveSupport::TestCase
     # Rerun the scraper to ensure that no tags, etc. get created redundantly
     scraper2 = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', false
     assert_equal scraper, scraper2
-    scraper.bkg_sync true
+    scraper.bkg_land
     # After scraping the page, there should be a SINGLE 'candied peel' tag, with corresponding expression, referent and ImageReference
     ing_tags = show_tags(:Ingredient)
     ing_tag = ing_tags.first
@@ -464,7 +464,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/sauce', true
     assert_equal :bbc_food_home_page, scraper.what.to_sym
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     dish_tags = Tag.where(tagtype: Tag.typenum(:Dish))
     assert_equal 1, dish_tags.count
@@ -506,7 +506,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_chefs_page' do
     url = 'http://www.bbc.co.uk/food/chefs'
     scraper = Scraper.assert url, true
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 8, Scraper.where(what: 'bbc_chefs_atoz_page').count
     assert_equal 0, ImageReference.count
   end
@@ -515,7 +515,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/dishes'
     scraper = Scraper.assert url, true
     assert_equal 'bbc_dishes_page', scraper.what
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert_equal 25, Scraper.where(what: 'bbc_dishes_atoz_page').count
     assert Scraper.where(url: 'http://www.bbc.co.uk/food/dishes/by/letter/b').exists?
@@ -526,11 +526,11 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/chefs/by/letters/d,e,f'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_chefs_atoz_page
-    scraper.recur = true
-    scraper.bkg_sync(true)
+    scraper.recur = false
+    scraper.bkg_land
     assert_equal 58, Scraper.where(what: 'bbc_chef_home_page').count
     assert_equal 58, Scraper.where(what: 'bbc_chef_recipes_page').count
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 58, Scraper.where(what: 'bbc_chef_home_page').count
     assert_equal 58, Scraper.where(what: 'bbc_chef_recipes_page').count
   end
@@ -539,9 +539,9 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/dishes/by/letter/b'
     scraper = Scraper.assert url
     assert_equal scraper.handler, :bbc_dishes_atoz_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
-    assert_equal 36, Scraper.where(what: 'bbc_food_home_page').count
+    assert_equal 37, Scraper.where(what: 'bbc_food_home_page').count
     assert_equal 36, Scraper.where(what: 'bbc_dish_recipes_page').count
   end
 
@@ -553,14 +553,14 @@ class ScraperTest < ActiveSupport::TestCase
                               tagtype: 'Process',
                               page_link: 'http://www.bbc.co.uk/food/techniques/how_to_knead_bread_dough'
     assert_equal 1, Tag.count
-    assert_equal 2, DefinitionReference.count
+    assert_equal 2, DefinitionPageRef.count
   end
 
   test 'bbc_programmes_page' do
     url = 'http://www.bbc.co.uk/food/programmes'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_programmes_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert_equal 158, Scraper.where(what: 'bbc_programme_home_page').count
     assert_equal 158, Scraper.where(what: 'bbc_programme_recipes_page').count
@@ -571,13 +571,13 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/techniques'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_techniques_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     process_tags = Tag.where tagtype: Tag.typenum(:Process)
     assert_equal 137, process_tags.count
     process_refs = Referent.where(type: 'ProcessReferent')
     assert_equal 137, process_refs.count
-    assert_equal 132, DefinitionReference.count # No header defs, but two definitions for "How to knead bread dough"
+    assert_equal 132, DefinitionPageRef.count # No header defs, but two definitions for "How to knead bread dough"
 
     header_tag = Tag.find_by name: 'Preparing fruit and vegetables'
     assert_equal 19, TagServices.new(header_tag).child_referents.count
@@ -587,9 +587,9 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/techniques/chopping_chillies'
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_technique_home_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
-    assert Reference.find_by( url: url, type: 'DefinitionReference')
+    assert PageRef.find_by( url: url, type: 'DefinitionPageRef')
 
     tech_tag = Tag.where(tagtype: Tag.typenum(:Process)).first
     assert_equal 'chopping chillies', tech_tag.name
@@ -613,9 +613,9 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/techniques/how_to_deglaze_a_pan'
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_technique_home_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
-    assert Reference.find_by( url: url, type: 'DefinitionReference')
+    assert PageRef.find_by( url: url, type: 'DefinitionPageRef')
 
     tech_tag = Tag.where(tagtype: Tag.typenum(:Process)).first
     assert_equal 'how to deglaze a pan', tech_tag.name
@@ -628,7 +628,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes'
     scraper = Scraper.assert url, true
     assert_equal :bbc_recipes_page, scraper.handler
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert_equal 7, List.count
     assert_equal 8, Scraper.count
@@ -639,7 +639,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/collections/healthy_fish_recipes'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_collection_home_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     list = List.first
     assert_equal 'Healthy fish recipes (BBC Food)', list.title
@@ -651,7 +651,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/collections/festival_recipes'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_collection_home_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     list = List.first
     assert_equal 'Healthy fish recipes (BBC Food)', list.title
@@ -663,12 +663,12 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/chefs/antonio_carluccio'
     scraper = Scraper.assert url, false
     assert_equal scraper.handler, :bbc_chef_home_page
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
-    assert (dr = DefinitionReference.find_by(url: url))
+    assert (dr = DefinitionPageRef.find_by(url: url))
 
-    assert DefinitionReference.where(link_text: "Antonio Carluccio's homepage").exists?, "Home page link missing"
-    assert DefinitionReference.where(link_text: "Carluccio's").exists?, "Carluccio's link missing"
+    assert DefinitionPageRef.where(link_text: "Antonio Carluccio's homepage").exists?, "Home page link missing"
+    assert DefinitionPageRef.where(link_text: "Carluccio's").exists?, "Carluccio's link missing"
 
     Rails.logger.info 'Tags gleaned: ' + Tag.all.map(&:name).join(', ')
     assert_equal 6, Tag.count
@@ -689,7 +689,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_programme_home_page
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     # Check for "find all recipes" link
     assert Scraper.find_by(what: 'bbc_programme_recipes_page', url: 'http://www.bbc.co.uk/food/recipes/search?programmes[]=b04gtx26')
     source_tags = show_tags(:Source)
@@ -697,13 +697,13 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 'A Taste of Britain', source_tag.name
 
     # Ensure the existence of both this page and the Programme's home page on the bbc
-    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26')
-    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b04gtx26')
+    assert PageRef.find_by(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26')
+    assert PageRef.find_by(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/programmes/b04gtx26')
 
     source_ref = source_tag.referents.first
     assert_equal 3, source_ref.references.count  # Two definitions plus image
-    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26').exists?
-    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b04gtx26').exists?
+    assert source_ref.references.where(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/food/programmes/b04gtx26').exists?
+    assert source_ref.references.where(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/programmes/b04gtx26').exists?
     assert source_ref.references.where(type: 'ImageReference', url: 'http://ichef.bbci.co.uk/images/ic/608x342/p025h6sj.jpg').exists?
     assert source_ref.description.match('Food programme exploring specialities from around Britain.')
 
@@ -716,7 +716,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert source_ref.references.where(type: 'ImageReference', url: 'http://ichef.bbci.co.uk/images/ic/608x342/p025h6sj.jpg').exists?
 
     assert_equal 'Brian Turner', auth_ref.name
-    assert auth_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/chefs/brian_turner').exists?
+    assert auth_ref.references.where(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/food/chefs/brian_turner').exists?
     assert auth_ref.references.where(type: 'ImageReference', url: 'http://ichef.bbci.co.uk/food/ic/food_1x1_95/chefs/brian_turner_1x1.jpg').exists?
   end
 
@@ -725,19 +725,19 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_programme_home_page
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     source_tags = show_tags(:Source)
     source_tag = source_tags.first
     assert_equal 'Delia\'s Classic Christmas', source_tag.name
 
     # Ensure the existence of both this page and the Programme's home page on the bbc
-    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9')
-    assert Reference.find_by(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b00p84s9')
+    assert PageRef.find_by(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9')
+    assert PageRef.find_by(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/programmes/b00p84s9')
 
     source_ref = source_tag.referents.first
     assert_equal 2, source_ref.references.count  # Two definitions, no image
-    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9').exists?
-    assert source_ref.references.where(type: 'DefinitionReference', url: 'http://www.bbc.co.uk/programmes/b00p84s9').exists?
+    assert source_ref.references.where(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/food/programmes/b00p84s9').exists?
+    assert source_ref.references.where(type: 'DefinitionPageRef', url: 'http://www.bbc.co.uk/programmes/b00p84s9').exists?
 
   end
 
@@ -746,7 +746,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert url, true
     assert_equal scraper.handler, :bbc_chef_home_page
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     chef_tag = show_tags(:Author).first
     assert_equal 'Nigella Lawson', chef_tag.name
@@ -760,7 +760,7 @@ class ScraperTest < ActiveSupport::TestCase
     url = 'http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080'
     r1 = CollectibleServices.find_or_create({ url: url }, { 'Title' => 'Lemon and ricotta tart' }, Recipe)
     scraper = Scraper.assert url, false
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert_equal 1, Recipe.count
     r = Recipe.first
@@ -794,7 +794,7 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_seasons_atoz_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/seasons', true
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     stags = show_tags :Occasion
     assert_equal 12, stags.count
     assert_equal 'January', stags.first.name
@@ -807,13 +807,13 @@ class ScraperTest < ActiveSupport::TestCase
 
   test 'bbc_seasons_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/seasons', true
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert_equal 12, Tag.where(tagtype: 8).count
     assert_equal 'January', Tag.where(tagtype: 8).first.name
 
-    assert_equal 'http://www.bbc.co.uk/food/seasons/january', DefinitionReference.first.url
-    assert_equal 12, DefinitionReference.count
+    assert_equal 'http://www.bbc.co.uk/food/seasons/january', DefinitionPageRef.first.url
+    assert_equal 12, DefinitionPageRef.count
     assert_equal 12, ImageReference.count
     assert_equal 12, OccasionReferent.count
     occr = OccasionReferent.first
@@ -825,9 +825,9 @@ class ScraperTest < ActiveSupport::TestCase
     # Scrape the 'January' page and confirm results
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/cuisines/italian', false
     assert_equal :bbc_cuisine_home_page, scraper.handler
-    scraper.recur = true
+    scraper.recur = false
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     genre_tags = show_tags(:Genre)
     assert_equal 1, genre_tags.count
@@ -846,7 +846,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert Tag.where(name: 'Angela Hartnett', tagtype: Tag.typenum(:Author)).exists?
 
     # ---- 3 definition pages, including this one
-    assert_equal 3, genre_tag.referents.first.references.count
+    assert_equal 3, genre_tag.referents.first.page_refs.count
 
     # ---- 40 recipes in 8 accordions
     assert_equal 40, Recipe.count
@@ -869,7 +869,7 @@ class ScraperTest < ActiveSupport::TestCase
     # Scrape the 'January' page and confirm results
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/seasons/january', false
     # We're going to go through this twice, the second time to confirm that redundancy was avoided
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 1, Tag.where(tagtype: 8).count
     month_tag = Tag.where(tagtype: 8).first
     assert_equal 'January', month_tag.name
@@ -889,7 +889,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert r.tags.include?(course_tag), "Recipe doesn't have course tag"
 
     # Second time around...
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 1, Tag.where(tagtype: 8).count
     month_tag = Tag.where(tagtype: 8).first
     assert_equal 'January', month_tag.name
@@ -912,14 +912,14 @@ class ScraperTest < ActiveSupport::TestCase
   test 'bbc_cuisines_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/cuisines', true
     assert_equal :bbc_cuisines_page, scraper.what.to_sym
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     tagtype = Tag.typenum :Genre
     assert_equal 20, Tag.where(tagtype: tagtype).count
     assert_equal 'African', Tag.where(tagtype: tagtype).first.name
 
-    assert_equal 'http://www.bbc.co.uk/food/cuisines/african', DefinitionReference.first.url
-    assert_equal 20, DefinitionReference.count
+    assert_equal 'http://www.bbc.co.uk/food/cuisines/african', DefinitionPageRef.first.url
+    assert_equal 20, DefinitionPageRef.count
     assert_equal 20, ImageReference.count
     assert_equal 20, GenreReferent.count
 
@@ -933,7 +933,7 @@ class ScraperTest < ActiveSupport::TestCase
 
   test 'bbc_ingredients_by_letter' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/ingredients/by/letter/o', true
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 21, Scraper.count
     assert !Scraper.where('url LIKE ?', '%related-foods%').exists?
     assert_equal 20, show_tags('Ingredient').count
@@ -941,9 +941,9 @@ class ScraperTest < ActiveSupport::TestCase
 
   test 'bbc_candied_peel_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', true
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 9, ImageReference.count
-    assert_equal 1, DefinitionReference.count
+    assert_equal 1, DefinitionPageRef.count
     assert_equal 1, show_tags(:Ingredient).count
     assert_equal 1, show_tags(:Source).count
     assert_equal 8, show_tags(:Author).count
@@ -972,7 +972,7 @@ class ScraperTest < ActiveSupport::TestCase
 
   test 'bbc_cheese_page' do
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/cheese', true
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     cheese_tag = Tag.where(normalized_name: 'cheese', tagtype: Tag.typenum(:Ingredient)).first
     # assert_equal 35, TagServices.new(cheese_tag).child_referents.count
     assert_equal 7, show_tags(:Dish).count
@@ -984,7 +984,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/occasions', true
     assert_equal :bbc_occasions_page, scraper.handler
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
     assert_equal 31, show_tags(:Occasion).count
     assert_equal 32, Scraper.count
   end
@@ -993,7 +993,7 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/occasions/passover', true
     assert_equal :bbc_occasion_home_page, scraper.handler
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert (occ_tag = Tag.find_by( name: 'Passover', tagtype: Tag.typenum(:Occasion)))
     assert_equal 17, occ_tag.recipes.count
@@ -1015,19 +1015,19 @@ class ScraperTest < ActiveSupport::TestCase
     scraper = Scraper.assert 'http://www.bbc.co.uk/food/occasions/christmas', true
     assert_equal :bbc_occasion_home_page, scraper.handler
     scraper.save
-    scraper.bkg_sync(true)
+    scraper.bkg_land
 
     assert (occ_tag = Tag.find_by( name: 'Christmas', tagtype: Tag.typenum(:Occasion)))
     assert_equal 45, occ_tag.recipes.count
     assert_equal 45, Recipe.count
-    assert_equal 23, show_tags(:Dish).count
+    assert_equal 22, show_tags(:Dish).count
     assert_equal 18, show_tags(:Ingredient).count
 
     assert_equal 8, show_tags(:Course).count
 
     assert (occ_ref = occ_tag.referents.first)
     assert_equal 17, occ_ref.ingredient_referents.count
-    assert_equal 23, occ_ref.dish_referents.count
+    assert_equal 22, occ_ref.dish_referents.count
     assert_equal 1, Scraper.where(what: 'bbc_occasion_recipes_page').count
     assert_equal 45, Scraper.where(what: 'bbc_recipe_home_page').count
     assert_equal 40, Scraper.where(what: 'bbc_food_home_page').count # Dishes plus Ingredients (both go to /food/<name>)

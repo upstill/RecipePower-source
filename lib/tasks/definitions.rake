@@ -8,9 +8,8 @@ namespace :definitions do
         if rm.referee.class == DefinitionReference
           reports << RefermentServices.new(rm).convert_reference
           if (referee = rm.referee).class == DefinitionReference
-            referee.bkg_enqueue
-            referee.bkg_asynch # Wait for the worker to return
-            referee.reload
+            referee.bkg_launch
+            referee.bkg_land # Wait for the worker to return
           end
         end
       }

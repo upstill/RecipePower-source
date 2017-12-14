@@ -39,6 +39,11 @@ class ApplicationController < ActionController::Base
 
   include ApplicationHelper
 
+  def edit
+    update_and_decorate
+    smartrender
+  end
+
   # Generic action for approving an entity
   def approve
     update_and_decorate
@@ -82,6 +87,8 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
+    # Finish whatever background task is associated with the entity
+    entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params = nil
     if entity
       # If the entity is provided, ignore parameters

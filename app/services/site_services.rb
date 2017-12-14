@@ -23,8 +23,8 @@ class SiteServices
     SiteReference.where(affiliate_id: site.id).each { |reference|
       report += "\n\tMaking SitePageRef for reference ##{reference.id} (#{reference.url})"
       puts "Enqueuing making of SitePageRef for Site ##{site.id} on Reference ##{reference.id} (#{reference.url})"
-      reference.bkg_enqueue true, priority: 10
-      reference.bkg_asynch # Wait for the worker to return
+      reference.bkg_launch true, priority: 10
+      reference.bkg_land # Wait for the worker to return
       puts "...done"
       # site.page_ref = PageRefServices.convert_reference reference, site.page_ref
     }
@@ -64,7 +64,7 @@ class SiteServices
   def resolve(candidate)
     return candidate if candidate.blank? || (candidate =~ /^\w*:/)
     begin
-      URI.join(@site.home, candidate).to_s
+      safe_uri_join(@site.home, candidate).to_s
     rescue
       candidate
     end
@@ -106,10 +106,14 @@ class SiteServices
     puts "\thome: (#{@site.home})"
     puts "\tdescription: (#{@site.description})"
     puts "\tlogo: (#{@site.logo})"
-    if results = FinderServices.glean(@site.home, @site)
+    begin
+      results = FinderServices.glean @site.home, @site
       results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
-    else
-      puts "!!! Couldn't open the page for analysis !!!"
+    rescue Exception => msg
+      puts '!!! Couldn\'t open the page for analysis!'
+      breakdown = FinderServices.err_breakdown @site.home, msg
+      @site.errors.add :url, breakdown[:msg]
+      puts breakdown[:msg]
     end
     results
   end
@@ -154,7 +158,7 @@ class SiteServices
         test_url = testback
       end
 
-      if recipe_url = (results = FinderServices.glean(test_url, site, 'URI')) && results.result_for('URI')
+      if recipe_url = (results = FinderServices.glean(test_url, site, 'URI') rescue nil) && results.result_for('URI')
         found = found + 1
       else
         suspect << test_url
