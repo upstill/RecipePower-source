@@ -146,9 +146,14 @@ class PageRef < ActiveRecord::Base
             end
             hr.is_a?(String) ? 666 : hr
           end
-      # Did the url change to a collision with an existing PageRef of the same type?
-      if (@data['url'] != url) && (self.extant_pr = self.class.find_by_url(@data['url']))
-        puts "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{@data['url']}'"
+      # Does the extracted url change to a collision with an existing PageRef of the same type?
+      new_url = @data['url']
+      if (new_url != url) &&
+          !aliases.include?(new_url) &&
+          (expr = self.class.find_by_url(new_url)) &&
+          (expr.id != self.id)
+        self.extant_pr = expr
+        puts "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{new_url}'"
         self.http_status = 666
         @data['url'] = url
         self.error_message = "URL has already been taken by #{self.class} ##{extant_pr.id}"
@@ -156,7 +161,7 @@ class PageRef < ActiveRecord::Base
       @data['content'] ||= ''
       @data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = @data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.aliases << url if (@data['url'] != url && !aliases.include?(url)) # Record the url in the aliases if not already there
+      self.aliases += [new_url] if new_url != url # Record the url in the aliases if not already there
       self.assign_attributes @data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
       self.error_message = "Bad URL '#{url}': #{e}"
