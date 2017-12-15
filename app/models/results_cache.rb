@@ -1165,7 +1165,7 @@ class SitesIndexCache < ResultsCache
       when :feed_count
       when :definition_count
       else
-        uniqueitemscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."referent_id" DESC})
+                                uniqueitemscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."referent_id" DESC})
     end || super
   end
 

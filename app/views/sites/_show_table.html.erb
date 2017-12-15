@@ -2,7 +2,9 @@
 <%= present decorator, current_user_or_guest do |presenter| %>
     <td class="avatar-column">
       <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
-      <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
+      <div class="pic-box" style="width: 100%">
+        <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
+      </div>
     </td>
     <td class="description-column" style="width: 30%">
       <%= presenter.card_homelink class: 'title-link' %>

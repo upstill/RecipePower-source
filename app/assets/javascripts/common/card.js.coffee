@@ -8,5 +8,5 @@ jQuery ->
 RP.card.onload = (event) ->
 	RP.masonry.onload event # Normal initializing of the Masonry
 	elmt = event.target
-	$('div.avatar', elmt).resize (event) ->
+	$('div.stamp', elmt).resize (event) ->
 		$(elmt).masonry() # Embedded images will trigger a layout when loaded
