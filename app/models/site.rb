@@ -34,6 +34,13 @@ class Site < ActiveRecord::Base
   has_many :feeds, :dependent=>:restrict_with_error
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
+  # Sites have an 'approved' bit which clears them for browsing
+  # This is because a site can appear for any link, including chef's restaurants, etc.
+  # By approving them explicitly (the default is nil), we can keep ahead of the cruft
+  scope :approved, -> { where(approved: true) }
+  scope :pending, -> { where(approved: nil) }
+  scope :hidden, -> { where(approved: false) }
+
   # Make an association with each type of PageRef that references this site
   PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym, :dependent=>:restrict_with_error }
 
