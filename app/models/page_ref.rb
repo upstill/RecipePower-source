@@ -207,9 +207,11 @@ class PageRef < ActiveRecord::Base
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
     urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
     url_node = self.arel_table[:url]
-    aliases_node = self.arel_table[:aliases]
     url_query = url_node.eq(urlpair.first).or url_node.eq(urlpair.last)
+
+    aliases_node = self.arel_table[:aliases]
     aliases_query = aliases_node.overlap urlpair # [url]
+
     url_query.or aliases_query
   end
 

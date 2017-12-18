@@ -166,7 +166,11 @@ class ApplicationController < ActionController::Base
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
     logger.info "SESSION Contents: >>>>>>>>"
-    env['rack.session'].keys.each { |key| logger.info "\t#{key}: '#{env['rack.session'][key]}'"}
+    if sess = env['rack.session']
+                  sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
+    else
+      logger.info "NO env['rack.session']!!!"
+    end
     logger.info "<<<<<<<< SESSION"
     logger.info "UUID: #{response_service.uuid}"
   end
