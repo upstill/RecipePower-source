@@ -161,7 +161,7 @@ class PageRef < ActiveRecord::Base
       @data['content'] ||= ''
       @data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = @data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.aliases += [new_url] if new_url != url # Record the url in the aliases if not already there
+      self.aliases |= [url] if @data['url'] != url # Record the existing url in the aliases if not already there
       self.assign_attributes @data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
       self.error_message = "Bad URL '#{url}': #{e}"
@@ -222,7 +222,8 @@ class PageRef < ActiveRecord::Base
     url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
   end
 
-  # Lookup a PageRef. We undergo two queries, on the theory that a direct lookup is faster
+  # Lookup a PageRef. We undergo two queries, on the theory that
+  #  a direct lookup is faster if the search url is likely to be found in the url attribute
   def self.find_by_url url, single_query=true
     url = indexing_url(url)
     single_query ?
@@ -250,6 +251,10 @@ class PageRef < ActiveRecord::Base
         extant.aliases |= mp.aliases - [extant.url]
         mp = extant
       end
+    end
+    # Ensure that we can always get back to this record via the indexing url
+    if (mp.url != (iu = indexing_url mp.url)) && !mp.aliases.include?(iu)
+      mp.aliases << iu
     end
     mp
   end

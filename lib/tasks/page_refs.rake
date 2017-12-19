@@ -19,7 +19,7 @@ namespace :page_refs do
       if pr.url != indexing_url(pr.url)
         extant = pr.class.find_by_url(pr.url)
         if !extant
-          pr.aliases += [indexing_url(pr.url)]
+          pr.aliases |= [indexing_url(pr.url)]
           pr.save
           count += 1
         elsif extant.id != pr.id
