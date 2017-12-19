@@ -145,7 +145,12 @@ class Feed < ActiveRecord::Base
 
   def self.preload url
     begin
-      f = Feedjira::Feed.fetch_and_parse url, :on_failure => Proc.new { raise 'Feedjira error: Can\'t open feed' }
+      f = Feedjira::Feed.fetch_and_parse url,
+                                         :on_failure => Proc.new {
+                                           raise 'Feedjira error: Can\'t open feed'
+                                         },
+                                         :max_redirects => 5,
+                                         :timeout => 4
       f = nil if [Fixnum, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
     rescue Exception => e
       f = nil
