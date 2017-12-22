@@ -23,7 +23,6 @@ namespace :gleanings do
       if gl.changed?
         puts "Saving Gleaning ##{gl.id}"
         gl.save
-        break;
       end
     }
   end
