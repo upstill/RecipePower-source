@@ -89,7 +89,6 @@ class FinderServices
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
           if attribute_value = attribute_name && child.attributes[attribute_name].to_s.if_present
-            attribute_value = safe_uri_join(pagehome, attribute_value).to_s if(%w{ href src}.include? attribute_name)
             result.push attribute_value
           elsif attribute_name == 'content'
             result.push child.content.strip
@@ -97,7 +96,7 @@ class FinderServices
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'
             outstr = child.attributes['src'].to_s
-            result.push safe_uri_join(pagehome, outstr) unless finder[:pattern] && !(outstr =~ /#{finder[:pattern]}/)
+            result.push outstr
             # If there's an enclosed link coextensive with the content, emit the link
           elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
             result.glean_atag finder[:linkpath], atag, pagehome
@@ -105,6 +104,16 @@ class FinderServices
             result.push child.content.strip
           end
         end
+      end
+      # Make sure that URLs are properly joined
+      case label
+        when 'URI'
+        when 'Author Link'
+        when 'RSS Feed'
+        when 'Image'
+          result.out = result.out.collect { |url|
+            url.match(/^data:/) ? url : safe_uri_join(pagehome, url).to_s
+          }.compact
       end
       if result.found
         result.report

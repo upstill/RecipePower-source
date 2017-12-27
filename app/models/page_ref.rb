@@ -39,6 +39,8 @@ class PageRef < ActiveRecord::Base
   # serialize :aliases
   store :extraneity, accessors: @@extraneous_attribs, coder: JSON
 
+  scope :matching, ->(str) { where("url ILIKE ?", "%#{str}%") }
+
   # What attributes are obtained from Mercury?
   def self.mercury_attributes
     @@mercury_attributes + [ :extraneity ]

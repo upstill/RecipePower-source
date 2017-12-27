@@ -255,6 +255,7 @@ class CollectibleController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     @resource = CollectibleServices.find_or_create params[response_service.controller_model_name],
                                                  response_service.controller_model_class
+    @resource.bkg_land # Glean title, etc. as necessary
     update_and_decorate @resource, touch: true
     if @resource.errors.empty? # Success (valid recipe, either created or fetched)
       current_user.collect @resource if current_user  # Add to collection
@@ -270,6 +271,8 @@ class CollectibleController < ApplicationController
         }
       end
     else # failure (not a valid collectible) => return to new
+      # Since only url errors will show up in the dialog, add them to the base
+      view_context.make_base_errors_except @resource, :url
       response_service.title = 'Cookmark a ' + @resource.class.to_s
       @nav_current = :addcookmark
       @decorator.url = params[response_service.controller_model_name][:url]

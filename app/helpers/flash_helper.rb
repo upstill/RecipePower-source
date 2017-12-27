@@ -30,6 +30,18 @@ module FlashHelper
     end
   end
 
+  # For a form where resource errors might be triggered by unavailable fields, add the errors to :base
+  def make_base_errors_except *args
+    return if resource.errors.empty?
+    resource = args.shift
+    (resource.errors.keys - args).each { |errkey|
+      next if errkey == :base
+      resource.errors[errkey].each { |error|
+        resource.errors.add :base, "#{errkey} #{error}"
+      }
+    }
+  end
+
   # Augments error display for record attributes (a la simple_form) with base-level errors
   def base_errors_helper resource, for_bootstrap = true
     flash_one :error, express_base_errors(resource), for_bootstrap
