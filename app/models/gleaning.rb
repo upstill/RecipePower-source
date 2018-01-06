@@ -61,7 +61,8 @@ class Gleaning < ActiveRecord::Base
         breakdown = FinderServices.err_breakdown url, msg
         self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
         self.http_status = breakdown[:status]
-        errors.add :url, " #{url} failed to glean (http_status #{http_status}): #{msg}"
+        # errors.add :url, " #{url} failed to glean (http_status #{http_status}): #{msg}"
+        raise msg
       end
   end
 
