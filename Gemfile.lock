@@ -1,17 +1,17 @@
 GIT
   remote: git://github.com/collectiveidea/delayed_job.git
-  revision: ce88693429188a63793b16daaab67056a4e4e0bf
+  revision: c7a42fb78dc538de46024eb36b31e72916ff21a0
   specs:
-    delayed_job (4.0.6)
-      activesupport (>= 3.0, < 5.0)
+    delayed_job (4.1.4)
+      activesupport (>= 3.0, < 5.2)
 
 GIT
   remote: git://github.com/collectiveidea/delayed_job_active_record.git
-  revision: 270b06eef0879a7ea167eb41182336aa14fb762e
+  revision: 45cebed242938dbf6d5bf1dd7d2523b99008f22e
   specs:
-    delayed_job_active_record (4.0.3)
-      activerecord (>= 3.0, < 5.0)
-      delayed_job (>= 3.0, < 4.1)
+    delayed_job_active_record (4.1.2)
+      activerecord (>= 3.0, < 5.2)
+      delayed_job (>= 3.0, < 5)
 
 GIT
   remote: git://github.com/smartinez87/exception_notification.git
@@ -70,7 +70,7 @@ GEM
     annotate (2.5.0)
       rake
     ansi (1.5.0)
-    arel (6.0.3)
+    arel (6.0.4)
     autoprefixer-rails (5.2.0)
       execjs
       json
@@ -189,7 +189,8 @@ GEM
     heapy (0.1.2)
     hirefire-resource (0.3.7)
     htmlentities (4.3.3)
-    i18n (0.8.1)
+    i18n (0.9.1)
+      concurrent-ruby (~> 1.0)
     jquery-migrate-rails (1.2.1)
     jquery-rails (4.0.3)
       rails-dom-testing (~> 1.0)
@@ -228,7 +229,7 @@ GEM
       mime-types-data (~> 3.2015)
     mime-types-data (3.2016.0221)
     mini_portile2 (2.1.0)
-    minitest (5.10.1)
+    minitest (5.11.1)
     mocha (1.1.0)
       metaclass (~> 0.0.1)
     multi_json (1.12.1)
@@ -402,7 +403,7 @@ GEM
       nokogiri (~> 1.6.1)
     turn (0.9.6)
       ansi
-    tzinfo (1.2.2)
+    tzinfo (1.2.4)
       thread_safe (~> 0.1)
     uglifier (2.7.1)
       execjs (>= 0.3.0)
