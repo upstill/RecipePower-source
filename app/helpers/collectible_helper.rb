@@ -171,7 +171,7 @@ module CollectibleHelper
       else
         do_label = options.delete :label
         label = ''
-        if current_user_or_guest.has_in_collection? entity
+        if entity.collectible_collected?(current_user_or_guest.id) # current_user_or_guest.has_in_collection? entity
           if options[:removable]
             label = '&nbsp;Remove from Collection' if do_label
             collection_link decorator, sprite_glyph(:minus)+label.html_safe, {}, :in_collection => false

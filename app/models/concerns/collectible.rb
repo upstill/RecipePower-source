@@ -9,6 +9,10 @@ module Collectible
       @cached_ref.save if cached_ref_valid? # It must have been set
     end
 
+    # We seek to preload the user pointer (collection flag) for an entity, which shows up using
+    has_many :rcprefs, :dependent => :destroy, :as => :entity
+    scope :including_user_pointer, -> (id) { includes(:rcprefs).where rcprefs: { user_id: id } }
+
     # User_pointers refers to users who have the entity in their collection
     has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
     has_many :users, :through => :user_pointers, :autosave => true
@@ -126,9 +130,14 @@ module Collectible
   def cached_ref force=true
     unless cached_ref_valid?
       # A user is specified, but the currently-cached ref doesn't match
-      @cached_ref = (force ?
-          toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id) :
-          toucher_pointers.where(user_id: @collectible_user_id).first)
+      @cached_ref =
+          if force
+            toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id)
+          else
+            # Look first to the cached rcprefs
+            (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == @collectible_user_id }) ||
+            toucher_pointers.find_by(user_id: @collectible_user_id)
+          end
     end
     @cached_ref
   end

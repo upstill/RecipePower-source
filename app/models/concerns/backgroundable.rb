@@ -80,16 +80,22 @@ module Backgroundable
                  :bad # Executed unsuccessfully
              ]
       end
-      # Clear the status attribute of all entities that may have been interrupted
-      # NB: The test pertains when migrating the status and dj_id columns, which don't yet exist
-      if ActiveRecord::Base.connection.column_exists?(self.model_name.collection, status_attribute) # Need to check b/c we may be going into the migration that provides status
-        self.where(status: 2, dj_id: nil).update_all status_attribute.to_sym => 0 # Mark all executing objects as virgin to prevent processing deadlock
-      end
     end
 
   end
 
   included do
+=begin  TODO: Ensure we have some way of clearing dead jobs
+    # Clear the status attribute of all entities that may have been interrupted
+    # NB: The test pertains when migrating the status and dj_id columns, which don't yet exist
+    unless @queue_cleared
+      if ActiveRecord::Base.connection.column_exists?(self.model_name.collection, :status) # Need to check b/c we may be going into the migration that provides status
+        self.where(status: 2, dj_id: nil).update_all :status => 0 # Mark all executing objects as virgin to prevent processing deadlock
+      end
+      @queue_cleared = true
+    end
+=end
+
     belongs_to :dj,
                :class_name => 'Delayed::Backend::ActiveRecord::Job',
                :dependent => :destroy

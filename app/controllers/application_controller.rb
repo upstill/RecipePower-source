@@ -244,15 +244,23 @@ class ApplicationController < ActionController::Base
         render :show, locals: { decorator: @decorator, viewparams: fp.viewparams }
       when :items # Stream items into the stream's container
         renderings = [ { deletions: [".stream-tail.#{fp.stream_id}"] } ]
-        while item = fp.next_item do
-          renderings << {
-              elmt: with_format("html") {
-                admin_sensitive = [:table, :card].include? fp.item_mode
-                cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
-                  view_context.render_item item, fp.item_mode
-                end
-              }
-          }
+        items = []
+        NestedBenchmark.measure 'Fetch items for display: ' do
+          while item = fp.next_item do
+            items << item
+          end
+        end
+        items.each do |item|
+          NestedBenchmark.measure "Render item ##{item.id}: " do
+            renderings << {
+                elmt: with_format("html") {
+                  admin_sensitive = [:table, :card].include? fp.item_mode
+                  cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
+                    view_context.render_item item, fp.item_mode
+                  end
+                }
+            }
+          end
         end
         renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { decorator: @decorator, viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings

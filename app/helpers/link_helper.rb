@@ -63,9 +63,9 @@ module LinkHelper
   # :id, :class, :style, :data, :onclick, :rel and :method are passed to link_to to create attributes
   # ...all other options get folded into the data attribute of the link
   def linkto_options path_or_options, options={}
-    query_option_names = [ :mode ] # These get folded into the query UNLESS we're going to a page
-    class_option_names = [ :trigger, :submit, :preload ]
-    attribute_names = [ :id, :class, :style, :data, :onclick, :onload, :method, :rel, :title ]
+    query_option_names = [:mode] # These get folded into the query UNLESS we're going to a page
+    class_option_names = [:trigger, :submit, :preload]
+    attribute_names = [:id, :class, :style, :data, :onclick, :onload, :method, :rel, :title]
     # We do NOT want a remote response: it asks for Javascript
     options = options.clone
     handler_class = options.delete(:handler_class) || 'submit'
@@ -82,7 +82,7 @@ module LinkHelper
     else
       # These options get included in the link's class
       # Pull out all class options and assert class "submit" to attract Javascript handling
-      class_list = [ handler_class ]
+      class_list = [handler_class]
       if class_options = options.slice(*class_option_names)
         class_list += class_options.keep_if { |k, v| v }.keys
       end

@@ -115,7 +115,11 @@ module ItemHelper
     end
     item, item_mode = item_preflight item_or_decorator_or_specs, (item_mode || :card)
     if partial = item_partial_name(item, item_mode)
-      with_format("html") { render partial, locals.merge(decorator: @decorator) }
+      result = nil
+      NestedBenchmark.measure "Render #{partial}: " do
+             result = with_format("html") { render partial, locals.merge(decorator: @decorator) }
+           end
+      result
     end
   end
 
@@ -130,7 +134,10 @@ module ItemHelper
         render_item *spec 
       }.join('').html_safe
     else
-      rendering = render_item_unwrapped item_or_decorator_or_specs, item_mode, locals # locals are the local bindings for the item
+      rendering = nil
+      NestedBenchmark.measure 'Rendering item unwrapped: ' do
+             rendering = render_item_unwrapped item_or_decorator_or_specs, item_mode, locals # locals are the local bindings for the item
+           end
       return "" unless rendering.present?
       item, item_mode = item_preflight item_or_decorator_or_specs, item_mode
     end

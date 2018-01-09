@@ -13,6 +13,8 @@ class Rcpref < ActiveRecord::Base
                   :column_names => {
                       ["rcprefs.in_collection = true"] => 'count_of_collecteds'
                   }
+  # Scope the user pointer for a specific user (like the current user)
+  scope :toucher_pointer, -> (id) { where(user_id: id) }
   # before_save :ensure_unique
   attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 

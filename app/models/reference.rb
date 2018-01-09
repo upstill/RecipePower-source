@@ -209,7 +209,7 @@ class ImageReference < Reference
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
   def imgdata force=false
     # Provide good thumbdata if possible
-    bkg_land # Doesn't return until the job is done
+    bkg_land if force # Doesn't return until the job is done
     thumbdata.present? ? thumbdata : url
   end
 

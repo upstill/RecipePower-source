@@ -14,7 +14,7 @@ end
 module SitesTable
   @item_mode = :table
   def table_headers
-    [ '', 'Title<br>Description'.html_safe, 'Misc. Info', ('Actions' if response_service.admin_view?) ].compact
+    response_service.admin_view? ? [ '', 'Title<br>Description'.html_safe, 'Misc. Info', 'Actions' ] : ['', '' ]
   end
 end
 

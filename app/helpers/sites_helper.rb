@@ -14,8 +14,8 @@ module SitesHelper
   end
 
   def site_feeds_summary site
-    napproved = site.approved_feeds.count
-    nothers = site.feeds.count - napproved
+    napproved = site.approved_feeds.size
+    nothers = site.feeds.size - napproved
     q = labelled_quantity(napproved, 'feed').capitalize
     link = (napproved == 1) ?
         feed_path(site.approved_feeds.first) :
@@ -27,9 +27,9 @@ module SitesHelper
   def site_recipes_summary site, options={}
     separator = summary_separator options[:separator]
     inward_separator = summary_separator separator
-    scope = site.recipes
-    safe_join ([labelled_quantity(scope.count, 'cookmark')] +
-                  scope.limit(5).collect { |rcp| homelink rcp, nuke_button: true }
+    rcps = site.recipes.loaded? ? site.recipes.first(5) : site.recipes.limit(5).to_a
+    safe_join ([labelled_quantity(site.recipes.size, 'cookmark')] +
+                  rcps.collect { |rcp| homelink rcp, nuke_button: true }
               ), inward_separator
   end
 
@@ -79,13 +79,13 @@ module SitesHelper
   def site_summaries site, admin_view
     set = [site_feeds_summary(site),
            site_recipes_summary(site)]
-    set += [
-        site_referent_summary(site),
-        site_finders_summary(site),
-        (summarize_page_ref(site.page_ref, label: "site page ref") if site.page_ref),
-        site_pagerefs_summary(site),
-        site_tags_summary(site)
-    ] if admin_view
+      set += [
+          site_referent_summary(site),
+          site_finders_summary(site),
+          (summarize_page_ref(site.page_ref, label: "site page ref") if site.page_ref),
+          site_pagerefs_summary(site),
+          site_tags_summary(site)
+      ] if admin_view
     summarize_set '', set
   end
 end

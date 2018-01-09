@@ -1154,7 +1154,10 @@ class SitesIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= admin_view ? Site.unscoped : Site.where(approved: approved)
+      @itemscope ||= Site.
+          including_user_pointer(@viewerid).
+          includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
+          where(approved: approved)
   end
 
   def ordereditemscope
@@ -1165,7 +1168,7 @@ class SitesIndexCache < ResultsCache
       when :feed_count
       when :definition_count
       else
-                                uniqueitemscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."referent_id" DESC})
+        uniqueitemscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."id" DESC})
     end || super
   end
 
