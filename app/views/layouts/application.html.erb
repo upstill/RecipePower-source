@@ -79,37 +79,37 @@
         </div>
     <% end %>
     <% if current_user %>
-        <% NestedBenchmark.measure 'Rendering navbar' do %>
-            <% NestedBenchmark.measure 'Rendering navtabs' do %>
+        <%# NestedBenchmark.measure 'Rendering navbar' do %>
+            <%# NestedBenchmark.measure 'Rendering navtabs' do %>
                 <!-- Caching the navbar doesn't seem to do much good. -->
                 <%# cache [current_user, :menu] do %>
                 <div class="menu">
                   <ul class="nav navbar-nav main-menu">
-                    <% NestedBenchmark.measure '...collections' do %>
+                    <%# NestedBenchmark.measure '...collections' do %>
                         <%= collections_navtab %>
-                    <% end %>
-                    <% NestedBenchmark.measure '...friends' do %>
+                    <%# end %>
+                    <%# NestedBenchmark.measure '...friends' do %>
                         <%= friends_navtab %>
-                    <% end %>
-                    <% NestedBenchmark.measure '...my_lists' do %>
+                    <%# end %>
+                    <%# NestedBenchmark.measure '...my_lists' do %>
                         <%= my_lists_navtab %>
-                    <% end %>
+                    <%# end %>
                     <%# other_lists_navtab %>
-                    <% NestedBenchmark.measure '...feeds' do %>
+                    <%# NestedBenchmark.measure '...feeds' do %>
                         <%= feeds_navtab %>
-                    <% end %>
+                    <%# end %>
                     <%# news_navtab %>
                     <%# more_navtab %>
-                    <% NestedBenchmark.measure '...home' do %>
+                    <%# NestedBenchmark.measure '...home' do %>
                         <%= home_navtab %>
-                    <% end %>
+                    <%# end %>
                   </ul>
                 </div>
-            <% end %>
-            <% NestedBenchmark.measure 'Rendering navbar layout' do %>
+            <%# end %>
+            <%# NestedBenchmark.measure 'Rendering navbar layout' do %>
                 <%= render 'layouts/navbar' %>
-            <% end %>
-        <% end %>
+            <%# end %>
+        <%# end %>
     <% end %>
     <% NestedBenchmark.measure 'Rendering notifications' do %>
         <%= response_service.do_notification %>

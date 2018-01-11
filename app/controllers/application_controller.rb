@@ -73,6 +73,21 @@ class ApplicationController < ActionController::Base
     response_service.invitation_token = nil
   end
 
+  # Generate a navtab menu as denoted by params[which]
+  # NB: JSON ONLY!!!
+  def menu
+    respond_to do |format|
+      format.json do
+        if %w{ collections friends my_lists feeds home }.include? params[:which]
+          render json: { replacements: [ navmenu_replacement(params[:which].to_sym) ] }.to_json, :content_type => 'application/json'
+        else
+          flash[:alert] = "Unknown menu type '#{params[:which]}'"
+          render :errors
+        end
+      end
+    end
+  end
+
   # Set up a model for editing or rendering. The parameters are orthogonal:
   # If entity is nil, it is either fetched using params[:id] or created anew
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity

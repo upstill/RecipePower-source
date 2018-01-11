@@ -4,8 +4,12 @@ module NavtabsHelper
   # -- simple label (no go_path and no block given)
   # -- link (valid go_path but no block)
   # -- Full-bore dropdown menu (block given), with or without a link at the top (go_path given or not)
-  def navtab which, menu_label, go_path, menu_only, booger=nil
-    NestedBenchmark.measure '>> construct navtab' do
+  # 'mode' denotes what to produce, one of:
+  #   :replacement -- return the portion of the menu that's replaced when elements have changed
+  #   :trigger -- the relevant menu, but with a trigger for defining the above in a separate request
+  #   :full -- the entire menu: no trigger, no replacement
+  def navtab which, menu_label, go_path, mode, booger=nil
+    NestedBenchmark.measure ">> construct #{which} navtab" do
       options={}
       class_str = 'master-navtab'
       if which == (@active_menu || response_service.active_menu)
@@ -15,7 +19,10 @@ module NavtabsHelper
 
       # The block should produce an array of menu items (links, etc.)
       itemlist =
-          if block_given?
+          if mode == :trigger
+            # Instead of generating the items now, leave a trigger for getting them later
+            # id: navmenu_id(which)
+          elsif block_given?
             menu_items = NestedBenchmark.measure '>>>> generate menu items' do
               yield
             end
@@ -30,7 +37,7 @@ module NavtabsHelper
             end
           end
 
-      if menu_only
+      if mode == :replacement
         itemlist
       else
         NestedBenchmark.measure '>>>> rolling up menu' do
@@ -52,8 +59,8 @@ module NavtabsHelper
     end
   end
 
-  def collections_navtab menu_only = false
-    navtab :collections, 'Collections', collection_user_path(current_user_or_guest), menu_only do
+  def collections_navtab mode = :full
+    navtab :collections, 'Collections', collection_user_path(current_user_or_guest), mode do
       [
           link_to_submit('My Collection', collection_user_path(current_user_or_guest)),
           link_to_submit('Cookmarks', collection_user_path(current_user_or_guest, result_type: 'cookmarks'), class: 'submenu'),
@@ -70,11 +77,11 @@ module NavtabsHelper
     end
   end
 
-  def friends_navtab menu_only = false
+  def friends_navtab mode = :full
     friends = NestedBenchmark.measure '>> query friends' do
       current_user_or_guest.followees.limit 10
     end
-    navtab :friends, 'Cookmates', users_path(:select => :followees), menu_only do
+    navtab :friends, 'Cookmates', users_path(:select => :followees), mode do
       friends.collect { |u|
         link_to_submit u.handle, user_path(u), id: dom_id(u)
       } + [
@@ -85,7 +92,7 @@ module NavtabsHelper
     end
   end
 
-  def my_lists_navtab menu_only = false
+  def my_lists_navtab mode = :full
     lids =
     NestedBenchmark.measure '>> query lists' do
       # List.joins(:name_tag).where(owner_id: current_user_or_guest.id).pluck :id, :'tags.name'
@@ -94,7 +101,7 @@ module NavtabsHelper
       # Replace the tag ids in the first array with the corresponding name from the second
       arr1.map { |elem| [elem.first, arr2.find { |elem2| elem2.first == elem.last}.last ] }
     end
-    navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), menu_only do
+    navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), mode do
       NestedBenchmark.measure('...collect list links') {
         lids.collect { |lid|
           link_to_submit lid.last, list_path(lid.first), id: "list_#{lid.first}"
@@ -110,8 +117,9 @@ module NavtabsHelper
     end
   end
 
-  def other_lists_navtab menu_only = false
-    navtab :other_lists, 'More Treasuries', lists_path(access: 'collected'), menu_only do
+=begin
+  def other_lists_navtab mode = :full
+    navtab :other_lists, 'More Treasuries', lists_path(access: 'collected'), mode do
       list_set = current_user_or_guest.decorate.collection_lists.take(16)
       if list_set.count < 16
         # Try adding the lists owned by friends
@@ -132,9 +140,10 @@ module NavtabsHelper
       ]
     end
   end
+=end
 
-  def feeds_navtab menu_only = false
-    navtab :feeds, 'Feeds', feeds_path(access: 'collected'), menu_only do
+  def feeds_navtab mode = :full
+    navtab :feeds, 'Feeds', feeds_path(access: 'collected'), mode do
       feed_set =
           NestedBenchmark.measure 'query (old)' do
             current_user_or_guest.collection_scope(entity_type: 'Feed').
@@ -185,22 +194,24 @@ module NavtabsHelper
     end
   end
 
-  def news_navtab menu_only = false
-    navtab :news, 'News', "/users/#{current_user_or_guest_id}/news", menu_only
+=begin
+  def news_navtab mode = :full
+    navtab :news, 'News', "/users/#{current_user_or_guest_id}/news", mode
   end
 
-  def more_navtab menu_only = false
-    navtab :more, 'More', "/users/#{current_user_or_guest_id}/biglist", menu_only
+  def more_navtab mode = :full
+    navtab :more, 'More', "/users/#{current_user_or_guest_id}/biglist", mode
   end
+=end
 
-  def home_navtab menu_only = false
+  def home_navtab mode = :full
     # Include a placeholder for the notifications, which will be rendered in a subsequent call
     notifications = content_tag :div, ''.html_safe, class: 'notification_wrapper' # render_notifications_of current_user
     navtab :home,
            content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
                content_tag(:span, '', class: 'measuring-spoons'),
            user_path(current_user, :mode => :partial),
-           menu_only, notifications.html_safe do
+           mode, notifications.html_safe do
       item_list = [
           link_to_dialog('Sign-in Services', authentications_path, class: 'transient'),
           link_to_dialog('Profile', users_profile_path),
@@ -240,11 +251,7 @@ module NavtabsHelper
 
   # Package the navtab up to be replaced via AJAX
   def navmenu_replacement which
-    ["ul##{navmenu_id(which)}", method(:"#{which}_navtab").call(true)]
-  end
-
-  def friends_navtab_replacement
-    ['ul#friends-navmenu', friends_navtab(true)]
+    ["ul##{navmenu_id(which)}", method(:"#{which}_navtab").call(:replacement)]
   end
 
   protected

@@ -90,6 +90,7 @@ RP::Application.routes.draw do
   put "redirect/go"
   get '/auth/failure' => 'authentications#failure'
   get 'defer_invitation' => 'application#defer_invitation'
+  get 'menu' => 'application#menu'
   # get '/authentications/new' => 'authentications#new'
   resources :authentications
 
