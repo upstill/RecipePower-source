@@ -251,16 +251,18 @@ class ApplicationController < ActionController::Base
           end
         end
         items.each do |item|
-          NestedBenchmark.measure "Render item ##{item.id}: " do
-            renderings << {
-                elmt: with_format("html") {
-                  admin_sensitive = [:table, :card].include? fp.item_mode
-                  cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
+          renderings << {
+              elmt: with_format("html") {
+                admin_sensitive = [:table, :card].include? fp.item_mode
+                # cache item do
+                cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
+                  puts "Cache miss rendering element #{item}"
+                  NestedBenchmark.measure "Render item ##{item.id}: " do
                     view_context.render_item item, fp.item_mode
                   end
-                }
-            }
-          end
+                end
+              }
+          }
         end
         renderings << { elmt: with_format("html") { render_to_string partial: "filtered_presenter/present/#{fp.tail_partial}", locals: { decorator: @decorator, viewparams: fp.viewparams } } } if fp.next_path
         render json: renderings

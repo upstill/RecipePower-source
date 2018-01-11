@@ -1,22 +1,24 @@
 <!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title><%= title %></title>
-  <%= stylesheet_link_tag 'application', :media => 'all' %>
-  <!--[if lt IE 9]>
-  <script src="http://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
-  <![endif]-->
-  <%= favicon_link_tag %>
+<% NestedBenchmark.measure 'Rendering application layout' do %>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <title><%= title %></title>
+      <% NestedBenchmark.measure 'Loading assets' do %>
+          <%= stylesheet_link_tag 'application', :media => 'all' %>
+          <!--[if lt IE 9]>
+          <script src="http://html5shim.googlecode.com/svn/trunk/html5.js" type="text/javascript"></script>
+          <![endif]-->
+          <%= favicon_link_tag %>
 
-  <!-- Include Bootstrap from CDN per getbootstrap.com -->
-  <!-- Latest compiled and minified JavaScript -->
-  <!--
-    <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
-  -->
-  <%# if Rails.configuration.no_cdn # Rails.env.development? %>
-  <!--
+          <!-- Include Bootstrap from CDN per getbootstrap.com -->
+          <!-- Latest compiled and minified JavaScript -->
+          <!--
+            <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+          -->
+          <%# if Rails.configuration.no_cdn # Rails.env.development? %>
+          <!--
   <%# if Rails.configuration.x.no_cdn %>
       <%# javascript_include_tag "jquery-1.7.1" %>
       <%# javascript_include_tag "jquery-2.1.3" %>
@@ -32,103 +34,126 @@
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.2/js/bootstrap-3.3.2.js"></script>
   <%# end %>
 -->
-  <%= bootstrap_css_include_tag !(Rails.env.development? || Rails.env.test?) %>
-  <%= jquery_include_tag !Rails.env.development?, Rails.application.config.use_jquery2 %>
-  <!-- From bootstrap-sass -->
-  <%= bootstrap_js_include_tag !(Rails.env.development? || Rails.env.test?) %>
-  <%= javascript_include_tag 'application' %>
-  <%= csrf_meta_tag %>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <%= yield :head %>
-<!-- Google Analytics payload:
-  <script type="text/javascript">
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-30180298-1']);
-      _gaq.push(['_trackPageview']);
+          <%= bootstrap_css_include_tag !(Rails.env.development? || Rails.env.test?) %>
+          <%= jquery_include_tag !Rails.env.development?, Rails.application.config.use_jquery2 %>
+          <!-- From bootstrap-sass -->
+          <%= bootstrap_js_include_tag !(Rails.env.development? || Rails.env.test?) %>
+          <%= javascript_include_tag 'application' %>
+          <%= csrf_meta_tag %>
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+      <% end %>
+      <% NestedBenchmark.measure 'Yielding to :head' do %>
+          <%= yield :head %>
+      <% end %>
+      <!-- Google Analytics payload:
+        <script type="text/javascript">
+            var _gaq = _gaq || [];
+            _gaq.push(['_setAccount', 'UA-30180298-1']);
+            _gaq.push(['_trackPageview']);
 
-      (function () {
-          var ga = document.createElement('script');
-          ga.type = 'text/javascript';
-          ga.async = true;
-          ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-          var s = document.getElementsByTagName('script')[0];
-          s.parentNode.insertBefore(ga, s);
-      })();
-  </script>
--->
-  <style title="pagelet-padding">
-      div.pagelet-body {
+            (function () {
+                var ga = document.createElement('script');
+                ga.type = 'text/javascript';
+                ga.async = true;
+                ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+                var s = document.getElementsByTagName('script')[0];
+                s.parentNode.insertBefore(ga, s);
+            })();
+        </script>
+      -->
+      <style title="pagelet-padding">
+          div.pagelet-body {
           padding-top: 54px; // 102px;
-      }
-  </style>
-</head>
-<body class="<%= response_service.controller %> <%= response_service.action %> <%= 'logged-in' if current_user %>" >
-<% if Rails.env.development? %>
-    <div class="booger">
-      <span class="phone" >phone</span>
-      <span class="small" >small</span>
-      <span class="medium" >medium</span>
-      <span class="largish" >largish</span>
-      <span class="large" >large</span>
-      <span class="wide" >wide</span>
-    </div>
-<% end %>
-<% if current_user %>
-<!-- Caching the navbar doesn't seem to do much good. -->
-    <%# cache [current_user, :menu] do %>
-        <div class="menu">
-          <ul class="nav navbar-nav main-menu">
-            <%= collections_navtab %>
-            <%= friends_navtab %>
-            <%= my_lists_navtab %>
-            <%# other_lists_navtab %>
-            <%= feeds_navtab %>
-            <%# news_navtab %>
-            <%# more_navtab %>
-            <%= home_navtab %>
-          </ul>
+          }
+      </style>
+    </head>
+    <body class="<%= response_service.controller %> <%= response_service.action %> <%= 'logged-in' if current_user %>">
+    <% if Rails.env.development? %>
+        <div class="booger">
+          <span class="phone">phone</span>
+          <span class="small">small</span>
+          <span class="medium">medium</span>
+          <span class="largish">largish</span>
+          <span class="large">large</span>
+          <span class="wide">wide</span>
         </div>
-    <%# end %>
-<% end %>
-<%= render 'layouts/navbar' %>
-<%= response_service.do_notification %>
-<%= do_notifs %>
-<%= render 'layouts/pagelet' %>
-<% if false && Rails.env.development? %>
-    <p>
-      Archivo:
-      <span class="archivo">default</span>&nbsp;
-      <span class="archivo light">light</span>&nbsp;
-      <span class="archivo bold">bold</span><br>
-      Archivo-Light:
-      <span class="arch-light">default</span>&nbsp;
-      <span class="arch-light light">light</span>&nbsp;
-      <span class="arch-light bold">bold</span><br>
-      Archivo-Bold:
-      <span class="arch-bold">default</span>&nbsp;
-      <span class="arch-bold light">light</span>&nbsp;
-      <span class="arch-bold bold">bold</span><br>
-      Oswald:
-      <span class="oswald">default</span>&nbsp;
-      <span class="oswald light">light</span>&nbsp;
-      <span class="oswald bold">bold</span><br>
-      Oswald-Light:
-      <span class="ow-light">default</span>&nbsp;
-      <span class="ow-light light">light</span>&nbsp;
-      <span class="ow-light bold">bold</span><br>
-      Oswald-Bold:
-      <span class="ow-bold">default</span>&nbsp;
-      <span class="ow-bold light">light</span>&nbsp;
-      <span class="ow-bold bold">bold</span><br>
-    </p>
-<% end %>
-<div id='popup_notification' class='hide alert-notice'>
-  <button class="close" data-dismiss="alert">&#215;</button>
-  <span>Msg Goes Here</span>
-</div>
-<%= feedback_tab :position => 'left' %>
+    <% end %>
+    <% if current_user %>
+        <% NestedBenchmark.measure 'Rendering navbar' do %>
+            <% NestedBenchmark.measure 'Rendering navtabs' do %>
+                <!-- Caching the navbar doesn't seem to do much good. -->
+                <%# cache [current_user, :menu] do %>
+                <div class="menu">
+                  <ul class="nav navbar-nav main-menu">
+                    <% NestedBenchmark.measure '...collections' do %>
+                        <%= collections_navtab %>
+                    <% end %>
+                    <% NestedBenchmark.measure '...friends' do %>
+                        <%= friends_navtab %>
+                    <% end %>
+                    <% NestedBenchmark.measure '...my_lists' do %>
+                        <%= my_lists_navtab %>
+                    <% end %>
+                    <%# other_lists_navtab %>
+                    <% NestedBenchmark.measure '...feeds' do %>
+                        <%= feeds_navtab %>
+                    <% end %>
+                    <%# news_navtab %>
+                    <%# more_navtab %>
+                    <% NestedBenchmark.measure '...home' do %>
+                        <%= home_navtab %>
+                    <% end %>
+                  </ul>
+                </div>
+            <% end %>
+            <% NestedBenchmark.measure 'Rendering navbar layout' do %>
+                <%= render 'layouts/navbar' %>
+            <% end %>
+        <% end %>
+    <% end %>
+    <% NestedBenchmark.measure 'Rendering notifications' do %>
+        <%= response_service.do_notification %>
+        <%= do_notifs %>
+    <% end %>
+    <% NestedBenchmark.measure 'Rendering pagelet' do %>
+        <%= render 'layouts/pagelet' %>
+    <% end %>
+    <% if false && Rails.env.development? %>
+        <p>
+          Archivo:
+          <span class="archivo">default</span>&nbsp;
+          <span class="archivo light">light</span>&nbsp;
+          <span class="archivo bold">bold</span><br>
+          Archivo-Light:
+          <span class="arch-light">default</span>&nbsp;
+          <span class="arch-light light">light</span>&nbsp;
+          <span class="arch-light bold">bold</span><br>
+          Archivo-Bold:
+          <span class="arch-bold">default</span>&nbsp;
+          <span class="arch-bold light">light</span>&nbsp;
+          <span class="arch-bold bold">bold</span><br>
+          Oswald:
+          <span class="oswald">default</span>&nbsp;
+          <span class="oswald light">light</span>&nbsp;
+          <span class="oswald bold">bold</span><br>
+          Oswald-Light:
+          <span class="ow-light">default</span>&nbsp;
+          <span class="ow-light light">light</span>&nbsp;
+          <span class="ow-light bold">bold</span><br>
+          Oswald-Bold:
+          <span class="ow-bold">default</span>&nbsp;
+          <span class="ow-bold light">light</span>&nbsp;
+          <span class="ow-bold bold">bold</span><br>
+        </p>
+    <% end %>
+    <div id='popup_notification' class='hide alert-notice'>
+      <button class="close" data-dismiss="alert">&#215;</button>
+      <span>Msg Goes Here</span>
+    </div>
+    <%= feedback_tab :position => 'left' %>
 <%# If there are any dialogs waiting, either in the session or the parameters %>
-<%= trigger_pending_modal %>
-<%= check_for_notifications %>
-</body>
-</html>
+    <%= trigger_pending_modal %>
+    <%= check_for_notifications %>
+    </body>
+    </html>
+<% end %>

@@ -43,8 +43,8 @@ module LinkHelper
 
   def link_to_submit label, path_or_options, options={}
     link_options = linkto_options path_or_options, options
-    path = link_options.delete :path
-    link_to label, path, link_options
+        path = link_options.delete :path
+        link_to label, path, link_options
   end
 
   # Provide a link to run a dialog
