@@ -11,7 +11,7 @@ class Counts < Hash
     when ActiveRecord::Relation
       # Late-breaking conversion of scope into items
       modelname = key_or_keys.model.to_s
-      key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr } if key_or_keys.present?
+      key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
     when Array
       key_or_keys.each { |k| self.include k, incr }
     when String
@@ -19,6 +19,7 @@ class Counts < Hash
     when ActiveRecord::Base
       self["#{key_or_keys.model_name.name}/#{key_or_keys.id}"] += incr
     end
+    self # ...for chainability
   end
 
   def [](ix)
@@ -42,6 +43,18 @@ class Counts < Hash
     partition.push itemstubs.count
   end
 
+  def merge_counts extant_counts
+    # Two cases:
+    #  -- there's an existing set of counts => merge counts in an exclusive fashion
+    #  -- no counts exist yet => return unchanged
+    if extant_counts
+      newcounts = collect { |key, value| [key, value+extant_counts[key]] if extant_counts.has_key? key }.compact
+      Counts[ newcounts ]
+    else
+      self
+    end
+
+  end
 end
 
 # A partition is an array of offsets within another array or a scope, denoting the boundaries of groups
@@ -171,7 +184,7 @@ module NullCache
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
-  def count_tag tag, counts
+  def count_tag tag
     raise 'Abstract Method count_tag  '
   end
 
@@ -193,14 +206,20 @@ module EntitiesCache
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
-  def count_tag tag, counts
+  def count_tag tag
     tagname = tag.normalized_name || Tag.normalizeName(tag.name)
     model = itemscope.model
 
+    counts = Counts.new
     # We index using tags, for taggable models
-    if model.reflect_on_association :tags
-      counts.include itemscope.joins(:tags).where('"tags"."normalized_name" ILIKE ?', "%#{tagname}%") # One extra point for matching in one field
-      counts.include itemscope.joins(:tags).where('"tags"."normalized_name" = ?', tagname), 10 # Extra points for complete matches
+    if model.reflect_on_association :tags # model has :tags association
+      normalized = Tag.normalizeName tagname
+      canditags = Tag.where('normalized_name LIKE ?', "%#{normalized}%").pluck :id, :normalized_name
+      counts.include itemscope.joins(:taggings).where(taggings: { tag_id: canditags.map(&:first) } ) # One extra point for matching in one field
+      exactcandi = canditags.find_all { |candi| candi.last == normalized }
+      if exactcandi.present?
+        counts.include itemscope.joins(:taggings).where(taggings: { tag_id: exactcandi.map(&:first) } ), 10 # Extra points for complete matches
+      end
     end
 
     # Models can apply strings to a search using a self-declared strategy
@@ -214,6 +233,7 @@ module EntitiesCache
       end
       counts.include strscope, 10
     end
+    counts
   end
 
   # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
@@ -280,8 +300,9 @@ module CollectionCache
   end
 
   # Apply a tag to the current set of result counts
-  def count_tag tag, counts
+  def count_tag tag
     matchstr = "%#{tag.name}%"
+    counts = Counts.new
     typeset.each do |type|
       modelclass = type.constantize
       scope = modelclass.joins :user_pointers
@@ -304,6 +325,7 @@ module CollectionCache
 =end
       counts.include subscope, 1
     end
+    counts
   end
 
 protected
@@ -351,12 +373,10 @@ module TaggingCache
   end
 
   # Apply the tag to the current set of result counts
-  def count_tag tag, counts
+  def count_tag tag
     # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    counts.include itemscope.where(tag_id: TagServices.new(tag).similar_ids) # One extra point for matching in one field
-
-    counts.include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
-
+    Counts.new.include(itemscope.where(tag_id: TagServices.new(tag).similar_ids)). # One extra point for matching in one field
+      include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
   end
 end
 
@@ -625,9 +645,9 @@ class ResultsCache < ActiveRecord::Base
       true
     else
       # Convert the itemscope relation into a hash on entity types
-      counts = Counts.new
+      counts = nil
       @querytags.each { |tag|
-        count_tag tag, counts
+        counts = count_tag(tag).merge_counts counts
       }
 
       # Sort the scope by number of hits, descending
@@ -1094,9 +1114,8 @@ class TagsIndexCache < ResultsCache
   end
 
   # Tags don't go through Taggings, so we just use/count them directly
-  def count_tag tag, counts
-    super # Do the usual strscopes thing
-    counts.include itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
+  def count_tag tag
+    super.include itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
   end
 
   def itemscope

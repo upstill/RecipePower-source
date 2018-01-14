@@ -13,9 +13,9 @@ class ApplicationController < ActionController::Base
 
   before_filter :check_flash
   before_filter :report_cookie_string
-  before_filter { report_session 'Before controller:' }
+  before_filter { report_session 'Before controller' }
   # after_filter :log_serve
-  after_filter { report_session 'After controller:'  }
+  after_filter { report_session 'After controller'  }
   before_filter :setup_response_service
 
   helper :all
@@ -166,7 +166,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_session context
-    logger.info 'XXXXXXXXXXXXXXXX ' + context + ' XXXXXXXXXXXXXXXX'
+    logger.info "XXXXXXXXXXXXXXXX #{context} at #{Time.now}: XXXXXXXXXXXXXXXX"
     logger.info "COOKIES: >>>>>>>>"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     logger.info "<<<<<<<< COOKIES"
@@ -203,44 +203,50 @@ class ApplicationController < ActionController::Base
 
   # Generalized response for dialog for a particular area
   def smartrender renderopts={}
-    response_service.action = renderopts[:action] || params[:action]
-    url = renderopts[:url] || request.original_url
-    renderopts = response_service.render_params renderopts
-    # Give the stream a crack at it
-    if fp = FilteredPresenter.build(view_context,
-                                    response_service,
-                                    params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
-                                    @decorator)
-      render_fp fp
-    else
-      respond_to do |format|
-        format.html do
-          if response_service.mode == :modal
-            # Run the request as a dialog within the home or collection page
-            redirect_to_modal url
-          else
-            render response_service.action, renderopts
-          end
+    NestedBenchmark.measure 'smartrender' do
+      response_service.action = renderopts[:action] || params[:action]
+      url = renderopts[:url] || request.original_url
+      renderopts = response_service.render_params renderopts
+      # Give the stream a crack at it
+      if fp = NestedBenchmark.measure('Building FilteredPresenter') do
+        FilteredPresenter.build view_context,
+                                response_service,
+                                params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
+                                @decorator
+      end
+        NestedBenchmark.measure "Rendering #{fp.class}" do
+          render_fp fp
         end
-        format.json {
-          case response_service.mode
-            when :modal, :injector
-              dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ['html'])
-              render json: { dlog: dialog, how: 'bootstrap' }.to_json, layout: false, :content_type => 'application/json'
+      else
+        respond_to do |format|
+          format.html do
+            if response_service.mode == :modal
+              # Run the request as a dialog within the home or collection page
+              redirect_to_modal url
             else
-              # Render a replacement for the pagelet partial, as if it were rendered on the page
-              render partial: 'layouts/pagelet' # Respond with JSON instructions to replace the pagelet appropriately
+              render response_service.action, renderopts
+            end
           end
-        }
-        format.js {
-          # XXX??? Must have set @partial in preparation
-          render renderopts.merge(action: 'capture')
-        }
+          format.json {
+            case response_service.mode
+              when :modal, :injector
+                dialog = render_to_string renderopts.merge(action: response_service.action, layout: (@layout || false), formats: ['html'])
+                render json: {dlog: dialog, how: 'bootstrap'}.to_json, layout: false, :content_type => 'application/json'
+              else
+                # Render a replacement for the pagelet partial, as if it were rendered on the page
+                render partial: 'layouts/pagelet' # Respond with JSON instructions to replace the pagelet appropriately
+            end
+          }
+          format.js {
+            # XXX??? Must have set @partial in preparation
+            render renderopts.merge(action: 'capture')
+          }
+        end
       end
     end
   end
 
-  # Use the filtered_presenter to render various aspects of a page--including streaming items
+# Use the filtered_presenter to render various aspects of a page--including streaming items
   def render_fp fp
     @filtered_presenter = fp
     @decorator = fp.decorator
@@ -270,9 +276,9 @@ class ApplicationController < ActionController::Base
               elmt: with_format("html") {
                 admin_sensitive = [:table, :card].include? fp.item_mode
                 # cache item do
-                cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
-                  puts "Cache miss rendering element #{item}"
-                  NestedBenchmark.measure "Render item ##{item.id}: " do
+                NestedBenchmark.measure "Render item ##{item.id}: " do
+                  cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
+                    puts "Cache miss rendering element #{item}"
                     view_context.render_item item, fp.item_mode
                   end
                 end

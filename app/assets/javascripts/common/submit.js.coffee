@@ -16,7 +16,8 @@ jQuery ->
 	$(document).on "ajax:beforeSend", 'form.ujs-submit', RP.submit.beforeSend
 	$(document).on "ajax:success", 'form.ujs-submit', RP.submit.success
 	$(document).on "ajax:error", 'form.ujs-submit', RP.submit.error
-	# We shunt form submission through RP.submit.submit_and_process so we can:
+	$(document).bind "ajaxComplete", (event) ->
+		RP.submit.dequeue() # Check for queued-up requests
 	# -- handle JSON responses properly,
 	# -- short-circuit redundant forms requests
 	# -- provide for keep-alive, popup and confirmation interaction
@@ -74,7 +75,6 @@ RP.submit.block_on = (elmt) ->
 
 RP.submit.block_off = (elmt) ->
 	$(elmt).removeClass 'loading'
-	RP.submit.dequeue()
 
 RP.submit.blocking_on = (elmt) ->
 	$(elmt).hasClass 'loading'
@@ -327,7 +327,6 @@ shortCircuit = (elmt) ->
 RP.submit.handleResponse = (elmt, responseData, status, xhr) ->
 	RP.notifications.done()
 	# A response has come in, so the element is no longer loading
-	RP.submit.block_off elmt
 	# Elements that preload their query results stash them away, unless they also have the 'trigger' class
 	immediate = $(elmt).hasClass 'trigger'
 	if elmt && !immediate
@@ -338,8 +337,7 @@ RP.submit.handleResponse = (elmt, responseData, status, xhr) ->
 		$(elmt).removeClass 'trigger'
 		RP.post_success responseData # Don't activate any response functions since we're just opening the dialog
 		RP.process_response responseData, RP.dialog.enclosing_modal(elmt)
-	# Check for pending requests
-	RP.submit.dequeue()
+	RP.submit.block_off elmt
 
 # Before making a form submission, see if the dialog is preloaded
 RP.submit.beforeSend = (event, xhr, settings) ->
@@ -362,4 +360,3 @@ RP.submit.error = (event, jqXHR, statusText, errorThrown) ->
 	RP.notifications.done()
 	if responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
 		RP.process_response responseData, RP.dialog.enclosing_modal(event.currentTarget)
-

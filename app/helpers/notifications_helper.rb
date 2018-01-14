@@ -33,12 +33,16 @@ module NotificationsHelper
   end
 
   def check_for_notifications
+=begin
     script =
     with_format('js') {
       render 'activity_notification/notifications/default/check_notifications',
              notification_count: current_user.unopened_notification_count
     } if current_user
     javascript_tag script
+=end
+    trigger_pending_results user_notifications_path(current_user, :for => 'counter', :filter => :unopened)
+    # RP.submit.submit_and_process('<%= user_notifications_path(current_user, :for => 'counter', :filter => :unopened) %>', $('<%= notifications_locator %>'));
   end
 
 end
