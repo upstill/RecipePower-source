@@ -508,13 +508,6 @@ end
 
 # Subclases for different types of referents
 
-# An Ingredient may suggest a type of dish
-class FoodReferent < Referent
-  def self.fix
-    FoodReferent.all.each { |ref| ref.type = 'IngredientReferent'; ref.save }
-  end
-end
-
 class SourceReferent < Referent
   has_one :site, foreign_key: 'referent_id'
 
