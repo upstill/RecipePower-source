@@ -88,6 +88,14 @@ class Referent < ActiveRecord::Base
   # before_save :ensure_expression
   after_save :ensure_tagtypes
 
+  # Scopes for the referents of the given tag(s)
+  scope :by_tag_id, -> (tagid_or_ids) { joins(:tags).where(tags: { id: tagid_or_ids }) }
+
+  scope :by_tag_name, -> (str, exact=false) {
+    # joins(:tags).where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalizeName str}#{'%' unless exact}")
+    joins(:tags).merge(Tag.by_string str, exact)
+  }
+
   def self.strscopes matcher
     [
         (block_given? ? yield() : self).joins(:tags).where('"tags"."name" ILIKE ?', matcher)

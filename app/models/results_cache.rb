@@ -11,9 +11,13 @@ class Counts < Hash
     when ActiveRecord::Relation
       # Late-breaking conversion of scope into items
       modelname = key_or_keys.model.to_s
-      key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
+      NestedBenchmark.measure "Counted #{key_or_keys.count} #{modelname}s" do
+        key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
+      end
     when Array
-      key_or_keys.each { |k| self.include k, incr }
+      NestedBenchmark.measure "Counted #{key_or_keys.count} ids" do
+        key_or_keys.each { |k| self.include k, incr }
+      end
     when String
       self[key_or_keys] += incr
     when ActiveRecord::Base
@@ -210,30 +214,64 @@ module EntitiesCache
     tagname = tag.normalized_name || Tag.normalizeName(tag.name)
     model = itemscope.model
 
-    counts = Counts.new
-    # We index using tags, for taggable models
-    if model.reflect_on_association :tags # model has :tags association
-      normalized = Tag.normalizeName tagname
-      canditags = Tag.where('normalized_name LIKE ?', "%#{normalized}%").pluck :id, :normalized_name
-      counts.include itemscope.joins(:taggings).where(taggings: { tag_id: canditags.map(&:first) } ) # One extra point for matching in one field
-      exactcandi = canditags.find_all { |candi| candi.last == normalized }
-      if exactcandi.present?
-        counts.include itemscope.joins(:taggings).where(taggings: { tag_id: exactcandi.map(&:first) } ), 10 # Extra points for complete matches
-      end
-    end
+    NestedBenchmark.measure 'count_tag' do
+      if Rails.env.development?
+        counts = Counts.new
+        NestedBenchmark.measure 'via taggings (old)' do
+          # We index using tags, for taggable models
+          if model.reflect_on_association :tags # model has :tags association
+            normalized = Tag.normalizeName tagname
+            canditags = Tag.where('normalized_name LIKE ?', "%#{normalized}%").pluck :id, :normalized_name
+            # Include synonyms: all tags which have the same referent
+            referent_ids = Referent.joins(:tags).where(tags: {id: canditags.map(&:first)}).pluck :id
+            tag_ids = Tag.joins(:referents).where(referents: {id: referent_ids}).pluck :id
+            counts.include itemscope.joins(:taggings).where(taggings: {tag_id: canditags.map(&:first)}) # One extra point for matching in one field
+            exactcandi = canditags.find_all { |candi| candi.last == normalized }
+            if exactcandi.present?
+              counts.include itemscope.joins(:taggings).where(taggings: {tag_id: exactcandi.map(&:first)}), 10 # Extra points for complete matches
+            end
+          end
+        end
 
-    # Models can apply strings to a search using a self-declared strategy
-    if model.respond_to? :strscopes
-      strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
-        joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
+        counts = Counts.new
+        NestedBenchmark.measure 'via taggings (new)' do
+          # We index using tags, for taggable models
+          if model.reflect_on_association :tags # model has :tags association
+            counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname)) # One extra point for matching in one field
+            counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
+          end
+        end
       end
-      counts.include strscope
-      strscope = model.strscopes tag.name do |joinspec=nil|
-        joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
+
+      counts = Counts.new
+      NestedBenchmark.measure 'via taggings (with synonoms)' do
+        counts = Counts.new
+        # We index using tags, for taggable models
+        if model.reflect_on_association :tags # model has :tags association
+          # Search by fuzzy string match
+          counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname)) # One point for matching in one field
+
+          # Search across synonyms
+          counts.include itemscope.joins(:tags).merge(Tag.synonyms_by_str(tagname)) # One point for matching in one field
+
+          # Search for exact name match
+          counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
+        end
       end
-      counts.include strscope, 10
-    end
-    counts
+
+      # Models can apply strings to a search using a self-declared strategy
+      if model.respond_to? :strscopes
+        strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
+          joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
+        end
+        counts.include strscope
+        strscope = model.strscopes tag.name do |joinspec=nil|
+          joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
+        end
+        counts.include strscope, 10
+      end
+      counts
+    end # NestedBenchmark.measure
   end
 
   # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
@@ -557,6 +595,8 @@ class ResultsCache < ActiveRecord::Base
       start = arr
     end
     oldwindow = safe_partition.window
+    # The limit isn't specified iff this is the first window of results: our signal to bust the cache
+    # TODO: suss out a better cache expiration strategy
     if !limit
       self.cache = nil
       self.partition = nil

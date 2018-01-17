@@ -38,8 +38,7 @@ class Recipe < ActiveRecord::Base
   def self.strscopes matcher
     scope = block_given? ? yield() : self.unscoped
     [
-        scope.where('"recipes"."title" ILIKE ?', matcher),
-        scope.where('"recipes"."description" ILIKE ?', matcher)
+        scope.where('"recipes"."title" ILIKE ? or "recipes"."description" ILIKE ?', matcher, matcher)
     ] + PageRef.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:page_ref => inward} : :page_ref
       block_given? ? yield(joinspec) : self.joins(joinspec)

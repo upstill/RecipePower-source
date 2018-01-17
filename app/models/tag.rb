@@ -52,6 +52,22 @@ class Tag < ActiveRecord::Base
   # Scope for tags that can be used in the usual sense (to apply to entities), as opposed to other unique strings
   scope :taggables, -> { where(tagtype: ((0..14).to_a - [5]))}
 
+  # Scope for finding tags by name, either exact or embedded
+  scope :by_string, -> (str, exact=false) {
+    where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalizeName str}#{'%' unless exact}")
+  }
+
+  # Scope for the collected synonyms of one or more tags
+  scope :synonyms, -> (tag_id_or_ids) {
+    joins(:referents).where( referents: { id: Referent.by_tag_id(tag_id_or_ids).pluck( :id) })
+  }
+
+  # Same, except accesses tags by name
+  scope :synonyms_by_str, -> (str, exact=false) {
+    joins(:referents).where(referents: { id: Referent.by_tag_name('African', exact).pluck(:id) } )
+    # joins(:referents).where( referents: { id: Referent.by_tag_ids(tagids).pluck :id })
+  }
+
   validates_presence_of :name
   before_validation :tagqa
 
