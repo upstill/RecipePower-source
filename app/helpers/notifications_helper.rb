@@ -41,7 +41,7 @@ module NotificationsHelper
     } if current_user
     javascript_tag script
 =end
-    trigger_pending_results user_notifications_path(current_user, :for => 'counter', :filter => :unopened)
+    trigger_pending_results user_notifications_path(current_user, :for => 'counter', :filter => :unopened) if current_user
     # RP.submit.submit_and_process('<%= user_notifications_path(current_user, :for => 'counter', :filter => :unopened) %>', $('<%= notifications_locator %>'));
   end
 
