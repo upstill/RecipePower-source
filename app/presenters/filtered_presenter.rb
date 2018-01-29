@@ -162,7 +162,7 @@ class FilteredPresenter
               :org, # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
               :klass # class of the underlying object
 
-  delegate :admin_view, :querytags, :"has_query?", :to => :results_cache
+  delegate :admin_view, :querytags, :to => :results_cache
 
   delegate :display_style, :to => :viewparams
 

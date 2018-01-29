@@ -49,6 +49,10 @@ class Tag < ActiveRecord::Base
   has_many :tag_owners, :dependent => :destroy
   has_many :owners, :through => :tag_owners, :class_name => 'User', :foreign_key => 'user_id'
 
+  scope :of_type, -> (type_or_types) {
+    type_or_types.present? ? where(tagtype: type_or_types) : unscoped
+  }
+
   # Scope for tags that can be used in the usual sense (to apply to entities), as opposed to other unique strings
   scope :taggables, -> { where(tagtype: ((0..14).to_a - [5]))}
 

@@ -12,10 +12,24 @@ module Collectible
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
     has_many :rcprefs, :dependent => :destroy, :as => :entity
     scope :including_user_pointer, -> (id) { includes(:rcprefs).where rcprefs: { user_id: id } }
+=begin
+        joins(:user_pointers).
+        where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @entity_id.to_s)
+    collectionscope = collectionscope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
+      # First, match on the comments using the rcpref
+      counts.include collectionscope.where('"rcprefs"."comment" ILIKE ?', "%#{matchstr}%")
+=end
 
     # User_pointers refers to users who have the entity in their collection
     has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
     has_many :users, :through => :user_pointers, :autosave => true
+    # Scope for instances of a class collected by a user, as visible to a possibly different viewer
+    scope :collected_by_user, -> (userid, viewerid=userid) {
+      joins(:user_pointers).merge(Rcpref.for_user(userid, viewerid))
+    }
+    scope :matching_comment, -> (matchstr) {
+      joins(:user_pointers).merge Rcpref.matching_comment(matchstr)
+    }
 
     # Viewer_points refers to all users who have viewed it, whether it's collected or not
     has_many :toucher_pointers, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'

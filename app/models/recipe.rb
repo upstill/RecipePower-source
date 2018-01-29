@@ -35,6 +35,7 @@ class Recipe < ActiveRecord::Base
   @@coder = HTMLEntities.new
 
   # Return scopes for searching the title and description
+  # The block, if given, is for the caller to assert its own scope, joining it with this scope
   def self.strscopes matcher
     scope = block_given? ? yield() : self.unscoped
     [

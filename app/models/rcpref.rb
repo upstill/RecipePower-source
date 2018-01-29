@@ -15,6 +15,23 @@ class Rcpref < ActiveRecord::Base
                   }
   # Scope the user pointer for a specific user (like the current user)
   scope :toucher_pointer, -> (id) { where(user_id: id) }
+  # Scope to fetch rcprefs for a given user and (possibly different) user
+  scope :for_user, -> (userid, viewerid=userid) {
+    constraints = {  user_id: userid, in_collection: true }
+    constraints[:private] = false if userid != viewerid
+    where constraints
+  }
+  scope :matching_comment, -> (matchstr) {
+    where('"rcprefs"."comment" ILIKE ?', "%#{matchstr}%")
+  }
+  # Filters Rcprefs for a collection of entity types
+  scope :for_entities, -> (*entity_types) {
+
+  }
+  # Filters Rcprefs by entity types, excluding those given
+  scope :except_entities, -> (*entity_types) {
+
+  }
   # before_save :ensure_unique
   attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 
