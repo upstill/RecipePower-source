@@ -221,7 +221,16 @@ module NullSearch
 
   # Modify the itemscope to order the items. Defaults to no sorting.
   def ordereditemscope iscope=itemscope
-    iscope
+    case org
+      when :newest
+        sort_attribute = %Q{"#{iscope.model_name.collection}"."created_at"}
+        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+      when :updated
+        sort_attribute = %Q{"#{iscope.model_name.collection}"."updated_at"}
+        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+      else # :ratings, :popularity, :random, :viewed, :approved, :referent_id, :recipe_count, :feed_count, :definition_count
+        iscope
+    end
   end
 
   def scope_count iscope=itemscope
@@ -314,20 +323,6 @@ module ModelSearch
     super
   end
 
-  # Provide the itemscope with a query for ordering the items. Defaults to no response
-  def ordereditemscope iscope=itemscope
-    # Use the org parameter and the ASC/DESC attribute to assert an ordering
-    case org
-      when :newest
-        sort_attribute = %Q{"#{iscope.model_name.collection}"."created_at"}
-        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      when :updated
-        sort_attribute = %Q{"#{iscope.model_name.collection}"."updated_at"}
-        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      else # :ratings, :popularity, :random
-        super
-    end
-  end
 end
 
 # Defines search for Collectible entities, i.e. looking for comments that match a tag
@@ -341,11 +336,9 @@ module CollectibleSearch
         # Newest in the collection
         iscope.joins(:rcprefs).order('"rcprefs"."created_at"' + (@sort_direction || 'DESC'))
         # iscope.order("#{iscope.model_name.collection}.created_at #{(@sort_direction || 'DESC')}")
-      when :updated
-        iscope.order("#{iscope.model_name.collection}.updated_at #{(@sort_direction || 'DESC')}") # joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
       when :viewed
         iscope.joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
-      else # :ratings, :popularity, :random
+      else
         super
     end
   end
@@ -449,15 +442,6 @@ module TagSearch
       counts.include oscope.where(normalized_name: nname), 10
     end
     super
-  end
-
-  def ordereditemscope iscope=itemscope
-    case org
-      when :newest
-        iscope.order(:created_at => :DESC)
-      else
-        super
-    end
   end
 
   def scope_count
@@ -1294,6 +1278,7 @@ end
 class TagsIndexCache < ResultsCache
   include TagSearch
   # include EntitiesCache
+  # Use the org parameter and the ASC/DESC attribute to assert an ordering
 
   def max_window_size
     10

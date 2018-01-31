@@ -7,6 +7,21 @@ en:
   recipe_status_medium: "Keepers"
   recipe_status_low: "To Try"
   recipe_status_default: "All Recipes"
+  filtered_presenter:
+    org_button_label:
+      default: 'order by'
+      panel: 'order:'
+      viewed: 'RECENTLY VIEWED'
+      newest: 'NEWEST'
+      updated: 'REVISED AT'
+      ratings: 'RATINGS'
+      popularity: 'POPULARITY'
+      random: 'RANDOM'
+      approved: 'APPROVED'
+      referent_id: 'REFERENT'
+      recipe_count: '#RECIPES'
+      feed_count: '#FEEDS'
+      definition_count: '#DEFINITIONS'
   definition_reference:
     label:
       tag:

@@ -347,16 +347,20 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
-    if context == 'panels'
+    if org_options.present?
       link_options = {}
-      label = 'order:'
-    else
-      link_options = { class: 'small' }
-      label = 'order by'
+      link_options[:class] = 'small' unless context == 'panels'
+      org_options.each { |option|
+        block.call I18n.t('filtered_presenter.org_button_label.' + option.to_s),
+                   {:org => option, active: org.to_sym == option},
+                   link_options
+      }
+      I18n.t('filtered_presenter.org_button_label.' + (context == 'panels' ? 'panel' : 'default'))
     end
-    block.call 'RECENTLY VIEWED', {:org => :viewed, active: org.to_sym == :viewed}, link_options
-    block.call 'NEWEST', {:org => :newest, active: org.to_sym == :newest}, link_options
-    label
+  end
+
+  def org_options
+    [ :viewed, :newest ]
   end
 
   # Specify a path for fetching the results partial, based on the current query
@@ -667,6 +671,10 @@ end
 
 class TagsIndexPresenter < FilteredPresenter
   include TagsTable
+
+  def org_options
+    [ :updated, :newest ]
+  end
 
   def result_type
     'tags'
