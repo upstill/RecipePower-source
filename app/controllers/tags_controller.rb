@@ -234,6 +234,11 @@ class TagsController < ApplicationController
     end
     if idsChanged
       render :json => {deletions: idsChanged.map { |id| ["#tagrow_#{id.to_s}", "#tagrow_#{id.to_s}HR", ".absorb_#{id.to_s}"] }.flatten,
+                       replacements: idsChanged.collect { |id|
+                         if tag = Tag.find_by(id: id)
+                           view_context.item_replacement tag, :table
+                         end
+                       }.compact,
                        popup: (tag ? "'#{tag.name}' now typed as '#{tag.typename}'" : 'Tags changed successfully')
              }
     else
