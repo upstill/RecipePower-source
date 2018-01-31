@@ -4,24 +4,59 @@ require 'tagging.rb'
 require 'result_type.rb'
 
 # Object to put a uniform interface on a set of results, whether they
-# exist as a scope (if there is no search) or an array of Rcprefs (with search)
+# exist as a scope (if there is no search) or an array of Rcprefs (with search).
+# Format of the hash:
+# -- keys are class/id pairs, for accumulating references
+# -- values are either: an integers (for weighting the results by appearances) or a sort key
+# Parameters:
+# -- key_or_keys can be:
+#    ** an ActiveRecord::Relation from which ids and (possibly) sort keys can be extracted
+#    ** a string, for use directly as a key
+#    ** an ActiveRecord::Base model
+#    ** an array of any of the above
+# -- incr can be:
+#    ** an integer, in which case values will be accumulated additively for sorting
+#    ** a specifier (either symbol or array), suitable for passing to ActiveRecord::Relation#pluck, for getting the sort value
+#    ** any other type of value, which is asserted directly as the sort key
+# -- accumulate is a flag for disambiguating an incr that can be added from one that is just asserted
 class Counts < Hash
-  def include key_or_keys, incr=1
+  def include key_or_keys, incr=1, accumulate=true
     case key_or_keys
-    when ActiveRecord::Relation
-      # Late-breaking conversion of scope into items
-      modelname = key_or_keys.model.to_s
-      NestedBenchmark.measure "Counted #{key_or_keys.count} #{modelname}s" do
-        key_or_keys.pluck(:id).each { |id| self[modelname+'/'+id.to_s] += incr }
-      end
-    when Array
-      NestedBenchmark.measure "Counted #{key_or_keys.count} ids" do
-        key_or_keys.each { |k| self.include k, incr }
-      end
-    when String
-      self[key_or_keys] += incr
-    when ActiveRecord::Base
-      self["#{key_or_keys.model_name.name}/#{key_or_keys.id}"] += incr
+      when ActiveRecord::Relation
+        # Late-breaking conversion of scope into items
+        modelname = key_or_keys.model.to_s
+        NestedBenchmark.measure "Counted #{key_or_keys.count} #{modelname}s" do
+          if incr.is_a?(Fixnum)
+            # We are accumulating hits, weighted by incr
+            key_or_keys.pluck(:id).uniq.each do |id|
+              key = modelname+'/'+id.to_s
+              self[key] += incr
+            end
+          else
+            # We are accumulating hits, using as values what we will later sort by
+            key_or_keys.pluck(:id, incr).uniq.each do |idval| # #pluck provides an array of results per record
+              id, sortval = idval
+              self[modelname+'/'+id.to_s] = sortval
+            end
+          end
+        end
+      when Array
+        NestedBenchmark.measure "Counted #{key_or_keys.count} ids" do
+          key_or_keys.each { |k| self.include k, incr }
+        end
+      when String
+        if incr.respond_to?(:'+') && accumulate
+          self[key_or_keys] += incr
+        else
+          self[key_or_keys] = incr
+        end
+      when ActiveRecord::Base
+        key = "#{key_or_keys.model_name.name}/#{key_or_keys.id}"
+        if incr.respond_to?(:'+') && accumulate
+          self[key_or_keys] += incr
+        else
+          self[key_or_keys] = incr
+        end
     end
     self # ...for chainability
   end
@@ -30,6 +65,7 @@ class Counts < Hash
     super(ix) || 0
   end
 
+  # Define an array of itemstubs: strings denoting entity type/value pairs
   def itemstubs sorted=true
     # Sort the count keys in descending order of hits
     @itemstubs ||= sorted ? self.keys.sort { |k1, k2| self[k2] <=> self[k1] } : self.keys
@@ -53,20 +89,21 @@ class Counts < Hash
     #  -- no counts exist yet => return unchanged
     if extant_counts
       newcounts = collect { |key, value| [key, value+extant_counts[key]] if extant_counts.has_key? key }.compact
-      Counts[ newcounts ]
+      Counts[newcounts]
     else
       self
     end
 
   end
+
 end
 
 # A partition is an array of offsets within another array or a scope, denoting the boundaries of groups
-# for streaming.  
+# for streaming.
 class Partition < Array
   attr_accessor :cur_position, :window, :max_window_size
 
-  def initialize range, mws=5
+  def initialize range, mws=max_window_size
     super range
     self.max_window_size = mws
   end
@@ -103,7 +140,7 @@ class Partition < Array
     if (lb = clip r.min) && # Returns nil if the range is invalid
         (pr = self.partition_range lb) && # Returns nil if lb is out of range
         (ub = clip r.max, lb..clip(lb+max_window_size, pr))
-      lb..ub
+      lb..ub # if ub > lb
     end
   end
 
@@ -118,7 +155,15 @@ class Partition < Array
     @window
   end
 
-  def done?
+  def done!
+    while self[-1] > cur_position
+      self.pop
+    end
+    self.push cur_position
+    window = self.window.min..cur_position
+  end
+
+  def done? # public
     cur_position >= window.max
   end
 
@@ -143,7 +188,7 @@ class Partition < Array
 
   # Find the index of the partition containing 'ix', or nil if outside the range
   def partition_of ix
-    (self.find_index { |lower_bound| lower_bound > ix } - 1 ) unless (ix < self[0]) or (ix >= self[-1])
+    (self.find_index { |lower_bound| lower_bound > ix } - 1) unless (ix < self[0]) or (ix >= self[-1])
   end
 
 end
@@ -157,8 +202,12 @@ module UserFunc
 
 end
 
-# Prototype of scope definitions and methods for a ResultsCache. These are stubs which do nothing
-module NullCache
+# Prototype of definitions and methods for searching to a ResultsCache. These are stubs which do nothing
+module NullSearch
+
+  def stream_id # public
+    "#{self.class.to_s}-#{itemscope.model.to_s}-#{@entity_id}"
+  end
 
   # Every meaningful ResultsCache MUST define an itemscope for the base set of results
   # Return a scope or array for the entire collection of items
@@ -166,57 +215,61 @@ module NullCache
     raise 'Abstract Method itemscope'
   end
 
-  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
-  # the redundant itemscope may need be retained (e.g., in the case of searching tagging-based scopes)
-  # This method may be overridden to
-  def uniqueitemscope
-    itemscope
+  def itemscopes
+    [itemscope]
   end
 
-  # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
-  def ordereditemscope
-    uniqueitemscope
+  # Modify the itemscope to order the items. Defaults to no sorting.
+  def ordereditemscope iscope=itemscope
+    iscope
   end
 
-  def scope_count
-    uniqueitemscope.size
-  end
-
-  def stream_id
-    "#{itemscope.model.to_s}-#{@entity_id}"
+  def scope_count iscope=itemscope
+    # To avoid loading the relation, we construct a count query from the scope query
+    scope_query = iscope.to_sql
+    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
+    res = ActiveRecord::Base.connection.execute sql
+    res.first["count"].to_i
   end
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
-  # incrementing the counts appropriately
-  def count_tag tag
-    raise 'Abstract Method count_tag  '
+  # incrementing the counts appropriately. This is the end of the class inheritance hierarchy.
+  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
+    if oscope.is_a? Array
+      # An array of scopes gets counted in turn
+      oscope.inject(counts) { |memo, os| count_tag tag, memo, os }
+    elsif !tag
+      counts.include oscope, pluck_key(oscope)
+    else
+      counts
+    end
   end
 
-  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
-  def item_scope_for_loading scope
-    scope
+  # When taking a slice out of the (single) itemscope, load the associated entities meanwhile
+  # NB This is not valid when the cache uses multiple scopes--but that should be handled by cache_and_partition
+  def scope_slice offset, limit
+    ordereditemscope.offset(offset).limit(limit).to_a
+  end
+
+  # Provide a pluck key so that count_tag can sort on an appropriate value
+  def pluck_key scope_or_weight=1
+    scope_or_weight.is_a?(Fixnum) ? scope_or_weight : "'#{scope_or_weight.model_name.collection}'.'updated_at'"
   end
 
 end
 
-# ...for a ResultsCache based on a table of a particular model
-module EntitiesCache
-
-=begin
-# Failing to define an itemscope will produce an error from NullCache
-  def itemscope
-  end
-=end
+# ...for a ResultsCache based on a table of a particular model, which presumably has scope for string searching
+module ModelSearch
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
-  def count_tag tag
-    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
-    model = itemscope.model
+  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
+    if tag && !oscope.is_a?(Array)
+      tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+      model = oscope.model
 
-    NestedBenchmark.measure 'count_tag' do
       if Rails.env.development?
-        counts = Counts.new
+        cts = Counts.new
         NestedBenchmark.measure 'via taggings (old)' do
           # We index using tags, for taggable models
           if model.reflect_on_association :tags # model has :tags association
@@ -225,149 +278,239 @@ module EntitiesCache
             # Include synonyms: all tags which have the same referent
             referent_ids = Referent.joins(:tags).where(tags: {id: canditags.map(&:first)}).pluck :id
             tag_ids = Tag.joins(:referents).where(referents: {id: referent_ids}).pluck :id
-            counts.include itemscope.joins(:taggings).where(taggings: {tag_id: canditags.map(&:first)}) # One extra point for matching in one field
+            cts.include oscope.joins(:taggings).where(taggings: {tag_id: canditags.map(&:first)}) # One extra point for matching in one field
             exactcandi = canditags.find_all { |candi| candi.last == normalized }
             if exactcandi.present?
-              counts.include itemscope.joins(:taggings).where(taggings: {tag_id: exactcandi.map(&:first)}), 10 # Extra points for complete matches
+              cts.include oscope.joins(:taggings).where(taggings: {tag_id: exactcandi.map(&:first)}), 10 # Extra points for complete matches
             end
           end
         end
 
-        counts = Counts.new
+        cts = Counts.new
         NestedBenchmark.measure 'via taggings (new)' do
           # We index using tags, for taggable models
           if model.reflect_on_association :tags # model has :tags association
-            counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname)) # One extra point for matching in one field
-            counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
+            cts.include oscope.joins(:tags).merge(Tag.by_string(tagname)) # One extra point for matching in one field
+            cts.include oscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
           end
         end
       end
 
-      counts = Counts.new
+      if model.respond_to? :strscopes
+        NestedBenchmark.measure 'Fuzzy searches on entity e.g., title and description' do
+          strscopes = model.strscopes "%#{str}%" do |joinspec=nil|
+            joinspec ? oscope.joins(joinspec) : oscope
+          end
+          counts.include strscopes, self.pluck_key
+        end
+        NestedBenchmark.measure 'Exact searches on entity e.g., title and description' do
+          strscopes = model.strscopes str do |joinspec=nil|
+            joinspec ? oscope.joins(joinspec) : oscope
+          end
+          counts.include strscopes, self.pluck_key(10)
+        end
+      end
+    end
+    super
+  end
+
+  # Provide the itemscope with a query for ordering the items. Defaults to no response
+  def ordereditemscope iscope=itemscope
+    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    case org
+      when :newest
+        sort_attribute = %Q{"#{iscope.model_name.collection}"."created_at"}
+        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+      when :updated
+        sort_attribute = %Q{"#{iscope.model_name.collection}"."updated_at"}
+        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
+      else # :ratings, :popularity, :random
+        super
+    end
+  end
+end
+
+# Defines search for Collectible entities, i.e. looking for comments that match a tag
+module CollectibleSearch
+
+  # Provide the iscope with a query for ordering the items. Defaults to no response
+  def ordereditemscope iscope=itemscope
+    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+    case org
+      when :newest
+        # Newest in the collection
+        iscope.joins(:rcprefs).order('"rcprefs"."created_at"' + (@sort_direction || 'DESC'))
+        # iscope.order("#{iscope.model_name.collection}.created_at #{(@sort_direction || 'DESC')}")
+      when :updated
+        iscope.order("#{iscope.model_name.collection}.updated_at #{(@sort_direction || 'DESC')}") # joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
+      when :viewed
+        iscope.joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
+      else # :ratings, :popularity, :random
+        super
+    end
+  end
+
+  # What to pass to #pluck for manual sorting
+  def pluck_key iscope=itemscope
+    case org
+      when :newest
+        # Newest in the collection
+        'rcprefs.created_at'
+      when :updated
+        iscope.order("#{iscope.model_name.collection}.updated_at #{(@sort_direction || 'DESC')}") # joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
+      when :viewed
+        'rcprefs.updated_at'
+      else # :ratings, :popularity, :random
+        super
+    end
+  end
+
+  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
+    if tag && !oscope.is_a?(Array)
+      tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+      model = oscope.model
+      counts.include oscope.collected_by_user(@entity_id, @viewerid).matching_comment(tagname)
+    end
+    super
+  end
+end
+
+module TaggableSearch
+
+  # module Uniquify
+  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
+  # the redundant itemscope may need to be retained (e.g., in the case of searching tagging-based scopes)
+  # while the final presentation (and initial count) are without redundancy.
+  # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
+  # polymorphic 'entity' associations
+=begin
+  def uniqueitemscope
+    itemscope # .select("DISTINCT ON (entity_type, entity_id) *")
+  end
+=end
+
+  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
+  def scope_slice offset, limit
+    ordereditemscope.includes(:entity).offset(offset).limit(limit).to_a
+  end
+
+=begin
+  # Apply the tag to the current set of result counts
+  def count_tag tag
+    # Intersect the scope with the set of entities tagged with tags similar to the given tag
+    Counts.new.
+        include(itemscope.where(tag_id: TagServices.new(tag).similar_ids)). # One extra point for matching in one field
+    include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
+  end
+=end
+
+  # Filter an entity scope by tag contents
+  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
+    if tag && !oscope.is_a?(Array)
+      tagname = tag.name
+      model = oscope.model
       NestedBenchmark.measure 'via taggings (with synonoms)' do
-        counts = Counts.new
         # We index using tags, for taggable models
         if model.reflect_on_association :tags # model has :tags association
           # Search by fuzzy string match
-          counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname)) # One point for matching in one field
+          counts.include oscope.joins(:tags).merge(Tag.by_string(tagname)) # One point for matching in one field
 
           # Search across synonyms
-          counts.include itemscope.joins(:tags).merge(Tag.synonyms_by_str(tagname)) # One point for matching in one field
+          counts.include oscope.joins(:tags).merge(Tag.synonyms_by_str(tagname)) # One point for matching in one field
 
           # Search for exact name match
-          counts.include itemscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
+          counts.include oscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
         end
       end
+    end
+    super
+  end
+end
 
-      # Models can apply strings to a search using a self-declared strategy
-      if model.respond_to? :strscopes
-        strscope = model.strscopes "%#{tag.name}%" do |joinspec=nil|
-          joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
-        end
-        counts.include strscope
-        strscope = model.strscopes tag.name do |joinspec=nil|
-          joinspec ? ordereditemscope.joins(joinspec) : ordereditemscope
-        end
-        counts.include strscope, 10
-      end
-      counts
-    end # NestedBenchmark.measure
+# Search for tags, typically for TagsController#index
+module TagSearch
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
-  # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
-  def ordereditemscope
-    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+  module ClassMethods
+
+    def params_needed
+      super + [:tagtype, :batch]
+    end
+
+  end
+
+  # Tags don't go through Taggings, so we just use/count them directly
+  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
+    if tag && !oscope.is_a?(Array)
+      nname = tag.normalized_name || Tag.normalizeName(tag.name)
+      counts.include oscope.where('normalized_name LIKE ?', "%#{nname}%"), 1
+      counts.include oscope.where(normalized_name: nname), 10
+    end
+    super
+  end
+
+  def ordereditemscope iscope=itemscope
     case org
-      when :ratings
-      when :popularity
       when :newest
-        sort_attribute = %Q{"#{sort_table_name}"."created_at"}
-        uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      when :updated
-        sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
-        uniqueitemscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      when :viewed
-        uniqueitemscope.joins(:user_pointers).order('"rcprefs"."updated_at" ' + (@sort_direction || 'DESC'))
-      when :random
-    end || super
+        iscope.order(:created_at => :DESC)
+      else
+        super
+    end
+  end
+
+  def scope_count
+    cache ? cache.count : ordereditemscope.count
+  end
+
+  # When taking a slice out of the (single) itemscope, load the associated entities meanwhile
+  # NB This is not valid when the cache uses multiple scopes--but that should be handled by cache_and_partition
+  def scope_slice offset, limit
+    offset += (@batch.to_i-1) * 100 if @batch
+    super
+  end
+
+  def itemscope
+    @itemscope ||= @tagtype ? Tag.of_type(@tagtype) : Tag.all
   end
 
 end
 
 # Methods and defaults for a ResultsCache based on a user's collection
 # @entity_id parameter denotes the user
+# NB: unlike most searches, a CollectionCache can be across several entity types.
+# Specifically, the Cookmarks subcollection picks up all collectible entities except
+# friends, lists and feeds
 module CollectionCache
+  include ModelSearch # Search via strscopes on the specific model
+  include TaggableSearch # Search via taggings
+  include CollectibleSearch # Search via Rcprefs (look at the user's comments)
   include UserFunc
   include ResultTyping
 
-  def itemscope
+  # The itemscope is one or more scopes on the relevant models
+  def itemscopes
     # :entity_type => %w{ Recipe Site FeedEntry },
-    @itemscope ||= user.collection_scope( { :in_collection => true }.merge result_type.entity_params)
+    @itemscopes ||= result_type.entity_params[:entity_type].collect { |entity_type|
+      entity_type.constantize.collected_by_user @entity_id, @viewerid
+    }.compact
   end
 
-  # Provide the uniqueitemscope with a query for ordering the items. Defaults to no response
-  def ordereditemscope
-    # Use the org parameter and the ASC/DESC attribute to assert an ordering
-    case org
-      when :ratings
-      when :popularity
-      ## when :updated
-        ## sort_attribute = %Q{"#{sort_table_name}"."updated_at"}
-        ## uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      when :newest
-        ## sort_attribute = %Q{"#{sort_table_name}"."created_at"}
-        ## uniqueitemscope.joins(sort_table_name.to_sym).order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-        uniqueitemscope.order('"rcprefs"."created_at"' + (@sort_direction || 'DESC'))
-      when :viewed, :updated
-        uniqueitemscope.order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
-      when :random
-    end || super
+  def itemscope
+    raise 'Called itemscope on CollectionCache model'
   end
 
-  # Return
-  def strscopes matcher, modelclass
-    if modelclass.respond_to? :strscopes
-      modelclass.strscopes(matcher).collect { |innerscope|
-        innerscope = innerscope.joins(:user_pointers).where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @entity_id.to_s)
-        innerscope = innerscope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
-        innerscope
-      }
-    else
-      []
+  # Sum scope_count for each scope in the collection
+  def scope_count
+    itemscopes.inject(0) do |memo, iscope|
+      memo + super(iscope)
     end
   end
 
-  # Apply a tag to the current set of result counts
-  def count_tag tag
-    matchstr = "%#{tag.name}%"
-    counts = Counts.new
-    typeset.each do |type|
-      modelclass = type.constantize
-      scope = modelclass.joins :user_pointers
-      scope = scope.where('"rcprefs"."user_id" = ? and "rcprefs"."in_collection" = true', @entity_id.to_s)
-      scope = scope.where('"rcprefs"."private" = false') unless @entity_id == @viewerid # Only non-private entities if the user is not the viewer
+  protected
 
-      # First, match on the comments using the rcpref
-      counts.include scope.where('"rcprefs"."comment" ILIKE ?', matchstr)
-
-      # Now match on the entity's relevant string field(s), for which we defer to the class
-      strscopes("%#{tag.name}%", modelclass).each { |innerscope| counts.include innerscope }
-      strscopes(tag.name, modelclass).each { |innerscope| counts.include innerscope, 30 }
-
-      subscope = modelclass.joins(:taggings).where 'taggings.tag_id = ?', tag.id.to_s
 =begin
-      # TODO: We're not filtering by user taggings (the more the merrier)
-      if @entity_id
-        subscope = subscope.where 'taggings.user_id = ?', @entity_id.to_s
-      end
-=end
-      counts.include subscope, 1
-    end
-    counts
-  end
-
-protected
-
   # Memoize a query to get all the currently-defined entity types
   def typeset
     @typeset ||=
@@ -382,46 +525,15 @@ protected
             [ modelname ]
         end
   end
+=end
 
-end
-
-module TaggingCache
-
-  # module Uniquify
-  # Allowing for the possibility of redundant items that are nonetheless significant for searching,
-  # the redundant itemscope may need to be retained (e.g., in the case of searching tagging-based scopes)
-  # while the final presentation (and initial count) are without redundancy.
-  # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
-  # polymorphic 'entity' associations
-  def uniqueitemscope
-    itemscope.select("DISTINCT ON (entity_type, entity_id) *")
-  end
-
-  def scope_count
-    # To avoid loading the relation, we construct a count query from the scope query
-    scope_query = uniqueitemscope.to_sql
-    sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
-    res = ActiveRecord::Base.connection.execute sql
-    res.first["count"].to_i
-  end
-
-  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
-  def item_scope_for_loading scope
-    scope.includes :entity
-  end
-
-  # Apply the tag to the current set of result counts
-  def count_tag tag
-    # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    Counts.new.include(itemscope.where(tag_id: TagServices.new(tag).similar_ids)). # One extra point for matching in one field
-      include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
-  end
 end
 
 module ExtractParams
   def self.included(base)
     base.extend(ClassMethods)
   end
+
   module ClassMethods
     def extract_params result_type=nil, params={}
       if result_type.is_a? Hash
@@ -455,7 +567,7 @@ module ExtractParams
 
   # Do type conversions when accepting instance variables
   def params= params_hash
-    defined?(super) ? super : (@params = params_hash.clone)# To handle, e.g., serialization
+    defined?(super) ? super : (@params = params_hash.clone) # To handle, e.g., serialization
     params_hash.each { |key, val|
       setter = :"#{key}="
       if self.private_methods.include? setter
@@ -472,9 +584,9 @@ module ExtractParams
 
 end
 
-# A NullCache is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
+# A NullSearch is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
 class NullResults
-  include NullCache
+  include NullSearch
   include ExtractParams
 
   attr_reader :params, :admin_view, :querytags
@@ -482,7 +594,7 @@ class NullResults
   # Declare the parameters needed for this class
   def self.params_needed
     # [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
-    [ :admin_view ]
+    [:admin_view, [:org, :newest]]
   end
 
   def initialize params={}
@@ -492,15 +604,25 @@ class NullResults
     @result_type = ResultType.new ''
   end
 
-  def has_query?
+  def has_query? # public
     false
+  end
+
+  def stream_id # public
+    "#{itemscope.model.to_s}-#{@entity_id}"
+  end
+
+  # Every meaningful ResultsCache MUST define an itemscope for the base set of results
+  # Return a scope or array for the entire collection of items
+  def itemscope
+    raise 'Abstract Method itemscope' #  needs to be overridden
   end
 
 end
 
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
-  include NullCache
+  include NullSearch # Defaults for *Cache methods
   include ExtractParams
 
   before_save do
@@ -516,17 +638,13 @@ class ResultsCache < ActiveRecord::Base
   # Standard parameters
   attr_reader :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
 
-  # Declare the parameters needed for this class
-  def self.params_needed
-    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
-  end
-
   attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
+  attr_accessor :typeset, :itemscope
   serialize :params
   serialize :cache
   serialize :partition
   attr_accessor :items
-  delegate :window, :next_index, :'done?', :max_window_size, :to => :safe_partition
+  delegate :window, :next_index, :'done!', :'done?', :max_window_size, :to => :safe_partition
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
@@ -539,9 +657,9 @@ class ResultsCache < ActiveRecord::Base
       if cc = (classname.constantize rescue nil)
         # Give the class a chance to defer to a subclass based on the result type
         cc = cc.subclass_for(result_type) if cc.respond_to? :subclass_for
-        
+
         relevant_params = cc.extract_params result_type, params
-        
+
         rc = cc.find_or_initialize_by(session_id: session_id,
                                       type: cc.to_s,
                                       result_typestr: (relevant_params[:result_type] || ''))
@@ -570,14 +688,11 @@ class ResultsCache < ActiveRecord::Base
     }.compact
   end
 
+=begin
   def self.bust session_id
     self.where(session_id: session_id).each { |rc| rc.destroy }
   end
-
-  # Memoize the viewing user
-  def viewer
-    @viewer ||= User.find @viewerid
-  end
+=end
 
   # Return the following range, for triggering purposes, and optionally pre-advance the window
   def next_range force=false
@@ -596,7 +711,7 @@ class ResultsCache < ActiveRecord::Base
     end
     oldwindow = safe_partition.window
     # The limit isn't specified iff this is the first window of results: our signal to bust the cache
-    # TODO: suss out a better cache expiration strategy
+    # TODO: develop a better cache expiration strategy
     if !limit
       self.cache = nil
       self.partition = nil
@@ -610,11 +725,7 @@ class ResultsCache < ActiveRecord::Base
     save
   end
 
-  def max_window_size= n
-    safe_partition.max_window_size = n
-    self.window = safe_partition.window.min
-  end
-
+=begin
   # Derive the class of the appropriate cache handler from the controller, action and other parameters
   def self.type params
     controller = (params[:controller] || '').singularize.capitalize
@@ -622,47 +733,47 @@ class ResultsCache < ActiveRecord::Base
     name = "#{controller}Cache"
     Object.const_defined?(name) ? name.constantize : ResultsCache
   end
+=end
 
   # Take a window of entities from the scope or the results cache
-  def items
+  def items # public
     @items ||=
-    if cache_and_partition
-      slice_cache
-    elsif itemscope.is_a? Array
-      itemscope.slice safe_partition.window.min, safe_partition.windowsize
-    else
-      item_scope_for_loading(
-        ordereditemscope.limit(safe_partition.windowsize).offset(safe_partition.window.min)
-      ).to_a
-    end
+        if cache_and_partition
+          slice_cache
+          # elsif itemscope.is_a? Array
+          #   itemscope.slice safe_partition.window.min, safe_partition.windowsize
+        else
+          scope_slice safe_partition.window.min, safe_partition.windowsize
+        end
   end
 
   # Return the next item in the current window, incrementing the cur_position
-  def next_item
+  def next_item # public
     if items
       if i = safe_partition.next_index
-        @items[i] # i is relative to the current window
+        done! unless @items[i] # i is relative to the current window
+        @items[i]
       end
     end
   end
 
-  def has_query?
+  def has_query? # public
     (@querytags ||= []).count > 0
   end
 
-  def ready? # Have the items been sorted out yet?
+  def ready? # Have the items been sorted out yet?  public
     ((@querytags ||= []).count == 0) || cache
   end
 
-  def nmatches # Force the partition and report the first window
+  def nmatches # Force the partition and report the first window  (public)
     cache_and_partition
     partition[1]
   end
 
   # Return the total number of items in the result. This doesn't have to be every possible item, just
   # enough to stay ahead of the window.
-  def full_size
-    return partition[-1] if partition  # Don't create if doesn't exist
+  def full_size # public
+    return partition[-1] if partition # Don't create if doesn't exist
     return cache.count if cache
     begin
       scope_count
@@ -671,79 +782,117 @@ class ResultsCache < ActiveRecord::Base
     end
   end
 
-  # Convert the scope to a cache of entries, as needed. In the default case, this is only
-  # necessary if there is a query. Otherwise, the cache remains empty and items are taken
-  # from the scope as partitioning dictates.
+  # Report a previously-saved parameter (or, in fact, any instance variable)
+  def param sym # public (used in testing)
+    self.instance_variable_get "@#{sym}".to_sym
+  end
+
+  protected
+  # Convert the scope to a cache of entries, as needed. Two cases:
+  # 1) The data can be provided by a single query => set up a partitioning object and use that to reference
+  #   elements of the query
+  # 2) The data needs to be cached en masses => it is stored in a list of strings denoting the entity type
+  #   and ID for each relevant entity.
   def cache_and_partition
     # count_tag is the hook for applying a tag to the current counts
     return (cache != nil) unless self.respond_to? :count_tag
-    if (@querytags ||= []).count == 0
+    if partition_on_scope?
       # Straight passthrough of the itemscope => no cache required
-      self.partition ||= Partition.new([0, scope_count ], max_window_size)
+      self.partition ||= Partition.new([0, scope_count], max_window_size)
       false
     elsif cache
       true
     else
-      # Convert the itemscope relation into a hash on entity types
-      counts = nil
-      @querytags.each { |tag|
-        counts = count_tag(tag).merge_counts counts
-      }
-
-      # Sort the scope by number of hits, descending
+      # We're here EITHER because there are querytags (which in general necessitate multiple queries)
+      # OR the 'scope' really requires multiple queries (say, on different entity types)
+      # Either way, we need to produce a cache as output
+      oscopes = itemscopes.collect { |iscope| ordereditemscope iscope }
+      counts =
+          if @querytags.present?
+            # Convert the itemscope relation into a hash on entity type/id pairs
+            @querytags.inject(nil) { |memo, tag|
+              if memo && memo.empty?
+                memo
+              else
+                merge_counts memo, count_tag(tag, Counts.new, oscopes)
+              end
+            }
+          else # By the logic of partition_on_scope?, we must have multiple scopes to merge into the cache
+            count_tag nil, Counts.new, oscopes
+          end
       self.cache = counts.itemstubs
-      bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*100 } # Partition according to the # of matches
-      wdw = partition.window if partition
-      self.partition = counts.partition bounds
-      self.window = [wdw.min, wdw.max] if wdw
+      self.partition = Partition.new([0, cache.count], max_window_size)      # bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*100 } # Partition according to the # of matches
+      wdw = partition.window
+      # self.partition = counts.partition bounds
+      self.window = [wdw.min, wdw.max]
       true
     end
   end
 
-  # Report a previously-saved parameter (or, in fact, any instance variable)
-  def param sym
-    self.instance_variable_get "@#{sym}".to_sym
+  # Can the entities be presented as a partition on a single scope?
+  # ...not if there are querytags (which entail multiple queries)
+  # ...and not if there are multiple scopes (only an issue in subclasses)
+  def partition_on_scope?
+    singular_scope = itemscopes.count <= 1
+    notags = (@querytags ||= []).count == 0
+    notags && singular_scope
+  end
+
+  # Incorporate the counts from a tag into existing counts, if any
+  def merge_counts prior_counts, new_counts
+    prior_counts ?
+        NestedBenchmark.measure('merge_counts') { new_counts.merge_counts prior_counts } :
+        new_counts
+  end
+
+  # Declare the parameters needed for this class
+  def self.params_needed
+    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [:result_type, '']]
+  end
+
+  # Memoize the viewing user
+  def viewer
+    @viewer ||= User.find @viewerid
   end
 
   def sort_table_name
     result_type.table_name
   end
 
-  protected
-
   # Convert from item stubs (modelname + id) to entities, in the most efficient manner possible
   def slice_cache
-    cache_slice = cache.slice safe_partition.window.min, safe_partition.windowsize
+    if cache_slice = cache.slice(safe_partition.window.min, safe_partition.windowsize)
 
-    # First, create a hash of arrays, indexed by modelname, to collect the ids for that model
-    records = { }
-    cache_slice.each { |itemspec|
-      modelname, id = *itemspec.split('/')
-      records[modelname] = (records[modelname] || []) << id.to_i
-    }
+      # First, create a hash of arrays, indexed by modelname, to collect the ids for that model
+      records = {}
+      cache_slice.each { |itemspec|
+        modelname, id = *itemspec.split('/')
+        records[modelname] = (records[modelname] || []) << id.to_i
+      }
 
-    # Now bulk-load all the records for each model type, replacing the id array with the corresponding array of records
-    records.keys.each { |modelname|
-      # Convert the ids to objects in one go
-      entries = modelname.constantize.where(id: records[modelname]).to_a
+      # Now bulk-load all the records for each model type, replacing the id array with the corresponding array of records
+      records.keys.each { |modelname|
+        # Convert the ids to objects in one go
+        entries = modelname.constantize.where(id: records[modelname]).to_a
 
-      # Restore the ordering after randomizing by
-      entry_map = entries.map &:id
-      records[modelname] = records[modelname].collect { |id| entries[entry_map.index id] }
-    }
+        # Restore the ordering after randomizing by
+        entry_map = entries.map &:id
+        records[modelname] = records[modelname].collect { |id| entries[entry_map.index id] }
+      }
 
-    # Finally convert the original, ordered array of item specs to the corresponding array of records (also ordered)
-    cache_slice.collect { |itemspec|
-      modelname= itemspec.split('/').first
-      records[modelname].shift
-    }
+      # Finally convert the original, ordered array of item specs to the corresponding array of records (also ordered)
+      cache_slice.collect { |itemspec|
+        modelname= itemspec.split('/').first
+        records[modelname].shift
+      }
+    end
   end
 
   def max_window_size
     5
   end
 
-  # Return the existing partition, if any; otherwise, create one otherwise
+  # Return the existing partition, if any; otherwise, create one
   def safe_partition
     if pt = partition
       pt
@@ -777,7 +926,7 @@ class ResultsCache < ActiveRecord::Base
                 else
                   # This is a new special tag. Unless it matches an existing tag, convert it to an internal tag and add it to the cache
                   name = e.gsub(/\'/, '').strip
-                  unless tag = Tag.strmatch(name, { matchall: true, uid: @userid }).first
+                  unless tag = Tag.strmatch(name, {matchall: true, uid: @userid}).first
                     tag = Tag.new name: name
                     unless special.find { |k, v| (special[k] = v and tag.id = k.to_i) if v == name }
                       tag.id = -1
@@ -815,18 +964,18 @@ end
 
 class SearchIndexCache < ResultsCache
   include ResultTyping
-  include EntitiesCache
+  include ModelSearch
 
-  def stream_id
+  def stream_id # public
     'search'
   end
 
-  def ordereditemscope
+  def ordereditemscope iscope=itemscope
     # Use the org parameter and the ASC/DESC attribute to assert an ordering
     ois =
-    if org == :viewed
-      uniqueitemscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
-    end || super
+        if org == :viewed
+          iscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
+        end || super
     if result_type == 'lists'
       # Eliminate empty lists
       ois.where.not(name_tag_id: [16310, 16311, 16312])
@@ -867,7 +1016,7 @@ end
 class UsersCollectionCache < UsersShowCache
   include CollectionCache
 
-  # The CollectionCache module defines the default itemscope on a user's collection,
+  # The module defines the default itemscope on a user's collection,
   # appropriately using the result_type parameter
 end
 
@@ -886,11 +1035,11 @@ class UsersBiglistCache < UsersCollectionCache
   end
 end
 
-class UserFeedsCache < UsersCollectionCache
+class UserFeedsCache < UsersShowCache
 
-  def ordereditemscope
+  def ordereditemscope iscope=itemscope # Blithely assuming a singular itemscope
     if @org && (@org.to_sym == :updated)
-      uniqueitemscope.joins(:feeds).order('"feeds"."last_post_date"' + (@sort_direction || 'DESC'))
+      iscope.order('"feeds"."last_post_date"' + (@sort_direction || 'DESC'))
     else
       super
     end
@@ -899,7 +1048,7 @@ class UserFeedsCache < UsersCollectionCache
 end
 
 class SitesFeedsCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def site
     @site ||= Site.find @entity_id
@@ -911,7 +1060,7 @@ class SitesFeedsCache < ResultsCache
 end
 
 class SitesRecipesCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def site
     @site ||= Site.find @entity_id
@@ -926,7 +1075,7 @@ end
 # Provide the set of lists the user has collected, but only those visible to her
 class UserCollectedListsCache < ResultsCache
   include UserFunc
-  include EntitiesCache
+  include ModelSearch
 
   def itemscope
     @itemscope ||= user.decorate.collected_lists(viewer) # ListServices.lists_collected_by user, viewer
@@ -936,7 +1085,7 @@ end
 # Provide the set of lists the user owns
 class UserOwnedListsCache < ResultsCache
   include UserFunc
-  include EntitiesCache
+  include ModelSearch
 
   def itemscope
     @itemscope ||= user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
@@ -953,21 +1102,21 @@ end
 
 # list of lists visible to the viewer
 class ListsIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   # A listcache may define an itemscope to let the superclass#items method do pagination
   def itemscope
     @itemscope ||=
-    case result_type.subtype
-      when 'owned'
-        user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
-      when 'collected'
-        user.decorate.collection_lists viewer # ListServices.lists_collected_by user, viewer
-      when 'all'
-        List.unscoped
-      else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
-        ListServices.visible_lists( viewer, true).where.not(name_tag_id: [16310,16311,16312]) # .order(owner_id: :desc)
-    end
+        case result_type.subtype
+          when 'owned'
+            user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
+          when 'collected'
+            user.decorate.collection_lists viewer # ListServices.lists_collected_by user, viewer
+          when 'all'
+            List.unscoped
+          else # By default, we only see lists belonging to our friends and Super that are not private, and all those that are public
+            ListServices.visible_lists(viewer, true).where.not(name_tag_id: [16310, 16311, 16312]) # .order(owner_id: :desc)
+        end
   end
 end
 
@@ -979,18 +1128,18 @@ end
 
 # list's content visible to current user (ListStreamer)
 class ListsShowCache < ResultsCache
-  include TaggingCache
+  include TaggableSearch
 
   def list
     @list ||= List.find @entity_id
   end
 
-  # The itemscope is the initial query for all possible items, subject to subqueries via count_tag
+  # The itemscope is the initial query for all possible items
   def itemscope
     @itemscope ||= ListServices.new(list).tagging_scope @viewerid
   end
 
-  def stream_id
+  def stream_id # public
     "list_#{@entity_id}_contents"
   end
 
@@ -1006,11 +1155,11 @@ end
 
 # list of feeds
 class FeedsIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   # Declare a different default org
   def self.params_needed
-    super + [ [ :org, :newest ], :approved ]
+    super + [:approved]
   end
 
   def max_window_size
@@ -1021,7 +1170,7 @@ class FeedsIndexCache < ResultsCache
     if defined?(@approved)
       case @approved
         when 'invisible'
-          [ nil, false ]
+          [nil, false]
         when 'true'
           true
         when 'false'
@@ -1036,28 +1185,28 @@ class FeedsIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||=
-    case result_type.subtype
-      when 'collected' # Feeds actually collected by user and friends
-        persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
-        Feed.joins(:user_pointers).
-            where("rcprefs.user_id in (#{persons_of_interest})").
-            order("rcprefs.user_id DESC").   # User's own feeds first
+        case result_type.subtype
+          when 'collected' # Feeds actually collected by user and friends
+            persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
+            Feed.joins(:user_pointers).
+                where("rcprefs.user_id in (#{persons_of_interest})").
+                order("rcprefs.user_id DESC").# User's own feeds first
             order("rcprefs.updated_at DESC") # Most recent first (within user)
-      when 'all' # For admins only: every feed in the world
-        Feed.order 'approved DESC'
-      when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
-        Feed.where approved: true
-      else
-        Feed.where approved: (admin_view ? approved : true)
-    end
+          when 'all' # For admins only: every feed in the world
+            Feed.order 'approved DESC'
+          when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
+            Feed.where approved: true
+          else
+            Feed.where approved: (admin_view ? approved : true)
+        end
   end
 
-  def ordereditemscope
-    case @org.to_sym
+  def ordereditemscope iscope=itemscope
+    case @org.to_sym # Blithely assuming a singular itemscope
       when :updated
-        uniqueitemscope.order('"feeds"."last_post_date" ' + (@sort_direction || 'DESC'))
+        iscope.order('"feeds"."last_post_date" ' + (@sort_direction || 'DESC'))
       when :approved
-        uniqueitemscope.order('"feeds"."approved" ' + (@sort_direction || 'DESC'))
+        iscope.order('"feeds"."approved" ' + (@sort_direction || 'DESC'))
       else
         super
     end
@@ -1067,7 +1216,7 @@ end
 
 # list of feed items
 class FeedsShowCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def feed
     @feed ||= Feed.find @entity_id
@@ -1089,7 +1238,7 @@ end
 
 # users: list of users visible to current_user (UsersStreamer)
 class UsersIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def max_window_size
     10
@@ -1097,28 +1246,28 @@ class UsersIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||=
-    if admin_view # See everyone in admin view
-      User.unscoped
-    else
-      case result_type.subtype
-        when 'followees'
-          viewer.followees
-        when 'relevant'
-          # Exclude the viewer and all their friends
-          User.where(private: false).
-              where('count_of_collecteds > 0').
-              where.not( id: viewer.followee_ids+[@viewerid, 4, 5] ).
-              order('count_of_collecteds DESC')
+        if admin_view # See everyone in admin view
+          User.unscoped
         else
-          User.where(private: false).where.not(id: [4, 5])
-      end
-    end
+          case result_type.subtype
+            when 'followees'
+              viewer.followees
+            when 'relevant'
+              # Exclude the viewer and all their friends
+              User.where(private: false).
+                  where('count_of_collecteds > 0').
+                  where.not(id: viewer.followee_ids+[@viewerid, 4, 5]).
+                  order('count_of_collecteds DESC')
+            else
+              User.where(private: false).where.not(id: [4, 5])
+          end
+        end
   end
 
 end
 
 class UserFriendsCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
   include UserFunc
 
   def itemscope
@@ -1133,7 +1282,7 @@ end
 
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
   include UserFunc
 
   def itemscope
@@ -1143,35 +1292,17 @@ class UserListsCache < ResultsCache
 end
 
 class TagsIndexCache < ResultsCache
-  include EntitiesCache
+  include TagSearch
+  # include EntitiesCache
 
   def max_window_size
     10
   end
 
-  def self.params_needed
-    super + [:tagtype, :batch]
-  end
-
-  # Tags don't go through Taggings, so we just use/count them directly
-  def count_tag tag
-    super.include itemscope.where(normalized_name: tag.normalized_name || Tag.normalizeName(tag.name)), 10
-  end
-
-  def itemscope
-    return @itemscope if @itemscope
-    @itemscope = @tagtype ? Tag.where(tagtype: @tagtype) : Tag.unscoped
-    if @batch
-      first = (@batch.to_i-1) * 100
-      @itemscope = @itemscope.order(id: :ASC).where("id >= #{first} and id < #{first+100}")
-    end
-    @itemscope
-  end
-
 end
 
 class TagsAssociatedCache < ResultsCache
-  include TaggingCache
+  include TaggableSearch
 
   def tag
     @tag ||= Tag.find @entity_id
@@ -1184,7 +1315,7 @@ class TagsAssociatedCache < ResultsCache
 end
 
 class SitesIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def self.params_needed
     super + [:approved]
@@ -1199,7 +1330,7 @@ class SitesIndexCache < ResultsCache
     if defined?(@approved)
       case @approved
         when 'invisible'
-          [ nil, false ]
+          [nil, false]
         when 'true'
           true
         when 'false'
@@ -1213,21 +1344,21 @@ class SitesIndexCache < ResultsCache
   end
 
   def itemscope
-      @itemscope ||= Site.
-          including_user_pointer(@viewerid).
-          includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
-          where(approved: approved)
+    @itemscope ||= Site.
+        including_user_pointer(@viewerid).
+        includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
+        where(approved: approved)
   end
 
-  def ordereditemscope
+  def ordereditemscope iscope=itemscope
     # Use the org parameter and the ASC/DESC attribute to assert an ordering
-    case org
+    case org # Blithely assuming a singular itemscope
       when :referent_id
       when :recipe_count
       when :feed_count
       when :definition_count
       else
-        uniqueitemscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."id" DESC})
+        iscope.order(admin_view ? %q{"sites"."approved" DESC } : %q{"sites"."id" DESC})
     end || super
   end
 
@@ -1235,7 +1366,7 @@ end
 
 class SitesShowCache < ResultsCache
   include ResultTyping
-  include EntitiesCache
+  include ModelSearch
 
   def site
     @site = Site.find @entity_id
@@ -1251,7 +1382,7 @@ class SitesAssociatedCache < SitesShowCache
 end
 
 class ReferencesIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def max_window_size
     10
@@ -1284,7 +1415,7 @@ class ReferenceCache < ResultsCache
 end
 
 class ReferentsIndexCache < ResultsCache
-  include EntitiesCache
+  include ModelSearch
 
   def max_window_size
     10
@@ -1303,7 +1434,7 @@ class ReferentsIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
+    @itemscope ||= typeclass.unscoped # (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
   end
 
 end
