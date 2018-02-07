@@ -220,8 +220,11 @@ BLOCK_END
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
 
-
-  def summarize_tag_similar this, other, absorb_btn = false
+  # Summarize a tag similar to this one.
+  # options:
+  #   absorb_btn: a button to absorb the other tag into this one
+  #   merge_into_btn: a button to absorb this tag into the other one
+  def summarize_tag_similar this, other, options={}
     contents = [
         homelink(other),
         "(#{other.typename})"
@@ -232,7 +235,14 @@ BLOCK_END
                                  mode: :modal,
                                  with_form: true,
                                  class: 'absorb_button',
-                                 id: "absorb_button_#{other.id}") if absorb_btn
+                                 id: "absorb_button_#{other.id}") if options[:absorb_btn]
+    contents << button_to_submit('Merge Into',
+                                 associate_tag_path(other, other: this.id, as: 'merge_into', format: 'json'),
+                                 :xs,
+                                 mode: :modal,
+                                 with_form: true,
+                                 class: 'absorb_button',
+                                 id: "merge_into_button_#{this.id}") if options[:merge_into_btn]
     content_tag :span, safe_join(contents, ' '), class: "absorb_#{other.id}"
   end
 

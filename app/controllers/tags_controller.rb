@@ -186,6 +186,7 @@ class TagsController < ApplicationController
   #  -- 'synonym' means to make the tag a synonym of the other
   #  -- 'child' means to make the other a parent of the tag
   #  -- 'absorb' means to make the other vanish into the tag
+  #  -- 'merge_into' means to vanish this tag into the other (inverse of absorb)
   def associate
     begin
       update_and_decorate
@@ -194,6 +195,9 @@ class TagsController < ApplicationController
       else
         @touched = [@tag, other]
         case params[:as]
+          when 'merge_into'
+            reporter = other.absorb @tag
+            resource_errors_to_flash reporter, preface: "Couldn\'t merge into '#{other.name}."
           when 'absorb'
             reporter = @tag.absorb other
             resource_errors_to_flash reporter, preface: "Couldn\'t absorb '#{other.name}."
@@ -210,7 +214,7 @@ class TagsController < ApplicationController
     @touched = [@tag, other, reporter].uniq
     respond_to do |format|
       format.html {}
-      format.json {}
+      format.json { render }
       format.js { render 'shared/get_content' }
     end
   end

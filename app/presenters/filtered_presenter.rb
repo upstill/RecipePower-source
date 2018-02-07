@@ -156,13 +156,13 @@ class FilteredPresenter
   require './app/models/results_cache.rb'
   attr_accessor :title, :h
 
-  attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype, :batch,
+  attr_reader :request_path, :decorator, :entity, :viewer, :response_service, :result_type, :viewparams, :tagtype,
               :content_mode, # What page element to render? :container, :entity, :results, :modal, :items
               :item_mode, # How composites are presented: :table, :strip, :masonry, :feed_item
-              :org, # How to organize the results: :ratings, :popularity, :newest, :viewed, :random
               :klass # class of the underlying object
 
-  delegate :admin_view, :querytags, :to => :results_cache
+  # Some params need to be persisted/controlled by ResultsCache
+  delegate :admin_view, :querytags, :org, :org_options, :batch, :to => :results_cache
 
   delegate :display_style, :to => :viewparams
 
@@ -256,7 +256,7 @@ class FilteredPresenter
   # Declare the parameters that we adopt as instance variables. subclasses would add to this list
   def params_needed
     (defined?(super) ? super : []) +
-        [ :tagtype, :batch, :result_type, :id, [ :content_mode, :container ], [ :org, :newest ], [ :sort_direction, 'DESC' ] ]
+        [ :tagtype, :result_type, :id, [ :content_mode, :container ], [ :sort_direction, 'DESC' ] ]
   end
 
   # Include a (tag) type selector in the query field?
@@ -274,7 +274,9 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
-    query_opts = opt_param.clone.merge tagtype: tagtype, batch: batch, querytags: querytags, type_selector: filter_type_selector
+    params = opt_param.clone
+    params[:batch] = batch if results_cache.respond_to?(:batch)
+    query_opts = params.merge tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector
     query_opts[:batch_select] = (1+ Tag.last.id/100) if response_service.admin_view?
     h.token_input_query query_opts.compact
   end
@@ -359,10 +361,6 @@ class FilteredPresenter
     end
   end
 
-  def org_options
-    [ :viewed, :newest ]
-  end
-
   # Specify a path for fetching the results partial, based on the current query
   def results_path qparams={}
     assert_query request_path, { content_mode: 'results', item_mode: item_mode }.merge(qparams)
@@ -400,10 +398,6 @@ protected
   end
 
   private
-
-  def org= val
-    @org = val.to_sym
-  end
 
 end
 
@@ -574,6 +568,7 @@ class FeedsIndexPresenter < FilteredPresenter
     'feeds'
   end
 
+=begin
   def org_buttons context, &block
     current_mode = @sort_direction
     block.call 'newest', { :org => :newest, :sort_direction => 'DESC', active: (@org == :newest) },
@@ -586,6 +581,7 @@ class FeedsIndexPresenter < FilteredPresenter
     end
     '' # No label
   end
+=end
 
 end
 
@@ -671,10 +667,6 @@ end
 
 class TagsIndexPresenter < FilteredPresenter
   include TagsTable
-
-  def org_options
-    [ :updated, :newest ]
-  end
 
   def result_type
     'tags'

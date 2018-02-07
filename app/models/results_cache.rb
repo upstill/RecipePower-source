@@ -202,8 +202,9 @@ module UserFunc
 
 end
 
-# Prototype of definitions and methods for searching to a ResultsCache. These are stubs which do nothing
-module NullSearch
+# Prototype of definitions and methods for searching to a ResultsCache. These are stubs which either define defaults
+# or do nothing
+module DefaultSearch
 
   def stream_id # public
     "#{self.class.to_s}-#{itemscope.model.to_s}-#{@entity_id}"
@@ -445,7 +446,7 @@ module TagSearch
   end
 
   def scope_count
-    cache ? cache.count : ordereditemscope.count
+    cache ? cache.count : itemscope.count
   end
 
   # When taking a slice out of the (single) itemscope, load the associated entities meanwhile
@@ -457,6 +458,15 @@ module TagSearch
 
   def itemscope
     @itemscope ||= @tagtype ? Tag.of_type(@tagtype) : Tag.all
+  end
+
+  def ordereditemscope iscope=itemscope
+    case org
+      when :popularity
+        iscope.joins(:taggings).group('tags.id').order("count(tags.id) desc")
+      else
+        super
+    end
   end
 
 end
@@ -568,12 +578,12 @@ module ExtractParams
 
 end
 
-# A NullSearch is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
+# A DefaultSearch is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
 class NullResults
-  include NullSearch
+  include DefaultSearch
   include ExtractParams
 
-  attr_reader :params, :admin_view, :querytags
+  attr_reader :params, :admin_view, :querytags, :org
 
   # Declare the parameters needed for this class
   def self.params_needed
@@ -606,7 +616,7 @@ end
 
 class ResultsCache < ActiveRecord::Base
   include ActiveRecord::Sanitization
-  include NullSearch # Defaults for *Cache methods
+  include DefaultSearch # Defaults for *Cache methods
   include ExtractParams
 
   before_save do
@@ -629,6 +639,11 @@ class ResultsCache < ActiveRecord::Base
   serialize :partition
   attr_accessor :items
   delegate :window, :next_index, :'done!', :'done?', :max_window_size, :to => :safe_partition
+
+  # What to present as choices for sorting the results
+  def org_options
+    [ :viewed, :newest ]
+  end
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
@@ -957,9 +972,12 @@ class SearchIndexCache < ResultsCache
   def ordereditemscope iscope=itemscope
     # Use the org parameter and the ASC/DESC attribute to assert an ordering
     ois =
-        if org == :viewed
-          iscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
-        end || super
+    case org
+      when :viewed
+        iscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
+      else
+        super
+    end
     if result_type == 'lists'
       # Eliminate empty lists
       ois.where.not(name_tag_id: [16310, 16311, 16312])
@@ -1000,6 +1018,10 @@ end
 class UsersCollectionCache < UsersShowCache
   include CollectionCache
 
+  def org_options
+    result_type == 'feeds' ? [ :posted, :newest ] : [ :updated, :newest ]
+  end
+
   # The module defines the default itemscope on a user's collection,
   # appropriately using the result_type parameter
 end
@@ -1021,12 +1043,23 @@ end
 
 class UserFeedsCache < UsersShowCache
 
+  def self.params_needed
+    super + [ [:org, :posted] ]
+  end
+
   def ordereditemscope iscope=itemscope # Blithely assuming a singular itemscope
-    if @org && (@org.to_sym == :updated)
-      iscope.order('"feeds"."last_post_date"' + (@sort_direction || 'DESC'))
-    else
-      super
+    case org
+      when :posted
+        iscope.order('"feeds"."last_post_date" DESC')
+      else
+        super
     end
+  end
+
+  def itemscope
+    # If we're looking at the feeds with the latest post, ignore those
+    # with no posts, which would otherwise come up first
+    org == :posted ? super.where.not(last_post_date: nil) : super
   end
 
 end
@@ -1150,6 +1183,10 @@ class FeedsIndexCache < ResultsCache
     10
   end
 
+  def org_options
+    [ :updated, :newest, (:approved if response_service.admin_view?) ].compact
+  end
+
   def approved
     if defined?(@approved)
       case @approved
@@ -1186,7 +1223,7 @@ class FeedsIndexCache < ResultsCache
   end
 
   def ordereditemscope iscope=itemscope
-    case @org.to_sym # Blithely assuming a singular itemscope
+    case org # Blithely assuming a singular itemscope
       when :updated
         iscope.order('"feeds"."last_post_date" ' + (@sort_direction || 'DESC'))
       when :approved
@@ -1282,6 +1319,10 @@ class TagsIndexCache < ResultsCache
 
   def max_window_size
     10
+  end
+
+  def org_options
+    [ :popularity, :newest ]
   end
 
 end

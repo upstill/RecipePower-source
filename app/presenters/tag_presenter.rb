@@ -37,7 +37,7 @@ class TagPresenter < BasePresenter
   # :definition_page_refs - Any definitions using the tag
   # :page_refs -- A set of page Refs selected using an entry from TagServices.type_selections
   # :synonyms - Tags for the semantic siblings of a tag
-  # :similars - Tags for the lexical of a tag (those which have the same normalized_name )
+  # :similars - Tags for the lexical of a tag (those which have the same normalized_name)
 
   # options[:for] declares a destination, one of:
   # :table - for dumping in a column of a row for the tag
@@ -45,6 +45,8 @@ class TagPresenter < BasePresenter
   # :raw - return just the strings for the elements
 
   # options[:helper] prescribes the name of a helper to name and possibly link to an instance of the aspect
+  # options[:absorb_btn] enables the provision of a button for absorbing the other into this tag
+  # options[:merge_into_btn] converse of :absorb_btn
   def summarize_aspect what, options={}
     helper = (options.delete :helper) || :homelink
     format = (options.delete :for) || :card
@@ -72,7 +74,9 @@ class TagPresenter < BasePresenter
     strs = scope.collect { |entity|
       case helper
         when :summarize_tag_similar
-          h.summarize_tag_similar tag, entity, (options[:absorb_btn] && tagserv.can_absorb(entity))
+          btn_options = {:absorb_btn => (options[:absorb_btn] && tagserv.can_absorb(entity)),
+                         :merge_into_btn => (options[:merge_into_btn] && TagServices.new(entity).can_absorb(tag)) }
+          h.summarize_tag_similar tag, entity, btn_options
         else
           h.public_send helper, entity
       end

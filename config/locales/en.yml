@@ -22,6 +22,7 @@ en:
       recipe_count: '#RECIPES'
       feed_count: '#FEEDS'
       definition_count: '#DEFINITIONS'
+      posted: 'LATEST POST'
   definition_reference:
     label:
       tag:
