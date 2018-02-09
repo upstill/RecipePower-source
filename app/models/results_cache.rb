@@ -207,7 +207,7 @@ end
 module DefaultSearch
 
   def stream_id # public
-    "#{self.class.to_s}-#{itemscope.model.to_s}-#{@entity_id}"
+    "#{self.class.to_s}-#{@entity_id}"
   end
 
   # Every meaningful ResultsCache MUST define an itemscope for the base set of results
@@ -220,21 +220,51 @@ module DefaultSearch
     [itemscope]
   end
 
+  # sort_key: map from an :org parameter to an attribute, for sorting AND for plucking a sort field
+  # USES @org parameter, which indicates how to sort the iscope relation
+  # iscope: an SQL disambiguator for the attribute
+  def sort_key scope_or_weight_or_name=nil
+    attribute =
+        case org
+          when :newest
+            'created_at'
+          when :updated
+            'updated_at'
+          else # :ratings, :popularity, :random, :viewed, :approved, :referent_id, :recipe_count, :feed_count, :definition_count
+            nil
+        end
+    case scope_or_weight_or_name
+      when Fixnum
+        scope_or_weight_or_name
+      when String
+        "\"#{scope_or_weight_or_name}\".\"#{attribute}\"" if attribute
+      when ActiveRecord::Relation
+        "\"#{scope_or_weight_or_name.model_name.collection}\".\"#{attribute}\"" if attribute
+      else
+        attribute
+    end
+  end
+
   # Modify the itemscope to order the items. Defaults to no sorting.
   def ordereditemscope iscope=itemscope
-    case org
-      when :newest
-        sort_attribute = %Q{"#{iscope.model_name.collection}"."created_at"}
-        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      when :updated
-        sort_attribute = %Q{"#{iscope.model_name.collection}"."updated_at"}
-        iscope.order("#{sort_attribute} #{@sort_direction || 'DESC'}")
-      else # :ratings, :popularity, :random, :viewed, :approved, :referent_id, :recipe_count, :feed_count, :definition_count
-        iscope
+    if key = sort_key(iscope)
+      modelname, attr = key.split('.')
+      if attr
+        modelname.gsub! /['"]/, ''
+        if modelname == iscope.model_name.collection # The table is redundant
+          key = attr.gsub /['"]/, ''
+        else
+          iscope = iscope.joins modelname.to_sym
+        end
+      end
+      iscope.order("#{key} #{@sort_direction || 'DESC'}")
+    else
+      iscope
     end
   end
 
   def scope_count iscope=itemscope
+    return cache.count if cache
     # To avoid loading the relation, we construct a count query from the scope query
     scope_query = iscope.to_sql
     sql = %Q{ SELECT COUNT(*) from (#{scope_query}) as internalQuery }
@@ -242,28 +272,17 @@ module DefaultSearch
     res.first["count"].to_i
   end
 
-  # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
-  # incrementing the counts appropriately. This is the end of the class inheritance hierarchy.
-  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
-    if oscope.is_a? Array
-      # An array of scopes gets counted in turn
-      oscope.inject(counts) { |memo, os| count_tag tag, memo, os }
-    elsif !tag
-      counts.include oscope, pluck_key(oscope)
-    else
-      counts
-    end
+  # This is the end of the superclass hierarchy for counting a tag, so we return the unmodified counts
+  def count_tag tag, counts, iscope
+    counts
   end
 
-  # When taking a slice out of the (single) itemscope, load the associated entities meanwhile
+  # When taking a slice out of the (singular) itemscope, load the associated entities meanwhile
   # NB This is not valid when the cache uses multiple scopes--but that should be handled by cache_and_partition
   def scope_slice offset, limit
-    ordereditemscope.offset(offset).limit(limit).to_a
-  end
-
-  # Provide a pluck key so that count_tag can sort on an appropriate value
-  def pluck_key scope_or_weight=1
-    scope_or_weight.is_a?(Fixnum) ? scope_or_weight : "'#{scope_or_weight.model_name.collection}'.'updated_at'"
+    oscope = ordereditemscope
+    oscope = oscope.includes(:entity) if %w{ rcprefs taggings }.include? oscope.model_name.collection
+    oscope.offset(offset).limit(limit).to_a
   end
 
 end
@@ -273,52 +292,22 @@ module ModelSearch
 
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
-  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
-    if tag && !oscope.is_a?(Array)
-      tagname = tag.normalized_name || Tag.normalizeName(tag.name)
-      model = oscope.model
-
-      if Rails.env.development?
-        cts = Counts.new
-        NestedBenchmark.measure 'via taggings (old)' do
-          # We index using tags, for taggable models
-          if model.reflect_on_association :tags # model has :tags association
-            normalized = Tag.normalizeName tagname
-            canditags = Tag.where('normalized_name LIKE ?', "%#{normalized}%").pluck :id, :normalized_name
-            # Include synonyms: all tags which have the same referent
-            referent_ids = Referent.joins(:tags).where(tags: {id: canditags.map(&:first)}).pluck :id
-            tag_ids = Tag.joins(:referents).where(referents: {id: referent_ids}).pluck :id
-            cts.include oscope.joins(:taggings).where(taggings: {tag_id: canditags.map(&:first)}) # One extra point for matching in one field
-            exactcandi = canditags.find_all { |candi| candi.last == normalized }
-            if exactcandi.present?
-              cts.include oscope.joins(:taggings).where(taggings: {tag_id: exactcandi.map(&:first)}), 10 # Extra points for complete matches
-            end
-          end
+  def count_tag tag, counts, iscope
+    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+    model = iscope.model
+    sk = sort_key iscope
+    if model.respond_to? :strscopes
+      NestedBenchmark.measure 'Fuzzy searches on entity e.g., title and description' do
+        strscopes = model.strscopes "%#{tagname}%" do |joinspec=nil|
+          joinspec ? iscope.joins(joinspec) : iscope
         end
-
-        cts = Counts.new
-        NestedBenchmark.measure 'via taggings (new)' do
-          # We index using tags, for taggable models
-          if model.reflect_on_association :tags # model has :tags association
-            cts.include oscope.joins(:tags).merge(Tag.by_string(tagname)) # One extra point for matching in one field
-            cts.include oscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
-          end
-        end
+        counts.include strscopes, sk
       end
-
-      if model.respond_to? :strscopes
-        NestedBenchmark.measure 'Fuzzy searches on entity e.g., title and description' do
-          strscopes = model.strscopes "%#{str}%" do |joinspec=nil|
-            joinspec ? oscope.joins(joinspec) : oscope
-          end
-          counts.include strscopes, self.pluck_key
+      NestedBenchmark.measure 'Exact searches on entity e.g., title and description' do
+        strscopes = model.strscopes tagname do |joinspec=nil|
+          joinspec ? iscope.joins(joinspec) : iscope
         end
-        NestedBenchmark.measure 'Exact searches on entity e.g., title and description' do
-          strscopes = model.strscopes str do |joinspec=nil|
-            joinspec ? oscope.joins(joinspec) : oscope
-          end
-          counts.include strscopes, self.pluck_key(10)
-        end
+        counts.include strscopes, sk
       end
     end
     super
@@ -329,42 +318,23 @@ end
 # Defines search for Collectible entities, i.e. looking for comments that match a tag
 module CollectibleSearch
 
-  # Provide the iscope with a query for ordering the items. Defaults to no response
-  def ordereditemscope iscope=itemscope
-    # Use the org parameter and the ASC/DESC attribute to assert an ordering
+  # What to sort on AND what to pass to #pluck for manual sorting
+  def sort_key scope_or_weight_or_name=nil
     case org
       when :newest
         # Newest in the collection
-        iscope.joins(:rcprefs).order('"rcprefs"."created_at"' + (@sort_direction || 'DESC'))
-        # iscope.order("#{iscope.model_name.collection}.created_at #{(@sort_direction || 'DESC')}")
+        'rcprefs.created_at'
       when :viewed
-        iscope.joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
+        'rcprefs.updated_at'
       else
         super
     end
   end
 
-  # What to pass to #pluck for manual sorting
-  def pluck_key iscope=itemscope
-    case org
-      when :newest
-        # Newest in the collection
-        'rcprefs.created_at'
-      when :updated
-        iscope.order("#{iscope.model_name.collection}.updated_at #{(@sort_direction || 'DESC')}") # joins(:rcprefs).order('"rcprefs"."updated_at"' + (@sort_direction || 'DESC'))
-      when :viewed
-        'rcprefs.updated_at'
-      else # :ratings, :popularity, :random
-        super
-    end
-  end
-
-  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
-    if tag && !oscope.is_a?(Array)
-      tagname = tag.normalized_name || Tag.normalizeName(tag.name)
-      model = oscope.model
-      counts.include oscope.collected_by_user(@entity_id, @viewerid).matching_comment(tagname)
-    end
+  def count_tag tag, counts, iscope
+    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+    sk = sort_key(iscope)
+    counts.include iscope.collected_by_user(@entity_id, @viewerid).matching_comment(tagname), sk
     super
   end
 end
@@ -377,44 +347,23 @@ module TaggableSearch
   # while the final presentation (and initial count) are without redundancy.
   # NB This happens to work for both collections (based on Rcpref) and taggings b/c both have
   # polymorphic 'entity' associations
-=begin
-  def uniqueitemscope
-    itemscope # .select("DISTINCT ON (entity_type, entity_id) *")
-  end
-=end
-
-  # When taking a slice out of the taggings/rcprefs, load the associated entities meanwhile
-  def scope_slice offset, limit
-    ordereditemscope.includes(:entity).offset(offset).limit(limit).to_a
-  end
-
-=begin
-  # Apply the tag to the current set of result counts
-  def count_tag tag
-    # Intersect the scope with the set of entities tagged with tags similar to the given tag
-    Counts.new.
-        include(itemscope.where(tag_id: TagServices.new(tag).similar_ids)). # One extra point for matching in one field
-    include TaggingServices.match(tag.name, itemscope) # Returns an array of Tagging objects
-  end
-=end
 
   # Filter an entity scope by tag contents
-  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
-    if tag && !oscope.is_a?(Array)
-      tagname = tag.name
-      model = oscope.model
-      NestedBenchmark.measure 'via taggings (with synonoms)' do
-        # We index using tags, for taggable models
-        if model.reflect_on_association :tags # model has :tags association
-          # Search by fuzzy string match
-          counts.include oscope.joins(:tags).merge(Tag.by_string(tagname)) # One point for matching in one field
+  def count_tag tag, counts, iscope
+    tagname = tag.name
+    model = iscope.model
+    sk = sort_key iscope
+    NestedBenchmark.measure 'via taggings (with synonoms)' do
+      # We index using tags, for taggable models
+      if model.reflect_on_association :tags # model has :tags association
+        # Search by fuzzy string match
+        counts.include iscope.joins(:tags).merge(Tag.by_string(tagname)), sk # One point for matching in one field
 
-          # Search across synonyms
-          counts.include oscope.joins(:tags).merge(Tag.synonyms_by_str(tagname)) # One point for matching in one field
+        # Search across synonyms
+        counts.include iscope.joins(:tags).merge(Tag.synonyms_by_str(tagname)), sk # One point for matching in one field
 
-          # Search for exact name match
-          counts.include oscope.joins(:tags).merge(Tag.by_string(tagname, true)), 10 # Extra points for exact name match
-        end
+        # Search for exact name match
+        counts.include iscope.joins(:tags).merge(Tag.by_string(tagname, true)), sk # Extra points for exact name match
       end
     end
     super
@@ -436,17 +385,12 @@ module TagSearch
   end
 
   # Tags don't go through Taggings, so we just use/count them directly
-  def count_tag tag=nil, counts=Counts.new, oscope=ordereditemscope
-    if tag && !oscope.is_a?(Array)
-      nname = tag.normalized_name || Tag.normalizeName(tag.name)
-      counts.include oscope.where('normalized_name LIKE ?', "%#{nname}%"), 1
-      counts.include oscope.where(normalized_name: nname), 10
-    end
+  def count_tag tag, counts, iscope
+    nname = tag.normalized_name || Tag.normalizeName(tag.name)
+    sk = sort_key iscope
+    counts.include iscope.where('normalized_name LIKE ?', "%#{nname}%"), sk
+    counts.include iscope.where(normalized_name: nname), sk
     super
-  end
-
-  def scope_count
-    cache ? cache.count : itemscope.count
   end
 
   # When taking a slice out of the (single) itemscope, load the associated entities meanwhile
@@ -485,14 +429,19 @@ module CollectionCache
 
   # The itemscope is one or more scopes on the relevant models
   def itemscopes
-    # :entity_type => %w{ Recipe Site FeedEntry },
-    @itemscopes ||= result_type.entity_params[:entity_type].collect { |entity_type|
+    # :entity_type => %w{ Recipe Site FeedEntry }, Feed
+    @itemscopes ||= [result_type.entity_params[:entity_type]].flatten.collect { |entity_type|
       entity_type.constantize.collected_by_user @entity_id, @viewerid
     }.compact
   end
 
   def itemscope
-    raise 'Called itemscope on CollectionCache model'
+    @itemscope ||=
+        if (types = [result_type.entity_params[:entity_type]].flatten).count == 1
+          types.first.constantize.collected_by_user @entity_id, @viewerid
+        else
+          raise 'Called itemscope on non-singular CollectionCache model'
+        end
   end
 
   # Sum scope_count for each scope in the collection
@@ -600,10 +549,6 @@ class NullResults
 
   def has_query? # public
     false
-  end
-
-  def stream_id # public
-    "#{itemscope.model.to_s}-#{@entity_id}"
   end
 
   # Every meaningful ResultsCache MUST define an itemscope for the base set of results
@@ -805,7 +750,7 @@ class ResultsCache < ActiveRecord::Base
       # We're here EITHER because there are querytags (which in general necessitate multiple queries)
       # OR the 'scope' really requires multiple queries (say, on different entity types)
       # Either way, we need to produce a cache as output
-      oscopes = itemscopes.collect { |iscope| ordereditemscope iscope }
+      # oscopes = itemscopes.collect { |iscope| ordereditemscope iscope }
       counts =
           if @querytags.present?
             # Convert the itemscope relation into a hash on entity type/id pairs
@@ -813,11 +758,13 @@ class ResultsCache < ActiveRecord::Base
               if memo && memo.empty?
                 memo
               else
-                merge_counts memo, count_tag(tag, Counts.new, oscopes)
+                merge_counts memo, itemscopes.inject(Counts.new) { |cmemo, iscope| count_tag tag, cmemo, iscope }
               end
             }
-          else # By the logic of partition_on_scope?, we must have multiple scopes to merge into the cache
-            count_tag nil, Counts.new, oscopes
+          else # By the logic of partition_on_scope?, we must have multiple scopes to merge in the cache
+            itemscopes.inject(Counts.new) do |memo, iscope|
+              memo.include iscope, sort_key(iscope) # ...and there must be a sort key to pluck and use
+            end
           end
       self.cache = counts.itemstubs
       self.partition = Partition.new([0, cache.count], max_window_size)      # bounds = (0...(@querytags.count)).to_a.map { |i| (@querytags.count-i)*100 } # Partition according to the # of matches
@@ -964,6 +911,7 @@ end
 class SearchIndexCache < ResultsCache
   include ResultTyping
   include ModelSearch
+  include TaggableSearch
 
   def stream_id # public
     'search'
@@ -974,9 +922,13 @@ class SearchIndexCache < ResultsCache
     ois =
     case org
       when :viewed
-        iscope.select("#{result_type.table_name}.*, max(rcprefs.updated_at)").joins(:toucher_pointers).group("#{result_type.table_name}.id").order('max("rcprefs"."updated_at") DESC')
+        iscope.
+            select("#{result_type.table_name}.*, max(rcprefs.updated_at)").
+            joins(:toucher_pointers).
+            group("#{result_type.table_name}.id").
+            order('max("rcprefs"."updated_at") DESC')
       else
-        super
+        super iscope
     end
     if result_type == 'lists'
       # Eliminate empty lists
@@ -1019,7 +971,7 @@ class UsersCollectionCache < UsersShowCache
   include CollectionCache
 
   def org_options
-    result_type == 'feeds' ? [ :posted, :newest ] : [ :updated, :newest ]
+    [ :updated, :newest ]
   end
 
   # The module defines the default itemscope on a user's collection,
@@ -1041,16 +993,20 @@ class UsersBiglistCache < UsersCollectionCache
   end
 end
 
-class UserFeedsCache < UsersShowCache
+class UserFeedsCache < UsersCollectionCache
+
+  def org_options
+    [ :posted, :newest ]
+  end
 
   def self.params_needed
     super + [ [:org, :posted] ]
   end
 
-  def ordereditemscope iscope=itemscope # Blithely assuming a singular itemscope
+  def sort_key scope_or_weight_or_name=nil
     case org
       when :posted
-        iscope.order('"feeds"."last_post_date" DESC')
+        'last_post_date'
       else
         super
     end
@@ -1059,7 +1015,8 @@ class UserFeedsCache < UsersShowCache
   def itemscope
     # If we're looking at the feeds with the latest post, ignore those
     # with no posts, which would otherwise come up first
-    org == :posted ? super.where.not(last_post_date: nil) : super
+    scope = Feed.collected_by_user @entity_id, @viewerid
+    org == :posted ? scope.where.not(last_post_date: nil) : scope
   end
 
 end
@@ -1287,7 +1244,7 @@ class UsersIndexCache < ResultsCache
 
 end
 
-class UserFriendsCache < ResultsCache
+class UserFriendUserFriendsCachesCache < ResultsCache
   include ModelSearch
   include UserFunc
 
@@ -1304,6 +1261,8 @@ end
 # user's lists visible to current_user (UserListsStreamer
 class UserListsCache < ResultsCache
   include ModelSearch
+  include CollectibleSearch
+  include TaggableSearch
   include UserFunc
 
   def itemscope
