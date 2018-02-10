@@ -22,7 +22,7 @@
     </td>
     <td>
       <%# labelled_quantity list.entity_count, "item" %>
-      <%= labelled_quantity ListServices.new(list).tagging_scope(current_user_or_guest_id).count, "item" %>
+      <%= labelled_quantity ListServices.new(list).tagging_query(current_user_or_guest_id).count, "item" %>
     </td>
     <td class="actions-column">
       <%= collectible_buttons_panel decorator, 'xl', :tools_menu => true %>

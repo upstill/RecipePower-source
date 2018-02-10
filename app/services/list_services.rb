@@ -39,13 +39,13 @@ class ListServices
           # List tag but no list! Assert the list as owned by the user UNLESS there's already an invisible list by that name
           (accept_if(List.create(name_tag: user_tag, owner: user), :owned) unless list_scope.exists?)
     } +
-    # The item may also be included in the list by
-    # -- its owner (if they allow it to be seen) => :friends
-    # -- or publicly => :public
-    (ts.tags(:List) - user_tags).collect { |other_tag|
-      accept_if(self.friend_lists_on_tag(decorator, other_tag, user).first, :friends) ||
-          accept_if(other_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
-    }).compact
+        # The item may also be included in the list by
+        # -- its owner (if they allow it to be seen) => :friends
+        # -- or publicly => :public
+        (ts.tags(:List) - user_tags).collect { |other_tag|
+          accept_if(self.friend_lists_on_tag(decorator, other_tag, user).first, :friends) ||
+              accept_if(other_tag.public_lists.first, :public) # There's at least one publicly available list using this tag as title
+        }).compact
   end
 
   # Compile the set of lists, leaving the status intact but optionally uniquifying the lists
@@ -115,7 +115,7 @@ class ListServices
         uniq
   end
 
-    # List tags are handled specially, due to ownership of lists
+  # List tags are handled specially, due to ownership of lists
   def self.associate entity_or_decorator, ntags, uid
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     otags = ListServices.associated_lists(decorator, uid).map &:name_tag
@@ -144,7 +144,7 @@ class ListServices
     uid = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
     ts = TaggingServices.new entity
     # It's included if the owner or this user has tagged it with the name tag
-    return true if ts.exists? @list.name_tag_id, (uid == @list.owner_id ? uid : [ uid, @list.owner_id ])
+    return true if ts.exists? @list.name_tag_id, (uid == @list.owner_id ? uid : [uid, @list.owner_id])
     # If not directly tagged, it's included if it's tagged with any of the list's tags, BY ANYONE (?)
     return false unless with_pullins && @list.pullin
     ts.exists? pulled_tag_ids
@@ -163,7 +163,7 @@ class ListServices
 
   # Return an array of the entities in the list, visible to the given viewer
   def entities viewerid=nil
-    tagging_scope(viewerid).to_a.map(&:entity)
+    tagging_query(viewerid).to_a.map(&:entity)
   end
 
   # Add an entity to the list based on parameters
@@ -195,43 +195,30 @@ class ListServices
     @list.pullin ? @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) : []
   end
 
-    # Return a scope on the Tagging table for the unfiltered contents of the list
-    def tagging_scope viewerid=nil
-      # We get everything tagged either directly by the list tag, or indirectly via
-      # the included tags, EXCEPT for other users' tags using the list's tag
-      tag_ids = [@list.name_tag_id]
-      tagger_id_or_ids = [@list.owner_id, viewerid].compact.uniq
-      whereclause = tagger_id_or_ids.count > 1 ?
-          "(user_id in (#{tagger_id_or_ids.join ','}))" :
-          "(user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})"
-      whereclause << " or (tag_id != #{@list.name_tag_id})"
-      # If the pullin flag is on, we also include material tagged with the list's included_tags
-      # BY ITS OWNER
-      if @list.pullin
-        @list.included_tags.each do |it|
-          tag_ids << it.id
-          tag_ids += TagServices.new(it).similar_ids
-        end
-        whereclause = "(#{whereclause}) and not (entity_type = 'List' and entity_id = #{@list.id})"
-      end
-      scope = Tagging.where(tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).where whereclause
-      scope
-    end
-
-    def self.study_users
-      User.all.collect { |user|
-        user.collection_tags.collect { |tag|
-          if (ct = tag.recipes(user.id).count) > 0
-            "User ##{user.id} has #{ct} recipes in #{tag.name} collection."
-          end
-        }+
-            user.lists.collect { |list|
-              if (ct = list.entity_count) > 0
-                "User ##{user.id} has #{ct} recipes in #{list.name} list."
-              end
-            }
-      }.flatten.compact.each { |str| puts str }
-      ""
-    end
-
+  def tagging_query viewerid=nil
+    Tagging.list_scope @list, viewerid
   end
+
+  # Return a scope on a given type of entity for list members visible by the viewer
+  def entity_scope type, viewer
+    # type.constantize.tagged_by list.name_tag, [ list.owner_id, viewer.id ]
+    type.constantize.joins(:taggings).merge(Tagging.list_scope @list, viewer.id)
+  end
+
+  def self.study_users
+    User.all.collect { |user|
+      user.collection_tags.collect { |tag|
+        if (ct = tag.recipes(user.id).count) > 0
+          "User ##{user.id} has #{ct} recipes in #{tag.name} collection."
+        end
+      }+
+          user.lists.collect { |list|
+            if (ct = list.entity_count) > 0
+              "User ##{user.id} has #{ct} recipes in #{list.name} list."
+            end
+          }
+    }.flatten.compact.each { |str| puts str }
+    ""
+  end
+
+end

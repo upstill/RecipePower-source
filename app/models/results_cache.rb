@@ -25,7 +25,7 @@ class Counts < Hash
       when ActiveRecord::Relation
         # Late-breaking conversion of scope into items
         modelname = key_or_keys.model.to_s
-        NestedBenchmark.measure "Counted #{key_or_keys.count} #{modelname}s" do
+        NestedBenchmark.measure "Counted #{modelname}s" do
           if pluck_key_or_increment.is_a?(Fixnum)
             # We are accumulating hits, weighted by pluck_key_or_increment
             key_or_keys.pluck(:id).uniq.each do |id|
@@ -41,7 +41,7 @@ class Counts < Hash
           end
         end
       when Array
-        NestedBenchmark.measure "Counted #{key_or_keys.count} ids" do
+        NestedBenchmark.measure "Counted ids" do
           key_or_keys.each { |k| self.include k, pluck_key_or_increment }
         end
       when String
@@ -245,9 +245,10 @@ module DefaultSearch
   # When taking a slice out of the (singular) itemscope, load the associated entities meanwhile
   # NB This is not valid when the cache uses multiple scopes--but that should be handled by cache_and_partition
   def scope_slice offset, limit
-    oscope, sort_key = orderingscope itemscope
+    iscope = itemscope
+    iscope = iscope.includes(:entity) if %w{ rcprefs taggings }.include? iscope.model_name.collection
+    oscope, sort_key = orderingscope iscope
     oscope = oscope.order("#{sort_key} #{@sort_direction || 'DESC'}") if sort_key
-    oscope = oscope.includes(:entity) if %w{ rcprefs taggings }.include? oscope.model_name.collection
     oscope.offset(offset).limit(limit).to_a
   end
 
@@ -297,7 +298,7 @@ module CollectibleSearch
       else
         return super
     end
-    [ iscope.collected_by_user(@entity_id, @viewerid), key ]
+    [ iscope, key ]
   end
 
   def count_tag tag, counts, iscope
@@ -408,31 +409,14 @@ module CollectionCache
 
   def itemscope
     @itemscope ||=
-        if (types = [result_type.entity_params[:entity_type]].flatten).count == 1
-          types.first.constantize.collected_by_user @entity_id, @viewerid
+        if itemscopes.count == 1
+          itemscopes.first
         else
           raise 'Called itemscope on non-singular CollectionCache model'
         end
   end
 
   protected
-
-=begin
-  # Memoize a query to get all the currently-defined entity types
-  def typeset
-    @typeset ||=
-        case modelname = itemscope.model.to_s
-          when 'Rcpref'
-            itemscope.
-                select(:entity_type).
-                distinct.
-                pluck(:entity_type).
-                sort
-          else
-            [ modelname ]
-        end
-  end
-=end
 
 end
 
@@ -1079,14 +1063,58 @@ end
 # list's content visible to current user (ListStreamer)
 class ListsShowCache < ResultsCache
   include TaggableSearch
+  include ModelSearch
+  include CollectibleSearch
+
+  attr_accessor :list_services
+
+  def org_options
+    [ ]
+  end
 
   def list
     @list ||= List.find @entity_id
   end
 
+  def list_services
+    @list_services ||= ListServices.new list
+  end
+
+  def itemscopes
+    # Create a scope for each type of object collected
+    return @itemscopes if @itemscopes
+=begin
+        NestedBenchmark.measure "Counted ListsShowCache#itemscopes via :pluck" do
+          itemscope.pluck(:entity_type, :entity_id).inject(Hash.new) { |memo, pair|
+            memo[pair.first] = (memo[pair.first] ||= []) << pair.last
+            memo
+          }.collect { |entity, ids|
+            entity.constantize.where(id: ids)
+          }
+        end
+=end
+    @itemscopes =
+    NestedBenchmark.measure "Counted ListsShowCache#itemscopes by entity type and id" do
+      itemscope.group(:entity_type).pluck(:entity_type).collect do |type|
+        list_services.entity_scope type, viewer
+      end
+    end
+  end
+
+  # TODO: offer option of ordering by list order
+  def orderingscope iscope=itemscope
+        case org
+          when :newest
+            # Newest in the list
+            [ iscope, 'taggings.created_at' ]
+          else
+            super
+        end
+  end
+
   # The itemscope is the initial query for all possible items
   def itemscope
-    @itemscope ||= ListServices.new(list).tagging_scope @viewerid
+    @itemscope ||= list_services.tagging_query @viewerid
   end
 
   def stream_id # public
@@ -1171,9 +1199,26 @@ end
 # list of feed items
 class FeedsShowCache < ResultsCache
   include ModelSearch
+  include CollectibleSearch
+
+  def org_options
+    [ :viewed, :newest ]
+  end
 
   def feed
     @feed ||= Feed.find @entity_id
+  end
+
+  def orderingscope iscope=itemscope
+    case org
+      when :newest
+        # Newest entries
+        [iscope, 'published_at']
+      when :viewed
+        [ iscope.joins(:toucher_pointers), 'rcprefs.updated_at' ]
+      else
+        super
+    end
   end
 
   def itemscope
@@ -1220,7 +1265,7 @@ class UsersIndexCache < ResultsCache
 
 end
 
-class UserFriendUserFriendsCachesCache < ResultsCache
+class UserFriendsCache < ResultsCache
   include ModelSearch
   include UserFunc
 

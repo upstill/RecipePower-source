@@ -64,7 +64,7 @@ class Feed < ActiveRecord::Base
   end
 =end
 
-  has_many :feed_entries, -> { order 'published_at DESC' }, :dependent => :destroy
+  has_many :feed_entries, :dependent => :destroy
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also
   # alias to the url of an already-extant feed (no good). We also need to extract the title and description 

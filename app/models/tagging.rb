@@ -17,6 +17,28 @@ class Tagging < ActiveRecord::Base
     where entity_type: classname.to_s
   }
 
+  # Return a scope on the Tagging table for the unfiltered contents of the list
+  scope :list_scope, -> (list, viewerid=nil) {
+    # We get everything tagged either directly by the list tag, or indirectly via
+    # the included tags, EXCEPT for other users' tags using the list's tag
+    tag_ids = [list.name_tag_id]
+    tagger_id_or_ids = [list.owner_id, viewerid].compact.uniq
+    whereclause = tagger_id_or_ids.count > 1 ?
+        "(taggings.user_id in (#{tagger_id_or_ids.join ','}))" :
+        "(taggings.user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})"
+    whereclause << " or (taggings.tag_id != #{list.name_tag_id})"
+    # If the pullin flag is on, we also include material tagged with the list's included_tags
+    # BY ITS OWNER
+    if list.pullin
+      list.included_tags.each do |it|
+        tag_ids << it.id
+        tag_ids += TagServices.new(it).similar_ids
+      end
+      whereclause = "(#{whereclause}) and not (taggings.entity_type = 'List' and taggings.entity_id = #{list.id})"
+    end
+    where(tag_id: (tag_ids.count>1 ? tag_ids : tag_ids.first)).where whereclause
+  }
+
   # From tagref: When saving a "new" Tag, make sure the tagging is unique
   def ensure_unique
   end

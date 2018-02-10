@@ -46,7 +46,7 @@ class ListDecorator < CollectibleDecorator
   def imgdata
     if (img = @object.imgdata).blank?
       # The default fallback is to use an image from a member of the list
-      sco = ListServices.new(@object).tagging_scope @object.collectible_user_id 
+      sco = ListServices.new(@object).tagging_query @object.collectible_user_id
       sco.each { |tagging|
         # Looking for a member of the list that has a valid picture
         if tagging.entity.imgdata.present?

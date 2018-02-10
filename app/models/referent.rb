@@ -1,4 +1,3 @@
-
 class ReferentValidator < ActiveModel::Validator
   def validate(record)
     # Test that record has non-generic type
@@ -89,7 +88,7 @@ class Referent < ActiveRecord::Base
   after_save :ensure_tagtypes
 
   # Scopes for the referents of the given tag(s)
-  scope :by_tag_id, -> (tagid_or_ids) { joins(:tags).where(tags: { id: tagid_or_ids }) }
+  scope :by_tag_id, -> (tagid_or_ids) { joins(:tags).where(tags: {id: tagid_or_ids}) }
 
   scope :by_tag_name, -> (str, exact=false) {
     # joins(:tags).where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalizeName str}#{'%' unless exact}")
@@ -486,7 +485,7 @@ class Referent < ActiveRecord::Base
     unless children.include? child_ref
       if move
         child_ref.parents = [self]
-       else
+      else
         child_ref.parents << self
       end
       children << child_ref
@@ -515,85 +514,90 @@ class Referent < ActiveRecord::Base
 end
 
 # Subclases for different types of referents
+if defined?(SourceReferent)
+  x=2 # raise "SourceReferent already defined!"
+else
 
-class SourceReferent < Referent
-  has_one :site, foreign_key: 'referent_id'
+  class SourceReferent < Referent
+    has_one :site, foreign_key: 'referent_id'
 
-  attr_accessible :site
+    attr_accessible :site
 
-  def associate
-    self.site
+    def associate
+      self.site
+    end
+
+    def detached?
+      super && !site
+    end
+
+    def affiliates
+      super + [site]
+    end
+
   end
 
-  def detached?
-    super && !site
+
+  class InterestReferent < Referent
   end
 
-  def affiliates
-    super + [ site ]
+  class GenreReferent < Referent
   end
 
-end
+  class RoleReferent < Referent
+  end
 
-class InterestReferent < Referent
-end
+  class DishReferent < Referent
+  end
 
-class GenreReferent < Referent
-end
+  class CourseReferent < Referent
+  end
 
-class RoleReferent < Referent
-end
+  class ProcessReferent < Referent
+  end
 
-class DishReferent < Referent
-end
+  class IngredientReferent < Referent
+  end
 
-class CourseReferent < Referent
-end
+  class UnitReferent < Referent
+  end
 
-class ProcessReferent < Referent
-end
+  class AuthorReferent < Referent
+  end
 
-class IngredientReferent < Referent
-end
+  class OccasionReferent < Referent
+  end
 
-class UnitReferent < Referent
-end
+  class PantrySectionReferent < Referent
+  end
 
-class AuthorReferent < Referent
-end
+  class StoreSectionReferent < Referent
+  end
 
-class OccasionReferent < Referent
-end
+  class DietReferent < Referent
+  end
 
-class PantrySectionReferent < Referent
-end
+  class ToolReferent < Referent
+  end
 
-class StoreSectionReferent < Referent
-end
+  class NutrientReferent < Referent
+  end
 
-class DietReferent < Referent
-end
+  class CulinaryTermReferent < Referent
+  end
 
-class ToolReferent < Referent
-end
+  class QuestionReferent < Referent
+  end
 
-class NutrientReferent < Referent
-end
+  class ListReferent < Referent
+  end
 
-class CulinaryTermReferent < Referent
-end
+  class EpitaphReferent < Referent
+  end
 
-class QuestionReferent < Referent
-end
+  class CourseReferent < Referent
+  end
 
-class ListReferent < Referent
-end
-
-class EpitaphReferent < Referent
-end
-
-class CourseReferent < Referent
-end
-
-class TimeReferent < Referent
+  class TimeReferent < Referent
+  end
 end

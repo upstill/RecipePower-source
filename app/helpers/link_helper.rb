@@ -144,7 +144,7 @@ module LinkHelper
         # homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
         action = :collection
         cssclass << ' ' + user_subclass(decorator.object)
-      when is_a?(Referent)
+      when Referent
         decorator.object = decorator.object.becomes(Referent)
     end
     data = options[:data] || {}

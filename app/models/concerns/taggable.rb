@@ -35,6 +35,12 @@ module Taggable
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => 'User'
+
+    # Scope for objects tagged by a given tag, as visible to the given viewer
+    scope :tagged_by, -> (tag, viewer_id_or_ids) {
+      joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag: tag }.compact )
+    }
+
     attr_reader :tagging_user_id
     attr_accessor :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
     attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes

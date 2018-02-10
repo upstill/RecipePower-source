@@ -71,7 +71,7 @@ RP::Application.routes.draw do
   end
 
   get "admin/toggle"
-  resources :feed_entries, :except => [:index, :create, :new], :concerns => [:taggable, :collectible]
+  resources :feed_entries, :except => [:index, :create, :new], :concerns => [:taggable, :collectible, :picable]
 
   resources :suggestions do
     member do
