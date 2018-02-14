@@ -9,14 +9,6 @@ module Typeable
       attr_accessible attribute, :typenum, :typename, :typesym
       @tag_types = TypeMap.new(list, 'unclassified')
       @attrib_name = attribute
-=begin
-      self.class_eval do
-        define_method("#{attribute}=") do |val|
-          instance_variable_set "@#{self.class.attrib_name}", self.class.typenum(val)
-        end
-      end
-=end
-
     end
 
     # Get the type number, taking any of the accepted datatypes

@@ -193,6 +193,51 @@ class Partition < Array
 
 end
 
+# Repository for org options on ResultsCaches
+class OrgOptions < Array
+  require 'type_map.rb'
+
+  @org_types = TypeMap.new(
+           none: ['none', 0],
+           viewed: ['RECENTLY VIEWED', 1],
+           newest: ['NEWEST', 2],
+           updated: ['REVISED AT', 3],
+           ratings: ['RATINGS', 4],
+           popularity: ['POPULARITY', 5],
+           random: ['RANDOM', 6],
+           approved: ['APPROVED', 7],
+           referent_id: ['REFERENT', 8],
+           recipe_count: ['#RECIPES', 9],
+           feed_count: ['#FEEDS', 10],
+           definition_count: ['#DEFINITIONS', 11],
+           posted: ['LATEST POST', 12]
+  )
+
+  def self.lookup val
+    symval = @org_types.sym val
+    raise "Invalid type #{val}" if symval == :none
+    symval
+  end
+
+  def initialize keys
+    # Check args against valid options
+    keys.each { |key|
+      self.push(self.class.lookup key) if key
+    }
+  end
+
+  # Is the given value among the allowed values?
+  def valid? val
+    self.include? @org_types.sym(val)
+  end
+
+  # For a valid org choice, provide a human-friendly label
+  def label orgval
+    I18n.t 'results_cache.org_button_label.' + orgval.to_s
+  end
+
+end
+
 # A mixin for ResultsCaches responding to the User controller
 module UserFunc
 
@@ -535,7 +580,12 @@ class ResultsCache < ActiveRecord::Base
 
   # What to present as choices for sorting the results
   def org_options
-    [ :viewed, :newest ]
+    @org_options ||= OrgOptions.new supported_org_options
+  end
+
+  # Assert an organization scheme, which must be among those declared in #supported_org_options
+  def org= orgscheme
+     @org = orgscheme if org_options.valid?(orgscheme)
   end
 
   # Get the current results cache and return it if relevant. Otherwise,
@@ -680,6 +730,10 @@ class ResultsCache < ActiveRecord::Base
   end
 
   protected
+
+  def supported_org_options
+    [ :viewed, :newest ]
+  end
 
   # Count the number of items in the basic scope in a smart way
   def scope_count
@@ -930,7 +984,9 @@ end
 class UsersCollectionCache < UsersShowCache
   include CollectionCache
 
-  def org_options
+  protected
+
+  def supported_org_options
     [ :updated, :newest ]
   end
 
@@ -955,10 +1011,6 @@ end
 
 class UserFeedsCache < UsersCollectionCache
 
-  def org_options
-    [ :posted, :newest ]
-  end
-
   def self.params_needed
     super + [ [:org, :posted] ]
   end
@@ -977,6 +1029,12 @@ class UserFeedsCache < UsersCollectionCache
     # with no posts, which would otherwise come up first
     scope = Feed.collected_by_user @entity_id, @viewerid
     org == :posted ? scope.where.not(last_post_date: nil) : scope
+  end
+
+  protected
+
+  def supported_org_options
+    [ :posted, :newest ]
   end
 
 end
@@ -1068,10 +1126,6 @@ class ListsShowCache < ResultsCache
 
   attr_accessor :list_services
 
-  def org_options
-    [ ]
-  end
-
   def list
     @list ||= List.find @entity_id
   end
@@ -1121,6 +1175,12 @@ class ListsShowCache < ResultsCache
     "list_#{@entity_id}_contents"
   end
 
+  protected
+
+  def supported_org_options
+    [ ]
+  end
+
 end
 
 class ListsContentsCache < ListsShowCache
@@ -1142,10 +1202,6 @@ class FeedsIndexCache < ResultsCache
 
   def max_window_size
     10
-  end
-
-  def org_options
-    [ :updated, :newest, (:approved if response_service.admin_view?) ].compact
   end
 
   def approved
@@ -1194,16 +1250,18 @@ class FeedsIndexCache < ResultsCache
     end
   end
 
+  protected
+
+  def supported_org_options
+    [ :updated, :newest, (:approved if response_service.admin_view?) ].compact
+  end
+
 end
 
 # list of feed items
 class FeedsShowCache < ResultsCache
   include ModelSearch
   include CollectibleSearch
-
-  def org_options
-    [ :viewed, :newest ]
-  end
 
   def feed
     @feed ||= Feed.find @entity_id
@@ -1223,6 +1281,10 @@ class FeedsShowCache < ResultsCache
 
   def itemscope
     @itemscope ||= feed.feed_entries
+  end
+
+  def supported_org_options
+    [ :viewed, :newest ]
   end
 
 end
@@ -1301,7 +1363,9 @@ class TagsIndexCache < ResultsCache
     10
   end
 
-  def org_options
+  protected
+
+  def supported_org_options
     [ :popularity, :newest ]
   end
 

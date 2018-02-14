@@ -353,11 +353,11 @@ class FilteredPresenter
       link_options = {}
       link_options[:class] = 'small' unless context == 'panels'
       org_options.each { |option|
-        block.call I18n.t('filtered_presenter.org_button_label.' + option.to_s),
+        block.call org_options.label(option),
                    {:org => option, active: org.to_sym == option},
                    link_options
       }
-      I18n.t('filtered_presenter.org_button_label.' + (context == 'panels' ? 'panel' : 'default'))
+      I18n.t('filtered_presenter.org_buttons_label.' + (context == 'panels' ? 'panel' : 'default'))
     end
   end
 

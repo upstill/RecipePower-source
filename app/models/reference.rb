@@ -7,7 +7,6 @@ require 'array_utils'
 class Reference < ActiveRecord::Base
 
   include Referrable # Can be linked to a Referent
-  # include Typeable
 
   include Backgroundable
 
