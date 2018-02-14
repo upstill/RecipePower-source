@@ -25,6 +25,8 @@ en:
       feed_count: '#FEEDS'
       definition_count: '#DEFINITIONS'
       posted: 'LATEST POST'
+      alphabetic: 'NAME'
+      activity: 'ACTIVITY'
   definition_reference:
     label:
       tag:

@@ -210,7 +210,9 @@ class OrgOptions < Array
            recipe_count: ['#RECIPES', 9],
            feed_count: ['#FEEDS', 10],
            definition_count: ['#DEFINITIONS', 11],
-           posted: ['LATEST POST', 12]
+           posted: ['LATEST POST', 12],
+           alphabetic: ['NAME', 13],
+           activity: ['ACTIVITY', 14]
   )
 
   def self.lookup val
@@ -588,6 +590,11 @@ class ResultsCache < ActiveRecord::Base
      @org = orgscheme if org_options.valid?(orgscheme)
   end
 
+  # Default the organization scheme to the first available option (if any)
+  def org
+    @org ||= org_options.first
+  end
+
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, result_types, params={}
@@ -812,7 +819,7 @@ class ResultsCache < ActiveRecord::Base
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [:result_type, '']]
+    [:entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, [:result_type, '']]
   end
 
   # Memoize the viewing user
@@ -1325,6 +1332,23 @@ class UsersIndexCache < ResultsCache
         end
   end
 
+  def orderingscope iscope=itemscope
+    case org
+      when :alphabetic
+        [iscope.order('CONCAT(fullname, email) ASC'), 'CONCAT(fullname, email)' ]
+      when :activity
+        [iscope.where.not(current_sign_in_at: nil).order(current_sign_in_at: :DESC), :current_sign_in_at ]
+      else
+        super
+    end
+  end
+
+  protected
+
+  def supported_org_options
+    [ :activity, :alphabetic ]
+  end
+
 end
 
 class UserFriendsCache < ResultsCache
@@ -1332,11 +1356,17 @@ class UserFriendsCache < ResultsCache
   include UserFunc
 
   def itemscope
-    @itemscope ||= user.followees
+    @itemscope ||= user.followees.order 'CONCAT(fullname, email) ASC'
   end
 
   def sort_table_name
     'user_relations'
+  end
+
+  protected
+
+  def supported_org_options
+    [ ]
   end
 
 end
