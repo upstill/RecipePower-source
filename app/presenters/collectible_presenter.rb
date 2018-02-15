@@ -97,24 +97,26 @@ class CollectiblePresenter < BasePresenter
 
   def card_avatar options={}
     # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
-    if (img = image_from_decorator(decorator)) && options[:onlinks]
-      # Include invisible links to open the entity on click and edit the picture on double-click
-      img <<
-          link_to('',
-                  decorator.external_link,
-                  {
-                      data: {report: touchpath(decorator)}.compact,
-                      target: '_blank',
-                      title: 'Open Original',
-                      class: 'clicker'
-                  }.compact) if decorator.respond_to?(:external_link)
-      img <<
-          link_to_dialog('',
-                         polymorphic_path([:editpic, decorator]),
-                         class: 'dblclicker') if decorator.user_can?(:update) && decorator.object.is_a?(Picable)
+    if img = image_from_decorator(decorator)
+      divclass = 'pic_box'
+      if options[:onlinks]
+        divclass << ' onlinks'
+        # Include invisible links to open the entity on click and edit the picture on double-click
+        img <<
+            link_to('',
+                    decorator.external_link,
+                    {
+                        data: {report: touchpath(decorator)}.compact,
+                        target: '_blank',
+                        title: 'Open Original',
+                        class: 'clicker'
+                    }.compact) if decorator.respond_to?(:external_link)
+        img <<
+            link_to_dialog('',
+                           polymorphic_path([:editpic, decorator]),
+                           class: 'dblclicker') if decorator.user_can?(:update) && decorator.object.is_a?(Picable)
+      end
       content_tag :div, img, class: 'onlinks pic-box'
-    else
-      img
     end
   end
 

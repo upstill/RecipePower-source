@@ -4,9 +4,7 @@
         <% NestedBenchmark.measure '...avatar:' do %>
             <td class="avatar-column">
               <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
-              <div class="pic-box" style="width: 100%">
-                <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
-              </div>
+              <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
             </td>
         <% end %>
         <% NestedBenchmark.measure '...description:' do %>

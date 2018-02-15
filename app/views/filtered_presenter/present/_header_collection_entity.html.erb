@@ -32,9 +32,7 @@
       <div class="col-md-4 user-nav <%= viewparams.display_style %>-card">
         <div class="row">
           <div class="col-lg-5 col-md-4 col-sm-3">
-            <div class="pic-box">
-              <%= presenter.card_avatar %>
-            </div>
+            <%= presenter.card_avatar %>
           </div>
             <div class="nav-top">
               <%= collectible_collect_button(decorator, 'xl', class: 'friend-color') unless decorator.object == response_service.user %>
