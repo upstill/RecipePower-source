@@ -13,6 +13,9 @@ table {
         }
         &.avatar-column {
           width: 200px;
+          div.pic-box {
+            width: 200px;
+          }
         }
         &.description-column {
           // width: 300px;
