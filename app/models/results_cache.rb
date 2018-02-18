@@ -1416,9 +1416,15 @@ end
 
 class SitesIndexCache < ResultsCache
   include ModelSearch
+  include CollectibleSearch
+  include TaggableSearch
 
   def self.params_needed
     super + [:approved]
+  end
+
+  def supported_org_options
+    [ :newest, :viewed, (:approved if admin_view) ]
   end
 
 =begin
@@ -1457,8 +1463,10 @@ class SitesIndexCache < ResultsCache
       when :recipe_count
       when :feed_count
       when :definition_count
-      else
+      when :approved
         [ iscope, (admin_view ? '"sites"."approved"' : '"sites"."id"') ]
+      when :newest
+        [ iscope, '"sites"."created_at"' ]
     end || super
   end
 
