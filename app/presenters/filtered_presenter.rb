@@ -49,7 +49,7 @@ end
 module UsersTable
   @item_mode = :table
   def table_headers
-    [ '', 'About', 'Interest(s)', '', '' ]
+    [ '', 'About', 'Interest(s)' ]
   end
 end
 
