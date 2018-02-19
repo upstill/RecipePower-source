@@ -1,7 +1,10 @@
 <% item ||= @tag %>
 <% presenter = TagPresenter.new item.decorate, self, current_user %>
 <% @tagserv = TagServices.new item %>
-<td class="tag_type">
+<td style="max-width:150px">
+  <strong><%= homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
+  (<%= item.typename %>)
+  <br><%= presenter.meaning %>
   <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= item.id.to_s %>
       <br>
@@ -35,24 +38,22 @@
                            data: {confirm: 'Are you sure you want to banish this tag?'},
                            method: :delete %>
   <% else %>
-      <%= item.typename %>
   <% end %>
 </td>
 <td>
-  <strong><%= homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
-  <br><%= presenter.meaning %>
-</td>
-<td>
-  <%= summarize_set '', presenter.taggees_table_summary %>
-</td>
-<td>
-  <%= presenter.table_summaries response_service.admin_view? %>
+  <% NestedBenchmark.measure 'Usages:' do %>
+    <%= summarize_set '', presenter.taggees_table_summary %>
+  <% end %>
+  <% NestedBenchmark.measure 'Meanings:' do %>
+    <br><%= presenter.table_summaries response_service.admin_view? %>
+  <% end %>
   <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= render 'form_synonym', presenter: presenter %>
       <%= render 'form_child', presenter: presenter %>
   <% end %>
 </td>
 <td>
+  <% NestedBenchmark.measure 'Similar Tags:' do %>
   <%= presenter.summarize_aspect :lexical_similars,
                                  :for => :table,
                                  helper: :summarize_tag_similar,
@@ -60,4 +61,5 @@
                                  absorb_btn: (presenter.decorator.user_can?(:edit) && response_service.admin_view?),
                                  merge_into_btn: (presenter.decorator.user_can?(:edit) && response_service.admin_view?),
                                  joiner: '<br>' %>
+  <% end %>
 </td>
