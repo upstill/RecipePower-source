@@ -45,7 +45,13 @@ class RpEvent < ActiveRecord::Base
     else
       args = args.merge data: data
       logger.debug "Creating rp_event with #{args}"
-      posted = self.create args
+      posted = self.new
+      posted.subject = subject
+      posted.direct_object = direct_object
+      posted.indirect_object = indirect_object
+      posted.data = data
+      logger.debug "Got rp_event: #{posted}"
+      posted.save
     end
     posted
   end
