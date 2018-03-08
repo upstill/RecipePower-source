@@ -37,10 +37,15 @@ class RpEvent < ActiveRecord::Base
     end
     args = self.assemble_attributes(subject, direct_object, indirect_object)
     # posted = self.create_with(data: data).where(args).first_or_create
-    posted = self.find_by(args) || self.create(args.merge data: data)
-    if (posted.data != data)
-      posted.data = data
-      posted.save
+    if posted = self.find_by(args)
+      if (posted.data != data)
+        posted.data = data
+        posted.save
+      end
+    else
+      args = args.merge data: data
+      logger.debug "Creating rp_event with #{args}"
+      posted = self.create args
     end
     posted
   end
