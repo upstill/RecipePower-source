@@ -36,7 +36,8 @@ class RpEvent < ActiveRecord::Base
       data, indirect_object = indirect_object, nil
     end
     args = self.assemble_attributes(subject, direct_object, indirect_object)
-    posted = self.create_with(data: data).where(args).first_or_create
+    # posted = self.create_with(data: data).where(args).first_or_create
+    posted = self.find_by(args) || self.create(args.merge data: data)
     if (posted.data != data)
       posted.data = data
       posted.save
