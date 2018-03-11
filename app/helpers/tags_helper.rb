@@ -237,7 +237,7 @@ BLOCK_END
                                  class: 'absorb_button',
                                  id: "absorb_button_#{other.id}") if options[:absorb_btn]
     contents << button_to_submit('Merge Into',
-                                 associate_tag_path(other, other: this.id, as: 'merge_into', format: 'json'),
+                                 associate_tag_path(this, other: other.id, as: 'merge_into', format: 'json'),
                                  :xs,
                                  mode: :modal,
                                  with_form: true,
