@@ -21,12 +21,22 @@ class TagPresenter < BasePresenter
   def table_summaries admin_view_on
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
     set = []
-    set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
-    set << self.summarize_aspect(:parents, :for => :table, :helper => :homelink, limit: 5)
-    set << self.summarize_aspect(:children, :for => :table, :helper => :homelink, limit: 5)
-    set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
-    # set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'Reference')
-    summarize_set '', set
+    NestedBenchmark.measure '...summarizing owners:' do
+      set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
+    end
+    NestedBenchmark.measure '...summarizing parents:' do
+      set << self.summarize_aspect(:parents, :for => :table, :helper => :homelink, limit: 5)
+    end
+    NestedBenchmark.measure '...summarizing children:' do
+      set << self.summarize_aspect(:children, :for => :table, :helper => :homelink, limit: 5)
+    end
+    NestedBenchmark.measure '...summarizing referents:' do
+      set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
+    end
+    NestedBenchmark.measure '...summarizing set:' do
+      # set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'Reference')
+      summarize_set '', set
+    end
   end
 
   # Present a summary of one aspect of a tag (specified as a symbol in 'what'). Possibilities:
@@ -127,13 +137,17 @@ class TagPresenter < BasePresenter
       }
     end
 =end
-    NestedBenchmark.measure '...getting taggee_samples:' do
-      tagserv.taggee_samples(5).collect { |sample|
+    samples =
+        NestedBenchmark.measure '...getting taggee_samples:' do
+          tagserv.taggee_samples 5
+        end
+    NestedBenchmark.measure '...formatting taggee samples:' do
+      samples.collect { |sample|
         klass, entities, full_count = *sample
         if full_count > 0
           label = (full_count > 1) ? labelled_quantity(full_count, klass.model_name.human) : klass.model_name.human
-          h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 50 }, label, options
-        end
+            h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 50 }, label, options
+          end
       }
     end
   end

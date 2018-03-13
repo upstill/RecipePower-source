@@ -240,7 +240,7 @@ body.logged-in {
         }
       }
     }
-    @include transition(max-height 0.5s);
+    // @include transition(max-height 0.5s);
     @include respond-to(largish-down) { // Mobile menu: stacks up and fills the screen
       width: 100%;
       z-index: $header-depth;
@@ -276,7 +276,7 @@ body.logged-in {
       overflow-y: hidden;
       &.menuOpen {
         max-height: 1000px;
-        @include transition(max-height 0.5s);
+        // @include transition(max-height 0.5s);
       }
       ul {
         text-align: center;

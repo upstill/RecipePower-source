@@ -1260,7 +1260,7 @@ class FeedsIndexCache < ResultsCache
   protected
 
   def supported_org_options
-    [ :updated, :newest, (:approved if response_service.admin_view?) ].compact
+    [ :updated, :newest, (:approved if admin_view) ].compact
   end
 
 end
@@ -1291,7 +1291,7 @@ class FeedsShowCache < ResultsCache
   end
 
   def supported_org_options
-    [ :viewed, :newest ]
+    [ :newest ]
   end
 
 end
@@ -1390,7 +1390,7 @@ class TagsIndexCache < ResultsCache
   # Use the org parameter and the ASC/DESC attribute to assert an ordering
 
   def max_window_size
-    10
+    5
   end
 
   protected

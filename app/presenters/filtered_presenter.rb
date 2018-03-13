@@ -349,7 +349,7 @@ class FilteredPresenter
 
   # Define buttons used in the search/redirect header above the presenter's results
   def org_buttons context, &block
-    if org_options.present?
+    if org_options.count > 1
       link_options = {}
       link_options[:class] = 'small' unless context == 'panels'
       org_options.each { |option|

@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-ruby '2.2.0'
+ruby '2.2.2'
 # gem 'bundler', '~> 1.4'
 gem 'rails', '4.2.6'
 
@@ -27,7 +27,7 @@ gem 'closure_tree' # https://github.com/mceachen/closure_tree
 gem 'arel', '~> 6.0' # https://github.com/rails/arel
 
 ####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
-gem 'pg'
+gem 'pg', '~> 0.21' # TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
 # gem 'pg_search' # For full-text search https://robots.thoughtbot.com/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
@@ -74,7 +74,7 @@ gem 'omniauth-openid'
 gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs
-gem "rmagick", "~> 2.13.2"
+gem "rmagick" # , "~> 2.13.2"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 gem 'truncato'  # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
