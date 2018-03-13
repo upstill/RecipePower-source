@@ -994,7 +994,7 @@ class UsersCollectionCache < UsersShowCache
   protected
 
   def supported_org_options
-    [ :updated, :newest ]
+    [ :viewed, :newest ]
   end
 
   # The module defines the default itemscope on a user's collection,
