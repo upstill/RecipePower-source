@@ -16,8 +16,9 @@ class Rcpref < ActiveRecord::Base
   # Scope the user pointer for a specific user (like the current user)
   scope :toucher_pointer, -> (id) { where(user_id: id) }
   # Scope to fetch rcprefs for a given user and (possibly different) user
-  scope :for_user, -> (userid, viewerid=userid) {
-    constraints = {  user_id: userid, in_collection: true }
+  scope :for_user, -> (userid, viewerid=userid, collected_only = true) {
+    constraints = {  user_id: userid }
+    constraints[:in_collection] = true if collected_only
     constraints[:private] = false if userid != viewerid
     where constraints
   }

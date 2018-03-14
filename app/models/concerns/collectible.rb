@@ -34,6 +34,9 @@ module Collectible
     # Viewer_points refers to all users who have viewed it, whether it's collected or not
     has_many :toucher_pointers, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
     has_many :touchers, :through => :toucher_pointers, :autosave => true
+    scope :viewed_by_user, -> (userid, viewerid=userid) {
+      joins(:toucher_pointers).merge(Rcpref.for_user(userid, viewerid, false))
+    }
 
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessor :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing

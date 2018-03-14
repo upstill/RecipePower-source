@@ -1077,7 +1077,7 @@ class UserCollectedListsCache < ResultsCache
   include ModelSearch
 
   def itemscope
-    @itemscope ||= user.decorate.collected_lists(viewer) # ListServices.lists_collected_by user, viewer
+    @itemscope ||= user.decorate.collected_lists(viewer)
   end
 end
 
@@ -1085,9 +1085,14 @@ end
 class UserOwnedListsCache < ResultsCache
   include UserFunc
   include ModelSearch
+  include CollectibleSearch
 
   def itemscope
-    @itemscope ||= user.decorate.owned_lists viewer # ListServices.lists_owned_by user, viewer
+    unless @itemscope
+      @itemscope = user.decorate.owned_lists viewer
+      @itemscope = @itemscope.viewed_by_user(@entity_id, @viewerid) if @org == :viewed
+    end
+    @itemscope
   end
 
 end
@@ -1352,11 +1357,16 @@ class UsersIndexCache < ResultsCache
 end
 
 class UserFriendsCache < ResultsCache
-  include ModelSearch
   include UserFunc
+  include ModelSearch
+  include CollectibleSearch
 
   def itemscope
-    @itemscope ||= user.followees.order 'CONCAT(fullname, email) ASC'
+    unless @itemscope
+      @itemscope = user.followees.order 'CONCAT(fullname, email) ASC'
+      @itemscope = @itemscope.viewed_by_user(@entity_id, @viewerid) if @org == :viewed
+    end
+    @itemscope
   end
 
   def sort_table_name

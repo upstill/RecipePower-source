@@ -1,4 +1,4 @@
-require 'RMagick' unless Rails.env.development?
+require 'rmagick' unless Rails.env.development?
 require 'open-uri'
 require 'mechanize'
 require 'fileutils'

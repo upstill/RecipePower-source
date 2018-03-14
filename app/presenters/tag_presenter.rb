@@ -194,7 +194,7 @@ class TagPresenter < BasePresenter
     itemstrs =
         (case which
            when :description
-             return ['', "... for tagging by #{decorator.typename}"]
+             return ['', (decorator.tagtype > 0 ? "... for tagging by #{decorator.typename}" : '')]
              # return ['', self.meaning || "... for tagging by #{decorator.typename}"]
            when :tag_synonyms
              label_singular = 'synonym'

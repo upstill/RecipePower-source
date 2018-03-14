@@ -68,7 +68,7 @@ class Tag < ActiveRecord::Base
 
   # Same, except accesses tags by name
   scope :synonyms_by_str, -> (str, exact=false) {
-    joins(:referents).where(referents: { id: Referent.by_tag_name('African', exact).pluck(:id) } )
+    joins(:referents).where(referents: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
     # joins(:referents).where( referents: { id: Referent.by_tag_ids(tagids).pluck :id })
   }
 
