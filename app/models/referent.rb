@@ -532,7 +532,7 @@ else
     end
 
     def affiliates
-      super + [site]
+      (super + [site]).compact
     end
 
   end
