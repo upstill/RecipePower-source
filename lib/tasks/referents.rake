@@ -26,4 +26,18 @@ namespace :referents do
       ref.destroy if ref.detached?
     }
   end
+
+  task fix_defrefs: :environment do
+    candidate_referments = Referment.where(referee_type: 'Reference')
+    candidate_reference_ids = candidate_referments.pluck :referee_id
+    definition_reference_ids = Reference.where(id: candidate_reference_ids, type: 'DefinitionReference').pluck :id
+    referments = candidate_referments.to_a.keep_if { |rfm| definition_reference_ids.include? rfm.referee_id }
+    referments.map &:destroy
+
+    if rfm = Referment.find_by(referee_type: 'Reference', referee_id: 14029)
+      rfm.referee = HomepagePageRef.fetch rfm.referee.url
+      rfm.save
+    end
+
+  end
 end

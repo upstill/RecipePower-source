@@ -161,6 +161,14 @@ class Reference < ActiveRecord::Base
 
 end
 
+class DefinitionReference < Reference
+
+end
+
+class HomepageReference < Reference
+
+end
+
 class ImageReference < Reference
 
   # An Image Reference maintains a local thumbnail of the image
