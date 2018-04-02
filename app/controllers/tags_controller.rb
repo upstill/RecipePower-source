@@ -254,6 +254,7 @@ class TagsController < ApplicationController
   # PUT /tags/1.xml
   def update
     @tag = Tag.find(params[:id])
+    @decorator = @tag.decorate
     respond_to do |format|
       params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
       if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
@@ -263,17 +264,10 @@ class TagsController < ApplicationController
         format.html { render :action => 'edit' }
         format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
       else
+        flash[:popup] = 'Tag successfully updated'
         format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
-        format.json {
-          render :json => {
-                     popup: 'Tag successfully updated',
-                     done: true,
-                     replacements: [
-                         ["tr#tag_#{@tag.id.to_s}", with_format('html') { render_to_string partial: 'tags/show_table', locals: {item: @tag} }]
-                     ]
-                 }
-        }
-        format.xml { head :ok }
+        format.json { render 'collectible/update', locals: { items: [:table, :card] } }
+        format.xml  { head :ok }
       end
     end
   end
