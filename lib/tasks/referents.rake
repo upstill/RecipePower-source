@@ -27,6 +27,42 @@ namespace :referents do
     }
   end
 
+  task circle_check: :environment do
+    # Transitively search for a key among the ancestors of the parents
+    def path_to path, parent_ids, map
+      if parent_ids.present?
+        # puts "Check Referent parentage ##{path} with parents #{parent_ids}"
+        parent_ids.each { |parent_id|
+          if path.include? parent_id
+            return path + [parent_id]
+          else
+            if found = path_to((path + [parent_id]), map[parent_id], map)
+              return found
+            end
+          end
+        }
+        nil
+      end
+    end
+
+    # Build a table giving the parents for each referent
+    map = []
+    ReferentRelation.all.pluck(:child_id, :parent_id).each { |pair|
+      map[pair.first] = (map[pair.first] || []) + [pair.last]
+    }
+    # parent_ids = 5222
+    # parent_ids = 4
+    map.each_index { |id|
+      if (path = path_to([id], map[id], map)) && (path.first == path.last)  # Let higher loops be reported directly
+        puts "Circular parentage found for Referent ##{id} (#{Referent.find(id).name}):"
+        puts path.map { |id| "    Referent ##{id} (#{Referent.find(id).name})" }
+      end
+    }
+    if rr = ReferentRelation.find_by( parent_id: 5222, child_id: 5036 )
+      rr.destroy
+    end
+  end
+
   task fix_defrefs: :environment do
     candidate_referments = Referment.where(referee_type: 'Reference')
     candidate_reference_ids = candidate_referments.pluck :referee_id
