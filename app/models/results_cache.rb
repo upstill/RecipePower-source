@@ -88,7 +88,12 @@ class Counts < Hash
     #  -- there's an existing set of counts => merge counts in an exclusive fashion
     #  -- no counts exist yet => return unchanged
     if extant_counts
-      newcounts = collect { |key, value| [key, value+extant_counts[key]] if extant_counts.has_key? key }.compact
+      newcounts = collect { |key, value|
+        if extant_counts.has_key? key
+          value += extant_counts[key] unless value.is_a?(Time)
+          [key, value]
+        end
+      }.compact
       Counts[newcounts]
     else
       self
