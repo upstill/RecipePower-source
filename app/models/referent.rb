@@ -5,7 +5,7 @@ class ReferentValidator < ActiveModel::Validator
       record.errors[:base] << 'Referent can\'t have generic type'
       return false;
     end
-    if record.tags.empty? && !record.canonical_expression
+    unless record.expression
       record.errors[:base] << 'A Referent must have at least one tag to express it.'
       return false
     end
@@ -30,6 +30,7 @@ class Referent < ActiveRecord::Base
   accepts_nested_attributes_for :expressions, allow_destroy: true
 
   belongs_to :canonical_expression, :class_name => 'Tag', :foreign_key => 'tag_id'
+  has_many :dependent_tags, :foreign_key => 'referent_id', :class_name => 'Tag', :dependent => :nullify
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
@@ -82,8 +83,6 @@ class Referent < ActiveRecord::Base
   # validates_associated :children
   validates_with ReferentValidator
 
-  before_destroy :fix_references
-
   # before_save :ensure_expression
   after_save :ensure_tagtypes
 
@@ -125,24 +124,6 @@ class Referent < ActiveRecord::Base
     self.reload
   end
 
-  # Callback before destroying this referent, to fix any tags that use it as primary meaning
-  def fix_references
-    tags.each do |tag|
-      if tag.primary_meaning == self
-        # Choose a new primary meaning
-        tag.referents.each do |referent|
-          if referent != self
-            tag.primary_meaning = referent
-            tag.save
-            return
-          end
-        end
-        tag.primary_meaning = nil
-        tag.save
-      end
-    end
-  end
-
   # The associate is the model associated with any particular class of referent, if any
   # By default, referents have no associate; currently, Sources have one
   def associate
@@ -179,7 +160,6 @@ class Referent < ActiveRecord::Base
           errors.add(:tags, "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(mytype)}'")
         else
           tag.tagtype = mytype
-          tag.primary_meaning = self unless tag.primary_meaning # Give tag this meaning if there's no other
           tag.isGlobal = true
           tag.save
         end
@@ -229,7 +209,7 @@ class Referent < ActiveRecord::Base
 
   # Convert a list of referents into the tags that reference them.
   def tags_from_referents(referents)
-    referents.collect { |ref| ref.canonical_expression }
+    referents.map &:expression
   end
 
   # Convert a list of tag tokens into the referents to which they refer
@@ -296,11 +276,9 @@ class Referent < ActiveRecord::Base
     # or form aren't specified, match any expression
     args[:form] = Expression.formnum(:generic) unless args[:form]
     if self.id
-      Expression.find_or_create self.id, tag.id # , args
+      self.expressions.create(Expression.scrub_args(args).merge tag_id: tag.id, referent_id: self.id) unless tag_ids.include?(tag.id) # , args
     elsif self.expressions.empty? # We're not saved, so have no id
-      args[:tag_id] = tag.id
-      expr = Expression.new(args)
-      self.expressions << expr
+      self.expressions << Expression.new(tag_id: tag.id)
     end
 
     # Point the tag back at this referent, if needed
@@ -439,20 +417,26 @@ class Referent < ActiveRecord::Base
   end
 
   # Return the tag expressing this referent according to the given form and locale, if any
-  def expression(args = {})
+  def expression args = {}
     args = Expression.scrub_args args
-    ((args.size > 0) && (expr = self.expressions.where(args).first)) ?
-        expr.tag :
-        canonical_expression
+    if (args.size > 0) && (expr = self.expressions.find_by args)
+      return expr.tag
+    elsif !canonical_expression
+      self.canonical_expression =
+          self.expressions.find_by(Expression.scrub_args :form => :generic) ||
+          self.expressions.first
+      save
+    end
+    canonical_expression
   end
 
   # Return the name of the referent
-  def normalized_name(args = {})
+  def normalized_name args = {}
     (tag = self.expression args) ? tag.normalized_name : "**no tag**"
   end
 
   # Return the name of the referent
-  def name(args = {})
+  def name args = {}
     (tag = self.expression args) ? tag.name : "**no tag**"
   end
 

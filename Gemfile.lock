@@ -76,7 +76,7 @@ GEM
       rake
     ansi (1.5.0)
     arel (6.0.4)
-    autoprefixer-rails (8.1.0.1)
+    autoprefixer-rails (8.2.0)
       execjs
     awesome_nested_set (3.1.4)
       activerecord (>= 4.0.0, < 5.3)
@@ -142,7 +142,7 @@ GEM
       addressable
     curb (0.9.4)
     daemons (1.2.6)
-    dalli (2.7.6)
+    dalli (2.7.7)
     debug_inspector (0.0.3)
     declarative_authorization (0.5.7)
     derailed (0.1.0)
@@ -219,7 +219,7 @@ GEM
       letter_opener (~> 1.0)
       rails (>= 3.2)
     log_buddy (0.7.0)
-    loofah (2.2.0)
+    loofah (2.2.2)
       crass (~> 1.0.2)
       nokogiri (>= 1.5.9)
     mail (2.7.0)
@@ -243,7 +243,7 @@ GEM
     mini_mime (1.0.0)
     mini_portile2 (2.1.0)
     minitest (5.11.3)
-    mocha (1.3.0)
+    mocha (1.4.0)
       metaclass (~> 0.0.1)
     multi_json (1.13.1)
     multi_xml (0.6.0)
@@ -300,14 +300,14 @@ GEM
       addressable
       css_parser (>= 1.6.0)
       htmlentities (>= 4.0.0)
-    premailer-rails (1.10.1)
+    premailer-rails (1.10.2)
       actionmailer (>= 3, < 6)
       premailer (~> 1.7, >= 1.7.9)
     protected_attributes (1.1.4)
       activemodel (>= 4.0.1, < 5.0)
     public_suffix (3.0.2)
     rack (1.6.9)
-    rack-mini-profiler (0.10.7)
+    rack-mini-profiler (1.0.0)
       rack (>= 1.2.0)
     rack-openid (1.3.1)
       rack (>= 1.1.0)
@@ -331,8 +331,8 @@ GEM
       activesupport (>= 4.2.0, < 5.0)
       nokogiri (~> 1.6)
       rails-deprecated_sanitizer (>= 1.0.1)
-    rails-html-sanitizer (1.0.3)
-      loofah (~> 2.0)
+    rails-html-sanitizer (1.0.4)
+      loofah (~> 2.2, >= 2.2.2)
     rails-observers (0.1.5)
       activemodel (>= 4.0)
     rails-perftest (0.0.7)
@@ -347,12 +347,12 @@ GEM
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
     raindrops (0.19.0)
-    rake (12.3.0)
+    rake (12.3.1)
     rb-fsevent (0.10.3)
     rb-inotify (0.9.10)
       ffi (>= 0.5.0, < 2)
     redcarpet (3.4.0)
-    request_store (1.4.0)
+    request_store (1.4.1)
       rack (>= 1.4)
     responders (2.4.0)
       actionpack (>= 4.2.0, < 5.3)
@@ -384,7 +384,7 @@ GEM
     ruby-prof (0.17.0)
     ruby_parser (3.11.0)
       sexp_processor (~> 4.9)
-    sass (3.5.5)
+    sass (3.5.6)
       sass-listen (~> 4.0.0)
     sass-listen (4.0.0)
       rb-fsevent (~> 0.9, >= 0.9.4)
@@ -429,7 +429,7 @@ GEM
       ansi
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
-    uglifier (4.1.7)
+    uglifier (4.1.8)
       execjs (>= 0.3.0, < 3)
     unf (0.1.4)
       unf_ext
@@ -511,7 +511,7 @@ DEPENDENCIES
   omniauth-google-oauth2
   omniauth-openid
   omniauth-twitter
-  pg (~> 0.21)
+  pg (~> 0.20)
   poltergeist
   postgres_ext
   premailer-rails

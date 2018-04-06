@@ -12,10 +12,9 @@ class TagPresenter < BasePresenter
   end
 
   # Provide a text meaning of a tag by getting a description from one of its referent(s), if any--preferentially the primary meaning
-  def meaning
-    primary_description = tagserv.primary_meaning && tagserv.primary_meaning.description
-    return primary_description if primary_description.present?
-    tagserv.referents.pluck(:description).find(&:'present?')
+  def description
+    (tag.meaning && tag.meaning.description.if_present) ||
+    tag.referents.pluck(:description).find(&:'present?')
   end
 
   def table_summaries admin_view_on

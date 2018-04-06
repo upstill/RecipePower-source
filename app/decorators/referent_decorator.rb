@@ -3,7 +3,7 @@ class ReferentDecorator < ModelDecorator
   delegate_all
 
   def title
-    (tag = object.canonical_expression || object.tags.first) ? tag.name : '** no tag **'
+    (tag = object.expression) ? tag.name : '** no tag **'
   end
 
 end

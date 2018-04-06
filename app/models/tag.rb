@@ -56,6 +56,8 @@ class Tag < ActiveRecord::Base
   # Scope for tags that can be used in the usual sense (to apply to entities), as opposed to other unique strings
   scope :taggables, -> { where(tagtype: ((0..14).to_a - [5]))}
 
+  scope :untyped, -> { where(tagtype: 0) }
+
   # Scope for finding tags by name, either exact or embedded
   scope :by_string, -> (str, exact=false) {
     where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalizeName str}#{'%' unless exact}")
@@ -76,7 +78,7 @@ class Tag < ActiveRecord::Base
   before_validation :tagqa
 
   def meaning
-    primary_meaning || referents.first
+    self.primary_meaning ||= referents.first
   end
 
   # Delete this tag only if it's safe to do so
@@ -207,7 +209,7 @@ class Tag < ActiveRecord::Base
   end
 
   # Use this tag instead of 'other', i.e., absorb its taggings, referents, etc.
-  # Either delete the other, or make it a synonym, according to 'keep'
+  # Either delete the other, or make it a synonym, according to 'delete'
   def absorb other, delete=true
     return other if other.id == id
     return other.absorb(self, delete) if !self.meaning && other.meaning # Make it easy for an unbound tag
@@ -243,7 +245,10 @@ class Tag < ActiveRecord::Base
       other = other.project tagtype
       if other != self
         # No need to monkey with referents if the projection devolved on us
-        Referent.express self unless primary_meaning || referent_ids.present?
+        unless primary_meaning || referent_ids.present?
+          Referent.express self
+          reload
+        end
         # Leave the other as a synonym
         other.referent_ids = other.referent_ids + self.referent_ids
         other.primary_meaning ||= self.primary_meaning
@@ -258,6 +263,7 @@ class Tag < ActiveRecord::Base
   # has a value
   def tagqa
     # Clean up the name by removing/collapsing whitespace
+    logger.info "Running 'tagqa'"
     self.name = Tag.tidyName name
     # ...and setting the normalized name
     self.normalized_name = Tag.normalizeName name
@@ -274,8 +280,8 @@ class Tag < ActiveRecord::Base
   def typedname include_type=false, include_ref=false
     return name unless include_type
     type_label =
-    if include_ref && referent_id
-      "#{primary_meaning.model_name.human} ##{primary_meaning.id}"
+    if include_ref && meaning
+      "#{meaning.model_name.human} ##{meaning.id}"
     else
       typename
     end
@@ -534,5 +540,6 @@ class Tag < ActiveRecord::Base
   def synonyms(opts = {})
     self.referents.uniq.collect { |ref| ref.tags }.flatten.uniq
   end
+
 end
 

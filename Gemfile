@@ -27,7 +27,7 @@ gem 'closure_tree' # https://github.com/mceachen/closure_tree
 gem 'arel', '~> 6.0' # https://github.com/rails/arel
 
 ####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
-gem 'pg', '~> 0.21' # TODO: 1.0.0 for Rails 5
+gem 'pg', '~> 0.20' # TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
 # gem 'pg_search' # For full-text search https://robots.thoughtbot.com/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers

@@ -100,7 +100,7 @@ class TagsController < ApplicationController
                                    }
                                    results = []
                                    names_ids.each { |key, matches|
-                                     disambiguate = matches.count > 1
+                                     disambiguate = (matches.count > 1) || params[:disambiguate]
                                      matches.each { |tag|
                                        results <<
                                            {

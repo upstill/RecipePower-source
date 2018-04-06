@@ -6,7 +6,7 @@
                         :noResultsText => 'No such tag found',
                         :tagtype => (presenter.tag.tagtype if presenter.tag.tagtype > 0),
                         :tagtype_x => [0, :List],
-                        :query => { all: true, except: presenter.tag.id, verbose: true }, # See TagsController#match
+                        :query => { all: true, except: presenter.tag.id, verbose: true, disambiguate: true }, # See TagsController#match
                         :allowFreeTagging => false,
                         :allowCustomEntry => false
     %>
