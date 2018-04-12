@@ -314,13 +314,8 @@ class ReferentTest < ActiveSupport::TestCase
     assert_equal nil, ref.tag_id
   end
 
-  test "Two parentless tags synonymize correctly" do
-    t1 = tags :jal
-    t2 = tags :jal2
-    t1.absorb t2, false
-    assert_equal t1.meaning, t2.meaning
-    assert_equal t1.referent_ids, t2.referent_ids
-    assert t1.meaning.is_a? (Referent)
+  test "Deleting referent nullifies reference in canonical_expression" do
+
   end
 
   test "Merge of two referents with overlapping parents has the right parents" do

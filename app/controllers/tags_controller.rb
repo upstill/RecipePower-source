@@ -162,25 +162,6 @@ class TagsController < ApplicationController
     render partial: 'editor'
   end
 
-=begin
-  # POST /id/absorb
-  # Merge two tags together, returning a list of DOM elements to nuke as a result
-  def absorb
-    if !(@absorber = Tag.find params[:id])
-      flash[:error] = 'Couldn\'t find tag to absorb into'
-    elsif !(victim = Tag.find_by id: params[:victim])
-      flash[:error] = 'Couldn\'t find tag to absorb'
-    elsif (survivor = @absorber.absorb victim) && !(resource_errors_to_flash survivor, preface: "Couldn\'t absorb '#{victim.name}.")
-      @to_delete = victim
-    end
-    respond_to do |format|
-      format.html {}
-      format.json {}
-      format.js { render 'shared/get_content' }
-    end
-  end
-=end
-
   # POST /id/associate
   # Associate the tag with another, according to params[:as]:
   #  -- 'synonym' means to make the tag a synonym of the other
@@ -196,15 +177,15 @@ class TagsController < ApplicationController
         @touched = [@tag, other]
         case params[:as]
           when 'merge_into'
-            reporter = other.absorb @tag
+            reporter = TagServices.new(other).absorb @tag
             resource_errors_to_flash reporter, preface: "Couldn\'t merge into '#{other.name}."
           when 'absorb'
-            reporter = @tag.absorb other
+            reporter = TagServices.new(@tag).absorb other
             resource_errors_to_flash reporter, preface: "Couldn\'t absorb '#{other.name}."
           when 'child' # Make the tag a child of the other
             reporter = TagServices.new(other).make_parent_of @tag
           when 'synonym' # Make the tag a synonym of the other
-            reporter = other.absorb @tag, false
+            reporter = TagServices.new(other).absorb @tag, false
             resource_errors_to_flash reporter, preface: "Couldn\'t make a synonym of '#{@tag.name}."
         end
       end

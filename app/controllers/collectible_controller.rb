@@ -207,19 +207,6 @@ class CollectibleController < ApplicationController
     end
   end
 
-=begin
-  def edit
-    update_and_decorate
-    entity = @decorator.object
-    # if entity.respond_to?(:page_ref) && (pr = entity.page_ref) && !pr.gleaning
-    if entity.respond_to?(:gleaning)
-      # entity.bkg_launch # Set gleaning process in motion
-      # @image_list = (@decorator.gleaning && @decorator.gleaning.images) ? @decorator.gleaning.images : []
-    end
-    smartrender
-  end
-=end
-
   def show
     update_and_decorate touch: true
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
