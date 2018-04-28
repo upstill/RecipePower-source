@@ -9,7 +9,7 @@ describe TagPresenter do
   include Devise::TestHelpers
 
   def setup
-    @admin = FactoryGirl.create(:admin)
+    @admin = FactoryBot.create(:admin)
     @request.env["devise.mapping"] = Devise.mappings[:admin]
     sign_in @admin
   end
@@ -17,7 +17,7 @@ describe TagPresenter do
   before do
     # setup
     @presenter = TagPresenter.new tags(:pie), view, @admin
-    @admin = FactoryGirl.create(:user)
+    @admin = FactoryBot.create(:user)
   end
 
   it "presents name" do

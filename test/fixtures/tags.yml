@@ -3,18 +3,21 @@ jal:
     name: jalapeño peppers
     tagtype: 4
     isGlobal: true
+    normalized_name: jalapeno-peppers
     
 jal2:
     id: 2
     name: Chipotle  -chiles
     tagtype: 4
     isGlobal: false
+    normalized_name: chipotle-chiles
 
 chilibean:
     id: 3
     name: chili bean
     tagtype: 4
     isGlobal: true
+    normalized_name: chile-bean
 
 dessert:
   id: 4
@@ -22,6 +25,7 @@ dessert:
   tagtype: 2
   isGlobal: true
   referent_id: 1
+  normalized_name: dessert
 
 desserts:
   id: 5
@@ -29,6 +33,7 @@ desserts:
   tagtype: 2
   isGlobal: true
   referent_id: 1
+  normalized_name: desserts
 
 pie:
   id: 6
@@ -36,6 +41,7 @@ pie:
   tagtype: 2
   isGlobal: true
   referent_id: 2
+  normalized_name: pie
 
 pies:
   id: 7
@@ -43,6 +49,7 @@ pies:
   tagtype: 2
   isGlobal: true
   referent_id: 2
+  normalized_name: pies
 
 cake:
   id: 8
@@ -50,6 +57,7 @@ cake:
   tagtype: 2
   isGlobal: true
   referent_id: 3
+  normalized_name: cake
 
 cakes:
   id: 9
@@ -57,6 +65,7 @@ cakes:
   tagtype: 2
   isGlobal: true
   referent_id: 3
+  normalized_name: cakes
 
 gateau:
   id: 10
@@ -64,23 +73,27 @@ gateau:
   tagtype: 2
   isGlobal: true
   referent_id: 3
+  normalized_name: gateau
 
 jal3:
-    id: 11
-    name: chipotle -Chiles
-    tagtype: 4
-    isGlobal: false
+  id: 11
+  name: chipotle -Chiles
+  tagtype: 4
+  isGlobal: false
+  normalized_name: chipotle-chiles
 
 chilibean_free:
-    id: 12
-    name: chili bean
-    tagtype: 0
-    isGlobal: true
+  id: 12
+  name: chili bean
+  tagtype: 0
+  isGlobal: true
+  normalized_name: chile-bean
 
 cakes_free:
   id: 13
   name: cakes
   tagtype: 0
   isGlobal: true
+  normalized_name: cakes
 
   

@@ -68,6 +68,21 @@ class Tag < ActiveRecord::Base
     joins(:referents).where( referents: { id: Referent.by_tag_id(tag_id_or_ids).pluck( :id) })
   }
 
+  # Scope for finding tags which clash with this one
+  scope :clashes, -> (tag) {
+    where(name: tag.name, tagtype: [tag.tagtype, 0]).where.not(id: tag.id)
+  }
+
+  # Is there a tag that clashes with the (probably new) name and type of this one?
+  def clashing_tag?
+    Tag.clashes(self).exists?
+  end
+
+  # Identify a tag that clashes with the (probably new) name and type of this one (if any)
+  def clashing_tag
+    Tag.clashes(self).first
+  end
+
   # Same, except accesses tags by name
   scope :synonyms_by_str, -> (str, exact=false) {
     joins(:referents).where(referents: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
@@ -190,72 +205,62 @@ class Tag < ActiveRecord::Base
     str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect { |word| @@wordmap[word] || word }.join('-')
   end
 
-  def clashing_tag
-    Tag.where(name: name, tagtype: [tagtype, 0]).detect { |other| other.id != id }
-  end
-
-  # self can't be saved because some other tag already has its name/type combination. Find that tag and make self
-  # disappear into it, UNLESS self already is typed and the other isn't, in which case the other disappears into
-  # self. In any case, nuke the disappeared tag, and save and return the survivor
-  # NB: this method functions like save but returns either the surviving tag (in case of success)
-  #  or the original tag, with errors
-  def disappear
-    if target = clashing_tag
-      ((target.tagtype == 0) && (tagtype != 0)) ? absorb(target) : target.absorb(self)
-    else
-      save
-      self
-    end
-  end
-
   # Use this tag instead of 'other', i.e., absorb its taggings, referents, etc.
   # Either delete the other, or make it a synonym, according to 'delete'
+  # Since either of the tags may disappear, return the survivor
   def absorb other, delete=true
     return other if other.id == id
-    return other.absorb(self, delete) if !self.meaning && other.meaning # Make it easy for an unbound tag
+    if (!meaning && other.meaning) || ((tagtype == 0) && (other.tagtype != 0)) # Make it easy for an unbound tag
+      return other.absorb(self, delete)
+    end
+    # The other may clash with an existing tag of the target type,
+    # So get either the other, or its equivalent in the appropriate type
+    other = Tag.assert other, tagtype unless delete
+    # ...which may indeed be the original
+    return self if self == other
     # Normal procedure:
-    if delete
-      TaggingServices.change_tag(other.id, self.id)
-      ReferentServices.change_tag(other.id, self.id) # Change the canonical expression of any referent which uses us
-    end
-    # Merge the general uses of other as an expression into those of the target
-    self.referent_ids = (other.referent_ids+self.referent_ids).uniq
-    self.primary_meaning ||= other.primary_meaning
-
-    # TODO Need to move any lists named by the other
-    # Take on all owners of the absorbee unless one of them is global
-    if self.isGlobal ||= other.isGlobal
-      self.owners.clear
-    else
-      self.owner_ids = (other.owner_ids + self.owner_ids).uniq
-    end
-    if self.errors.any?
-      # Failure: copy errors into the original record and return it
-      self.errors.each { |k, v| other.errors[k] = v }
-      other
-    elsif delete
-      Tag.transaction do
+    Tag.transaction do
+      # The important thing here is that we're making all requisite changes (to Taggings, Referents and Expressions)
+      # directly in the database, to ensure consistency
+      # Take on all owners of the absorbee unless one of them is global
+      tag_owners.delete_all if self.isGlobal ||= other.isGlobal
+      if delete
+        # Redirect taggings, referents and expressions hither
+        TagOwnerServices.change_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+        TaggingServices.change_tag other.id, id
+        ReferentServices.change_tag other.id, id # Change the canonical expression of any referent which uses us
+        ExpressionServices.change_tag other.id, id
+      else
+        TagOwnerServices.copy_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+        # Make this tag synonymous with the other => Ensure it has a matching set of referents and expressions
+        # (taggings are unnecessary b/c the original is surviving)
+        ExpressionServices.copy_tag other.id, id
+      end
+      # Merge the general uses of other as an expression into those of the target
+      # TODO Need to move any lists named by the other
+      to_return =
+      if delete
+        other.reload
         other.destroy
-        save
-      end
-      self
-    else
-      # The other may clash with an existing tag of the target type,
-      # So get either the other, or its equivalent
-      other = other.project tagtype
-      if other != self
-        # No need to monkey with referents if the projection devolved on us
-        unless primary_meaning || referent_ids.present?
-          Referent.express self
-          reload
+        self
+      else # Make this tag synonymous with the other by ensuring it has the other's referents
+        if other != self
+          # No need to monkey with referents if the projection devolved on us
+          # Ensure that we have at least one referent
+          Referent.express(self) unless primary_meaning || referents.first
+          if !valid?
+            # Failure: copy errors into the original record and return it
+            errors.each { |k, v| other.errors[k] = v }
+            return other
+          end
+          # Leave the other as a synonym
+          other.update_attribute(:referent_id, referent_id) if referent_id
+          ExpressionServices.copy_tag id, other.id
+          other.reload
         end
-        # Leave the other as a synonym
-        other.referent_ids = other.referent_ids + self.referent_ids
-        other.primary_meaning ||= self.primary_meaning
-        other.save
+        other
       end
-      save
-      other
+      reload
     end
   end
 
@@ -268,10 +273,13 @@ class Tag < ActiveRecord::Base
     # ...and setting the normalized name
     self.normalized_name = Tag.normalizeName name
     self.tagtype = 0 unless tagtype
-    return true unless clashing_tag
-    # Shouldn't be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used
-    self.errors[:key] = "Tag can't be saved because of possible redundancy"
-    false
+    if clashing_tag?
+      # Shouldn't be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used
+      self.errors[:key] = "Tag can't be saved because of possible redundancy"
+      false
+    else
+      true
+    end
   end
 
   public
@@ -295,82 +303,80 @@ class Tag < ActiveRecord::Base
     self.tagtype = Tag.typenum(tt)
   end
 
-  # Move the tag to a new type, possibly merging it with another tag of identical spelling
-  def project(tt)
-    return self if typematch(tt) # We're already in the target type!
-    self.typenum = tt
-    save
-    clashing_tag ? disappear : self
-  end
-
   # Taking either a tag, a string or an id, make sure there's a corresponding tag
-  #  of the given type that's available to the named user. NB: 't' may be a Tag, but
-  #  not necessarily of the given type, or one available to the user.
-  def self.assert(t, opts = {})
+  #  of the given type that's available to the named user. If no type is asserted,
+  #  any type will do.
+  #
+  #  NB: if a tag is presented, it's
+  #  not necessarily of the given type, or available to the user. If a type conversion
+  #  is required, the tag returned may differ from that provided.
+  #
+  #  One wrinkle: if there is a free tag (tagtype=0) that matches the given name (or the name
+  #  of the given tag), it will be retyped to the requested type
+  def self.assert tag_or_id_or_name, tagtype=nil, opts = {}
+    tagtype, opts = nil, tagtype if tagtype.is_a? Hash
     # Convert tag type, if any, into internal form
-    opts[:tagtype] = Tag.typenum(opts[:tagtype]) if opts[:tagtype]
-    if t.class == Fixnum
-      # Fetch an existing tag
-      begin
-        tag = Tag.find t
-      rescue Exception => e
-        return nil
-      end
-    elsif t.class == Tag
-      tag = t
-    else
-      opts[:assert] = true
-      opts[:matchall] = true
-      tag = Tag.strmatch(t, opts).first # strmatch will create a tag if none exists
-      return nil if tag.nil?
-    end
-    # Now we've found/created a tag, we need to ensure it's the right type (if we care)
-    unless tag.typematch opts[:tagtype]
-      target_type = opts[:tagtype].kind_of?(Array) ? opts[:tagtype].first : opts[:tagtype]
+    tagtype = Tag.typenum tagtype if tagtype
+    extant_only = opts.delete :extant_only
+    tag =
+        case tag_or_id_or_name
+          when Fixnum
+            # Fetch an existing tag
+            Tag.find_by id: tag_or_id_or_name
+          when Tag
+            tag_or_id_or_name
+          else
+            opts[:matchall] = true
+            opts[:assert] = !extant_only
+            if tagtype
+              # Look for a matching tag of the correct type, then for an untyped match, then create one
+              Tag.find_by(name: tag_or_id_or_name, tagtype: tagtype) ||
+                  (Tag.find_by(name: tag_or_id_or_name, tagtype: 0) unless tagtype == 0) ||
+                  Tag.strmatch(tag_or_id_or_name, opts.merge(tagtype: tagtype)).first
+            else
+              # Any type will do (but prefer an extant free tag)
+              Tag.strmatch(tag_or_id_or_name, opts).first
+            end
+        end
+    return nil if tag.nil?
+    # Now we've found/created a tag, we need to ensure it's the right type
+    if tagtype && (tag.tagtype != tagtype)
       # We have to be wary of a clash with an existing tag of the target type
-      if t = Tag.find_by(name: tag.name, tagtype: target_type)
+      if t = Tag.find_by(name: tag.name, tagtype: tagtype)
         # Resolve the clash by using the existing one, absorbing the original if it's untyped
-        t.absorb tag if tag.tagtype == 0
+        t.absorb tag if tag.persisted? && (tag.tagtype == 0)
         tag = t
       else
         # Clone the tag for another type, but if it's a free tag, just change types
-        tag = tag.dup if tag.tagtype != 0
-        tag.tagtype = target_type
+        tag = tag.dup if tag.persisted? && (tag.tagtype != 0)
+        tag.tagtype = tagtype
       end
-      tag.isGlobal = opts[:userid].nil? # If userid not asserted, globalize it
-      tag.save
     end
     # Ensure that the tag is available to the user (or globally, depending)
     # NB: Tag.strmatch does this, but not the other ways of getting here
-    tag.admit_user opts[:userid]
+    tag.admit_user opts[:userid] if opts[:userid]
+    tag.save! if tag.changed?
     tag
   end
 
   # Expose this tag to the given user; if user is nil or super, make the tag global
   def admit_user(uid = nil)
-    unless self.isGlobal
+    unless isGlobal
       if (uid.nil? || (uid == User.super_id))
         self.isGlobal = true
-      elsif !self.owners.exists?(uid) # Reality check on the user id
-        begin
-          user = User.find(uid)
-          self.owners << user
-        rescue
-          # Take no other action
-        end
+      elsif !owners.exists?(uid) && (user = User.find_by id: uid) # Reality check on the user id
+        self.owners << user
       end
-      self.save
     end
   end
 
-  # Give this tag a primary meaning if it doesn't already have one or we're
-  # forcing the issue
-  def admit_meaning ref, force=false
-    if !self.primary_meaning || force
-      self.primary_meaning = ref
-      self.save
-    end
+  # Ensure that we no longer use this ref as a meaning
+  def elide_meaning ref
+    self.primary_meaning = nil if primary_meaning == ref
+    referents.delete ref
+    expressions.each { |expr| expressions.delete(expr) if expr.referent == ref }
   end
+
 
   # Look up a tag by name, userid and type, creating a new one if needed
   # RETURNS: an array of matching tags (possibly empty if assert is not true)

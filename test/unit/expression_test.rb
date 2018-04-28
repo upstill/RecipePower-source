@@ -6,7 +6,6 @@ class ExpressionTest < ActiveSupport::TestCase
   fixtures :expressions
 
   test "Create expression" do
-    ref = FoodReferent.create
 
     tagid = tags(:jal).id
     assert tags(:jal).save, "Couldn't save tag"
@@ -16,11 +15,12 @@ class ExpressionTest < ActiveSupport::TestCase
     assert tags(:jal2).save, "Couldn't save tag"
     jal2 = Tag.find tagid
 
+    tags(:chilibean_free).destroy
     tagid = tags(:chilibean).id
     assert tags(:chilibean).save, "Couldn't save tag"
     chilibean = Tag.find tagid
 
-    ref.express jal, locale: :es
+    ref = Referent.express jal, locale: :es
     assert_equal "jalapeño peppers", ref.name, "Didn't adopt name when expressed"
     ref.express jal2, form: :plural
     ref.express chilibean, form: :generic, locale: :en
@@ -46,7 +46,7 @@ class ExpressionTest < ActiveSupport::TestCase
     gateau = tags(:gateau)
     assert_equal 1, cake.referents.count, "Cake should only have one referent"
     assert_equal cake.primary_meaning, cake.referents.first, "Cake should have only its referent's primary meaning"
-    assert_equal gateau, cake.primary_meaning.canonical_expression, "Gateau should be the primary expression of cake"
+    assert_equal cake, gateau.meaning.expression, "Gateau should be the primary expression of cake"
 
   end
 
@@ -99,7 +99,7 @@ class ExpressionTest < ActiveSupport::TestCase
 
   test "Build a new tag with referent" do
     dessert = Tag.new name: "Mexican", tagtype: 1
-    ref = TagServices.new(dessert).assert_referent
+    ref = Referent.express dessert # TagServices.new(dessert).assert_referent
     assert dessert.referents.include?(ref)
     assert ref.tags.include?(dessert)
     assert_equal ref.expression, dessert
@@ -119,10 +119,10 @@ class ExpressionTest < ActiveSupport::TestCase
   test "Two parentless tags synonymize correctly" do
     t1 = tags :jal
     t2 = tags :jal2
-    TagServices.new(t1).absorb t2, false
+    t1.absorb t2, false
     assert_equal t1.meaning, t2.meaning
     assert_equal t1.referent_ids, t2.referent_ids
-    assert t1.meaning.is_a? (Referent)
+    assert t1.meaning.is_a?(Referent)
   end
 
   test "Deleting tag nullifies  in Referent" do

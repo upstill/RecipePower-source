@@ -2,6 +2,24 @@ class ExpressionServices
   def initialize(expression)
     @expression = expression
   end
+
+  # Transfer the expressions of a tag to another by revising their tag_id
+  def self.change_tag from_id, to_id
+    extant_refids = Expression.where(tag_id: to_id).pluck :referent_id
+    Expression.where(tag_id: from_id).where.not(referent_id: extant_refids).each { |expr|
+      expr.update_attribute :tag_id, to_id
+    }
+  end
+
+  # Duplicate the expressions of a tag by fetching all of its expressions and assigning copies to the other
+  def self.copy_tag from_id, to_id
+    extant_refids = Expression.where(tag_id: to_id).pluck :referent_id
+    Expression.where(tag_id: from_id).where.not(referent_id: extant_refids).each { |expr|
+      new = expr.dup
+      new.tag_id = to_id
+      new.save
+    }
+  end
   
   # Deliver referents for the (set of) tags
   def self.meaning_ids(tag_ids)
@@ -27,7 +45,7 @@ class ExpressionServices
     refids = ExpressionServices.meaning_ids tag_ids
     # Return all the tags referred to by those
     result = ExpressionServices.expression_ids refids
-    unique ? result - ((tag_ids.is_a? Fixnum) ? [tag_ids] : tag_id) : result
+    unique ? result - ((tag_ids.is_a? Fixnum) ? [tag_ids] : tag_ids) : result
   end
   
   # Return all the semantic children of the tag(s) as an array of arrays

@@ -274,6 +274,17 @@ class PageRef < ActiveRecord::Base
     type == qtype && (url == qurl || aliases.include?(qurl))
   end
 
+  # Associate this page_ref with the given referent.
+  # NB: had better be a ReferrableReferent or subclass thereof
+  def assert_referent rft
+    return unless rft
+    unless referents.exists?(id: rft.id)
+      self.referents << rft
+      # Saving the page_ref appears to be the only way to ensure that the list of referents is current
+      save
+    end
+  end
+
   private
 
   # We have not extracted information to the full extent needed

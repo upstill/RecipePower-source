@@ -20,12 +20,21 @@ class LinkableTest < ActiveSupport::TestCase
   end
   
   test "Recipe rejects bad URLs" do
-    rcp = CollectibleServices.find_or_create( url: "htp://www.foodandwine.com/chefs/adam-erace", title: "Some title or other" )
-    assert !rcp.errors.empty?, "Bogus protocol should throw error"
-    rcp = CollectibleServices.find_or_create( url: "chefs/adam-erace", title: "Some title or other" )
-    assert !rcp.errors.empty?, "Relative path in URL should throw error"
-    rcp = CollectibleServices.find_or_create( url: "Totally bogus URL", title: "Some title or other" )
-    assert !rcp.errors.empty?, "Totally bogus URL should throw error"
+    begin
+      CollectibleServices.find_or_create( url: "htp://www.foodandwine.com/chefs/adam-erace", title: "Some title or other" )
+      assert false, "Bogus protocol should throw error"
+    rescue
+    end
+    begin
+      CollectibleServices.find_or_create( url: "chefs/adam-erace", title: "Some title or other" )
+      assert false, "Relative path in URL should throw error"
+    rescue
+    end
+    begin
+      CollectibleServices.find_or_create( url: "Totally bogus URL", title: "Some title or other" )
+      assert false, "Totally bogus URL should throw error"
+    rescue
+    end
   end
 
 end

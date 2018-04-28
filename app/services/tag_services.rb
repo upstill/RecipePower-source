@@ -1,9 +1,10 @@
 class TagServices
-  
+
   attr_accessor :tag
   
-  delegate :id, :typename, :name, :normalized_name, :meaning, :primary_meaning, :isGlobal, :taggings,
-    :users, :user_ids, :owners, :owner_ids, :can_absorb, :to => :tag
+  delegate :id, :typename, :name, :normalized_name, :isGlobal, :taggings,
+           :meaning, :primary_meaning, :elide_meaning,
+            :users, :user_ids, :owners, :owner_ids, :can_absorb, :to => :tag
   
   def initialize(tag, user=nil)
     self.tag = tag
@@ -13,6 +14,7 @@ class TagServices
   def referents exclude_self=false
     exclude_self ? tag.referents.where.not(id: tag.referent_id) : tag.referents
   end
+
 # -----------------------------------------------
   def sites
     tag.typesym == :Source ? Site.where(referent_id: tag.referent_ids) : Site.where(id: tag.site_ids)
@@ -103,9 +105,9 @@ class TagServices
     unique ? ids - [id] : ids
   end
   
-  def self.synonym_ids(ids)
-    ids = ExpressionServices.synonym_ids_of_tags(ids)
-    unique ? ids - [ids].flatten : ids
+  def self.synonym_ids(ids_in, unique=false)
+    ids = ExpressionServices.synonym_ids_of_tags(ids_in, unique)
+    unique ? ids - [ids_in].flatten : ids
   end
   
   def synonyms unique=false
@@ -139,34 +141,52 @@ class TagServices
     # Tag.where id: parent_ids
   end
 
-  # Ensure that the child tag has a referent that is a child of our referent
+# Ensure that the child tag has a referent that is a child of our referent
   def make_parent_of child_tag, move=true
-    # NB: In the child needs to change type, and if there is a name clash with an existing type,
+    # NB: If the child needs to change type, and if there is a name clash with an existing type,
     # Tag.assert WILL RETURN A TAG DIFFERENT THAN THAT PROVIDED. Thus,
     # THE RETURN VALUE OF THIS METHOD NEEDS TO BE ATTENDED TO
+    # In the event of failure, any errors are attached to the tag returned, which may be the original tag
     if child_tag == tag
       tag.errors.add :id, 'refers to the same tag'
-      return tag
+      tag
+    else
+      begin
+        Tag.transaction do
+          child_tag = Tag.assert child_tag, tag.tagtype
+          if child_tag == tag # We MAY have mapped an untyped tag onto our new "parent" => act as absorb
+            tag
+          else
+            (child_tag.referent_ids | tag.referent_ids).each { |exid|
+              # child_tag and tag are synonyms on some referent(s), so child needs to be removed from those refs
+              child_tag.elide_meaning child_tag.referents.find_by(id: exid)
+            }
+            child_ref = Referent.express child_tag, force: true
+            parent_ref = Referent.express tag
+            parent_ref.make_parent_of child_ref, move
+            # Raise an error to back out of the whole thing
+            raise parent_ref.errors.full_messages.join("\n") if parent_ref.errors.any?
+            child_tag.save
+            raise child_tag.errors.full_messages.join("\n") if child_tag.errors.any?
+            parent_ref.save
+            child_ref.save
+            child_tag
+          end
+        end
+      rescue => e
+        tag.errors.add :child, "#{child_tag.name} can't be added to #{tag.name}: #{e}"
+        tag
+      end
     end
-    child_tag = Tag.assert child_tag, tagtype: tag.tagtype
-    parent_ref = Referent.express tag
-    child_ref = Referent.express child_tag
-    if parent_ref == child_ref # Synonyms of the same referent => split off a new referent to establish the child
-      child_tag.referents.delete child_ref
-      child_ref = Referent.express child_tag, force: true
-    end
-    parent_ref.make_parent_of child_ref, move
-    parent_ref.save
-    child_ref.save
-    child_tag
   end
+
 # -----------------------------------------------
   def suggests target_tag
-    Referent.express(tag).suggests Referent.express(target_tag)
+    self.express(tag).suggests self.express(target_tag)
   end
 
   def suggests? target_tag
-    Referent.express(tag).suggests? Referent.express(target_tag)
+    self.express(tag).suggests? self.express(target_tag)
   end
 
   def child_referents
@@ -183,6 +203,7 @@ class TagServices
       referent.image_refs << image_ref unless referent.image_refs.include?(image_ref)
     }
   end
+
 # Given a name (or the tag thereof), ensure the existence of:
 # -- a tag of the tagtype
 # -- a referent "defining" that kind of entity
@@ -192,22 +213,29 @@ class TagServices
     return nil unless tag_or_tagname
     page_link = options[:page_link]
     image_link = options[:image_link]
-    tagtype = Tag.typenum options[:tagtype] if options[:tagtype]
-    tag = tag_or_tagname.is_a?(Tag) ?
-        tag_or_tagname :
-        Tag.assert(tag_or_tagname.to_s, tagtype: tagtype)
-    location =
-        if page_link
-          # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
-          page_ref = PageRefServices.assert_for_referent page_link, tag, :Definition
-          if options[:link_text].present? # Force the link text to something else
-            page_ref.link_text = options[:link_text].strip
-            page_ref.save
+    return nil unless tag =
+        Tag.transaction do
+          tag =
+              if tt = options[:tagtype]
+                # Force the existence of a tag of the given type
+                Tag.assert(tag_or_tagname, tt) if tag_or_tagname.present?
+              elsif tag_or_tagname.is_a?(Tag)
+                tag_or_tagname
+              end
+          if tag
+            tag_ref = Referent.express tag
+            location =
+                if page_link
+                  # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
+                  page_ref = PageRefServices.assert_for_referent page_link, tag_ref, :Definition
+                  page_ref.link_text = options[:link_text].strip if options[:link_text].present? # Force the link text to something else
+                  page_ref.save! if page_ref.changed?
+                  page_link
+                else
+                  '(no page_ref)'
+                end
           end
-          page_link
-        else
-          Referent.express tag
-          '(no page_ref)'
+          tag
         end
     unless tag_or_tagname.is_a?(Tag)
       msg = "!!!Scraper Defined #{tag.typename} link to #{tag.name} (Tag ##{tag.id}) at #{location}"
@@ -227,7 +255,7 @@ class TagServices
     if target_tag = options[:suggests]
       target_tag = self.define target_tag, options.slice(:tagtype)
       Rails.logger.info "!!!Scraper  ...noted that '#{tag.name}' suggests '#{target_tag.name}'"
-      TagServices.new(tag).suggests target_tag
+      suggests target_tag
     end
     if options[:description].present?
       tag.referents.each { |ref|
@@ -237,10 +265,7 @@ class TagServices
         end
       }
     end
-    if image_link
-      irf = ReferenceServices.assert_image_for_referent image_link, tag
-      TagServices.new(tag).has_image irf
-    end
+    has_image ReferenceServices.assert_image_for_referent(image_link, tag) if image_link
     tag
   end
 
@@ -277,7 +302,7 @@ class TagServices
   # ...semantic parents of the originals get weight 1/3
   def self.semantic_neighborhood(tag_ids, min_weight = 0.4)
     result = Hash.new
-    new_tag_ids = self.synonym_ids(tag_ids) + [tag_ids].flatten
+    new_tag_ids = self.synonym_ids tag_ids
     weight = 1.0
     until new_tag_ids.empty? || (weight < min_weight) do
       new_tag_ids.each { |tagid| result[tagid] = weight }
@@ -292,7 +317,9 @@ class TagServices
   def self.qa
     Tag.all.each do |tag|
       if !tag.tagqa
-        result = tag.errors[:key] && tag.disappear
+        if tag.errors[:key] && other = clashing_tag
+          other.absorb tag
+        end
       end
     end
   end

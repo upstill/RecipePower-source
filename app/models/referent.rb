@@ -74,7 +74,7 @@ class Referent < ActiveRecord::Base
 =end
 
   attr_accessible :tag, :type, :description, :isCountable, :dependent,
-                  :expressions_attributes, :add_expression, :tag_id,
+                  :canonical_expression, :expressions_attributes, :add_expression, :tag_id,
                   :parents, :children, :parent_tokens, :child_tokens, :typeindex
 
   attr_accessor :dependent
@@ -85,6 +85,12 @@ class Referent < ActiveRecord::Base
 
   # before_save :ensure_expression
   after_save :ensure_tagtypes
+
+  after_create do |ref|
+    # Want to ensure the tag appears among our expressions, but
+    # that can only be done after the ref has been saved (so it can be attached to the tag)
+    ref.express ref.canonical_expression
+  end
 
   # Scopes for the referents of the given tag(s)
   scope :by_tag_id, -> (tagid_or_ids) { joins(:tags).where(tags: {id: tagid_or_ids}) }
@@ -230,60 +236,87 @@ class Referent < ActiveRecord::Base
 
   # Class method to create a referent of a given type under the given tag,
   # or to find an existing one.
-  # WARNING: while some effort is made to find an existing referent and use that,
-  #  this procedure lends itself to redundancy in the dictionary
-  def self.express (tag, tagtype = nil, args = {})
+  # Parameters:
+  # -- 'tag_or_id_or_string' may be an extant tag, or the id of a tag, or a string
+  # -- 'tagtype' may be a symbol, an integer or a string, according to the typing of Tags
+  #     (Since you can't #express a free tag (type 0) 'tagtype' must not be :Free if creating a tag)
+  def self.express (tag_or_id_or_string, tagtype = nil, args = {})
     if tagtype.is_a? Hash
       tagtype, args = nil, tagtype
     end
-    if tag.class == Tag # Creating it if need be, and/or making it global
-      tagtype = tag.tagtype
-    else
-      tag = Tag.assert(tag, tagtype: tagtype)
-    end
-    # We may not immediately have a referent for this tag
-    #...but there may already be one as a plural or a singular
-    ref = (tag.meaning ||
-        tag.aliases.map(&:meaning).find(&:'present?')) unless args.delete(:force)
-    # Tag doesn't have an existing referent (or we're forcing), so need to make one
-    ref ||= Referent.referent_class_for_tagtype(tag.tagtype).constantize.create(tag_id: tag.id)
-    if ref.id # Successfully created
-      ref.express tag, args
-      ref
+    typenum =
+        if tag_or_id_or_string.is_a?(Tag) && !tagtype
+          tag_or_id_or_string.tagtype
+        else
+          Tag.typenum tagtype
+        end
+    # The tagtype must be something other than 0 unless the tag already has such a type
+    if typenum != 0
+      Referent.transaction do
+        # Creating it if need be, and/or making it global
+        if tag = Tag.assert(tag_or_id_or_string, typenum)
+          # We may not immediately have a referent for this tag
+          #...but there may already be one as a plural or a singular
+          ref = (tag.meaning ||
+              tag.aliases.map(&:meaning).find(&:'present?')) unless args.delete(:force)
+          # Tag doesn't have an existing referent (or we're forcing), so need to make one
+          ref ||= Referent.referent_class_for_tagtype(tag.tagtype).constantize.create(canonical_expression: tag)
+          ref.express tag, args
+          ref
+        end
+      end
     end
   end
 
   # Add a tag to the expressions of this referent, returning the tag id
-  def express(tag, args = {})
+  def express(tag_or_id_or_name, args = {})
+    if !persisted?
+      errors.add :tags, "can't be used as expressions until referent is saved"
+      return nil
+    end
     # We assert the tag in case it's
     # 1) specified by string or id, rather than a tag object
     # 2) of a different type, or
     # 3) not already global
-    name = tag.is_a?(String) ? tag : tag.name
-    tag = Tag.assert tag, tagtype: self.typenum
-    if tag.name != name
-      tag.name = name # We may be setting the name to something that matches an existing tag
-      tag.save
-    end
+    if tag = Tag.assert(tag_or_id_or_name, self.typenum) # Ensure that there's a tag of OUR type
 
-    # Promote the tag to the canonical expression on this referent if needed
-    if (args[:form] == :generic) || !self.canonical_expression
-      self.canonical_expression = tag
-      self.save
-    end
+      # Promote the tag to the canonical expression on this referent if needed
+      if (args[:form] == :generic) && (canonical_expression != tag)
+        self.canonical_expression = tag
+        update_attribute :tag_id, tag.id
+      end
 
-    # Find or create an expression of this referent on this tag. If locale
-    # or form aren't specified, match any expression
-    args[:form] = Expression.formnum(:generic) unless args[:form]
-    if self.id
-      self.expressions.create(Expression.scrub_args(args).merge tag_id: tag.id, referent_id: self.id) unless tag_ids.include?(tag.id) # , args
-    elsif self.expressions.empty? # We're not saved, so have no id
-      self.expressions << Expression.new(tag_id: tag.id)
+      # Find or create an expression of this referent on this tag. If locale
+      # or form aren't specified, match any expression
+      args[:form] ||= Expression.formnum :generic
+      scrubbed_args = Expression.scrub_args(args).merge tag: tag, referent: self
+      unless expressions.exists?(scrubbed_args)
+        tag.save if tag.changed?
+        expr = tag.expressions.create(scrubbed_args)
+        self.expressions << expr
+        tag.reload # To ensure the tag's referents are current
+      end
+    else
+      self.errors.add :tags, "won't take bogus tag as expression"
     end
+    tag
+  end
 
-    # Point the tag back at this referent, if needed
-    tag.admit_meaning(self)
-    tag.id
+  # alias_method :orig_canonical_expression=, :canonical_expression=
+  def canonical_expression= tag_or_string
+    tag = tag_or_string.is_a?(String) ? Tag.assert(tag_or_string, typenum) : tag_or_string
+    if tag && (tag.tagtype == typenum)
+      super tag
+      express tag if persisted? # Ensure the tag is listed among the expressions
+      true
+    elsif tag
+      # It is an error to assign a tag to a referent of the wrong type
+      errors.add :canonical_expression, "#{tag.typename} tag can't express #{typename} referent"
+      false
+    else
+      # There's not even a bloody tag!
+      errors.add :canonical_expression, "#{tag_or_string} can't express #{typename} referent"
+    end
   end
 
   # Return a list of all tags that are related to the one provided. This means:
@@ -419,13 +452,11 @@ class Referent < ActiveRecord::Base
   # Return the tag expressing this referent according to the given form and locale, if any
   def expression args = {}
     args = Expression.scrub_args args
-    if (args.size > 0) && (expr = self.expressions.find_by args)
+    if (args.size > 0) && (expr = expressions.find_by args)
       return expr.tag
     elsif !canonical_expression
-      self.canonical_expression =
-          self.expressions.find_by(Expression.scrub_args :form => :generic) ||
-          self.expressions.first
-      save
+      expr = expressions.find_by(Expression.scrub_args :form => :generic) || expressions.first
+      self.canonical_expression = expr.tag if expr
     end
     canonical_expression
   end
@@ -461,10 +492,15 @@ class Referent < ActiveRecord::Base
       return
     end
 
-    if self.descends_from? child_ref
-      # Decouple from the tree
-      self.parent_ids -= self.parents.collect { |grandparent|
-        grandparent.id if (grandparent == child_ref) || grandparent.descends_from?(child_ref) }
+    if path = ReferentServices.new(self).ancestor_path_to(child_ref)
+      report = "Referent ##{child_ref.id} (#{child_ref.name}) can't be adopted as a child of ##{id} (#{name}): it's an ancestor!\n"
+      ellipsis = 'Path:'
+      path.each { |ref|
+        report << "  #{ellipsis} Referent ##{ref.id} (#{ref.name})\n"
+        ellipsis = '...has child'
+      }
+      errors.add :ancestor, report
+      return
     end
     unless children.include? child_ref
       if move
@@ -473,12 +509,9 @@ class Referent < ActiveRecord::Base
         child_ref.parents << self
       end
       children << child_ref
+      save
+      child_ref.save
     end
-  end
-
-  # Test whether a referent is higher in the semantic hierarchy
-  def descends_from? other
-    parents.include?(other) || parents.any? { |parent| parent.descends_from? other }
   end
 
   def suggests target_ref

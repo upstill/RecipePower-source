@@ -9,9 +9,9 @@ class ListTagTest < ActiveSupport::TestCase
     @lst_name = "Test List"
     @lst = List.assert @lst_name, @owner, create: true
     # Get a recipe under a tag
-    @lst.store (@included = FactoryGirl.create(:recipe))
+    @lst.store (@included = FactoryBot.create(:recipe))
 
-    @tagged = FactoryGirl.create(:recipe)
+    @tagged = FactoryBot.create(:recipe)
     @tag = Tag.assert("Test Tag", userid: @owner.id)
     TaggingServices.new(@tagged).tag_with @tag, @owner.id
     TaggingServices.new(@lst).tag_with @tag, @owner.id
@@ -24,7 +24,7 @@ class ListTagTest < ActiveSupport::TestCase
   test "a list accepts recipes" do
     list = List.assert "Empty List", @owner
     assert_equal [], list.entities, "List not asserted with empty entities list"
-    rcp = FactoryGirl.create(:recipe)
+    rcp = FactoryBot.create(:recipe)
     refute list.stores?(rcp), "List shouldn't include entity before inclusion"
     list.store rcp
     assert list.stores?(rcp), "List should include entity after inclusion"
@@ -54,7 +54,7 @@ class ListTagTest < ActiveSupport::TestCase
 
   test "a list creates, saves and restores tag list" do
     tag1 = Tag.assert "Tag 1", userid: @owner.id
-    tag2 = Tag.assert "Tag 2", userid: @owner.id, tagtype: :Ingredient
+    tag2 = Tag.assert "Tag 2", :Ingredient, userid: @owner.id
     @lst.tags = [tag1, tag2]
     assert_equal tag1, @lst.tags.first, "First tag not attached to list after assignment"
     assert_equal tag2, @lst.tags.last, "Last tag not attached to list after assignment"

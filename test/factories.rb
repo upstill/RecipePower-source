@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :tag
 
   factory :admin do
@@ -22,19 +22,22 @@ FactoryGirl.define do
     transient do
       name "Herve"
     end
+    canonical_expression { create(:tag, typenum: 3, name: name) }
+=begin
     after(:build) do |ref, evaluator|
       ref.express create(:tag, typenum: 3, name: evaluator.name)
       ref.save
     end
+=end
   end
 
   factory :ingredient_referent do
     transient do
       name "Herve"
     end
+    canonical_expression { create(:ingredient_tag, name: name) }
     after(:build) do |ref, evaluator|
-      ref.express create(:ingredient_tag, name: evaluator.name)
-      ref.save
+      ref.express ref.canonical_expression
     end
     # association :canonical_expression, factory: :ingredient_tag, name: "#{name}"
   end
@@ -46,22 +49,12 @@ FactoryGirl.define do
     # title "#{description}"
   end
 
-=begin
   factory :page_ref, class: PageRef::ReferrablePageRef do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end
-=end
 
   sequence :rcptitle do |n|
     "dish#{n}"
-  end
-
-  factory :channel_referent do
-    trait :name do
-      association :canonical_expression, factory: :ingredient_tag, name: "Some Channel Name"
-    end
-    description "This is a channel referent"
-    # association :canonical_expression, factory: :ingredient_tag, name: "#{name}"
   end
 
 end

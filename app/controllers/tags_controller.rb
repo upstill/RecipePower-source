@@ -214,7 +214,7 @@ class TagsController < ApplicationController
       # Change the type of a single tag
       # We ask and allow for the possibility that the tag will be absorbed into another
       # tag of the target type
-      tag = (Tag.find params['tagid'].to_i).project params['typenum']
+      tag = Tag.assert Tag.find_by(id: params['tagid']), params['typenum']
       idsChanged = tag.errors.empty? && [tag.id]
     end
     if idsChanged
@@ -239,7 +239,9 @@ class TagsController < ApplicationController
     respond_to do |format|
       params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
       if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
-        @tag = @tag.disappear
+        if other = @tag.clashing_tag
+          @decorator = (@tag = other.absorb @tag).decorate
+        end
       end
       if @tag.errors.any?
         format.html { render :action => 'edit' }

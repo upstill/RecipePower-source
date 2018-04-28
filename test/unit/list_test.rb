@@ -11,7 +11,7 @@ class ListTest < ActiveSupport::TestCase
     @description = "A list strictly for testing purposes"
     @lst = List.assert @lst_name, @owner, description: @description
     # Get a recipe under a tag
-    @lst.store (@included = FactoryGirl.create(:recipe))
+    @lst.store (@included = FactoryBot.create(:recipe))
   end
 
   # Called after every test method runs. Can be used to tear
@@ -45,7 +45,7 @@ class ListTest < ActiveSupport::TestCase
   end
 
   test "a list accepts, saves and restores a name tag" do
-    tag = Tag.assert("Test Tag", userid: @owner.id, tagtype: :Collection)
+    tag = Tag.assert("Test Tag", :Collection, userid: @owner.id )
     tst = List.new owner: @owner, name_tag: tag
     assert_equal tag, tst.name_tag, "Name tag not stored in list"
     tst.save
@@ -97,7 +97,7 @@ class ListTest < ActiveSupport::TestCase
   end
 
   test "a list item dumps and loads self without entity" do
-    li = ListItem.new entity: FactoryGirl.create(:recipe)
+    li = ListItem.new entity: FactoryBot.create(:recipe)
     str = ListItem.dump li
     li2 = ListItem.load str
     assert_equal li.id, li2.id

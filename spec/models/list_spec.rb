@@ -4,7 +4,7 @@ describe List do
   # fixtures :all
 
   it "should create a list with a name string" do
-    tagee = FactoryGirl.create(:user)
+    tagee = FactoryBot.create(:user)
     list_name = "Test List"
     list = List.assert list_name, tagee
     list.save

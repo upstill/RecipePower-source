@@ -140,10 +140,11 @@ group :test do
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
   ## gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
-  gem 'factory_girl_rails', "~> 4.0"
+  gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
   gem 'rspec-rails', '2.99'
+  gem 'rspec-html-matchers'
   gem 'rspec-html-matchers'
 end
 

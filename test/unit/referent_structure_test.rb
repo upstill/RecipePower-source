@@ -47,16 +47,17 @@ class ReferentStructureTest < ActiveSupport::TestCase
   end
 
   test "Merge of two referents gets all components" do
-    r1 = create :ingredient_referent, name: "goat cheese"
     r2 = create :ingredient_referent, name: "cow cheese", description: "It's me, Cow Cheese!"
     assert_equal "It's me, Cow Cheese!", r2.description, "Description failed to be created"
 
     t2 = r2.canonical_expression
     puts "r2 is #{r2.class} #{r2.id} with canonical expression ##{r2.canonical_expression.id}"
-    puts "t2##{t2.id}'s primary meaning is #{t2.primary_meaning.class}"
-    assert_equal t2.primary_meaning, r2, "r2 is not the primary meaning of its canonical expression"
+    puts "t2##{t2.id}'s primary meaning is #{t2.meaning.class}"
+    assert_equal t2.meaning, r2, "r2 is not the primary meaning of its canonical expression"
+
+    r1 = create :ingredient_referent, name: "goat cheese"
     t1 = r1.canonical_expression
-    assert_equal t1.primary_meaning, r1, "r1 is not the primary meaning of its canonical expression"
+    assert_equal t1.meaning, r1, "r1 is not the primary meaning of its canonical expression"
 
     p1 = create :ingredient_referent, name: "goat dairy"
     p2 = create :ingredient_referent, name: "milk"
@@ -93,12 +94,12 @@ class ReferentStructureTest < ActiveSupport::TestCase
     assert_equal r2.recipes.first, rcp2, "Recipe not added to referent"
 
     rfc1 = create :page_ref
-    PageRefServices.new(rfc1).assert_referent r1
+    rfc1.assert_referent r1
     assert_equal r1.page_refs.first, rfc1, "Reference not added to referent"
     assert_equal rfc1.referents.first, r1, "Referent not added to page_ref"
 
     rfc2 = create :page_ref, url: "http://www.foodandwine.com/chefs/adam-frace"
-    PageRefServices.new(rfc2).assert_referent r2
+    rfc2.assert_referent r2
     assert_equal r2.page_refs.first, rfc2, "Reference not added to referent"
     assert_equal rfc2.referents.first, r2, "Referent not added to page_ref"
 
@@ -148,12 +149,12 @@ class ReferentStructureTest < ActiveSupport::TestCase
 
     # Set up page_refs
     rfc1 = create :page_ref
-    PageRefServices.new(rfc1).assert_referent r1
+    rfc1.assert_referent r1
     assert_equal r1.page_refs.first, rfc1, "Reference not added to referent"
     assert_equal rfc1.referents.first, r1, "Referent not added to page_ref"
 
     rfc2 = create :page_ref, url: "http://www.foodandwine.com/chefs/adam-frace"
-    PageRefServices.new(rfc2).assert_referent r1
+    rfc2.assert_referent r1
     assert_equal r1.page_refs.last, rfc2, "Reference not added to referent"
     assert_equal rfc2.referents.first, r1, "Referent not added to page_ref"
 

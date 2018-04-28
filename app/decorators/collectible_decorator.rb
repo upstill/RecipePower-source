@@ -66,7 +66,7 @@ class CollectibleDecorator < ModelDecorator
       self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
       self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
       if findings.result_for('Total Time').present?
-        tt = Tag.assert (self.total_time = findings.result_for('Total Time')), :tagtype => :Time
+        tt = Tag.assert (self.total_time = findings.result_for('Total Time')), :Time
         tt && ((ts ||= TaggingServices.new object).tag_with tt, User.super_id)
       end
       self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?

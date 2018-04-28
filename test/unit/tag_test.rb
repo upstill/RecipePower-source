@@ -48,10 +48,8 @@ class TagTest < ActiveSupport::TestCase
     test "normalized name must elide gratuity" do
         assert_equal "cafe", Tag.assert("CAfé").normalized_name
         assert_equal "joes-bar-grille-and-restaurant", Tag.assert(" Joe's Bar, Grille and   - -Restaurant  ").normalized_name
-        tag = Tag.find_by_name tags(:chilibean).name
+        tag = Tag.find_or_initialize_by name: tags(:chilibean).name
         assert_equal tags(:chilibean).name, tag.name, "'chili bean' not found by name"
-        assert_nil tag.normalized_name, "Normalized_name should be nil for unsaved record"
-        tag.save
         assert_equal "chile-bean", tag.normalized_name, "'chili bean' should normalize to 'chile-bean'"
     end
     
@@ -86,44 +84,44 @@ class TagTest < ActiveSupport::TestCase
     
     # Tag takes on specified type
     test "tag takes on specified type" do
-        assert_equal 6, Tag.assert("tag2check", tagtype: 6).tagtype
-        assert_equal 1, Tag.assert("genretagcheck", tagtype: :Genre ).tagtype
-        assert_equal 1, Tag.assert("genretagcheck2", tagtype: "Genre" ).tagtype
+        assert_equal 6, Tag.assert("tag2check", 6).tagtype
+        assert_equal 1, Tag.assert("genretagcheck", :Genre ).tagtype
+        assert_equal 1, Tag.assert("genretagcheck2", "Genre" ).tagtype
     end
     
     # String matches for given type
     test "tag match succeeds against type" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_equal t, Tag.strmatch("tagtypecheck", tagtype: 1).first
     end
     
     # String matches for nonspecified
     test "tag match succeeds for unspecified type" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_equal t, Tag.strmatch("tagtypecheck").first
     end
     
     # String doesn't match for other types
     test "tag match fails against other types" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_not_equal t, Tag.strmatch("tagtypecheck", tagtype: 2).first
     end
     
     # String matches for given set of types
     test "tag matches against set of types" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_equal t, Tag.strmatch("tagtypecheck", tagtype: [1,2,3], matchall: true).first
     end
     
     # String matches for given set of types
     test "tag matched against empty set of types matches any" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_equal t, Tag.strmatch("tagtypecheck", tagtype: [], matchall: true).first
     end
     
     # String doesn't match for other sets of types
     test "tag match against nonmatching typeset fails" do
-        t = Tag.assert("tagtypecheck", tagtype: 1)
+        t = Tag.assert("tagtypecheck", 1)
         assert_not_equal t, Tag.strmatch("tagtypecheck", tagtype: [4,5,6], matchall: true).first
     end
     
@@ -139,16 +137,16 @@ class TagTest < ActiveSupport::TestCase
     test "Synonyms identified correctly" do
       pie = tags(:pie)
       pies = tags(:pies)
-      assert_equal [pies], TagServices.new(pie).synonyms
+      assert_equal [pies], TagServices.new(pie).synonyms(true)
 
       dessert = tags(:dessert)
       desserts = tags(:desserts)
-      assert_equal [desserts], TagServices.new(dessert).synonyms
+      assert_equal [desserts], TagServices.new(dessert).synonyms(true)
 
       cake = tags(:cake)
       cakes = tags(:cakes)
       gateau = tags(:gateau)
-      cake_syns = TagServices.new(cake).synonyms
+      cake_syns = TagServices.new(cake).synonyms(true)
       assert cake_syns.include?(cakes), "Cake should have cakes as synonym"
       assert cake_syns.include?(gateau), "Cake should have gateau as synonym"
       assert_equal 2, cake_syns.count, "Cake should only have two synonyms"

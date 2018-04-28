@@ -1,4 +1,4 @@
 # See test/factories.rb
-FactoryGirl.define do
+FactoryBot.define do
 
 end

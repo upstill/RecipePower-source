@@ -49,6 +49,7 @@ class SiteTest < ActiveSupport::TestCase
     dpr.save
     site = dpr.site
     assert_not_nil site
+    site.reload
     assert_equal dpr, site.page_refs.first
   end
 
@@ -125,13 +126,6 @@ class SiteTest < ActiveSupport::TestCase
     dpr2.save
     site2 = dpr2.site
     assert_equal "www.nytimes.com", site2.root
-
-    longer_site.root = "www.nytimes.com/2016"
-    longer_site.save
-    dpr1.reload
-    assert_equal site1, dpr1.site # Site returns to original
-    dpr2.reload
-    assert_equal longer_site, dpr2.site
 
   end
 
@@ -257,18 +251,18 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     site = Site.find_or_create_for "http://www.esquire.com/food-drink/index.html"
     site.bkg_land
     # Should now have two references, the canonical one without the slash, and a second one with
-    assert_equal "http://www.esquire.com", site.home.sub(/\/$/, '')
+    assert_equal "https://www.esquire.com", site.home.sub(/\/$/, '')
     assert_equal "www.esquire.com", site.root.sub(/\/$/, '')
 
     site.root = "www.esquire.com/food-drink"
     # Should now have two references, the canonical one without the slash, and a second one with
-    assert_equal "http://www.esquire.com", site.home.sub(/\/$/, '')
+    assert_equal "https://www.esquire.com", site.home.sub(/\/$/, '')
     assert_equal "www.esquire.com/food-drink", site.root.sub(/\/$/, '')
 
-    site.home = "http://www.esquire.com/food-drink"
+    site.home = "https://www.esquire.com/food-drink"
     # Should now have two references, the canonical one without the slash, and a second one with
     unless site.respond_to? :reference
-      assert_equal "http://www.esquire.com/food-drink", site.home.sub(/\/$/, '')
+      assert_equal "https://www.esquire.com/food-drink", site.home.sub(/\/$/, '')
     end
     assert_equal "www.esquire.com/food-drink", site.root.sub(/\/$/, '')
   end

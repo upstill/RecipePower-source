@@ -80,16 +80,9 @@ class TaggingServices
   def self.change_tag(fromid, toid)
     Tagging.where(tag_id: fromid).each do |tochange| 
       tochange.tag_id = toid
-      if Tagging.exists?(
-          tag_id: tochange.tag_id,
-          user_id: tochange.user_id,
-          entity_id: tochange.entity_id,
-          entity_type: tochange.entity_type) #,
-          # is_definition: tochange.is_definition)
-        tochange.destroy # Assuming that it failed validation because not unique
-      else
+      Tagging.exists?( tochange.attributes.slice 'tag_id', 'user_id', 'entity_id', 'entity_type') ?
+        tochange.destroy :
         tochange.save
-      end
     end
   end
 

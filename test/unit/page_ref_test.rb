@@ -78,7 +78,7 @@ class PageRefTest < ActiveSupport::TestCase
     mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
     assert mp.aliases.empty?
-    assert_equal 'An Ode to the Rosetta Spacecraft as It Flings Itself Into a Comet', mp.title
+    assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
   end
 
   test "target in URL made irrelevant" do
@@ -120,15 +120,14 @@ class PageRefTest < ActiveSupport::TestCase
     mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     assert_not_nil mp
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
-    assert_equal 'An Ode to the Rosetta Spacecraft as It Flings Itself Into a Comet', mp.title
-    assert_equal 'https://www.wired.com/wp-content/uploads/2016/09/Rosetta_impact-1-1200x630.jpg', mp.lead_image_url
+    assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
+    assert_equal "https://media.wired.com/photos/5926b676af95806129f50602/191:100/pass/Rosetta_impact-1.jpg", mp.lead_image_url
     assert_equal 'www.wired.com', mp.domain
     assert_equal 'Time to break out the tissues, space fans.', mp.excerpt
-    assert_equal 1031, mp.word_count
+    assert_equal 966, mp.word_count
     assert_equal 'ltr', mp.direction
     assert_equal 1, mp.total_pages
     assert_equal 1, mp.rendered_pages
-    assert_equal 'Emma Grey Ellis', mp.author
   end
 
   test "catch null byte" do
@@ -181,19 +180,21 @@ class PageRefTest < ActiveSupport::TestCase
   test "Make New DefinitionPageRef" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = PageRefServices.assert_for_referent uri, jal
-    ref.reload
-    rft = jal.primary_meaning
-    refid = rft.id
-    assert ref.referents.exists?(id: refid), "Referent wasn't added properly"
+    ref = PageRefServices.assert_for_referent uri, Referent.express(jal)
+    rft = ref.referents.first # jal.primary_meaning
+    assert rft, "Referent wasn't added properly"
+    assert_equal rft.definition_page_refs.first, ref
+    assert jal.referent_ids.include? rft.id
+    assert_equal jal.referents.first, rft
+    assert_equal jal.meaning, rft
   end
 
   test "Assert Redundant Reference Properly" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = PageRefServices.assert_for_referent uri, jal, :Tip
+    ref = PageRefServices.assert_for_referent uri, Referent.express(jal), :Tip
     assert_equal :Tip, ref.typesym, "Reference didn't get type"
-    ref2 = PageRefServices.assert_for_referent uri, jal, :Video
+    ref2 = PageRefServices.assert_for_referent uri, Referent.express(jal), :Video
     assert_equal :Video, ref2.typesym, "New reference on same url didn't get new type"
     assert_equal 1, ref2.referents.size, "Reference should have one referent"
   end

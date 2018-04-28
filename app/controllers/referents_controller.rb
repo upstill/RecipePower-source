@@ -29,7 +29,7 @@ class ReferentsController < ApplicationController
 
     handlerclass = "#{params[:type]}Referent".constantize # @@HandlersByIndex[@tabindex]
     @referent = handlerclass.new
-    @referent.express (params[:tagid]) if params[:tagid]
+    @referent.express(params[:tagid]) if params[:tagid]
     @typeselections = Tag.type_selections
     @typeselections.shift
 
@@ -38,7 +38,7 @@ class ReferentsController < ApplicationController
         if params[:tagid]
           render json: [ { :title=>@referent.longname, :isLazy=>true, :key=>@referent.id, :isFolder=>false } ]
         else
-          render json: { dlog: with_format("html") { render_to_string layout: false } }
+          render json: { dlog: with_format('html') { render_to_string layout: false } }
         end
       }
     end
@@ -68,12 +68,12 @@ class ReferentsController < ApplicationController
         tagid = params[param_key][:tag_id]
         # params[param_key].delete :typenum
     end
-    go = 0
+
     keyback = 0
     
     # This code will pertain when we get some kind of hierarchy back
     case params[:mode]
-    when "before"
+    when 'before'
         @referent = handlerclass.create tag: tagid
         # @referent.express tagid, form: :canonical # Ensure it has a tag
         # Make a child of this node's parent, if any
@@ -84,7 +84,7 @@ class ReferentsController < ApplicationController
             parent.save
         end
         keyback = @referent.id
-    when "after"
+    when 'after'
         # Make a child of this node
         @referent = handlerclass.create tag: tagid
         # @referent.express tagid, form: :canonical
@@ -92,15 +92,15 @@ class ReferentsController < ApplicationController
         parent.add_child @referent
         parent.save
         keyback = @referent.id
-    when "child"
+    when 'child'
         # debugger
-    when "over"
+    when 'over'
         # "over" indicates to add the tag to the referent's expressions
         @referent = handlerclass.find params[:target].to_i
         @referent.express tagid
     end
 
-    if params[:mode] == "over"
+    if params[:mode] == 'over'
       # "over" indicates to add the tag to the referent's expressions
       @referent = handlerclass.find params[:target].to_i
       @referent.express tagid
@@ -119,14 +119,14 @@ class ReferentsController < ApplicationController
           if params[:tagid]
             render json: [{:title => @referent.longname, :isLazy => true, :key => keyback, :isFolder => false}], status: :created
           else
-            render json: {done: true, notice: "Successfully created "+@referent.longname}, status: :created
+            render json: {done: true, notice: 'Successfully created '+@referent.longname}, status: :created
           end
         }
       end
     else
       @typeselections = Tag.type_selections
       @typeselections.shift
-      if name_error = @referent.errors["user.username"]
+      if name_error = @referent.errors['user.username']
         @referent.errors.add :tag_token, name_error[0]
       end
       smartrender :action => :new
@@ -160,14 +160,14 @@ class ReferentsController < ApplicationController
           element = @referent.becomes(Referent)
           render json: {
             done: true,
-            popup: "Referent now updated to serve you better"
+            popup: 'Referent now updated to serve you better'
           }
         }
       else
         @referent.becomes(Referent)
         @typeselections = Tag.type_selections
         @typeselections.shift
-        format.html { render action: "edit" }
+        format.html { render action: 'edit' }
         format.json { render json: @referent.errors, status: :unprocessable_entity }
       end
     end

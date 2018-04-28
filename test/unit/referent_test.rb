@@ -56,6 +56,28 @@ class ReferentTest < ActiveSupport::TestCase
     assert_equal tags(:chilibean).id, pt.first.id, "Parent should be tag of chilibean"
   end
 
+  test "Tag absorbs identical free tag" do
+    parent = Referent.express tags(:chilibean).name, tags(:chilibean).tagtype
+    assert_equal tags(:chilibean), parent.expression
+    # Add synonym
+    cbf_id = tags(:chilibean_free).id
+    parent.canonical_expression.absorb tags(:chilibean_free), false
+    refute Tag.find_by(id: cbf_id)
+    assert_equal tags(:chilibean).meaning, parent
+    assert parent.tags.include?(tags(:chilibean))
+    assert parent.tag_ids.include?(tags(:chilibean).id)
+  end
+
+  test "Tags without parents synonymize correctly" do
+    j = tags(:jal)
+    j2 = tags(:jal2)
+    j.absorb j2, false
+    # They should have a common referent
+    assert_equal j.meaning, j2.meaning
+    assert_equal j.referents, j2.referents
+    # Expression should be generic
+  end
+
   test "Fail to match referent and token of different types" do
     ref = GenreReferent.create tag_id: tags(:cake).id
     tagid = tags(:chilibean).id
@@ -68,6 +90,7 @@ class ReferentTest < ActiveSupport::TestCase
   end
 
   test "Create parents list, convert to tokens and back again" do
+    tags(:chilibean_free).destroy
     ref = IngredientReferent.create
     parent1 = Referent.express tags(:jal).name, ref.typenum
     assert_equal tags(:jal).name, parent1.name, "Expression doesn't pan out"
@@ -101,7 +124,7 @@ class ReferentTest < ActiveSupport::TestCase
     ref = IngredientReferent.create
     ref.parent_tokens= "#{tags(:jal).id}, '#{tags(:jal).name}'"
     assert_equal 1, ref.parents.length, "Two identical parents successfully asserted as one"
-    ref.child_tokens= "#{tags(:chilibean).id}, '#{tags(:chilibean).name}'"
+    ref.child_tokens= "#{tags(:chilibean_free).id}, '#{tags(:chilibean_free).name}'"
     assert_equal 1, ref.children.length, "Two identical children successfully asserted as one"
   end
 

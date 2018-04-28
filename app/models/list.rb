@@ -83,7 +83,7 @@ class List < ActiveRecord::Base
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
   def self.assert name, user, options={}
     STDERR.puts "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
-    tag = Tag.assert(name, tagtype: 'List', userid: user.id)
+    tag = Tag.assert(name, 'List', userid: user.id)
     puts "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
@@ -124,7 +124,7 @@ class List < ActiveRecord::Base
   def name=(new_name)
     puts "Setting name '#{new_name}'"
     oname = name_tag
-    newname = Tag.assert(new_name, tagtype: "List", userid: owner.id)
+    newname = Tag.assert(new_name, "List", userid: owner.id)
     if oname != newname
       oname.dependent_lists.delete self
       self.name_tag = newname
