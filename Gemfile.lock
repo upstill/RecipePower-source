@@ -522,7 +522,7 @@ DEPENDENCIES
   rails-perftest
   rails_12factor
   redcarpet
-  rmagick
+  rmagick (~> 2.16.0)
   rspec-html-matchers
   rspec-rails (= 2.99)
   ruby-openid

@@ -74,7 +74,7 @@ gem 'omniauth-openid'
 gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs
-gem "rmagick" # , "~> 2.13.2"
+gem "rmagick", "~> 2.16.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 gem 'truncato'  # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
