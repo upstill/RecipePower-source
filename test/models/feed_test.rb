@@ -48,7 +48,7 @@ class FeedTest < ActiveSupport::TestCase
     # Launch_update should have no effect b/c the update is in the future
     test_feed.launch_update
     ua = test_feed.updated_at
-    test_feed.bkg_land
+    test_feed.bkg_land false
     assert_equal ua, test_feed.updated_at # Should not have been updated
 
     # Launch_update should bring the update time back to the present

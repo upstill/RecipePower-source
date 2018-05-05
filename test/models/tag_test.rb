@@ -117,7 +117,7 @@ class TagTest < ActiveSupport::TestCase
   end
 
   test 'cannot make a tag its own parent' do
-    dessert = tags(:pie)
+    pie = tags(:pie)
     pie = TagServices.new(pie).make_parent_of pie
     assert pie.errors.any?
   end

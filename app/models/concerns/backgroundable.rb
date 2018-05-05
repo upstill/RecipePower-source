@@ -168,11 +168,13 @@ module Backgroundable
       refresh, djopts = false, refresh
     end
     if dj # Job is already queued
-      djopts[:run_at] ||= Time.now if refresh # Acting as if the job is being queued afresh
-      if djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
-        dj.with_lock do
-          dj.update_attributes djopts
-          dj.save if dj.changed?
+      if refresh # Acting as if the job is being queued afresh
+        djopts[:run_at] ||= Time.now
+        if djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
+          dj.with_lock do
+            dj.update_attributes djopts
+            dj.save if dj.changed?
+          end
         end
       end
       puts ">>>>>>>>>>> bkg_launch redundant on #{self} (dj #{self.dj})"

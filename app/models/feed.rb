@@ -44,11 +44,16 @@ class Feed < ActiveRecord::Base
         if value
           # If the home link is nominally good, we assume that site errors come from that
           err_source = cleanpath(feed.home).blank? ? :site : :home
-          if value.page_ref && value.page_ref.good?
-            value.save if value.new_record?
-            feed.errors.add err_source, "isn't legit (#{value.errors.messages})" if value.errors.present?
+          if site_pr = value.page_ref
+            site_pr.bkg_land
+            if site_pr.good?
+              value.save if value.new_record?
+              feed.errors.add err_source, "isn't legit (#{value.errors.messages})" if value.errors.present?
+            else
+              feed.errors.add err_source, "isn't legit (can't access the home page)"
+            end
           else
-            feed.errors.add err_source, "isn't legit (can't access the home page)"
+            feed.errors.add err_source, "isn't legit (has no accessible home)"
           end
         else
           feed.errors.add :site, "can't be empty"
@@ -242,7 +247,7 @@ class Feed < ActiveRecord::Base
     # When the feed is updated successfully, re-queue it for one week hence
     super
     logger.debug "Successfully updated feed ##{id}"
-    bkg_launch(true, run_at: (Time.now + 1.day))  # Launch the next update for one day hence
+    bkg_launch true, run_at: (Time.now + 1.day)  # Launch the next update for one day hence
     logger.debug "Queued up feed ##{id}"
   end
 
