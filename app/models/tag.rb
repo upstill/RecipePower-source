@@ -372,9 +372,11 @@ class Tag < ActiveRecord::Base
 
   # Ensure that we no longer use this ref as a meaning
   def elide_meaning ref
-    self.primary_meaning = nil if primary_meaning == ref
-    referents.delete ref
-    expressions.each { |expr| expressions.delete(expr) if expr.referent == ref }
+    if ref
+      self.primary_meaning = nil if primary_meaning == ref
+      referents.delete ref
+      expressions.each { |expr| expressions.delete(expr) if expr.referent == ref }
+    end
   end
 
 

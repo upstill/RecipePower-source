@@ -157,7 +157,7 @@ class TagServices
           if child_tag == tag # We MAY have mapped an untyped tag onto our new "parent" => act as absorb
             tag
           else
-            (child_tag.referent_ids | tag.referent_ids).each { |exid|
+            (child_tag.referent_ids & tag.referent_ids).each { |exid|
               # child_tag and tag are synonyms on some referent(s), so child needs to be removed from those refs
               child_tag.elide_meaning child_tag.referents.find_by(id: exid)
             }
