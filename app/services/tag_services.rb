@@ -4,7 +4,8 @@ class TagServices
   
   delegate :id, :typename, :name, :normalized_name, :isGlobal, :taggings,
            :meaning, :primary_meaning, :elide_meaning,
-            :users, :user_ids, :owners, :owner_ids, :can_absorb, :to => :tag
+           :absorb, :can_absorb,
+           :users, :user_ids, :owners, :owner_ids, :to => :tag
   
   def initialize(tag, user=nil)
     self.tag = tag
