@@ -9,7 +9,7 @@ class TagOwnerServices
   def self.copy_tag from_id, to_id
     TagOwner.where(tag_id: from_id).each { |to|
       to = to.dup
-      to.id = to_id
+      to.tag_id = to_id
       to.save
     }
   end
