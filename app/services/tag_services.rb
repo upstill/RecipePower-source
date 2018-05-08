@@ -214,6 +214,7 @@ class TagServices
     return nil unless tag_or_tagname
     page_link = options[:page_link]
     image_link = options[:image_link]
+    location = nil
     return nil unless tag =
         Tag.transaction do
           tag =
