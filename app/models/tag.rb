@@ -93,7 +93,7 @@ class Tag < ActiveRecord::Base
   before_validation :tagqa
 
   def meaning
-    self.primary_meaning ||= referents.first
+    self.primary_meaning ||= (referents.first.becomes(Referent) if referents.first)
   end
 
   # Delete this tag only if it's safe to do so
@@ -403,56 +403,52 @@ class Tag < ActiveRecord::Base
     do_fold = opts[:fold]
     # Case-insensitive lookup
     fuzzyname = Tag.normalizeName name
+    tags =
     if opts[:matchall] || assert
       if type
-        tags = Tag.where normalized_name: fuzzyname, tagtype: type
+        Tag.where normalized_name: fuzzyname, tagtype: type
       elsif type_x # Specific collection of types
-        tags = Tag.where.not(tagtype: type_x).where normalized_name: fuzzyname
+        Tag.where.not(tagtype: type_x).where normalized_name: fuzzyname
       else
-        tags = Tag.where normalized_name: fuzzyname
+        Tag.where normalized_name: fuzzyname
       end
     else # Substring match
       if type
-        typelist = (type.kind_of? Array) ? type.map(&:to_s).join(',') : type.to_s
-        tags = Tag.where "normalized_name like ? AND tagtype IN (#{typelist})", "%#{fuzzyname}%"
+        typelist = [type].flatten.map(&:to_s).join(',')
+        Tag.where "normalized_name like ? AND tagtype IN (#{typelist})", "%#{fuzzyname}%"
       elsif type_x # Specific collection of types
-        typelist = (type_x.kind_of? Array) ? type_x.map(&:to_s).join(',') : type_x.to_s
-        tags = Tag.where.not("tagtype IN (#{typelist})").where "normalized_name like ?", "%#{fuzzyname}%"
+        typelist = [type_x].flatten.map(&:to_s).join(',')
+        Tag.where.not("tagtype IN (#{typelist})").where "normalized_name like ?", "%#{fuzzyname}%"
       else
-        tags = Tag.where "normalized_name like ? ", "%#{fuzzyname}%"
+        Tag.where "normalized_name like ? ", "%#{fuzzyname}%"
       end
     end
-    tags = tags.limit(50)
+    tags = tags.limit 75
     # We now have a list of tags which match the input, perhaps fuzzily.
     # If we don't need to assert the full string, we're done
     if assert
       # The tag set will be those which totally match the input. If there are none such, we need to create one
-      unless tags.empty?
+      if tags.present?
         # Since these match, we only need to make them visible to the user, if necessary
         tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
       else
         # We are to create a tag on the given string (after cleanup), and make it visible to the given user
         name = Tag.tidyName name # Strip/collapse whitespace and commas
         return [] if name.blank?
-        tag = nil
-        if type.nil? # No type specified
-          tag = Tag.find_or_create_by :name => name, tagtype: 0 # It'll be a free tag, but if you don't care enough to specify...
-        else
-          if type.kind_of?(Array) # Look for the tag among the given types
-            type.find { |t| break if tag = Tag.find_by_name_and_tagtype(name, t) }
-          else
-            tag = Tag.find_by_name_and_tagtype(name, type)
-          end
-          if tag.nil?
-            type = type.first if type.kind_of?(Array)
-            if tag = Tag.find_by_name_and_tagtype(name, 0) # Convert a free tag to the type, if avail.
-              tag.tagtype = type
-              tag.save
-            else
-              tag = Tag.create :name => name, :tagtype => type
+        tag =
+            if type
+              # 'type' could be singular or an array
+              types = [type].flatten
+              types.find { |t| Tag.find_by_name_and_tagtype name, t } ||
+                  if tag = Tag.find_by_name_and_tagtype(name, 0) # Convert a free tag to the type, if avail.
+                    tag.update_attribute :tagtype, types.first
+                    tag
+                  else
+                    Tag.create :name => name, :tagtype => types.first
+                  end
+            else # No type specified
+              Tag.find_or_create_by :name => name, tagtype: 0 # It'll be a free tag, but if you don't care enough to specify...
             end
-          end
-        end
         # If it's private, make it visible to this user
         tag.admit_user uid
         tags = [tag]
