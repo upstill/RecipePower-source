@@ -162,7 +162,7 @@ class TagServices
               # child_tag and tag are synonyms on some referent(s), so child needs to be removed from those refs
               child_tag.elide_meaning child_tag.referents.find_by(id: exid)
             }
-            child_ref = Referent.express child_tag, force: true
+            child_ref = Referent.express child_tag # , force: true
             parent_ref = Referent.express tag
             parent_ref.make_parent_of child_ref, move
             # Raise an error to back out of the whole thing
