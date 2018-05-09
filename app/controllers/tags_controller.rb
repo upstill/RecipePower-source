@@ -171,7 +171,8 @@ class TagsController < ApplicationController
   def associate
     begin
       update_and_decorate
-      if !(other = Tag.find_by id: params[:other])
+      if !(other = Tag.find_by(id: params[:other]) ||
+          (Tag.assert(params[:other], tagtype: @tag.tagtype) if @tag.tagtype > 0))
         flash[:error] = 'Couldn\'t find tag to associate with'
       else
         @touched = [@tag, other]

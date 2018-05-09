@@ -7,10 +7,13 @@ class TagOwnerServices
 
   # Copy tag ownership from a tag with from_id to another tag with to_id
   def self.copy_tag from_id, to_id
+    extant = TagOwner.where(tag_id: to_id).pluck :user_id # Get current owner ids for the target
     TagOwner.where(tag_id: from_id).each { |to|
-      to = to.dup
-      to.tag_id = to_id
-      to.save
+      unless extant.include? to.user_id
+        to = to.dup
+        to.tag_id = to_id
+        to.save
+      end
     }
   end
 end

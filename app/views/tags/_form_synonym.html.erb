@@ -7,7 +7,7 @@
                         :tagtype => (presenter.tag.tagtype if presenter.tag.tagtype > 0),
                         :tagtype_x => [0, :List],
                         :query => { all: true, except: presenter.tag.id, verbose: true, disambiguate: true }, # See TagsController#match
-                        :allowFreeTagging => false,
-                        :allowCustomEntry => false
+                        :allowFreeTagging => (presenter.tag.tagtype > 0),
+                        :allowCustomEntry => (presenter.tag.tagtype > 0)
     %>
 <% end %>
