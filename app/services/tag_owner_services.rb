@@ -6,7 +6,7 @@ class TagOwnerServices
     TagOwner.where(tag_id: from_id).each { |from|
       extant.include?(from.user_id) ?
         from.destroy : # Don't retain a redundant TagOwner
-        from.update_attribute :tag_id, to_id # Reassign the record to the target tag
+        from.update_attribute(:tag_id, to_id) # Reassign the record to the target tag
     }
   end
 
