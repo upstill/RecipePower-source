@@ -218,50 +218,51 @@ class Tag < ActiveRecord::Base
     other = Tag.assert other, tagtype unless delete
     # ...which may indeed be the original
     return self if self == other
-    # Normal procedure:
-    Tag.transaction do
-      # The important thing here is that we're making all requisite changes (to Taggings, Referents and Expressions)
-      # directly in the database, to ensure consistency
-      # Take on all owners of the absorbee unless one of them is global
-      tag_owners.delete_all if self.isGlobal ||= other.isGlobal
-      if delete
-        # Redirect taggings, referents and expressions hither
-        TagOwnerServices.change_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
-        TaggingServices.change_tag other.id, id
-        ReferentServices.change_tag other.id, id # Change the canonical expression of any referent which uses us
-        ExpressionServices.change_tag other.id, id
-      else
-        TagOwnerServices.copy_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
-        # Make this tag synonymous with the other => Ensure it has a matching set of referents and expressions
-        # (taggings are unnecessary b/c the original is surviving)
-        ExpressionServices.copy_tag other.id, id
-      end
-      # Merge the general uses of other as an expression into those of the target
-      # TODO Need to move any lists named by the other
-      to_return =
-      if delete
-        other.reload
-        other.destroy
-        self
-      else # Make this tag synonymous with the other by ensuring it has the other's referents
-        if other != self
-          # No need to monkey with referents if the projection devolved on us
+    begin
+      # Normal procedure:
+      Tag.transaction do
+        # The important thing here is that we're making all requisite changes (to Taggings, Referents and Expressions)
+        # directly in the database, to ensure consistency
+        # Take on all owners of the absorbee unless one of them is global
+        tag_owners.delete_all if self.isGlobal ||= other.isGlobal
+        if delete
+          # Redirect taggings, referents and expressions hither
+          TagOwnerServices.change_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+          TaggingServices.change_tag other.id, id
+          ReferentServices.change_tag other.id, id # Change the canonical expression of any referent which uses us
+          ExpressionServices.change_tag other.id, id
+        else
+          TagOwnerServices.copy_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+          # Make this tag synonymous with the other => Ensure it has a matching set of referents and expressions
+          # (taggings are unnecessary b/c the original is surviving)
+          ExpressionServices.copy_tag other.id, id
+        end
+        # Merge the general uses of other as an expression into those of the target
+        # TODO Need to move any lists named by the other
+        if delete
+          other.reload
+          other.destroy
+          other = self
+        elsif other != self # No need to monkey with referents if the projection devolved on us
+          # Make this tag synonymous with the other by ensuring it has the other's referents
           # Ensure that we have at least one referent
           Referent.express(self) unless primary_meaning || referents.first
           if !valid?
             # Failure: copy errors into the original record and return it
             errors.each { |k, v| other.errors[k] = v }
-            return other
+            raise other.full_messages
           end
           # Leave the other as a synonym
           other.update_attribute(:referent_id, referent_id) if referent_id
           ExpressionServices.copy_tag id, other.id
           other.reload
         end
-        other
+        reload
       end
-      reload
+    rescue Exception => e
+      # Errors should be present in the other record
     end
+    other
   end
 
   # Callback for tidying up the name and setting the normalized_name field and ensuring the tagtype
