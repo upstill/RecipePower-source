@@ -158,11 +158,14 @@ class TagServices
           if child_tag == tag # We MAY have mapped an untyped tag onto our new "parent" => act as absorb
             tag
           else
+            child_ref = Referent.express child_tag
             (child_tag.referent_ids & tag.referent_ids).each { |exid|
               # child_tag and tag are synonyms on some referent(s), so child needs to be removed from those refs
               child_tag.elide_meaning child_tag.referents.find_by(id: exid)
+              child_ref = nil if child_ref.id == exid # Can't use a referent of the parent as the child's referent
             }
-            child_ref = Referent.express child_tag # , force: true
+            # Force the creation of a new meaning for the child if it was a synonym of the parent
+            child_ref ||= Referent.express child_tag, force: true
             parent_ref = Referent.express tag
             parent_ref.make_parent_of child_ref, move
             # Raise an error to back out of the whole thing

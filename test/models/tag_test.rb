@@ -94,7 +94,7 @@ class TagTest < ActiveSupport::TestCase
     assert_equal pie_ref.parents, cake_ref.parents
     free_tag = TagServices.new(cake_tag).make_parent_of(free_tag)
     assert free_tag.meaning.parents.to_a.include?(cake_ref)
-    assert cake_ref.children.to_a.include?(free_tag.meaning)
+    assert cake_ref.child_ids.include?(free_tag.meaning.id)
   end
 
   test 'adds a synonym as child' do
