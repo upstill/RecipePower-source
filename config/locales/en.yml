@@ -27,6 +27,7 @@ en:
       posted: 'LATEST POST'
       alphabetic: 'NAME'
       activity: 'ACTIVITY'
+      meaningless: 'UNDEFINED'
   definition_reference:
     label:
       tag:

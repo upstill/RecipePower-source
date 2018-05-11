@@ -34,9 +34,10 @@ class Counts < Hash
             end
           else
             # We are accumulating hits, using as values what we will later sort by
-            key_or_keys.pluck(:id, pluck_key_or_increment).uniq.each do |idval| # #pluck provides an array of results per record
+            to_pluck = [ :id, pluck_key_or_increment].compact
+            key_or_keys.pluck(*to_pluck).uniq.each do |idval| # #pluck provides an array of results per record
               id, sortval = idval
-              self[modelname+'/'+id.to_s] = sortval
+              self[modelname+'/'+id.to_s] = sortval || 1
             end
           end
         end
@@ -217,7 +218,8 @@ class OrgOptions < Array
            definition_count: ['#DEFINITIONS', 11],
            posted: ['LATEST POST', 12],
            alphabetic: ['NAME', 13],
-           activity: ['ACTIVITY', 14]
+           activity: ['ACTIVITY', 14],
+           meaningless: ['MEANINGLESS', 15]
   )
 
   def self.lookup val
@@ -432,6 +434,8 @@ module TagSearch
     case org
       when :popularity
         [ iscope.joins(:taggings).group('tags.id'), 'count(tags.id)' ]
+      when :meaningless
+        [ iscope.meaningless ]
       else
         super
     end
@@ -1411,7 +1415,7 @@ class TagsIndexCache < ResultsCache
   protected
 
   def supported_org_options
-    [ :popularity, :newest ]
+    [ :popularity, :newest, (:meaningless if admin_view) ]
   end
 
 end

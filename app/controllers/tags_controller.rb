@@ -196,7 +196,7 @@ class TagsController < ApplicationController
     @touched = [@tag, other, reporter].uniq
     respond_to do |format|
       format.html {}
-      format.json { render }
+      format.json { render 'tags/update' }
       format.js { render 'shared/get_content' }
     end
   end
@@ -237,20 +237,23 @@ class TagsController < ApplicationController
   def update
     @tag = Tag.find(params[:id])
     @decorator = @tag.decorate
-    respond_to do |format|
-      params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
-      if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
-        if other = @tag.clashing_tag
-          @decorator = (@tag = other.absorb @tag).decorate
-        end
+    @touched = [ @tag ]
+    params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
+    if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
+      if other = @tag.clashing_tag
+        @touched << other
+        @decorator = (@tag = other.absorb @tag).decorate
+        flash[:popup] = 'Tag merged into like-named other'
       end
+    end
+    respond_to do |format|
       if @tag.errors.any?
         format.html { render :action => 'edit' }
         format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
       else
-        flash[:popup] = 'Tag successfully updated'
+        flash[:popup] ||= 'Tag successfully updated'
         format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
-        format.json { render 'collectible/update', locals: { items: [:table, :card] } }
+        format.json { render }
         format.xml  { head :ok }
       end
     end

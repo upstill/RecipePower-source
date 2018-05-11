@@ -53,6 +53,10 @@ class Tag < ActiveRecord::Base
     type_or_types.present? ? where(tagtype: type_or_types) : unscoped
   }
 
+  scope :meaningless, -> {
+    includes(:expressions).where(expressions: {id: nil})
+  }
+
   # Scope for tags that can be used in the usual sense (to apply to entities), as opposed to other unique strings
   scope :taggables, -> { where(tagtype: ((0..14).to_a - [5]))}
 
