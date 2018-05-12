@@ -1,17 +1,13 @@
 class String
 
   def extensions_to_classes
-    this = nil
-    self.split('.').collect { |substr|
-      this = this ? "#{this}-#{substr.downcase}" : substr.downcase
+    split('.').inject([]) { |classes, substr|
+      classes << (classes.present? ? "#{classes.last}-#{substr.downcase}" : substr.downcase)
     }.join ' '
   end
   
   def extensions_to_selector
-    this = nil
-    self.split('.').collect { |substr|
-      this = this ? "#{this}-#{substr.downcase}" : substr.downcase
-    }.join '.'
+    extensions_to_classes.gsub /\s+\b/, '.'
   end
 
   def to_boolean
