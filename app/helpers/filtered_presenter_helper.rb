@@ -26,6 +26,16 @@ module FilteredPresenterHelper
     content_tag :div, '', class: "results #{type.to_s.extensions_to_classes} placeholder"
   end
 
+  def filtered_presenter_header_label viewparams
+    content_tag :span,
+                viewparams.panel_title(true),
+                class: "panels-label #{viewparams.display_style}-label"
+  end
+
+  def filtered_presenter_header_label_replacement viewparams
+    [ "span.panels-label", filtered_presenter_header_label(viewparams) ]
+  end
+
   def filtered_presenter_panel_results viewparams
     with_format('html') { render "filtered_presenter/present/#{viewparams.results_partial}", viewparams: viewparams }
   end

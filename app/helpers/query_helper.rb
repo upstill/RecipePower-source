@@ -38,11 +38,12 @@ module QueryHelper
     ) if options[:glyphicon]
 
     if options[:type_selector]
-      type_select = 'Show tags of type&nbsp;'.html_safe +
+      type_select = 'Show&nbsp;'.html_safe +
           select_tag(:tagtype,
                      options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
                      :include_blank => false,
-                     :onchange => 'RP.tagger.select_type(event);') # RP.submit.onselect( event );') +
+                     :onchange => 'RP.tagger.select_type(event);') +
+          '&nbsp;Names'.html_safe
       batch_select = options[:batch_select] ? ('  ...from batch #&nbsp;'.html_safe +
           select_tag(:batch, options_for_select((1..(options[:batch_select].to_i)).to_a, options[:batch]),
                      :include_blank => true,

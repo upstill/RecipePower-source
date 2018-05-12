@@ -675,6 +675,12 @@ class TagsIndexPresenter < FilteredPresenter
   def filter_type_selector
     true
   end
+
+  def panel_title
+    typenum = tagtype.to_i
+    selection = Tag.type_selections(true).find { |ts| ts.last == typenum } if tagtype
+    (selection || [ 'All'] ).first + ' Names'
+  end
 end
 
 # Present the entries associated with a list

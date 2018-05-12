@@ -2,10 +2,7 @@
 <div class="row">
   <div class="col-md-12 header-element <%= viewparams.display_style %>">
     <div class="links">
-        <span class="panels-label <%= viewparams.display_style %>-label">
-          <%= viewparams.panel_title true %>
-          <%# feed_update_trigger(viewparams.entity, true) if viewparams.entity.is_a? Feed %>
-        </span>
+      <%= filtered_presenter_header_label viewparams %>
     </div>
     <div class="org-element">
         <%= viewparams.filter_field handler: 'querify', placeholder: 'Search within results' %>
