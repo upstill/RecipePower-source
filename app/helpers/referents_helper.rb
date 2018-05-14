@@ -13,7 +13,9 @@ module ReferentsHelper
 
   def summarize_referent ref, options={}
     separator = summary_separator options[:separator]
-    header, inward_separator = ('Knowledge about '.html_safe + homelink(ref)), summary_separator(separator)
+    ttltag = options[:except] || ref.expression
+    header = 'Knowledge about '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>'))
+    inward_separator = summary_separator separator
     if options[:header] || options[:label]
       header = safe_join([
                              (options[:label] || 'Meaning'),
@@ -25,7 +27,7 @@ module ReferentsHelper
     summarize_set '',
                   [
                       header,
-                      summarize_ref_expressions(ref, separator: inward_separator),
+                      summarize_ref_expressions(ref, except: ttltag, separator: inward_separator),
                       summarize_ref_parents(ref, separator: inward_separator),
                       summarize_ref_children(ref, separator: inward_separator),
                       summarize_ref_affiliates(ref, separator: inward_separator)
@@ -34,13 +36,13 @@ module ReferentsHelper
   end
 
   def summarize_ref_expressions referent, options={}
-    label = 'Expression'
+    label = 'Other Expression'
     ct = referent.expressions.count
     label = labelled_quantity(ct, label) if ct > 1
     summarize_set label,
                   referent.expressions.limit(8).collect { |expr|
-                    homelink(expr.tag, nuke_button: referent.expressions.count > 1)
-                  },
+                    homelink(expr.tag, nuke_button: referent.expressions.count > 1) unless expr.tag == options[:except]
+                  }.compact,
                   options[:separator]
   end
 

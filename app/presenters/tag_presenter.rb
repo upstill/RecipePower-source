@@ -86,6 +86,8 @@ class TagPresenter < BasePresenter
           btn_options = {:absorb_btn => (options[:absorb_btn] && tagserv.can_absorb(entity)),
                          :merge_into_btn => (options[:merge_into_btn] && TagServices.new(entity).can_absorb(tag)) }
           h.summarize_tag_similar tag, entity, btn_options
+        when :summarize_referent
+          h.summarize_referent entity, except: tag
         else
           h.public_send helper, entity
       end
@@ -96,7 +98,7 @@ class TagPresenter < BasePresenter
       when :table
         label = options[:label] || what.to_s.singularize.capitalize
         counted_label = ((strs.count > 1) ? labelled_quantity(options[:count] || strs.count, label) : label) if label.present?
-        h.format_table_summary strs, (counted_label if what != :referent)
+        h.format_table_summary strs, (counted_label if what != :referents)
       when :raw
         strs
     end
