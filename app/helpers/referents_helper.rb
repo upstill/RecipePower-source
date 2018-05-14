@@ -13,7 +13,7 @@ module ReferentsHelper
 
   def summarize_referent ref, options={}
     separator = summary_separator options[:separator]
-    header, inward_separator = '', summary_separator(separator)
+    header, inward_separator = ('Knowledge about '.html_safe + homelink(ref)), summary_separator(separator)
     if options[:header] || options[:label]
       header = safe_join([
                              (options[:label] || 'Meaning'),

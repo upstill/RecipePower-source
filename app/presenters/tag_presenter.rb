@@ -96,7 +96,7 @@ class TagPresenter < BasePresenter
       when :table
         label = options[:label] || what.to_s.singularize.capitalize
         counted_label = ((strs.count > 1) ? labelled_quantity(options[:count] || strs.count, label) : label) if label.present?
-        h.format_table_summary strs, counted_label
+        h.format_table_summary strs, (counted_label if what != :referent)
       when :raw
         strs
     end
