@@ -17,7 +17,7 @@ class ReferentsController < ApplicationController
   # GET /referents/1
   # GET /referents/1.json
   def show
-    @referent = Referent.find(params[:id])
+    update_and_decorate # @referent = Referent.find(params[:id])
     smartrender
   end
 

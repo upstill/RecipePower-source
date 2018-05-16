@@ -1,0 +1,23 @@
+.edit_referent.dialog {
+  table#expressions_table {
+    margin-left: 10px;
+    font-size: 16px;
+    th {
+      height: 30px;
+      padding-left: 12px;
+    }
+    td div.form-group {
+      margin: 5px;
+      select {
+        font-size: 18px;
+      }
+    }
+  }
+  form.referent_form {
+    div#expressions_field {
+      a.add_fields {
+        display: none;
+      }
+    }
+  }
+}

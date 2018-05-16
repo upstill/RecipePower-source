@@ -19,7 +19,7 @@ en:
       ratings: 'RATINGS'
       popularity: 'POPULARITY'
       random: 'RANDOM'
-      approved: 'APPROVED'
+      approved: 'PENDING'
       referent_id: 'REFERENT'
       recipe_count: '#RECIPES'
       feed_count: '#FEEDS'

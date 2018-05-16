@@ -122,7 +122,8 @@ module LinkHelper
   end
 
   def linkpath object_or_decorator, action=nil
-    (action && polymorphic_path([action, object_or_decorator]) rescue nil) ||
+    action = nil if ['show', :show].include? action
+    (polymorphic_path([action, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:collection, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:contents, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:associated, object_or_decorator]) rescue nil) ||

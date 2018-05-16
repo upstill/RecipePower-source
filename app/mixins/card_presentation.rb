@@ -76,7 +76,7 @@ module CardPresentation
 
   # Enumerate the possible aspects of the card
   def card_aspects for_column=nil
-    decorator.individual_tagtypes
+    decorator.object.is_a?(Taggable) ? decorator.individual_tagtypes : []
   end
 
   # Select available aspects according to the given arguments

@@ -167,7 +167,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def votable_from_card?
-    true
+    decorator.object.is_a?(Voteable)
   end
 
   def vote_buttons
@@ -175,7 +175,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def collectible_from_card?
-    true
+    decorator.object.is_a? Collectible
   end
 
   def collect_button

@@ -14,7 +14,7 @@ class ReferentValidator < ActiveModel::Validator
 end
 
 class Referent < ActiveRecord::Base
-  include Picable
+  # include Picable
 
   # picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
@@ -75,7 +75,7 @@ class Referent < ActiveRecord::Base
 
   attr_accessible :tag, :type, :description, :isCountable, :dependent,
                   :canonical_expression, :expressions_attributes, :add_expression, :tag_id,
-                  :parents, :children, :parent_tokens, :child_tokens, :typeindex
+                  :parents, :children, :parent_tag_tokens, :child_tag_tokens, :typeindex
 
   attr_accessor :dependent
 
@@ -83,7 +83,9 @@ class Referent < ActiveRecord::Base
   # validates_associated :children
   validates_with ReferentValidator
 
-  # before_save :ensure_expression
+  before_save do |ref|
+    ref.canonical_expression = nil if !ref.tags.include?(ref.canonical_expression)
+  end
   after_save :ensure_tagtypes
 
   after_create do |ref|
@@ -185,7 +187,7 @@ class Referent < ActiveRecord::Base
   # Virtual attributes for parent and child referents. These are represented by tags,
   # so getting and setting involves token lookup. Since parents and children are both
   # just sets of referents, these v.a.s go through a single pair of methods
-  def parent_tokens
+  def parent_tag_tokens
     parent_tags.map(&:attributes).to_json
   end
 
@@ -193,13 +195,13 @@ class Referent < ActiveRecord::Base
     tags_from_referents self.parents
   end
 
-  def parent_tokens=(tokenlist)
+  def parent_tag_tokens=(tokenlist)
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
     self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, 'Can\'t be its own parent.') }.uniq
   end
 
-  def child_tokens
+  def child_tag_tokens
     child_tags.map(&:attributes).to_json
   end
 
@@ -207,7 +209,7 @@ class Referent < ActiveRecord::Base
     tags_from_referents self.children
   end
 
-  def child_tokens=(tokenlist)
+  def child_tag_tokens=(tokenlist)
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
     self.children = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:children, "Can't be its own child.") }.uniq
@@ -451,7 +453,7 @@ class Referent < ActiveRecord::Base
 
   # Return the tag expressing this referent according to the given form and locale, if any
   def expression args = {}
-    args = Expression.scrub_args args
+    args = ::Expression.scrub_args args
     if (args.size > 0) && (expr = expressions.find_by args)
       return expr.tag
     elsif !canonical_expression

@@ -7,13 +7,13 @@
                           data: { type: @referent.typenum } %>
     <%= token_input_field f,
                           :children,
-                          label: "#{@referent.typename.pluralize} in this category",
+                          label: "Kinds of #{@referent.name}",
                           data: { type: @referent.typenum } %>
-    <h3>Names for this <%= @referent.typename %></h3>
-    <div class="field">
-      <table id="expression_table">
+    <h3>Expressions <%# @referent.typename %></h3>
+    <div class="field" id="expressions_field">
+      <table id="expressions_table">
         <tr>
-          <th>Tag</th>
+          <th>Name</th>
           <th>Language</th>
           <th>Form</th>
         </tr>
@@ -21,16 +21,16 @@
           <%= render 'expression_fields', f: builder %>
         <% end %>
       </table>
-      <h4>Add Name:</h4>
-      <%= link_to_add_fields "Add Name:", f, :expressions, referent_id: @referent.id, localename: "English", formname: "Generic" %>
+      <%= link_to_add_fields "Add Expression:", f, :expressions, referent_id: @referent.id, localename: "English", formname: "Generic" %>
+      <h4>Add Expression:</h4>
       <%= text_field_tag :"expression_txt", "",
                          class: "token-input-field-pending",
                          id: "referent_add_expression",
                          data: { pre: "",
                                  "token-limit" => 1,
                                  "query" => "tagtypes=#{@referent.typenum}&untypedOK=1",
-                                 "no-results-text" => "No existing tag found; hit Enter to make a new tag",
-                                 "hint" => "Type/select another tag to express this thing",
+                                 "no-results-text" => "No existing name found; hit Enter to make a new tag",
+                                 "hint" => "Type/select another name tag to express this thing",
                                  "on-add" => "RP.edit_referent.add_expression" } %>
     </div>
     <%= f.input :isCountable, :label => false, :inline_label => "Countable", :as => :boolean %>
