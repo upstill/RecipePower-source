@@ -4,7 +4,13 @@
              url: { action: (decorator.id ? 'update' : 'create'), format: 'json', mode: :modal } do |f| %>
     <%# form_errors_helper f, decorator.object %>
     <!--The form_content partial is specific to each entity type-->
-    <%= (defined?(in_panes) && in_panes) ? decorator.dialog_panes(f) : render('form_content', decorator: decorator, f: f) %>
+    <% if defined?(in_panes) && in_panes %>
+        <% decorator.dialog_pane_list.each { |spec|  %>
+          <%= render spec[:partial], decorator: decorator, f: f  %>
+        <% } %>
+    <% else %>
+        <%= render('form_content', decorator: decorator, f: f) %>
+    <% end %>
     <div class="modal-footer">
       <% mn = decorator.human_name %>
       <% if decorator.user_can?(:destroy) && response_service.admin_view? %>

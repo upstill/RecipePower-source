@@ -3,7 +3,7 @@
 <%# classify_listtags all_tags %>
 <% used_tags = user_decorator.list_tags(@decorator) %>
 <% classify_listtags used_tags %>
-<%= dialog_pane 'lists_collectible' do %>
+<%= dialog_pane @decorator.dialog_pane_spec(:lists) do %>
     <div class="control-group now-appearing">
       <label class="string optional">Now Appearing in the Treasuries:</label>
       <input id="<%= @decorator.element_id :tagging_user_id %>"

@@ -1,5 +1,6 @@
 class ReferentDecorator < ModelDecorator
   include Templateer
+  include DialogPanes
   delegate_all
 
   def title

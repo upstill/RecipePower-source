@@ -100,18 +100,40 @@ module DialogsHelper
     content_tag :div, ft, class: "modal-footer row #{options[:class]}"
   end
 
-  def pane_dialog decorator, colorscheme='green'
-    bc = content_tag( :div, flash_notifications_div, class: 'notifications-panel')+
-         render('form', decorator: decorator, in_panes: true)
+  # Produce a modal dialog divided into panes according to the decorator, as provided by the DialogPanes module
+  def pane_dialog decorator, options={}
+    colorscheme = options[:colorscheme] || 'green'
+    bc = content_tag(:div, flash_notifications_div, class: 'notifications-panel')+
+        render('form', decorator: decorator, in_panes: true)
 
-    modal_dialog "pane_runner new-style #{colorscheme}",
+    modal_dialog "pane_runner #{options[:dialog_class]} new-style #{colorscheme}",
                  "Edit #{decorator.object.class}",
-                 header_contents: decorator.dialog_pane_buttons,
+                 header_contents: dialog_pane_buttons(decorator),
                  dialog_class: 'modal-lg',
                  body_contents: bc
   end
 
-  def dialog_pane(name, inner_col=true, form_params={}, &block)
+  # Declare the buttons for switching amongst panes in the dialog
+  def dialog_pane_buttons decorator
+    input = '<input type="radio" name="options" autocomplete="off" checked '
+    active = 'active' # Marks the input
+    btns = decorator.dialog_pane_list.collect { |spec|
+      label = content_tag :label,
+                            (input + "data-pane='#{spec[:css_class]}'> " + spec[:label]).html_safe,
+                            class: 'btn btn-primary ' + active
+      active = ''
+      input.sub! 'checked', ''
+      label
+    }.compact
+    content_tag(:div,
+                  safe_join(btns),
+                  class: 'btn-group',
+                  id: 'paneButtons',
+                  data: {toggle: 'buttons'},
+                  role: 'group') if btns.count > 1
+  end
+
+  def dialog_pane(pane_spec, inner_col=true, form_params={}, &block)
     if inner_col.is_a? Hash
       inner_col, form_params = true, inner_col
     end
@@ -120,6 +142,7 @@ module DialogsHelper
                            contents,
                            class: 'col-md-12'
     ) if inner_col
+    name = pane_spec[:css_class]
     content_tag(:div,
                 content_tag(:div, contents, class: 'row'),
                 class: "#{name} pane",

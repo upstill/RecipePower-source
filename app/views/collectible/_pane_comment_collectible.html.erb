@@ -1,5 +1,5 @@
 <!--Pane for editing a user's comment on an entity-->
-<%= dialog_pane 'comment-collectible' do %>
+<%= dialog_pane @decorator.dialog_pane_spec(:comment) do %>
     <div class='item-enclosure'>
       <div class='label-enclosure'>
         <%= f.label :comment, 'Comment' -%>

@@ -1,6 +1,7 @@
 class CollectibleDecorator < ModelDecorator
   # include Draper::LazyHelpers
   include Templateer
+  include DialogPanes
   delegate_all
 
   # Translation from label names to attribute names
@@ -281,59 +282,6 @@ class CollectibleDecorator < ModelDecorator
         callname = misc_tags_name_expanded callname
     end
     super callname, *args
-  end
-
-  # The id and label for the 'edit' pane button (if any)
-  def dialog_edit_button
-    [
-        :"edit_#{object.class.to_s.downcase}",
-        'Title & Description'
-    ]
-  end
-
-  # Declare the buttons for switching amongst panes in the dialog
-  def dialog_pane_buttons
-    keyval = dialog_edit_button
-    keyvals={
-        :'comment-collectible' => ('Comment' if object.is_a?(Collectible)),
-        keyval.first => (keyval.last if user_can?(:admin)),
-        :'tag-collectible' => ('Tags' if object.is_a?(Taggable) && user_can?(:tag)),
-        :lists_collectible => ('Treasuries' if object.is_a?(Taggable) && user_can?(:lists)),
-        :pic_picker => ('Picture' if object.is_a?(Picable) && user_can?(:editpic))
-    }.compact
-    input = '<input type="radio" name="options" autocomplete="off" checked '
-    active = 'active' # Marks the input
-    btns = keyvals.collect { |key, val|
-      if val.present?
-        label = h.content_tag :label,
-                              (input + "data-pane='#{key}'> " + val).html_safe,
-                              class: 'btn btn-primary ' + active
-        active = ''
-        input.sub! 'checked', ''
-        label
-      end
-    }.compact
-    h.content_tag(:div,
-                  h.safe_join(btns),
-                  class: 'btn-group',
-                  id: 'paneButtons',
-                  data: {toggle: 'buttons'},
-                  role: 'group') if btns.count > 1
-  end
-
-  # Here's how Collectibles render their panes into a dialog
-  def dialog_panes f
-    result = ''.html_safe  
-    result << h.render('pane_comment_collectible', decorator: self, f: f) if object.is_a?(Collectible)
-    result << h.render('pane_tag', decorator: self, f: f) if object.is_a?(Taggable) && user_can?(:tag)
-    result << h.render('pane_edit', decorator: self, f: f) if dialog_edit_button.first && user_can?(:admin)
-    result << h.render('pane_editpic', decorator: self, f: f) if object.is_a?(Picable) && user_can?(:editpic)
-    result << h.render('pane_lists_collectible', decorator: self, f: f) if object.is_a?(Taggable) && user_can?(:lists)
-    result
-  end
-
-  def dialog_pane f
-    h.dialog_pane(dialog_edit_button.first, decorator: self, f: f) if dialog_edit_button.first
   end
 
   end
