@@ -146,30 +146,31 @@ class ReferentsController < ApplicationController
   def update
     # @tabindex = session[:tabindex] || params[:tabindex] || 0
     # handlerclass = @@HandlersByIndex[@tabindex]
-    @referent = Referent.find(params[:id]) # .becomes(Referent)
+    # @referent = Referent.find(params[:id]) # .becomes(Referent)
+    update_and_decorate
     param_key = ActiveModel::Naming.param_key(@referent.class)
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
     fix_expression_tokens params[param_key][:expressions_attributes], @referent.typenum
-    respond_to do |format|
-      # params[param_key].delete(:typenum)
-      if @referent.update_attributes(params[param_key])
-        format.html { redirect_to @referent.becomes(Referent), notice: 'Referent was successfully updated.' }
-        format.json {
-          selector = "#Referent#{@referent.id}"
-          element = @referent.becomes(Referent)
-          render json: {
-            done: true,
-            popup: 'Referent now updated to serve you better'
-          }
-        }
-      else
-        @referent.becomes(Referent)
-        @typeselections = Tag.type_selections
-        @typeselections.shift
-        format.html { render action: 'edit' }
-        format.json { render json: @referent.errors, status: :unprocessable_entity }
+    expressions_attributes = params[:diet_referent][:expressions_attributes].values.collect { |expression_attributes|
+      if expression_attributes['_destroy'] == 'false'
+        # Because the token can be either a tag id or a string, make sure to use only the string
+        tagname = expression_attributes['tag_token']
+        tagid = tagname.to_i
+        tagname = ((t = Tag.find_by id: tagid) && t.name) if tagid != 0
+        ([tagname] + expression_attributes.slice('referent_id','localename','formname').values).join('/')
       end
+    }.compact
+    if expressions_attributes.count != expressions_attributes.uniq.count
+      # Error! Expressions must be unique
+      @referent.errors.add :expressions, 'must be unique'
+    end
+    if @referent.errors.empty? && @referent.update_attributes(params[param_key])
+      flash[:popup] = "'#{@referent.name}' now updated to serve you better"
+      @update_items = [ :card ]
+    else
+      resource_errors_to_flash @referent, preface: "Couldn't save the #{@referent.typename}"
+      render action: 'edit'
     end
   end
 

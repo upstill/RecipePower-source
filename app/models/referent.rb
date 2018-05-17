@@ -83,8 +83,12 @@ class Referent < ActiveRecord::Base
   # validates_associated :children
   validates_with ReferentValidator
 
-  before_save do |ref|
-    ref.canonical_expression = nil if !ref.tags.include?(ref.canonical_expression)
+  after_save do |ref|
+    # If the canonical expression has been removed from the tag set, nullify it
+    unless ref.canonical_expression && ref.tags.where(id: ref.canonical_expression.id).exists?
+      ref.canonical_expression = nil
+      ref.update_attribute :tag_id, nil if ref.tag_id
+    end
   end
   after_save :ensure_tagtypes
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20171019061332) do
+ActiveRecord::Schema.define(version: 20180516163651) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -130,6 +130,8 @@ ActiveRecord::Schema.define(version: 20171019061332) do
     t.datetime "created_at"
     t.datetime "updated_at"
   end
+
+  add_index "expressions", ["referent_id", "tag_id", "form", "locale"], name: "expression_unique", unique: true, using: :btree
 
   create_table "feed_entries", force: :cascade do |t|
     t.string   "title",        limit: 255

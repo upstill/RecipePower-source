@@ -324,11 +324,11 @@ class Tag < ActiveRecord::Base
     tagtype = Tag.typenum tagtype if tagtype
     extant_only = opts.delete :extant_only
     tag =
-        case tag_or_id_or_name
-          when Fixnum
+        case tag_or_id_or_name.class.to_s
+          when 'Fixnum'
             # Fetch an existing tag
             Tag.find_by id: tag_or_id_or_name
-          when Tag
+          when 'Tag'
             tag_or_id_or_name
           else
             opts[:matchall] = true
