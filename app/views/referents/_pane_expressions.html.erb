@@ -1,0 +1,25 @@
+<%= dialog_pane @decorator.dialog_pane_spec(:expressions) do %>
+    <div class="field" id="expressions_field">
+      <table id="expressions_table">
+        <tr>
+          <th>Name</th>
+          <th>Language</th>
+          <th>Form</th>
+        </tr>
+        <%= f.fields_for :expressions do |builder| %>
+            <%= render 'expression_fields', f: builder %>
+        <% end %>
+      </table>
+      <%= link_to_add_fields "Add Expression:", f, :expressions, referent_id: @referent.id, localename: "English", formname: "Generic" %>
+      Add Expression:
+      <%= text_field_tag :"expression_txt", "",
+                         class: "token-input-field-pending",
+                         id: "referent_add_expression",
+                         data: { pre: "",
+                                 "token-limit" => 1,
+                                 "query" => "tagtypes=#{@referent.typenum}&untypedOK=1",
+                                 "no-results-text" => "No existing name found; hit Enter to make a new tag",
+                                 "hint" => "Type/select another name tag to express this thing",
+                                 "on-add" => "RP.edit_referent.add_expression" } %>
+    </div>
+<% end %>

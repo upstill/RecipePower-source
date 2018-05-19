@@ -46,12 +46,8 @@ class ReferentsController < ApplicationController
 
   # GET /referents/1/edit
   def edit
-      @referent = Referent.find(params[:id]) # .becomes(Referent)
-      # @expressions = @referent.expressions
-      @referent_type = @referent.typenum
-      @typeselections = Tag.type_selections
-      @typeselections.shift
-      smartrender
+    update_and_decorate
+    smartrender
   end
 
   # POST /referents?tagid=1&mode={over,before,after}&target=referentid
@@ -148,19 +144,20 @@ class ReferentsController < ApplicationController
     # handlerclass = @@HandlersByIndex[@tabindex]
     # @referent = Referent.find(params[:id]) # .becomes(Referent)
     update_and_decorate
-    param_key = ActiveModel::Naming.param_key(@referent.class)
+    param_key = ActiveModel::Naming.param_key(@referent.class.base_class)
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
     fix_expression_tokens params[param_key][:expressions_attributes], @referent.typenum
-    expressions_attributes = params[:diet_referent][:expressions_attributes].values.collect { |expression_attributes|
-      if expression_attributes['_destroy'] == 'false'
-        # Because the token can be either a tag id or a string, make sure to use only the string
-        tagname = expression_attributes['tag_token']
-        tagid = tagname.to_i
-        tagname = ((t = Tag.find_by id: tagid) && t.name) if tagid != 0
-        ([tagname] + expression_attributes.slice('referent_id','localename','formname').values).join('/')
-      end
-    }.compact
+    expressions_attributes =
+        params[param_key][:expressions_attributes].values.find_all { |expression_attributes|
+          expression_attributes['_destroy'] == 'false'
+        }.collect { |expression_attributes|
+          # Because the token can be either a tag id or a string, make sure to use only the string
+          tagname = expression_attributes['tag_token']
+          tagid = tagname.to_i
+          tagname = ((t = Tag.find_by id: tagid) && t.name) if tagid != 0
+          ([tagname] + expression_attributes.slice('referent_id', 'localename', 'formname').values).join('/')
+        }
     if expressions_attributes.count != expressions_attributes.uniq.count
       # Error! Expressions must be unique
       @referent.errors.add :expressions, 'must be unique'

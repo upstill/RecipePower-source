@@ -1,3 +1,1 @@
-<%= modal_dialog 'edit_referent new-style green', "#{summarize_ref_name(@referent, true)}" do %>
-  <%= render 'form' %>
-<% end %>
+<%= pane_dialog @decorator, dialog_class: 'edit_referent new-style green' %>

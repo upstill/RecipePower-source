@@ -1,4 +1,4 @@
-# This module provides Pane functionality for editing dialogs
+# This module provides Pane functionality for editing dialogs on Collectible objects
 module DialogPanes
 
   # Provide a list of the editing panes available for the object
@@ -10,7 +10,7 @@ module DialogPanes
       (dialog_pane_spec(:tags) if object.is_a?(Taggable) && user_can?(:tag)),
       (dialog_pane_spec(:lists) if object.is_a?(Taggable) && user_can?(:lists)),
       (dialog_pane_spec(:pic) if object.is_a?(Picable) && user_can?(:editpic))
-    ]
+    ].compact
   end
 
   def dialog_has_pane topic
