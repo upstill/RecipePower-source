@@ -143,14 +143,14 @@ class ReferentsController < ApplicationController
   def update
     # @tabindex = session[:tabindex] || params[:tabindex] || 0
     # handlerclass = @@HandlersByIndex[@tabindex]
-    # @referent = Referent.find(params[:id]) # .becomes(Referent)
-    update_and_decorate
-    param_key = ActiveModel::Naming.param_key(@referent.class.base_class)
+    @referent = Referent.find(params[:id]).becomes(Referent)
+    # update_and_decorate
+    attribute_params = params[ActiveModel::Naming.param_key(@referent.class)]
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
-    fix_expression_tokens params[param_key][:expressions_attributes], @referent.typenum
+    fix_expression_tokens attribute_params[:expressions_attributes], @referent.typenum
     expressions_attributes =
-        params[param_key][:expressions_attributes].values.find_all { |expression_attributes|
+        attribute_params[:expressions_attributes].values.find_all { |expression_attributes|
           expression_attributes['_destroy'] == 'false'
         }.collect { |expression_attributes|
           # Because the token can be either a tag id or a string, make sure to use only the string
@@ -163,7 +163,8 @@ class ReferentsController < ApplicationController
       # Error! Expressions must be unique
       @referent.errors.add :expressions, 'must be unique'
     end
-    if @referent.errors.empty? && @referent.update_attributes(params[param_key])
+    @decorator = @referent.decorate
+    if @referent.errors.empty? && @referent.update_attributes(attribute_params)
       flash[:popup] = "'#{@referent.name}' now updated to serve you better"
       @update_items = [ :card ]
     else

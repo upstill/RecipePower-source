@@ -36,28 +36,31 @@ RP.edit_expressions.onopen = (dlog) ->
 		RP.edit_expressions.check_removal()
 		event.preventDefault()
 
+replace_field = (source, pattern, replacement) ->
+	regexp = new RegExp pattern, 'g'
+	source.replace regexp, replacement
+
 # Callback for the selection of a new tag for an expression
 RP.edit_expressions.add_expression = (token_input, li) ->
 	# hi = { id: $(token_input)[0].value, name: $(token_input)[0].value }
 	# hi.id is the tag id; hi.data is the string
 	parent = $(token_input).parent()
 	that = $('a.add_fields', parent) # The add-fields element carries the data for the new stuff
-	time = new Date().getTime()
-	# Replace the 'id' with a random timestamp
-	regexp = new RegExp $(that).data('id'), 'g'
-	newfields = $(that).data('fields').replace regexp, time
+	newfields = $(that).data('fields')
+
+	# Replace the expression id with a random timestamp
+	newfields = replace_field newfields, $(that).data('id'), new Date().getTime()
 
 	# Insert the tag
-	regexp = new RegExp "\\[\\w+ \\d+\\]"
-	tagname = li.name.replace regexp, ''
-	regexp = new RegExp "\\*\\*no tag\\*\\*", 'g'
-	newfields = newfields.replace regexp, tagname
+	tagname = replace_field li.name, "\\[\\w+ \\d+\\]", '' # Elide whitespace
+	newfields = replace_field newfields, "\\*\\*no tag\\*\\*", tagname
 
 	# Insert the tag id
 	regexp = new RegExp "type=.hidden."
 	tagid = li.id || "\'"+li.name+"\'"
 	valstr = "type=\"hidden\" value=\""+tagid+"\""
 	newfields = newfields.replace regexp, valstr
+	# newfields = replace_field newfields, "type=.hidden.", "type=\"hidden\" value=\""+tagid+"\""
 
 	other = $('tr', parent)
 	$(other).last().after newfields
