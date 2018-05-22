@@ -1,3 +1,7 @@
+class PageRefsSerializer < ActiveModel::Serializer
+  attributes :id, :url, :type
+end
+
 class PageRefsController < CollectibleController
   require 'page_ref.rb'
   before_action :set_page_ref, only: [:show, :edit, :update, :destroy]
@@ -117,15 +121,31 @@ class PageRefsController < CollectibleController
 
   # POST /page_refs
   def create
-    @page_ref = PageRefServices.assert params[:page_ref][:type], params[:page_ref][:url]
-    @page_ref.save if @page_ref.changed?
+    update_and_decorate PageRefServices.assert(params[:page_ref][:type], params[:page_ref][:url])
+    if @page_ref.errors.any?
+      resource_errors_to_flash @page_ref
+    else
+      @page_ref.bkg_land
+    end
+    respond_to do |format|
+      format.json {
+        if @page_ref.errors.any?
+          render 'application/errors'
+        else
+          render json: @page_ref
+        end
+      }
+      format.html { }
+    end
+=begin
     if @page_ref.errors.any?
       resource_errors_to_flash @page_ref
       smartrender :new
     else
       redirect_to tag_page_ref_path(@page_ref.becomes(PageRef), :mode => :modal)
     end
-  end
+=end
+    end
 
 =begin
   # PATCH/PUT /page_refs/1

@@ -14,7 +14,25 @@ class ReferentPresenter < CollectiblePresenter
 
   def card_aspects which_column=nil
     # decorator.object.is_a?(Taggable) ? decorator.individual_tagtypes : []
-  [ :description, :title ]
+  [ :description, :title, :parents, :children, :relateds ]
+  end
+
+  def card_aspect which
+    label = nil
+    whichsym = which.to_sym
+    whichstr = which.to_s.downcase.singularize
+    contents =
+        case whichsym
+          when :parents, :children, :relateds
+            denotation = which.to_s.downcase.singularize
+            tags = decorator.send "visible_#{whichstr}_tags" # visible_tags :tagtype => :Dish
+            label = decorator.send("#{whichstr}_tags_label")
+            label = field_label_counted label, tags.count unless whichsym == :relateds
+            entity_links tags, joinstr: ' | '
+          else
+            return super
+        end
+    [ label, contents ]
   end
 
 end

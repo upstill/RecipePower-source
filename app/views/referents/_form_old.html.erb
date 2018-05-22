@@ -31,7 +31,7 @@
                                  "query" => "tagtypes=#{@referent.typenum}&untypedOK=1",
                                  "no-results-text" => "No existing name found; hit Enter to make a new tag",
                                  "hint" => "Type/select another name tag to express this thing",
-                                 "on-add" => "RP.edit_referent.add_expression" } %>
+                                 "on-add" => "RP.edit_expressions.add_expression" } %>
     </div>
     <%= f.input :isCountable, :label => false, :inline_label => "Countable", :as => :boolean if [4,5,12,13].include?(@referent.typenum)%>
     <%= form_actions f, cancel_path: referents_path %>

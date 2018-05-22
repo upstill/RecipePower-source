@@ -14,8 +14,8 @@ class String
     %w{ true TRUE t T 1 }.include? self
   end
 
-  # Return nil if the string is empty. Also defined on NilClass, so empty strings and nil both return nil
-  def if_present
-    self unless self.empty?
+  # Return nil if the string is empty. Also defined on NilClass, so empty strings and nil both return nil (or default)
+  def if_present default=nil
+    self.empty? ? default : self
   end
 end

@@ -59,6 +59,7 @@ RP::Application.routes.draw do
   resources :page_refs, :concerns => [:taggable, :collectible, :picable] do
     collection do
       get 'tag'
+      put 'create'
     end
   end
 

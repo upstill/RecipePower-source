@@ -47,6 +47,7 @@ class ReferentsController < ApplicationController
   # GET /referents/1/edit
   def edit
     update_and_decorate
+    @decorator.object = @referent.becomes(@referent.class.base_class)
     smartrender
   end
 

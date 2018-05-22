@@ -1,7 +1,17 @@
 div.dialog.edit_referent form.edit_referent {
-  div#expressions_field {
+  div.pane.edit_family {
+    div.token_input_field {
+      margin-top: 20px;
+    }
+  }
+  div.pane.edit_expressions {
+    a.add_fields {
+      display: none;
+    }
+  }
+  div.table-field {
     margin-left: 30px;
-    table#expressions_table {
+    table {
       margin-top: 10px;
       font-size: 16px;
       th {
@@ -20,9 +30,6 @@ div.dialog.edit_referent form.edit_referent {
       display: inline-block;
       position: relative;
       top: 11px;
-    }
-    a.add_fields {
-      display: none;
     }
   }
 }

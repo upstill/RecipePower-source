@@ -1,5 +1,5 @@
 <%= dialog_pane @decorator.dialog_pane_spec(:expressions) do %>
-    <div class="field" id="expressions_field">
+    <div class="field table-field" id="expressions_field">
       <table id="expressions_table">
         <tr>
           <th>Name</th>
@@ -20,6 +20,6 @@
                                  "query" => "tagtypes=#{@referent.typenum}&untypedOK=1",
                                  "no-results-text" => "No existing name found; hit Enter to make a new tag",
                                  "hint" => "Type/select another name tag to express this thing",
-                                 "on-add" => "RP.edit_referent.add_expression" } %>
+                                 "on-add" => "RP.edit_expressions.add_expression" } %>
     </div>
 <% end %>

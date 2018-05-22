@@ -64,8 +64,13 @@ class Referent < ActiveRecord::Base
   @@referment_associations.each { |assoc|
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
+  has_many :relateds, :through => :referments, :source => :referee, :source_type => 'Referent'
   has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
   has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
+
+  has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef'
+  accepts_nested_attributes_for :page_refs
+  # has_many :referents, :through => :referments, :source => :referee, :source_type => 'Referent'
 
 =begin
     def self.referrable klass
@@ -75,7 +80,9 @@ class Referent < ActiveRecord::Base
 
   attr_accessible :tag, :type, :description, :isCountable, :dependent,
                   :canonical_expression, :expressions_attributes, :add_expression, :tag_id,
-                  :parents, :children, :parent_tag_tokens, :child_tag_tokens, :typeindex
+                  :parents, :children, :relateds,
+                  :parent_tag_tokens, :child_tag_tokens, :related_tag_tokens,
+                  :typeindex
 
   attr_accessor :dependent
 
@@ -188,7 +195,7 @@ class Referent < ActiveRecord::Base
   def add_expression=(tag)
   end
 
-  # Virtual attributes for parent and child referents. These are represented by tags,
+  # Virtual attributes for parent, child and related referents. These are represented by tags,
   # so getting and setting involves token lookup. Since parents and children are both
   # just sets of referents, these v.a.s go through a single pair of methods
   def parent_tag_tokens
@@ -217,6 +224,20 @@ class Referent < ActiveRecord::Base
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
     self.children = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:children, "Can't be its own child.") }.uniq
+  end
+
+  def related_tag_tokens
+    related_tags.map(&:attributes).to_json
+  end
+
+  def related_tags
+    tags_from_referents self.relateds
+  end
+
+  def related_tag_tokens=(tokenlist)
+    # After collecting tags, scan list to eliminate references to self
+    tokenlist = tokenlist.split(',')
+    self.relateds = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:related, "Can't suggest itself.") }.uniq
   end
 
   # Convert a list of referents into the tags that reference them.
@@ -431,17 +452,6 @@ class Referent < ActiveRecord::Base
     end
   end
 
-  # Find a referent from a tag string of a given type. This is a search
-  # for ANY tag that refers to the the referent, not just the canonical one
-  def self.find_by_tag tag, tagtype
-    # Find or create the tag
-
-    # We now have a list of qualifying tags. Choose the one which has
-    # an existing referent, if any
-
-    # Find or create an appropriate referent for the tag
-  end
-
   # Remove uses of this tag by this referent
   # A tagid may be passed
   def drop tag_or_id
@@ -520,14 +530,15 @@ class Referent < ActiveRecord::Base
     end
   end
 
+  # Declare a relationship between two referents
   def suggests target_ref
     target_ref.save unless target_ref.id
     # author_referents << target_ref unless author_referents.include?(target_ref)
-    referments.create(referee_type: target_ref.class.to_s, referee_id: target_ref.id) unless referments.where(referee_type: target_ref.class.to_s, referee_id: target_ref.id).exists?
+    referments.create(referee: target_ref) unless suggests?(target_ref)
   end
 
   def suggests? target_ref
-    referments.exists? referee_type: target_ref.type, referee_id: target_ref.id
+    referments.exists? referee: target_ref
   end
 
   # Can the referent be destroyed, ie., is it empty of all connections?

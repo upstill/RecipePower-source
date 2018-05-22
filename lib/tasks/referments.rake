@@ -1,6 +1,36 @@
 namespace :referments do
   desc "Manage the Referments class"
 
+  # Make referments polymorphic by changing all Referent types to 'Referent'
+  task :polymorphosize => :environment do
+    typenames = %w{
+      SourceReferent
+      InterestReferent
+      GenreReferent
+      RoleReferent
+      DishReferent
+      CourseReferent
+      ProcessReferent
+      IngredientReferent
+      AuthorReferent
+      OccasionReferent
+      PantrySectionReferent
+      StoreSectionReferent
+      DietReferent
+      ToolReferent
+      NutrientReferent
+      CulinaryTermReferent
+      QuestionReferent
+      ListReferent
+      EpitaphReferent
+      CourseReferent
+      TimeReferent
+    }
+    Referment.where(referee_type: typenames).each { |rfm|
+      rfm.update_attribute :referee_type, 'Referent'
+    }
+  end
+
   # Remove all referments with non-existent Reference pointers
   task :cleanup => :environment do
     bogus_refs = Reference.where.not(type: 'ImageReference')

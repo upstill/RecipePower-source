@@ -1,0 +1,17 @@
+<%= dialog_pane @decorator.dialog_pane_spec(:references) do %>
+    <div class="field table-field" id="page_refs_field">
+      <table id="page_refs_table">
+        <tr>
+          <th>Target</th>
+          <th>Kind</th>
+        </tr>
+        <%= f.fields_for :page_refs do |builder| %>
+            <%= render 'page_ref_fields', f: builder %>
+        <% end %>
+      </table>
+      New Reference:
+      <%= url_field_tag :url, "",
+                         id: "referent_add_page_ref" %>
+      <%= link_to_add_fields "Add Reference", f, :page_refs, referent_id: @referent.id, type: 'DefinitionPageRef' %>
+    </div>
+<% end %>

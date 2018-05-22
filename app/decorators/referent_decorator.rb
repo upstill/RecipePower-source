@@ -25,22 +25,22 @@ class ReferentDecorator < ModelDecorator
     @pane_specs ||=
         {
             description: {
-                css_class: :"edit_#{object.class.to_s.downcase}",
+                css_class: :"edit_#{object.class.base_class.to_s.downcase}",
                 label: 'Description',
                 partial: 'pane_description'
             },
             family: {
-                css_class: 'family_pane',
+                css_class: 'edit_family',
                 label: 'Family',
                 partial: 'pane_family'
             },
             expressions: {
-                css_class: 'expressions_pane',
+                css_class: 'edit_expressions',
                 label: 'Expressions',
                 partial: 'pane_expressions'
             },
             references: {
-                css_class: 'references_pane',
+                css_class: 'edit_page_refs',
                 label: 'References',
                 partial: 'pane_references'
             }
@@ -69,4 +69,29 @@ class ReferentDecorator < ModelDecorator
         }.each { |topic, value| value[:topic] = topic }
     @pane_specs[topic]
   end
+
+  def visible_parent_tags
+    parent_tags
+  end
+
+  def parent_tags_label
+    'In Categories'
+  end
+
+  def visible_child_tags
+    child_tags
+  end
+
+  def child_tags_label
+    "Kinds of #{name}"
+  end
+
+  def visible_related_tags
+    related_tags
+  end
+
+  def related_tags_label
+    'See Also'
+  end
+
 end

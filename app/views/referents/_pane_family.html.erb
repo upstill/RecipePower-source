@@ -11,4 +11,10 @@
                             label: "Kinds of #{@referent.name}",
                             data: { type: @referent.typenum } %>
     </div>
+    <div class="token_input_field">
+      <%= token_input_field f,
+                            :relateds,
+                            label: "See Also",
+                            data: { type: @referent.typenum } %>
+    </div>
 <% end %>
