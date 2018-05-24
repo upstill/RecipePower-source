@@ -10,8 +10,10 @@
         <% end %>
       </table>
       New Reference:
-      <%= url_field_tag :url, "",
-                         id: "referent_add_page_ref" %>
-      <%= link_to_add_fields "Add Reference", f, :page_refs, referent_id: @referent.id, type: 'DefinitionPageRef' %>
+      <%= url_field_tag :url, "", id: "referent_add_page_ref" %>
+      <% url_options = { url: page_refs_path, :method => :post } %>
+      <%# link_to 'Add', page_refs_path(format: :json), data: { params: [ { name: 'page_ref[url]', value: 'test url' } ] }, id: 'add_page_ref', format: 'json', method: :put %>
+      <%= link_to_submit 'Add', page_refs_path, data: { params: { page_ref: { url: 'test url' } } }, id: 'add_page_ref', format: 'json', method: :put %>
+      <%# link_to_add_fields "Add Reference", f, :page_refs, title: ';Title Goes Here;', url: ';URL TBD;' %>
     </div>
 <% end %>

@@ -79,6 +79,22 @@ RP.submit.block_off = (elmt) ->
 RP.submit.blocking_on = (elmt) ->
 	$(elmt).hasClass 'loading'
 
+# Recursively express an object as parameter name/value pairs
+obj_to_params = (obj, ancestry) ->
+	result = []
+	for attrname, attrvalue of obj
+		if obj.hasOwnProperty attrname
+			if typeof ancestry == 'undefined'
+				attrstr = attrname
+			else
+				attrstr = ancestry + '[' + attrname + ']'
+			if typeof attrvalue == 'object'
+				recurs = obj_to_params attrvalue, attrstr
+				result = result.concat recurs
+			else
+				result.push { name: attrstr, value: attrvalue }
+	result
+
 # Master function for submitting AJAX, perhaps in the context of a DOM element that triggered it
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
@@ -97,10 +113,14 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 				RP.submit.handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
 				RP.submit.handleResponse elmt, responseData, statusText, xhr
-		if $(elmt).prop("tagName") == "FORM"
+		if $(elmt).data('params')
+			ajdata.data = obj_to_params $(elmt).data('params') # TODO: should be merging these with form data
+			# ajdata.data.push.apply ajdata.data, extraData
+		if $(elmt).prop("tagName") == "FORM" # || $(elmt).data('params')
 			ajdata.url ||= $(elmt).attr('action')
 			method = $(elmt).attr('method')
-			ajdata.data = $(elmt).serialize()
+			ajdata.data = $(elmt).serializeArray()
+			console.log ajdata.data
 		else
 			method = $(elmt).data('method')
 		if method
@@ -190,6 +210,7 @@ RP.submit.filter_submit = (eventdata) ->
 			type: method, # $('input[name=_method]', this).attr("value"),
 			async: false,
 			dataType: 'json',
+			data: $(context).serializeArray(),
 			error: (jqXHR, textStatus, errorThrown) ->
 				RP.notifications.done()
 				jsonout = RP.post_error jqXHR, dlog # Show the error message in the dialog

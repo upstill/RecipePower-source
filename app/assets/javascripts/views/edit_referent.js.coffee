@@ -3,23 +3,18 @@ RP.edit_referent = RP.edit_referent || {}
 RP.edit_page_refs = RP.edit_page_refs || {}
 
 RP.edit_page_refs.onopen = (pane) ->
+	$(pane).on 'click', '#add_page_ref', (event) ->
+		$("form input[name='authenticity_token']")[0].value
+		x=2
 	$(pane).on 'click', '.add_fields', (event) ->
+		# Launch a query back to the server to initialize/fetch the page_ref
 		that = $('a.add_fields', pane) # The add-fields element carries the data for the new stuff
-		time = new Date().getTime()
 		# Replace the 'id' with a random timestamp
-		regexp = new RegExp $(that).data('id'), 'g'
-		newfields = $(that).data('fields').replace regexp, time
+		newfields = replace_field_globally $(that).data('fields'), $(that).data('id'), new Date().getTime()
 
 		# Insert the tag
-		regexp = new RegExp "\\[\\w+ \\d+\\]"
-		url = $('input#referent_add_page_ref')[0].value.replace regexp, ''
-		regexp = new RegExp $(that).data('url'), 'g'
-		newfields = newfields.replace regexp, url
-
-		# Insert the tag id
-		#		regexp = new RegExp "type=.hidden."
-		#		valstr = "type=\"hidden\" value=\""+tagid+"\""
-		#		newfields = newfields.replace regexp, url
+		url = replace_field $('input#referent_add_page_ref')[0].value, "\\[\\w+ \\d+\\]", ''
+		newfields = replace_field_globally newfields, $(that).data('url'), url
 
 		other = $('tr', pane)
 		$(other).last().after newfields
@@ -37,6 +32,10 @@ RP.edit_expressions.onopen = (dlog) ->
 		event.preventDefault()
 
 replace_field = (source, pattern, replacement) ->
+	regexp = new RegExp pattern
+	source.replace regexp, replacement
+
+replace_field_globally = (source, pattern, replacement) ->
 	regexp = new RegExp pattern, 'g'
 	source.replace regexp, replacement
 
@@ -49,18 +48,15 @@ RP.edit_expressions.add_expression = (token_input, li) ->
 	newfields = $(that).data('fields')
 
 	# Replace the expression id with a random timestamp
-	newfields = replace_field newfields, $(that).data('id'), new Date().getTime()
+	newfields = replace_field_globally newfields, $(that).data('id'), new Date().getTime()
 
 	# Insert the tag
 	tagname = replace_field li.name, "\\[\\w+ \\d+\\]", '' # Elide whitespace
-	newfields = replace_field newfields, "\\*\\*no tag\\*\\*", tagname
+	newfields = replace_field_globally newfields, "\\*\\*no tag\\*\\*", tagname
 
 	# Insert the tag id
-	regexp = new RegExp "type=.hidden."
 	tagid = li.id || "\'"+li.name+"\'"
-	valstr = "type=\"hidden\" value=\""+tagid+"\""
-	newfields = newfields.replace regexp, valstr
-	# newfields = replace_field newfields, "type=.hidden.", "type=\"hidden\" value=\""+tagid+"\""
+	newfields = replace_field newfields, "type=.hidden.", "type=\"hidden\" value=\""+tagid+"\""
 
 	other = $('tr', parent)
 	$(other).last().after newfields
@@ -71,13 +67,13 @@ RP.edit_expressions.add_expression = (token_input, li) ->
 
 # Set the state of the Remove buttons so the last expression can't be removed
 RP.edit_expressions.check_removal = ->
-	if $('table#expressions_table input.delete-expression[value="false"]').length > 1
-		$('a.remove-allowed').show()
-		$('span.remove-not-allowed').hide()
+	exprtbl = $('table#expressions_table')
+	if $('input.delete-expression[value="false"]', exprtbl).length > 1
+		$('a.remove-allowed', exprtbl).show()
+		$('span.remove-not-allowed', exprtbl).hide()
 	else
-		$('a.remove-allowed').hide()
-		$('span.remove-not-allowed').show()
-
+		$('a.remove-allowed', exprtbl).hide()
+		$('span.remove-not-allowed', exprtbl).show()
 
 # When dialog is loaded, activate its functionality
 ###

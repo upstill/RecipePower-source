@@ -1,6 +1,3 @@
-class PageRefsSerializer < ActiveModel::Serializer
-  attributes :id, :url, :type
-end
 
 class PageRefsController < CollectibleController
   require 'page_ref.rb'
@@ -121,18 +118,19 @@ class PageRefsController < CollectibleController
 
   # POST /page_refs
   def create
-    update_and_decorate PageRefServices.assert(params[:page_ref][:type], params[:page_ref][:url])
+    @page_ref = PageRefServices.assert(params[:page_ref][:type], params[:page_ref][:url])
     if @page_ref.errors.any?
       resource_errors_to_flash @page_ref
     else
       @page_ref.bkg_land
+      update_and_decorate @page_ref
     end
     respond_to do |format|
       format.json {
         if @page_ref.errors.any?
           render 'application/errors'
         else
-          render json: @page_ref
+          render json: @page_ref.attributes.slice( :id, :url, :type )
         end
       }
       format.html { }
