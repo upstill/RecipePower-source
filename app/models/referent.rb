@@ -424,12 +424,30 @@ class Referent < ActiveRecord::Base
   def update_attributes(*params)
     actuals = params.first
 
+    # We take care of the page_refs list here
     if pras = actuals['page_refs_attributes']
-      # Ensure that we have Referments for each PageRef
+      # Ensure that we have Referments for each PageRef that hasn't been deleted
       pras.each { |id, values|
         prid = values['id'].to_i
-        self.page_refs << PageRef.find(prid) unless page_ref_ids.include?(prid)
+        if values['_destroy'] == 'false'
+          # Keep it/add it
+          pr =
+          if page_refs.exists? id: prid
+            page_refs.find prid
+          else
+            page_refs << (pr = PageRef.find prid)
+            pr
+          end
+          # Make sure the type matches
+          if pr.type != values['type']
+            pr.update_attribute :type, values['type']
+          end
+        elsif page_refs.exists?(id: prid)
+          # Nuke it
+          page_refs.delete page_refs.where(id: prid).first
+        end
       }
+      actuals.delete 'page_refs_attributes'
     end
 
     # If the parent id is changing, we need to make sure the tree stays sound

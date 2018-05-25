@@ -3,6 +3,10 @@ RP.edit_referent = RP.edit_referent || {}
 RP.edit_page_refs = RP.edit_page_refs || {}
 
 RP.edit_page_refs.onopen = (pane) ->
+	$(pane).on 'click', '.remove_fields', (event) ->
+		$(this).prev('input[type=hidden]').val('1')
+		$(this).closest('tr').hide()
+		event.preventDefault()
 	$(pane).on 'click', '#add_page_ref', (event) ->
 		url_elmt = $('input#referent_add_page_ref')[0]
 		if !url_elmt.checkValidity()
@@ -48,10 +52,10 @@ RP.edit_page_refs.onopen = (pane) ->
 		# annnnddd...we've taken care of business
 		event.preventDefault()
 
-RP.edit_expressions.onopen = (dlog) ->
+RP.edit_expressions.onopen = (pane) ->
 	RP.edit_expressions.check_removal()
 	# Arm the removal link
-	$(dlog).on 'click', '.remove_fields', (event) ->
+	$(pane).on 'click', '.remove_fields', (event) ->
 		$(this).prev('input[type=hidden]').val('1')
 		$(this).closest('tr.expression_fields').hide()
 		RP.edit_expressions.check_removal()
