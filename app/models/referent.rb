@@ -68,7 +68,7 @@ class Referent < ActiveRecord::Base
   has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
   has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
 
-  has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef'
+  has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef', inverse_of: :referents
   accepts_nested_attributes_for :page_refs
   # has_many :referents, :through => :referments, :source => :referee, :source_type => 'Referent'
 
@@ -80,6 +80,7 @@ class Referent < ActiveRecord::Base
 
   attr_accessible :tag, :type, :description, :isCountable, :dependent,
                   :canonical_expression, :expressions_attributes, :add_expression, :tag_id,
+                  :page_refs_attributes,
                   :parents, :children, :relateds,
                   :parent_tag_tokens, :child_tag_tokens, :related_tag_tokens,
                   :typeindex
@@ -422,6 +423,15 @@ class Referent < ActiveRecord::Base
 
   def update_attributes(*params)
     actuals = params.first
+
+    if pras = actuals['page_refs_attributes']
+      # Ensure that we have Referments for each PageRef
+      pras.each { |id, values|
+        prid = values['id'].to_i
+        self.page_refs << PageRef.find(prid) unless page_ref_ids.include?(prid)
+      }
+    end
+
     # If the parent id is changing, we need to make sure the tree stays sound
     if actuals[:parent_id]
       # We're specifying a new parent:

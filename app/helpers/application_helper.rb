@@ -79,12 +79,12 @@ module ApplicationHelper
   def data_to_add_fields f, association, *initializers
     new_object = f.object.send(association).klass.new *initializers
     new_object = new_object.becomes(new_object.class.base_class)
-    id = new_object.object_id
-    fields = f.simple_fields_for(association, new_object, child_index: id) do |builder|
+    new_object.id = new_object.object_id
+    fields = f.simple_fields_for(association, new_object, child_index: new_object.id) do |builder|
       render association.to_s.singularize + '_fields', f: builder
     end
     # The initializing values are all declared in the data for purposes of client-side substitution
-    initializers[0].merge id: id, fields: fields.gsub("\n", '')
+    initializers[0].merge id: new_object.id, fields: fields.gsub("\n", '')
   end
 
   def recipe_popup(rcp)
