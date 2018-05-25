@@ -9,6 +9,7 @@ class PageRefServices
   # Provide an array of label/type pairs for selecting the type of a pageref
   def self.type_selections
     [
+        ['choose a type', 'PageRef'],
         ['Recipe', 'RecipePageRef'],
         ['Site', 'SitePageRef'],
         # ['Referrable', 'ReferrablePageRef'],

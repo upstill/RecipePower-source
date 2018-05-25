@@ -99,7 +99,7 @@ obj_to_params = (obj, ancestry) ->
 # Elements may fire off requests by:
 # -- being clicked (click events get here by association with the 'submit' class
 # -- having a 'preload' class, which attaches the result of the request to the element pending a subsequent click
-RP.submit.submit_and_process = ( request, elmt ) ->
+RP.submit.submit_and_process = ( request, elmt, ajaxData ) ->
 	$(elmt).addClass 'trigger'
 	unless elmt && (RP.submit.blocking_on(elmt) || (preloaded = shortCircuit elmt))
 		RP.submit.block_on elmt
@@ -113,6 +113,8 @@ RP.submit.submit_and_process = ( request, elmt ) ->
 				RP.submit.handleResponse elmt, responseData, statusText, errorThrown
 			success: (responseData, statusText, xhr) ->
 				RP.submit.handleResponse elmt, responseData, statusText, xhr
+		if typeof ajaxData != 'undefined'
+			ajdata = Object.assign ajdata, ajaxData
 		if $(elmt).data('params')
 			ajdata.data = obj_to_params $(elmt).data('params') # TODO: should be merging these with form data
 			# ajdata.data.push.apply ajdata.data, extraData

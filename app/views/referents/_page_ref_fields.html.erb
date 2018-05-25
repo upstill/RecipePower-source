@@ -10,8 +10,8 @@
   <td><%# f.input :formname, label: false, collection: Expression.forms.collect { |entry| entry[0] } %></td>
 -->
   <td>
-    <%# f.select :type, PageRefServices.type_selections %>
-    <%= collection_select f.object,
+    <%= f.select :type, PageRefServices.type_selections %>
+    <%# collection_select f.object,
                           :type,
                           PageRefServices.type_selections,
                           :last,

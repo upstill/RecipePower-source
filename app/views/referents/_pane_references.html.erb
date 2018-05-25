@@ -2,8 +2,8 @@
     <div class="field table-field" id="page_refs_field">
       <table id="page_refs_table">
         <tr>
-          <th>Target</th>
-          <th>Kind</th>
+          <th>Page</th>
+          <th>Type</th>
         </tr>
         <%= f.fields_for :page_refs do |builder| %>
             <%= render 'page_ref_fields', f: builder %>
@@ -13,7 +13,14 @@
       <%= url_field_tag :url, "", id: "referent_add_page_ref" %>
       <% url_options = { url: page_refs_path, :method => :post } %>
       <%# link_to 'Add', page_refs_path(format: :json), data: { params: [ { name: 'page_ref[url]', value: 'test url' } ] }, id: 'add_page_ref', format: 'json', method: :put %>
-      <%= link_to_submit 'Add', page_refs_path, data: { params: { page_ref: { url: 'test url' } } }, id: 'add_page_ref', format: 'json', method: :put %>
-      <%# link_to_add_fields "Add Reference", f, :page_refs, title: ';Title Goes Here;', url: ';URL TBD;' %>
+      <%  data = data_to_add_fields f, :page_refs, title: ';Title Goes Here;', url: ';URL TBD;' %>
+      <%= link_to_submit 'Add Reference',
+                         page_refs_path,
+                         data: { params: { page_ref: { url: 'test url' } } }.merge(data),
+                         id: 'add_page_ref',
+                         class: 'add_fields',
+                         format: 'json',
+                         method: :put %>
+      <%# link_to_add_fields "Add Reference", f, :page_refs, title: ';Title Goes Here;', url: ';URL TBD;'  %>
     </div>
 <% end %>

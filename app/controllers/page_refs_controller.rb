@@ -130,7 +130,7 @@ class PageRefsController < CollectibleController
         if @page_ref.errors.any?
           render 'application/errors'
         else
-          render json: @page_ref.attributes.slice( :id, :url, :type )
+          render json: @page_ref.attributes.slice( 'id', 'url', 'type', 'title' )
         end
       }
       format.html { }
