@@ -45,10 +45,10 @@
     <div class="right">
       <%= f.label "Collect As" %>
       <!-- Use the virtual attribute for the page_ref type to arm the type selector -->
-      <% @entity.page_ref_type = @entity.page_ref.type %>
+      <% @entity.page_ref_kind = @entity.page_ref.kind %>
       <%= collection_select @decorator.param_key,
-                            :page_ref_type,
-                            PageRefServices.type_selections,
+                            :page_ref_kind,
+                            PageRefServices.kind_selections,
                             :last,
                             :first %>
       <br><br><%= f.check_box :collectible_private %>

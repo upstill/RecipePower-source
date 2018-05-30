@@ -56,7 +56,7 @@ namespace :sites do
     puts Site.includes(:referent).to_a.collect { |site|
       next if site.referent
       "Site ##{site.id} ('#{site.home}' has no referent (ERROR) #{('but title is '+site.page_ref.title.to_s) if site.page_ref}" +
-          "\n\t...with #{site.definition_page_refs.count} DefinitionPageRef(s) and #{site.recipe_page_refs.count} RecipePageRef(s)"
+          "\n\t...with #{site.page_refs.about.count} DefinitionPageRef(s) and #{site.page_refs.recipe.count} RecipePageRef(s)"
     }.compact.sort
     puts Site.includes(:page_ref).to_a.collect { |site| "Site ##{site.id} ('#{site.home}' has no page_ref (ERROR)" unless site.page_ref }.compact.sort
 

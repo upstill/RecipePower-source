@@ -14,7 +14,7 @@ class InvitationsController < Devise::InvitationsController
   # Create a new invitation--with or without a shared entity--and throw up a dialog to get email, message, etc.
   def new
     if (classname = params[:shared_class]).present?
-      entity_name = params[:shared_name].if_present || PageRefServices.type_to_name(params[:shared_class]) || classname.underscore.gsub('_',' ')
+      entity_name = params[:shared_name].if_present || classname.underscore.gsub('_',' ')
       @shared = classname.constantize.find_by id: params[:shared_id].to_i
       self.resource = resource_class.new invitation_message: current_user.comment_for(@shared) || "Here's an interesting #{entity_name} I found on RecipePower. Have a look and tell me what you think."
       resource.shared_name = entity_name

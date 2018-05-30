@@ -66,7 +66,6 @@ class Referent < ActiveRecord::Base
   }
   has_many :relateds, :through => :referments, :source => :referee, :source_type => 'Referent'
   has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
-  has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
 
   has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef', inverse_of: :referents
   accepts_nested_attributes_for :page_refs

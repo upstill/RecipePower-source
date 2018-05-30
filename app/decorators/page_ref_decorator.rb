@@ -16,7 +16,7 @@ class PageRefDecorator < CollectibleDecorator
     case what.to_sym
       when :image
         :picurl
-      when :page_ref_type, :type
+      when :page_ref_kind, :type
         nil
       else
         super
@@ -37,7 +37,7 @@ class PageRefDecorator < CollectibleDecorator
 =end
 
   def human_name plural=false, capitalize=true
-    name = PageRefServices.type_to_name object.type
+    name = object.kind.humanize
     name = name.pluralize if plural
     capitalize ? name : name.downcase
   end

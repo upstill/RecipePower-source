@@ -15,7 +15,7 @@ class CollectibleDecorator < ModelDecorator
 
   def attribute_represents what
     what = what.to_sym
-    what if what != :page_ref_type
+    what if what != :page_ref_kind
   end
 
   # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
