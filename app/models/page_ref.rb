@@ -5,6 +5,9 @@ require 'net/http'
 # canonical URL, many URLs could lead to that single referent.
 class PageRef < ActiveRecord::Base
   include Collectible
+  # Referrable page refs are referred to by, e.g., a glossary entry for a given concept
+  include Referrable
+
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
@@ -21,10 +24,67 @@ class PageRef < ActiveRecord::Base
   @@mercury_attributes = [ :url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :type, :description, :error_message, :http_status, :link_text, :errcode, :gleaning
+  attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
+                  :error_message, :http_status, :errcode,
+                  :recipes, :sites # Entities that uniquely refer to this pageref
+
+  unless method_defined? :"kind="
+    enum kind: [ :link, :recipe, :site, :referrable, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event]
+  end
+
+  def kind_as_fixnum
+    PageRef.kinds[kind]
+  end
+
+  # Provides access to PageRefs of a particular named kind, denoted by either symbol or integer
+  scope :of_kind, -> (kind) {
+    # TODO: Rails 5 supports both string and fixnum kinds directly
+    kind.is_a?(Fixnum) ? where(kind: kind) : where(kind: PageRef.kinds[kind])
+  }
 
   attr_accessor :extant_pr,
                 :entity # Currently (transiently) designated collectible entity (which may be self)
+
+  has_many :recipes, :dependent => :nullify # , foreign_key: 'page_ref_id'
+  has_many :sites, :dependent => :nullify # , foreign_key: 'page_ref_id'
+
+  # belongs_to :site, foreign_key: 'affiliate_id'
+  # before_save :fix_host
+
+  # alias_method :host, :domain
+  def host
+    domain
+  end
+
+  def kind= newkind
+    # Detect and act upon a proposed change of kind
+    # If there is an accompanying entity, it is masking the page_ref's title, tags, etc., so take them up before switching
+    case kind
+      when 'recipe'
+        if newkind != 'recipe'
+          self.title = recipes.first.title
+          if tagging_user_id
+            # Just for the sake of tidiness, if we're retyping the page_ref from :recipe to something else,
+            # and this user is the only one who's collected it, then we destroy it.
+            recipes.to_a.each { |recipe|
+              # Remove any uncollected recipes
+              self.recipes.destroy recipe unless (recipe.user_ids - [tagging_user_id]).present?
+            }
+          end
+        end
+      when 'site'
+        self.title = sites.first.title if newkind != 'site'
+      else
+        case newkind
+          when 'recipe'
+            recipes.first.title = title if recipes.first
+          when 'site'
+            sites.first.title = title if sites.first
+        end
+    end
+    newkind = PageRef.kinds[newkind] unless newkind.is_a?(Fixnum)
+    write_attribute :kind, newkind
+  end
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
@@ -32,10 +92,23 @@ class PageRef < ActiveRecord::Base
   has_many :referments, :as => :referee
   has_many :referents, :through => :referments, inverse_of: :page_refs
 
+=begin
   before_save do |pr|
-    if (pr.class != SitePageRef) && (pr.url_changed? || !pr.site) && pr.url.present?
+    if (!pr.site?) && (pr.url_changed? || !pr.site) && pr.url.present?
       puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
-      pr.site = Site.find_or_create_for(pr.url)
+      pr.site = Site.find_or_create_for(pr)
+    end
+  end
+=end
+
+  after_save do |pr|
+    if !pr.site && pr.url.present?
+      puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
+      unless pr.site = Site.find_by(page_ref_id: id)
+        pr.site = Site.find_or_create_for pr.url
+        pr.site.page_refs << self
+        pr.update_attribute :site_id, pr.site.id
+      end
     end
   end
 
@@ -49,6 +122,7 @@ class PageRef < ActiveRecord::Base
     @@mercury_attributes + [ :extraneity ]
   end
 
+=begin
   def self.types
     @@prtypes ||= %w{ recipe definition article newsitem tip video homepage product offering event }
   end
@@ -57,6 +131,7 @@ class PageRef < ActiveRecord::Base
   def type= newtype
     super
   end
+=end
 
   def page_ref
     self
@@ -221,7 +296,7 @@ class PageRef < ActiveRecord::Base
   end
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url path
-  def self.url_path_query(urlpath)
+  def self.url_path_query urlpath
     urls = [ "http://#{urlpath}%", "https://#{urlpath}%" ]
     url_node = self.arel_table[:url]
     url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
@@ -273,8 +348,8 @@ class PageRef < ActiveRecord::Base
   end
 
   # Will this page_ref be found when looking for a page_ref of the given type and url?
-  def answers_to? qtype, qurl
-    type == qtype && (url == qurl || aliases.include?(qurl))
+  def answers_to? qurl, kind=nil
+    (!kind || (self.kind == kind)) && (url == qurl || aliases.include?(qurl))
   end
 
   # Associate this page_ref with the given referent.
@@ -304,11 +379,8 @@ class PageRef < ActiveRecord::Base
 
 end
 
-class RecipePageRef < PageRef
-  attr_accessible :recipes
-
-  has_many :recipes, foreign_key: 'page_ref_id', :dependent => :nullify
 =begin
+class RecipePageRef < PageRef
 # This needs to be adapted from RecipeReference to RecipePageRef (or does it??)
   def self.scrape first=''
     mechanize = Mechanize.new
@@ -367,30 +439,13 @@ class RecipePageRef < PageRef
       end
     end
   end
-=end
 end
 
 class SitePageRef < PageRef
-  attr_accessible :sites
-
-  has_many :sites, foreign_key: 'page_ref_id', :dependent => :nullify
-  # belongs_to :site, foreign_key: 'affiliate_id'
-  # before_save :fix_host
-
-  # alias_method :host, :domain
-  def host
-    domain
-  end
 
 end
 
 class ReferrablePageRef < PageRef
-  # Referrable page refs are referred to by, e.g., a glossary entry for a given concept
-  include Referrable
-
-  def typesym
-    type.sub('PageRef','').to_sym
-  end
 
 end
 
@@ -429,3 +484,4 @@ end
 class EventPageRef < ReferrablePageRef
 
 end
+=end

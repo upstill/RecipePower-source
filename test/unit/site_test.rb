@@ -45,7 +45,8 @@ class SiteTest < ActiveSupport::TestCase
 
   test "PageRef has site that refers back to it" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    dpr = DefinitionPageRef.fetch alcasample
+    dpr = PageRef.fetch alcasample
+    dpr.kind = 'about'
     dpr.save
     site = dpr.site
     assert_not_nil site
@@ -55,7 +56,8 @@ class SiteTest < ActiveSupport::TestCase
 
   test "site can get longer root if compatible" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    dpr = DefinitionPageRef.fetch alcasample
+    dpr = PageRef.fetch alcasample
+    dpr.kind = 'about'
     dpr.save
     site = dpr.site
     site.bkg_land
@@ -67,7 +69,7 @@ class SiteTest < ActiveSupport::TestCase
 
   test "bogus change in site root gets caught" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    dpr = DefinitionPageRef.fetch alcasample
+    dpr = PageRef.fetch alcasample
     dpr.save
     site = dpr.site
     site.bkg_land
@@ -81,20 +83,25 @@ class SiteTest < ActiveSupport::TestCase
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
     site = Site.find_or_create_for(alcasample)
     site.bkg_land
-    dpr = DefinitionPageRef.fetch alcasample
+    dpr = PageRef.fetch alcasample
+    dpr.kind = 'about'
     dpr.save
+    assert_equal site, dpr.site # Should get the same site
     alcasample = "http://www.alcademics.com/2012/04/the-golden-gate-75-cocktail-.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    rpr = RecipePageRef.fetch alcasample
+    rpr = PageRef.fetch alcasample
+    rpr.kind = 'recipe'
     rpr.save
-    assert_equal site, dpr.site
     assert_equal site, rpr.site
-    assert_equal [dpr, rpr], site.page_refs.to_a
+    assert_equal [dpr.id, rpr.id, site.page_ref_id].sort, site.page_ref_ids.sort
+    site.save
+    assert_equal [dpr.id, rpr.id, site.page_ref_id].sort, site.page_ref_ids.sort
   end
 
   test "with_subroot_of" do
     nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
     nyt2 = "http://www.nytimes.com/2016/12/13/dining/restaurants-no-tipping-service.html?ref=dining"
-    dpr = DefinitionPageRef.fetch nyt1
+    dpr = PageRef.fetch nyt1
+    dpr.kind = 'about'
     dpr.save
     short = dpr.site
     short.bkg_land
@@ -108,7 +115,8 @@ class SiteTest < ActiveSupport::TestCase
 
   test "root lengthening moves entities" do
     nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
-    dpr1 = DefinitionPageRef.fetch nyt1
+    dpr1 = PageRef.fetch nyt1
+    dpr1.kind = 'about'
     dpr1.save
     site1 = dpr1.site
     site1.bkg_land
@@ -122,7 +130,8 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal longer_site, dpr1.site
 
     nyt2 = "http://www.nytimes.com/2016/12/13/dining/restaurants-no-tipping-service.html?ref=dining"
-    dpr2 = DefinitionPageRef.fetch nyt2
+    dpr2 = PageRef.fetch nyt2
+    dpr1.kind = 'about'
     dpr2.save
     site2 = dpr2.site
     assert_equal "www.nytimes.com", site2.root
@@ -131,7 +140,8 @@ class SiteTest < ActiveSupport::TestCase
 
   test "Lengthening path sorts pagerefs appropriately" do
     nyt1 = "http://www.nytimes.com/2015/08/24/business/economy/as-minimum-wage-rises-restaurants-say-no-to-tips-yes-to-higher-prices.html"
-    dpr1 = DefinitionPageRef.fetch nyt1
+    dpr1 = PageRef.fetch nyt1
+    dpr1.kind = 'about'
     dpr1.save
     site1 = dpr1.site
     site1.bkg_land
@@ -143,7 +153,8 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal longer, dpr1.site
 
     nyt2 = "http://www.nytimes.com/2015/10/15/dining/danny-meyer-restaurants-no-tips.html"
-    dpr2 = DefinitionPageRef.fetch nyt2
+    dpr2 = PageRef.fetch nyt2
+    dpr2.kind = 'about'
     dpr2.save
     dpr2.site.bkg_land
     assert_equal longer, dpr2.site
@@ -271,21 +282,15 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     site_count = Site.count
     site = Site.find_or_create_for "http://www.esquire.com/food-drink/"
     site.bkg_land
-    PageRef.types.each { |type|
-      assoc_name = "#{type}_page_refs".to_sym
-      assert_equal 0, site.method(assoc_name).call.count
-      prtype = "#{type.capitalize}PageRef"
-      pr = prtype.constantize.fetch 'http://www.esquire.com/food-drink/'
-      assert_equal prtype, pr.type
-      assert_equal prtype, pr.class.to_s
-      pr.save
-      assert_equal 1, site.method(assoc_name).call.count
-      assert_equal (site_count+1), Site.count
-    }
+    assert_equal 0, site.dependent_page_refs.count
+    pr = PageRef.fetch 'http://www.esquire.com/food-drink/'
+    pr.save
+    assert_equal 1, site.dependent_page_refs.count
+    assert_equal (site_count+1), Site.count
   end
 
   test "standalone gleaning" do
-    pr = SitePageRef.fetch 'http://barbecuebible.com'
+    pr = PageRef.fetch 'http://barbecuebible.com'
     refute pr.gleaning
     gl = pr.create_gleaning
     assert_equal gl.page_ref, pr
@@ -296,7 +301,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
   end
 
   test "site pageref" do
-    pr = SitePageRef.fetch 'http://barbecuebible.com'
+    pr = PageRef.fetch 'http://barbecuebible.com'
     pr.bkg_launch
     assert pr.dj
     pr.bkg_land

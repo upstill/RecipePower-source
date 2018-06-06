@@ -106,6 +106,7 @@ class CollectibleController < ApplicationController
   # GET tag
   # PATCH tag
   def tag
+    # NB: the PageRefsController handles a GET request to set up tagging, taking params[:extractions] into account
     if current_user
       modelname = response_service.controller_model_name
       modelparams = params[modelname]
@@ -114,31 +115,17 @@ class CollectibleController < ApplicationController
       else
         misc_tag_tokens = modelparams.delete :editable_misc_tag_tokens
       end
-      objclass = response_service.controller_model_class
-      entity = objclass.find_by id: params[:id]
-      decorator = entity.decorate
-      # Detect and act upon a proposed change of type
-      if (prtype = modelparams[:page_ref_type]) && (entity.page_ref.type != prtype)
-        # If all of the recipes associated with the pr can be destroyed
-        # (because they are uncollected), then we can just retype the original
-        convert_recipe = (entity.model_name == 'Recipe') &&
-            entity.page_ref.recipes.all? { |recipe|
-              # Remove any uncollected recipes
-              if (recipe.user_ids - [current_user.id]).present?
-                false
-              else
-                recipe.destroy
-                true
-              end
-            }
-        # Save as a different type of entity
-        entity = PageRefServices.new(entity.page_ref).convert(modelparams, entity: entity, convert_recipe: convert_recipe)
-        entity = entity.becomes(PageRef) if entity.is_a? PageRef
-        params[entity.model_name.param_key] = decorator.translate_params modelparams, entity
-      elsif entity.is_a? PageRef
-        entity = entity.becomes PageRef
+      update_and_decorate
+      if @decorator.entity.is_a?(PageRef)
+        page_ref = @decorator.entity
+        # If the page_ref needs an accompanying entity (for a recipe or a site, for example), make it
+        entity = PageRefServices.new(page_ref).ensure_accompanying_entity modelparams.except(:id, :kind)
+        if entity != page_ref
+          # We're really going to tag the accompanying entity (Site or Recipe)
+          params[entity.model_name.param_key] = @decorator.translate_params modelparams, entity
+          @decorator = entity.decorate
+        end
       end
-      update_and_decorate entity, update_attributes: true
 
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain
@@ -160,8 +147,18 @@ class CollectibleController < ApplicationController
         end
       end
     else
-      flash[:error] = 'You have to be logged in to tag anything'
-      render :errors
+      respond_to do |format|
+        format.html {# This is for capturing a new recipe and tagging it using a new page.
+          # Defer request, redirecting it for JSON
+          login_required :json
+        }
+        format.json {
+          # Not logged in => have to store recipe parameters (url, title, comment) in a safe place pending login
+          # session[:pending_recipe] = params[:recipe].merge page_ref_id: page_ref.id
+          # After login, we'll be returned to this request to complete tagging
+          login_required
+        }
+      end
     end
   end
 
@@ -277,15 +274,15 @@ class CollectibleController < ApplicationController
         # Injector dialog.
         # Produce javascript in response to the bookmarklet, to build minimal javascript into the host page
         # (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js
-        # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
-        # This gets extracted from the request referrer or, failing that, the href passed as a parameter
         response_service.is_injector
         begin
+          # We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.
+          # This gets extracted from the request referrer or, failing that, the href passed as a parameter
           url = params[:recipe][:url]
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           else
-            page_ref = PageRef.find_by_url(url) || RecipePageRef.build_by_url(url)  # Default is recipe, unless another exists
+            page_ref = PageRef.find_by_url(url) || PageRef.build_by_url(url)
             if page_ref.errors.any?
               msg = page_ref.errors.messages.gsub /\"/, '\''
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
@@ -296,7 +293,7 @@ class CollectibleController < ApplicationController
               edit_params = response_service.redirect_params.merge sourcehome: sourcehome,
                                                                    page_ref: {
                                                                        url: page_ref.url,
-                                                                       type: page_ref.type,
+                                                                       kind: page_ref.kind,
                                                                        title: params[:recipe][:title]
                                                                    }.compact
               @url = page_ref.id ? tag_page_ref_url(page_ref, edit_params) : tag_page_refs_url(edit_params)

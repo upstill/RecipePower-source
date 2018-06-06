@@ -1,5 +1,5 @@
 <% @entity = @decorator.object %>
-<%= form_for @entity, :url => polymorphic_path([:tag, @decorator], :mode => :injector), :html => { style: 'width:auto;height:auto'} do |f| %>
+<%= form_for @entity, :url => polymorphic_path([:tag, @decorator], :mode => :injector), :html => {style: 'width:auto;height:auto'} do |f| %>
     <%= form_errors_helper f, @entity, false %>
 
     <div class="left">
@@ -18,13 +18,13 @@
       <div class="notifications-panel">
         <%= flash_notifications_div 'flash_notifications', false %>
       </div>
-      <div class="edit_recipe_field text" >
+      <div class="edit_recipe_field text">
         <%= f.label @decorator.attribute_for(:title), 'Title' -%>
         <% @decorator.title %>
-          <div class="expandingArea">
-            <pre><span></span><br></pre>
-            <%= f.text_area @decorator.attribute_for(:title) -%>
-          </div>
+        <div class="expandingArea">
+          <pre><span></span><br></pre>
+          <%= f.text_area @decorator.attribute_for(:title) -%>
+        </div>
       </div>
 
       <%= token_input_div f,
@@ -33,21 +33,27 @@
                           :data => {type: Tag.typenum(@decorator.eligible_tagtypes)}
       %>
 
-      <div class="edit_recipe_field text" >
+      <div class="edit_recipe_field text">
         <%= f.label :comment, 'Notes' -%>
-          <div class="expandingArea">
-            <pre><span></span><br></pre>
-            <%= f.text_area :collectible_comment, rows: '1', placeholder: 'Your thoughts here' -%>
-          </div>
+        <div class="expandingArea">
+          <pre><span></span><br></pre>
+          <%= f.text_area :collectible_comment, rows: '1', placeholder: 'Your thoughts here' -%>
+        </div>
       </div>
     </div>
 
     <div class="right">
       <%= f.label "Collect As" %>
-      <!-- Use the virtual attribute for the page_ref type to arm the type selector -->
-      <% @entity.page_ref_kind = @entity.page_ref.kind %>
-      <%= collection_select @decorator.param_key,
-                            :page_ref_kind,
+      <!--Either the object has a page_ref or it IS a page_ref-->
+      <% if @decorator.object.is_a?(PageRef) %>
+          <%= f.select :kind, PageRefServices.kind_selections %>
+      <% else %>
+          <%= f.fields_for :page_ref do |builder| %>
+              <%= builder.select :kind, PageRefServices.kind_selections %>
+          <% end %>
+      <% end %>
+      <%# collection_select @decorator.param_key,
+                            :kind,
                             PageRefServices.kind_selections,
                             :last,
                             :first %>

@@ -53,11 +53,11 @@ class ReferentStructureTest < ActiveSupport::TestCase
     t2 = r2.canonical_expression
     puts "r2 is #{r2.class} #{r2.id} with canonical expression ##{r2.canonical_expression.id}"
     puts "t2##{t2.id}'s primary meaning is #{t2.meaning.class}"
-    assert_equal t2.meaning, r2, "r2 is not the primary meaning of its canonical expression"
+    assert_equal t2.meaning, r2.becomes(Referent), "r2 is not the primary meaning of its canonical expression"
 
     r1 = create :ingredient_referent, name: "goat cheese"
     t1 = r1.canonical_expression
-    assert_equal t1.meaning, r1, "r1 is not the primary meaning of its canonical expression"
+    assert_equal t1.meaning, r1.becomes(Referent), "r1 is not the primary meaning of its canonical expression"
 
     p1 = create :ingredient_referent, name: "goat dairy"
     p2 = create :ingredient_referent, name: "milk"

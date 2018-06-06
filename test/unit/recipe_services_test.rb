@@ -17,7 +17,7 @@ class RecipeServicesTest < ActiveSupport::TestCase
     # table = PageRef.arel_table
     # page_refs_with_alias = PageRef.where(PageRef.url_query test_url)
 
-    assert_not_nil RecipePageRef.fetch(@test_url)
+    assert_not_nil PageRef.fetch(@test_url)
     rec = Recipe.find_by_url @test_url
     assert_equal @rcp1, rec
     assert_not_nil rec.site

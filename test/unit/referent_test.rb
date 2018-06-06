@@ -63,7 +63,7 @@ class ReferentTest < ActiveSupport::TestCase
     cbf_id = tags(:chilibean_free).id
     parent.canonical_expression.absorb tags(:chilibean_free), false
     refute Tag.find_by(id: cbf_id)
-    assert_equal tags(:chilibean).meaning, parent
+    assert_equal tags(:chilibean).meaning, parent.becomes(Referent)
     assert parent.tags.include?(tags(:chilibean))
     assert parent.tag_ids.include?(tags(:chilibean).id)
   end

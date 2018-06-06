@@ -9,14 +9,13 @@ module Pagerefable
   module ClassMethods
 
     def pagerefable(url_attribute, options = {})
-      ref_type = "#{self.to_s}PageRef"
 
       # The url attribute is accessible, but access is through an instance method that
       # defers to a Reference
       attr_accessible url_attribute, :page_ref
 
       # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
-      belongs_to :page_ref, class_name: self.to_s+'PageRef', foreign_key: 'page_ref_id', validate: true, autosave: true
+      belongs_to :page_ref, validate: true, autosave: true
 
       has_one :site, :through => :page_ref
       # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
@@ -41,14 +40,12 @@ module Pagerefable
         # The class gets two finder methods, for finding by exact url, and matching a root path (host+path)
         # Locate an entity by its url. This could be the canonical url or any alias
         define_singleton_method :find_by_url do |url|
-          page_ref_class = (self.to_s + 'PageRef').constantize
-          self.joins(:page_ref).find_by(page_ref_class.url_query url)
+          self.joins(:page_ref).find_by(PageRef.url_query url)
         end
 
         # Find entitites whose url matches the given path (which includes the host)
         define_singleton_method :query_on_path do |urpath|
-          page_ref_class = (self.to_s + 'PageRef').constantize
-          self.joins(:page_ref).where(page_ref_class.url_path_query urpath)
+          self.joins(:page_ref).where(PageRef.url_path_query urpath)
         end
 
       end
@@ -59,20 +56,11 @@ module Pagerefable
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
         define_method "#{url_attribute}=" do |url|
-          klass = ref_type.constantize
-          pr = klass.fetch url
-          # Now we have a pageref which has the url, either in the attribute or the aliases
-=begin
-          unless (pr.url == url) || pr.good?
-            # The given url must be among the aliases => take it out and fetch on its own
-            pr.aliases -= [ url ]
-            pr.save
-            pr = klass.fetch url
+          unless page_ref && page_ref.answers_to?(url)
+            pr = PageRef.fetch url
+            # pr.glean unless self.errors.any? # Update the gleaning data, if any
+            self.page_ref = pr
           end
-=end
-          # errors.add(:url, pr.errors[url_attribute]) if pr.errors[url_attribute].present?
-          self.page_ref = pr
-          # pr.glean unless self.errors.any? # Update the gleaning data, if any
           url
         end
 

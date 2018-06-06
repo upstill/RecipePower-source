@@ -85,19 +85,17 @@ class SiteDecorator < CollectibleDecorator
     site = object
 
     # Clear all recipe page refs without associated (i.e., priorly destroyed) recipes
-    site.recipe_page_refs.destroy_all if site.recipes.empty?
+    site.page_refs.recipe.destroy_all if site.recipes.empty?
 
-    assocs = PageRef.types.collect { |prt| "#{prt}_page_refs".to_sym } << :feeds
-    assocs.each { |assoc|
-      site.errors.add(assoc, 'not empty') if site.method(assoc).call.exists?
-    }
+    site.errors.add(:feeds, 'not empty') if site.feeds.exists?
+    site.errors.add(:page_refs, 'not empty') if site.page_refs.exists?
 
     # Normally we can't destroy a site if there are any dependent definition page refs.
     # We make an exception for cases where the site home is the same as the page ref.
-    dpr_urls = site.definition_page_refs.pluck(:url).uniq
+    dpr_urls = site.page_refs.about.pluck(:url).uniq
     if (dpr_urls.count == 1) && (cleanpath(site.home) == cleanpath(dpr_urls.first))
-      site.errors.delete(:definition_page_refs)
-      site.definition_page_refs.destroy_all
+      site.errors.delete(:page_refs)
+      site.page_refs.destroy_all
     end
 
     site.destroy unless site.errors.any?

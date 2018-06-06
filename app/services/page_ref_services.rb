@@ -7,55 +7,39 @@ class PageRefServices
   end
 
   # Provide an array of label/type pairs for selecting the type of a pageref
-  def self.type_selections
-    [
-        ['choose a type', 'PageRef'],
-        ['Recipe', 'RecipePageRef'],
-        ['Site', 'SitePageRef'],
-        # ['Referrable', 'ReferrablePageRef'],
-        ['About', 'DefinitionPageRef'],
-        ['Article', 'ArticlePageRef'],
-        ['News Item', 'NewsitemPageRef'],
-        ['Tip', 'TipPageRef'],
-        ['Video', 'VideoPageRef'],
-        ['Home Page', 'HomepagePageRef'],
-        ['Product', 'ProductPageRef'],
-        ['Offering', 'OfferingPageRef'],
-        ['Event', 'EventPageRef']
-    ]
+  def self.kind_selections
+    PageRef.kinds.collect { |kind, kind_id| [ kind.gsub('_',' ').capitalize, kind ]}
   end
 
-  # Try to translate a PageRef type into English
-  def self.type_to_name type
-    self.type_selections.find { |ts|
-      return ts.first if type == ts.last
-    }
+  # Try to translate a PageRef kind into English
+  def self.kind_to_name kind
+    kind.is_a?(Fixnum) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
   end
 
-  # Get a collectible entity for the PageRef, which may be the PageRef itself
-  # If the pageref has an entity_id, lookup with that
-  def entity params
-    klass =
-    case page_ref.type
-      when 'RecipePageRef'
-        Recipe
-      when 'SitePageRef'
-        Site
-      else
-        return page_ref.becomes(PageRef)
-    end
-    klass.find_by(id: params[:entity_id]) || begin
-      # Initialize the entity from parameters and extractions, as needed
-      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-      defaults = {
-          'Title' => params[:page_ref][:title],
-          'href' => page_ref.url,
-          'Image' => params[:page_ref][:picurl]
-      }
-      defaults.merge! params[:extractions] if params[:extractions]
-      # Produce a set of initializers for the target class
-      CollectibleServices.find_or_create(page_ref, defaults, klass)
-    end
+  # Get a collectible, taggable entity for the PageRef. Five possibilities:
+  # 1) If it has an accompanying site, return the site
+  # 2) If it has an accompanying recipe, return that
+  # 3) If its URL is the domain root (has no path), create and return a new site
+  # 4) If its kind is :recipe, create and return a new recipe
+  # 5) Otherwise, just return the PageRef itself
+  def ensure_accompanying_entity params={}
+    page_ref.sites.first || page_ref.recipes.first ||
+        if page_ref.recipe? || page_ref.site?
+          # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
+          klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
+          # Initialize the recipe from parameters and extractions, as needed
+          # defaults = page_ref.decorate.translate_params params[:page_ref], entity
+          defaults = {
+              'Title' => params[:page_ref][:title],
+              'href' => page_ref.url,
+              'Image' => params[:page_ref][:picurl]
+          }
+          defaults.merge! params[:extractions] if params[:extractions]
+          # Produce a set of initializers for the target class
+          CollectibleServices.find_or_create page_ref, defaults, klass
+        else
+          page_ref
+        end
   end
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
@@ -109,60 +93,6 @@ class PageRefServices
 
     other.destroy if other.id # May not have been saved
     page_ref.save
-  end
-
-  # Convert a PageRef (and its associated entity, if any) to a new type
-  def convert entity_params={}, options={}
-    type = entity_params[:page_ref_type]
-    entity = options[:entity]
-    convertible = case page_ref
-                    when RecipePageRef
-                      options[:convert_recipe]
-                    when SitePageRef
-                      false
-                    else
-                      true
-                  end
-    typeclass = type.constantize
-    if newpr = typeclass.find_by_url(page_ref.url, false)
-      # TODO What attributes do we impose on an existing page_ref?
-      page_ref.destroy if convertible
-    elsif convertible
-      (newpr = page_ref.becomes typeclass).type = type
-    else
-      (newpr = page_ref.dup.becomes typeclass).type = type
-    end
-    # Now that we have a PageRef, build and initialize a corresponding Recipe or Site as necessary
-    PageRefServices.new(newpr).entity page_ref: entity_params.except(:id, :page_ref_id)
-  end
-
-  def self.assert type, uri
-    (type.present? ? type.constantize : PageRef).fetch uri
-  end
-
-  # Assert a reference to the given URL, linking back to a referent
-  def self.assert_for_referent(uri, referent, type=:Definition )
-    pr = "#{type}PageRef".constantize.fetch uri
-    pr.assert_referent referent if pr.errors.empty?
-    pr
-  end
-
-  def make_match type, url
-    return page_ref if page_ref.answers_to?(type, url)
-    typeclass = (type.present? ? type.constantize : PageRef)
-    if page_ref.type == type
-      # The given page_ref is of the appropriate type.
-      # If there is no other page_ref of that type with this url, we can just add the url
-      if other = typeclass.find_by_url(type, url)
-        other
-      else
-        # We can adopt this url for ourselves
-        page_ref.aliases << url
-        page_ref
-      end
-    else
-      typeclass.fetch url
-    end
   end
 
   # Convert any relative paths in PageRef urls by resort to aliases
@@ -243,11 +173,13 @@ class PageRefServices
     sentences.join "\n\t"
   end
 
+=begin
   # Make sure the page_ref has a site
   def ensure_site
-    page_ref.site ||= Site.find_or_create_for(page_ref.url) unless (page_ref.class == SitePageRef)
+    page_ref.site ||= Site.find_or_create_for(page_ref.url) unless (page_ref.site?) # class == SitePageRef)
     page_ref.save
   end
+=end
 
   # Try to make a URL good by applying a pattern (string or regexp)
   def try_substitute old_ptn, subst

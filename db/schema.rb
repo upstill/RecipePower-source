@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180516163651) do
+ActiveRecord::Schema.define(version: 20180526221942) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -254,7 +254,7 @@ ActiveRecord::Schema.define(version: 20180516163651) do
     t.string   "link_text"
     t.integer  "site_id"
     t.text     "error_message"
-    t.string   "type",           limit: 25, default: "PageRef"
+    t.string   "otype",          limit: 25, default: "PageRef"
     t.text     "title"
     t.text     "content"
     t.datetime "date_published"
@@ -271,9 +271,8 @@ ActiveRecord::Schema.define(version: 20180516163651) do
     t.integer  "gleaning_id"
     t.integer  "picture_id"
     t.text     "description"
+    t.integer  "kind",                      default: 1
   end
-
-  add_index "page_refs", ["url", "type"], name: "page_refs_index_by_url_and_type", unique: true, using: :btree
 
   create_table "private_subscriptions", force: :cascade do |t|
     t.integer  "user_id"

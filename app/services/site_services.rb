@@ -10,8 +10,8 @@ class SiteServices
     if site.recipes.exists? || site.feeds.exists?
       # No go: can't delete if there are feeds or recipes associated
       'NO DELETION: site contains recipes and/or feeds'
-    elsif site.definition_page_refs.exists?
-      button + "CAUTION: site has #{labelled_quantity site.definition_page_refs.count, 'definition page ref'} pointing to it, which will also be destroyed".html_safe
+    elsif site.dependent_page_refs.exists?
+      button + "CAUTION: site has #{labelled_quantity site.dependent_page_refs.count, 'page ref'} pointing to it, which will also be destroyed".html_safe
     else
       button
     end
@@ -21,8 +21,8 @@ class SiteServices
   def convert_references
     report = "Converting references for site #{site.id}:"
     SiteReference.where(affiliate_id: site.id).each { |reference|
-      report += "\n\tMaking SitePageRef for reference ##{reference.id} (#{reference.url})"
-      puts "Enqueuing making of SitePageRef for Site ##{site.id} on Reference ##{reference.id} (#{reference.url})"
+      report += "\n\tMaking PageRef for reference ##{reference.id} (#{reference.url})"
+      puts "Enqueuing making of PageRef for Site ##{site.id} on Reference ##{reference.id} (#{reference.url})"
       reference.bkg_launch true, priority: 10
       reference.bkg_land # Wait for the worker to return
       puts "...done"

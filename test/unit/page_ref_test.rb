@@ -45,12 +45,12 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "try substitute absorbs" do
-    mpgood = RecipePageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
+    mpgood = PageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
     mpgood.bkg_land
     assert mpgood.good?
 
     url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
-    mpbad = RecipePageRef.new url: url
+    mpbad = PageRef.new url: url
     mpbad.bkg_land
     assert mpbad.bad?
     badid = mpbad.id
@@ -93,12 +93,15 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "calls initialize only once" do
-    mp = RecipePageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    mp.kind = :recipe
     mp.sync
     mp.content = ''
     mp.save
-    mp2 = RecipePageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
-    assert_equal 1, RecipePageRef.count
+    mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
+    mp2.kind = :recipe
+    mp2.save
+    assert_equal 1, PageRef.recipe.count
     assert_equal '', mp.content
   end
 
@@ -165,37 +168,55 @@ class PageRefTest < ActiveSupport::TestCase
 
   test "follow redirects" do
     url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
-    pr = RecipePageRef.fetch url
+    pr = PageRef.fetch url
     assert_equal 200, pr.http_status
     assert pr.aliases.include? "https://www.tastecooking.com"
   end
 
   test "funky direct" do
     url = "http://www.finecooking.com/recipes/spicy-red-pepper-cilantro-sauce.aspx"
-    pr = RecipePageRef.fetch url
+    pr = PageRef.fetch url
     pr.bkg_land
     x=2
   end
 
-  test "Make New DefinitionPageRef" do
+  test "Make New PageRef" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = PageRefServices.assert_for_referent uri, Referent.express(jal)
+
+    ref = PageRef.fetch uri
+    ref.assert_referent Referent.express(jal)
+    # ref = PageRefServices.assert_for_referent uri, Referent.express(jal)
+
+    ref.kind = :about
+    ref.save
+
+    # ref.reload
     rft = ref.referents.first # jal.primary_meaning
     assert rft, "Referent wasn't added properly"
-    assert_equal rft.definition_page_refs.first, ref
+    assert_equal rft.page_refs.about.first, ref
     assert jal.referent_ids.include? rft.id
     assert_equal jal.referents.first, rft
-    assert_equal jal.meaning, rft
+    assert_equal jal.meaning, rft.becomes(Referent)
   end
 
   test "Assert Redundant Reference Properly" do
     jal = tags(:jal)
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = PageRefServices.assert_for_referent uri, Referent.express(jal), :Tip
-    assert_equal :Tip, ref.typesym, "Reference didn't get type"
-    ref2 = PageRefServices.assert_for_referent uri, Referent.express(jal), :Video
-    assert_equal :Video, ref2.typesym, "New reference on same url didn't get new type"
+
+    ref = PageRef.fetch uri
+    ref.assert_referent Referent.express(jal)
+    # ref = PageRefServices.assert_for_referent uri, Referent.express(jal)
+
+    ref.kind = :tip
+    assert ref.tip?, "Reference didn't get kind"
+
+    ref2 = PageRef.fetch uri
+    ref2.assert_referent Referent.express(jal)
+    # ref2 = PageRefServices.assert_for_referent uri, Referent.express(jal)
+
+    ref2.kind = :video
+    assert ref2.video?, "New reference on same url didn't get new type"
     assert_equal 1, ref2.referents.size, "Reference should have one referent"
   end
 
@@ -203,8 +224,13 @@ class PageRefTest < ActiveSupport::TestCase
     jal = tags(:jal)
     rft = Referent.express jal
     uri = "http://www.foodandwine.com/chefs/adam-erace"
-    ref = PageRefServices.assert_for_referent uri, rft, :Definition
-    assert_equal :Definition, ref.typesym, "Definition typesym not :Definition"
+
+    ref = PageRef.fetch uri
+    ref.assert_referent rft
+    # ref = PageRefServices.assert_for_referent uri, rft
+
+    ref.kind = :about
+    assert ref.about?, "Definition kind not 'about'"
     assert (ref2 = rft.page_refs.first), "Referent didn't get reference"
     assert_equal ref.id, ref2.id, "Referent's reference not ours"
     assert ref.referents.first, "New ref didn't get referent"
@@ -215,7 +241,7 @@ class PageRefTest < ActiveSupport::TestCase
     # Unfortunately, Mercury gets fooled by answers.com pages, thinking the url is the home page
     # PageRef.fetch special-cases that (smell!), and here we test it.
     url = "http://www.answers.com/topic/pinch"
-    dpr = DefinitionPageRef.fetch url
+    dpr = PageRef.fetch url
     assert dpr
     assert_equal url, dpr.url
   end

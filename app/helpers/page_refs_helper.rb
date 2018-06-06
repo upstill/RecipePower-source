@@ -18,11 +18,10 @@ module PageRefsHelper
 
   def summarize_page_ref pr, options={}
     separator = summary_separator options[:separator]
-    header, inward_separator = '', summary_separator(separator)
+    header = '' #, inward_separator = '', summary_separator(separator)
     if options[:header] || options[:label]
       header = "#{options[:label] || 'Page'} (##{pr.id}): ".html_safe +
-          homelink(pr.becomes(PageRef).decorate,
-                   nuke_button: !%w{ SitePageRef RecipePageRef }.include?(pr.type))
+          homelink(pr.decorate, nuke_button: !(pr.recipe? || pr.site?))
     end
     referent_summaries = (pr.is_a?(Referrable) ? pr.referents.limit(8) : []).collect { |referent|
       summarize_referent referent, label: "#{referent.class} ##{referent.id}", separator: separator

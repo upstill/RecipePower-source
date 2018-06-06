@@ -5,7 +5,7 @@ class ReferenceTest < ActiveSupport::TestCase
   fixtures :tags
 
   test 'image reference gets joined properly' do
-    site = Site.new home: 'http://www.dailybitesblog.com/'
+    site = Site.find_or_create_for 'http://www.dailybitesblog.com/'
     site.bkg_land
     assert site.good?
     refute site.errors.any?

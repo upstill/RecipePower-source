@@ -247,12 +247,15 @@ class Referent < ActiveRecord::Base
 
   # Convert a list of tag tokens into the referents to which they refer
   def tag_tokens_to_referents(tokens, use_existing=true)
-    refs = tokens.collect { |token|
+    refs = tokens.inject([]) { |set, token|
       # We either match the referent to token or create a new one
       token.strip!
       token = token.to_i unless token.sub!(/^\'(.*)\'$/, '\1')
-      Referent.express token, self.typenum
-    }.compact # Blow off failed referents
+      ref = Referent.express token, self.typenum
+      # Ignore failed referents and eliminate redundancies
+      set << ref unless !ref || set.find { |collected| collected.id == ref.id }
+      set
+    }
     puts 'Tokens converted to referents: '+refs.inspect
     refs
   end

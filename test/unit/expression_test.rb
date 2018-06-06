@@ -103,7 +103,7 @@ class ExpressionTest < ActiveSupport::TestCase
     assert dessert.referents.include?(ref)
     assert ref.tags.include?(dessert)
     assert_equal ref.expression, dessert
-    assert_equal dessert.meaning, ref
+    assert_equal dessert.meaning, ref.becomes(Referent)
     ref.reload
     assert_equal 1, ref.expressions.size
     assert_equal 1, ref.tags.size

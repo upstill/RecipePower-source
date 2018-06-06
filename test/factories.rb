@@ -49,7 +49,7 @@ FactoryBot.define do
     # title "#{description}"
   end
 
-  factory :page_ref, class: PageRef::ReferrablePageRef do
+  factory :page_ref, class: PageRef do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end
 

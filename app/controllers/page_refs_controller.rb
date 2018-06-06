@@ -17,7 +17,7 @@ class PageRefsController < CollectibleController
 
   # GET /page_refs/new
   def new
-    @page_ref = RecipePageRef.new
+    @page_ref = PageRef.new kind: 'recipe'
     smartrender
   end
 
@@ -35,90 +35,65 @@ class PageRefsController < CollectibleController
   # Regardless, we throw up the tagging dialog, which returns to the #tag method for setting
   # the appropriate attributes.
   def tag
-    return super unless request.method == 'GET' # We have exclusive responsibility for setting up tagging
-    unless current_user # Have to be logged in!
-      respond_to do |format|
-        format.html {# This is for capturing a new recipe and tagging it using a new page.
-          # Defer request, redirecting it for JSON
-          login_required :json
-        }
-        format.json {
-          # Not logged in => have to store recipe parameters (url, title, comment) in a safe place pending login
-          # session[:pending_recipe] = params[:recipe].merge page_ref_id: page_ref.id
-          # After login, we'll be returned to this request to complete tagging
-          login_required
-        }
-      end
+    return super unless request.method == 'GET' && current_user # We have exclusive responsibility for setting up tagging
+    # Either get the pageref directly, via ID, or by creating one anew
+    # Either way, establish the desired type and url for the page_ref
+    if page_ref = PageRef.find_by(id: params[:id]) # ...if we're coming here to tag a PageRef
+      kind, url = page_ref.kind, page_ref.url
+    elsif params[:page_ref]
+      kind, url = (params[:page_ref][:kind] || 'recipe'), params[:page_ref][:url]
     else
-      # Either get the pageref directly, via ID, or by creating one anew
-      # Either way, establish the desired type and url for the page_ref
-      if page_ref = PageRef.find_by(id: params[:id])
-        type, url = page_ref.type, page_ref.url
-      elsif params[:page_ref]
-        type, url = (params[:page_ref][:type] || 'RecipePageRef'), params[:page_ref][:url]
-      else
-        type, url = 'RecipePageRef', nil
-      end
-      # Construct a valid URL from the given url and the extracted URI or href
-      # Prefer the url from the extractions
-      if params[:extractions]
-        url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
-      end
-      uri = URI url
-      # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
-      if type == 'RecipePageRef' &&
-          (uri.path.length < 2) &&
-          !((page_ref && page_ref.answers_to?('RecipePageRef', url)) || (page_ref = RecipePageRef.find_by_url(url)))
-        # There is no extant recipe ref on a URL with no path => fetch/create a site instead
-        type = 'SitePageRef'
-      end
-      # Now we compare the submitted page_ref, if any, to the requisite type and URL
-      page_ref = page_ref ?
-          PageRefServices.new(page_ref).make_match(type, url) :
-          PageRefServices.assert(type, url)
-      # Ensure there's an associated collectible entity
-      # NB: it's safe to build one now that we've got a logged-in user
-      # The entity is what we're "really" tagging, even though
-      # the dialog keys on a page_ref.
-      # This means we need to
-      # 1) ensure the existence of the resource
-      # 2) copy and save any parameters or extractions for it
-      # 3) ensure that the user has collected it
+      kind, url = 'recipe', nil
+    end
+    # Construct a valid URL from the given url and the extracted URI or href
+    # Prefer the url from the extractions
+    if params[:extractions]
+      url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
+    end
+    # Now we compare the submitted page_ref, if any, to the requisite kind and URL
+    page_ref = PageRef.fetch(url) unless page_ref && page_ref.answers_to?(url)
 
-      # Initialize the entity from parameters and extractions, as needed
-      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-      entity = PageRefServices.new(page_ref).entity params
-      # Translate the :page_ref parameters to a collection aimed at this entity
-      params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref], entity
-      update_and_decorate entity
-      if @decorator.save # Finally! Save the object
-        current_user.collect(@decorator.object)
-        entity.bkg_launch # Scrape the page for other attributes in background
-      end
-      respond_to do |format|
-        format.html {# This is for capturing a new recipe and tagging it using a new page.
-          if response_service.injector?
-            smartrender
-          else
-            # If we're collecting a recipe outside the context of the iframe, redirect to
-            # the collection page with an embedded modal dialog invocation
-            redirect_to_modal polymorphic_path(:tag, @decorator)
-          end
-        }
-        format.json {
-          if @decorator.object.errors.any?
-            render :errors, locals: {entity: @decorator.object}
-          else
-            smartrender
-          end
-        }
-      end
+    # Ensure there's an associated collectible entity
+    # NB: it's safe to build one now that we've got a logged-in user
+    # The entity is what we're "really" tagging, even though
+    # the dialog keys on a page_ref.
+    # This means we need to
+    # 1) ensure the existence of the resource
+    # 2) copy and save any parameters or extractions for it
+    # 3) ensure that the user has collected it
+
+    # Initialize the entity from parameters and extractions, as needed
+    entity = PageRefServices.new(page_ref).ensure_accompanying_entity params
+    # Translate the :page_ref parameters to a collection aimed at this entity
+    # params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref].slice(:title, :url), entity
+    update_and_decorate entity # , update_attributes: !entity.persisted?
+    if entity.save # Finally! Save the object
+      current_user.collect entity
+      entity.bkg_launch # Scrape the page for other attributes in background
+    end
+    respond_to do |format|
+      format.html {# This is for capturing a new recipe and tagging it using a new page.
+        if response_service.injector?
+          smartrender
+        else
+          # If we're collecting a recipe outside the context of the iframe, redirect to
+          # the collection page with an embedded modal dialog invocation
+          redirect_to_modal polymorphic_path(:tag, entity)
+        end
+      }
+      format.json {
+        if entity.errors.any?
+          render :errors, locals: {entity: entity}
+        else
+          smartrender
+        end
+      }
     end
   end
 
   # POST /page_refs
   def create
-    @page_ref = PageRefServices.assert(params[:page_ref][:type], params[:page_ref][:url])
+    @page_ref = PageRefServices.assert(params[:page_ref][:kind], params[:page_ref][:url])
     if @page_ref.errors.any?
       resource_errors_to_flash @page_ref
     else
@@ -130,7 +105,7 @@ class PageRefsController < CollectibleController
         if @page_ref.errors.any?
           render 'application/errors'
         else
-          render json: @page_ref.attributes.slice( 'id', 'url', 'type', 'title' )
+          render json: @page_ref.attributes.slice( 'id', 'url', 'kind', 'title' )
         end
       }
       format.html { }
@@ -140,7 +115,7 @@ class PageRefsController < CollectibleController
       resource_errors_to_flash @page_ref
       smartrender :new
     else
-      redirect_to tag_page_ref_path(@page_ref.becomes(PageRef), :mode => :modal)
+      redirect_to tag_page_ref_path(@page_ref, :mode => :modal)
     end
 =end
     end
@@ -168,7 +143,7 @@ class PageRefsController < CollectibleController
 
   def scrape
     begin
-      render json: { popup: 'Scraped through ' + RecipePageRef.scrape(params[:first]) + '. Hit reload for next batch.' }
+      render json: { popup: 'Scraped through ' + PageRef.scrape(params[:first]) + '. Hit reload for next batch.' }
     rescue Exception => e
       render json: { alert: 'Scrape died: ' + e.to_s }
     end

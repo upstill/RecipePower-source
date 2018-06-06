@@ -19,9 +19,10 @@ class Recipe < ActiveRecord::Base
                   :prep_time, :prep_time_low, :prep_time_high,
                   :cook_time, :cook_time_low, :cook_time_high,
                   :total_time, :total_time_low, :total_time_high,
-                  :yield
+                  :yield, :page_ref_attributes
 
-  belongs_to :page_ref
+  # For reassigning the kind of the page_ref
+  accepts_nested_attributes_for :page_ref
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }

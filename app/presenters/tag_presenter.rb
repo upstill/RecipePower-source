@@ -32,10 +32,6 @@ class TagPresenter < BasePresenter
     NestedBenchmark.measure '...summarizing referents:' do
       set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     end
-    NestedBenchmark.measure '...summarizing set:' do
-      # set << self.summarize_aspect(:definition_page_refs, :for => :table, :helper => :present_definition, :label => 'Reference')
-      summarize_set '', set
-    end
   end
 
   # Present a summary of one aspect of a tag (specified as a symbol in 'what'). Possibilities:
@@ -43,7 +39,6 @@ class TagPresenter < BasePresenter
   # :parents - Tags for the semantic parents of a tag
   # :children - Tags for the semantic offspring of a tag
   # :referents - The meaning(s) attached to a tag
-  # :definition_page_refs - Any definitions using the tag
   # :page_refs -- A set of page Refs selected using an entry from TagServices.type_selections
   # :synonyms - Tags for the semantic siblings of a tag
   # :similars - Tags for the lexical of a tag (those which have the same normalized_name)
@@ -72,7 +67,8 @@ class TagPresenter < BasePresenter
             when :synonyms
               tagserv.synonyms true
             when Array
-              tagserv.taggees_of_class what.last, true
+              # An array from the PageRefServices select list: first is the label, second is the kind
+              tagserv.page_refs_of_kind what.last
             else
               tagserv.public_send what
           end
@@ -181,7 +177,7 @@ class TagPresenter < BasePresenter
         :tag_parents,
         :tag_children,
         # :tag_references,
-    ] + PageRefServices.type_selections[2..-1]
+    ] + [*PageRef.kinds.except(:link, :recipe)] # PageRefServices.type_selections[2..-1]
     if block_given?
       aspects.each { |aspect|
         yield *presenter.card_aspect(aspect)
@@ -222,15 +218,9 @@ class TagPresenter < BasePresenter
              label = 'includes'
              # tagserv.children.collect { |child| h.homelink child }
              summarize_aspect :children, :for => :raw, :helper => :homelink
-=begin
-           when :tag_references
-             label_singular = 'see also'
-             # content = h.summarize_tag_references
-             summarize_aspect :definition_page_refs, :for => :raw, :helper => :present_page_ref
-             # tagserv.definition_page_refs.collect { |definition| h.present_definition(definition) }.compact
-=end
            when Array
-             label_singular = which.first
+             # An array from the PageRefServices select list: first is the label, second is the kind
+             label_singular = which.first.gsub(/_/,' ').capitalize
              # The remaining "aspects" are entries from TagServices.type_selections
              summarize_aspect which, :for => :raw, :helper => :present_page_ref
          end || []).compact

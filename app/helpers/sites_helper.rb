@@ -36,12 +36,14 @@ module SitesHelper
   def site_pagerefs_summary site, options={}
     separator = summary_separator options[:separator]
     inward_separator = summary_separator separator
-    reflines = (PageRef.types - ['recipe']).collect { |prtype|
-      scope = site.method("#{prtype.to_s}_page_refs").call
-      label = labelled_quantity(scope.count, "#{prtype} page") if scope.exists?
+    reflines =
+    site.page_refs.group(:kind).count.except(PageRef.kinds[:recipe]).collect { |kind_id, count|
+      scope = site.page_refs.where kind: kind_id
+      prs = scope.limit(5).to_a
+      label = labelled_quantity(count, "#{prs.first.kind}")
       safe_join ([label] +
-                    scope.limit(5).collect { |pr|
-                      summarize_page_ref pr, label: prtype, separator: separator
+                    prs.collect { |pr|
+                      summarize_page_ref pr, label: label, separator: separator
                     }
                 ), inward_separator
     }

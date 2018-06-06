@@ -12,6 +12,10 @@ class Site < ActiveRecord::Base
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
+  def dependent_page_refs
+    page_refs.where.not id: page_ref_id
+  end
+
   # site: root of the domain (i.e., protocol + domain); suitable for pattern-matching on a reference URL to glean a set of matching Sites
   # subsite: a path relative to the domain which differentiates among Sites with the same domain (site attribute)
   # home: where the nominal site lives. This MAY be (site+subsite), but in cases of indirection, it may be an entirely
@@ -21,7 +25,10 @@ class Site < ActiveRecord::Base
   # Also, in most cases, site==home (when the domain is home, i.e. subsite is empty); in others, (site+subsite)==home,
   #     and only rarely will home be different from either of those
   attr_accessible :finders_attributes, :oldname, :ttlcut, :finders, :approved, :approved_feeds_count, :feeds_count,
-                  :description, :reference, :references, :name
+                  :description, :reference, :references, :name, :page_ref_attributes
+
+  # For reassigning the kind of the page_ref
+  accepts_nested_attributes_for :page_ref
 
   attr_accessible :sample, :root
 
@@ -40,11 +47,8 @@ class Site < ActiveRecord::Base
   scope :pending, -> { where(approved: nil) }
   scope :hidden, -> { where(approved: false) }
 
-  # Make an association with each type of PageRef that references this site
-  PageRef.types.each { |type| has_many "#{type}_page_refs".to_sym, :dependent=>:restrict_with_error }
-
   #...and associate with recipes via the recipe_page_refs that refer back here
-  has_many :recipes, :through => :recipe_page_refs, :dependent=>:restrict_with_error
+  has_many :recipes, :through => :page_refs, :dependent=>:restrict_with_error
 
   before_validation do |site|
     if site.root.blank? && site.page_ref
@@ -119,7 +123,7 @@ public
       end
       # Newly created feed => enqueue it and add it to the list
       Delayed::Job.enqueue feed  # New feeds get updated by default
-      self.feeds << feed
+      self.feeds << feed unless feeds.exists?(id: feed.id)
     end
   end
 
@@ -129,10 +133,6 @@ public
     finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
     finder.hits += 1
     finder.save
-  end
-
-  def site
-    self
   end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model
@@ -151,7 +151,7 @@ public
         onscope.where(%q{"sites"."description" ILIKE ?}, matcher),
         # onscope.where(%q{"sites"."root" ILIKE ?}, matcher)
     ]
-    a2 = SitePageRef.strscopes(matcher) { |inward=nil|
+    a2 = PageRef.strscopes(matcher) { |inward=nil|
       joinspec = inward ? {:page_ref => inward} : :page_ref
       block_given? ? yield(joinspec) : self.joins(joinspec)
     }
@@ -224,11 +224,11 @@ public
       # All page refs will still be valid if the new root is a substring of the current one
       # ...but the shorter version may still attract others
       unless Site.with_subroot_of(root) # A site that <could> take all pagerefs as needed
-        orphans = page_refs.where.not(PageRef.url_path_query new_root).pluck :url
+        orphans = dependent_page_refs.where.not(PageRef.url_path_query new_root).pluck :url
         unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id)  }.empty?
           # The new root is neither a substring nor a superstring of the existing root.
           # Since we've already established that there's no Site to catch the existing entities, we fail
-          errors.add(:root, "would abandon #{orphans.count} out of #{page_refs.count} existing entities")
+          errors.add(:root, "would abandon #{orphans.count} out of #{dependent_page_refs.count} existing entities")
           return
         end
       end
@@ -254,22 +254,17 @@ public
   end
 
   # Produce a Site that maps to a given url(s) whether one already exists or not
-  def self.find_or_create_for link_or_links
-    links = link_or_links.is_a?(Array) ? link_or_links : [link_or_links]
+  def self.find_or_create_for link
 
     # Look first for existing sites on any of the links
-    links.each { |link|
-      if site = self.find_for(link)
-        return site
-      end
-    }
-    links.each { |link|
-      if inlinks = subpaths(link)
-        # return self.create(home: host_url(link), root: inlinks.first, sample: link)
+    if site = self.find_for(link)
+      return site
+    end
+
+    if inlinks = subpaths(link)
+      # return self.create(home: host_url(link), root: inlinks.first, sample: link)
         return self.find_or_create host_url(link), root: inlinks.first, sample: link
-      end
-    }
-    link = links.first
+    end
     self.find_or_create host_url(link), sample: link
   end
 
@@ -280,6 +275,14 @@ public
       # Find a site, if any, based on the longest subpath of the URL
       Site.find_by(root: uri) || Site.create({sample: homelink}.merge(options).merge(root: uri, home: homelink))
     end
+  end
+
+  alias_method :ohome_eq, :'home='
+  # We need to point the page_ref back to us so that it doesn't create a redundant site.
+  def home=(url)
+    revised = ohome_eq(url)
+    page_ref.site = self
+    revised
   end
 
   # Produce a Site for a given url(s) whether one already exists or not,

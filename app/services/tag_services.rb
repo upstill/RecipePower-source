@@ -59,46 +59,20 @@ class TagServices
 
 # -----------------------------------------------
 
-# Return the definitions associated with the tag. This includes all the definitions from synonyms of the tag
-  def definition_page_ref_ids
-    tag.referents(true).collect { |referent| referent.definition_page_ref_ids }.flatten.uniq
-  end
-
-# Return the references associated with the tag. This includes all the references from synonyms of the tag
-  def definition_page_refs
-    PageRef::DefinitionPageRef.where id: definition_page_ref_ids
-  end
-
-# Just return the count of references
-  def definition_page_ref_count
-    definition_page_ref_ids.count
-  end
-
-# Return the definitions associated with the tag. This includes all the definitions from synonyms of the tag
-  def referred_page_ref_ids type
-    #   has_many :definition_page_refs, -> { where type: 'DefinitionPageRef' }, :through => :referments, :source => :referee, :source_type => 'PageRef'
-    tag.referents(true).collect { |referent| referent.page_refs.where(type: type).pluck :id }.flatten.uniq
-  end
-
-# Return the references associated with the tag. This includes all the references from synonyms of the tag
-  def referred_page_refs type
-    tag.referents(true).collect { |referent| referent.page_refs.where type: type }.flatten.uniq
-  end
-
-# Just return the count of references
-  def referred_page_ref_count type
-    referred_page_ref_ids(type).count
-  end
-
-  def taggees_of_class entity_class_name, with_synonyms=false
+  # Get all the PageRefs associated with the tag, which consists of two populations
+  # 1) PageRefs that are tagged explicitly by the tag and--possibly, depending on with_synonyms--its synonyms
+  # 2) PageRefs that are linked to the tag's referent(s)
+  def page_refs_of_kind kind
     # entity_class = entity_class_name.constantize
     # id_or_ids = with_synonyms ? synonym_ids : id
-    if with_synonyms && synonym_ids.present?
-      assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id in (#{synonym_ids.join(',')})")
+    synids = synonym_ids true
+    if synids.present?
+      assoc = PageRef.of_kind(kind).joins(:taggings).where("taggings.tag_id in (#{(synids << id).join(',')})")
     else
-      assoc = PageRef.joins(:taggings).where("page_refs.type = '#{entity_class_name}' and taggings.tag_id = #{id}")
+      assoc = PageRef.of_kind(kind).joins(:taggings).where("taggings.tag_id = #{id}")
     end
-    (assoc.to_a + referred_page_refs(entity_class_name)).compact
+    referred_page_refs = tag.referents(true).collect { |referent| referent.page_refs.of_kind kind }.flatten.uniq
+    (assoc.to_a + referred_page_refs).compact
   end
 # -----------------------------------------------
   def synonym_ids unique=false
@@ -232,7 +206,9 @@ class TagServices
             location =
                 if page_link
                   # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
-                  page_ref = PageRefServices.assert_for_referent page_link, tag_ref, :Definition
+                  page_ref = PageRef.fetch page_link
+                  page_ref.assert_referent tag_ref if page_ref.errors.empty?
+                  page_ref.kind = options[:kind] if options[:kind].present?
                   page_ref.link_text = options[:link_text].strip if options[:link_text].present? # Force the link text to something else
                   page_ref.save! if page_ref.changed?
                   page_link
