@@ -22,7 +22,7 @@ module Collectible
 
     # User_pointers refers to users who have the entity in their collection
     has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
-    has_many :users, :through => :user_pointers, :autosave => true
+    has_many :users, :through => :user_pointers, :autosave => true, :source=>'user'
     # Scope for instances of a class collected by a user, as visible to a possibly different viewer
     scope :collected_by_user, -> (userid, viewerid=userid) {
       joins(:user_pointers).merge(Rcpref.for_user(userid, viewerid))

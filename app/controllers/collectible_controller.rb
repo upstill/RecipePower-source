@@ -103,29 +103,68 @@ class CollectibleController < ApplicationController
     end
   end
 
+  # This method is responsible for attending to the fact that PageRefs are often edited on their own,
+  # and perhaps more often presented in the form of an associated recipe or a site
+  # When tagging, we will use the associated 'editable_entity', whether that's the PageRef itself,
+  # or its proxy.
+  #
+  # When ASSERTING a tagging (PATCH method), we have to attend to the possibility that the pageref
+  # kind was modified. This is tantamount to a SaveAs operation; therefore, we modify the
+  # incoming parameters for assigning to the target proxy object.
+  #
+  # Both of these needs can be satisfied by returning the proxy entity and an appropriate parameters hash,
+  # for use by #update_attributes.
+  def proxify entity, entity_params
+    if entity.is_a? PageRef
+      page_ref, prparams = entity, entity_params
+    elsif entity.is_a? Pagerefable
+      page_ref, prparams = entity.page_ref, entity_params[:page_ref_attributes]
+    else
+      return entity, entity_params # When no page_ref is involved, keep everything as it was
+    end
+    # We proceed here IFF THE PAGE_REF, IF ANY, IS CHANGING KIND
+    if prparams[:kind] && (prparams[:kind] != page_ref.kind)
+      # This is effectively a SaveAs, changing the kind of PageRef and with it targetting a different entity
+      page_ref.kind = prparams[:kind]
+      decorator = entity.decorate
+      # First, we get an entity--associated with the PageRef--that reflects the new kind of PageRef
+      entity = PageRefServices.new(page_ref).editable_entity entity # modelparams.except(:id, :kind)
+      # We're really going to tag the accompanying entity (Site or Recipe)
+      # We need to rejigger the parameters so they find their way to the new kind of entity.
+      entity_params = decorator.translate_params entity_params, entity
+
+      # When changing a :recipe page_ref to another type, the associated
+      # recipe may have been created gratuitously.
+      # So in the special case where a recipe is only subscribed to by the current user, we delete it
+      if decorator.object.is_a?(Recipe) && !page_ref.recipe?
+        # If the page_ref for a recipe is not of that kind...
+        # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
+        # and this user is the only one who's collected it, then we destroy it.
+        page_ref.recipes.to_a.each { |recipe|
+          # Remove any uncollected recipes
+          page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
+        }
+      end
+    end
+    return entity, entity_params
+  end
+
   # GET tag
   # PATCH tag
   def tag
     # NB: the PageRefsController handles a GET request to set up tagging, taking params[:extractions] into account
     if current_user
-      modelname = response_service.controller_model_name
-      modelparams = params[modelname]
+      model, modelparams = proxify response_service.controller_model_class.find(params[:id]),
+                                   params[response_service.controller_model_name]
+      modelname = model.model_name.param_key
       if request.method == 'GET' # We're not saving anything otherwise
         params.delete modelname
       else
         misc_tag_tokens = modelparams.delete :editable_misc_tag_tokens
+        params[modelname] = modelparams
       end
-      update_and_decorate
-      if @decorator.entity.is_a?(PageRef)
-        page_ref = @decorator.entity
-        # If the page_ref needs an accompanying entity (for a recipe or a site, for example), make it
-        entity = PageRefServices.new(page_ref).ensure_accompanying_entity modelparams.except(:id, :kind)
-        if entity != page_ref
-          # We're really going to tag the accompanying entity (Site or Recipe)
-          params[entity.model_name.param_key] = @decorator.translate_params modelparams, entity
-          @decorator = entity.decorate
-        end
-      end
+      # Now the parameters should reflect the target type, and we can proceed as usual
+      update_and_decorate model, update_attributes: true
 
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain

@@ -56,36 +56,6 @@ class PageRef < ActiveRecord::Base
     domain
   end
 
-  def kind= newkind
-    # Detect and act upon a proposed change of kind
-    # If there is an accompanying entity, it is masking the page_ref's title, tags, etc., so take them up before switching
-    case kind
-      when 'recipe'
-        if newkind != 'recipe'
-          self.title = recipes.first.title
-          if tagging_user_id
-            # Just for the sake of tidiness, if we're retyping the page_ref from :recipe to something else,
-            # and this user is the only one who's collected it, then we destroy it.
-            recipes.to_a.each { |recipe|
-              # Remove any uncollected recipes
-              self.recipes.destroy recipe unless (recipe.user_ids - [tagging_user_id]).present?
-            }
-          end
-        end
-      when 'site'
-        self.title = sites.first.title if newkind != 'site'
-      else
-        case newkind
-          when 'recipe'
-            recipes.first.title = title if recipes.first
-          when 'site'
-            sites.first.title = title if sites.first
-        end
-    end
-    newkind = PageRef.kinds[newkind] unless newkind.is_a?(Fixnum)
-    write_attribute :kind, newkind
-  end
-
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
 

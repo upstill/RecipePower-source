@@ -274,6 +274,8 @@ ActiveRecord::Schema.define(version: 20180526221942) do
     t.integer  "kind",                      default: 1
   end
 
+  add_index "page_refs", ["url"], name: "page_refs_index_by_url", unique: true, using: :btree
+
   create_table "private_subscriptions", force: :cascade do |t|
     t.integer  "user_id"
     t.integer  "tag_id"

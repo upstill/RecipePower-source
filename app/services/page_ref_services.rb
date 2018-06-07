@@ -22,24 +22,28 @@ class PageRefServices
   # 3) If its URL is the domain root (has no path), create and return a new site
   # 4) If its kind is :recipe, create and return a new recipe
   # 5) Otherwise, just return the PageRef itself
-  def ensure_accompanying_entity params={}
-    page_ref.sites.first || page_ref.recipes.first ||
-        if page_ref.recipe? || page_ref.site?
-          # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
-          klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
-          # Initialize the recipe from parameters and extractions, as needed
-          # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-          defaults = {
-              'Title' => params[:page_ref][:title],
-              'href' => page_ref.url,
-              'Image' => params[:page_ref][:picurl]
-          }
-          defaults.merge! params[:extractions] if params[:extractions]
-          # Produce a set of initializers for the target class
-          CollectibleServices.find_or_create page_ref, defaults, klass
-        else
-          page_ref
-        end
+  def editable_entity called_for=nil, params={}
+    if called_for.is_a? Hash
+      called_for, params = nil, called_for
+    end
+    (page_ref unless page_ref.recipe? || page_ref.site?) ||
+        (called_for if called_for.is_a?(Recipe) || called_for.is_a?(Site)) ||
+        page_ref.sites.first ||
+        page_ref.recipes.first ||
+    begin
+      # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
+      klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
+      # Initialize the recipe from parameters and extractions, as needed
+      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
+      defaults = {
+          'Title' => params[:page_ref][:title],
+          'href' => page_ref.url,
+          'Image' => params[:page_ref][:picurl]
+      }
+      defaults.merge! params[:extractions] if params[:extractions]
+      # Produce a set of initializers for the target class
+      CollectibleServices.find_or_create page_ref, defaults, klass
+    end
   end
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
@@ -58,12 +62,12 @@ class PageRefServices
     other.recipes.each { |other_recipe|
       other_recipe.page_ref = page_ref
       other_recipe.save
-    } if other.respond_to? :recipes
+    }
 
     other.sites.each { |other_site|
       other_site.page_ref = page_ref
       other_site.save
-    } if other.respond_to? :sites
+    }
 
     # Absorb referments, taking care to elide redundancy
 

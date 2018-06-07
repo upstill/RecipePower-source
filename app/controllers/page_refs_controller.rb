@@ -63,7 +63,7 @@ class PageRefsController < CollectibleController
     # 3) ensure that the user has collected it
 
     # Initialize the entity from parameters and extractions, as needed
-    entity = PageRefServices.new(page_ref).ensure_accompanying_entity params
+    entity = PageRefServices.new(page_ref).editable_entity params
     # Translate the :page_ref parameters to a collection aimed at this entity
     # params[entity.model_name.param_key] = page_ref.decorate.translate_params params[:page_ref].slice(:title, :url), entity
     update_and_decorate entity # , update_attributes: !entity.persisted?
