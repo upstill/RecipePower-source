@@ -72,7 +72,7 @@ class PageRef < ActiveRecord::Base
 =end
 
   after_save do |pr|
-    if !pr.site && pr.url.present?
+    if !pr.site_id && pr.url.present?
       puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
       unless pr.site = Site.find_by(page_ref_id: id)
         pr.site = Site.find_or_create_for pr.url
@@ -319,7 +319,7 @@ class PageRef < ActiveRecord::Base
 
   # Will this page_ref be found when looking for a page_ref of the given type and url?
   def answers_to? qurl, kind=nil
-    (!kind || (self.kind == kind)) && (url == qurl || aliases.include?(qurl))
+    (!kind || (self.kind == kind)) && (url.sub(/^https/,'http') == qurl.sub(/^https/,'http') || aliases.include?(qurl))
   end
 
   # Associate this page_ref with the given referent.

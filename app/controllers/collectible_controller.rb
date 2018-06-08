@@ -114,39 +114,46 @@ class CollectibleController < ApplicationController
   #
   # Both of these needs can be satisfied by returning the proxy entity and an appropriate parameters hash,
   # for use by #update_attributes.
-  def proxify entity, entity_params
-    if entity.is_a? PageRef
-      page_ref, prparams = entity, entity_params
-    elsif entity.is_a? Pagerefable
-      page_ref, prparams = entity.page_ref, entity_params[:page_ref_attributes]
-    else
-      return entity, entity_params # When no page_ref is involved, keep everything as it was
+  def proxify nominal_entity
+    entity_params = params[response_service.controller_model_name]
+    case nominal_entity
+      when PageRef
+        page_ref, prparams = nominal_entity, entity_params
+      when Pagerefable
+        page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
+      when NilClass
+        page_ref, prparams = nil, params[:page_ref] || (entity_params && entity_params[:page_ref_attributes])
+      else
+        return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
-    # We proceed here IFF THE PAGE_REF, IF ANY, IS CHANGING KIND
-    if prparams[:kind] && (prparams[:kind] != page_ref.kind)
-      # This is effectively a SaveAs, changing the kind of PageRef and with it targetting a different entity
-      page_ref.kind = prparams[:kind]
-      decorator = entity.decorate
-      # First, we get an entity--associated with the PageRef--that reflects the new kind of PageRef
-      entity = PageRefServices.new(page_ref).editable_entity entity # modelparams.except(:id, :kind)
-      # We're really going to tag the accompanying entity (Site or Recipe)
-      # We need to rejigger the parameters so they find their way to the new kind of entity.
-      entity_params = decorator.translate_params entity_params, entity
+    # Reconcile the page_ref with any url provided by :extractions parameters
+    url = page_ref ? page_ref.url : prparams[:url]
+    if params[:extractions]
+      url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
+    end
+    # Now we compare the submitted page_ref, if any, to the requisite URL
+    page_ref = PageRef.fetch(url) unless page_ref && page_ref.answers_to?(url)
+    page_ref.kind = prparams[:kind] if prparams
 
-      # When changing a :recipe page_ref to another type, the associated
-      # recipe may have been created gratuitously.
-      # So in the special case where a recipe is only subscribed to by the current user, we delete it
-      if decorator.object.is_a?(Recipe) && !page_ref.recipe?
-        # If the page_ref for a recipe is not of that kind...
-        # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
-        # and this user is the only one who's collected it, then we destroy it.
-        page_ref.recipes.to_a.each { |recipe|
-          # Remove any uncollected recipes
-          page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
-        }
-      end
+    # We get an entity--associated with the PageRef--that reflects the possibly new PageRef
+    actual_entity = PageRefServices.new(page_ref).editable_entity nominal_entity, params
+    # We're really going to tag the accompanying entity (Site or Recipe)
+    # We need to rejigger the parameters so they find their way to the new kind of entity.
+    entity_params = nominal_entity.decorate.translate_params(entity_params, actual_entity) if nominal_entity
+
+    # When changing a :recipe page_ref to another type, the associated
+    # recipe may have been created gratuitously.
+    # So in the special case where a recipe is only subscribed to by the current user, we delete it
+    if nominal_entity.is_a?(Recipe) && !page_ref.recipe?
+      # If the page_ref for a recipe is not of that kind...
+      # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
+      # and this user is the only one who's collected it, then we destroy it.
+      page_ref.recipes.to_a.each { |recipe|
+        # Remove any uncollected recipes
+        page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
+      }
     end
-    return entity, entity_params
+    return actual_entity, entity_params
   end
 
   # GET tag
@@ -154,17 +161,12 @@ class CollectibleController < ApplicationController
   def tag
     # NB: the PageRefsController handles a GET request to set up tagging, taking params[:extractions] into account
     if current_user
-      model, modelparams = proxify response_service.controller_model_class.find(params[:id]),
-                                   params[response_service.controller_model_name]
+      model, modelparams = proxify response_service.controller_model_class.find_by(id: params[:id])
       modelname = model.model_name.param_key
-      if request.method == 'GET' # We're not saving anything otherwise
-        params.delete modelname
-      else
-        misc_tag_tokens = modelparams.delete :editable_misc_tag_tokens
-        params[modelname] = modelparams
-      end
+      misc_tag_tokens = modelparams[:editable_misc_tag_tokens]
+      params[modelname] = modelparams.except :editable_misc_tag_tokens
       # Now the parameters should reflect the target type, and we can proceed as usual
-      update_and_decorate model, update_attributes: true
+      update_and_decorate model, update_attributes: (request.method != 'GET')
 
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain
