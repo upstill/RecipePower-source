@@ -1,0 +1,59 @@
+// Formerly newRecipe
+div.new_page_ref.dialog {
+	// width: 650px;
+	// height: auto;
+	.prompt {
+		font:18px arial,sans-serif;
+		font-weight:bold;
+	}
+    div.lesson, p.airy {
+      font-size: 14px;
+    }
+    li {
+      line-height: 1.3em;
+    }
+	form {
+		width: 95%;
+		margin: 10px;
+		padding: 15px;
+		border: 3px solid #CCD3CC;
+		background: #DDE3DD;
+		overflow: auto;
+        label {
+          color: rgb(199, 94, 92);
+        }
+
+		div.page_ref_url {
+			margin-top:15px;
+			margin-bottom:15px;
+			width:95%;
+			// outline:#999 solid 1px
+			label {
+				width: 100%;
+			}
+            textarea {
+              width: 100%;
+              resize: vertical;
+              min-height: 2em;
+              max-height: 6em;
+              margin-bottom: 10px;
+              padding-top: 5px;
+              font-size: 1.2em;
+            }
+		}
+        div#options {
+          width: 100%;
+          div {
+            float: right;
+            position: relative;
+            top: -6px;
+          }
+          .contents {
+            display: inline-block;
+          }
+          input[type='checkbox'] {
+            margin: 2px 7px 0 0;
+          }
+        }
+	}
+}

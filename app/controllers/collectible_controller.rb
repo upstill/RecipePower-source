@@ -114,7 +114,7 @@ class CollectibleController < ApplicationController
   #
   # Both of these needs can be satisfied by returning the proxy entity and an appropriate parameters hash,
   # for use by #update_attributes.
-  def proxify nominal_entity
+  def proxify nominal_entity=nil
     entity_params = params[response_service.controller_model_name]
     case nominal_entity
       when PageRef
@@ -133,27 +133,31 @@ class CollectibleController < ApplicationController
     end
     # Now we compare the submitted page_ref, if any, to the requisite URL
     page_ref = PageRef.fetch(url) unless page_ref && page_ref.answers_to?(url)
-    page_ref.kind = prparams[:kind] if prparams
+
+    # Take steps if the page_ref is changing kinds
+    if prparams && prparams[:kind] && (prparams[:kind] != page_ref.kind)
+      # When changing a :recipe page_ref to another type, the associated
+      # recipe may have been created gratuitously.
+      if page_ref.recipe?
+        # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
+        # and this user is the only one who's collected it, then we destroy it.
+        page_ref.recipes.to_a.each { |recipe|
+          # Remove any uncollected recipes
+          page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
+        }
+      end
+      page_ref.kind = prparams[:kind]
+    end
 
     # We get an entity--associated with the PageRef--that reflects the possibly new PageRef
-    actual_entity = PageRefServices.new(page_ref).editable_entity nominal_entity, params
+    proxy = PageRefServices.new(page_ref).editable_entity nominal_entity, params
     # We're really going to tag the accompanying entity (Site or Recipe)
     # We need to rejigger the parameters so they find their way to the new kind of entity.
-    entity_params = nominal_entity.decorate.translate_params(entity_params, actual_entity) if nominal_entity
+    entity_params = nominal_entity ?
+        nominal_entity.decorate.translate_params(entity_params, proxy) :
+        prparams
 
-    # When changing a :recipe page_ref to another type, the associated
-    # recipe may have been created gratuitously.
-    # So in the special case where a recipe is only subscribed to by the current user, we delete it
-    if nominal_entity.is_a?(Recipe) && !page_ref.recipe?
-      # If the page_ref for a recipe is not of that kind...
-      # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
-      # and this user is the only one who's collected it, then we destroy it.
-      page_ref.recipes.to_a.each { |recipe|
-        # Remove any uncollected recipes
-        page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
-      }
-    end
-    return actual_entity, entity_params
+    return proxy, entity_params
   end
 
   # GET tag
@@ -277,12 +281,16 @@ class CollectibleController < ApplicationController
   def create # Take a URL, then either lookup or create the entity
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
+    entity, modelparams = proxify
+    params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
+=begin
     @resource = CollectibleServices.find_or_create params[response_service.controller_model_name],
                                                  response_service.controller_model_class
-    @resource.bkg_land # Glean title, etc. as necessary
-    update_and_decorate @resource, touch: true
-    if @resource.errors.empty? # Success (valid recipe, either created or fetched)
-      current_user.collect @resource if current_user  # Add to collection
+=end
+    update_and_decorate entity, touch: true, update_attributes: true
+    entity.bkg_land # Glean title, etc. as necessary
+    if entity.errors.empty? # Success (valid recipe, either created or fetched)
+      current_user.collect entity if current_user  # Add to collection
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page.
           redirect_to default_next_path
@@ -296,8 +304,8 @@ class CollectibleController < ApplicationController
       end
     else # failure (not a valid collectible) => return to new
       # Since only url errors will show up in the dialog, add them to the base
-      view_context.make_base_errors_except @resource, :url
-      response_service.title = 'Cookmark a ' + @resource.class.to_s
+      view_context.make_base_errors_except entity, :url
+      response_service.title = 'Cookmark a ' + entity.class.to_s
       @nav_current = :addcookmark
       @decorator.url = params[response_service.controller_model_name][:url]
       smartrender :action => 'new', mode: :modal

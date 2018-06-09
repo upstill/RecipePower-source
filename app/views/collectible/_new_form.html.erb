@@ -1,5 +1,5 @@
 <div class="lesson">
-  <p class="prompt">To add a recipe to your collection by hand:</p>
+  <p class="prompt">To add a recipe (or other page) to your collection by hand:</p>
   <ul>
     <li>Get its web page up in your browser.</li>
     <li>Double-click inside the address bar (that long box with the incomprehensible text near the top of the window) to select the <strong>whole</strong> address (100% of the gobbledygook).</li>
@@ -8,14 +8,23 @@
     <li>Click the button.</li>
   </ul>
 </div>
-<%= simple_form_for @recipe, url: "/recipes?mode=#{response_service.mode}", html: { class: "new_recipe json" } do |f| %>
-    <%= form_errors_helper f, @recipe %>
-    <%= f.input :url, label: "Paste URL here and click 'Add Cookmark'", autofocus: true %>
+<%= simple_form_for @page_ref, url: "/recipes?mode=#{response_service.mode}", html: { class: "new_recipe json" } do |f| %>
+    <%= form_errors_helper f, @page_ref %>
+    <%= f.input :url, label: "Paste URL here and click 'Add Cookmark'", autofocus: true, html_options: { style: 'display: inline-block; height: 2em' } %>
+    <div id="options" >
+      <%= f.label "Collect As", class: 'contents' %>
+      <%= f.select :kind, PageRefServices.kind_selections, class: 'contents' %>
+      <div class="contents" >
+        <%= f.check_box :collectible_private, class: 'contents' %>
+        <%= f.label :collectible_private, 'Private', class: 'checkbox contents' %>
+      </div>
+    </div>
+    <br>
     <%= form_actions f, submit_label: "Add Cookmark" %>
     <%# f.submit :value=>"Add Cookmark", class: "btn btn-lg btn-success dialog-submit-button" %>
 <% end %>
 <div class="lesson", style="margin: 20px; margin-top: 0px;">
-<br><h3> PS: How to collect a recipe the easy way </h3>
+<br><h3> PS: How to collect the easy way </h3>
 <div style="float: left; margin: 6px 12px 4px 12px;">
   <%= bookmarklet %>
 </div>
