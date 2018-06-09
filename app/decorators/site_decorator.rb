@@ -3,34 +3,11 @@ class SiteDecorator < CollectibleDecorator
   include Templateer
   delegate_all
 
+  def self.attrmap
+    super.merge :logo => :image, :name => :title, :home => :url
+  end
+
   # Standard accessors for model attributes
-
-  def attribute_for what
-    case default = super
-      when :title
-        :name
-      when :image, :picurl
-        :logo
-      when :url
-        :home
-      else
-        default
-    end
-  end
-
-  # What the attributes of a site "really" represent
-  def attribute_represents what
-    case what.to_sym
-      when :name
-        :title
-      when :logo
-        :image
-      when :home
-        :url
-      else
-        super
-    end
-  end
 
   def title
     object.name

@@ -2,25 +2,8 @@ class PageRefDecorator < CollectibleDecorator
   # include Templateer
   # delegate_all
 
-  def attribute_for what
-    case default = super
-      when :image
-        :picurl
-      else
-        default
-    end
-  end
-
-  # What the attributes of a site "really" represent
-  def attribute_represents what
-    case what.to_sym
-      when :image
-        :picurl
-      when :page_ref_kind, :type
-        nil
-      else
-        super
-    end
+  def self.attrmap
+    super.merge(picurl: :image).except :page_ref_kind, :type
   end
 
 =begin

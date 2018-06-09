@@ -4,18 +4,8 @@ class CollectibleDecorator < ModelDecorator
   include DialogPanes
   delegate_all
 
-  # Translation from label names to attribute names
-  def attribute_for what
-    what.to_s.downcase.to_sym
-  end
-
   def sourcename
 
-  end
-
-  def attribute_represents what
-    what = what.to_sym
-    what if what != :page_ref_kind
   end
 
   # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
@@ -127,18 +117,6 @@ class CollectibleDecorator < ModelDecorator
       tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Ingredient' }
     end
 =end
-  end
-
-  # Translate params for one class to those for another.
-  # NB: generally speaking, only common parameters (e.g., title, url, description) work properly
-  def translate_params params, entity
-    ed = entity.decorate
-    (params || {}).inject(HashWithIndifferentAccess.new) { |memo, item|
-      if attr = attribute_represents(item.first)
-        memo[ed.attribute_for(attr)] = item.last
-      end
-      memo
-    }
   end
 
   # The robotags are those owned by super

@@ -3,13 +3,8 @@ require 'templateer.rb'
 class RecipeDecorator < CollectibleDecorator
   include Templateer
 
-  def attribute_for label
-    case default = super
-      when :image
-        :picurl
-      else
-        default
-    end
+  def self.attrmap
+    super.merge :picurl => :image
   end
 
   def image

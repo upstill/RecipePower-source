@@ -152,12 +152,8 @@ class CollectibleController < ApplicationController
     # We get an entity--associated with the PageRef--that reflects the possibly new PageRef
     proxy = PageRefServices.new(page_ref).editable_entity nominal_entity, params
     # We're really going to tag the accompanying entity (Site or Recipe)
-    # We need to rejigger the parameters so they find their way to the new kind of entity.
-    entity_params = nominal_entity ?
-        nominal_entity.decorate.translate_params(entity_params, proxy) :
-        prparams
-
-    return proxy, entity_params
+    # We need to rejigger the parameters so they find their way to the proxy entity.
+    return proxy, (nominal_entity || page_ref).decorate.translate_params_for(entity_params, proxy)
   end
 
   # GET tag
