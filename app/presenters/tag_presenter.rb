@@ -21,14 +21,8 @@ class TagPresenter < BasePresenter
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
     set = []
     NestedBenchmark.measure '...summarizing owners:' do
-      set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
-    end
-    NestedBenchmark.measure '...summarizing parents:' do
-      set << self.summarize_aspect(:parents, :for => :table, :helper => :homelink, limit: 5)
-    end
-    NestedBenchmark.measure '...summarizing children:' do
-      set << self.summarize_aspect(:children, :for => :table, :helper => :homelink, limit: 5)
-    end
+      set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5)
+    end unless tagserv.isGlobal
     NestedBenchmark.measure '...summarizing referents:' do
       set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     end
@@ -83,7 +77,7 @@ class TagPresenter < BasePresenter
                          :merge_into_btn => (options[:merge_into_btn] && TagServices.new(entity).can_absorb(tag)) }
           h.summarize_tag_similar tag, entity, btn_options
         when :summarize_referent
-          h.summarize_referent entity, except: tag
+          h.summarize_referent entity, except: tag, disambiguate: (scope.count > 1)
         else
           h.public_send helper, entity
       end

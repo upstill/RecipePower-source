@@ -1,12 +1,16 @@
 module StringsHelper
 
   # Present a collection of strings as a label followed by an indented list--all html safe
-  def summarize_set label, set, separator=nil
+  def summarize_set header, set, separator=nil
     separator = summary_separator separator
-    purged = set.flatten.keep_if { |line_item| line_item.present? }
-    if purged.size > 0
-      purged.unshift label.html_safe if label.present?
-      safe_join purged, separator
+    set = set.flatten.keep_if &:present?
+    if set.size > 0
+      if header.present?
+        set.unshift header.html_safe
+        safe_join set, summary_separator(separator)
+      else
+        safe_join set, separator
+      end
     else
       ''.html_safe
     end

@@ -16,10 +16,15 @@ module ReferentsHelper
   end
 
   def summarize_referent ref, options={}
-    separator = summary_separator options[:separator]
     ttltag = options[:except] || ref.expression
-    header = 'Knowledge about '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>'))
-    inward_separator = summary_separator separator
+    separator = options[:separator]
+    if options[:disambiguate]
+      header = 'Knowledge about '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>'))
+      inward_separator = summary_separator separator # Indent further after the header
+    else
+      header = ''
+      inward_separator = separator
+    end
     if options[:header] || options[:label]
       header = safe_join([
                              (options[:label] || 'Meaning'),
@@ -27,10 +32,8 @@ module ReferentsHelper
                          ], ': '.html_safe,
       )
     end
-    return header if separator.length > 15
-    summarize_set '',
+    summarize_set header,
                   [
-                      header,
                       summarize_ref_expressions(ref, except: ttltag, separator: inward_separator),
                       summarize_ref_parents(ref, separator: inward_separator),
                       summarize_ref_children(ref, separator: inward_separator),
@@ -40,25 +43,30 @@ module ReferentsHelper
   end
 
   def summarize_ref_expressions referent, options={}
-    label = 'Other Expression'
+    header = 'Other Expression'
     ct = referent.expressions.count
-    label = labelled_quantity(ct, label) if ct > 1
-    summarize_set label,
-                  referent.expressions.limit(8).collect { |expr|
-                    homelink(expr.tag, nuke_button: referent.expressions.count > 1) unless expr.tag == options[:except]
+    header = labelled_quantity(ct, header) if ct > 1
+    summarize_set header,
+                  referent.expressions.includes(:tag).limit(8).collect { |expr|
+                    homelink(expr.tag, nuke_button: ct > 1) unless expr.tag == options[:except]
                   }.compact,
                   options[:separator]
   end
 
   def summarize_ref_parents ref, options={}
-    summarize_set (options[:label] || 'Categorized under'),
-                  ref.parents.limit(8).collect { |parent| homelink parent.becomes(Referent) },
-                  options[:separator]
+    set = ref.parents.includes(:canonical_expression).limit(8).collect { |parent| homelink parent.becomes(Referent) }
+    if set.present?
+      unless label = options[:label]
+        label = labelled_quantity(ref.parents.count, 'Belongs to the category').sub(/^\d+\s/, '')
+      end
+      safe_join [ label, safe_join(set, ' | '.html_safe) ], ': '.html_safe
+      # summarize_set label, set, options[:separator]
+    end
   end
 
   def summarize_ref_children ref, options={}
     summarize_set (options[:label] || 'Category includes'),
-                  ref.children.limit(8).collect { |child| homelink child.becomes(Referent) },
+                  ref.children.includes(:canonical_expression).limit(8).collect { |child| homelink child.becomes(Referent) },
                   options[:separator]
   end
 

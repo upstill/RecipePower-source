@@ -45,7 +45,7 @@
     <%= summarize_set '', presenter.taggees_table_summary %>
   <% end %>
   <% NestedBenchmark.measure 'Meanings:' do %>
-    <br><%= presenter.table_summaries response_service.admin_view? %>
+    <br><%= safe_join presenter.table_summaries(response_service.admin_view?).compact, '<br>'.html_safe %>
   <% end %>
   <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= render 'form_synonym', presenter: presenter %>
