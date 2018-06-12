@@ -70,4 +70,18 @@ module TableHelper
     safe_join strlist, inward_separator
   end
 
+  def format_table_tree strtree, indent=''.html_safe
+    if strtree
+      return indent + strtree if strtree.is_a?(String)
+      safe_join strtree.collect { |item|
+        case item
+          when String
+            (indent + item) if item.present?
+          when Array
+            format_table_tree item, '&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe + indent
+        end
+      }.compact, '<br>'.html_safe
+    end
+  end
+
 end
