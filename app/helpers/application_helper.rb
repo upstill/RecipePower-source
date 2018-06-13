@@ -288,4 +288,43 @@ module ApplicationHelper
     [ "span##{dom_id decorator.object}", entity_approval(decorator) ]
   end
 
+  # Provide a labelled presentation of a collection of entities
+  # scope_or_array: either a scope for items, or a preloaded array
+  # label: string to form a header
+  # options:
+  # limit: max number of items to display
+  # fixed_label: don't include a count of items
+  def report_items scope_or_array, label, options={}, &block
+    if scope_or_array.present?
+      label = labelled_quantity(scope_or_array.count, label).sub(/^1 /,'') unless options[:fixed_label]
+      scope_or_array = scope_or_array.limit(options[:limit]) if options[:limit]
+      summs = if block_given?
+                scope_or_array.collect &block
+              elsif scope_or_array.first.is_a? ActiveRecord::Base
+                scope_or_array.collect { |item| homelink item }
+              else
+                scope_or_array
+              end
+      if summs.count > 1
+        [ label.html_safe, summs ]
+      else
+        "#{label}: ".html_safe + summs.first
+      end
+    end
+  end
+
+  def format_table_tree strtree, indent=''.html_safe
+    if strtree
+      return indent + strtree if strtree.is_a?(String)
+      safe_join strtree.collect { |item|
+                  case item
+                    when String
+                      (indent + item) if item.present?
+                    when Array
+                      format_table_tree item, '&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe + indent
+                  end
+                }.compact, '<br>'.html_safe
+    end
+  end
+
 end

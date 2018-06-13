@@ -86,9 +86,7 @@ class TagPresenter < BasePresenter
       when :card
         h.format_card_summary strs, { label: what.to_s }.merge(options)
       when :table
-        label = options[:label] || what.to_s.singularize.capitalize
-        counted_label = ((strs.count > 1) ? labelled_quantity(options[:count] || strs.count, label) : label) if label.present?
-        h.format_table_summary strs, (counted_label if what != :referents)
+        h.format_table_tree report_items(strs, options[:label] || what.to_s.singularize.capitalize)
       when :raw
         strs
     end
@@ -132,15 +130,14 @@ class TagPresenter < BasePresenter
         NestedBenchmark.measure '...getting taggee_samples:' do
           tagserv.taggee_samples 5
         end
+    summs =
     NestedBenchmark.measure '...formatting taggee samples:' do
       samples.collect { |sample|
         klass, entities, full_count = *sample
-        if full_count > 0
-          label = (full_count > 1) ? labelled_quantity(full_count, klass.model_name.human) : klass.model_name.human
-            h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 50 }, label, options
-          end
+        h.report_items(entities, klass.model_name.human) { |entity| h.homelink entity, truncate: 50 }
       }
     end
+    h.format_table_tree summs.compact.flatten(1)
   end
 
   def card_homelink options={}

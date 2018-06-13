@@ -63,25 +63,4 @@ module TableHelper
 
   end
 
-  def format_table_summary strlist, label, options={}
-    separator = summary_separator options[:separator]
-    inward_separator = summary_separator separator
-    strlist.unshift label.html_safe if label.present?
-    safe_join strlist, inward_separator
-  end
-
-  def format_table_tree strtree, indent=''.html_safe
-    if strtree
-      return indent + strtree if strtree.is_a?(String)
-      safe_join strtree.collect { |item|
-        case item
-          when String
-            (indent + item) if item.present?
-          when Array
-            format_table_tree item, '&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe + indent
-        end
-      }.compact, '<br>'.html_safe
-    end
-  end
-
 end

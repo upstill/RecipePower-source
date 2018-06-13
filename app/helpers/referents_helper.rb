@@ -11,32 +11,6 @@ module ReferentsHelper
 
   def summarize_referent ref, options={}
     format_table_tree referent_summary(ref, options)
-=begin
-    ttltag = options[:except] || ref.expression
-    separator = options[:separator]
-    if options[:disambiguate]
-      header = 'Knowledge about '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>'))
-      inward_separator = summary_separator separator # Indent further after the header
-    else
-      header = ''
-      inward_separator = separator
-    end
-    if options[:header] || options[:label]
-      header = safe_join([
-                             (options[:label] || 'Meaning'),
-                             homelink(ref.becomes(Referent))
-                         ], ': '.html_safe,
-      )
-    end
-    summarize_set header,
-                  [
-                      summarize_ref_expressions(ref, except: ttltag, separator: inward_separator),
-                      summarize_ref_parents(ref, separator: inward_separator),
-                      summarize_ref_children(ref, separator: inward_separator),
-                      summarize_ref_affiliates(ref, separator: inward_separator)
-                  ],
-                  separator
-=end
   end
 
   def referent_identifier ref, label=nil
@@ -104,7 +78,7 @@ module ReferentsHelper
         }.compact.flatten(1)
 
     if affiliate_summs.present?
-      label = options[:label] || 'Associated with '
+      label = (options[:label] || 'Associated with ').html_safe
       affiliate_summs.count > 1 ? [ label, affiliate_summs ] : (label+affiliate_summs.first)
     end
   end
