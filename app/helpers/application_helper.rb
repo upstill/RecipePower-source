@@ -296,7 +296,7 @@ module ApplicationHelper
   # fixed_label: don't include a count of items
   # orig_size: size of the set from which the scope or array are drawn, for reporting purposes
   def report_items scope_or_array, label, options={}, &block
-    label = labelled_quantity((options[:orig_size] || scope_or_array.count), label).sub(/^1 /, '') unless options[:fixed_label]
+    label = labelled_quantity((options[:orig_size] || scope_or_array.count), label).sub(/^1 /, '') if label.present? && !options[:fixed_label]
     if limit = options[:limit]
       scope_or_array = (scope_or_array.is_a?(Array) ? scope_or_array[0..limit] : scope_or_array.limit(limit))
     end
@@ -307,6 +307,7 @@ module ApplicationHelper
             else
               scope_or_array
             end
+    return summs unless label.present?
     if summs.count > 1
       [label.html_safe, summs]
     elsif summs.present?

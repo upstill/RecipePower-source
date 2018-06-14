@@ -86,7 +86,8 @@ class TagPresenter < BasePresenter
       when :card
         h.format_card_summary strs, { label: what.to_s }.merge(options)
       when :table
-        h.format_table_tree report_items(strs, options[:label] || what.to_s.singularize.capitalize)
+        h.format_table_tree report_items(strs,
+                                         (options[:label] || what.to_s.singularize.capitalize unless helper == :summarize_referent))
       when :raw
         strs
     end
@@ -95,37 +96,6 @@ class TagPresenter < BasePresenter
   # The taggees of a tag are only summarized in its table listing;
   # when shown on a card, the taggees should appear in an associated list
   def taggees_table_summary options={}
-=begin
-    taggees =
-        NestedBenchmark.measure '...getting taggees (old):' do
-          tagserv.taggees
-        end
-    return (options[:report_null] ? ['No Cookmarks'] : []) if taggees.empty?
-    NestedBenchmark.measure '...reporting taggees (old):' do
-      taggees.collect { |keyval|
-        klass, scope = *keyval
-        ct = scope.count
-        label = (ct > 1) ? labelled_quantity(ct, klass.model_name.human) : klass.model_name.human
-        h.format_table_summary scope.limit(5).collect { |entity| h.homelink entity, truncate: 20 }, label, options
-      }
-    end
-    taggee_ids =
-        NestedBenchmark.measure '...getting taggee_ids (new):' do
-          tagserv.taggee_ids
-        end
-    return (options[:report_null] ? ['No Cookmarks'] : []) if taggee_ids.empty?
-    NestedBenchmark.measure '...reporting taggee_ids (new):' do
-      taggee_ids.collect { |keyval|
-        classname, ids = *keyval
-        klass = classname.constantize
-        if (ct = ids.count) > 0
-          label = (ct > 1) ? labelled_quantity(ct, klass.model_name.human) : klass.model_name.human
-          entities = klass.where(id: ids[0..5]).to_a
-          h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 20 }, label, options
-        end
-      }
-    end
-=end
     summs =
         NestedBenchmark.measure '...getting taggee_samples:' do
           # Provide a collection of (direct) taggees
