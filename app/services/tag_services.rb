@@ -48,15 +48,6 @@ class TagServices
     }
   end
 
-  # Provide a collection of (direct) taggees
-  def taggee_samples limit
-    taggings.group(:entity_type).pluck(:entity_type).collect { |entity_type|
-      klass = entity_type.constantize
-      scope = taggings.where :entity_type => entity_type
-      [ klass, klass.where(id: scope.limit(limit).pluck(:entity_id)).to_a, scope.count ]
-    }
-  end
-
 # -----------------------------------------------
 
   # Get all the PageRefs associated with the tag, which consists of two populations

@@ -126,17 +126,15 @@ class TagPresenter < BasePresenter
       }
     end
 =end
-    samples =
-        NestedBenchmark.measure '...getting taggee_samples:' do
-          tagserv.taggee_samples 5
-        end
     summs =
-    NestedBenchmark.measure '...formatting taggee samples:' do
-      samples.collect { |sample|
-        klass, entities, full_count = *sample
-        h.report_items(entities, klass.model_name.human) { |entity| h.homelink entity, truncate: 50 }
-      }
-    end
+        NestedBenchmark.measure '...getting taggee_samples:' do
+          # Provide a collection of (direct) taggees
+            tag.taggings.group(:entity_type).pluck(:entity_type).collect { |entity_type|
+              h.report_items(tag.taggings.includes(:entity).where(:entity_type => entity_type),
+                             entity_type.capitalize,
+                             limit: 5) { |tagging| h.homelink tagging.entity, truncate: 100 }
+            }
+        end
     h.format_table_tree summs.compact.flatten(1)
   end
 
