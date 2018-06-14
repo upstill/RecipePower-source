@@ -51,7 +51,7 @@ module ReferentsHelper
   def ref_parents_summary ref, options={}
     set = ref.parents.includes(:canonical_expression).limit(8).collect { |parent| homelink parent.becomes(Referent) }
     if set.present?
-      label = options[:label].if_present || ('Belongs to the categor'+(set.count > 1 ? 'ies' : 'y ')).html_safe
+      label = (options[:label].if_present || ('Belongs to the categor'+(set.count > 1 ? 'ies' : 'y '))).html_safe
       set.count > 1 ? [ label, set ] : (label + set.first)
     end
   end
@@ -59,7 +59,7 @@ module ReferentsHelper
   def ref_children_summary ref, options={}
     child_summs = ref.children.includes(:canonical_expression).limit(8).collect { |child| homelink child.becomes(Referent) }
     if child_summs.present?
-      label = (options[:label].if_present || 'Category includes ')
+      label = (options[:label].if_present || 'Category includes ').html_safe
       child_summs.count > 1 ? [label, child_summs] : (label+child_summs.first)
     end
   end
