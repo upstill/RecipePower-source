@@ -58,7 +58,7 @@ module SitesHelper
     if admin_view
       set << (site.referent ? referent_summary(site.referent, header: true) : 'No Referent (!!?!)'.html_safe)
       set << "#{site.finders.present? ? 'Has' : 'No'} scraping finders".html_safe
-      set << page_ref_identifier(site.page_ref, label: 'site home page')
+      set << page_ref_identifier(site.page_ref, 'site home page')
       set << page_refs_summary
       set << report_items(site.tags, 'Tagged With', fixed_label: true)
 
