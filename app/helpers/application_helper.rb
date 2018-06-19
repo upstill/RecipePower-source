@@ -84,7 +84,7 @@ module ApplicationHelper
       render association.to_s.singularize + '_fields', f: builder
     end
     # The initializing values are all declared in the data for purposes of client-side substitution
-    initializers[0].merge id: new_object.id, fields: fields.gsub("\n", '')
+    (initializers[0] || {}).merge id: new_object.id, fields: fields.gsub("\n", '')
   end
 
   def recipe_popup(rcp)
