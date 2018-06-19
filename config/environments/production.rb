@@ -11,12 +11,12 @@ RP::Application.configure do
   config.serve_static_files = true
 
   # Compress JavaScripts and CSS
-  config.assets.js_compressor = Uglifier.new(
-      # Add new lines
-      :beautify => true,
-      # Don't add indentation
-      # :beautify_options => {:indent_level => 0}
-  ) # :uglifier
+  config.assets.js_compressor = Uglifier.new(output: {
+                                                 # Add new lines
+                                                 :beautify => true,
+                                                 # Don't add indentation
+                                                 # :beautify_options => {:indent_level => 0}
+                                             }) # :uglifier
 
   # Don't fallback to assets pipeline if a precompiled asset is missed
   config.assets.compile = false
