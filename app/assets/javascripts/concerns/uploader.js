@@ -103,7 +103,7 @@ function uploader_init(elem) {
                 // $('img#image_id')[0].src = "http:"+url
             },
             fail: function (e, data) {
-                abort_upload(elem);
+                abort_upload(elem, 'upload failure: ' + JSON.stringify(data) + JSON.stringify(upload_params));
                 console.debug( upload_params );
                 progressBar.
                     css("background", "red").
