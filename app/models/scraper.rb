@@ -41,6 +41,7 @@ class Scraper < ActiveRecord::Base
 
     scraper = self.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what, subclass: subclass)
     Rails.logger.info "!!!#{scraper.persisted? ? 'Scraper Already' : 'New Scraper'} Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
+    scraper.bkg_launch
     scraper
   end
 
@@ -146,6 +147,38 @@ class Scraper < ActiveRecord::Base
     recipe.decorate.findings = FinderServices.from_extractions(extractions) if extractions
     recipe
   end
+end
+
+class En_wikibooks_org_Scraper < Scraper
+
+  def self.handler url_or_uri
+    :wikipedia_cookbook_ingredients
+  end
+
+  def wikipedia_cookbook_ingredients
+    next_links = page.search('div#mw-pages > a')
+    next_links.each { |link|
+      if link.text.match 'next'
+        scrape link
+        break
+      end
+    }
+    ingredient_links = page.search('div.mw-category-group > ul > li > a')
+    tagnames =
+    ingredient_links.collect { |link|
+      title = link.text
+      tagname = title.sub(/^Cookbook:/, '').gsub(/_/,' ').downcase
+      puts "Tag #{tagname} getting associated with #{link}"
+      next unless title.match(/^Cookbook:/) && (URI::decode(link[:href]) == link[:href]) # Easy way to check for diacriticals
+      TagServices.define tagname,
+                         :tagtype => :Ingredient,
+                         :page_link => absolutize(link)
+      tagname
+    }.compact
+    puts "#{tagnames.count} pages pegged: "
+    puts tagnames
+  end
+
 end
 
 class Www_bbc_co_uk_Scraper < Scraper
