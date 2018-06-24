@@ -198,8 +198,8 @@ class TagServices
                 if page_link
                   # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
                   page_ref = PageRef.fetch page_link
+                  page_ref.kind = (options[:page_kind] || :about ) unless page_ref.persisted?
                   page_ref.assert_referent tag_ref if page_ref.errors.empty?
-                  page_ref.kind = options[:kind] if options[:kind].present?
                   page_ref.link_text = options[:link_text].strip if options[:link_text].present? # Force the link text to something else
                   page_ref.save! if page_ref.changed?
                   page_link

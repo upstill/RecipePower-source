@@ -172,7 +172,8 @@ class En_wikibooks_org_Scraper < Scraper
       next unless title.match(/^Cookbook:/) && (URI::decode(link[:href]) == link[:href]) # Easy way to check for diacriticals
       TagServices.define tagname,
                          :tagtype => :Ingredient,
-                         :page_link => absolutize(link)
+                         :page_link => absolutize(link),
+                         :page_kind => :about
       tagname
     }.compact
     puts "#{tagnames.count} pages pegged: "
