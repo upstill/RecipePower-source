@@ -79,6 +79,8 @@ gem "rmagick", "~> 2.16.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', "~> 1.6.6" # "~> 1.5.3"
 gem 'truncato'  # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
+# Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
+gem 'redcarpet' # https://github.com/vmg/redcarpet
 
 ###### Worker management
 gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
@@ -150,9 +152,6 @@ group :test do
 end
 
 ###### TODO are these even being used?
-
-# Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
-gem 'redcarpet' # https://github.com/vmg/redcarpet
 
 # Enables use of content_for in your controllers
 gem 'content_for_in_controllers' # https://github.com/clm-a/content_for_in_controllers

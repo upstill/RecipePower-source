@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180526221942) do
+ActiveRecord::Schema.define(version: 20180626182827) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -113,6 +113,30 @@ ActiveRecord::Schema.define(version: 20180526221942) do
   end
 
   add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
+
+  create_table "editions", force: :cascade do |t|
+    t.text     "opening"
+    t.text     "signoff"
+    t.integer  "recipe_id"
+    t.text     "recipe_before"
+    t.text     "recipe_after"
+    t.integer  "condiment_id"
+    t.string   "condiment_type",   default: "IngredientReferent"
+    t.text     "condiment_before"
+    t.text     "condiment_after"
+    t.integer  "site_id"
+    t.text     "site_before"
+    t.text     "site_after"
+    t.integer  "list_id"
+    t.text     "list_before"
+    t.text     "list_after"
+    t.integer  "guest_id"
+    t.string   "guest_type",       default: "AuthorReferent"
+    t.text     "guest_before"
+    t.text     "guest_after"
+    t.datetime "created_at",                                      null: false
+    t.datetime "updated_at",                                      null: false
+  end
 
   create_table "event_notices", force: :cascade do |t|
     t.integer  "event_id"

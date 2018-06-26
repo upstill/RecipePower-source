@@ -1,89 +1,41 @@
 <p id="notice"><%= notice %></p>
 
-<p>
-  <strong>Opening:</strong>
-  <%= @edition.opening %>
-</p>
+<%= @markdown.render(@edition.opening).html_safe if @edition.opening.present? %>
+<% if @edition.recipe %>
+    <h4>Recipe of the Week:</h4>
+    <%= @markdown.render(@edition.recipe_before).html_safe %>
+    <%= @edition.site_id %>: <%= homelink @edition.recipe.decorate %>
+    <%= @markdown.render(@edition.recipe_after).html_safe %>
+<% end %>
 
-<p>
-  <strong>Signoff:</strong>
-  <%= @edition.signoff %>
-</p>
+<% if @edition.site %>
+    <h4>Site Spotlight</h4>
+    <%= @markdown.render(@edition.site_before).html_safe %>
+    <%= @edition.site_id %>: <%= homelink @edition.site.decorate %>
+    <%= @markdown.render(@edition.site_after).html_safe %>
+<% end %>
 
-<p>
-  <strong>Recipe:</strong>
-  <%= @edition.recipe_id %>
-</p>
+<% if @edition.condiment %>
+    <h4>Condiment of the Week</h4>
+    <%= @markdown.render(@edition.condiment_before).html_safe %>
+    <%= @edition.condiment_id %>: <%= homelink @edition.condiment.decorate %>
+    <%= @markdown.render(@edition.condiment_after).html_safe %>
+<% end %>
 
-<p>
-  <strong>Recipe before:</strong>
-  <%= @edition.recipe_before %>
-</p>
+<% if @edition.list %>
+    <h4>'Tis the Season</h4>
+    <%= @markdown.render(@edition.list_before).html_safe %>
+    <%= @edition.list_id %>: <%= homelink @edition.list.decorate %>
+    <%= @markdown.render(@edition.list_after).html_safe %>
+<% end %>
 
-<p>
-  <strong>Recipe after:</strong>
-  <%= @edition.recipe_after %>
-</p>
-
-<p>
-  <strong>Site:</strong>
-  <%= @edition.site_id %>
-</p>
-
-<p>
-  <strong>Site before:</strong>
-  <%= @edition.site_before %>
-</p>
-
-<p>
-  <strong>Site after:</strong>
-  <%= @edition.site_after %>
-</p>
-
-<p>
-  <strong>List:</strong>
-  <%= @edition.list_id %>
-</p>
-
-<p>
-  <strong>List before:</strong>
-  <%= @edition.list_before %>
-</p>
-
-<p>
-  <strong>List after:</strong>
-  <%= @edition.list_after %>
-</p>
-
-<p>
-  <strong>Guest:</strong>
-  <%= @edition.guest_id %>
-</p>
-
-<p>
-  <strong>Guest before:</strong>
-  <%= @edition.guest_before %>
-</p>
-
-<p>
-  <strong>Guest after:</strong>
-  <%= @edition.guest_after %>
-</p>
-
-<p>
-  <strong>List:</strong>
-  <%= @edition.list_id %>
-</p>
-
-<p>
-  <strong>List before:</strong>
-  <%= @edition.list_before %>
-</p>
-
-<p>
-  <strong>List after:</strong>
-  <%= @edition.list_after %>
-</p>
+<% if @edition.guest %>
+    <h4>Distinguished Guest</h4>
+    <%= @markdown.render(@edition.guest_before).html_safe %>
+    <%= @edition.guest.class.to_s %> #<%= @edition.guest_id %>: <%= homelink @edition.guest.decorate %>
+    <%= @markdown.render(@edition.guest_after).html_safe %>
+<% end %>
+<%= @markdown.render(@edition.signoff).html_safe if @edition.signoff.present? %>
 
 <%= link_to 'Edit', edit_edition_path(@edition) %> |
 <%= link_to 'Back', editions_path %>

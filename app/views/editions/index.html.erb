@@ -6,49 +6,39 @@
   <thead>
     <tr>
       <th>Opening</th>
+      <th>Recipe/Recipe before/Recipe after</th>
+      <th>Site/Site beforeSite after</th>
+      <th>Condiment/Condiment before/Condiment after</th>
+      <th>List/List before/List after</th>
+      <th>Guest/Guest before/Guest after</th>
       <th>Signoff</th>
-      <th>Recipe</th>
-      <th>Recipe before</th>
-      <th>Recipe after</th>
-      <th>Site</th>
-      <th>Site before</th>
-      <th>Site after</th>
-      <th>List</th>
-      <th>List before</th>
-      <th>List after</th>
-      <th>Guest</th>
-      <th>Guest before</th>
-      <th>Guest after</th>
-      <th>List</th>
-      <th>List before</th>
-      <th>List after</th>
-      <th colspan="3"></th>
+      <th></th>
     </tr>
   </thead>
 
   <tbody>
     <% @editions.each do |edition| %>
       <tr>
-        <td><%= edition.opening %></td>
-        <td><%= edition.signoff %></td>
-        <td><%= edition.recipe_id %></td>
-        <td><%= edition.recipe_before %></td>
-        <td><%= edition.recipe_after %></td>
-        <td><%= edition.site_id %></td>
-        <td><%= edition.site_before %></td>
-        <td><%= edition.site_after %></td>
-        <td><%= edition.list_id %></td>
-        <td><%= edition.list_before %></td>
-        <td><%= edition.list_after %></td>
-        <td><%= edition.guest_id %></td>
-        <td><%= edition.guest_before %></td>
-        <td><%= edition.guest_after %></td>
-        <td><%= edition.list_id %></td>
-        <td><%= edition.list_before %></td>
-        <td><%= edition.list_after %></td>
-        <td><%= link_to 'Show', edition %></td>
-        <td><%= link_to 'Edit', edit_edition_path(edition) %></td>
-        <td><%= link_to 'Destroy', edition, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+        <td><%= (edition.opening || '').truncate(30) %></td>
+        <td><%= edition.recipe_id %>
+          <br><%= (edition.recipe_before || '').truncate(30) %>
+          <hr><%= (edition.recipe_after || '').truncate(30) %></td>
+        <td><%= edition.condiment_type %>: <%= edition.condiment_id %>
+          <br><%= (edition.condiment_before || '').truncate(30) %>
+          <hr><%= (edition.condiment_after || '').truncate(30) %></td>
+        <td><%= edition.site_id %>:
+          <br><%= (edition.site_before || '').truncate(30) %>
+          <hr><%= (edition.site_after || '').truncate(30) %></td>
+        <td><%= edition.list_id %>:
+          <br><%= (edition.list_before || '').truncate(30) %>
+          <hr><%= (edition.list_after || '').truncate(30) %></td>
+        <td><%= edition.guest_type %>: <%= edition.guest_id %>
+          <br><%= (edition.guest_before || '').truncate(30) %>
+          <hr><%= (edition.guest_after || '').truncate(30) %></td>
+        <td><%= (edition.signoff || '').truncate(30) %></td>
+        <td><%= link_to 'Show', edition %>
+          <br><%= link_to 'Edit', edit_edition_path(edition) %>
+          <br><%= link_to 'Destroy', edition, method: :delete, data: { confirm: 'Are you sure?' } %></td>
       </tr>
     <% end %>
   </tbody>

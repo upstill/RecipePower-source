@@ -8,6 +8,8 @@ class EditionsController < ApplicationController
 
   # GET /editions/1
   def show
+    @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML
+    @recipient = User.find 1
   end
 
   # GET /editions/new
@@ -53,6 +55,6 @@ class EditionsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def edition_params
-      params.require(:edition).permit(:opening, :signoff, :recipe_id, :recipe_before, :recipe_after, :site_id, :site_before, :site_after, :list_id, :list_before, :list_after, :guest_id, :guest_before, :guest_after, :list_id, :list_before, :list_after)
+      params.require(:edition).permit(:opening, :signoff, :recipe_id, :recipe_before, :recipe_after, :site_id, :site_before, :site_after, :list_id, :list_before, :list_after, :guest_id, :guest_type, :guest_before, :guest_after, :list_id, :list_before, :list_after)
     end
 end
