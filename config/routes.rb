@@ -4,6 +4,7 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  resources :editions
   get 'rp_events/show'
 
   get 'rp_events/show_page'

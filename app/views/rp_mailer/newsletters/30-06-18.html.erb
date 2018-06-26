@@ -1,0 +1,233 @@
+<!--# TODO: delete as obsolete-->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta content='text/html; charset=UTF-8' http-equiv='Content-Type' />
+		<%# stylesheet_link_tag "sharemail", :media => "all" %>
+		<style type="text/css">
+		body {
+			font:16px arial,sans-serif;
+		}
+
+		div.header_content {
+			margin: 20px 50px;
+			display: block;
+			overflow: auto;
+		}
+
+		div.message_banner {
+			font-size: 18px;
+			margin: 10px 0px 10px 10px;
+		}
+
+		div.message_box {
+			margin: 0px 50px;
+			padding-left: 15px;
+			border: 2px solid #CCCCCC;
+			display: block;
+			overflow: auto;
+			background-color: #F6F6FA;
+		}
+
+		div.message_content {
+			font-size: 18px;
+			margin: 10px 0px 10px 50px;
+		}
+
+		a.get_button {
+			float: left;
+		  display: inline-block;
+		  margin: 20px;
+		  *display: inline;
+		  /* IE7 inline-block hack */
+		  *zoom: 1;
+		  padding: 4px 12px;
+		  margin-bottom: 0;
+		  font-size: 14px;
+		  line-height: 20px;
+		  text-align: center;
+		  vertical-align: middle;
+		  cursor: pointer;
+		  color: #333333;
+		  text-shadow: 0 1px 1px rgba(255, 255, 255, 0.75);
+		  background-color: whitesmoke;
+		  background-image: -moz-linear-gradient(top, white, #e6e6e6);
+		  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(white), to(#e6e6e6));
+		  background-image: -webkit-linear-gradient(top, white, #e6e6e6);
+		  background-image: -o-linear-gradient(top, white, #e6e6e6);
+		  background-image: linear-gradient(to bottom, #ffffff, #e6e6e6);
+		  background-repeat: repeat-x;
+		  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FFFFFFFF', endColorstr='#FFE6E6E6', GradientType=0);
+		  border-color: #e6e6e6 #e6e6e6 #bfbfbf;
+		  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+		  *background-color: #e6e6e6;
+		  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+		  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+		  border: 1px solid #bbbbbb;
+		  *border: 0;
+		  border-bottom-color: #a2a2a2;
+		  -webkit-border-radius: 4px;
+		  -moz-border-radius: 4px;
+		  border-radius: 4px;
+		  *margin-left: .3em;
+		  -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+		  -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+		  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
+		}
+
+		a.get_button.btn-lg {
+			padding: 11px 19px;
+			font-size: 17.5px;
+			-webkit-border-radius: 6px;
+			-moz-border-radius: 6px;
+			border-radius: 6px;
+		}
+		a.get_button.btn-success {
+		  color: white;
+		  text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+		  background-color: #5bb65b;
+		  background-image: -moz-linear-gradient(top, #62c462, #51a351);
+		  background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+		  background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+		  background-image: -o-linear-gradient(top, #62c462, #51a351);
+		  background-image: linear-gradient(to bottom, #62c462, #51a351);
+		  background-repeat: repeat-x;
+		  filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
+		  border-color: #51a351 #51a351 #387038;
+		  border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+		  *background-color: #51a351;
+		  /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+		  filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+		}
+
+		.share_recipe_pic_box {
+			width: 150px;
+			height: 150px;
+			display: -webkit-box;
+			display: -moz-box;
+			display: box;
+			float: left;
+			margin: 10px 30px 10px 10px;
+
+			-webkit-box-orient: vertical;
+			-moz-box-orient: vertical;
+			box-orient: vertical;
+
+			-webkit-box-align: center;
+			-moz-box-align: center;
+			box-align: center;
+
+			-webkit-box-pack: center;
+			-moz-box-pack: center;
+			box-pack: center;
+		}
+
+		.share_recipe_pic_box img {
+			max-width: 100%;
+			height: auto;
+			vertical-align: middle;
+			border: 0;
+		}
+
+		div.recipe_info_box {
+			float: left;
+			margin: 30px 20px;
+		}
+
+		a.share_recipe_title {
+			// display: block;
+			// overflow: hidden;
+			// max-height: 2.8em;	
+			text-decoration: none;
+			color: #444488;
+			font-size: 1.2em;
+		}
+
+		a.share_recipe_source {
+			font-size: 1.0em;
+			color: #999;
+			text-decoration: none;
+		}
+
+		a.brand {
+			font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+			line-height: 20px;
+			text-decoration: none;
+			font-size: 20px;
+			font-weight: 200;
+			color: #999999;
+		}
+
+		div.footer {
+			margin: 20px;
+			text-align: center;
+		}
+	</style>
+  </head>
+  <body>
+  for <%= @recipient.polite_name %>, from Steve Upstill@RecipePower
+  <br>Dear Friend and/or Family Member,
+  <br>
+  Without trying a hard sell, I'd like to invite you to my new project, the RecipePower newsletter. After years of work,
+  the site is finally ready for prime time, and I want to use it myself. RecipePower is about wrangling the best recipes and food-related
+  information from around the Web, and this newsletter is going to be a weekly jolt of inspiration from my kitchen to
+  yours.
+  <br>
+  In fact, here it is--slightly padded out by introducing the various departments. Clicking on the links will save
+  the appropriate entries for you in RecipePower in addition to taking you to the thing itself.
+  <h3>Recipe of the Week</h3>
+  Recipe of the Week: Recipe #15244: To Make The World's Best Pasta Sauce, You Only Need 3 Ingredients
+  <p>Some recipes fire on all cylinders--quick, simple, economical, classic, delicious, universal appeal--but those are few and far
+  between. We'll have one for you every time we go out.</p>
+  <h3>Site of the Week</h3>
+  <p>Each week we'll ferret out some food site, novel or classic, that you might want to check out.</p>
+  <h3>Condiment of the Week</h3>
+  <p>You know how hard it is to get started on some new territory in the food world because the recipes all require
+  a drawerful of new ingredients? Well, we have a host of ingredients that will rock your world, and recipes that
+  use them without other exotica. The idea is to build up a pantry that can take on an ever-wider range of recipes.</p>
+  Sesame Oil, Chipotle Puree, Tahini, Toasted Cumin, Sichuan Bean Paste, Sichuan peppercorns, sriracha
+  <h3>Our Next Guest</h3>
+    <p>Your entrée into the cooking of notable characters whose work is spread out all over the show.</p>
+      Yotam Ottolenghi, Alice Medrich, Deborah Madison, Mark Bittman, Marcella Hazan, Lynne Kasper, Pati Jinich, Roberto Santibanez, Fuschia Dunlop, Judy Rodgers,
+  <h3>'Tis the Season</h3>
+  <p>As ingredients reach their seasonal peak, we'll swamp you with knockout ways to use them.</p>
+  <br>Asparagus! Salmon! Stonefruit! Oh My!
+  <h3>The Scoop</h3>
+  <p>That's what we've got so far, but there's more to come down the road...<i>especially</i> if you send mail to
+  . Personalized suggestions? New departments? Hot recipes/sites/ingredients/chefs we haven't found? If you see
+    something, say something.</p>
+  <p>To get the newsletter, you don't need to do anything; you're already signed up for RecipePower, so you're
+  on by default. But if you want to unsubscribe, just <%= '<click here>' %>.</p>
+		<div class="header_content">
+			<div class="message_banner">
+				<strong><%= @sender.polite_name %></strong> sez:
+				<%= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %> has a
+              <%= @recipient.shared.model_name.human.downcase %> for you.
+			</div>
+			<% unless @recipient.invitation_message.blank? %>
+				<div class="message_content">
+					<blockquote><%= @recipient.invitation_message %></blockquote>
+				</div>
+			<% end %>
+		</div>
+		<div class="message_box">
+			<%= render "rp_devise_mailer/collectible_share",
+                       accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token)
+            %>
+		</div>
+		<br>
+		<div class="message_box">
+			<div style="width:90%;margin: 20px 0px 0px;float: left;font-size:20px; font-weight:bold;">Rather not deal with this now?</div>
+			<div style="width:90%; margin: 0px;float: left;">
+				<%= link_to "Save It To RecipePower", 
+					notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
+					class: "get_button btn-lg btn-success" %>
+			</div>
+			<div style="width:90%; margin: 20px 0px;float: left; font-size:16px;">...and have it waiting for you.</div>
+		</div>
+		<div class="footer">
+	  	<p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
+			<p>Copyright 2011-2017 by RecipePower. All Rights Reserved</p>
+		</div>
+  </body>
+</html>

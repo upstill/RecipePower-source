@@ -1,0 +1,59 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Editions</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Opening</th>
+      <th>Signoff</th>
+      <th>Recipe</th>
+      <th>Recipe before</th>
+      <th>Recipe after</th>
+      <th>Site</th>
+      <th>Site before</th>
+      <th>Site after</th>
+      <th>List</th>
+      <th>List before</th>
+      <th>List after</th>
+      <th>Guest</th>
+      <th>Guest before</th>
+      <th>Guest after</th>
+      <th>List</th>
+      <th>List before</th>
+      <th>List after</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @editions.each do |edition| %>
+      <tr>
+        <td><%= edition.opening %></td>
+        <td><%= edition.signoff %></td>
+        <td><%= edition.recipe_id %></td>
+        <td><%= edition.recipe_before %></td>
+        <td><%= edition.recipe_after %></td>
+        <td><%= edition.site_id %></td>
+        <td><%= edition.site_before %></td>
+        <td><%= edition.site_after %></td>
+        <td><%= edition.list_id %></td>
+        <td><%= edition.list_before %></td>
+        <td><%= edition.list_after %></td>
+        <td><%= edition.guest_id %></td>
+        <td><%= edition.guest_before %></td>
+        <td><%= edition.guest_after %></td>
+        <td><%= edition.list_id %></td>
+        <td><%= edition.list_before %></td>
+        <td><%= edition.list_after %></td>
+        <td><%= link_to 'Show', edition %></td>
+        <td><%= link_to 'Edit', edit_edition_path(edition) %></td>
+        <td><%= link_to 'Destroy', edition, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Edition', new_edition_path %>

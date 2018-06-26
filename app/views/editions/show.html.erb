@@ -1,0 +1,89 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Opening:</strong>
+  <%= @edition.opening %>
+</p>
+
+<p>
+  <strong>Signoff:</strong>
+  <%= @edition.signoff %>
+</p>
+
+<p>
+  <strong>Recipe:</strong>
+  <%= @edition.recipe_id %>
+</p>
+
+<p>
+  <strong>Recipe before:</strong>
+  <%= @edition.recipe_before %>
+</p>
+
+<p>
+  <strong>Recipe after:</strong>
+  <%= @edition.recipe_after %>
+</p>
+
+<p>
+  <strong>Site:</strong>
+  <%= @edition.site_id %>
+</p>
+
+<p>
+  <strong>Site before:</strong>
+  <%= @edition.site_before %>
+</p>
+
+<p>
+  <strong>Site after:</strong>
+  <%= @edition.site_after %>
+</p>
+
+<p>
+  <strong>List:</strong>
+  <%= @edition.list_id %>
+</p>
+
+<p>
+  <strong>List before:</strong>
+  <%= @edition.list_before %>
+</p>
+
+<p>
+  <strong>List after:</strong>
+  <%= @edition.list_after %>
+</p>
+
+<p>
+  <strong>Guest:</strong>
+  <%= @edition.guest_id %>
+</p>
+
+<p>
+  <strong>Guest before:</strong>
+  <%= @edition.guest_before %>
+</p>
+
+<p>
+  <strong>Guest after:</strong>
+  <%= @edition.guest_after %>
+</p>
+
+<p>
+  <strong>List:</strong>
+  <%= @edition.list_id %>
+</p>
+
+<p>
+  <strong>List before:</strong>
+  <%= @edition.list_before %>
+</p>
+
+<p>
+  <strong>List after:</strong>
+  <%= @edition.list_after %>
+</p>
+
+<%= link_to 'Edit', edit_edition_path(@edition) %> |
+<%= link_to 'Back', editions_path %>

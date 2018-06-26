@@ -1,0 +1,27 @@
+<%= simple_form_for(@edition) do |f| %>
+  <%= form_errors_helper f %>
+
+  <div class="form-inputs">
+    <%= f.input :opening %>
+    <%= f.input :signoff %>
+    <%= f.input :recipe_id %>
+    <%= f.input :recipe_before %>
+    <%= f.input :recipe_after %>
+    <%= f.input :site_id %>
+    <%= f.input :site_before %>
+    <%= f.input :site_after %>
+    <%= f.input :list_id %>
+    <%= f.input :list_before %>
+    <%= f.input :list_after %>
+    <%= f.input :guest_id %>
+    <%= f.input :guest_before %>
+    <%= f.input :guest_after %>
+    <%= f.input :list_id %>
+    <%= f.input :list_before %>
+    <%= f.input :list_after %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

@@ -1,0 +1,39 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  opening: MyText
+  signoff: MyText
+  recipe_id: 1
+  recipe_before: MyText
+  recipe_after: MyText
+  site_id: 1
+  site_before: MyText
+  site_after: MyText
+  list_id: 1
+  list_before: MyText
+  list_after: MyText
+  guest_id: 1
+  guest_before: MyText
+  guest_after: MyText
+  list_id: 1
+  list_before: MyText
+  list_after: MyText
+
+two:
+  opening: MyText
+  signoff: MyText
+  recipe_id: 1
+  recipe_before: MyText
+  recipe_after: MyText
+  site_id: 1
+  site_before: MyText
+  site_after: MyText
+  list_id: 1
+  list_before: MyText
+  list_after: MyText
+  guest_id: 1
+  guest_before: MyText
+  guest_after: MyText
+  list_id: 1
+  list_before: MyText
+  list_after: MyText
