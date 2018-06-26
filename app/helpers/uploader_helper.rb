@@ -3,6 +3,12 @@ module UploaderHelper
     s3_direct_post = S3_BUCKET.presigned_post(key: "uploads/#{decorator.object.class.to_s.underscore}/#{decorator.id}/${filename}",
                                               success_action_status: 201,
                                               acl: :public_read)
+    jstr = Base64.decode64(s3_direct_post.fields['policy'])
+    js = JSON.parse jstr
+    expiration = js['expiration']
+    logger.info "Expiration: #{expiration}; Time #{Time.now}"
+    logger.info "Policy:"
+    js.each { |key, value| logger.info "    #{key}: #{value}" }
     {
         input_id: pic_preview_input_id(decorator),
         img_id: pic_preview_img_id(decorator),

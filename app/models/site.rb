@@ -186,7 +186,7 @@ public
     other.feeds = []
     self.page_ref_ids = page_ref_ids | other.page_ref_ids
     other.page_refs = []
-    super other if defined?(super) # Let the taggable, collectible, etc. modules do their work
+    super(other) if defined?(super) # Let the taggable, collectible, etc. modules do their work
     other.destroy if destroy
     save
   end

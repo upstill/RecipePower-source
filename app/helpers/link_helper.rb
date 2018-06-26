@@ -147,6 +147,8 @@ module LinkHelper
         cssclass << ' ' + user_subclass(decorator.object)
       when Referent
         decorator.object = decorator.object.becomes(Referent)
+      when Site, Tag
+        action = :associated
     end
     data = options[:data] || {}
     data[:report] = touchpath decorator

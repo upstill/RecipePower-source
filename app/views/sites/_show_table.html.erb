@@ -1,39 +1,41 @@
 <% site = decorator.object %>
 <%= present decorator, current_user_or_guest do |presenter| %>
-    <% NestedBenchmark.measure 'sites/show_table' do  %>
+    <% NestedBenchmark.measure 'sites/show_table' do %>
         <% NestedBenchmark.measure '...avatar:' do %>
             <td class="avatar-column">
               <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
               <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
             </td>
         <% end %>
-        <% NestedBenchmark.measure '...description:' do %>
-            <td class="description-column" style="width: 80%">
+        <td class="description-column" style="width: 80%">
+          <% NestedBenchmark.measure '...description:' do %>
               <%= presenter.card_homelink class: 'title-link' %>
               <%= presenter.edit_button if decorator.user_can? :edit %>
               <%= collectible_collect_button decorator, 'lg' %>
               <%# collectible_destroy_button decorator, 'xs', title: 'The Nuclear Option', style: 'margin-left: 3.8em;' %>
               <br><%= site.description.html_safe if site.description.present? %>
-            </td>
-        <% end %>
-        <% if response_service.admin_view? %>
-            <% NestedBenchmark.measure '...summaries:' do %>
-                <td>
+          <% end %>
+          <% if response_service.admin_view? %>
+              <% NestedBenchmark.measure '...summaries:' do %>
                   <!--<b>Home</b>: <%# site.home %><br>-->
-                  <%# site_summaries site, response_service.admin_view? %>
+                  <div class="site-summaries">
+                    <%= site_summaries site, response_service.admin_view? %>
+                  </div>
                   <%# site_pagerefs_summary site, separator: tag(:br) %>
-                </td>
-            <% end %>
-            <% NestedBenchmark.measure '...admin report:' do %>
-                <td class="actions-column">
-                  <%= summarize_set '', [
-                                              entity_approval(decorator),
-                                              site_similars(site),
-                                              site_glean_button(site),
-                                              site_nuke_button(site)
-                                      ] %>
-                </td>
-            <% end %>
+              <% end %>
+          <% end %>
+        </td>
+    <% end %>
+    <% if response_service.admin_view? %>
+        <% NestedBenchmark.measure '...admin report:' do %>
+            <td class="actions-column">
+              <%= safe_join [
+                      entity_approval(decorator),
+                      site_similars(site),
+                      site_glean_button(site),
+                      site_nuke_button(site)
+                  ].compact, '<br>'.html_safe %>
+            </td>
         <% end %>
     <% end %>
 <% end %>

@@ -22,6 +22,14 @@ table {
           span.homelink-item {
             font-size: 1.3em;
           }
+          div.site-summaries {
+            margin-top: 5px;
+            padding-top: 5px;
+            border-top: 1px darkgray;
+            span.homelink-item {
+              font-size: inherit;
+            }
+          }
         }
         &.actions-column {
           width: 50px;

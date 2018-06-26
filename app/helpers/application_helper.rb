@@ -84,7 +84,7 @@ module ApplicationHelper
       render association.to_s.singularize + '_fields', f: builder
     end
     # The initializing values are all declared in the data for purposes of client-side substitution
-    initializers[0].merge id: new_object.id, fields: fields.gsub("\n", '')
+    (initializers[0] || {}).merge id: new_object.id, fields: fields.gsub("\n", '')
   end
 
   def recipe_popup(rcp)
@@ -286,6 +286,47 @@ module ApplicationHelper
 
   def entity_approval_replacement decorator
     [ "span##{dom_id decorator.object}", entity_approval(decorator) ]
+  end
+
+  # Provide a labelled presentation of a collection of entities
+  # scope_or_array: either a scope for items, or a preloaded array
+  # label: string to form a header
+  # options:
+  # limit: max number of items to display
+  # fixed_label: don't include a count of items
+  # orig_size: size of the set from which the scope or array are drawn, for reporting purposes
+  def report_items scope_or_array, label, options={}, &block
+    label = labelled_quantity((options[:orig_size] || scope_or_array.count), label).sub(/^1 /, '') if label.present? && !options[:fixed_label]
+    if limit = options[:limit]
+      scope_or_array = (scope_or_array.is_a?(Array) ? scope_or_array[0..limit] : scope_or_array.limit(limit))
+    end
+    summs = if block_given?
+              scope_or_array.collect &block
+            elsif scope_or_array.first.is_a? ActiveRecord::Base
+              scope_or_array.collect { |item| homelink item }
+            else
+              scope_or_array
+            end
+    return summs unless label.present?
+    if summs.count > 1
+      [label.html_safe, summs]
+    elsif summs.present?
+      "#{label}: ".html_safe + summs.first
+    end
+  end
+
+  def format_table_tree strtree, indent=''.html_safe
+    if strtree
+      return indent + strtree if strtree.is_a?(String)
+      safe_join strtree.collect { |item|
+                  case item
+                    when String
+                      (indent + item) if item.present?
+                    when Array
+                      format_table_tree item, '&nbsp;&nbsp;&nbsp;&nbsp;'.html_safe + indent
+                  end
+                }.compact, '<br>'.html_safe
+    end
   end
 
 end

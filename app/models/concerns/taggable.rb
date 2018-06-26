@@ -90,6 +90,17 @@ module Taggable
                   )
   end
 
+  # We can't get here if we're not Pagerefable
+  def adopt_gleaning
+    if page_ref.gleaning && (tagstrings = page_ref.gleaning.results_for('Tags'))
+      ts = TaggingServices.new self
+      tagstrings.each { |tagstring|
+        tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
+      }
+    end
+    super if defined?(super)
+  end
+
 =begin
   # Provide the tags of appropriate types for the user identified by @tagging_user_id
   def tagging_tag_data options={}

@@ -61,7 +61,8 @@ gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 # gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
 gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
-gem "masonry-rails"
+gem 'masonry-rails'
+gem 'jquery-fileupload-rails'
 
 ###### Authentication and authorization
 gem 'devise', '~> 3.4.0'                       # auth, rails generate devise:install, rails generate devise MODEL

@@ -160,10 +160,9 @@ module Backgroundable
   def bkg_launch refresh=false, djopts = {}
     # We need to reload to ensure we're not stepping on existing processing.
     # Therefore, it is an error to be called with a changed record
-    if dj
-      reload
-      return true if processing?
-    end
+    reload if dj
+    return true if processing?
+
     if refresh.is_a?(Hash)
       refresh, djopts = false, refresh
     end

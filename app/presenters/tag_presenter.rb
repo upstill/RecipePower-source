@@ -21,14 +21,8 @@ class TagPresenter < BasePresenter
     # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
     set = []
     NestedBenchmark.measure '...summarizing owners:' do
-      set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5) unless tagserv.isGlobal
-    end
-    NestedBenchmark.measure '...summarizing parents:' do
-      set << self.summarize_aspect(:parents, :for => :table, :helper => :homelink, limit: 5)
-    end
-    NestedBenchmark.measure '...summarizing children:' do
-      set << self.summarize_aspect(:children, :for => :table, :helper => :homelink, limit: 5)
-    end
+      set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5)
+    end unless tagserv.isGlobal
     NestedBenchmark.measure '...summarizing referents:' do
       set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     end
@@ -83,7 +77,7 @@ class TagPresenter < BasePresenter
                          :merge_into_btn => (options[:merge_into_btn] && TagServices.new(entity).can_absorb(tag)) }
           h.summarize_tag_similar tag, entity, btn_options
         when :summarize_referent
-          h.summarize_referent entity, except: tag
+          h.summarize_referent entity, except: tag, disambiguate: (scope.count > 1)
         else
           h.public_send helper, entity
       end
@@ -92,9 +86,8 @@ class TagPresenter < BasePresenter
       when :card
         h.format_card_summary strs, { label: what.to_s }.merge(options)
       when :table
-        label = options[:label] || what.to_s.singularize.capitalize
-        counted_label = ((strs.count > 1) ? labelled_quantity(options[:count] || strs.count, label) : label) if label.present?
-        h.format_table_summary strs, (counted_label if what != :referents)
+        h.format_table_tree report_items(strs,
+                                         (options[:label] || what.to_s.singularize.capitalize unless helper == :summarize_referent))
       when :raw
         strs
     end
@@ -103,50 +96,16 @@ class TagPresenter < BasePresenter
   # The taggees of a tag are only summarized in its table listing;
   # when shown on a card, the taggees should appear in an associated list
   def taggees_table_summary options={}
-=begin
-    taggees =
-        NestedBenchmark.measure '...getting taggees (old):' do
-          tagserv.taggees
-        end
-    return (options[:report_null] ? ['No Cookmarks'] : []) if taggees.empty?
-    NestedBenchmark.measure '...reporting taggees (old):' do
-      taggees.collect { |keyval|
-        klass, scope = *keyval
-        ct = scope.count
-        label = (ct > 1) ? labelled_quantity(ct, klass.model_name.human) : klass.model_name.human
-        h.format_table_summary scope.limit(5).collect { |entity| h.homelink entity, truncate: 20 }, label, options
-      }
-    end
-    taggee_ids =
-        NestedBenchmark.measure '...getting taggee_ids (new):' do
-          tagserv.taggee_ids
-        end
-    return (options[:report_null] ? ['No Cookmarks'] : []) if taggee_ids.empty?
-    NestedBenchmark.measure '...reporting taggee_ids (new):' do
-      taggee_ids.collect { |keyval|
-        classname, ids = *keyval
-        klass = classname.constantize
-        if (ct = ids.count) > 0
-          label = (ct > 1) ? labelled_quantity(ct, klass.model_name.human) : klass.model_name.human
-          entities = klass.where(id: ids[0..5]).to_a
-          h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 20 }, label, options
-        end
-      }
-    end
-=end
-    samples =
+    summs =
         NestedBenchmark.measure '...getting taggee_samples:' do
-          tagserv.taggee_samples 5
+          # Provide a collection of (direct) taggees
+            tag.taggings.group(:entity_type).pluck(:entity_type).collect { |entity_type|
+              h.report_items(tag.taggings.includes(:entity).where(:entity_type => entity_type),
+                             entity_type.capitalize,
+                             limit: 5) { |tagging| h.homelink tagging.entity, truncate: 100 }
+            }
         end
-    NestedBenchmark.measure '...formatting taggee samples:' do
-      samples.collect { |sample|
-        klass, entities, full_count = *sample
-        if full_count > 0
-          label = (full_count > 1) ? labelled_quantity(full_count, klass.model_name.human) : klass.model_name.human
-            h.format_table_summary entities.collect { |entity| h.homelink entity, truncate: 50 }, label, options
-          end
-      }
-    end
+    h.format_table_tree summs.compact.flatten(1)
   end
 
   def card_homelink options={}
