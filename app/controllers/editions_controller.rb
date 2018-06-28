@@ -34,6 +34,7 @@ class EditionsController < ApplicationController
 
   # PATCH/PUT /editions/1
   def update
+    @edition.published = true if params[:commit].match 'Publish'
     if @edition.update(edition_params)
       redirect_to @edition, notice: 'Edition was successfully updated.'
     else

@@ -134,6 +134,9 @@ ActiveRecord::Schema.define(version: 20180626182827) do
     t.string   "guest_type",       default: "AuthorReferent"
     t.text     "guest_before"
     t.text     "guest_after"
+    t.boolean  "published",        default: false
+    t.date     "published_at"
+    t.integer  "number"
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
   end

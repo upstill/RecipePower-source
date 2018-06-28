@@ -1,0 +1,29 @@
+<% if item %>
+    <% @decorator = item.decorate %>
+    <h3><%= headline %></h3>
+    <div class="message_box">
+      <% if before_text.present? %>
+          <div class="item_text">
+            <%= @markdown.render(before_text).html_safe %>
+          </div>
+      <% end %>
+
+      <div class="cardini">
+        <% if picref = (defined?(attachments) && attachments[item.model_name].url) || @decorator.picture %>
+            <div class="share_recipe_pic_box">
+              <%= image_from_decorator(@decorator) -%>
+            </div>
+        <% end %>
+        <br>
+        <%= homelink @decorator, class: "share_recipe_title" %>
+        <br>
+
+        <div class="share_recipe_description"><%= @decorator.description %></div>
+      </div>
+    <% if after_text.present? %>
+      <div class="item_text">
+        <%= @markdown.render(after_text).html_safe %>
+      </div>
+    <% end %>
+    </div>
+<% end %>

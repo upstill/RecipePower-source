@@ -38,6 +38,7 @@ authorization do
     has_permission_on [:tags, :lists, :recipes, :feeds, :sites, :finders, :page_refs ], :to => [:destroy]
     has_permission_on [:feeds, :sites, :finders], :to => [:approve]
     has_permission_on [:users, :expressions, :links, :pages, :ratings, :recipes, :referents, :scales, :sites], :to => :manage
+    has_permission_on [:editions], :to => [:new, :create, :update, :destroy]
   end
 end
 

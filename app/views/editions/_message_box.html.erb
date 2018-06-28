@@ -1,0 +1,34 @@
+<div class="message">
+  <div class="header_content">
+    <div class="message_banner">
+      <% if @edition.published %>
+          <strong>RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>
+            )</strong>
+      <% else %>
+          <strong>RecipePower Newsletter Draft</strong>
+      <% end %>
+    </div>
+    <% if @edition.opening.present? %>
+        <div class="message_content">
+          <%= @markdown.render(@edition.opening).html_safe %>
+        </div>
+    <% end %>
+  </div>
+
+  <%= show_edition_item @edition.recipe, "Recipe of the Week", @edition.recipe_before, @edition.recipe_after %>
+  <%= show_edition_item @edition.site, "Site Spotlight", @edition.site_before, @edition.site_after %>
+  <%= show_edition_item @edition.condiment, "Condiment of the Week", @edition.condiment_before, @edition.condiment_after %>
+  <%= show_edition_item @edition.list, "'Tis the Season", @edition.list_before, @edition.list_after %>
+  <%= show_edition_item @edition.guest, "Distinguished Guest", @edition.guest_before, @edition.guest_after %>
+
+  <% if @edition.signoff.present? %>
+      <div class="message_content">
+        <%= @markdown.render(@edition.signoff).html_safe %>
+      </div>
+  <% end %>
+  <div class="footer">
+    <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
+
+    <p>Copyright 2011-2018 by RecipePower. All Rights Reserved</p>
+  </div>
+</div>
