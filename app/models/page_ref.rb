@@ -59,7 +59,7 @@ class PageRef < ActiveRecord::Base
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site
 
-  has_many :referments, :as => :referee
+  has_many :referments, :as => :referee, :dependent => :destroy
   has_many :referents, :through => :referments, inverse_of: :page_refs
 
 =begin

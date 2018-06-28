@@ -179,9 +179,8 @@ class ImageReference < Reference
   has_many :recipes, :foreign_key => :picture_id, :dependent => :nullify
   has_many :sites, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
-  has_many :referments, :as => :referee
+  has_many :referments, :as => :referee, :dependent => :destroy
   has_many :referents, :through => :referments
-  # has_many :referments, :foreign_key => :referee_id, :dependent => :nullify
 
   # Since the URL is never written once established, this method uniquely handles both
   # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)

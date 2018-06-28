@@ -33,6 +33,11 @@ class Referent < ActiveRecord::Base
   has_many :dependent_tags, :foreign_key => 'referent_id', :class_name => 'Tag', :dependent => :nullify
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
+
+  before_destroy do
+    # Must destroy any referments that refer to us as :referee
+    Referment.where(referee_id: self.id, referee_type: self.class.to_s).destroy_all
+  end
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
       PageRef
