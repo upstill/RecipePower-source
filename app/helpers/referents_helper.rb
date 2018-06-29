@@ -5,7 +5,7 @@ module ReferentsHelper
     referent.typename.html_safe +
         extra.html_safe +
         " '".html_safe +
-        referent.name.html_safe +
+        homelink(referent) +
         "' ".html_safe
   end
 
@@ -15,7 +15,7 @@ module ReferentsHelper
 
   def referent_identifier ref, label=nil
     safe_join [ (label.if_present || ref.model_name.human.split(' ').first),
-                homelink(ref.becomes(Referent)) ], ': '.html_safe
+                homelink(ref) ], ': '.html_safe
   end
 
   def referent_summary ref, options={}
@@ -49,7 +49,7 @@ module ReferentsHelper
   end
 
   def ref_parents_summary ref, options={}
-    set = ref.parents.includes(:canonical_expression).limit(8).collect { |parent| homelink parent.becomes(Referent) }
+    set = ref.parents.includes(:canonical_expression).limit(8).collect { |parent| homelink parent }
     if set.present?
       label = (options[:label].if_present || ('Belongs to the categor'+(set.count > 1 ? 'ies' : 'y '))).html_safe
       set.count > 1 ? [ label, set ] : (label + set.first)
@@ -57,7 +57,7 @@ module ReferentsHelper
   end
 
   def ref_children_summary ref, options={}
-    child_summs = ref.children.includes(:canonical_expression).limit(8).collect { |child| homelink child.becomes(Referent) }
+    child_summs = ref.children.includes(:canonical_expression).limit(8).collect { |child| homelink child }
     if child_summs.present?
       label = (options[:label].if_present || 'Category includes ').html_safe
       child_summs.count > 1 ? [label, child_summs] : (label+child_summs.first)

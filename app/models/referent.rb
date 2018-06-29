@@ -359,6 +359,7 @@ class Referent < ActiveRecord::Base
     tag = tag_or_string.is_a?(String) ? Tag.assert(tag_or_string, typenum) : tag_or_string
     if tag && (tag.tagtype == typenum)
       super tag
+      update_attribute(:tag_id, tag.id) if tag_id_changed? && tag.id # Save for later
       express tag if persisted? # Ensure the tag is listed among the expressions
       true
     elsif tag
