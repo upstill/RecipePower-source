@@ -125,7 +125,24 @@ class Referent < ActiveRecord::Base
   end
 
   def affiliates
-    referments.map &:referee
+    @affiliates ||=
+        referments.pluck(:referee_type, :referee_id).inject({}) { |memo, rfm|
+          classname = rfm.first.sub(/.*Referent/, 'Referent')
+          memo[classname] ||= []
+          memo[classname] << rfm.last
+          memo
+        }.collect { |classname, ids|
+          scope =
+              case classname
+                when 'Referent'
+                  Referent.includes :canonical_expression
+                when 'Recipe'
+                  Recipe.includes :page_ref
+                else
+                  classname.constantize
+              end
+          scope.where(id: ids).to_a
+        }.flatten
   end
 
   def absorb other, nuke_it=true
