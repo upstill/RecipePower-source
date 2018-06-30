@@ -17,7 +17,7 @@ end
 require 'type_map.rb'
 
 class Expression < ActiveRecord::Base
-  attr_accessible :tag_id, :referent_id
+  attr_accessible :tag, :tag_id, :referent, :referent_id, :locale, :form, :tagname, :tag_token, :localename, :formname
   belongs_to :tag
   belongs_to :referent
 
@@ -29,7 +29,6 @@ class Expression < ActiveRecord::Base
     tg.typenum = ref.typenum if (tg.typenum != ref.typenum) && (tg.typenum == 0)
   end
 
-  attr_accessible :tag, :tag_id, :referent, :referent_id, :locale, :form, :tagname, :tag_token, :localename, :formname
 
   @@Attribs = [:tag_id, :referent_id, :form, :locale]
 
