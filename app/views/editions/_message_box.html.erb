@@ -2,10 +2,10 @@
   <div class="header_content">
     <div class="message_banner">
       <% if @edition.published %>
-          <strong>RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>
-            )</strong>
+          <p><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>
+            )</p>
       <% else %>
-          <strong>RecipePower Newsletter Draft</strong>
+          <p><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;RecipePower Newsletter Draft</p>
       <% end %>
     </div>
     <% if @edition.opening.present? %>
@@ -22,8 +22,10 @@
   <%= show_edition_item @edition.guest, "Distinguished Guest", @edition.guest_before, @edition.guest_after %>
 
   <% if @edition.signoff.present? %>
-      <div class="message_content">
-        <%= @markdown.render(@edition.signoff).html_safe %>
+      <div class="header_content">
+        <div class="message_content">
+          <%= @markdown.render(@edition.signoff).html_safe %>
+        </div>
       </div>
   <% end %>
   <div class="footer">
