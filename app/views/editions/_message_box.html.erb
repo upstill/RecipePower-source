@@ -1,12 +1,13 @@
 <div class="message">
   <div class="header_content">
     <div class="message_banner">
-      <% if @edition.published %>
-          <p><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>
-            )</p>
+      <p class="share_recipe_title"><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;
+        <% if @edition.published %>
+          RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>)
       <% else %>
-          <p><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;RecipePower Newsletter Draft</p>
+          RecipePower Newsletter Draft
       <% end %>
+        </p>
     </div>
     <% if @edition.opening.present? %>
         <div class="message_content">

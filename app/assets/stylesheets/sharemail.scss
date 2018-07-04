@@ -4,10 +4,23 @@ div.message {
   font-weight: 400;
   line-height: 1.5em;
   font-size: 18px;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.6px;
   color: #908e8e;
   background-color: #FDFDFD;
   padding-top: 20px;
+  .share_recipe_title {
+    // display: block;
+    // overflow: hidden;
+    // max-height: 2.8em;
+    text-decoration: none;
+    color: #606060;
+    font-family: "Oxygen", sans-serif;
+    font-size: 32px;
+    letter-spacing: -1px;
+    &.box-header {
+      color: #1d6a2b;
+    }
+  }
   div.header_content {
     margin: 20px 50px;
     display: block;
@@ -88,14 +101,6 @@ div.message {
       div.recipe_info_box {
         float: left;
         margin: 30px 20px;
-      }
-      a.share_recipe_title {
-        // display: block;
-        // overflow: hidden;
-        // max-height: 2.8em;
-        text-decoration: none;
-        color: #606060;
-        font-size: 32px;
       }
       div.share_recipe_description {
         // display: block;
