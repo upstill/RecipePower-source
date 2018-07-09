@@ -10,7 +10,7 @@ module ItemHelper
       unless @decorator && @decorator.object == item
         controller.update_and_decorate item
         @decorator = controller.instance_variable_get :"@decorator"
-        instance_variable_set :"@#{item.class.to_s.underscore}", item
+        instance_variable_set :"@#{item.class.base_class.model_name.singular}", item
       end
     end
     [ item, item_mode ]

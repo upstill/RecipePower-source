@@ -33,6 +33,11 @@ class Referent < ActiveRecord::Base
   has_many :dependent_tags, :foreign_key => 'referent_id', :class_name => 'Tag', :dependent => :nullify
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
+
+  before_destroy do
+    # Must destroy any referments that refer to us as :referee
+    Referment.where(referee_id: self.id, referee_type: self.class.to_s).destroy_all
+  end
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
       PageRef
@@ -120,7 +125,24 @@ class Referent < ActiveRecord::Base
   end
 
   def affiliates
-    referments.map &:referee
+    @affiliates ||=
+        referments.pluck(:referee_type, :referee_id).inject({}) { |memo, rfm|
+          classname = rfm.first.sub(/.*Referent/, 'Referent')
+          memo[classname] ||= []
+          memo[classname] << rfm.last
+          memo
+        }.collect { |classname, ids|
+          scope =
+              case classname
+                when 'Referent'
+                  Referent.includes :canonical_expression
+                when 'Recipe'
+                  Recipe.includes :page_ref
+                else
+                  classname.constantize
+              end
+          scope.where(id: ids).to_a
+        }.flatten
   end
 
   def absorb other, nuke_it=true
@@ -337,6 +359,7 @@ class Referent < ActiveRecord::Base
     tag = tag_or_string.is_a?(String) ? Tag.assert(tag_or_string, typenum) : tag_or_string
     if tag && (tag.tagtype == typenum)
       super tag
+      update_attribute(:tag_id, tag.id) if tag_id_changed? && tag.id # Save for later
       express tag if persisted? # Ensure the tag is listed among the expressions
       true
     elsif tag

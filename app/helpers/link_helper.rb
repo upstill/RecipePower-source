@@ -146,7 +146,7 @@ module LinkHelper
         action = :collection
         cssclass << ' ' + user_subclass(decorator.object)
       when Referent
-        decorator.object = decorator.object.becomes(Referent)
+        # decorator.object = decorator.object.becomes(Referent)
       when Site, Tag
         action = :associated
     end

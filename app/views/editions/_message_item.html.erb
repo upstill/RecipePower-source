@@ -1,7 +1,7 @@
 <% if item %>
     <% @decorator = item.decorate %>
-    <h3><%= headline %></h3>
     <div class="message_box">
+      <h3 class="share_recipe_title box-header">>&nbsp;<%= headline %></h3>
       <% if before_text.present? %>
           <div class="item_text">
             <%= @markdown.render(before_text).html_safe %>

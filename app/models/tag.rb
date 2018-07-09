@@ -100,6 +100,11 @@ class Tag < ActiveRecord::Base
     self.primary_meaning ||= (referents.first.becomes(Referent) if referents.first)
   end
 
+  def meaning=ref
+    self.primary_meaning = ref.becomes(Referent)
+    self.referents << ref unless self.referent_ids.include?(ref.id)
+  end
+
   # Delete this tag only if it's safe to do so
   def safe_destroy
     destroy if taggings.empty? && expressions.empty? && dependent_lists.empty?

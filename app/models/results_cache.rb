@@ -1561,7 +1561,7 @@ class ReferentsIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= typeclass.unscoped # (typeclass == Referent) ? Referent.unscoped : Referent.where(type: typeclass)
+    @itemscope ||= (typeclass == 'Referent') ? Referent.unscoped : Referent.where(type: typeclass)
   end
 
 end
