@@ -1,20 +1,56 @@
 div.message {
   font: 16px arial, sans-serif;
+  // font: 16px arial, sans-serif;
+  font-family: "Archivo Narrow", "Helvetica Neue", Helvetica, Arial, Calibri, sans-serif;
+  font-weight: 400;
+  line-height: 1.5em;
+  font-size: 18px;
+  letter-spacing: 0.6px;
+  color: #908e8e;
+  background-color: #FDFDFD;
+  padding-top: 20px;
+  .share_recipe_title {
+    // display: block;
+    // overflow: hidden;
+    // max-height: 2.8em;
+    text-decoration: none;
+    color: #606060;
+    //font-family: "Oxygen", sans-serif;
+    //font-family: "Libre Franklin", sans-serif;
+    //font-family: "Hind Siliguri", sans-serif;
+    //font-family: "Tangerine", sans-serif;
+    //font-family: "Josefin Sans", sans-serif;
+    //font-family: "PT Sans Caption", sans-serif;
+    //font-family: "Heebo", sans-serif;
+    font-family: "Muli", sans-serif;
+    font-size: 32px;
+    letter-spacing: -1px;
+    &.box-header {
+      color: #1d6a2b;
+    }
+  }
   div.header_content {
     margin: 20px 50px;
     display: block;
     overflow: auto;
-    line-height: 24px;
-    font: inherit;
-  }
-
-  div.message_banner {
-    font-size: 24px;
-    margin: 10px 0px 10px 10px;
-  }
-
-  div.item_text {
-    font-size: 16px;
+    div.message_banner {
+      letter-spacing: 1px;
+      color: #606060;
+      margin: 0px 10px 30px 0px;
+      img {
+        width: 250px;
+      }
+      p {
+        // text-align: center;
+      }
+    }
+    div.message_content {
+      font-size: 18px;
+      margin: 10px 40px ;
+      p {
+        line-height: 1.8em;
+      }
+    }
   }
 
   div.message_box {

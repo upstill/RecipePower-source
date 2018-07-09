@@ -1,3 +1,23 @@
-<%= modal_dialog 'edit_tag new-style green', "Editing tag #{@tag.id.to_s}: #{@tag.name}" do %>
-  <%= render 'form' %>
+<% if @alert_choices %>
+    <%= choice_alert 'A Quick Question', 'new-style green', entity: @tag, choices: @alert_choices do |f| %>
+        <%= f.hidden_field :name %>
+        <%= f.hidden_field :tagtype %>
+        <% if @alert_choices.count > 1 %>
+            '<%= @tag.name %>' is already defined as <%= @oldtype.with_article %> name.
+            <br>Do you mean it should be <%= @tag.typename.with_article %> and <span style="text-decoration: underline">not</span> <%= @oldtype.with_article %>,
+            <br>or be defined as <span style="text-decoration: underline">both</span> <%= @tag.typename %> <span style="text-decoration: underline">and</span> <%= @oldtype %>?
+        <% else %>
+            '<%= @tag.name %>' can't be <span style="text-decoration: underline">changed</span> to be <%= @tag.typename.with_article %> name,
+            but it can be duplicated to be
+            both <%= @tag.typename %> <span style="text-decoration: underline">and</span> <%= @oldtype %>.
+            <br>Click 'Okay' if that's what you want, otherwise 'Cancel'.
+        <% end %>
+    <% end %>
+    <%# modal_dialog 'edit_tag new-style green', 'A Quick Question' do %>
+    <%# render 'alert_form' %>
+    <%# end %>
+<% else %>
+    <%= modal_dialog 'edit_tag new-style green', "Editing tag #{@tag.id.to_s}: #{@tag.name}" do %>
+        <%= render 'form' %>
+    <% end %>
 <% end %>

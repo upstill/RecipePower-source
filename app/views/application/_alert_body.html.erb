@@ -1,0 +1,20 @@
+<%= form_for(entity) do |f| %>
+    <%= tag :input, type: 'hidden', name: 'mode', value: 'modal' %>
+    <%= tag :input, type: 'hidden', name: 'button_name', id: 'button_name' %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert-msg">
+          <%= prompt %><%= yield f %>
+        </div>
+      </div>
+    </div>
+    <%= modal_footer do %>
+        <%# form_actions f, submit_label: 'Move', class: "btn btn-success", style: "margin-top: 10px;" %>
+        <div class='form-group actions'>
+          <%= dialog_cancel_button %>
+          <% button_options.each do |button_option| %>
+              <%= dialog_answer_button button_option.first, button_style: button_option.last %>
+          <% end %>
+        </div>
+    <% end %>
+<% end %>

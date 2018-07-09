@@ -239,22 +239,54 @@ class TagsController < ApplicationController
     @decorator = @tag.decorate
     @touched = [ @tag ]
     params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
-    if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key]
-      if other = @tag.clashing_tag
-        @touched << other
-        @decorator = (@tag = other.absorb @tag).decorate
-        flash[:popup] = 'Tag merged into like-named other'
+    # Special handling: if the tag has a Meaning, and the spec is for a change of category,
+    # we need the user to decide whether to actually
+    # change it to the new category, or duplicate it (make a synonym) in the new category
+    # '<new tagname> is already defined as a <source category>. Do you mean it should <i>really</i>
+    # be a <target category>, or be defined as BOTH <source category> AND <target category>?'
+    if (@tag.tagtype > 0) && (@tag.tagtype != params[:tag][:tagtype])
+      # Moving the tag between semantic types
+      ts = TagServices.new @tag
+      case params[:button_name]
+        when 'Duplicate', 'Okay' # 'Okay' is the acknowledgement that we have to copy; 'Duplicate' is a choice
+          # Make a duplicate tag of the target type
+          ts.retype
+          @tag = Tag.assert @tag, params[:tag][:tagtype]
+        when /Only/ # No duplication; change type with no duplication
+          # It's okay to just retype the tag during update_attributes
+          @tag = ts.retype false
+          @newtag = Tag.assert @tag, params[:tag][:tagtype]
+          @tag = @newtag.absorb(@tag, true) if @newtag != @tag
+        else
+          # :button_name param is only set in the alert => reached here from editor, responding with the alert
+          @oldtype = @tag.typename
+          @tag.tagtype = params[:tag][:tagtype]
+          @alert_choices = ts.retypeable? ? [ 'Both', "#{@tag.typename} Only"] : %w{ Okay }
+          respond_to do |format|
+            format.html { render :action => 'edit' }
+            format.json { render 'edit' }
+            format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
+          end
       end
-    end
-    respond_to do |format|
-      if @tag.errors.any?
-        format.html { render :action => 'edit' }
-        format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
-      else
-        flash[:popup] ||= 'Tag successfully updated'
-        format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
-        format.json { render }
-        format.xml  { head :ok }
+    else
+      # Keeping it the same type, possibly with a change of spelling, so we have to watch out for a name clash
+      if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key] # ...signalling a name clash, possibly
+        if other = @tag.clashing_tag
+          @touched << other
+          @decorator = (@tag = other.absorb @tag).decorate
+          flash[:popup] = 'Tag merged into like-named other'
+        end
+      end
+      respond_to do |format|
+        if @tag.errors.any?
+          format.html { render :action => 'edit' }
+          format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
+        else
+          flash[:popup] ||= 'Tag successfully updated'
+          format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
+          format.json { render }
+          format.xml  { head :ok }
+        end
       end
     end
   end

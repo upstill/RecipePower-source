@@ -173,6 +173,11 @@ class TagServices
     }
   end
 
+  # Can the associated tag have its type changed?
+  def retypeable?
+    !(parent_ids.present? || child_ids.present?)
+  end
+
 # Given a name (or the tag thereof), ensure the existence of:
 # -- a tag of the tagtype
 # -- a referent "defining" that kind of entity

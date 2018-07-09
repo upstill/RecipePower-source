@@ -148,6 +148,8 @@ open_modal = (dlog, omit_button) ->
 	# Arm event responders for the dialog
 	if typeof RP.submit != 'undefined' # The submit module has its own onload call, so we only call for new dialogs
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
+	$('.dialog-submit-button').click ->
+		$('input[name="button_name"]').val $(this).attr('value')
 	$('.dialog-cancel-button', dlog).click (event) ->
 		# When canceling, check for pending dialog/page, following instructions in the response
 		close_modal RP.dialog.enclosing_modal(event.target), 'close'

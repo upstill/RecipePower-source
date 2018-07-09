@@ -1,0 +1,22 @@
+<%= form_for(@tag) do |f| %>
+    <%= tag :input, type: 'hidden', name: 'mode', value: 'modal' %>
+    <%= tag :input, type: 'hidden', name: 'button_name', id: 'button_name' %>
+    <%= f.hidden_field :name %>
+    <%= f.hidden_field :tagtype %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="alert-msg">'<%= @tag.name %>' is already defined as <%= @oldtype.with_article %>.
+          <br>Do you mean it should be <%= @tag.typename.with_article %> and <strong>not</strong> <%= @oldtype.with_article %>,
+          <br>or be defined as <strong>both</strong> <%= @oldtype %> <strong>and</strong> <%= @tag.typename %>?
+        </div>
+      </div>
+    </div>
+    <%= modal_footer do %>
+        <%# form_actions f, submit_label: 'Move', class: "btn btn-success", style: "margin-top: 10px;" %>
+        <div class='form-group actions'>
+          <%= dialog_cancel_button %>
+          <%= dialog_answer_button 'Duplicate', button_style: 'success' %>
+          <%= dialog_answer_button 'Move', button_style: 'primary' %>
+        </div>
+    <% end %>
+<% end %>

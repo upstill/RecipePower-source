@@ -1,4 +1,5 @@
 <%= form_for(@tag) do |f| %>
+    <%= tag :input, type: 'hidden', name: 'mode', value: 'modal' %>
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">
@@ -8,7 +9,7 @@
         </div>
       </div>
     </div>
-    <% if permitted_to?(:admin, :tags) && response_service.admin_view? %>
+    <% if response_service.admin_view? %>
         <div class="row">
           <div class="col-md-12">
             <div class="form-group">

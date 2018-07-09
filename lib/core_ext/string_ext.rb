@@ -18,4 +18,8 @@ class String
   def if_present default=nil
     self.empty? ? default : self
   end
+
+  def with_article
+    ((%w{ a e i o u }.include? self[0]) ? 'an ' : 'a ') + self
+  end
 end

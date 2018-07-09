@@ -49,13 +49,47 @@ module DialogsHelper
     modal_dialog(which, ttl, options).html_safe
   end
 
+  # Construct a dialog that offers the user a choice of actions.
+  # Each choice will be expressed as a button with a label that will be passed back to the controller under :button_name
+  # title: the header string in the dialog
+  # style: the style
+  # options:
+  #     :entity: either a string for a path, or an entity which will be hit with a PATCH directive that handles the
+  #               patch in accordance with the button name
+  #     :choices: an array of strings, or string/button style pairs, for the buttons. The possible styles
+  #               are according to Bootstrap: https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
+  #     :prompt: the question being posed to the user
+  def choice_alert title, style, options={}, &block
+    styles = %w{ success primary }
+    button_options = (options.delete(:choices) || []).reverse.collect { |choice| choice.is_a?(Array) ? choice : [ choice, (styles.pop || 'default')]}
+    prompt = options.delete(:prompt) || ''
+    entity = options.delete :entity
+    options[:body_contents] =
+        render layout: 'application/alert_body', locals: { prompt: prompt, entity: entity, button_options: button_options } do |f|
+          yield f
+        end
+    modal_dialog style, title, options
+  end
+
+  # Present a modal dialog
+  # which: CSS class for dialog, including color scheme, one of 'green', 'salmon', 'purple', 'blue', 'list-dialog', 'feed-dialog'
+  # ttl: the title to be displayed in the header
+  # block: declares the contents
+  # options:
+  #     dialog_class:
+  #     header_contents:
+  #     requires: JS modules this dialog requires
+  #     body_contents: (passed to modal_body) declares body directly, obviating call to &block
+  #     prompt: (passed to modal_body)
+  #     noflash: (passed to modal_body)
+  #     body_class: (passed to modal_body)
   def modal_dialog(which, ttl=nil, options={}, &block)
     if ttl.is_a?(Hash)
       ttl, options = nil, ttl
     end
     dialog_class = options[:dialog_class]
     header = modal_header ttl, header_contents: options.delete(:header_contents)
-    options[:body_contents] ||= with_output_buffer(&block)
+    options[:body_contents] ||= with_output_buffer(&block).if_present
     body = modal_body options.slice(:prompt, :body_contents, :noflash, :body_class)
     options[:class] =
         ['dialog hide',
@@ -201,6 +235,23 @@ module DialogsHelper
         type: 'submit',
         value: label||'Save',
         data: { method: options[:method] || 'post' }
+  end
+
+  def dialog_answer_button label = nil, options={}
+    if label.is_a? Hash
+      options, label = label, nil
+    end
+    options = bootstrap_button_options options.merge(
+                                           button_style: (options[:button_style] || 'success'),
+                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
+                                       )
+    # submit_tag label, name: label, data: { name: label }
+    tag :input,
+        class: "#{options[:class]} dialog-submit-button",
+        name: 'commit',
+        type: 'submit',
+        value: label||'Save',
+        data: { name: label, method: options[:method] || 'post' }
   end
 
   # Present an 'X' close button at the top right of a dialog

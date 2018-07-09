@@ -42,6 +42,17 @@
           <%= csrf_meta_tag %>
           <meta name="viewport" content="width=device-width, initial-scale=1.0">
       <% end %>
+      <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Muli">
+      <!--
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Oxygen">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Libre Franklin">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Hind Siliguri">
+
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Tangerine">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Josefin Sans">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=PT Sans Caption">
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Heebo">
+      -->
       <% NestedBenchmark.measure 'Yielding to :head' do %>
           <%= yield :head %>
       <% end %>
