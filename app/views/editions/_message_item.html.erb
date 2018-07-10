@@ -1,7 +1,7 @@
 <% if item %>
     <% @decorator = item.decorate %>
     <div class="message_box">
-      <h3 class="share_recipe_title box-header">>&nbsp;<%= headline %></h3>
+      <h3 class="share_recipe_title box-header"><%= headline %></h3>
       <% if before_text.present? %>
           <div class="item_text">
             <%= @markdown.render(before_text).html_safe %>
@@ -9,21 +9,31 @@
       <% end %>
 
       <div class="cardini">
-        <% if picref = (defined?(attachments) && attachments[item.model_name].url) || @decorator.picture %>
+        <% if @decorator.picture %>
             <div class="share_recipe_pic_box">
-              <%= image_from_decorator(@decorator) -%>
+              <% if defined?(attachments) %>
+                  <% attachments[@decorator.dom_id] = Base64.decode64(@decorator.imgdata.sub(/^data:image\/[^;]*;base64,/, '')) %>
+                  <%= image_tag attachments[@decorator.dom_id].url -%>
+              <% else %>
+                  <%= image_from_decorator(@decorator) -%>
+              <% end %>
             </div>
         <% end %>
         <br>
-        <%= homelink @decorator, class: "share_recipe_title" %>
+        <% if defined?(attachments) %>
+            <span class="share_recipe_title"><%= @decorator.title %></span>
+        <% else %>
+            <%= homelink @decorator, class: "share_recipe_title" %>
+        <% end %>
+
         <br>
 
         <div class="share_recipe_description"><%= @decorator.description %></div>
       </div>
-    <% if after_text.present? %>
-      <div class="item_text">
-        <%= @markdown.render(after_text).html_safe %>
-      </div>
-    <% end %>
+      <% if after_text.present? %>
+          <div class="item_text">
+            <%= @markdown.render(after_text).html_safe %>
+          </div>
+      <% end %>
     </div>
 <% end %>

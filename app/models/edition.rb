@@ -22,4 +22,11 @@ class Edition < ActiveRecord::Base
       ed.number = (Edition.maximum(:number) || 0) + 1
     end
   end
+
+  def banner
+    "RecipePower Newsletter " +
+        (published ?
+        "##{number} #{published_at.strftime('%d %b, %Y')}" :
+        'Draft')
+  end
 end

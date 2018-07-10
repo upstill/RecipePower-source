@@ -1,13 +1,17 @@
 <div class="message">
   <div class="header_content">
     <div class="message_banner">
-      <p class="share_recipe_title"><%= image_tag 'rp-logo-sm.png' %>&nbsp;&nbsp;&nbsp;
-        <% if @edition.published %>
-          RecipePower Newsletter #<%= @edition.number %> (<%= @edition.published_at.strftime("%d %b, %Y") %>)
-      <% else %>
-          RecipePower Newsletter Draft
-      <% end %>
-        </p>
+      <div class="share_recipe_title">
+        <% if defined?(attachments) %>
+            <%= email_image_tag 'rp-logo-sm.png' %>
+        <% else %>
+            <%= image_tag 'rp-logo-sm.png' %>
+        <% end %>
+        <div class="banner-text">
+          <%= @edition.banner %>
+          <br><span class="subhead">All the News that's Fit to Eat</span>
+        </div>
+      </div>
     </div>
     <% if @edition.opening.present? %>
         <div class="message_content">
@@ -16,11 +20,11 @@
     <% end %>
   </div>
 
-  <%= show_edition_item @edition.recipe, "Recipe of the Week", @edition.recipe_before, @edition.recipe_after %>
-  <%= show_edition_item @edition.site, "Site Spotlight", @edition.site_before, @edition.site_after %>
-  <%= show_edition_item @edition.condiment, "Condiment of the Week", @edition.condiment_before, @edition.condiment_after %>
-  <%= show_edition_item @edition.list, "'Tis the Season", @edition.list_before, @edition.list_after %>
-  <%= show_edition_item @edition.guest, "Distinguished Guest", @edition.guest_before, @edition.guest_after %>
+  <%= show_edition_item @edition.recipe, 'Recipe of the Week', @edition.recipe_before, @edition.recipe_after %>
+  <%= show_edition_item @edition.site, 'Site Spotlight', @edition.site_before, @edition.site_after %>
+  <%= show_edition_item @edition.condiment, 'Condiment of the Week', @edition.condiment_before, @edition.condiment_after %>
+  <%= show_edition_item @edition.list, '\'Tis the Season', @edition.list_before, @edition.list_after %>
+  <%= show_edition_item @edition.guest, 'Distinguished Guest', @edition.guest_before, @edition.guest_after %>
 
   <% if @edition.signoff.present? %>
       <div class="header_content">
@@ -30,6 +34,10 @@
       </div>
   <% end %>
   <div class="footer">
+    <p>
+      To unsubscribe from this newsletter, click here.
+      <br>To cut RecipePower off altogether, click here.
+    </p>
     <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
 
     <p>Copyright 2011-2018 by RecipePower. All Rights Reserved</p>

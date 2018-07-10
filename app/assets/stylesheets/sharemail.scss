@@ -1,5 +1,4 @@
 div.message {
-  font: 16px arial, sans-serif;
   // font: 16px arial, sans-serif;
   font-family: "Archivo Narrow", "Helvetica Neue", Helvetica, Arial, Calibri, sans-serif;
   font-weight: 400;
@@ -26,7 +25,7 @@ div.message {
     font-size: 32px;
     letter-spacing: -1px;
     &.box-header {
-      color: #1d6a2b;
+      color: inherit;
     }
   }
   div.header_content {
@@ -34,14 +33,27 @@ div.message {
     display: block;
     overflow: auto;
     div.message_banner {
+      font-family: "Archivo Narrow", sans-serif;
+      font-size: 36px;
       letter-spacing: 1px;
       color: #606060;
       margin: 0px 10px 30px 0px;
       img {
         width: 250px;
       }
-      p {
-        // text-align: center;
+      div.banner-text {
+        vertical-align: top;
+        margin-top: 3px;
+        display: inline-block;
+        margin-left: 15px;
+        p {
+          // text-align: center;
+        }
+        span.subhead {
+
+          font-style: italic;
+          font-size: 20px;
+        }
       }
     }
     div.message_content {
@@ -54,30 +66,91 @@ div.message {
   }
 
   div.message_box {
-    margin: 0px 50px;
-    padding: 10px 15px;
-    border: 2px solid #CCCCCC;
+    margin: 20px 50px;
+    padding: 0px 15px 10px 15px;
     display: block;
     overflow: auto;
-    background-color: #F6F6FA;
+    outline: none; // 1px solid #c4c4c4;
+    border: none; // 1px solid #CCDDCC;
+    box-shadow: 5px 6px 10px -5px rgba(0,0,0,0.75);
+    color: #209020;
+    background-color: #e4ece6;
     p {
-      margin: 10px;
-      font: inherit;
-      line-height: 1.5em;
+      margin: 10px 30px;
+    }
+    h3 {
+      // color: #1d6a2b;
+      font-size: 36px;
+      letter-spacing: 1px;
+      margin: 32px 10px 20px 15px;
     }
     div.cardini {
       // Enclose the item "cardini" so that subsequent text is fully below the picture
       display: block;
       overflow: auto;
+      // padding: 0 25px 23px 25px;
+      margin: 10px 30px;
+      .share_recipe_pic_box {
+        width: 200px;
+        display: -webkit-box;
+        display: -moz-box;
+        display: box;
+        float: left;
+        margin: 10px 20px 10px 10px;
+
+        -webkit-box-orient: vertical;
+        -moz-box-orient: vertical;
+        box-orient: vertical;
+
+        -webkit-box-align: center;
+        -moz-box-align: center;
+        box-align: center;
+
+        -webkit-box-pack: center;
+        -moz-box-pack: center;
+        box-pack: center;
+        img {
+          max-width: 100%;
+          height: auto;
+          vertical-align: middle;
+          border: 0;
+        }
+      }
+      div.recipe_info_box {
+        float: left;
+        margin: 30px 20px;
+      }
+      div.share_recipe_description {
+        // display: block;
+        // overflow: hidden;
+        // max-height: 2.8em;
+        text-decoration: none;
+        color: #909090;
+        font-size: 1em;
+        margin: 12px;
+      }
+      a.share_recipe_source {
+        font-size: 1.0em;
+        color: #999;
+        text-decoration: none;
+      }
     }
   }
 
-  div.message_content {
-    font-size: 18px;
-    margin: 10px 0px 10px 50px;
-    p {
-      line-height: 1.8em;
-    }
+  a.brand {
+    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+    line-height: 20px;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: 200;
+    color: #999999;
+  }
+
+  div.footer {
+    margin: 20px;
+    text-align: center;
+    font-size: 16px;
+    line-height: 21px;
   }
 
   a.get_button {
@@ -119,105 +192,29 @@ div.message {
     -webkit-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
     -moz-box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
     box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2), 0 1px 2px rgba(0, 0, 0, 0.05);
-  }
-
-  a.get_button.btn-lg {
-    padding: 11px 19px;
-    font-size: 17.5px;
-    -webkit-border-radius: 6px;
-    -moz-border-radius: 6px;
-    border-radius: 6px;
-  }
-  a.get_button.btn-success {
-    color: white;
-    text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
-    background-color: #5bb65b;
-    background-image: -moz-linear-gradient(top, #62c462, #51a351);
-    background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
-    background-image: -webkit-linear-gradient(top, #62c462, #51a351);
-    background-image: -o-linear-gradient(top, #62c462, #51a351);
-    background-image: linear-gradient(to bottom, #62c462, #51a351);
-    background-repeat: repeat-x;
-    filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
-    border-color: #51a351 #51a351 #387038;
-    border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
-    *background-color: #51a351;
-    /* Darken IE7 buttons by default so they stand out more given they won't have borders */
-    filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
-  }
-
-  .share_recipe_pic_box {
-    width: 150px;
-    # height: 150px;
-    display: -webkit-box;
-    display: -moz-box;
-    display: box;
-    float: left;
-    margin: 10px 30px 10px 10px;
-
-    -webkit-box-orient: vertical;
-    -moz-box-orient: vertical;
-    box-orient: vertical;
-
-    -webkit-box-align: center;
-    -moz-box-align: center;
-    box-align: center;
-
-    -webkit-box-pack: center;
-    -moz-box-pack: center;
-    box-pack: center;
-  }
-
-  .share_recipe_pic_box img {
-    max-width: 100%;
-    height: auto;
-    vertical-align: middle;
-    border: 0;
-  }
-
-  div.recipe_info_box {
-    float: left;
-    margin: 30px 20px;
-  }
-
-  a.share_recipe_title {
-    // display: block;
-    // overflow: hidden;
-    // max-height: 2.8em;
-    text-decoration: none;
-    color: #444488;
-    font-size: 1.4em;
-  }
-
-  div.share_recipe_description {
-    // display: block;
-    // overflow: hidden;
-    // max-height: 2.8em;
-    text-decoration: none;
-    color: #909090;
-    font-size: 1em;
-    margin: 12px;
-  }
-
-  a.share_recipe_source {
-    font-size: 1.0em;
-    color: #999;
-    text-decoration: none;
-  }
-
-  a.brand {
-    font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
-    line-height: 20px;
-    text-decoration: none;
-    font-size: 20px;
-    font-weight: 200;
-    color: #999999;
-  }
-
-  div.footer {
-    margin: 20px;
-    text-align: center;
+    &.btn-lg {
+      padding: 11px 19px;
+      font-size: 17.5px;
+      -webkit-border-radius: 6px;
+      -moz-border-radius: 6px;
+      border-radius: 6px;
+    }
+    &.btn-success {
+      color: white;
+      text-shadow: 0 -1px 0 rgba(0, 0, 0, 0.25);
+      background-color: #5bb65b;
+      background-image: -moz-linear-gradient(top, #62c462, #51a351);
+      background-image: -webkit-gradient(linear, 0 0, 0 100%, from(#62c462), to(#51a351));
+      background-image: -webkit-linear-gradient(top, #62c462, #51a351);
+      background-image: -o-linear-gradient(top, #62c462, #51a351);
+      background-image: linear-gradient(to bottom, #62c462, #51a351);
+      background-repeat: repeat-x;
+      filter: progid:DXImageTransform.Microsoft.gradient(startColorstr='#FF62C462', endColorstr='#FF51A351', GradientType=0);
+      border-color: #51a351 #51a351 #387038;
+      border-color: rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.1) rgba(0, 0, 0, 0.25);
+      *background-color: #51a351;
+      /* Darken IE7 buttons by default so they stand out more given they won't have borders */
+      filter: progid:DXImageTransform.Microsoft.gradient(enabled=false);
+    }
   }
 }
-
-

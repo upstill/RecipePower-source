@@ -72,7 +72,7 @@ module LinkHelper
     options.delete :remote
 
     # Pull out button options and set classes appropriately to express the link as a button
-    bootstrap_button_options options
+    bootstrap_button_options options # if defined?(bootstrap_button_options) # Not in the mailer context
 
     query = options.delete(:query) || {} # Remove the query options from consideration and include them in the path
     format = options.delete(:format) || :json # Submitting for JSON unless otherwise stipulated
@@ -101,7 +101,7 @@ module LinkHelper
 
     # Sequester all options except HTML standard link options in the data attribute
     link_options = options.slice *attribute_names
-    link_options[:title] ||= "Your Tooltip Here"
+    link_options[:title] ||= 'Your Tooltip Here'
     data = (options[:data] ||= {}).merge options.except(*attribute_names)
     data.keys.each do |key|
       # data with keys of the form 'data-.*' get folded in directly
@@ -130,8 +130,10 @@ module LinkHelper
         (polymorphic_path(object_or_decorator) rescue nil)
   end
 
-  def touchpath decorator
-    (polymorphic_path([:touch, decorator]) rescue nil) if current_user
+  def touchpath decorator, for_user=nil
+    if for_user ||= (defined?(current_user) && current_user) # Who will get the touch
+      polymorphic_path([:touch, decorator], user_id: for_user.id) rescue nil
+    end
   end
 
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
@@ -151,7 +153,7 @@ module LinkHelper
         action = :associated
     end
     data = options[:data] || {}
-    data[:report] = touchpath decorator
+    data[:report] = touchpath decorator, options[:for_user]
 
     title = options[:title] || (decorator.title rescue "Untitled #{decorator.human_name}")
     if options[:truncate]
