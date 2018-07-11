@@ -74,4 +74,53 @@ class UserServices
     add_followee User.find(1)
     add_followee User.find(3)
   end
+
+  def self.glean_names
+    changed = User.all.to_a.keep_if { |u|
+      keep = false
+      if u.first_name.blank?
+        if u.fullname.present?
+          puts "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+          keep = UserServices.new(u).glean_names
+          puts " => #{u.first_name} | #{u.last_name}"
+        else
+          puts "Dud: #{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+        end
+      end
+      keep
+    }
+    changed.each { |u|
+      puts "'#{u.fullname}' => #{u.first_name} | #{u.last_name} (#{u.id}/#{u.email}/#{u.username})"
+    }
+    nil
+  end
+
+  def self.fix_user id, name
+    names = name.split
+    first_name = names.first
+    last_name = (names.last if names.count > 1)
+    u = User.find_by id: id
+    u.first_name = first_name
+    if last_name.present?
+      u.last_name = last_name
+      u.fullname = "#{first_name} #{last_name}"
+    end
+    u.save
+    puts "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+  end
+
+  # Infer default first and last names from the full name, and vice versa
+  def glean_names
+    if fullname.present?
+      names = fullname.split
+      # if names.count > 1
+        user.first_name = names.first unless first_name.present?
+        user.last_name = names.last if names.count > 1 && last_name.blank?
+        user.save
+      # end
+    elsif first_name.present? && last_name.present?
+      user.fullname = "#{first_name} #{last_name}"
+      user.save
+    end
+  end
 end

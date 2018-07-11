@@ -15,7 +15,12 @@
     </div>
     <% if @edition.opening.present? %>
         <div class="message_content">
-          <%= @markdown.render(@edition.opening).html_safe %>
+          <% if defined?(@recipient) && @recipient.first_name %>
+              Dear <%= @recipient.first_name.capitalize %>,
+          <% else %>
+              Hello,
+          <% end %>
+          <br><%= @markdown.render(@edition.opening).html_safe %>
         </div>
     <% end %>
   </div>
@@ -38,6 +43,7 @@
       To unsubscribe from this newsletter, click here.
       <br>To cut RecipePower off altogether, click here.
     </p>
+
     <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
 
     <p>Copyright 2011-2018 by RecipePower. All Rights Reserved</p>
