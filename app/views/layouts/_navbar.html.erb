@@ -10,5 +10,11 @@
     <% end %>
   </div>
   <%= render 'layouts/filter_header', glyphicon: 'search' %>
+  <% unless current_user %>
+    <div class="login-invitation">This is a preview.
+      <br><a class="select-content signup main" data-activate="signup">Sign Up</a>
+      or <a class="select-content signin " data-activate="signin">Sign In</a>
+      for the rest of RecipePower goodness.</div>
+  <% end %>
   <!--<div style="width: 100%; height: 15px; outline: 1px solid red"></div>-->
 </div>

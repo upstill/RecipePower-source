@@ -617,6 +617,7 @@ ActiveRecord::Schema.define(version: 20180709191329) do
     t.integer  "count_of_collecteds",                default: 0,     null: false
     t.integer  "alias_id"
     t.boolean  "subscribed",                         default: true
+    t.integer  "last_edition",                       default: 0
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree

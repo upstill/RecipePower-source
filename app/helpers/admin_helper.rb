@@ -11,6 +11,7 @@ module AdminHelper
       when :num_tags_per_recipe
         "NaN" if row[:num_recipes] == 0
     end
+    protect_against_forgery?
   end
 
   def aggregate_user_table_row row, field

@@ -118,10 +118,10 @@
                 </div>
             <%# end %>
             <%# NestedBenchmark.measure 'Rendering navbar layout' do %>
-                <%= render 'layouts/navbar' %>
             <%# end %>
         <%# end %>
     <% end %>
+    <%= render 'layouts/navbar' %>
     <% NestedBenchmark.measure 'Rendering notifications' do %>
         <%= response_service.do_notification %>
         <%= do_notifs %>

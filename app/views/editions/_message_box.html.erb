@@ -39,10 +39,11 @@
       </div>
   <% end %>
   <div class="footer">
-    <p>
-      To unsubscribe from this newsletter, click here.
-      <br>To cut RecipePower off altogether, click here.
-    </p>
+    <% if defined? @recipient %>
+        <p>
+          To unsubscribe from this newsletter, click <%= link_to 'here', unsubscribe_user_url(@recipient, subscribed: !@recipient.subscribed ) %>.
+        </p>
+    <% end %>
 
     <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
 

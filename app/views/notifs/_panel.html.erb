@@ -1,14 +1,16 @@
-<div class="notifs-holder" style="position: absolute; width: 100%; top: 50px;", onload="RP.notifs.onload(event);">
+<div class="notifs-holder" style="position: absolute; width: 100%; top: 50px;" , onload="RP.notifs.onload(event);">
   <div class="new-style notifs <%= 'collapsed' unless sections.any?(&:is_vis) %> <%= 'wide' if defined?(wide) %>">
     <div class="modal-content">
       <% unless defined?(as_alert) && as_alert %>
           <div class="modal-header">
             <!--Define the wait state of the header-->
-            <div class="header-links waiting" style="display: <%= sections.any?(&:is_vis) ? 'none' : 'block' %>" >
+            <div class="header-links waiting" style="display: <%= sections.any?(&:is_vis) ? 'none' : 'block' %>">
               <% sections.each do |section| %>
-                  <a class="select-content <%= section.signature %> <%= 'main' if section.is_main %>" data-activate="<%= section.signature %>"><%= section.title %></a>
-                  <% if section != sections.last %>
-                      <span class="separator">&nbsp;|&nbsp;</span>
+                  <% if section.header_link %>
+                      <a class="select-content <%= section.signature %> <%= 'main' if section.is_main %>" data-activate="<%= section.signature %>"><%= section.title %></a>
+                      <% if section != sections.last %>
+                          <span class="separator">&nbsp;|&nbsp;</span>
+                      <% end %>
                   <% end %>
               <% end %>
               <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
@@ -17,9 +19,13 @@
             <% sections.each do |section| %>
                 <div class="header-links <%= section.signature %>" style="display: <%= section.is_vis ? 'block' : 'none' %>">
                   <div style="display: table; margin: 0 auto">
-                    <span><%= section.title %></span>
-                    <% (sections - [section]).each do |othersection| %>
-                        <br><a class="select-content <%= section.signature %>" data-activate="<%= othersection.signature %>"><%= othersection.title %></a>
+                    <span><%= section.title %></span><br>
+                    <% othersections = sections.find_all { |os| os.header_link && (os != section) } %>
+                    <% othersections.each do |othersection| %>
+                        <a class="select-content <%= section.signature %>" data-activate="<%= othersection.signature %>"><%= othersection.title %></a>
+                        <% if othersection != othersections.last %>
+                            &nbsp;|&nbsp;
+                        <% end %>
                     <% end %>
                   </div>
                   <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
@@ -29,7 +35,7 @@
       <% end %>
       <!--Define each section of the panel-->
       <% sections.each do |section| %>
-          <div class="selectable modal-body <%= section.signature %>" style="display:<%= section.is_vis ? :block : :hidden %>" >
+          <div class="selectable modal-body <%= section.signature %>" style="display:<%= section.is_vis ? :block : :hidden %>">
             <%= flash_notifications_div %>
             <%= render section.partial, section.to_h.merge(section.partial_locals || {}) %>
           </div>

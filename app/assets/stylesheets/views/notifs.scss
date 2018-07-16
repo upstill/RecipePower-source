@@ -136,6 +136,14 @@ div.notifs {
   }
   div.selectable {
     display: none;
+    &.newpw {
+      padding-top:  0;
+      margin: 10px;
+      div.user_login input {
+        margin: 0;
+        width: 100%;
+      }
+    }
   }
   div.modal-content {
     @include dialog-color-scheme(green);

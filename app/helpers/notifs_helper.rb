@@ -77,13 +77,22 @@ module NotifsHelper
             is_main: true,
             is_vis: (!invitee_error.nil?) || params[:notif] == 'signup',
             title: 'Sign Up',
-            partial: 'registrations/options' # 'notifs/signup'
+            partial: 'registrations/options', # 'notifs/signup',
+            header_link: true
+        )
+        sections << OpenStruct.new( # Forgot Password
+            signature: 'newpw',
+            title: 'Forgot Password',
+            is_vis: params[:notif] == 'newpw',
+            partial: 'devise/passwords/form_new',
+            header_link: false
         )
         sections << OpenStruct.new(# Sign In
             signature: 'signin',
             title: 'Sign In',
             is_vis: params[:notif] == 'signin',
-            partial: 'notifs/signin'
+            partial: 'notifs/signin',
+            header_link: true
         )
       end
     end

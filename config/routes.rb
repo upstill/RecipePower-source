@@ -148,6 +148,7 @@ RP::Application.routes.draw do
       post 'follow'
       get 'getpic'
       patch 'sendmail'
+      get 'unsubscribe'
       get 'sendmail', :as => "mailto"
     end
   end

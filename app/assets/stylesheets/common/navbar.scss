@@ -241,7 +241,8 @@ body.logged-in {
       }
     }
     // @include transition(max-height 0.5s);
-    @include respond-to(largish-down) { // Mobile menu: stacks up and fills the screen
+    @include respond-to(largish-down) {
+      // Mobile menu: stacks up and fills the screen
       width: 100%;
       z-index: $header-depth;
       /*
@@ -366,6 +367,22 @@ body.logged-in {
   background-color: #f1f1f0;
   padding-top: 0;
   border-bottom: 4px solid $header-outline-color;
+  div.login-invitation {
+    display: inline-block;
+    margin-top: 6px;
+    vertical-align: top;
+    font-size: 1.2em;
+    font-family: "Archivo-Narrow", "Archivo Narrow", "Helvetica Neue", Helvetica, Arial, sans-serif;
+    font-weight: 700;
+    color: #909090;
+    letter-spacing: 1.5px;
+    margin-bottom: 3px;
+    margin-left: 9px;
+    background-color: inherit;
+    a.select-content {
+      color: #b39f4d;
+    }
+  }
   // Default layout for the header (not logged-in)
   @include respond-to(phone) {
     padding-left: $logo-clearance-xs;
@@ -423,7 +440,9 @@ body.logged-in {
     margin-bottom: 0;
   }
   div.triggered-form {
-    margin: 0 3px 0 3px;
+    display: inline-block;
+    margin: 5px;
+    padding-left: 7px;
     z-index: $header-depth;
     div.token-input-holder {
       width: 100%;
