@@ -314,6 +314,8 @@ private
               self.fullname = uname.strip.titleize if self.fullname.blank?
           end
       end
+      # Catch the user up on the newsletter, except for the last published issue
+      self.last_edition = (Edition.where(published: true).maximum(:id) || 1)-1 if subscribed && subscribed_changed?
   end
 
   has_many :authentications, :dependent => :destroy
