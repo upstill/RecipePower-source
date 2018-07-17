@@ -2,6 +2,9 @@ require 'type_map.rb'
 require 'rp_event.rb'
 
 class User < ActiveRecord::Base
+  # The users are backgroundable to mail the latest newsletter
+  include Backgroundable
+  backgroundable :status
 #  acts_as_notifier :printable_notifier_name => :username,
 #                   :printable_name => :salutation
 
@@ -510,6 +513,19 @@ private
 
   def shared= entity
     @shared_class, @shared_id = entity ? [ entity.class, entity.id ] : []
+  end
+
+  def perform # Do a DelayedJob task by emailing the earliest unseen Newsletter
+    if edition_id = Edition.where("id > #{last_edition}").where(published: true).minimum(:id)
+      edition = Edition.find_by id: edition_id
+      begin
+        RpMailer.newsletter(edition, self).deliver_now
+        self.last_edition = edition.id
+        return save
+      rescue Exception => e
+        return false
+      end
+    end
   end
 
   private

@@ -1,16 +1,20 @@
 <%= modal_dialog 'new-style green', 'Unsubscribed', entity: @user do |f| %>
     <div class="row">
       <div class="col-md-12">
-        <p>You're now unsubscribed from the RecipePower Newsletter. If you feel you've reached this
-          situation in error, click Undo below, otherwise Okay.</p>
-        <p>PS: If you ever change your mind, you can re-subscribe in your Profile.</p>
+        <div style="margin: 0 15px">
+          <p>You're now unsubscribed from the RecipePower Newsletter. If you feel you've reached this
+            situation in error, click Undo below, otherwise Okay.</p>
+          <p>PS: If you ever change your mind, you can re-subscribe in your Profile.</p>
+        </div>
         <%= modal_footer do %>
             <%= button_to_submit 'Undo',
                                  unsubscribe_user_path(@user,
                                                        'user[subscribed]' => true,
                                                        format: 'json',
                                                        id: Rails.application.message_verifier(:unsubscribe).generate(@user.id)),
-                                 class: 'form-button' %>
+                                 'success',
+                                 class: 'form-button',
+                                 style: 'color: white' %>
             <%= dialog_cancel_button 'Okay' %>
         <% end %>
       </div>

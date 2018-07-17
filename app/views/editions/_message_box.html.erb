@@ -44,7 +44,8 @@
           To unsubscribe from this newsletter, click <%= link_to 'here', unsubscribe_user_url(@recipient,
                                                                                               id: @unsubscribe,
                                                                                               :format => :html,
-                                                                                              :mode => :modal ) %>.
+                                                                                              :mode => :modal ),
+                                                                 target: '_blank' %>.
         </p>
     <% end %>
 

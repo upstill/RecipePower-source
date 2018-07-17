@@ -139,6 +139,8 @@ ActiveRecord::Schema.define(version: 20180709191329) do
     t.integer  "number"
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
+    t.integer  "status",           default: 0
+    t.integer  "dj_id",            default: 0
   end
 
   create_table "event_notices", force: :cascade do |t|
@@ -618,6 +620,8 @@ ActiveRecord::Schema.define(version: 20180709191329) do
     t.integer  "alias_id"
     t.boolean  "subscribed",                         default: true
     t.integer  "last_edition",                       default: 0
+    t.integer  "status",                             default: 0
+    t.integer  "dj_id",                              default: 0
   end
 
   add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
