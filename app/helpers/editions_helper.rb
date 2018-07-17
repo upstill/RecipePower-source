@@ -7,10 +7,10 @@ module EditionsHelper
       when Recipe, Site
         decorator.url
       when User
-        polymorphic_url decorator.object, :protocol => :https, :action => :collection
+        polymorphic_url decorator.object, :action => :collection
       else
         # Any other item links to the internal card page
-        polymorphic_url decorator.object, :protocol => :https, :action => :associated
+        polymorphic_url decorator.object, :action => :associated
     end
   end
 

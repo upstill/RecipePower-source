@@ -4,8 +4,8 @@ require 'filtered_presenter.rb'
 class UsersController < CollectibleController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
-  before_filter :login_required, :except => [:create, :new, :show, :index, :identify, :profile, :sign_up, :collection ]
-  before_filter :authenticate_user!, :except => [:new, :show, :index, :identify, :profile, :collection]
+  before_filter :login_required, :except => [:unsubscribe, :create, :new, :show, :index, :identify, :profile, :sign_up, :collection ]
+  before_filter :authenticate_user!, :except => [:unsubscribe, :new, :show, :index, :identify, :profile, :collection]
 
   # Take a tokenInput query string and match the input against the given user's set of friends
   def match_friends
@@ -175,6 +175,22 @@ class UsersController < CollectibleController
 
   def getpic
     update_and_decorate
+  end
+
+  # Turn off newsletter subscription
+  def unsubscribe
+    user_id = Rails.application.message_verifier(:unsubscribe).verify params[:id]
+    @user = User.find user_id
+    @user.subscribed = params[:user] && (params[:user][:subscribed] == 'true')
+    update_and_decorate @user
+    @user.save
+    if @user.subscribed
+      respond_to do |format|
+        format.json { render json: { done: true, popup: 'Unsubscribe Reversed. Thanks for Reading!' } }
+      end
+    else
+      smartrender # render :controller => :pages, :action => :home
+    end
   end
 
   def update

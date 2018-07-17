@@ -4,6 +4,7 @@ authorization do
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :associated]
     has_permission_on [:tags], :to => [:show, :match, :query, :associated ]
+    has_permission_on [:users], :to => [ :unsubscribe ] # ...following pre-authorized links
   end
   
   role :user do

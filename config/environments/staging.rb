@@ -55,7 +55,7 @@ RP::Application.configure do
 
   # Disable delivery errors, bad email addresses will be ignored
   config.action_mailer.raise_delivery_errors = true
-  config.action_mailer.default_url_options = { :host => 'staging.recipepower.com' }
+  config.action_mailer.default_url_options = { :protocol => :https, :host => 'staging.recipepower.com' }
   
 =begin
   config.action_mailer.delivery_method = :smtp

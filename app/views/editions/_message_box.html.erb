@@ -41,7 +41,10 @@
   <div class="footer">
     <% if defined? @recipient %>
         <p>
-          To unsubscribe from this newsletter, click <%= link_to 'here', unsubscribe_user_url(@recipient, subscribed: !@recipient.subscribed ) %>.
+          To unsubscribe from this newsletter, click <%= link_to 'here', unsubscribe_user_url(@recipient,
+                                                                                              id: @unsubscribe,
+                                                                                              :format => :html,
+                                                                                              :mode => :modal ) %>.
         </p>
     <% end %>
 
