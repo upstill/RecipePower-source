@@ -46,14 +46,8 @@ RP::Application.configure do
       :sender_address => %{"notifier" <notifier@recipepower.com>},
       :exception_recipients => %w{recipepowerfeedback@gmail.com}
     }  
-=begin
-  config.middleware.use ExceptionNotification,
-    :email_prefix => "[RecipePower Failure!!] ",
-    :sender_address => %{"notifier" <notifier@recipepower.com>},
-    :exception_recipients => %w{recipepowerfeedback@gmail.com}
-=end
 
-  config.action_mailer.delivery_method = :letter_opener # :smtp
+  config.action_mailer.delivery_method = :letter_opener # :smtp #
 
   config.eager_load = false # Added for Rails 4:
 
