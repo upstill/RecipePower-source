@@ -516,8 +516,8 @@ private
   end
 
   def perform # Do a DelayedJob task by emailing the earliest unseen Newsletter
-    if edition_id = Edition.where("id > #{last_edition}").where(published: true).minimum(:id)
-      edition = Edition.find_by id: edition_id
+    if edition_num = Edition.where("number > #{last_edition}").where(published: true).minimum(:number)
+      edition = Edition.find_by number: edition_num
       begin
         RpMailer.newsletter(edition, self).deliver_now
         self.last_edition = edition.id

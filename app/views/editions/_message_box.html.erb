@@ -39,15 +39,16 @@
       </div>
   <% end %>
   <div class="footer">
-    <% if defined? @recipient %>
-        <p>
-          To unsubscribe from this newsletter, click <%= link_to 'here', unsubscribe_user_url(@recipient,
-                                                                                              id: @unsubscribe,
-                                                                                              :format => :html,
-                                                                                              :mode => :modal ),
-                                                                 target: '_blank' %>.
-        </p>
-    <% end %>
+    <p>
+      To unsubscribe from this newsletter, click
+      <%= (@recipient && @unsubscribe) ? link_to('here',
+                                                 unsubscribe_user_url(
+                                                         @recipient,
+                                                         id: @unsubscribe,
+                                                         :format => :html,
+                                                         :mode => :modal),
+                                                 target: '_blank') : 'here' %>.
+    </p>
 
     <p><a class="brand" href="<%= rp_url %>">RecipePower</a></p>
 

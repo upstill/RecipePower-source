@@ -9,7 +9,7 @@ class EditionsController < ApplicationController
   # GET /editions/1
   def show
     @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML
-    @recipient = User.find 1
+    @recipient = current_user || User.find(1)
   end
 
   # GET /editions/new
