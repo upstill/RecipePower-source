@@ -5,7 +5,7 @@ class AddSubscribedToUsers < ActiveRecord::Migration
     # :status and :dj_id are for Delayed::Job
     add_column :users, :status, :integer, default: 0
     add_column :users, :dj_id, :integer, default: 0
-    add_column :editions, :status, :integer, default: 0
-    add_column :editions, :dj_id, :integer, default: 0
+    # add_column :editions, :status, :integer, default: 0
+    # add_column :editions, :dj_id, :integer, default: 0
   end
 end

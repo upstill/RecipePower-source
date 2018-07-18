@@ -123,4 +123,15 @@ class UserServices
       user.save
     end
   end
+
+  def self.fix_names
+    # Interactively sort out names
+    User.where(first_name: nil).each { |u|
+      puts "#{u.id}(#{u.email}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+      name = gets
+      return unless name && name.length > 0
+      name.chomp!
+      UserServices.fix_user u.id, name if name.length > 0
+    }
+  end
 end
