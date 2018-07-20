@@ -115,7 +115,7 @@ class Reference < ActiveRecord::Base
   end
 
   # Get data from the reference via HTTP
-  def fetch
+  def fetch starter=nil
     def get_response url
       self.errcode = response = nil
       begin
@@ -144,7 +144,7 @@ class Reference < ActiveRecord::Base
 
     # get_response records the errcode of the last HTTP access in self.errcode
     tried = {}
-    next_try = url
+    next_try = starter || url
     until tried[next_try]
       tried[next_try] = true
       response = get_response next_try
@@ -210,6 +210,30 @@ class ImageReference < Reference
             candidates.find &:canonical || candidates.first
         end
     ]
+  end
+
+  # Provide a url that's valid anywhere. It may come direct from the IR or, if there's only thumbdata,
+  # it gets stored on AWS and returned as a link to there
+  def imgurl
+    if url.match /^\d\d\d\d-/
+      # The more complicated case: we have an IR with image data, but no URL.
+      # So we lookup the corresponding URL on AWS. If it exists, we return that;
+      # Otherwise, we CREATE it on AWS first, then return it.
+      #
+      # Does the resource exist? If so, we just return the link
+      path = "uploads/reference/#{id}.png"
+      obj = S3_BUCKET.objects[path]
+      unless obj.exists?
+        puts 'Creating AWS file ' + path
+        # The nut of the problem: take the image in the thumbdata, upload it to aws, and return the link
+        b64 = thumbdata.sub 'data:image/png;base64,', ''
+        img = Magick::Image.read_inline(b64).first
+        S3_BUCKET.objects[path].write img.to_blob, {:acl=>:public_read}
+      end
+      obj.public_url.to_s
+    else
+      return url
+    end
   end
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
