@@ -7,7 +7,7 @@ body.editions {
   color: #908e8e;
   background-color: #FDFDFD;
   table.message-banner {
-    margin: 0px 50px;
+    margin: 0;
     td.logo {
       img {
         width: 250px;
@@ -15,7 +15,7 @@ body.editions {
     }
     td.banner-text {
       font-family: "Archivo Narrow", sans-serif;
-      font-size: 36px;
+      font-size: 24px;
       letter-spacing: 1px;
       color: #606060;
       padding: 15px;
@@ -28,7 +28,7 @@ body.editions {
   p {
     font-size: 18px;
     margin: 10px 40px;
-    line-height: 1.8em;
+    line-height: 1.2em;
   }
   p.footer {
     margin: 20px;
@@ -110,7 +110,7 @@ body.editions {
         //font-family: "PT Sans Caption", sans-serif;
         //font-family: "Heebo", sans-serif;
         font-family: "Muli", sans-serif;
-        font-size: 32px;
+        font-size: 24px;
         letter-spacing: -1px;
         &.box-header {
           color: inherit;
