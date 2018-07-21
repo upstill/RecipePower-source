@@ -107,6 +107,11 @@ module Picable
     end
   end
 
+  # Ignore the thumbnail and return a url
+  def imgurl
+    picref.imgurl if picref
+  end
+
   # One picable is being merged into another => transfer image
   def absorb other
     # Act only if there's not already an image in the absorber

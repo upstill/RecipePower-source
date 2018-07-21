@@ -9,12 +9,7 @@
   <div class="cardini">
     <% if decorator.picture %>
         <div class="share_recipe_pic_box">
-          <% if defined?(attachments) %>
-              <%# attachments[decorator.dom_id] = Base64.decode64(decorator.imgdata.sub(/^data:image\/[^;]*;base64,/, '')) %>
-              <%# image_tag attachments[decorator.dom_id].url -%>
-          <% else %>
-              <%= image_from_decorator(decorator) -%>
-          <% end %>
+          <%= image_tag decorator.imgurl %>
         </div>
     <% end %>
     <p class="share_recipe_title">

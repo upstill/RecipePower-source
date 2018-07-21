@@ -1,4 +1,7 @@
 class Edition < ActiveRecord::Base
+  include Backgroundable
+
+  backgroundable :status
   require 'referent.rb'
 
   attr_accessible :opening, :signoff,
@@ -17,10 +20,32 @@ class Edition < ActiveRecord::Base
   validates :guest_type, inclusion: { in: %w(User AuthorReferent), message: "%{value} is not a valid guest" }
 
   before_save do |ed|
-    if ed.published_changed? && ed.published
-      ed.published_at = Time.now
-      ed.number = (Edition.maximum(:number) || 0) + 1
+    if ed.published_changed? && ed.published # PUBLISH! Queue up mailer job
+      ed.published_at ||= Time.now
     end
+  end
+
+
+  after_save do |ed|
+    if ed.published && ed.published_at
+      # Launch if virgin/relaunch if published_at has changed
+      if ed.virgin? || (ed.dj && (ed.dj.run_at != ed.published_at))
+        ed.bkg_launch run_at: ed.published_at
+        if Rails.env.development?
+          ed.bkg_land
+        end
+      end
+    end
+  end
+
+  # The edition performs by mailing all subscribed users, one every 20 minutes (to conform to MailGun limitations)
+  def perform
+    self.number ||= (Edition.maximum(:number) || 0) + 1
+    time = Time.now + 5.seconds
+    User.where(subscribed: true).where("last_edition < #{number}").each { |u|
+      u.bkg_launch true, run_at: time
+      time = time + 20.minutes
+    }
   end
 
   def banner

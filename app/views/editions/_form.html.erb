@@ -11,14 +11,17 @@
       <%= f.input :site_before %>
       <%= f.input :site_after %>
       <%= f.input :condiment_id %>
+      <%= f.input :condiment_type, :as => :radio_buttons, :collection => %w{ Referent PageRef } %>
       <%= f.input :condiment_before %>
       <%= f.input :condiment_after %>
       <%= f.input :guest_id %>
+      <%= f.input :guest_type, :as => :radio_buttons, :collection => %w{ User Referent } %>
       <%= f.input :guest_before %>
       <%= f.input :guest_after %>
       <%= f.input :list_id %>
       <%= f.input :list_before %>
       <%= f.input :list_after %>
+      <%= f.datetime_select :published_at %>
     </div>
 
     <div class="form-actions">

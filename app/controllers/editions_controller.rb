@@ -35,7 +35,7 @@ class EditionsController < ApplicationController
   # PATCH/PUT /editions/1
   def update
     @edition.published = true if params[:commit].match 'Publish'
-    if @edition.update(edition_params)
+    if @edition.update_attributes(edition_params)
       redirect_to @edition, notice: 'Edition was successfully updated.'
     else
       render :edit
@@ -56,6 +56,11 @@ class EditionsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def edition_params
-      params.require(:edition).permit(:opening, :signoff, :recipe_id, :recipe_before, :recipe_after, :site_id, :site_before, :site_after, :list_id, :list_before, :list_after, :guest_id, :guest_type, :guest_before, :guest_after, :list_id, :list_before, :list_after)
+      params.require(:edition).permit(:opening, :signoff, :published_at,
+                                      :recipe_id, :recipe_before, :recipe_after,
+                                      :condiment_id, :condiment_type, :condiment_before, :condiment_after,
+                                      :site_id, :site_before, :site_after,
+                                      :guest_id, :guest_type, :guest_before, :guest_after,
+                                      :list_id, :list_before, :list_after)
     end
 end
