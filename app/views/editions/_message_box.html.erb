@@ -1,11 +1,13 @@
 <table class="message-banner">
   <tr>
     <td class="logo">
-      <% if defined?(attachments) %>
-          <%= email_image_tag 'rp-logo-sm.jpg' %>
-      <% else %>
-          <%= image_tag 'rp-logo-sm.png' %>
-      <% end %>
+      <a href="https://www.recipepower.com">
+        <% if defined?(attachments) %>
+            <%= email_image_tag 'rp-logo-sm.jpg' %>
+        <% else %>
+            <%= image_tag 'rp-logo-sm.png' %>
+        <% end %>
+      </a>
     </td>
     <td class="banner-text">
       <%= @edition.banner %>
