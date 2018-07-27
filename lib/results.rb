@@ -7,7 +7,7 @@ class Results < Hash
   end
 
   def results_for label
-    (self[label] || []).map(&:out).flatten.uniq
+    (self[label] || []).map(&:out).flatten.map(&:strip).map(&:if_present).compact.uniq
   end
 
   def result_for label
