@@ -13,11 +13,11 @@
         </div>
     <% end %>
     <p class="share_recipe_title">
-      <%# if defined?(attachments) %>
-        <%# decorator.title %>
-      <%# else %>
+      <% if defined?(attachments) %>
+        <%= decorator.title %>
+      <% else %>
         <%= homelink decorator %>
-      <%# end %>
+      <% end %>
     </p>
     <p class="share_recipe_description"><%= decorator.description %></p>
   </div>
