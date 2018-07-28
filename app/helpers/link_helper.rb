@@ -72,7 +72,7 @@ module LinkHelper
     options.delete :remote
 
     # Pull out button options and set classes appropriately to express the link as a button
-    bootstrap_button_options options # if defined?(bootstrap_button_options) # Not in the mailer context
+    bootstrap_button_options options if defined?(bootstrap_button_options) # Not in the mailer context
 
     query = options.delete(:query) || {} # Remove the query options from consideration and include them in the path
     format = options.delete(:format) || :json # Submitting for JSON unless otherwise stipulated
@@ -146,7 +146,7 @@ module LinkHelper
       when User
         # homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
         action = :collection
-        cssclass << ' ' + user_subclass(decorator.object)
+        cssclass << ' ' + user_subclass(decorator.object) if defined?(user_subclass)
       when Referent
         # decorator.object = decorator.object.becomes(Referent)
       when Site, Tag

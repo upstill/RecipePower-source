@@ -1,8 +1,8 @@
 class RpMailer < ActionMailer::Base
   add_template_helper EditionsHelper
-  add_template_helper UsersHelper
+  #add_template_helper UsersHelper
   add_template_helper LinkHelper
-  # add_template_helper ItemHelper
+  add_template_helper ItemHelper
   # add_template_helper BootstrapHelper
   add_template_helper EmailHelper
   # default from: "rpm@recipepower.com"
@@ -30,8 +30,9 @@ class RpMailer < ActionMailer::Base
     @edition = edition
     @recipient = recipient
     @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML
-    @unsubscribe = Rails.application.message_verifier(:unsubscribe).generate(@recipient.id)
-    mail :to => recipient.email, :from => 'recipepowerfeedback@gmail.com', :subject => edition.banner
+    @unsubscribe = Rails.application.message_verifier(:unsubscribe).generate @recipient.id
+    @touch_id = Rails.application.message_verifier(:touch).generate @recipient.id
+    mail :to => recipient.email, :from => '"RecipePower" <recipepowerfeedback@gmail.com>', :subject => "Newsletter ##{edition.number}" # edition.banner
   end
 
 end

@@ -1,5 +1,5 @@
 class ListsController < CollectibleController
-  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect, :card, :contents ]
+  before_filter :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card, :contents ]
 
   def index
     # seeker_result Reference, 'div.reference_list' # , clear_tags: true

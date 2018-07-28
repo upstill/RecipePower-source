@@ -115,6 +115,14 @@ body.editions {
         &.box-header {
           color: inherit;
         }
+        a {
+          font-size: 1.2em;
+          color: #5aab7a;
+          text-decoration: none;
+          &.share_recipe_internal {
+            font-size: 0.7em;
+          }
+        }
       }
       div.recipe_info_box {
         float: left;
@@ -129,12 +137,8 @@ body.editions {
         font-size: 1em;
         margin: 12px;
       }
-      a.share_recipe_source {
-        font-size: 1.0em;
-        color: #999;
-        text-decoration: none;
-      }
     }
+    /*
     a span.link-spanner {
       position: absolute;
       width: 100%;
@@ -143,6 +147,7 @@ body.editions {
       left: 0;
       z-index: 1;
     }
+    */
   }
 }
 

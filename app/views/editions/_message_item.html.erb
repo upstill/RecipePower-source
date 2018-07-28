@@ -13,10 +13,14 @@
         </div>
     <% end %>
     <p class="share_recipe_title">
+      <a href="<%= item_link %>" , target="_blank"><%= decorator.title %></a>
+      <% unless item_link.match('recipepower') %>
+          &nbsp;&nbsp;<a class="share_recipe_internal" href="<%= polymorphic_url [:touch, decorator.object], :user_id => @touch_id, :collect => true %>", target="_blank">Collect in RecipePower</a>
+      <% end %>
       <%# if defined?(attachments) %>
         <%# decorator.title %>
       <%# else %>
-        <%= homelink decorator %>
+        <%# homelink decorator %>
       <%# end %>
     </p>
     <p class="share_recipe_description"><%= decorator.description %></p>
@@ -26,7 +30,9 @@
         <%= @markdown.render(after_text).html_safe %>
       </div>
   <% end %>
-  <a href="<%= item_link %>" , target="_blank">
+<!--
+  <a href="<%# item_link %>" , target="_blank">
     <span class="link-spanner"></span>
   </a>
+-->
 </div>

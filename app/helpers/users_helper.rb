@@ -97,10 +97,6 @@ module UsersHelper
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
 
-  def user_linktitle user
-    user.fullname.if_present || user.username.if_present || user.handle
-  end
-
   def user_subclass user
     user.id == current_user_or_guest_id ? 'viewer' : 'friend'
   end

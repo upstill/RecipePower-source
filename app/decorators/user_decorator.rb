@@ -4,7 +4,7 @@ class UserDecorator < CollectibleDecorator
   # delegate_all
 
   def title
-    h.user_linktitle object
+    object.fullname.if_present || object.username.if_present || object.handle
   end
 
   def sourcename

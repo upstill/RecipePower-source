@@ -1,5 +1,5 @@
 class CollectibleController < ApplicationController
-  before_filter :login_required, :except => [:index, :show, :associated, :capture, :collect, :card ]
+  before_filter :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card ]
   before_filter :allow_iframe, only: :capture
 #  protect_from_forgery except: :capture
 
@@ -224,15 +224,31 @@ class CollectibleController < ApplicationController
     # If all is well, make sure it's on the user's list
     @resource = CollectibleServices.find_or_create(params.slice(:id, :url), response_service.controller_model_class)
     if update_and_decorate(@resource) # May be defined by a subclass before calling up the chain
-      if current_user
-        current_user.touch @decorator.object
-        flash[:popup] = "Snap! Touched #{@decorator.human_name} #{@decorator.title}." unless params[:silent]
+      who = current_user ||
+      if params[:user_id]
+        user_id = Rails.application.message_verifier(:touch).verify params[:user_id]
+        User.find_by id: user_id
+      end
+      which_flash = (response_service.format == :html) ? :notice : (who ? :popup : :alert)
+      if who
+        who.touch @decorator.object, params[:collect]
+        flash[which_flash] = "Snap! #{params[:collect] ? 'Collected' : 'Touched'} '#{@decorator.title}'." unless params[:silent]
       else
-        flash[:alert] = "Sorry, you need to be logged in to touch a #{@decorator.human_name}" unless params[:silent]
+        flash[which_flash] = "Sorry, you need to be logged in to touch a #{@decorator.human_name}" unless params[:silent]
       end
     end
     resource_errors_to_flash(@decorator.object) if @decorator
-    render :errors # This won't be invoked directly by a user, so there's nothing else to render
+    respond_to do |format|
+      format.html { # This is for capturing a new recipe and tagging it using a new page.
+        begin
+          path_or_object = polymorphic_path [:associated, @resource]
+        rescue
+          path_or_object = @resource
+        end
+        redirect_to path_or_object
+      }
+      format.json { render :errors } # This won't be invoked directly by a user, so there's nothing else to render
+    end
   end
 
   # Absorb another collectible of the same type, denoted by params[:other_id]

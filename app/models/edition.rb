@@ -49,7 +49,7 @@ class Edition < ActiveRecord::Base
   end
 
   def banner
-    "RecipePower Newsletter " +
+    "Newsletter " +
         (published ?
         "##{number}: #{published_at.strftime('%d %b, %Y')}" :
         'Draft')

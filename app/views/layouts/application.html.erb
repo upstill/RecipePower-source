@@ -122,12 +122,12 @@
         <%# end %>
     <% end %>
     <%= render 'layouts/navbar' %>
+    <% NestedBenchmark.measure 'Rendering pagelet' do %>
+        <%= render 'layouts/pagelet' %>
+    <% end %>
     <% NestedBenchmark.measure 'Rendering notifications' do %>
         <%= response_service.do_notification %>
         <%= do_notifs %>
-    <% end %>
-    <% NestedBenchmark.measure 'Rendering pagelet' do %>
-        <%= render 'layouts/pagelet' %>
     <% end %>
     <% if false && Rails.env.development? %>
         <p>
