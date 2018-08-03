@@ -169,7 +169,13 @@ module CardPresentation
   def entity_links entities, options={}
     safe_join entities.collect { |entity|
       decorator = entity.decorate
-      link_to_submit decorator.title, linkpath(decorator), :mode => (options[:mode] || :partial)
+      title = decorator.title
+      if options[:external]
+        title << "  on #{decorator.site.name}" unless (entity.is_a?(Site)) || (entity.is_a?(PageRef) && entity.site?)
+        link_to title, decorator.url
+      else
+        link_to_submit title, linkpath(decorator), :mode => (options[:mode] || :partial)
+      end
     }, (options[:joinstr] || ', ').html_safe
   end
 

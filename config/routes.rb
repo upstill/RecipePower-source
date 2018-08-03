@@ -227,8 +227,7 @@ RP::Application.routes.draw do
 
   resources :feedback, :only => [:new, :create]
   resources :expressions
-  resources :referents
-  resources :referents do
+  resources :referents, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'associated'
     end

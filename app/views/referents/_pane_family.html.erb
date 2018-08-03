@@ -2,15 +2,17 @@
     <div class="token_input_field">
       <%= token_input_field f,
                             :parents,
-                            label: "Categories it's under",
+                            label: "Category(ies) this subject is under",
                             data: { type: @referent.typenum } %>
     </div>
-    <div class="token_input_field">
-      <%= token_input_field f,
-                            :children,
-                            label: "Kinds of #{@referent.name}",
-                            data: { type: @referent.typenum } %>
-    </div>
+    <% if @presenter.has_editable :children %>
+        <div class="token_input_field">
+          <%= token_input_field f,
+                                :children,
+                                label: "Kinds of #{@referent.name}",
+                                data: { type: @referent.typenum } %>
+        </div>
+    <% end %>
     <div class="token_input_field">
       <%= token_input_field f,
                             :relateds,

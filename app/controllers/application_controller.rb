@@ -135,6 +135,7 @@ class ApplicationController < ActionController::Base
     elsif @decorator && @decorator.respond_to?(:title)
       response_service.title = (@decorator.title || '').truncate(20)
     end
+    @presenter = present(entity) rescue nil # Produce a presenter if possible
     entity.errors.empty? # ...and report back status
   end
 
@@ -144,8 +145,9 @@ class ApplicationController < ActionController::Base
   end
 
   # Get a presenter for the object from within a controller
+  # TODO Should we be detecting a presenter on the subclass if such?
   def present object
-    "#{object.class}Presenter".constantize.new object, view_context
+    "#{object.class.base_class.to_s}Presenter".constantize.new object, view_context, current_user_or_guest
   end
 
   def check_flash

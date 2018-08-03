@@ -17,6 +17,11 @@ class Tagging < ActiveRecord::Base
     where entity_type: classname.to_s
   }
 
+  # Scope for the entities of a given type tagged by the tag_ids, as visible to the viewer
+  scope :tagged_scope, -> (tag_ids, entity_type, viewer) {
+    viewer_ids = viewer.follow
+  }
+
   # Return a scope on the Tagging table for the unfiltered contents of the list
   scope :list_scope, -> (list, viewerid=nil) {
     # We get everything tagged either directly by the list tag, or indirectly via

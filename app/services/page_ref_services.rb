@@ -6,14 +6,31 @@ class PageRefServices
     # @current_user = current_user
   end
 
+  # The PageRef kinds that are available for a user to declare.
+  # normally, :link, :referrable, :offering, and :event are excluded, but they can be forced
+  # by using them as parameters
+  def self.selectable_kinds include=nil
+    PageRef.kinds.except *([:link, :referrable, :offering, :event] - (include || []).map(&:to_a))
+  end
+
   # Provide an array of label/type pairs for selecting the type of a pageref
-  def self.kind_selections
-    PageRef.kinds.collect { |kind, kind_id| [ kind.gsub('_',' ').capitalize, kind ]}
+  def self.kind_selections options={}
+    kinds = PageRefServices.selectable_kinds options[:include]
+    except = (options[:except] || []).map &:to_s
+    kinds.except(*except).collect { |kind, kind_id| [ kind.gsub('_',' ').capitalize, kind ]}
   end
 
   # Try to translate a PageRef kind into English
   def self.kind_to_name kind
     kind.is_a?(Fixnum) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
+  end
+
+  # Ensure the existence of a page_ref of a particular kind with the given url
+  def self.assert kind, url
+    if pr = PageRef.fetch(url)
+      pr.kind = kind
+    end
+    pr
   end
 
   # Get a collectible, taggable entity for the PageRef. Five possibilities:

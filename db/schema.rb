@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180709191329) do
+ActiveRecord::Schema.define(version: 20180731005408) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -397,6 +397,7 @@ ActiveRecord::Schema.define(version: 20180709191329) do
     t.boolean  "isCountable"
     t.string   "description", limit: 255
     t.integer  "tag_id"
+    t.integer  "picture_id"
   end
 
   create_table "referments", force: :cascade do |t|

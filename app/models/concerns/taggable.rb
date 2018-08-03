@@ -37,8 +37,9 @@ module Taggable
     has_many :taggers, -> { uniq }, :through => :taggings, :class_name => 'User'
 
     # Scope for objects tagged by a given tag, as visible to the given viewer
-    scope :tagged_by, -> (tag, viewer_id_or_ids) {
-      joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag: tag }.compact )
+    scope :tagged_by, -> (tag_or_tags_or_id_or_ids, viewer_id_or_ids=nil) {
+      ids = [tag_or_tags_or_id_or_ids].flatten.map { |tag_or_id| tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id }
+      joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag_id: ids }.compact )
     }
 
     attr_reader :tagging_user_id

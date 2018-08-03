@@ -14,9 +14,9 @@ class ReferentValidator < ActiveModel::Validator
 end
 
 class Referent < ActiveRecord::Base
-  # include Picable
+  include Collectible
+  picable :picurl, :picture
 
-  # picable :picurl, :picture
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.
   # This relationship is implemented by the ReferentRelation table, with parent_id and child_id keys
   has_many :child_relations, :foreign_key => 'parent_id', :dependent => :destroy, :class_name => 'ReferentRelation'
@@ -341,7 +341,7 @@ class Referent < ActiveRecord::Base
       # Find or create an expression of this referent on this tag. If locale
       # or form aren't specified, match any expression
       args[:form] ||= Expression.formnum :generic
-      scrubbed_args = Expression.scrub_args(args).merge tag: tag, referent: self
+      scrubbed_args = Expression.scrub_args(args).merge tag: tag, referent: self.becomes(Referent)
       unless expressions.exists?(scrubbed_args)
         tag.save if tag.changed?
         expr = tag.expressions.create(scrubbed_args)
@@ -464,8 +464,8 @@ class Referent < ActiveRecord::Base
             pr
           end
           # Make sure the type matches
-          if pr.type != values['type']
-            pr.update_attribute :type, values['type']
+          if pr.kind != values['kind']
+            pr.update_attribute :kind, values['kind']
           end
         elsif page_refs.exists?(id: prid)
           # Nuke it

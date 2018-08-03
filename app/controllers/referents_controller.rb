@@ -1,4 +1,4 @@
-class ReferentsController < ApplicationController
+class ReferentsController < CollectibleController
     filter_access_to :all
     # Here's where we defer to different handlers for different types of referent
     @@HandlersByIndex = [ Referent, GenreReferent, DishReferent, 

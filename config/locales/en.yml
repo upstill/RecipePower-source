@@ -28,6 +28,13 @@ en:
       alphabetic: 'NAME'
       activity: 'ACTIVITY'
       meaningless: 'UNDEFINED'
+  referent:
+    tags_labels:
+      parents: 'In Categories'
+      children: "Kinds of %{name}"
+      relateds: 'See Also'
+      expressions: 'Expressions'
+      synonyms: 'Synonyms'
   definition_reference:
     label:
       tag:
