@@ -29,12 +29,24 @@ en:
       activity: 'ACTIVITY'
       meaningless: 'UNDEFINED'
   referent:
-    tags_labels:
+    card_labels:
       parents: 'In Categories'
       children: "Kinds of %{name}"
       relateds: 'See Also'
       expressions: 'Expressions'
       synonyms: 'Synonyms'
+      lists: 'Treasuries'
+      feeds: 'Feeds'
+      sites: 'Sites'
+      about: "About %{name}"
+      article: 'Article'
+      news_item: 'News Item'
+      tip: 'Tip'
+      video: 'Video'
+      home_page: 'Home'
+      product: 'Product'
+      offering: 'Offer'
+      event: 'Event'
   definition_reference:
     label:
       tag:

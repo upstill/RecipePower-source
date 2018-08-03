@@ -18,38 +18,34 @@ class ReferentPresenter < CollectiblePresenter
   end
 
   def card_aspect which
-    label = nil
     whichsym = which.to_sym
     whichstr = which.to_s.downcase.singularize
-    contents =
+    label = I18n.t "referent.card_labels.#{which}", name: decorator.title
+    counted_label = nil
+    link_options = {}
+    collection =
         case whichsym
           when :parents, :children, :relateds, :expressions, :synonyms
-            tags = decorator.visible_tags_of_kind whichsym, viewer
-            label = I18n.t "referent.tags_labels.#{which}", name: decorator.title
-            # tags = decorator.send "visible_#{whichstr}_tags" # visible_tags :tagtype => :Dish
-            # label = decorator.send("#{whichstr}_tags_label")
-            label = field_label_counted label, tags.count unless whichsym == :relateds
-            entity_links tags, joinstr: ' | '
-          when :lists
+            counted_label = label if whichsym == :relateds
+            link_options[:joinstr] = ' | '
+            decorator.visible_tags_of_kind(whichsym, viewer)
+          when :lists, :feeds, :sites
             # Lists that are tagged by an expression tag
-            feeds = decorator.tagged_entities :list, @user
-          when :feeds
-            # Feeds that are tagged by an expression tag
-            sites = decorator.tagged_entities :feed, @user
-          when :sites
-            # Sites given by associated PageRefs, or that are tagged by an expression tag
-            sites = decorator.tagged_entities :site, @user
-            label = field_label_counted 'site', sites.count
-            entity_links sites, external: true
+            link_options[:external] = whichsym == :sites
+            decorator.tagged_entities whichstr, @user
           when :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event
             # Associated PageRefs, either direct (via Referment) or indirect (tagged by one of our tags)
-            prs = decorator.page_refs whichsym
-            label = (whichsym == :about) ? "About #{decorator.title}" : field_label_counted(whichsym.to_s, prs.count)
-            entity_links prs, external: true, joinstr: '; '
+            counted_label = label if whichsym == :about
+            link_options[:external] = true
+            link_options[:joinstr] = '; '
+            decorator.page_refs whichsym
           else
             return super
         end
-    [ label, contents ]
+    [
+        (counted_label || field_label_counted(label, collection.count)),
+        entity_links(collection, link_options)
+    ]
   end
 
 end

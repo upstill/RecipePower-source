@@ -172,7 +172,7 @@ module CardPresentation
       title = decorator.title
       if options[:external]
         title << "  on #{decorator.site.name}" unless (entity.is_a?(Site)) || (entity.is_a?(PageRef) && entity.site?)
-        link_to title, decorator.url
+        link_to title, decorator.url, target: :_blank
       else
         link_to_submit title, linkpath(decorator), :mode => (options[:mode] || :partial)
       end
