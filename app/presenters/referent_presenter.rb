@@ -22,13 +22,13 @@ class ReferentPresenter < CollectiblePresenter
     whichstr = which.to_s.downcase.singularize
     label = I18n.t "referent.card_labels.#{which}", name: decorator.title
     counted_label = nil
-    link_options = {}
+    link_options = { joinstr: '; ' }
     collection =
         case whichsym
           when :parents, :children, :relateds, :expressions, :synonyms
             counted_label = label if whichsym == :relateds
             link_options[:joinstr] = ' | '
-            decorator.visible_tags_of_kind(whichsym, viewer)
+            decorator.visible_tags_of_kind whichsym, viewer
           when :lists, :feeds, :sites
             # Lists that are tagged by an expression tag
             link_options[:external] = whichsym == :sites
@@ -37,7 +37,6 @@ class ReferentPresenter < CollectiblePresenter
             # Associated PageRefs, either direct (via Referment) or indirect (tagged by one of our tags)
             counted_label = label if whichsym == :about
             link_options[:external] = true
-            link_options[:joinstr] = '; '
             decorator.page_refs whichsym
           else
             return super

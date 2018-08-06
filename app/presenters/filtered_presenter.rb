@@ -471,6 +471,18 @@ class RecipesAssociatedPresenter < FilteredPresenter
 
 end
 
+class ReferentsAssociatedPresenter < FilteredPresenter
+
+  def result_type
+    'referents.associated'
+  end
+
+  def panel_label
+    'recipes'
+  end
+
+end
+
 # Present a list of items for a user
 class UserContentPresenter < FilteredPresenter
 

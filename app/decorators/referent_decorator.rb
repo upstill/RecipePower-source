@@ -34,12 +34,12 @@ class ReferentDecorator < CollectibleDecorator
   # -- directly, via the Referments, or
   # -- indirectly, via taggings on the Referent's expressions
   def tagged_entities type, who=nil
-    entity_ids = Tagging.where(entity_type: type, tag_id: tag_ids).pluck :entity_id
+    entity_ids = Tagging.where(entity_type: type.camelize, tag_id: tag_ids).pluck :entity_id
     case type.to_sym
       when :list
-        return List.find_by(id: entity_ids).to_a
+        return List.where(id: entity_ids).to_a
       when :feed
-        return Feed.find_by(id: entity_ids).to_a
+        return Feed.where(id: entity_ids).to_a
       when :site
         entity_ids += @object.page_refs.where(kind: PageRef.kinds[:site]).pluck :site_id
         Site.includes(:page_ref).where(id: entity_ids).to_a

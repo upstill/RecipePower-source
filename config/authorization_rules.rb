@@ -2,9 +2,10 @@ authorization do
   role :guest do
     has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ]
     has_permission_on [:visitors], :to => [:create]
-    has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :associated, :touch]
+    has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :touch]
+    has_permission_on [:referents], :to => [ :read ]
     has_permission_on [:lists, :feeds, :feed_entries, :sites, :users, :page_refs, :referents ], :to => [ :touch ]
-    has_permission_on [:tags], :to => [:show, :match, :query, :associated ]
+    has_permission_on [:tags], :to => [:read, :match, :query ]
     has_permission_on [:users], :to => [ :unsubscribe ] # ...following pre-authorized links
   end
   
@@ -52,7 +53,7 @@ privileges do
     includes :new
   end
   privilege :read do
-    includes :index, :show
+    includes :index, :show, :associated
   end
   privilege :update do
     includes :edit

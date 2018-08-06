@@ -1433,6 +1433,27 @@ class TagsAssociatedCache < ResultsCache
 
 end
 
+class ReferentsAssociatedCache < ResultsCache
+  include ModelSearch
+  include CollectibleSearch
+  include TaggableSearch
+
+  def supported_org_options
+    [  ]
+  end
+
+  def referent
+    @referent ||= Referent.find_by id: @entity_id
+  end
+
+  # Everything tagged by any of the referent's tags, EXCEPT page_refs, lists, feeds and sites
+  def itemscope
+    # @itemscope ||= Tagging.where(entity_type: %w{ FeedEntry Recipe }, tag_id: referent.tag_ids)
+    return @itemscope if @itemscope
+    @itemscope ||= Recipe.joins(:taggings).where(taggings: { entity_type: Recipe, tag_id: referent.tag_ids } )
+  end
+end
+
 class SitesIndexCache < ResultsCache
   include ModelSearch
   include CollectibleSearch
