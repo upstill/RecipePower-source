@@ -1,6 +1,33 @@
 # The Registrar class registers scraping findings with the database
 class Registrar < Object
 
+  attr_accessor :url
+
+  # Initialize the Registrar for a particular url
+  def self.initialize url
+    @url = url
+  end
+
+  # Ensure that a given link (or Nokogiri spec or Mechanize node) has a valid url
+  def absolutize link_or_path, attr=:href
+    path =
+        case link_or_path
+          when String
+            link_or_path
+          when Mechanize::Page::Link
+            link_or_path.href
+          when Nokogiri::XML::Element
+            link_or_path.attribute(attr.to_s).to_s
+          when Nokogiri::XML::Attr
+            link_or_path.to_s
+          when respond_to?(attr.to_sym)
+            link_or_path.send attr.to_sym
+          when nil
+            return nil
+        end
+    path.present? ? URI.decode(safe_uri_join(url, path).to_s) : url
+  end
+
   # Ensure that a recipe has been filed, and launch it for scraping if new
   def self.register_recipe recipe_link, extractions
     scrape recipe_link
@@ -132,7 +159,7 @@ class Scraper < ActiveRecord::Base
   def perform 
     self.errcode = 0
     Rails.logger.info "!!!Scraper Started Performing #{what} on #{url} with status #{status}"
-    self.becomes(subclass.constantize).send what.to_sym
+    self.becomes(subclass.constantize).send what.to_sym # Invoke the scraper
     Rails.logger.info "!!!Scraper Finished Performing #{what} on #{url} with status #{status}"
   end
 
@@ -164,29 +191,9 @@ class Scraper < ActiveRecord::Base
       what, imm = nil, what
     end
     [link_or_links].flatten.compact.collect { |link|
-      link = absolutize link # A Mechanize object for a link
+      link = registrar.absolutize link # A Mechanize object for a link
       Scraper.assert link, what, recur
     }
-  end
-
-  # Ensure that a given link (or Nokogiri spec or Mechanize node)
-  def absolutize link_or_path, attr=:href
-    path =
-        case link_or_path
-          when String
-            link_or_path
-          when Mechanize::Page::Link
-            link_or_path.href
-          when Nokogiri::XML::Element
-            link_or_path.attribute(attr.to_s).to_s
-          when Nokogiri::XML::Attr
-            link_or_path.to_s
-          when respond_to?(attr.to_sym)
-            link_or_path.send attr.to_sym
-          when nil
-            return nil
-        end
-    path.present? ? URI.decode(safe_uri_join(url, path).to_s) : url
   end
 
   # Get the page data via Mechanize
@@ -319,7 +326,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     return unless recipe_link['href'].match /food\/recipes\//
     extractions['Title'] = recipe_link.text.strip
     if img_link = li.search('img').first
-      extractions['Image'] = absolutize img_link, :src
+      extractions['Image'] = registrar.absolutize img_link, :src
     end
     if chef_name = li.search('span.chef-name').first
       extractions['Author'] = chef_name.text
@@ -367,11 +374,8 @@ class Www_bbc_co_uk_Scraper < Scraper
 
   # Scrape the definition of a tag, and the link to the tag's page
   def tag_item li, tagtype=nil
-    entity_page = absolutize(entity_link = li.search('a').first)
-    if img_link = li.search('img').first
-      img_link = absolutize img_link, :src
-    end
-    scrape entity_page if recur
+    entity_link = li.search('a').first
+    scrape entity_link if recur
     tagname = entity_link.text.strip
     if tagtype
       # Dishes and ingredients are downcased
@@ -380,7 +384,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       tagtype =
           # How to tag the link depends on what the target page denotes
           # For that, we depend on the #handler method parsing the URL to tell us what kind of link it is
-          case self.class.handler(entity_page)
+          case self.class.handler(entity_link)
             when :bbc_chef_home_page
               :Author
             when :bbc_occasion_home_page
@@ -391,12 +395,15 @@ class Www_bbc_co_uk_Scraper < Scraper
               :Occasion
           end
     end
+    # if img_link = li.search('img').first
+    #   img_link = absolutize img_link, :src
+    # end
     # These are home pages, so they'll just be given the name of the tag
     # TagServices.define(tagname,
     #                    tagtype: Tag.typenum(tagtype),
-    #                    page_link: entity_page,
+    #                    page_link: absolutize(entity_link),
     #                    image_link: img_link) if tagtype
-    Registrar.register_tag(tagname, tagtype, entity_page, image_link: img_link) if tagtype
+    Registrar.register_tag(tagname, tagtype, entity_link, image_link: li.search('img').first) if tagtype
   end
 
   def accordions enclosure_selector=nil, extractions={}
@@ -429,19 +436,19 @@ class Www_bbc_co_uk_Scraper < Scraper
   def bbc_food_page
     headered_list_items 'dt#special-diets', 'dd' do |header_text, li|
       if diet_atag = li.search('a').first
-        diet_url = absolutize diet_atag.attribute('href')
         diet_name = diet_atag.text.strip.sub(/\s*recipes$/, '').sub ' ', '-'
+        # diet_url = absolutize diet_atag.attribute('href')
         # TagServices.define diet_name.downcase,
         #                    :tagtype => :Diet,
         #                    :page_link => diet_url
-        Registrar.register_tag diet_name.downcase, :Diet, diet_url
-        scrape diet_url
+        Registrar.register_tag diet_name.downcase, :Diet, diet_atag
+        scrape diet_atag
       end
     end
     page.search('ol#site-nav a').each do |link|
       link.attribute('href').to_s.match /.*\/food\/(\w*)\b/
       if (topic = $1).present?
-        scrape absolutize(link) unless %w{ my about ingredients }.include? topic
+        scrape link unless %w{ my about ingredients }.include? topic
       end
     end
   end

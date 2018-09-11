@@ -1450,7 +1450,7 @@ class ReferentsAssociatedCache < ResultsCache
   def itemscope
     # @itemscope ||= Tagging.where(entity_type: %w{ FeedEntry Recipe }, tag_id: referent.tag_ids)
     return @itemscope if @itemscope
-    @itemscope ||= Recipe.joins(:taggings).where(taggings: { entity_type: Recipe, tag_id: referent.tag_ids } )
+    @itemscope ||= Recipe.joins(:taggings).where(taggings: { entity_type: Recipe, tag_id: referent.tag_ids } ).uniq
   end
 end
 

@@ -121,6 +121,7 @@ module LinkHelper
     link_options
   end
 
+  # Provide a sensible internal link to the object
   def linkpath object_or_decorator, action=nil
     action = nil if ['show', :show].include? action
     (polymorphic_path([action, object_or_decorator]) rescue nil) ||
@@ -135,6 +136,27 @@ module LinkHelper
       polymorphic_path([:touch, decorator], user_id: for_user.id) rescue nil
     end
   end
+
+  # Like #polymorphic_path and #polymorphic_link, except
+  # -- the choice of ...path or ...link is given by a flag, absolute_or_relative, taking :absolute or :relative
+  # -- accommodates the case in which the object is really a decorator
+  # -- uses the base class of the object
+  def polymorphic_link object_or_decorator, absolute_or_relative=:relative, options={}
+    if absolute_or_relative.is_a?(Hash)
+      absolute_or_relative, options = :relative, absolute_or_relative
+    end
+    # Derive the object as a member of its base class
+    obj = object_or_decorator.is_a?(Draper::Decorator) ? object_or_decorator.object : object_or_decorator
+    bc = obj.class.base_class
+    obj = obj.becomes(bc) if bc != obj.class
+    case absolute_or_relative
+      when :relative
+        polymorphic_path obj, options
+      when :absolute
+        polymorphic_url obj, options
+    end
+  end
+
 
   # Provide an internal link to an object's #associated, #contents or #show methods, as available
   def homelink decorator, options={}

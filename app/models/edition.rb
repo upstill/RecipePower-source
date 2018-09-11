@@ -17,7 +17,7 @@ class Edition < ActiveRecord::Base
   belongs_to :condiment, polymorphic: true
   validates :condiment_type, inclusion: { in: %w(List IngredientReferent), message: "%{value} is not a valid condiment" }
   belongs_to :guest, polymorphic: true
-  validates :guest_type, inclusion: { in: %w(User AuthorReferent), message: "%{value} is not a valid guest" }
+  validates :guest_type, inclusion: { in: %w(User Referent), message: "%{value} is not a valid guest" }
 
   before_save do |ed|
     if ed.published_changed? && ed.published # PUBLISH! Queue up mailer job
