@@ -124,7 +124,7 @@ module LinkHelper
   # Provide a sensible internal link to the object
   def linkpath object_or_decorator, action=nil
     action = nil if ['show', :show].include? action
-    (polymorphic_path([action, object_or_decorator]) rescue nil) ||
+    (action && polymorphic_path([action, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:collection, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:contents, object_or_decorator]) rescue nil) ||
         (polymorphic_path([:associated, object_or_decorator]) rescue nil) ||

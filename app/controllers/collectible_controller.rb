@@ -232,19 +232,18 @@ class CollectibleController < ApplicationController
       which_flash = (response_service.format == :html) ? :notice : (who ? :popup : :alert)
       if who
         who.touch @decorator.object, params[:collect]
-        flash[which_flash] = "Snap! #{params[:collect] ? 'Collected' : 'Touched'} '#{@decorator.title}'." unless params[:silent]
+        verb = @resource.is_a?(User) ? 'Now Following' : 'Collected'
+        flash[which_flash] = "Snap! #{verb} '#{@decorator.title}'." if params[:collect]
       else
         flash[which_flash] = "Sorry, you need to be logged in to touch a #{@decorator.human_name}" unless params[:silent]
       end
     end
     resource_errors_to_flash(@decorator.object) if @decorator
     respond_to do |format|
-      format.html { # This is for capturing a new recipe and tagging it using a new page.
-        begin
-          path_or_object = polymorphic_path [:associated, @resource]
-        rescue
-          path_or_object = @resource
-        end
+      format.html {
+        path_or_object =
+          (params[:redirect_external] && ([Recipe, Site, FeedEntry].include? @resource.class.base_class) && @decorator.url.if_present) ||
+              view_context.linkpath(@resource)
         redirect_to path_or_object
       }
       format.json { render :errors } # This won't be invoked directly by a user, so there's nothing else to render

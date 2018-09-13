@@ -10,6 +10,8 @@ class EditionsController < ApplicationController
   def show
     @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML
     @recipient = current_user || User.find(1)
+    @unsubscribe = Rails.application.message_verifier(:unsubscribe).generate @recipient.id
+    @touch_id = Rails.application.message_verifier(:touch).generate @recipient.id
   end
 
   # GET /editions/new

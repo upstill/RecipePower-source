@@ -14,9 +14,7 @@
     <% end %>
     <p class="share_recipe_title">
       <a href="<%= item_link %>" , target="_blank"><%= decorator.title %></a>
-      <% unless item_link.match('recipepower') %>
-          &nbsp;&nbsp;<a class="share_recipe_internal" href="<%= polymorphic_url [:touch, decorator.object], :user_id => @touch_id, :collect => true %>", target="_blank">Collect in RecipePower</a>
-      <% end %>
+      &nbsp;&nbsp;<a class="share_recipe_internal" href="<%= polymorphic_url [:touch, decorator.object], :user_id => @touch_id, :collect => true %>", target="_blank"><%= decorator.object.is_a?(User) ? 'Follow' : 'Collect' %> in RecipePower</a>
       <%# if defined?(attachments) %>
         <%# decorator.title %>
       <%# else %>
