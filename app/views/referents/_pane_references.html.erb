@@ -1,8 +1,8 @@
 <%= dialog_pane @decorator.dialog_pane_spec(:references) do %>
-    <% @available_kinds = PageRefServices.kind_selections(:except => [:link, :recipe, :referrable]) %>
+    <% @available_kinds = PageRefServices.kind_selections(:except => [:link, :referrable]) %>
     <div class="field table-field" id="page_refs_field">
       <table id="page_refs_table">
-        <tr>
+        <tr <%= "style=display:none" if @decorator.page_refs.empty? %>>
           <th>Page</th>
           <th>Type</th>
         </tr>
