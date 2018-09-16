@@ -27,4 +27,10 @@ class RefermentsController < ApplicationController
 
   def destroy
   end
+
+private
+
+  def referment_model_params
+    params.permit(:kind, :url, :title)
+  end
 end

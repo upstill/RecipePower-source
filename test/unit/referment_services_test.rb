@@ -30,5 +30,9 @@ class RefermentServicesTest < ActiveSupport::TestCase
     rft = RefermentServices.assert 'Recipe', "http://www.recipepower.com/recipes/#{rcp.id}"
     refute rft.errors.any?
     assert_equal rft.referee, rcp
+    rft.referent = Referent.first
+    rft.save
+    refute rft.errors.any?
   end
+
 end

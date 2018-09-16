@@ -5,6 +5,7 @@
 
 RP::Application.routes.draw do
   resources :editions
+
   get 'rp_events/show'
 
   get 'rp_events/show_page'
@@ -60,6 +61,14 @@ RP::Application.routes.draw do
   resources :page_refs, :concerns => [:taggable, :collectible, :picable] do
     collection do
       get 'tag'
+      put 'create'
+    end
+  end
+
+  # Referments are a join table used to link Referents to a wide variety of "See Also" entities (PageRef, Recipe, ImageReference, Referent...)
+  # We only create or edit referments in the context of the associated Referent
+  resources :referments, :only => [:show, :create, :update, :destroy] do
+    collection do
       put 'create'
     end
   end

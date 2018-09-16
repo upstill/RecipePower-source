@@ -1,6 +1,7 @@
 RP.edit_expressions = RP.edit_expressions || {}
 RP.edit_referent = RP.edit_referent || {}
 RP.edit_page_refs = RP.edit_page_refs || {}
+RP.edit_referments = RP.edit_referments || {}
 
 RP.edit_page_refs.onopen = (pane) ->
 	$(pane).on 'click', '.remove_fields', (event) ->
@@ -15,8 +16,10 @@ RP.edit_page_refs.onopen = (pane) ->
 			return
 
 		url = url_elmt.value
+		kind_elmt = $('select#kind', pane)[0]
 		timeStamp = new Date().getTime()
 		$(this).data('params')['page_ref']['url'] = url_elmt.value
+		$(this).data('params')['referment']['kind'] = kind_elmt.value
 		ajaxData =
 			success: (responseData, statusText, xhr) ->
 				that = $('a.add_fields', pane) # The add-fields element carries the data for the new stuff
@@ -47,6 +50,58 @@ RP.edit_page_refs.onopen = (pane) ->
 		$(other).last().after placeholder
 
 		# Launch a query back to the server to initialize/fetch the page_ref
+		RP.submit.submit_and_process $(this).data('href'), this, ajaxData
+
+		# annnnddd...we've taken care of business
+		event.preventDefault()
+
+RP.edit_referments.onopen = (pane) ->
+	$(pane).on 'click', '.remove_fields', (event) ->
+		$(this).prev('input[type=hidden]').val('1')
+		$(this).closest('tr').hide()
+		event.preventDefault()
+	$(pane).on 'click', '#add_referment', (event) ->
+		url_elmt = $('input#referent_add_referment')[0]
+		kind_elmt = $('select#kind', pane)[0]
+		if !url_elmt.checkValidity()
+			alert "Sorry, this needs to be a valid URL. If you think you have reached this statement in error, try using it in your browswer"
+			event.preventDefault()
+			return
+
+		url = url_elmt.value
+		timeStamp = new Date().getTime()
+		$(this).data('params')['referment']['url'] = url_elmt.value
+		$(this).data('params')['referment']['kind'] = kind_elmt.value
+		ajaxData =
+			success: (responseData, statusText, xhr) ->
+				that = $('a.add_fields', pane) # The add-fields element carries the data for the new stuff
+				# Replace the 'id' with a random timestamp
+				newfields = replace_field_globally $(that).data('fields'), $(that).data('id'), responseData['id']
+
+				# Insert the URL
+				newfields = replace_field_globally newfields, $(that).data('url'), responseData['url']
+
+				# Insert the Title
+				newfields = replace_field_globally newfields, $(that).data('title'), responseData['title']
+
+				# Insert the type by removing the "selected=" attribute and selecting the given type
+				newfields = replace_field newfields, 'selected=\\\"selected\\\"', ''
+				newfields = replace_field_globally newfields,
+					'value=\\\"' + responseData['type'] + '\\\"',
+					'selected="selected" value="' + responseData['type'] + '"'
+
+				# other = $('tr', pane)
+				# $(other).last().after newfields
+				$('tr#' + timeStamp, pane).replaceWith newfields
+
+				# Finally, clear the tag from the "Add Reference" box
+				$('input#referent_add_referment')[0].value = ''
+		# Leave a spinning clock to keep the user entertained
+		other = $('tr', pane)
+		placeholder = "<tr id=" + timeStamp + "><td style=height:30px><div class=beachball><td><tr>"
+		$(other).last().after placeholder
+
+		# Launch a query back to the server to initialize/fetch the referment
 		RP.submit.submit_and_process $(this).data('href'), this, ajaxData
 
 		# annnnddd...we've taken care of business

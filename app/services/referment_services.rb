@@ -67,17 +67,17 @@ class RefermentServices
         return bail(:url, 'isn\'t anything viable in RecipePower')
       end
       if model.is_a?(Referrable)
-        rfmt = Referment.new(referee: model)
-        return rfmt
+        Referment.new(referee: model)
       else
-        return bail(:referee, 'isn\'t Referrable')
+        bail(:referee, 'isn\'t Referrable')
       end
     else
       # An external link
       if pr = PageRef.fetch(url) # URL produces a viable PageRef
         pr.kind = kind
+        Referment.new referee: pr
       else
-        return bail(:url, 'can\'t be read')
+        bail(:url, 'can\'t be read')
       end
     end
   end

@@ -55,6 +55,7 @@ class ReferentDecorator < CollectibleDecorator
             (dialog_pane_spec(:family) if true),
             (dialog_pane_spec(:expressions) if true),
             (dialog_pane_spec(:references) if true),
+            (dialog_pane_spec(:referments) if true),
             (dialog_pane_spec(:pic) if true)
         ].compact
   end
@@ -79,8 +80,13 @@ class ReferentDecorator < CollectibleDecorator
             },
             references: {
                 css_class: 'edit_page_refs',
-                label: 'References',
+                label: 'Page Refs',
                 partial: 'pane_references'
+            },
+            referments: {
+                css_class: 'edit_referments',
+                label: 'References',
+                partial: 'pane_referments'
             },
 =begin
             tags: {
