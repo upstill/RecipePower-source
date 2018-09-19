@@ -1,8 +1,10 @@
 <tr class="referment_fields">
-  <td><%# f.hidden_field :tag_token %>
-    <%= f.hidden_field :id %>
-    <%= f.hidden_field :url %>
-    <%= f.hidden_field :title %>
+  <%= f.hidden_field :id %>
+  <%= f.hidden_field :url %>
+  <%= f.hidden_field :referee_type %>
+  <%= f.hidden_field :referee_id %>
+  <td>
+    <span class='title'><%= f.object.title %></span><br><span class='url'><%= f.object.url %></span>
     <%# link_to f.object.title.if_present('').truncate(100), f.object.url, target: '_blank'  %>
   </td>
   <!--
@@ -11,11 +13,6 @@
 -->
   <td>
     <%= f.select :kind, (@available_kinds || PageRefServices.kind_selections) %>
-    <%# collection_select f.object,
-                          :type,
-                          PageRefServices.type_selections,
-                          :last,
-                          :first %>
   </td>
   <td>
     <%= f.hidden_field :_destroy, class: 'delete-expression' %>

@@ -7,15 +7,16 @@ class RefermentsController < ApplicationController
     if @referment.errors.any?
       resource_errors_to_flash @referment
     else
-      # @referment.bkg_land
-      update_and_decorate @referment
+      @referment.referee.bkg_land # Scrape title from the page_ref
+      # update_and_decorate @referment
     end
     respond_to do |format|
       format.json {
         if @referment.errors.any?
           render 'application/errors'
         else
-          render json: @referment.attributes.slice( 'id', 'url', 'kind', 'title' )
+          render json: @referment.attributes.slice( 'id', 'referee_type', 'referee_id' ).
+                     merge(@referment.referee.attributes.slice 'url', 'title').merge(kind: 'article')
         end
       }
       format.html { }
@@ -30,7 +31,7 @@ class RefermentsController < ApplicationController
 
 private
 
-  def referment_model_params
+  def referment_params
     params.permit(:kind, :url, :title)
   end
 end

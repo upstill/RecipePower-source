@@ -77,8 +77,7 @@ module ApplicationHelper
   end
 
   def data_to_add_fields f, association, *initializers
-    new_object = f.object.send(association).klass.new *initializers
-    new_object = new_object.becomes(new_object.class.base_class)
+    new_object = f.object.send(association).klass.base_class.new *initializers
     new_object.id = new_object.object_id
     fields = f.simple_fields_for(association, new_object, child_index: new_object.id) do |builder|
       render association.to_s.singularize + '_fields', f: builder

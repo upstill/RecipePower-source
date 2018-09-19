@@ -14,7 +14,12 @@ div.dialog.edit_referent form.edit_referent {
     table {
       margin-top: 10px;
       margin-bottom: 20px;
-      font-size: 16px;
+      tbody span.title {
+        font-size: 21px;
+      }
+      tbody span.url {
+        font-size: 14px;
+      }
       th {
         height: 30px;
         padding: 10px;

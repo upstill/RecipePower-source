@@ -7,7 +7,7 @@
           <th>Type</th>
         </tr>
         <%= f.fields_for :referments do |builder| %>
-            <%= render 'referment_fields', f: builder %>
+            <%= render 'referment_fields', f: builder if builder.object %>
         <% end %>
       </table>
       New Reference: <span style="font-size: 14px">(provide a URL, select a type and click 'Add')</span>
