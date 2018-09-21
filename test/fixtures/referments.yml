@@ -1,0 +1,9 @@
+empty:
+  id: 1
+  referee_type: 'Recipe'
+  referee_id: 3
+
+goodpr:
+  id: 2
+  referee_type: 'PageRef'
+  referee_id: 4

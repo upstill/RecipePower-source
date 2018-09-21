@@ -2,7 +2,11 @@
 require 'test_helper'
 class ReferentTest < ActiveSupport::TestCase
   fixtures :referents
+  fixtures :references
+  fixtures :referments
   fixtures :tags
+  fixtures :recipes
+  fixtures :page_refs
 
   test "Convert empty parents list to tokens and back again" do
     ref = GenreReferent.create
@@ -372,4 +376,74 @@ class ReferentTest < ActiveSupport::TestCase
   test "Merge of two referents has appropriate description" do
 
   end
+
+  test "Referment params for existing referment get parsed properly" do
+    ref = Referent.first
+    rfs = ReferentServices.new ref
+    assert_empty ref.referments
+    rfs.parse_referment_params [ { id: 1 } ]
+    refute ref.errors.any?
+    assert_equal referments(:empty), ref.referments.first
+    assert_equal referments(:empty), ref.referments.last
+  end
+
+  test "Referment params for specified referee get parsed properly" do
+    ref = Referent.first
+    rfs = ReferentServices.new ref
+    rfs.parse_referment_params [ { referee_type: 'Recipe', referee_id: 3 } ]
+    refute ref.errors.any?
+    assert_equal recipes(:rcp), ref.referments.first.referee
+    assert_equal recipes(:rcp), ref.referments.last.referee
+  end
+
+  test "Referment params for specified referee with changed kind get parsed properly" do
+    ref = Referent.first
+    rfs = ReferentServices.new ref
+    rfs.parse_referment_params [ { referee_type: 'Recipe', referee_id: 3, kind: 'article' } ]
+    refute ref.errors.any?
+  end
+
+  test "Referment params for new referee--URL only--get parsed properly" do
+    ref = Referent.first
+    rfs = ReferentServices.new ref
+  end
+
+  test 'PageRef Referee translates between kinds' do
+    pr_before = page_refs :goodpr
+    assert_equal 'article', pr_before.kind
+    pr_after = RefereeServices.new(pr_before).assert_kind 'about'
+    assert_equal pr_before, pr_after
+    assert_equal 'about', pr_after.kind
+  end
+
+  test 'PageRef Referee translates to Recipe' do
+    pr_before = page_refs :goodpr
+    assert_equal 'article', pr_before.kind
+    pr_after = RefereeServices.new(pr_before).assert_kind 'recipe'
+    assert_equal Recipe, pr_after.class
+    refute pr_after.errors.any?
+  end
+
+  test 'Referent Referee rejects translation to PageRef' do
+    ref = Referent.first
+    after = RefereeServices.new(ref).assert_kind 'article'
+    assert_equal ref, after
+    assert after.errors.any?
+  end
+
+  test 'Referent Referee rejects translation to Recipe' do
+    ref = Referent.first
+    after = RefereeServices.new(ref).assert_kind 'recipe'
+    assert_equal ref, after
+    assert after.errors.any?
+  end
+
+  test 'Reference Referee rejects translation to PageRef' do
+    ref = Reference.first
+    assert_equal ImageReference, ref.class
+    after = RefereeServices.new(ref).assert_kind 'article'
+    assert_equal ref, after
+    assert after.errors.any?
+  end
+
 end
