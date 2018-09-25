@@ -5,29 +5,29 @@ class RefermentServicesTest < ActiveSupport::TestCase
   fixtures :tags
 
   test 'RefermentServices rejects bogus URL' do
-    rft = RefermentServices.assert 'Recipe', nil
+    rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', nil
     assert rft.errors.any?
   end
 
   test 'RefermentServices rejects invalid internal URL' do
-    rft = RefermentServices.assert 'Recipe', 'http://www.recipepower.com/noplace'
+    rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', 'http://www.recipepower.com/noplace'
     assert rft.errors.any?
   end
 
   test 'RefermentServices rejects valid internal URL that has no valid entity' do
-    rft = RefermentServices.assert 'Recipe', 'http://www.recipepower.com/home'
+    rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', 'http://www.recipepower.com/home'
     assert rft.errors.any?
   end
 
   test 'RefermentServices rejects internal URL for non-referrable entity' do
     tag = Tag.first
-    rft = RefermentServices.assert 'Recipe', "http://www.recipepower.com/tags/#{tag.id}"
+    rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', "http://www.recipepower.com/tags/#{tag.id}"
     assert rft.errors.any?
   end
 
   test 'RefermentServices provides errorfree referment when given referrable entity' do
     rcp = Recipe.first
-    rft = RefermentServices.assert 'Recipe', "http://www.recipepower.com/recipes/#{rcp.id}"
+    rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', "http://www.recipepower.com/recipes/#{rcp.id}"
     refute rft.errors.any?
     assert_equal rft.referee, rcp
     rft.referent = Referent.first

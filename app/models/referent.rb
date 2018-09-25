@@ -33,6 +33,7 @@ class Referent < ActiveRecord::Base
   has_many :dependent_tags, :foreign_key => 'referent_id', :class_name => 'Tag', :dependent => :nullify
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
+  accepts_nested_attributes_for :referments
 
   before_destroy do
     # Must destroy any referments that refer to us as :referee
@@ -231,7 +232,10 @@ class Referent < ActiveRecord::Base
   def parent_tag_tokens=(tokenlist)
     # After collecting tags, scan list to eliminate references to self
     tokenlist = tokenlist.split(',')
-    self.parents = tag_tokens_to_referents(tokenlist).delete_if { |rel| (rel.id == self.id) && errors.add(:parents, 'Can\'t be its own parent.') }.uniq
+    self.parent_ids = tag_tokens_to_referents(tokenlist).
+        delete_if { |rel| (rel.id == self.id) && errors.add(:parents, 'Can\'t be its own parent.') }.
+        uniq.
+        map(&:id)
   end
 
   def child_tag_tokens

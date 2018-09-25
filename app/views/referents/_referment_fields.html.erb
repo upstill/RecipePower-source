@@ -1,8 +1,13 @@
 <tr class="referment_fields">
   <%= f.hidden_field :id %>
   <%= f.hidden_field :url %>
-  <%= f.hidden_field :referee_type %>
-  <%= f.hidden_field :referee_id %>
+  <% if @referment_params %>
+      <%= f.hidden_field :referee_type, value: @referment_params[:referee_type] %>
+      <%= f.hidden_field :referee_id, value: @referment_params[:referee_id] %>
+  <% else %>
+      <%= f.hidden_field :referee_type %>
+      <%= f.hidden_field :referee_id %>
+  <% end %>
   <td>
     <span class='title'><%= f.object.title %></span><br><span class='url'><%= f.object.url %></span>
     <%# link_to f.object.title.if_present('').truncate(100), f.object.url, target: '_blank'  %>
@@ -12,7 +17,7 @@
   <td><%# f.input :formname, label: false, collection: Expression.forms.collect { |entry| entry[0] } %></td>
 -->
   <td>
-    <%= f.select :kind, (@available_kinds || PageRefServices.kind_selections) %>
+    <%= f.select( :kind, (@available_kinds || PageRefServices.kind_selections)) if f.object.kind %>
   </td>
   <td>
     <%= f.hidden_field :_destroy, class: 'delete-expression' %>

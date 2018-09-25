@@ -86,28 +86,84 @@ class ReferentServices
   # 3) It may only be specified as a URL and Kind without priorly existing.
   #     => find or create a PageRef and associated entity
   def parse_referment_params params
-    params.each do |rfmt_params|
-      # First, the simple case: the referment is accessible by id
-      if rfmt = Referment.find_by(id: rfmt_params[:id])
+    params.each do |index, rfmt_params|
+      if (rfmt = Referment.find_by id: rfmt_params[:id]) || (rfmt_params[:_destroy] || '') == '1'
+        @referent.referments.destroy rfmt if rfmt
+      elsif rfmt # First, the simple case: the referment is accessible by id
         @referent.referments << rfmt unless @referent.referment_ids.include? rfmt.id
         # Referment exists => we only have to confirm that the kind parameter matches the referee type
-        rfmt.referee = ReferrableServices.new(rfmt.referee).assert_kind rfmt_params[:kind]
+        rfmt.referee = RefereeServices.new(rfmt.referee).assert_kind rfmt_params[:kind]
+        rfmt.save if rfmt.changed?
       elsif rfmt_params[:referee_id] &&
           rfmt_params[:referee_type].present? &&
           referee = rfmt_params[:referee_type].constantize.find_by(id: rfmt_params[:referee_id].to_i)
+        if referee == @referent
+          @referent.errors.add :reference, "can't refer to itself"
+          return
+        end
         # The referment's referee is accessible => build a new referment for the referent
         # Ensure the type of referee matches the 'kind' parameter
-        referee = ReferrableServices.new(referee).assert_kind rfmt_params[:kind]
+        referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind]
         # The Referment doesn't exist but the referee does => create a new Referment
+        # Don't want to add a redundant referment
+        if @referent.referments.exists?( referee: referee)
+          @referent.errors.add :reference, "already exists"
+        end
         rfmt = @referent.referments.build referee: referee
       else
         # There is no extant referment OR referent, but only the kind and url parameters
-        rfmt = RefermentServices.assert rfmt_params[:kind], rfmt_params[:url]
+        rfmt = assert_referment rfmt_params[:kind], rfmt_params[:url]
         if rfmt.errors.any?
           @referent.errors.add :referments, "have bad kind/url #{rfmt_params[:kind]}/#{rfmt_params[:url]}: #{rfmt.errors.full_messages}"
+        elsif @referent.referments.exists? referee: referee
+          @referent.errors.add :reference, "already exists"
         else
           @referent.referments << rfmt
         end
+      end
+    end
+  end
+
+  # Ensure the existence of a Referment of a particular kind with the given url
+  def assert_referment kind, url
+    def self.bail attribute, err
+      rtn = Referment.new
+      rtn.errors.add attribute, err
+      rtn
+    end
+    begin
+      uri = URI url
+    rescue Exception => e
+      # Bad URL or path => Post an error in an unsaved record and return
+      return bail(:url, 'is not a viable URL')
+    end
+    if uri.host.match 'recipepower.com'
+      # An internal link, presumably to a Referrable entity
+      begin
+        hsh = Rails.application.routes.recognize_path uri.path
+        controller, id = hsh[:controller], hsh[:id].to_i
+        model_class = controller.classify.constantize
+        model = model_class.find_by id: id
+      rescue Exception => e
+        # Bad URL or path => Post an error in an unsaved record
+        return bail(:url, 'isn\'t anything viable in RecipePower')
+      end
+      if @referent.referments.exists? referee: model
+        bail :reference, "already exists"
+      elsif @referent == model
+        bail :reference, "can't have itself as reference"
+      elsif model.is_a?(Referrable) || model.is_a?(Referent)
+        Referment.new referee: model
+      else
+        bail :reference, 'isn\'t anything usable from RecipePower'
+      end
+    else
+      # An external link
+      if pr = PageRef.fetch(url) # URL produces a viable PageRef
+        pr.kind = kind
+        Referment.new referee: pr
+      else
+        bail(:url, 'can\'t be read')
       end
     end
   end

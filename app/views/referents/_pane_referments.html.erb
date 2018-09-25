@@ -2,25 +2,26 @@
     <% @available_kinds = PageRefServices.kind_selections(:except => [:link, :referrable]) %>
     <div class="field table-field" id="referments_field">
       <table id="referments_table">
-        <tr <%= "style=display:none" if @decorator.referments.empty? %>>
-          <th>Page</th>
-          <th>Type</th>
-        </tr>
         <%= f.fields_for :referments do |builder| %>
             <%= render 'referment_fields', f: builder if builder.object %>
         <% end %>
       </table>
-      New Reference: <span style="font-size: 14px">(provide a URL, select a type and click 'Add')</span>
+      New Reference: <span style="font-size: 14px">(provide a URL and click 'Add')</span>
       <%= url_field_tag :url, "", id: "referent_add_referment", style: 'margin-bottom: 10px; margin-left: 20px; width: 95%' %>
+<!--
       <span style="margin-left: 22px; font-size: 0.9em">Kind:</span> <%= select_tag :kind, options_for_select(@available_kinds) %>
-      <% url_options = { url: referments_path, :method => :post } %>
+      <%# url_options = { url: referments_path, :method => :post } %>
       <%# link_to 'Add', referments_path(format: :json), data: { params: [ { name: 'referment[url]', value: 'test url' } ] }, id: 'add_referment', format: 'json', method: :put %>
-      <%  data = data_to_add_fields f, :referments, title: ';Title Goes Here;', url: ';URL TBD;' %>
+-->
+      <% @referment_params = { referee_type: ';reftype;', referee_id: ';refid;' } %>
+      <% data = data_to_add_fields f, :referments, title: ';Title Goes Here;', url: ';URL TBD;', kind: 'article', referent_id: f.object.id %>
       <%= button_to_submit 'Add',
                          referments_path,
                            'default',
                            'sm',
-                         data: { params: { referment: { url: 'test url' } } }.merge(data),
+                         data: { params: { referment: { url: 'test url', referent_id: f.object.id } },
+                                 substs: @referment_params
+                         }.merge(data),
                          id: 'add_referment',
                          class: 'add_fields',
                          format: 'json',

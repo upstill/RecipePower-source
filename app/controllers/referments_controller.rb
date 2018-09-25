@@ -3,20 +3,16 @@ class RefermentsController < ApplicationController
   # Creating a Referment is quite flexible. The url may denote a Referrable object internal to RecipePower, or any
   # external URL.
   def create
-    @referment = RefermentServices.assert params[:referment][:kind], params[:referment][:url]
-    if @referment.errors.any?
-      resource_errors_to_flash @referment
-    else
-      @referment.referee.bkg_land # Scrape title from the page_ref
-      # update_and_decorate @referment
-    end
+    @referent = Referent.find_by id: params[:referment][:referent_id]
+    @referment = ReferentServices.new(@referent).assert_referment params[:referment][:kind], params[:referment][:url]
+    @referment.referee.bkg_land if @referment.referee.is_a?(Backgroundable) && !@referment.errors.any? # Scrape title from the page_ref
     respond_to do |format|
       format.json {
         if @referment.errors.any?
-          render 'application/errors'
+          render json: view_context.flash_notify(@referment, false)
         else
-          render json: @referment.attributes.slice( 'id', 'referee_type', 'referee_id' ).
-                     merge(@referment.referee.attributes.slice 'url', 'title').merge(kind: 'article')
+          render json: @referment.attributes.slice( 'id', 'referee_type', 'referee_id').
+                     merge(url: @referment.url, title: @referment.title, kind: @referment.kind)
         end
       }
       format.html { }

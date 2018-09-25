@@ -114,7 +114,7 @@ module FlashHelper
     # Collect any errors from the resource
     if resource==true || resource==false
       resource, popup_only = nil, resource
-    elsif resource.respond_to?( :errors) && resource.errors.any?
+    elsif resource.respond_to?(:errors) && resource.errors.any?
       resource_errors_to_flash resource
     end
     if flash.empty?

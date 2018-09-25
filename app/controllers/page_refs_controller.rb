@@ -30,16 +30,14 @@ class PageRefsController < CollectibleController
   # POST /page_refs
   def create
     @page_ref = PageRefServices.assert(params[:page_ref][:kind], params[:page_ref][:url])
-    if @page_ref.errors.any?
-      resource_errors_to_flash @page_ref
-    else
+    if !@page_ref.errors.any?
       @page_ref.bkg_land
       update_and_decorate @page_ref
     end
     respond_to do |format|
       format.json {
         if @page_ref.errors.any?
-          render 'application/errors'
+          render json: view_context.flash_notify(@page_ref, false)
         else
           render json: @page_ref.attributes.slice( 'id', 'url', 'kind', 'title' )
         end
