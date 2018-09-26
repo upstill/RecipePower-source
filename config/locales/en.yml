@@ -38,6 +38,7 @@ en:
       lists: 'Treasuries'
       feeds: 'Feeds'
       sites: 'Sites'
+      recipes: 'Recipes'
       about: "About %{name}"
       article: 'Article'
       news_item: 'News Item'

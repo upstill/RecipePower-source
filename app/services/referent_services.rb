@@ -145,7 +145,10 @@ class ReferentServices
       uri = URI url
     rescue Exception => e
       # Bad URL or path => Post an error in an unsaved record and return
-      return bail(:url, 'is not a viable URL')
+      uri = nil
+    end
+    unless uri && uri.host.present?
+      return bail :url, 'is not a viable URL'
     end
     if uri.host.match 'recipepower.com'
       # An internal link, presumably to a Referrable entity

@@ -40,6 +40,8 @@ class ReferentDecorator < CollectibleDecorator
         return List.where(id: entity_ids).to_a
       when :feed
         return Feed.where(id: entity_ids).to_a
+      when :recipe
+        return @object.recipes # Recipe.where(id: @object.referments.where(referee_type: 'Recipe').pluck :referee_id)
       when :site
         entity_ids += @object.page_refs.where(kind: PageRef.kinds[:site]).pluck :site_id
         Site.includes(:page_ref).where(id: entity_ids).to_a

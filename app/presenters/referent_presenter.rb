@@ -14,7 +14,7 @@ class ReferentPresenter < CollectiblePresenter
 
   def card_aspects which_column=nil
     # decorator.object.is_a?(Taggable) ? decorator.individual_tagtypes : []
-  [ :description, :title, :parents, :children, :relateds, :synonyms, :lists, :feeds, :sites, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event ]
+  [ :description, :title, :parents, :children, :relateds, :synonyms, :lists, :feeds, :sites, :recipes, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event ]
   end
 
   def card_aspect which
@@ -29,7 +29,7 @@ class ReferentPresenter < CollectiblePresenter
             counted_label = label if whichsym == :relateds
             link_options[:joinstr] = ' | '
             decorator.visible_tags_of_kind whichsym, viewer
-          when :lists, :feeds, :sites
+          when :lists, :feeds, :sites, :recipes
             # Lists that are tagged by an expression tag
             link_options[:external] = whichsym == :sites
             decorator.tagged_entities whichstr, @user
