@@ -33,15 +33,20 @@ RP.edit_referments.onopen = (pane) ->
 				# Insert the referee_id
 				newfields = replace_field_globally newfields, $(that).data('substs').referee_id, responseData['referee_id'] || ''
 
-				# Insert the type by removing the "selected=" attribute and selecting the given type
+				# Insert the kind by removing the "selected=" attribute and selecting the given type
 				newfields = replace_field newfields, 'selected=\\\"selected\\\"', ''
 				newfields = replace_field_globally newfields,
-					'value=\\\"' + responseData['type'] + '\\\"',
-					'selected="selected" value="' + responseData['type'] + '"'
+					'value=\\\"' + responseData['kind'] + '\\\"',
+					'selected="selected" value="' + responseData['kind'] + '"'
 
 				# other = $('tr', pane)
 				# $(other).last().after newfields
 				$('tr#' + timeStamp, pane).replaceWith newfields
+
+				# Activate the kind selector, but only as appropriate
+				select_id = 'referent_referments_attributes_'+responseData['id']+'_kind'
+				if !responseData['kind']
+					$('select#'+select_id, pane).css 'display','none'
 
 				# Finally, clear the tag from the "Add Reference" box
 				$('input#referent_add_referment')[0].value = ''

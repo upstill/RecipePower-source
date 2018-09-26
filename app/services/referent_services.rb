@@ -86,42 +86,52 @@ class ReferentServices
   # 3) It may only be specified as a URL and Kind without priorly existing.
   #     => find or create a PageRef and associated entity
   def parse_referment_params params
+    return false if params.blank?
+    changed = false
     params.each do |index, rfmt_params|
-      if (rfmt = Referment.find_by id: rfmt_params[:id]) || (rfmt_params[:_destroy] || '') == '1'
+      destroy = (rfmt_params[:_destroy] || '') == '1'
+      rfmt = Referment.find_by id: rfmt_params[:id]
+      if destroy
+        # We could be "destroying" a non-existent referment if one was added and removed in the dialog
         @referent.referments.destroy rfmt if rfmt
       elsif rfmt # First, the simple case: the referment is accessible by id
         @referent.referments << rfmt unless @referent.referment_ids.include? rfmt.id
         # Referment exists => we only have to confirm that the kind parameter matches the referee type
-        rfmt.referee = RefereeServices.new(rfmt.referee).assert_kind rfmt_params[:kind]
+        rfmt.referee = RefereeServices.new(rfmt.referee).assert_kind rfmt_params[:kind] if rfmt.referee.is_a?(Referrable)
         rfmt.save if rfmt.changed?
+        changed = true
       elsif rfmt_params[:referee_id] &&
           rfmt_params[:referee_type].present? &&
           referee = rfmt_params[:referee_type].constantize.find_by(id: rfmt_params[:referee_id].to_i)
         if referee == @referent
-          @referent.errors.add :reference, "can't refer to itself"
-          return
+          @referent.errors.add :reference, 'can\'t refer to itself'
+        else
+          # The referment's referee is accessible => build a new referment for the referent
+          # Ensure the type of referee matches the 'kind' parameter (for Referrable referees only)
+          referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind] if referee.is_a?(Referrable)
+          # The Referment doesn't exist but the referee does => create a new Referment
+          if @referent.referments.exists?(referee: referee)
+            # Don't want to add a redundant referment
+            @referent.errors.add :reference, 'already exists'
+          else
+            @referent.referments.build referee: referee
+            changed = true
+          end
         end
-        # The referment's referee is accessible => build a new referment for the referent
-        # Ensure the type of referee matches the 'kind' parameter
-        referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind]
-        # The Referment doesn't exist but the referee does => create a new Referment
-        # Don't want to add a redundant referment
-        if @referent.referments.exists?( referee: referee)
-          @referent.errors.add :reference, "already exists"
-        end
-        rfmt = @referent.referments.build referee: referee
       else
         # There is no extant referment OR referent, but only the kind and url parameters
         rfmt = assert_referment rfmt_params[:kind], rfmt_params[:url]
         if rfmt.errors.any?
           @referent.errors.add :referments, "have bad kind/url #{rfmt_params[:kind]}/#{rfmt_params[:url]}: #{rfmt.errors.full_messages}"
         elsif @referent.referments.exists? referee: referee
-          @referent.errors.add :reference, "already exists"
+          @referent.errors.add :reference, 'already exists'
         else
           @referent.referments << rfmt
+          changed = true
         end
       end
     end
+    changed && !@referent.errors.any?
   end
 
   # Ensure the existence of a Referment of a particular kind with the given url

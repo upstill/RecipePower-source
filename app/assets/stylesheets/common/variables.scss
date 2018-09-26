@@ -356,6 +356,9 @@ $dialog-colors: (
     &.btn-info {
       color: lightyellow;
     }
+    &.nukeable_X {
+      color: #d26d34;
+    }
   }
   span.help-block.has-error, div.alert-info {
     background-color: map-get($dialog-colors, unquote("#{$colorName}-flash-background-color"));

@@ -6,7 +6,7 @@
             <%= render 'referment_fields', f: builder if builder.object %>
         <% end %>
       </table>
-      New Reference: <span style="font-size: 14px">(provide a URL and click 'Add')</span>
+      <hr>New Reference: <span style="font-size: 14px">(provide a URL and click 'Add')</span>
       <%= url_field_tag :url, "", id: "referent_add_referment", style: 'margin-bottom: 10px; margin-left: 20px; width: 95%' %>
 <!--
       <span style="margin-left: 22px; font-size: 0.9em">Kind:</span> <%= select_tag :kind, options_for_select(@available_kinds) %>

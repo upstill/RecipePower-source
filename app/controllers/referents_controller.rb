@@ -168,8 +168,9 @@ class ReferentsController < CollectibleController
     # The referment params require special processing
     rfmt_params = attribute_params.delete :referments_attributes
     @referent.update_attributes attribute_params
-    ReferentServices.new(@referent).parse_referment_params rfmt_params
+    @referent.save if !@referent.errors.any? && ReferentServices.new(@referent).parse_referment_params(rfmt_params)
     if !@referent.errors.any?
+      @referent.reload
       flash[:popup] = "'#{@referent.name}' now updated to serve you better"
       @update_items = [ :card ]
     else

@@ -10,7 +10,7 @@
   <td><%= f.select :formname, Expression.forms.collect { |entry| entry[0] } %></td>
   <td>
     <%= f.hidden_field :_destroy, class: 'delete-expression' %>
-    <%= link_to "remove", '#', class: "remove_fields remove-allowed", :title => 'Nuke It!' %>
+    <%= link_to '', '#', class: "remove_fields remove-allowed nukeable_X glyphicon glyphicon-remove", :title => 'Nuke It!' %>
     <span class="remove-not-allowed" title="Must leave at least one expression" style="display:none">can't remove</span>
   </td>
 </tr>
