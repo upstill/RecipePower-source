@@ -174,7 +174,7 @@ module CardPresentation
         title << "  on #{decorator.site.name}" unless (entity.is_a?(Site)) || (entity.is_a?(PageRef) && entity.site?)
         link_to title, decorator.url, target: :_blank
       else
-        link_to_submit title, linkpath(decorator), :mode => (options[:mode] || :partial)
+         homelink decorator # link_to_submit title, linkpath(decorator), :mode => (options[:mode] || :partial)
       end
     }, (options[:joinstr] || ', ').html_safe
   end

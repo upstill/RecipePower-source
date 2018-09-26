@@ -173,10 +173,9 @@ class ReferentServices
     else
       # An external link
       if pr = PageRef.fetch(url) # URL produces a viable PageRef
-        pr.kind = kind
-        Referment.new referee: pr
+        Referment.new referee: RefereeServices.new(pr).assert_kind(kind) # Promote the PageRef to Site or Recipe, as appropriate
       else
-        bail(:url, 'can\'t be read')
+        bail :url, 'can\'t be read'
       end
     end
   end
