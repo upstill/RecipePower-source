@@ -27,6 +27,7 @@ class User < ActiveRecord::Base
   devise :invitable, :database_authenticatable, :registerable,
          :recoverable, :rememberable, :trackable #, :validatable,
          :lockable
+  validates_confirmation_of :password
 
   after_invitation_accepted :initial_setup
   # before_save :serialize_browser

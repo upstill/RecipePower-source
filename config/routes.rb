@@ -62,6 +62,7 @@ RP::Application.routes.draw do
     collection do
       get 'tag'
       put 'create'
+      post 'create'
     end
   end
 
@@ -268,10 +269,11 @@ RP::Application.routes.draw do
   get '/about', :to => 'pages#about'
   get '/mission', :to => 'pages#mission'
   get '/welcome', :to => 'pages#welcome'
-  get '/faq', :to => "pages#faq"
-  get '/admin', :to => "pages#admin"
-  get '/sprites', :to => "pages#sprites"
-  get '/cookmark', :to => "pages#cookmark"
+  get '/faq', :to => 'pages#faq'
+  get '/admin', :to => 'pages#admin'
+  get '/sprites', :to => 'pages#sprites'
+  get '/cookmark', :to => 'pages#cookmark'
+  get '/collect', :to => 'pages#collect'
   # Challenge response for Lets Encrypt
   get '/.well-known/acme-challenge/:id' => 'pages#letsencrypt'
   root :to => 'pages#root'

@@ -1,7 +1,17 @@
 class PagesController < ApplicationController
   # filter_access_to :all
   respond_to :html, :json
-  
+
+  # Present dialog for collecting a cookmark in a super-simple layout
+  def collect
+    if current_user
+      @page_ref = PageRef.new
+      render layout: 'collect'
+    else
+      login_required :login_direct => true
+    end
+  end
+
   def root
     redirect_to default_next_path # Either current user's home page (if any) or /home (if not)
   end

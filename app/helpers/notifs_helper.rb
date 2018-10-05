@@ -94,6 +94,10 @@ module NotifsHelper
             partial: 'notifs/signin',
             header_link: true
         )
+        # Ensure that the visible section comes first, to show any flash
+        if visible = sections.find(&:is_vis)
+          sections.delete_if(&:is_vis).unshift visible
+        end
       end
     end
     render('notifs/panel', sections: sections) if sections.present?

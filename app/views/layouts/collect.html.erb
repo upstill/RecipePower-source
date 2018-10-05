@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <style>
+      img.logo {
+          display: inline-block;
+      }
+
+      div.collect_form {
+          font-family: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
+          font-size: 1.2em;
+          background-color: #4B815B;
+          color: #ECE6CD;
+          width: 6in;
+          margin-left: auto;
+          margin-right: auto;
+          margin-top: 30px;
+          padding: 10px;
+      }
+
+      a.entity_link {
+          color: #9AB3A0;
+      }
+
+      textarea.url_field {
+          width: 95%;
+          margin: 10px;
+          font-size: 0.8em;
+      }
+
+      span.prompt {
+          font-size: 0.9em;
+          margin: 10px;
+      }
+
+      label.kind {
+      }
+
+      select#page_ref_kind {
+
+      }
+
+      input.submit_button {
+          float: right;
+          display: inline-block;
+          margin: 2px;
+      }
+  </style>
+  <%= csrf_meta_tag %>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <%= favicon_link_tag %>
+</head>
+<body>
+<%= yield %>
+</body>
+</html>

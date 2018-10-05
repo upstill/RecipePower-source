@@ -376,7 +376,7 @@ class ApplicationController < ActionController::Base
   end
 
   # before_filter on controller that needs login to do anything
-  def  login_required format=nil
+  def  login_required options={}
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
@@ -385,19 +385,20 @@ class ApplicationController < ActionController::Base
         response_service.uuid = session.id
       end
       if session.id || true
-        defer_request path: request.fullpath, format: if response_service.mode == :injector
-                                                        :json
-                                                      else
-                                                        format||request.format.symbol
-                                                      end
+        request_options = { path: request.fullpath,
+            format: (response_service.mode == :injector ? :json : request.format.symbol)
+        }.merge(options.slice :path, :format)
+        defer_request request_options
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert
                       defer_invitation_path(response_service.redirect_params(params.slice(:sourcehome)).merge(notif: 'signup'))
                     elsif response_service.mode == :injector
                       new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
+                    elsif options[:login_direct]
+                      new_user_registration_url notif: 'signin', header: 'Sorry, members only', flash: {alert: alert}
                     else
                       # Redirect to the home page with a login popup trigger
-                      view_context.page_with_trigger home_path, new_user_registration_url(header: 'Sorry, members only', flash: {alert: alert})
+                      home_path
                     end
         )
       else
@@ -426,7 +427,9 @@ class ApplicationController < ActionController::Base
     if response_service.injector?
       deferred_request
     else
-      if current_user.sign_in_count < 2
+      if specs = specs_matching(:format => :html)
+        deferred_request specs
+      elsif current_user.sign_in_count < 2
         flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
         deferred_request path: collection_user_path(current_user, flash: flash), :format => :html
       else
@@ -448,7 +451,8 @@ class ApplicationController < ActionController::Base
 
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs
-    defer_request path: "/cookmark", :mode => :modal, :format => :json
+    dialog = specs_matching(path: '/collect', format: :html) ? view_context.new_page_ref_path : '/cookmark'
+    defer_request path: dialog, :mode => :modal, :format => :json
     # defer_request path: "/popup/need_to_know?context=signup", :mode => :modal, :format => :json
     # defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
     # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json

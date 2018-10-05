@@ -3,6 +3,7 @@ class PageRefsController < CollectibleController
   require 'page_ref.rb'
   before_action :set_page_ref, only: [:show, :edit, :update, :destroy]
   before_filter :allow_iframe, only: :tag
+  before_filter :login_required, :except => [:create, :touch, :index, :show, :associated, :capture, :collect, :card ]
 
   # GET /page_refs
   def index
@@ -28,31 +29,47 @@ class PageRefsController < CollectibleController
   end
 
   # POST /page_refs
+  # Soecial, super-simple page for collecting a cookmark
+  # With no parameters, we display the dialog for collecting a URL and Kind
+  # With URL and Kind parameters, we try to create the appropriate entity
+  #   -- Is there a user logged in?
+  #     N: redirect to [collect the enitity after logging in]
+  #     Y: can the entity be collected?
+  #       Y: display a success report and a link to the entity on RecipePower
+  #       N: redraw the dialog with a flash error
   def create
-    @page_ref = PageRefServices.assert(params[:page_ref][:kind], params[:page_ref][:url])
-    if !@page_ref.errors.any?
-      @page_ref.bkg_land
-      update_and_decorate @page_ref
+    if current_user
+      @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
+      if !@page_ref.errors.any?
+        @page_ref.bkg_land
+        update_and_decorate @page_ref
+        @entity = RefereeServices.new(@page_ref).assert_kind params[:page_ref][:kind], true
+      end
+      respond_to do |format|
+        format.json {
+          # JSON format is for dialogs creating a page_ref
+          if @page_ref.errors.any?
+            render json: view_context.flash_notify(@page_ref, false)
+          else
+            render json: @page_ref.attributes.slice('id', 'url', 'kind', 'title')
+          end
+        }
+        format.html {
+          # This is from the "dialog" in the 'collect' layout. Response depends on errors:
+          #   * No errors: present an equally simple page with dialog offering a link to the entity on RecipePower
+          #   * Errors: re-render the dialog with an error flash and the provided parameters
+          if @page_ref.errors.any?
+            resource_errors_to_flash @page_ref
+            render controller: 'pages', action: 'collect', layout: 'collect'
+          else
+            render layout: 'collect'
+          end
+        }
+      end
+    else # No user logged in => stash request pending login and redirect to #home
+      login_required :format => :json # To get a dialog
     end
-    respond_to do |format|
-      format.json {
-        if @page_ref.errors.any?
-          render json: view_context.flash_notify(@page_ref, false)
-        else
-          render json: @page_ref.attributes.slice( 'id', 'url', 'kind', 'title' )
-        end
-      }
-      format.html { }
-    end
-=begin
-    if @page_ref.errors.any?
-      resource_errors_to_flash @page_ref
-      smartrender :new
-    else
-      redirect_to tag_page_ref_path(@page_ref, :mode => :modal)
-    end
-=end
-    end
+  end
 
 =begin
   # PATCH/PUT /page_refs/1

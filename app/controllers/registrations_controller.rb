@@ -40,11 +40,14 @@ class RegistrationsController < Devise::RegistrationsController
           else
             clean_up_passwords resource
             respond_with resource do |format|
-              format.html { }
+              format.html {
+                smartrender action: 'new', layout: 'signup', locals: { header: params[:header] }
+              }
               format.json { 
                 render json: { 
                           replacements: [
-                            ["form.new_user", with_format("html") { render_to_string partial: "registrations/form" }]
+                            ["form.new_user", with_format("html") {
+                                              render_to_string partial: "registrations/form" }]
                           ]
                         }
               }
@@ -57,7 +60,7 @@ class RegistrationsController < Devise::RegistrationsController
     def new
       response_service.omniauth_pending(params[:clear_omniauth])
       build_resource({})
-      smartrender action: "new", locals: { header: params[:header] }
+      smartrender action: 'new', layout: 'signin', locals: { header: params[:header] }
     end
 
     # PUT /resource
@@ -67,8 +70,8 @@ class RegistrationsController < Devise::RegistrationsController
       account_update_params = devise_parameter_sanitizer.sanitize(:account_update)
       # required for settings form to submit when password is left blank
       if account_update_params[:password].blank?
-        account_update_params.delete("password")
-        account_update_params.delete("password_confirmation")
+        account_update_params.delete('password')
+        account_update_params.delete('password_confirmation')
       end
 
       self.resource = resource_class.to_adapter.get!(send(:"current_#{resource_name}").to_key)

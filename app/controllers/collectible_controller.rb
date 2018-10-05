@@ -191,7 +191,7 @@ class CollectibleController < ApplicationController
       respond_to do |format|
         format.html {# This is for capturing a new recipe and tagging it using a new page.
           # Defer request, redirecting it for JSON
-          login_required :json
+          login_required :format => :json
         }
         format.json {
           # Not logged in => have to store recipe parameters (url, title, comment) in a safe place pending login

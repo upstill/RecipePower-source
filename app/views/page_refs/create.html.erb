@@ -1,0 +1,5 @@
+<div class='collect_form'>
+  <%= image_tag 'rp-logo-xs-web.png', class: 'logo' %>
+  <span class="prompt">"<%= @entity.decorate.title %>" collected!</span>
+  <p style="margin-left: 10px">To view and tag it in RecipePower, click <%= link_to 'here', polymorphic_path(@entity), class: 'entity_link' %>.</p>
+</div>

@@ -132,16 +132,18 @@ class ResponseServices
   end
 
   # Return appropriate parameters for a render call, asserting defaults as necessary
-  def render_params defaults = {}
-    defaults.merge layout:
+  def render_params defaults_in = {}
+    defaults_out = defaults_in.clone
+    defaults_out[:layout] ||=
                        case @mode
                          when :injector
-                           "injector"
+                           'injector'
                          when :page
-                           "application"
+                           'application'
                          else
                            false
                        end
+    defaults_out
   end
 
   def admin_view?
