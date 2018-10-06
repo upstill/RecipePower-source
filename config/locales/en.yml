@@ -60,6 +60,14 @@ en:
         Diet: "%{tagname} %{entity_type}"
         Dish: "%{tagname} %{entity_type}"
         Course: "%{tagname} %{entity_type}"
+  activerecord:
+    errors:
+      models:
+        user:
+          attributes:
+            email:
+              blank: needed for signup
+              invalid: needs to be a working email address
   errors: &errors
     format: ! '%{attribute} %{message}'
     action:

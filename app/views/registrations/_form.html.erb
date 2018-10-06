@@ -4,7 +4,12 @@
                  :url => registration_path(resource_name, response_service.redirect_params)) do |f| %>
         <div class="signin">
           <p style="margin: 0 0 10px 0;"><strong>Open an account with just an email:</strong><br></p>
-          <%= form_errors_helper f, resource %>
+          <%# form_errors_helper f, resource %>
+          <% if (flashes = flash_all(false)).present? %>
+              <%= flashes %>
+          <% else %>
+              <%= flash_notifications_div 'flash_notifications', false %>
+          <% end %>
           <div class="signin_credentials">
             <%# f.label :username, "Username (Handle)".html_safe, class: "signin_element" %>
             <%# f.text_field :username, class: "signin_element", placeholder: "CoolBeans" %>
