@@ -33,7 +33,8 @@ module ControllerUtils
 
 # Default broad-level error report based on controller and action
   def express_error_context resource
-    "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
+    I18n.t "errors.action.#{params[:controller]}.#{params[:action]}.#{resource.class.to_s.downcase}",
+           default: "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
   end
 
 # Stick ActiveRecord errors into the flash for presentation at the next action

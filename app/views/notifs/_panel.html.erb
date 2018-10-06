@@ -35,10 +35,7 @@
       <% end %>
       <!--Define each section of the panel-->
       <% sections.each do |section| %>
-          <div class="selectable modal-body <%= section.signature %>" style="display:<%= section.is_vis ? :block : :hidden %>">
-            <%= flash_notifications_div %>
-            <%= render section.partial, section.to_h.merge(section.partial_locals || {}) %>
-          </div>
+          <%= panel_body section %>
       <% end %>
     </div>
   </div>

@@ -62,10 +62,14 @@ en:
         Course: "%{tagname} %{entity_type}"
   errors: &errors
     format: ! '%{attribute} %{message}'
+    action:
+      registrations:
+        create:
+          user: "Couldn't register you with these credentials"
     messages:
       accepted: must be accepted
       blank: can't be blank
-      confirmation: doesn't match confirmation
+      confirmation: and password need to match
       empty: can't be empty
       equal_to: must be equal to %{count}
       even: must be even

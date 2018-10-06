@@ -39,18 +39,13 @@ class RegistrationsController < Devise::RegistrationsController
             end
           else
             clean_up_passwords resource
+            resource_errors_to_flash resource
+            resource.errors.clear
             respond_with resource do |format|
               format.html {
                 smartrender action: 'new', layout: 'signup', locals: { header: params[:header] }
               }
-              format.json { 
-                render json: { 
-                          replacements: [
-                            ["form.new_user", with_format("html") {
-                                              render_to_string partial: "registrations/form" }]
-                          ]
-                        }
-              }
+              format.json { render }
             end
           end
         session[:omniauth] = nil unless response_service.user.new_record?

@@ -68,4 +68,14 @@ module PanelHelper
     selector << '.' + type.extensions_to_selector if type.present?
     [selector, (partial ? panel_suggestions(partial) : panel_suggestions_placeholder(type)) ]
   end
+
+  def panel_body section
+    panel = with_format('html') { render 'notifs/panel_body', section: section }
+    panel
+  end
+
+  def panel_body_replacement signature
+    section = notifs_section signature, :is_vis => true
+    [ 'div.selectable.modal-body.'+section.signature, panel_body(section) ]
+  end
 end

@@ -24,11 +24,16 @@ module NotifsHelper
           # Clear the invitation_token
         else # Invitation is for some other user
           # Post "please logout first" alert
+          sections << notifs_section(:logout_first,
+                                     is_vis: true,
+          )
+=begin
           sections << OpenStruct.new(
               is_vis: true,
               partial: 'sessions/logout_panel',
               partial_locals: {message: 'That invitation is for someone else.<br>Just sign out if you\'d like to use it'.html_safe}
           )
+=end
         end
         return render('notifs/panel', sections: sections, as_alert: true, wide: true)
       end
@@ -37,12 +42,18 @@ module NotifsHelper
       if notif && (current_user.id != notif.target.id)
         # If the notification doesn't match the current user
         # Notification is for some other user
+        sections << notifs_section(:logout,
+                                   is_vis: true,
+                                   exclusive: true
+        )
+=begin
         sections << OpenStruct.new(
             is_vis: true,
             exclusive: true,
             partial: 'sessions/logout',
             partial_locals: {message: 'That notification is for someone else. Just sign out if you\'d like to see it'}
         )
+=end
       end # User is logged in, pending items disposed of
 
     else # if no current user, but there's a pending invitation
@@ -55,6 +66,12 @@ module NotifsHelper
         flash.now[:alert] = 'Sorry, that invitation has expired. But do sign up!'
       end
       if invitee
+        sections << notifs_section( :accept, # Collect credentials
+            is_main: true,
+            exclusive: true,
+            partial_locals: {resource: invitee, resource_name: 'user', invitee_error: invitee_error}.compact
+        )
+=begin
         sections << OpenStruct.new(# Collect credentials
             signature: 'accept',
             is_vis: true,
@@ -64,36 +81,21 @@ module NotifsHelper
             partial: 'devise/invitations/form', # 'notifs/accept_invitation',
             partial_locals: {resource: invitee, resource_name: 'user', invitee_error: invitee_error}.compact
         )
+=end
+        sections << notifs_section(:signin, title: 'Sign In Otherwise')
+=begin
         sections << OpenStruct.new(# Sign In
             signature: 'signin',
             title: 'Sign In Otherwise',
             partial: 'notifs/signin'
         )
+=end
       else # No current user, no pending invitation (or invitation cancelled)
         # The simplest case: no invitation token, no current user
         # Simply present login options
-        sections << OpenStruct.new(# Sign Up
-            signature: 'signup',
-            is_main: true,
-            is_vis: (!invitee_error.nil?) || params[:notif] == 'signup',
-            title: 'Sign Up',
-            partial: 'registrations/options', # 'notifs/signup',
-            header_link: true
-        )
-        sections << OpenStruct.new( # Forgot Password
-            signature: 'newpw',
-            title: 'Forgot Password',
-            is_vis: params[:notif] == 'newpw',
-            partial: 'devise/passwords/form_new',
-            header_link: false
-        )
-        sections << OpenStruct.new(# Sign In
-            signature: 'signin',
-            title: 'Sign In',
-            is_vis: params[:notif] == 'signin',
-            partial: 'notifs/signin',
-            header_link: true
-        )
+        sections << notifs_section(:signup, is_main: true, is_vis: (!invitee_error.nil?) || params[:notif] == 'signup')
+        sections << notifs_section(:newpw, header_link: false)
+        sections << notifs_section(:signin)
         # Ensure that the visible section comes first, to show any flash
         if visible = sections.find(&:is_vis)
           sections.delete_if(&:is_vis).unshift visible
@@ -101,6 +103,46 @@ module NotifsHelper
       end
     end
     render('notifs/panel', sections: sections) if sections.present?
+  end
+
+  def notifs_section what, options={}
+    default_options = {
+        is_vis: (params[:notif] == what.to_s),
+        is_main: false,
+        header_link: true
+    }.merge case what
+              when :accept
+                {
+                  title: invitation_acceptance_label,
+                  partial: 'devise/invitations/form', # 'notifs/accept_invitation',
+                }
+              when :signin
+                {
+                    title: 'Sign In',
+                    partial: 'notifs/signin'
+                }
+              when :signup
+                {
+                    title: 'Sign Up',
+                    partial: 'registrations/options'
+                }
+              when :newpw
+                {
+                    title: 'Forgot Password',
+                    partial: 'devise/passwords/form_new'
+                }
+              when :logout
+                {
+                    partial: 'sessions/logout',
+                    partial_locals: {message: 'That notification is for someone else. Just sign out if you\'d like to see it'}
+                }
+              when :logout_first
+                {
+                    partial: 'sessions/logout_panel',
+                    partial_locals: {message: 'That invitation is for someone else.<br>Just sign out if you\'d like to use it'.html_safe}
+                }
+            end
+    OpenStruct.new default_options.merge(options).merge(signature: what.to_s) # Signature is the only option that's enforced
   end
 
   # Deal with an invitation, rendering it to the given partial if there's action to be taken.

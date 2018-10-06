@@ -1,0 +1,4 @@
+<div class="selectable modal-body <%= section.signature %>" style="display:<%= section.is_vis ? :block : :none %>">
+  <%= flash_notifications_div %>
+  <%= render section.partial, section.to_h.merge(section.partial_locals || {}) %>
+</div>
