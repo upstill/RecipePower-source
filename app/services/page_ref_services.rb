@@ -30,6 +30,7 @@ class PageRefServices
     if pr = PageRef.fetch(url)
       pr.kind = kind
     end
+    pr.persisted? || pr.valid?
     pr
   end
 

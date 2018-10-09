@@ -60,17 +60,12 @@ en:
         Diet: "%{tagname} %{entity_type}"
         Dish: "%{tagname} %{entity_type}"
         Course: "%{tagname} %{entity_type}"
-  activerecord:
-    errors:
-      models:
-        user:
-          attributes:
-            email:
-              blank: needed for signup
-              invalid: needs to be a working email address
   errors: &errors
     format: ! '%{attribute} %{message}'
     action:
+      page_refs:
+        create:
+          page_ref: "Couldn't add such a reference"
       registrations:
         create:
           user: "Couldn't register you with these credentials"
@@ -102,3 +97,15 @@ en:
       wrong_length:
         one: is the wrong length (should be 1 character)
         other: is the wrong length (should be %{count} characters)
+  activerecord:
+    errors:
+      models:
+        page_ref:
+          attributes:
+            url:
+              invalid: "doesn't lead to a web page.<br>Can you open it in a browser?"
+        user:
+          attributes:
+            email:
+              blank: needed for signup
+              invalid: needs to be a working email address

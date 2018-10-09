@@ -33,7 +33,7 @@ module ControllerUtils
 
 # Default broad-level error report based on controller and action
   def express_error_context resource
-    I18n.t "errors.action.#{params[:controller]}.#{params[:action]}.#{resource.class.to_s.downcase}",
+    I18n.t "errors.action.#{params[:controller]}.#{params[:action]}.#{resource.class.model_name.i18n_key}",
            default: "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
   end
 

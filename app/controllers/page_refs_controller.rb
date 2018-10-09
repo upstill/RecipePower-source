@@ -60,7 +60,7 @@ class PageRefsController < CollectibleController
           #   * Errors: re-render the dialog with an error flash and the provided parameters
           if @page_ref.errors.any?
             resource_errors_to_flash @page_ref
-            render controller: 'pages', action: 'collect', layout: 'collect'
+            render 'pages/collect', layout: 'collect'
           else
             render layout: 'collect'
           end

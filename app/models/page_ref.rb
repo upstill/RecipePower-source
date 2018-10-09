@@ -11,8 +11,11 @@ class PageRef < ActiveRecord::Base
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
-  validates_each :url do |pr, attr, value|
-    pr.errors.add :url, "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL" unless pr.good? || validate_link(pr.url, %w{ http https }) # Is it a valid URL?
+  validates_each :url do |pr, attr, value| # "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL"
+    unless pr.good? || validate_link(pr.url, %w{ http https }) # Is it a valid URL?
+      message = pr.errors.generate_message(:url, :invalid).html_safe
+      pr.errors.add(:link, message) unless pr.errors.added? :link, message # Seems to happen sometimes...
+    end
   end
 
   include Backgroundable

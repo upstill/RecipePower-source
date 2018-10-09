@@ -9,14 +9,14 @@ module ErrorsHelper
 # NB: preface can be locked out entirely by passing ""
   def express_resource_errors resource, options={}
     preface = options[:preface] || express_error_context(resource)
-    base_errors = options[:with_base] ? express_base_errors(resource) : ""
+    base_errors = options[:with_base] ? express_base_errors(resource) : ''
     details =
         if attribute = options[:attribute]
           (attribute.to_s.upcase+" "+liststrs(resource.errors[attribute])+".")
         else
           resource.errors.full_messages.to_sentence
         end + base_errors
-    preface = "<strong>#{preface}</strong>: " unless preface.blank?
+    preface = "<strong>#{preface}</strong><br>" unless preface.blank?
     (preface+details).html_safe
   end
 
