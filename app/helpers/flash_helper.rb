@@ -50,11 +50,6 @@ module FlashHelper
   # Emit a single error panel, returning an empty string if the message is empty
   def flash_one level, message, for_bootstrap=true
     return "".html_safe if message.blank?
-    if message.blank?
-      hide = "hide"
-    else
-      hide = ""
-    end
     if for_bootstrap
       bootstrap_class =
       case level
@@ -74,9 +69,9 @@ module FlashHelper
       message = "<span>#{message.html_safe}</span>".html_safe
       button = "<button class=\"close\" data-dismiss=\"alert\">&#215;</button>".html_safe
        # This message may have been cleared earlier...
-      html = content_tag :div, button+message, class: "alert #{bootstrap_class} alert_block fade in #{hide}"
+      html = content_tag :div, button+message, class: "alert #{bootstrap_class} alert_block fade in"
     else
-      html = content_tag :div, message.html_safe, class: "alert #{hide}"
+      html = content_tag :div, message.html_safe, class: "alert"
     end
     html.html_safe
   end
@@ -114,7 +109,7 @@ module FlashHelper
     # Collect any errors from the resource
     if resource==true || resource==false
       resource, popup_only = nil, resource
-    elsif resource.respond_to?(:errors) && resource.errors.any?
+    else
       resource_errors_to_flash resource
     end
     if flash.empty?

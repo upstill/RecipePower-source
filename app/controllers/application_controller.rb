@@ -56,8 +56,8 @@ class ApplicationController < ActionController::Base
   def destroy
     if update_and_decorate
       @decorator.destroy
-      if resource_errors_to_flash(@decorator.object)
-        render :errors
+      if @decorator.errors.any? # resource_errors_to_flash(@decorator.object)
+        render :errors, locals: { entity: @decorator.object }
       else
         flash[:popup] = "#{@decorator.human_name} is no more."
         render :update
@@ -463,8 +463,8 @@ class ApplicationController < ActionController::Base
   include ControllerDeference
 
   def render_optional_error_file(status_code)
-    logger.info "Logger sez: Error 500"
-    render :template => "errors/500", :status => 500, :layout => 'application'
+    logger.info 'Logger sez: Error 500'
+    render :template => 'errors/500', :status => 500, :layout => 'application'
   end
 
   private
@@ -472,6 +472,6 @@ class ApplicationController < ActionController::Base
   # The capture action should be embeddable in the iframe
   def allow_iframe
     # response.headers.except! 'X-Frame-Options'
-    response.header['X-Frame-Options'] = "ALLOWALL"
+    response.header['X-Frame-Options'] = 'ALLOWALL'
   end
 end

@@ -31,18 +31,20 @@ module ControllerUtils
     "#{action} #{controller}"
   end
 
-# Default broad-level error report based on controller and action
+  # Default broad-level error report based on controller and action
   def express_error_context resource
     I18n.t "errors.action.#{params[:controller]}.#{params[:action]}.#{resource.class.model_name.i18n_key}",
            default: "Couldn't #{params[:action]} the #{resource.class.to_s.downcase}"
   end
 
-# Stick ActiveRecord errors into the flash for presentation at the next action
+  # Stick ActiveRecord errors into the flash for presentation at the next action
   def resource_errors_to_flash resource, options={}
-    flash[:error] = view_context.express_resource_errors(resource, options) if resource.errors.any?
+    if resource.respond_to?(:errors) && resource.errors.any?
+      flash[:error] = view_context.express_resource_errors(resource, options)
+    end
   end
 
-# Stick ActiveRecord errors into the flash for presentation now
+  # Stick ActiveRecord errors into the flash for presentation now
   def resource_errors_to_flash_now resource, options={}
     flash.now[:error] = view_context.express_resource_errors resource, options
   end
