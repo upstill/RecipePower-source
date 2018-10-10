@@ -56,7 +56,7 @@ class SessionsController < Devise::SessionsController
         render nil
       else
         flash[:error] = 'Oops! Can\'t find those credentials in our records.' unless current_user
-        render :errors
+        render :errors, locals: { with_popup: false } # Report error as flash
       end
     end
   end
