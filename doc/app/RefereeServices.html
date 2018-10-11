@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class RefereeServices - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-assert_kind">#assert_kind</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-RefereeServices">
+  <h1 id="class-RefereeServices" class="class">
+    class RefereeServices
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(referee)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/services/referee_services.rb, line 3</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span>(<span class="ruby-identifier">referee</span>)
+  <span class="ruby-comment"># An referee is any object that a Referent accepts as a referee (via the Referments join table)</span>
+  <span class="ruby-ivar">@referee</span> = <span class="ruby-identifier">referee</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-assert_kind" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert_kind</span><span
+            class="method-args">(kind, promote=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure a <a href="Pagerefable.html">Pagerefable</a> referee matches the
+kind of its page ref Return the original object (if the kind matches) or a
+new, matching object</p>
+          
+          
+
+          
+          <div class="method-source-code" id="assert_kind-source">
+            <pre><span class="ruby-comment"># File app/services/referee_services.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_kind</span> <span class="ruby-identifier">kind</span>, <span class="ruby-identifier">promote</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">page_ref</span> =
+  <span class="ruby-keyword">case</span> <span class="ruby-ivar">@referee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">PageRef</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-ivar">@referee</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@referee</span>.<span class="ruby-identifier">kind</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">kind</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">promote</span>
+      <span class="ruby-ivar">@referee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Pagerefable</span> <span class="ruby-comment"># Recipe, Site</span>
+      <span class="ruby-ivar">@referee</span>.<span class="ruby-identifier">page_ref</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-ivar">@referee</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:referment</span>, <span class="ruby-node">&quot;won&#39;t translate to #{kind}&quot;</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-ivar">@referee</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">kind</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;recipe&#39;</span>
+      <span class="ruby-comment"># We want a recipe, but the current referee is not a recipe</span>
+      <span class="ruby-comment"># Either the page_ref will have an associated recipe, or we make one</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-ivar">@referee</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">promote</span>
+      (<span class="ruby-ivar">@referee</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@referee</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Recipe</span>)) <span class="ruby-operator">||</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">page_ref</span><span class="ruby-operator">:</span> <span class="ruby-identifier">page_ref</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;site&#39;</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-ivar">@referee</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">promote</span>
+      (<span class="ruby-ivar">@referee</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@referee</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Site</span>)) <span class="ruby-operator">||</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">sites</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> <span class="ruby-constant">Site</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">page_ref</span><span class="ruby-operator">:</span> <span class="ruby-identifier">page_ref</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">kind</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">kind</span> <span class="ruby-comment"># All other kinds are simply a type of PageRef. We convert and return</span>
+        <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">kind</span> = <span class="ruby-identifier">kind</span>
+        <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">persisted?</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">page_ref</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

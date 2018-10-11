@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>module TaggableSearch - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="module">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-i-count_tag">#count_tag</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="module-TaggableSearch">
+  <h1 id="module-TaggableSearch" class="module">
+    module TaggableSearch
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-count_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">count_tag</span><span
+            class="method-args">(tag, counts, iscope)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Filter an entity scope by tag contents</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="count_tag-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 376</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">count_tag</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">counts</span>, <span class="ruby-identifier">iscope</span>
+  <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>
+  <span class="ruby-identifier">iscope</span>, <span class="ruby-identifier">sort_key</span>, <span class="ruby-identifier">pluck_key</span> = <span class="ruby-identifier">orderingscope</span> <span class="ruby-identifier">iscope</span>
+  <span class="ruby-identifier">pluck_key</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">sort_key</span>
+  <span class="ruby-identifier">model</span> = <span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">model</span>
+  <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;via taggings (with synonoms)&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-comment"># We index using tags, for taggable models</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">model</span>.<span class="ruby-identifier">reflect_on_association</span> <span class="ruby-value">:tags</span> <span class="ruby-comment"># model has :tags association</span>
+      <span class="ruby-comment"># Search by fuzzy string match</span>
+      <span class="ruby-identifier">counts</span>.<span class="ruby-identifier">include</span> <span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-value">:tags</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">by_string</span>(<span class="ruby-identifier">tagname</span>)), <span class="ruby-identifier">pluck_key</span> <span class="ruby-comment"># One point for matching in one field</span>
+
+      <span class="ruby-comment"># Search across synonyms</span>
+      <span class="ruby-identifier">counts</span>.<span class="ruby-identifier">include</span> <span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-value">:tags</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">synonyms_by_str</span>(<span class="ruby-identifier">tagname</span>)), <span class="ruby-identifier">pluck_key</span> <span class="ruby-comment"># One point for matching in one field</span>
+
+      <span class="ruby-comment"># Search for exact name match</span>
+      <span class="ruby-identifier">counts</span>.<span class="ruby-identifier">include</span> <span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-value">:tags</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">by_string</span>(<span class="ruby-identifier">tagname</span>, <span class="ruby-keyword">true</span>)), <span class="ruby-identifier">pluck_key</span> <span class="ruby-comment"># Extra points for exact name match</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

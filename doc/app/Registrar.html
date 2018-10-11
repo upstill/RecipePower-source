@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class Registrar - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-add_to_list">::add_to_list</a>
+    
+    <li ><a href="#method-c-initialize">::initialize</a>
+    
+    <li ><a href="#method-c-register_list">::register_list</a>
+    
+    <li ><a href="#method-c-register_recipe">::register_recipe</a>
+    
+    <li ><a href="#method-c-register_tag">::register_tag</a>
+    
+    <li ><a href="#method-i-absolutize">#absolutize</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Registrar">
+  <h1 id="class-Registrar" class="class">
+    class Registrar
+  </h1>
+
+  <section class="description">
+    
+<p>The <a href="Registrar.html">Registrar</a> class registers scraping
+findings with the database</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-url" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">url</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-add_to_list" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">add_to_list</span><span
+            class="method-args">(item, list, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="add_to_list-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 104</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">add_to_list</span> <span class="ruby-identifier">item</span>, <span class="ruby-identifier">list</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">list</span>).<span class="ruby-identifier">include</span> <span class="ruby-identifier">item</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-value">:user</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">superuser</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-initialize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">initialize</span><span
+            class="method-args">(url)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Initialize the <a href="Registrar.html">Registrar</a> for a particular url</p>
+          
+          
+
+          
+          <div class="method-source-code" id="initialize-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">initialize</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-ivar">@url</span> = <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-register_list" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">register_list</span><span
+            class="method-args">(name, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Assert a list into the database with the given name. Options: :owner is the
+<a href="User.html">User</a> who owns it :picurl is the list&#39;s picture
+:description is the list&#39;s description</p>
+          
+          
+
+          
+          <div class="method-source-code" id="register_list-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 96</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_list</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">list</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:owner</span>] <span class="ruby-operator">||</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">superuser</span>
+  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:picurl</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:picurl</span>]
+  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:description</span>].<span class="ruby-identifier">strip</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:description</span>].<span class="ruby-identifier">present?</span>
+  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-identifier">list</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-register_recipe" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">register_recipe</span><span
+            class="method-args">(recipe_link, extractions)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure that a recipe has been filed, and launch it for scraping if new</p>
+          
+          
+
+          
+          <div class="method-source-code" id="register_recipe-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 32</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_recipe</span> <span class="ruby-identifier">recipe_link</span>, <span class="ruby-identifier">extractions</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">recipe_link</span>
+  <span class="ruby-identifier">recipe</span> = <span class="ruby-constant">CollectibleServices</span>.<span class="ruby-identifier">find_or_create</span>({<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">recipe_link</span>)}, <span class="ruby-identifier">extractions</span>, <span class="ruby-constant">Recipe</span>)
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Recipe at #{absolutize recipe_link}:&quot;</span>
+  <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Recipe        #{key}: &#39;#{value}&#39;&quot;</span> }
+  <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">from_extractions</span>(<span class="ruby-identifier">extractions</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>
+  <span class="ruby-identifier">recipe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-register_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">register_tag</span><span
+            class="method-args">(name_or_tag, tagtype=nil, page_link=nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>name_or_tag: a string or a <a href="Tag.html">Tag</a> instance;</p>
+
+<pre class="ruby"><span class="ruby-identifier">tagtype</span> <span class="ruby-identifier">required</span> <span class="ruby-identifier">to</span> <span class="ruby-identifier">give</span> <span class="ruby-identifier">the</span> <span class="ruby-identifier">tag</span> <span class="ruby-identifier">type</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">a</span> <span class="ruby-identifier">string</span>
+<span class="ruby-identifier">tagtype</span> <span class="ruby-identifier">omitted</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">already</span> <span class="ruby-identifier">a</span> <span class="ruby-identifier">tag</span>
+</pre>
+
+<p>page_link (optional): a page to associate with the tag options: other info
+useful to <a href="TagServices.html#method-c-define">TagServices.define</a></p>
+
+<pre>:page_kind: how the PageRef will be classified
+:image_link: for an image to be associated with the reference
+:link_text: passed to the page_ref for labeling its URL in links
+:description: description of the associated referent
+:parent_tag: tag to be a parent of the asserted tag
+:child_tag: tag to be a child of the asserted tag
+:suggests: tag to be suggested by the asserted tag
+:suggested_by: tag that will suggest the asserted tag</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="register_tag-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 69</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">name_or_tag</span>, <span class="ruby-identifier">tagtype</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">page_link</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">name_or_tag</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Tag</span>)
+    <span class="ruby-identifier">page_link</span>, <span class="ruby-identifier">options</span> = <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">page_link</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">options</span>[<span class="ruby-value">:tagtype</span>] = <span class="ruby-identifier">tagtype</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_link</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">options</span>, <span class="ruby-identifier">page_link</span> = <span class="ruby-identifier">page_link</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:page_link</span>] = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">page_link</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:image_link</span>] = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:image_link</span>]
+  <span class="ruby-identifier">parent_tag</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:parent_tag</span>
+  <span class="ruby-identifier">child_tag</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:child_tag</span>
+  <span class="ruby-identifier">suggested_tag</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:suggests</span>
+  <span class="ruby-identifier">suggested_by</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:suggested_by</span>
+  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">name_or_tag</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">compact</span>
+  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">parent_tag</span>).<span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">parent_tag</span>
+  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tag</span>).<span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">child_tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">child_tag</span>
+  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tag</span>).<span class="ruby-identifier">suggests</span> <span class="ruby-identifier">suggested_tag</span>
+  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">suggested_by</span>).<span class="ruby-identifier">suggests</span> <span class="ruby-identifier">tag</span>
+  <span class="ruby-identifier">tag</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-absolutize" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">absolutize</span><span
+            class="method-args">(link_or_path, attr=:href)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure that a given link (or Nokogiri spec or Mechanize node) has a valid
+url</p>
+          
+          
+
+          
+          <div class="method-source-code" id="absolutize-source">
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">link_or_path</span>, <span class="ruby-identifier">attr</span>=<span class="ruby-value">:href</span>
+  <span class="ruby-identifier">path</span> =
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">link_or_path</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>
+          <span class="ruby-identifier">link_or_path</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Mechanize</span><span class="ruby-operator">::</span><span class="ruby-constant">Page</span><span class="ruby-operator">::</span><span class="ruby-constant">Link</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">href</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Element</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">XML</span><span class="ruby-operator">::</span><span class="ruby-constant">Attr</span>
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-identifier">respond_to?</span>(<span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_sym</span>)
+          <span class="ruby-identifier">link_or_path</span>.<span class="ruby-identifier">send</span> <span class="ruby-identifier">attr</span>.<span class="ruby-identifier">to_sym</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>
+          <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">path</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">decode</span>(<span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">url</span>, <span class="ruby-identifier">path</span>).<span class="ruby-identifier">to_s</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

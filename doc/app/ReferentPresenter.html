@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ReferentPresenter - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="CollectiblePresenter.html">CollectiblePresenter</a>
+  
+</div>
+
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="CardPresentation.html">CardPresentation</a>
+  
+  
+  </ul>
+</div>
+
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-i-card_aspect">#card_aspect</a>
+    
+    <li ><a href="#method-i-card_aspects">#card_aspects</a>
+    
+    <li ><a href="#method-i-has_editable">#has_editable</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ReferentPresenter">
+  <h1 id="class-ReferentPresenter" class="class">
+    class ReferentPresenter
+  </h1>
+
+  <section class="description">
+    
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-card_aspect" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspect</span><span
+            class="method-args">(which)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="CardPresentation.html#method-i-card_aspect">CardPresentation#card_aspect</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="card_aspect-source">
+            <pre><span class="ruby-comment"># File app/presenters/referent_presenter.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
+  <span class="ruby-identifier">whichsym</span> = <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_sym</span>
+  <span class="ruby-identifier">whichstr</span> = <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">singularize</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-constant">I18n</span>.<span class="ruby-identifier">t</span> <span class="ruby-node">&quot;referent.card_labels.#{which}&quot;</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>
+  <span class="ruby-identifier">counted_label</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">link_options</span> = { <span class="ruby-identifier">joinstr</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;; &#39;</span> }
+  <span class="ruby-identifier">collection</span> =
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">whichsym</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:parents</span>, <span class="ruby-value">:children</span>, <span class="ruby-value">:relateds</span>, <span class="ruby-value">:expressions</span>, <span class="ruby-value">:synonyms</span>
+          <span class="ruby-identifier">counted_label</span> = <span class="ruby-identifier">label</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">whichsym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:relateds</span>
+          <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:joinstr</span>] = <span class="ruby-string">&#39; | &#39;</span>
+          <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">visible_tags_of_kind</span> <span class="ruby-identifier">whichsym</span>, <span class="ruby-identifier">viewer</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:lists</span>, <span class="ruby-value">:feeds</span>, <span class="ruby-value">:sites</span>, <span class="ruby-value">:recipes</span>
+          <span class="ruby-comment"># Lists that are tagged by an expression tag</span>
+          <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:external</span>] = <span class="ruby-identifier">whichsym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:sites</span>
+          <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">tagged_entities</span> <span class="ruby-identifier">whichstr</span>, <span class="ruby-ivar">@user</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:about</span>, <span class="ruby-value">:article</span>, <span class="ruby-value">:news_item</span>, <span class="ruby-value">:tip</span>, <span class="ruby-value">:video</span>, <span class="ruby-value">:home_page</span>, <span class="ruby-value">:product</span>, <span class="ruby-value">:offering</span>, <span class="ruby-value">:event</span>
+          <span class="ruby-comment"># Associated PageRefs, either direct (via Referment) or indirect (tagged by one of our tags)</span>
+          <span class="ruby-identifier">counted_label</span> = <span class="ruby-identifier">label</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">whichsym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:about</span>
+          <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:external</span>] = <span class="ruby-keyword">true</span>
+          <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">page_refs</span> <span class="ruby-identifier">whichsym</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-keyword">return</span> <span class="ruby-keyword">super</span>
+      <span class="ruby-keyword">end</span>
+  [
+      (<span class="ruby-identifier">counted_label</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">field_label_counted</span>(<span class="ruby-identifier">label</span>, <span class="ruby-identifier">collection</span>.<span class="ruby-identifier">count</span>)),
+      <span class="ruby-identifier">entity_links</span>(<span class="ruby-identifier">collection</span>, <span class="ruby-identifier">link_options</span>)
+  ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_aspects" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_aspects</span><span
+            class="method-args">(which_column=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="card_aspects-source">
+            <pre><span class="ruby-comment"># File app/presenters/referent_presenter.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">which_column</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># decorator.object.is_a?(Taggable) ? decorator.individual_tagtypes : []</span>
+[ <span class="ruby-value">:description</span>, <span class="ruby-value">:title</span>, <span class="ruby-value">:parents</span>, <span class="ruby-value">:children</span>, <span class="ruby-value">:relateds</span>, <span class="ruby-value">:synonyms</span>, <span class="ruby-value">:lists</span>, <span class="ruby-value">:feeds</span>, <span class="ruby-value">:sites</span>, <span class="ruby-value">:recipes</span>, <span class="ruby-value">:about</span>, <span class="ruby-value">:article</span>, <span class="ruby-value">:news_item</span>, <span class="ruby-value">:tip</span>, <span class="ruby-value">:video</span>, <span class="ruby-value">:home_page</span>, <span class="ruby-value">:product</span>, <span class="ruby-value">:offering</span>, <span class="ruby-value">:event</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-has_editable" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">has_editable</span><span
+            class="method-args">(kind)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Does this kind of <a href="Referent.html">Referent</a> have an editable
+field for</p>
+          
+          
+
+          
+          <div class="method-source-code" id="has_editable-source">
+            <pre><span class="ruby-comment"># File app/presenters/referent_presenter.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_editable</span> <span class="ruby-identifier">kind</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">kind</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:children</span>
+      <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

@@ -1,0 +1,661 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class ModelDecorator - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link">Draper::Decorator
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-attrmap">::attrmap</a>
+    
+    <li ><a href="#method-c-attrmap_inverted">::attrmap_inverted</a>
+    
+    <li ><a href="#method-i-attribute_for">#attribute_for</a>
+    
+    <li ><a href="#method-i-base_class_name">#base_class_name</a>
+    
+    <li ><a href="#method-i-base_object">#base_object</a>
+    
+    <li ><a href="#method-i-class_name">#class_name</a>
+    
+    <li ><a href="#method-i-collection_name">#collection_name</a>
+    
+    <li ><a href="#method-i-element_name">#element_name</a>
+    
+    <li ><a href="#method-i-human_name">#human_name</a>
+    
+    <li ><a href="#method-i-param_key">#param_key</a>
+    
+    <li ><a href="#method-i-plural_name">#plural_name</a>
+    
+    <li ><a href="#method-i-singular_name">#singular_name</a>
+    
+    <li ><a href="#method-i-translate_params_for">#translate_params_for</a>
+    
+    <li ><a href="#method-i-user_can-3F">#user_can?</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-ModelDecorator">
+  <h1 id="class-ModelDecorator" class="class">
+    class ModelDecorator
+  </h1>
+
+  <section class="description">
+    
+<p>This class of Decorator handles ALL persisted object classes. It defines
+convenience methods for deriving names for the objects, but the main point
+is to provide as_base_class for the use of polymorphic_path, which
+otherwise would try to build different paths for STI subclasses
+individually</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-attrmap" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attrmap</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define the attributes of the model in a way amenable to translating between
+types This is a hash whose keys are the accessible attributes of the model,
+and the values are those attributes as translated into a “common”
+representation, e.g., &#39;name&#39; (commonly known as &#39;title&#39;),
+&#39;logo&#39;/&#39;picurl&#39; (&#39;image&#39;), &#39;home&#39;
+(&#39;url&#39;). For example, the :url of a recipe corresponds to the :home
+of a site In most cases, the attributes pass from one model to the other
+without changing name, but, importantly, no translation occurs if the
+target model is missing such an attribute</p>
+          
+          
+
+          
+          <div class="method-source-code" id="attrmap-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 17</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">attrmap</span>
+  <span class="ruby-comment"># We memoize the map for each type</span>
+  <span class="ruby-identifier">@@AttrMaps</span> <span class="ruby-operator">||=</span> {}
+  <span class="ruby-comment"># By default, all accessible attributes map to themselves</span>
+  <span class="ruby-identifier">@@AttrMaps</span>[<span class="ruby-keyword">self</span>.<span class="ruby-identifier">object_class</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-operator">||=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">object_class</span>.<span class="ruby-identifier">accessible_attributes</span>.<span class="ruby-identifier">inject</span>(<span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">memo</span>, <span class="ruby-identifier">attrname</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">memo</span>[<span class="ruby-identifier">attrname</span>] = <span class="ruby-identifier">attrname</span>
+    <span class="ruby-identifier">memo</span>
+  }
+  <span class="ruby-identifier">@@AttrMaps</span>[<span class="ruby-keyword">self</span>.<span class="ruby-identifier">object_class</span>.<span class="ruby-identifier">to_s</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-attrmap_inverted" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attrmap_inverted</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="attrmap_inverted-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 28</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">attrmap_inverted</span>
+  <span class="ruby-identifier">@@AttrMapsInverted</span> <span class="ruby-operator">||=</span> {}
+  <span class="ruby-identifier">@@AttrMapsInverted</span>[<span class="ruby-keyword">self</span>.<span class="ruby-identifier">object_class</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-operator">||=</span> <span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">attrmap</span>.<span class="ruby-identifier">invert</span>
+  <span class="ruby-identifier">@@AttrMapsInverted</span>[<span class="ruby-keyword">self</span>.<span class="ruby-identifier">object_class</span>.<span class="ruby-identifier">to_s</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-attribute_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attribute_for</span><span
+            class="method-args">(what)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Translation from label names to attribute names</p>
+          
+          
+
+          
+          <div class="method-source-code" id="attribute_for-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 52</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">attribute_for</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">attrmap_inverted</span>[<span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-base_class_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">base_class_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="base_class_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">base_class_name</span>
+  <span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">base_class</span>.<span class="ruby-identifier">to_s</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-base_object" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">base_object</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present an STI subclass as the base class</p>
+          
+          
+
+          
+          <div class="method-source-code" id="base_object-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 108</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">base_object</span>
+  <span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">base_class</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">object</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">base_class</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-class_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">class_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="class_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">class_name</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">name</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-collection_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">collection_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;recipes&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;feed_entries&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="collection_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">collection_name</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">collection</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-element_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">element_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;recipe&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;feed_entry&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="element_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">element_name</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">element</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-human_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">human_name</span><span
+            class="method-args">(plural=false, capitalize=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;Recipe&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;Feed entry&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="human_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 84</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">human_name</span> <span class="ruby-identifier">plural</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">capitalize</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">human</span>
+  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">name</span>.<span class="ruby-identifier">pluralize</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">plural</span>
+  <span class="ruby-identifier">capitalize</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">downcase</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-param_key" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">param_key</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;recipe&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;feed_entry&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="param_key-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 92</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">param_key</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">param_key</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-plural_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">plural_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;recipes&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;feed_entries&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="plural_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">plural_name</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">plural</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-singular_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">singular_name</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Recipe.html">Recipe</a> =&gt; &#39;recipe&#39; <a
+href="FeedEntry.html">FeedEntry</a> =&gt; &#39;feed_entry&#39;</p>
+          
+          
+
+          
+          <div class="method-source-code" id="singular_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 66</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">singular_name</span>
+  <span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">singular</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-translate_params_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">translate_params_for</span><span
+            class="method-args">(params, entity)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Translate params for one class to those for another. NB: generally
+speaking, only common parameters (e.g., title, url, description) work
+properly</p>
+          
+          
+
+          
+          <div class="method-source-code" id="translate_params_for-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">translate_params_for</span> <span class="ruby-identifier">params</span>, <span class="ruby-identifier">entity</span>
+  <span class="ruby-identifier">params</span> <span class="ruby-operator">||=</span> {}
+  <span class="ruby-identifier">ed</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">entity</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">params</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ed</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>
+  <span class="ruby-identifier">inmap</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">attrmap</span>
+  <span class="ruby-identifier">outmap</span> = <span class="ruby-identifier">ed</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">attrmap_inverted</span> <span class="ruby-comment"># HashWithIndifferentAccess.new ed.class.attrmap.invert</span>
+  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">inject</span>(<span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">memo</span>, <span class="ruby-identifier">item</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span> = <span class="ruby-operator">*</span><span class="ruby-identifier">item</span>
+    <span class="ruby-keyword">next</span> <span class="ruby-identifier">memo</span> <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">common_name</span> = <span class="ruby-identifier">inmap</span>[<span class="ruby-identifier">key</span>])
+    <span class="ruby-keyword">next</span> <span class="ruby-identifier">memo</span> <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">output_key</span> = <span class="ruby-identifier">outmap</span>[<span class="ruby-identifier">common_name</span>])
+    <span class="ruby-identifier">memo</span>[<span class="ruby-identifier">output_key</span>] = <span class="ruby-identifier">value</span>
+    <span class="ruby-identifier">memo</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-user_can-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">user_can?</span><span
+            class="method-args">(what)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Check permissions for current user to access controller method</p>
+          
+          
+
+          
+          <div class="method-source-code" id="user_can-3F-source">
+            <pre><span class="ruby-comment"># File app/decorators/model_decorator.rb, line 103</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">user_can?</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">permitted_to?</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_sym</span>, <span class="ruby-identifier">collection_name</span>.<span class="ruby-identifier">to_sym</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+

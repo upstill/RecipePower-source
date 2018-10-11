@@ -1,0 +1,624 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+<meta charset="utf-8">
+
+<title>class Articulator - Rails Application Documentation</title>
+
+<script type="text/javascript">
+  var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
+</script>
+
+<script src="./js/jquery.js"></script>
+<script src="./js/darkfish.js"></script>
+
+<link href="./css/fonts.css" rel="stylesheet">
+<link href="./css/rdoc.css" rel="stylesheet">
+
+
+
+<body id="top" role="document" class="class">
+<nav role="navigation">
+  <div id="project-navigation">
+    <div id="home-section" role="region" title="Quick navigation" class="nav-section">
+  <h2>
+    <a href="./index.html" rel="home">Home</a>
+  </h2>
+
+  <div id="table-of-contents-navigation">
+    <a href="./table_of_contents.html#pages">Pages</a>
+    <a href="./table_of_contents.html#classes">Classes</a>
+    <a href="./table_of_contents.html#methods">Methods</a>
+  </div>
+</div>
+
+    <div id="search-section" role="search" class="project-section initially-hidden">
+  <form action="#" method="get" accept-charset="utf-8">
+    <div id="search-field-wrapper">
+      <input id="search-field" role="combobox" aria-label="Search"
+             aria-autocomplete="list" aria-controls="search-results"
+             type="text" name="search" placeholder="Search" spellcheck="false"
+             title="Type to search, Up and Down to navigate, Enter to load">
+    </div>
+
+    <ul id="search-results" aria-label="Search Results"
+        aria-busy="false" aria-expanded="false"
+        aria-atomic="false" class="initially-hidden"></ul>
+  </form>
+</div>
+
+  </div>
+
+  
+
+  <div id="class-metadata">
+    
+    <div id="parent-class-section" class="nav-section">
+  <h3>Parent</h3>
+
+  
+  <p class="link"><a href="Object.html">Object</a>
+  
+</div>
+
+    
+    
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
+    
+    <li ><a href="#method-c-articulates">::articulates</a>
+    
+    <li ><a href="#method-c-class_for">::class_for</a>
+    
+    <li ><a href="#method-c-make">::make</a>
+    
+    <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-c-register">::register</a>
+    
+    <li ><a href="#method-c-registry">::registry</a>
+    
+    <li ><a href="#method-i-message_key">#message_key</a>
+    
+    <li ><a href="#method-i-method_missing">#method_missing</a>
+    
+    <li ><a href="#method-i-summary">#summary</a>
+    
+    <li ><a href="#method-i-user_reference">#user_reference</a>
+    
+    <li ><a href="#method-i-verb">#verb</a>
+    
+  </ul>
+</div>
+
+  </div>
+</nav>
+
+<main role="main" aria-labelledby="class-Articulator">
+  <h1 id="class-Articulator" class="class">
+    class Articulator
+  </h1>
+
+  <section class="description">
+    
+<p>class for articulating RpEvents as sentences, with the ability to embed
+content strings in HTML before forming the sentence</p>
+
+  </section>
+
+  
+  
+  
+  <section id="5Buntitled-5D" class="documentation-section">
+    
+
+    
+
+    
+    <section class="constants-list">
+      <header>
+        <h3>Constants</h3>
+      </header>
+      <dl>
+      
+        <dt id="SUMMARY_USES">SUMMARY_USES
+        
+        <dd>
+        
+      
+      </dl>
+    </section>
+    
+
+    
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-direct_object" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">direct_object</span><span
+            class="attribute-access-type">[W]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-indirect_object" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">indirect_object</span><span
+            class="attribute-access-type">[W]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-notification" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">notification</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-subject" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">subject</span><span
+            class="attribute-access-type">[W]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
+
+    
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-articulates" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">articulates</span><span
+            class="method-args">(*keys)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="articulates-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 41</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">articulates</span> <span class="ruby-operator">*</span><span class="ruby-identifier">keys</span>
+  <span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
+    <span class="ruby-constant">Articulator</span>.<span class="ruby-identifier">register</span> <span class="ruby-identifier">key</span>, <span class="ruby-keyword">self</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-class_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">class_for</span><span
+            class="method-args">(notifiable, key)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="class_for-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class_for</span> <span class="ruby-identifier">notifiable</span>, <span class="ruby-identifier">key</span>
+  <span class="ruby-identifier">key</span> = <span class="ruby-node">&quot;#{notifiable.class.to_s.underscore}.#{key}&quot;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/\./</span>
+  <span class="ruby-identifier">@@registry</span>[<span class="ruby-identifier">key</span>] <span class="ruby-operator">||</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">klass</span> = ((<span class="ruby-identifier">key</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\./</span>, <span class="ruby-string">&#39;_&#39;</span>).<span class="ruby-identifier">camelize</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;Articulator&#39;</span>).<span class="ruby-identifier">constantize</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>)
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">klass</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">klass</span> = ((<span class="ruby-identifier">key</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\..*$/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">camelize</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;Articulator&#39;</span>).<span class="ruby-identifier">constantize</span> <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>)
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">klass</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-constant">Articulator</span>
+    <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-make" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">make</span><span
+            class="method-args">(notification)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Determine the class that articulates the given notifiable/key pair</p>
+          
+          
+
+          
+          <div class="method-source-code" id="make-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 8</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">make</span> <span class="ruby-identifier">notification</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class_for</span>(<span class="ruby-identifier">notification</span>.<span class="ruby-identifier">notifiable</span>, <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">key</span>).<span class="ruby-identifier">new</span> <span class="ruby-identifier">notification</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(notification)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">notification</span>
+  <span class="ruby-ivar">@notification</span> = <span class="ruby-identifier">notification</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-register" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">register</span><span
+            class="method-args">(key, klass)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Register a class as articulating a particular key</p>
+          
+          
+
+          
+          <div class="method-source-code" id="register-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">register</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">klass</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Registering #{klass} to handle #{key}&quot;</span>
+  <span class="ruby-identifier">@@registry</span>[<span class="ruby-identifier">key</span>] = <span class="ruby-identifier">klass</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-registry" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">registry</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="registry-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">registry</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Registered:&#39;</span>
+  <span class="ruby-identifier">@@registry</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">val</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\t#{key}: #{val}&quot;</span>}
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-method_missing" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">method_missing</span><span
+            class="method-args">(namesym, *args, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="method_missing-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span> <span class="ruby-identifier">namesym</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span><span class="ruby-operator">::</span><span class="ruby-constant">SUMMARY_USES</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">namesym</span>
+    <span class="ruby-identifier">instance_variable_get</span>(<span class="ruby-value">:&quot;@#{namesym}&quot;</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">instance_variable_set</span>(<span class="ruby-value">:&quot;@#{namesym}&quot;</span>,
+                                                                   <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">notifiable</span>.<span class="ruby-identifier">title_of</span>(<span class="ruby-identifier">namesym</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>))
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summary" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summary</span><span
+            class="method-args">(forcements = {})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="summary-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 47</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summary</span> <span class="ruby-identifier">forcements</span> = {}
+  <span class="ruby-identifier">finals</span> = <span class="ruby-identifier">extract</span> <span class="ruby-operator">*</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span><span class="ruby-operator">::</span><span class="ruby-constant">SUMMARY_USES</span> <span class="ruby-operator">+</span> [<span class="ruby-identifier">forcements</span>])
+  <span class="ruby-identifier">finals</span>[<span class="ruby-value">:default</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span><span class="ruby-operator">::</span><span class="ruby-constant">SUMMARY_USES</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span> <span class="ruby-identifier">finals</span>[<span class="ruby-identifier">key</span>] }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span> <span class="ruby-string">&#39; &#39;</span>
+  <span class="ruby-constant">I18n</span>.<span class="ruby-identifier">t</span>(<span class="ruby-identifier">message_key</span>(<span class="ruby-identifier">finals</span>), <span class="ruby-identifier">finals</span>).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-user_reference" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">user_reference</span><span
+            class="method-args">(user, possessive = false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>How to name a user, substituting &#39;you&#39; when the viewer and the user
+are the same, optionally making it possessive</p>
+          
+          
+
+          
+          <div class="method-source-code" id="user_reference-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 61</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">user_reference</span> <span class="ruby-identifier">user</span>, <span class="ruby-identifier">possessive</span> = <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">possessive</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">target</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;your&#39;</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">name</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;&#39;s&quot;</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">target</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;you&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">name</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">possessive</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;your&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;you&#39;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-verb" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">verb</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Override the verb for a coherent expression</p>
+          
+          
+
+          
+          <div class="method-source-code" id="verb-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 74</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">verb</span>
+  <span class="ruby-string">&#39;&lt;your verb here&gt;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-message_key" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">message_key</span><span
+            class="method-args">(finals)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Articulator.html#method-i-message_key">#message_key</a> specifies
+the place in the locale table where the message is found</p>
+          
+          
+
+          
+          <div class="method-source-code" id="message_key-source">
+            <pre><span class="ruby-comment"># File lib/articulator.rb, line 81</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">message_key</span> <span class="ruby-identifier">finals</span>
+  <span class="ruby-string">&#39;notification.user.&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">notification</span>.<span class="ruby-identifier">key</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;.summary&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+  </section>
+</main>
+
+
+<footer id="validator-badges" role="contentinfo">
+  <p><a href="http://validator.w3.org/check/referer">Validate</a>
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
+  <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
+</footer>
+
