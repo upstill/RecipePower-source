@@ -123,12 +123,7 @@ module LinkHelper
 
   # Provide a sensible internal link to the object
   def linkpath object_or_decorator, action=nil
-    # Use the object in case we got a decorator
-    object = object_or_decorator.is_a?(Draper::Decorator) ? object_or_decorator.object : object_or_decorator
-
-    # Reduce the object to its base class for the use of polymorphic_path
-    bc = object.class.base_class
-    object = object.becomes(bc) unless bc == object.class
+    object = polymorphable object_or_decorator
     action = nil if ['show', :show].include? action
     (action && polymorphic_path([action, object]) rescue nil) ||
         (polymorphic_path([:collection, object]) rescue nil) ||
@@ -139,7 +134,7 @@ module LinkHelper
 
   def touchpath decorator, for_user=nil
     if for_user ||= (defined?(current_user) && current_user) # Who will get the touch
-      polymorphic_path([:touch, decorator], user_id: for_user.id) rescue nil
+      polymorphic_path([:touch, polymorphable(decorator)], user_id: for_user.id) rescue nil
     end
   end
 
@@ -152,9 +147,7 @@ module LinkHelper
       absolute_or_relative, options = :relative, absolute_or_relative
     end
     # Derive the object as a member of its base class
-    obj = object_or_decorator.is_a?(Draper::Decorator) ? object_or_decorator.object : object_or_decorator
-    bc = obj.class.base_class
-    obj = obj.becomes(bc) if bc != obj.class
+    obj = polymorphable object_or_decorator
     case absolute_or_relative
       when :relative
         polymorphic_path obj, options
