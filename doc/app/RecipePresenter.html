@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -76,9 +77,13 @@
     
     <li class="calls-super" ><a href="#method-i-card_avatar">#card_avatar</a>
     
+    <li ><a href="#method-i-card_label">#card_label</a>
+    
     <li ><a href="#method-i-card_show_avatar">#card_show_avatar</a>
     
     <li ><a href="#method-i-card_video">#card_video</a>
+    
+    <li ><a href="#method-i-ribbon">#ribbon</a>
     
   </ul>
 </div>
@@ -138,7 +143,7 @@
 
           
           <div class="method-source-code" id="card_aspect-source">
-            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 35</span>
+            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 37</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
   <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">contents</span> =
@@ -190,7 +195,7 @@
 
           
           <div class="method-source-code" id="card_aspects-source">
-            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 31</span>
+            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 33</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">which_column</span>=<span class="ruby-keyword">nil</span>
   ([ <span class="ruby-value">:yield</span>, <span class="ruby-value">:times</span> ] <span class="ruby-operator">+</span> <span class="ruby-keyword">super</span>).<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
@@ -217,12 +222,7 @@
 
         <div class="method-description">
           
-          <pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar?</span>
-  <span class="ruby-identifier">card_video</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">super</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p># The recipe&#39;s avatar can be either a video or a straight image</p>
+          <p>The recipe&#39;s avatar can be either a video or a straight image</p>
           
           
             <div class="method-calls-super">
@@ -233,9 +233,41 @@
 
           
           <div class="method-source-code" id="card_avatar-source">
-            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">card_video</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">card_video</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_label</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Recipes don&#39;t have a tab on their card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_label-source">
+            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 25</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_label</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -322,6 +354,38 @@
       </div>
 
     
+      <div id="method-i-ribbon" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ribbon</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Recipes don&#39;t have a ribbon on their card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ribbon-source">
+            <pre><span class="ruby-comment"># File app/presenters/recipe_presenter.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ribbon</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
     </section>
   
   </section>
@@ -330,7 +394,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

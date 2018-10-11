@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,7 +69,7 @@
   <ul class="link-list">
   
   
-    <li><a class="include" href="EntitiesCache.html">EntitiesCache</a>
+    <li><a class="include" href="ModelSearch.html">ModelSearch</a>
   
   
   </ul>
@@ -84,6 +85,10 @@
     <li ><a href="#method-i-itemscope">#itemscope</a>
     
     <li ><a href="#method-i-max_window_size">#max_window_size</a>
+    
+    <li class="calls-super" ><a href="#method-i-orderingscope">#orderingscope</a>
+    
+    <li ><a href="#method-i-supported_org_options">#supported_org_options</a>
     
   </ul>
 </div>
@@ -140,25 +145,25 @@
 
           
           <div class="method-source-code" id="itemscope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1015</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1329</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscope</span>
   <span class="ruby-ivar">@itemscope</span> <span class="ruby-operator">||=</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">admin_view</span> <span class="ruby-comment"># See everyone in admin view</span>
-    <span class="ruby-constant">User</span>.<span class="ruby-identifier">unscoped</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">case</span> <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">subtype</span>
-      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;followees&#39;</span>
-        <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">followees</span>
-      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;relevant&#39;</span>
-        <span class="ruby-comment"># Exclude the viewer and all their friends</span>
-        <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">private</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).
-            <span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;count_of_collecteds &gt; 0&#39;</span>).
-            <span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>( <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">followee_ids</span><span class="ruby-operator">+</span>[<span class="ruby-ivar">@viewerid</span>, <span class="ruby-value">4</span>, <span class="ruby-value">5</span>] ).
-            <span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;count_of_collecteds DESC&#39;</span>)
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">admin_view</span> <span class="ruby-comment"># See everyone in admin view</span>
+        <span class="ruby-constant">User</span>.<span class="ruby-identifier">unscoped</span>
       <span class="ruby-keyword">else</span>
-        <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">private</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> [<span class="ruby-value">4</span>, <span class="ruby-value">5</span>])
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">subtype</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;followees&#39;</span>
+            <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">followees</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;relevant&#39;</span>
+            <span class="ruby-comment"># Exclude the viewer and all their friends</span>
+            <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">private</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).
+                <span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;count_of_collecteds &gt; 0&#39;</span>).
+                <span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">followee_ids</span><span class="ruby-operator">+</span>[<span class="ruby-ivar">@viewerid</span>, <span class="ruby-value">4</span>, <span class="ruby-value">5</span>]).
+                <span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;count_of_collecteds DESC&#39;</span>)
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">private</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> [<span class="ruby-value">4</span>, <span class="ruby-value">5</span>])
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -189,9 +194,95 @@
 
           
           <div class="method-source-code" id="max_window_size-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1011</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1325</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">max_window_size</span>
   <span class="ruby-value">10</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-orderingscope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">orderingscope</span><span
+            class="method-args">(iscope=itemscope)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="DefaultSearch.html#method-i-orderingscope">DefaultSearch#orderingscope</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="orderingscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1349</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">orderingscope</span> <span class="ruby-identifier">iscope</span>=<span class="ruby-identifier">itemscope</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">org</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:alphabetic</span>
+      [<span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;CONCAT(fullname, email) ASC&#39;</span>), <span class="ruby-string">&#39;CONCAT(fullname, email)&#39;</span> ]
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:activity</span>
+      [<span class="ruby-identifier">iscope</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">current_sign_in_at</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">order</span>(<span class="ruby-identifier">current_sign_in_at</span><span class="ruby-operator">:</span> <span class="ruby-value">:DESC</span>), <span class="ruby-value">:current_sign_in_at</span> ]
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">super</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-supported_org_options" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">supported_org_options</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="supported_org_options-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1362</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">supported_org_options</span>
+  [ <span class="ruby-value">:activity</span>, <span class="ruby-value">:alphabetic</span> ]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -211,7 +302,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

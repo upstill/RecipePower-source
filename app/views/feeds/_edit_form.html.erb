@@ -1,5 +1,4 @@
 <%= form_for @feed, html: {class: "new_feed json", 'data-type' => :json} do |f| %>
-    <%# flash_all %>
     <%= form_errors_helper f %>
     <%= render 'form_content', decorator: @decorator, f: f %>
     <%# f.button :submit, "Save" %>

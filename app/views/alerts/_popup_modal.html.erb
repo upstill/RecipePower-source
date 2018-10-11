@@ -1,6 +1,6 @@
 <%= modal_dialog "popup new-style purple", (defined?(alert_hdr) && alert_hdr) || '', dialog_class: 'dialog-sm', :noflash => true do %>
     <div class="modal-body">
-      <p><%= msg = defined?(alert_msg) ? alert_msg : flash_usurp %></p>
+      <p><%= defined?(alert_msg) ? alert_msg : flash_strings %></p>
     </div>
     <div class="modal-footer">
       <%= dialog_cancel_button "GOT IT", style: "dialog-button" %>

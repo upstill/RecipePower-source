@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -141,11 +142,11 @@
 
           
           <div class="method-source-code" id="contents-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 44</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 46</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">contents</span>
   <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-node">&quot;About #{@list.name}&quot;</span>
-  <span class="ruby-ivar">@empty_msg</span> = <span class="ruby-string">&quot;This list is empty now, but you can add any item that has an &#39;Add to...&#39; button&quot;</span>
+  <span class="ruby-ivar">@empty_msg</span> = <span class="ruby-string">&#39;This list is empty now, but you can add any item by editing that item&#39;</span>
   <span class="ruby-ivar">@active_menu</span> = (<span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">current_user</span>) <span class="ruby-operator">?</span> <span class="ruby-value">:my_lists</span> <span class="ruby-operator">:</span> <span class="ruby-value">:other_lists</span>
   <span class="ruby-identifier">smartrender</span> 
 <span class="ruby-keyword">end</span></pre>
@@ -178,14 +179,15 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 28</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-ivar">@first_entity</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:entity_type</span>].<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:entity_id</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-string">&quot;New List&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;List#create params: &quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">params</span>[<span class="ruby-value">:list</span>].<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-node">&quot; for user &#39;#{current_user.name}&#39;&quot;</span>
-  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span>( <span class="ruby-identifier">params</span>[<span class="ruby-value">:list</span>][<span class="ruby-value">:name</span>], <span class="ruby-identifier">current_user</span>), <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">l</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span>( <span class="ruby-identifier">params</span>[<span class="ruby-value">:list</span>][<span class="ruby-value">:name</span>], <span class="ruby-identifier">current_user</span>)
+  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-identifier">l</span>, <span class="ruby-identifier">touch</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">update_attributes</span><span class="ruby-operator">:</span> <span class="ruby-operator">!</span><span class="ruby-identifier">l</span>.<span class="ruby-identifier">persisted?</span>
 
-  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">l</span>.<span class="ruby-identifier">persisted?</span>
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:popup</span>] = <span class="ruby-node">&quot;Found list &#39;#{@list.name}&#39;.&quot;</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:popup</span>] =<span class="ruby-node">&quot;Successfully created &#39;#{@list.name}&#39;.&quot;</span>
@@ -224,9 +226,9 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 75</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 77</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
-  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-identifier">name</span> = <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name</span>
   <span class="ruby-identifier">selector</span> = <span class="ruby-node">&quot;tr##{@decorator.dom_id}&quot;</span>
   <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">destroy</span>
@@ -265,7 +267,7 @@
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 22</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 23</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
   <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-identifier">smartrender</span>
@@ -299,7 +301,7 @@
 
           
           <div class="method-source-code" id="index-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 3</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 4</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
   <span class="ruby-comment"># seeker_result Reference, &#39;div.reference_list&#39; # , clear_tags: true</span>
   <span class="ruby-ivar">@active_menu</span> = <span class="ruby-value">:other_lists</span>
@@ -347,10 +349,10 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 87</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 89</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
   <span class="ruby-ivar">@first_entity</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:entity_type</span>].<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:entity_id</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:owner_id</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>), <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:owner_id</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>), <span class="ruby-identifier">touch</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">smartrender</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -382,7 +384,7 @@
 
           
           <div class="method-source-code" id="pin-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 93</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 95</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">pin</span>
   <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
@@ -432,7 +434,7 @@
 
           
           <div class="method-source-code" id="show-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 52</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 54</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
   <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-node">&quot;About #{@list.name}&quot;</span>
@@ -468,7 +470,7 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 59</span>
+            <pre><span class="ruby-comment"># File app/controllers/lists_controller.rb, line 61</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
   <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
@@ -502,7 +504,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

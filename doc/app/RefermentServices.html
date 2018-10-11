@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -70,19 +71,11 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-c-convert_references">::convert_references</a>
-    
     <li ><a href="#method-c-make_polymorphic">::make_polymorphic</a>
     
     <li ><a href="#method-c-new">::new</a>
     
-    <li ><a href="#method-c-recover_references">::recover_references</a>
-    
     <li ><a href="#method-c-show_definitions">::show_definitions</a>
-    
-    <li ><a href="#method-i-convert_reference">#convert_reference</a>
-    
-    <li ><a href="#method-i-make_polymorphic">#make_polymorphic</a>
     
     <li ><a href="#method-i-type_to_class">#type_to_class</a>
     
@@ -139,67 +132,6 @@
        <header>
          <h3>Public Class Methods</h3>
        </header>
-
-    
-      <div id="method-c-convert_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">convert_references</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="convert_references-source">
-            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 49</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_references</span>
-  <span class="ruby-identifier">reports</span> = [ <span class="ruby-string">&#39;***** RefermentServices.convert_references ********&#39;</span>]
-  <span class="ruby-comment"># Re-establish connection to old references if they didn&#39;t convert</span>
-  <span class="ruby-identifier">mappings</span> = []
-  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;references.txt&#39;</span>, <span class="ruby-string">&#39;r&#39;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">while</span> (<span class="ruby-identifier">l</span> = <span class="ruby-identifier">file</span>.<span class="ruby-identifier">gets</span>).<span class="ruby-identifier">present?</span>
-      <span class="ruby-identifier">indices</span> = <span class="ruby-identifier">l</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;=&gt;&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_i</span>)
-      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{indices.first}:#{indices.last}&quot;</span>
-      <span class="ruby-identifier">mappings</span>[<span class="ruby-identifier">indices</span>.<span class="ruby-identifier">first</span>] = <span class="ruby-identifier">indices</span>.<span class="ruby-identifier">last</span>
-    <span class="ruby-keyword">end</span>
-  }
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">DefinitionPageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">old_referee</span><span class="ruby-operator">|</span>
-    <span class="ruby-comment"># Bad url =&gt; need to replace</span>
-    <span class="ruby-constant">Referment</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;PageRef&#39;</span>, <span class="ruby-identifier">referee_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">old_referee</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rfm</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">refid</span> = <span class="ruby-identifier">mappings</span>[<span class="ruby-identifier">rfm</span>.<span class="ruby-identifier">id</span>]
-      <span class="ruby-identifier">new_referee</span> = <span class="ruby-constant">DefinitionReference</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">refid</span>)
-      <span class="ruby-identifier">rfm</span>.<span class="ruby-identifier">referee</span> = <span class="ruby-identifier">new_referee</span>
-      <span class="ruby-identifier">rfm</span>.<span class="ruby-identifier">save</span>
-      <span class="ruby-identifier">old_referee</span>.<span class="ruby-identifier">destroy</span>
-      <span class="ruby-node">&quot;Replaced DefinitionPageRef##{old_referee.id} &#39;#{old_referee.url}&#39; with DefinitionReference #{refid} to #{new_referee.url}&quot;</span>
-    }
-  }
-  <span class="ruby-comment"># Convert any references that have come in since the initial conversion</span>
-  <span class="ruby-comment"># ...thus ensuring that we have NO DefinitionReferences hanging around</span>
-  <span class="ruby-constant">Referment</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Reference&quot;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rm</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">rm</span>.<span class="ruby-identifier">referee</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">DefinitionReference</span>
-      <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">RefermentServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">rm</span>).<span class="ruby-identifier">convert_reference</span>
-    <span class="ruby-keyword">end</span>
-  }
-  <span class="ruby-identifier">reports</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">sort</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
 
     
       <div id="method-c-make_polymorphic" class="method-detail ">
@@ -270,44 +202,6 @@
       </div>
 
     
-      <div id="method-c-recover_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">recover_references</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="recover_references-source">
-            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 104</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">recover_references</span>
-  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;references.txt&#39;</span>, <span class="ruby-string">&#39;w&#39;</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">file</span><span class="ruby-operator">|</span>
-    <span class="ruby-constant">Referment</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Reference&quot;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rfm</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">file</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{rfm.id}=&gt;#{rfm.referee_id}&quot;</span>
-    }
-  }
-  <span class="ruby-keyword">nil</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-c-show_definitions" class="method-detail ">
         
         <div class="method-heading">
@@ -327,7 +221,7 @@
 
           
           <div class="method-source-code" id="show_definitions-source">
-            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 23</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">show_definitions</span> <span class="ruby-identifier">attribute</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">rms</span> = <span class="ruby-constant">Referment</span>.
       <span class="ruby-identifier">where</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Reference&quot;</span>).
@@ -365,89 +259,6 @@
        <header>
          <h3>Public Instance Methods</h3>
        </header>
-
-    
-      <div id="method-i-convert_reference" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">convert_reference</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Convert a DefintionReference for this referment to a <a
-href="DefinitionPageRef.html">DefinitionPageRef</a> …but do it through
-DelayedJob</p>
-          
-          
-
-          
-          <div class="method-source-code" id="convert_reference-source">
-            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 83</span>
-  <span class="ruby-keyword">def</span> <span class="ruby-identifier">convert_reference</span>
-    <span class="ruby-identifier">line</span> = <span class="ruby-string">&#39;&#39;</span>
-    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">referee</span> = <span class="ruby-identifier">referment</span>.<span class="ruby-identifier">referee</span>).<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">DefinitionReference</span>
-      <span class="ruby-identifier">referee</span>.<span class="ruby-identifier">bkg_enqueue</span>
-      <span class="ruby-identifier">referee</span>.<span class="ruby-identifier">bkg_asynch</span>
-      <span class="ruby-identifier">referee</span>.<span class="ruby-identifier">reload</span>
-<span class="ruby-comment">      url = referment.referee.url.sub /www\.foodandwine\.com\/chefs\//, &#39;www.foodandwine.com/contributors/&#39;
-      line &lt;&lt; &quot;    Converting Reference #{referment.referee_id} by fetching url &#39;#{url}&#39;\n&quot;
-      pr = DefinitionPageRef.fetch(url)
-      pr.save
-      referment.referee = pr
-      result = referment.save ? &#39;successfully&#39; : &#39;unsuccessfully&#39;
-      line &lt;&lt; &quot;    Referment ##{referment.id} #{result} converted to DefinitionPageRef ##{pr.id}\n&quot;
-      line &lt;&lt; &quot;    PageRef #{pr.id} says #{pr.errors.messages}\n&quot; if pr.errors.any?
-      line &lt;&lt; &quot;    Referment #{referment.id} says #{referment.errors.messages}\n&quot; if referment.errors.any?
-</span>    <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">line</span>
-  <span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-make_polymorphic" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">make_polymorphic</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="make_polymorphic-source">
-            <pre><span class="ruby-comment"># File app/services/referment_services.rb, line 23</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">make_polymorphic</span>
-
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
 
     
       <div id="method-i-type_to_class" class="method-detail ">
@@ -491,7 +302,7 @@ DelayedJob</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

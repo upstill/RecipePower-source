@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -207,7 +208,7 @@
 
           
           <div class="method-source-code" id="handler-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 202</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 299</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">handler</span> <span class="ruby-identifier">url_or_uri</span>
   <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">url_or_uri</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> (<span class="ruby-identifier">normalized_uri</span> <span class="ruby-constant">CGI</span>.<span class="ruby-identifier">unescape</span>(<span class="ruby-identifier">url_or_uri</span>)) <span class="ruby-operator">:</span> <span class="ruby-identifier">url_or_uri</span>
   <span class="ruby-keyword">case</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">decode</span> [<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\/$/</span>,<span class="ruby-string">&#39;&#39;</span>), <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span>].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;?&#39;</span>)
@@ -266,7 +267,7 @@
 
           
           <div class="method-source-code" id="accordions-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 311</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 409</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">accordions</span> <span class="ruby-identifier">enclosure_selector</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">extractions</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">enclosure_selector</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
     <span class="ruby-identifier">enclosure_selector</span>, <span class="ruby-identifier">extractions</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">enclosure_selector</span>
@@ -282,7 +283,8 @@
           <span class="ruby-identifier">course_name</span> = <span class="ruby-keyword">nil</span>
         <span class="ruby-keyword">else</span>
           <span class="ruby-identifier">course_name</span> = <span class="ruby-identifier">header_name</span>.<span class="ruby-identifier">downcase</span>
-          <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">course_name</span>, <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Course</span>
+          <span class="ruby-comment"># TagServices.define course_name, :tagtype =&gt; :Course</span>
+          <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">course_name</span>, <span class="ruby-value">:Course</span>
           <span class="ruby-identifier">course_name</span>
         <span class="ruby-keyword">end</span>
         <span class="ruby-identifier">recipe_item</span> <span class="ruby-identifier">li</span>, <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-string">&#39;Course&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">course_name</span>).<span class="ruby-identifier">compact</span>
@@ -320,7 +322,7 @@
 
           
           <div class="method-source-code" id="bbc_chef_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 389</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 489</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_chef_home_page</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">m</span> = <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/chefs(\[[^\]]*\]=|\/)([^&amp;]*)/</span>)
     <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-string">&#39;doesn\t match the format of a chefs page&#39;</span>
@@ -329,9 +331,10 @@
 
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">s</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;h1.fn&#39;</span>).<span class="ruby-identifier">first</span>
     <span class="ruby-identifier">author_name</span> = <span class="ruby-identifier">s</span>.<span class="ruby-identifier">content</span>
-    <span class="ruby-identifier">author_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>( <span class="ruby-identifier">author_name</span>,
-                             <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Author&#39;</span>,
-                             <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>)
+    <span class="ruby-comment"># author_tag = TagServices.define( author_name,</span>
+    <span class="ruby-comment">#                          tagtype: &#39;Author&#39;,</span>
+    <span class="ruby-comment">#                          page_link: url)</span>
+    <span class="ruby-identifier">author_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">author_name</span>, <span class="ruby-value">:Author</span>, <span class="ruby-identifier">url</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#overview p&#39;</span>).<span class="ruby-identifier">first</span>
       <span class="ruby-identifier">description</span> = <span class="ruby-identifier">item</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
       <span class="ruby-identifier">author_tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
@@ -346,7 +349,8 @@
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div.links-module h2&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">hdr_title</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">hdr_title</span>.<span class="ruby-identifier">match</span>( <span class="ruby-string">&#39;Elsewhere&#39;</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>)
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">author_tag</span>, <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">link</span>), <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">content</span>
+      <span class="ruby-comment"># TagServices.define author_tag, page_link: absolutize(link), link_text: link.content</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">author_tag</span>, <span class="ruby-identifier">link</span>, <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">content</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -379,7 +383,7 @@
 
           
           <div class="method-source-code" id="bbc_chef_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 502</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 606</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_chef_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Author</span>
 <span class="ruby-keyword">end</span></pre>
@@ -412,15 +416,15 @@
 
           
           <div class="method-source-code" id="bbc_chefs_atoz_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 365</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 465</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_chefs_atoz_page</span>
   <span class="ruby-identifier">chef_ids</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-regexp">/\A\/food\/chefs\/[-\w]+\z/</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;/&#39;</span>).<span class="ruby-identifier">last</span>
   }.<span class="ruby-identifier">compact</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">chef_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">chef_id</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">chef_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">chef_id</span><span class="ruby-operator">|</span>
            <span class="ruby-string">&#39;http://www.bbc.co.uk/food/chefs/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">chef_id</span>
          }
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">chef_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">chef_id</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">chef_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">chef_id</span><span class="ruby-operator">|</span>
            <span class="ruby-string">&#39;http://www.bbc.co.uk/food/recipes/search?chefs[]=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">chef_id</span>
          }
 <span class="ruby-keyword">end</span></pre>
@@ -453,9 +457,9 @@
 
           
           <div class="method-source-code" id="bbc_chefs_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 357</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 457</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_chefs_page</span> <span class="ruby-comment"># Top level of chef scraping</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-regexp">/\/by\/letters\//</span>)
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-regexp">/\/by\/letters\//</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -486,14 +490,11 @@
 
           
           <div class="method-source-code" id="bbc_collection_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 728</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 847</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_collection_home_page</span>
-  <span class="ruby-identifier">list_name</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; (BBC Food)&#39;</span>
-  <span class="ruby-identifier">list</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">list_name</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">superuser</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">description_item</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#quote-module p&#39;</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-identifier">list</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">description_item</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-identifier">description_item</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#quote-module p&#39;</span>).<span class="ruby-identifier">first</span>
+  <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_list</span> (<span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; (BBC Food)&#39;</span>),
+                          <span class="ruby-value">:description</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">description_item</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">description_item</span>.<span class="ruby-identifier">text</span>)
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#the-collection a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">member_link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">extractions</span> = {}
     <span class="ruby-identifier">rlink</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">member_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
@@ -501,7 +502,7 @@
       <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Image&#39;</span>] = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">rpic</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>)
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Title&#39;</span>] = <span class="ruby-identifier">member_link</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">strip</span>
-    (<span class="ruby-identifier">ls</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">list</span>).<span class="ruby-identifier">include</span> <span class="ruby-identifier">propose_recipe</span>(<span class="ruby-identifier">rlink</span>, <span class="ruby-identifier">extractions</span>), <span class="ruby-constant">User</span>.<span class="ruby-identifier">superuser</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">add_to_list</span> <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_recipe</span>(<span class="ruby-identifier">rlink</span>, <span class="ruby-identifier">extractions</span>), <span class="ruby-identifier">list</span>
   }
   <span class="ruby-comment"># accordions &#39;List&#39; =&gt; list_name</span>
 <span class="ruby-keyword">end</span></pre>
@@ -534,7 +535,7 @@
 
           
           <div class="method-source-code" id="bbc_course_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 490</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 594</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_course_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Course</span>
 <span class="ruby-keyword">end</span></pre>
@@ -635,12 +636,13 @@
 
           
           <div class="method-source-code" id="bbc_cuisine_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 945</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1075</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_cuisine_home_page</span>
   <span class="ruby-identifier">genre_name</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/.*\s([-\w]*\z)/</span>, <span class="ruby-string">&#39;\1&#39;</span>
-  <span class="ruby-identifier">genre_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">genre_name</span>,
-                                 <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Genre</span>,
-                                 <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>)
+  <span class="ruby-comment"># genre_tag = TagServices.define(genre_name,</span>
+  <span class="ruby-comment">#                                :tagtype =&gt; :Genre,</span>
+  <span class="ruby-comment">#                                :page_link =&gt; url)</span>
+  <span class="ruby-identifier">genre_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">genre_name</span>, <span class="ruby-value">:Genre</span>, <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">accordions</span> <span class="ruby-string">&#39;Genre&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">genre_name</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div.related-resources-module h2&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span>, <span class="ruby-string">&#39;Related chefs&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">title</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-comment"># The &#39;Related Chefs&#39; section</span>
@@ -664,7 +666,8 @@
 
   <span class="ruby-comment"># A see-also section within a &#39;links-module&#39; div</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div.links-module a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">see_also_link</span><span class="ruby-operator">|</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">genre_tag</span>, <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>))
+    <span class="ruby-comment"># TagServices.define genre_tag, page_link: absolutize(see_also_link.attribute(&#39;href&#39;))</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">genre_tag</span>, <span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
   }
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -696,7 +699,7 @@
 
           
           <div class="method-source-code" id="bbc_cuisine_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 506</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 610</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_cuisine_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Genre</span>
 <span class="ruby-keyword">end</span></pre>
@@ -729,7 +732,7 @@
 
           
           <div class="method-source-code" id="bbc_cuisines_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 666</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 779</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_cuisines_page</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;ol#cuisines li.cuisine a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">season_link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">tag_name</span> = <span class="ruby-identifier">season_link</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&#39;span.cuisine-title&#39;</span>).<span class="ruby-identifier">text</span>
@@ -738,11 +741,12 @@
       <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">img_link</span>.<span class="ruby-identifier">to_s</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Tag &#39;#{tag_name}&#39; -&gt; #{page_link} and image link #{img_link}&quot;</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tag_name</span>,
-                       <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Genre&#39;</span>,
-                       <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">page_link</span>,
-                       <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page_link</span>
+    <span class="ruby-comment"># TagServices.define tag_name,</span>
+    <span class="ruby-comment">#                    tagtype: &#39;Genre&#39;,</span>
+    <span class="ruby-comment">#                    page_link: page_link,</span>
+    <span class="ruby-comment">#                    image_link: img_link</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tag_name</span>, <span class="ruby-value">:Genre</span>, <span class="ruby-identifier">page_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page_link</span>
   }
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -774,12 +778,11 @@
 
           
           <div class="method-source-code" id="bbc_define_collection-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 747</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 864</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_define_collection</span> <span class="ruby-identifier">cname</span>, <span class="ruby-identifier">home_link</span>, <span class="ruby-identifier">image_link</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">list</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">cname</span>.<span class="ruby-identifier">strip</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; (BBC Food)&#39;</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">superuser</span>
-  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">image_link</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">image_link</span>
-  <span class="ruby-identifier">list</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">home_link</span>, <span class="ruby-value">:bbc_collection_home_page</span>
+  <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_list</span> (<span class="ruby-identifier">cname</span>.<span class="ruby-identifier">strip</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; (BBC Food)&#39;</span>),
+                          <span class="ruby-identifier">picurl</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">image_link</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">image_link</span>)
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">home_link</span>, <span class="ruby-value">:bbc_collection_home_page</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -810,22 +813,26 @@
 
           
           <div class="method-source-code" id="bbc_diet_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 711</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 826</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_diet_home_page</span>
   <span class="ruby-identifier">diet_name</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/\s.*/</span>, <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-identifier">diet_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">diet_name</span>,
-      <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Diet</span>,
-      <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-comment"># diet_tag = TagServices.define diet_name,</span>
+  <span class="ruby-comment">#     :tagtype =&gt; :Diet,</span>
+  <span class="ruby-comment">#     :page_link =&gt; url</span>
+  <span class="ruby-identifier">diet_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">diet_name</span>, <span class="ruby-value">:Diet</span>, <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">accordions</span> <span class="ruby-string">&#39;Diet&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">diet_name</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div.links-module h2&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span> <span class="ruby-keyword">do</span>  <span class="ruby-operator">|</span><span class="ruby-identifier">header_text</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">header_text</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Elsewhere on the web&#39;</span>
       <span class="ruby-identifier">see_also_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">diet_tag</span>,
-                         <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)),
-                         <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
+      <span class="ruby-comment"># TagServices.define diet_tag,</span>
+      <span class="ruby-comment">#                    page_link: absolutize(see_also_link.attribute(&#39;href&#39;)),</span>
+      <span class="ruby-comment">#                    link_text: see_also_link.text.strip</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">diet_tag</span>,
+                             <span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>),
+                             <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">launch</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>) }
+  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>) }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -856,7 +863,7 @@
 
           
           <div class="method-source-code" id="bbc_diet_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 494</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 598</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_diet_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Diet</span>
 <span class="ruby-keyword">end</span></pre>
@@ -889,7 +896,7 @@
 
           
           <div class="method-source-code" id="bbc_dish_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 498</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 602</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_dish_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Dish</span>
 <span class="ruby-keyword">end</span></pre>
@@ -922,15 +929,15 @@
 
           
           <div class="method-source-code" id="bbc_dishes_atoz_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 377</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 477</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_dishes_atoz_page</span>
   <span class="ruby-identifier">dish_ids</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;li.resource.food a&#39;</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/\/food\/(\w*)\b.*$/</span>, <span class="ruby-string">&#39;\1&#39;</span>
   }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">dish_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dish_id</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">dish_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dish_id</span><span class="ruby-operator">|</span>
            <span class="ruby-string">&#39;http://www.bbc.co.uk/food/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">dish_id</span>
          }
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">dish_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dish_id</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">dish_ids</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">dish_id</span><span class="ruby-operator">|</span>
            <span class="ruby-string">&#39;http://www.bbc.co.uk/food/recipes/search?dishes[]=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">dish_id</span>
          }
 <span class="ruby-keyword">end</span></pre>
@@ -963,9 +970,9 @@
 
           
           <div class="method-source-code" id="bbc_dishes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 361</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 461</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_dishes_page</span> <span class="ruby-comment"># Top level of dish scraping</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-regexp">/\/by\/letter\//</span>)
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-regexp">/\/by\/letter\//</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -997,7 +1004,7 @@
 
           
           <div class="method-source-code" id="bbc_food_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 799</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 919</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_food_home_page</span>
   <span class="ruby-comment"># The first thing is to distinguish between the two cases by consulting the sub-heading at the top of the page</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">subhead</span> = <span class="ruby-identifier">find_by_selector</span>(<span class="ruby-string">&#39;p#sub-heading&#39;</span>).<span class="ruby-identifier">strip</span>
@@ -1016,13 +1023,14 @@
 
   <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/([-\w]*) recipes/</span>, <span class="ruby-string">&#39;\1&#39;</span>).<span class="ruby-identifier">downcase</span>
   <span class="ruby-identifier">image_link</span> = (<span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">find_by_selector</span>(<span class="ruby-string">&#39;img#food-image&#39;</span>, <span class="ruby-value">:src</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Ingredient</span>) <span class="ruby-comment"># No pic for Dishes</span>
-  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">tagname</span>, {
-                                      <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">tagtype</span>,
-                                      <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>,
-                                      <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span>
-                                  }.<span class="ruby-identifier">compact</span>
-  )
-  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">launch</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>) }
+  <span class="ruby-comment"># tag = TagServices.define(tagname, {</span>
+  <span class="ruby-comment">#                                     :tagtype =&gt; tagtype,</span>
+  <span class="ruby-comment">#                                     :page_link =&gt; url,</span>
+  <span class="ruby-comment">#                                     :image_link =&gt; image_link</span>
+  <span class="ruby-comment">#                                 }.compact</span>
+  <span class="ruby-comment"># )</span>
+  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">url</span>, <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span>
+  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>) }
   <span class="ruby-comment"># The two &#39;grouped-resource-list-module&#39; accordions have different extractions.</span>
   <span class="ruby-comment"># The one labeled &#39;Recipes for&#39; uses the tag in the context of a dish</span>
   <span class="ruby-comment"># The one labeled &#39;Recipes using&#39; uses the tag in the context of an ingredient</span>
@@ -1032,20 +1040,22 @@
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">h2</span> = <span class="ruby-identifier">group</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;h2&#39;</span>).<span class="ruby-identifier">first</span>
       <span class="ruby-keyword">case</span> <span class="ruby-identifier">h2</span>.<span class="ruby-identifier">text</span>
         <span class="ruby-keyword">when</span> <span class="ruby-regexp">/Recipes for/</span>
-          <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">tagname</span>, {
-                                        <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Dish</span>,
-                                        <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>,
-                                        <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span>
-                                    }.<span class="ruby-identifier">compact</span>
-          ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Dish</span>
+          <span class="ruby-comment"># TagServices.define(tagname, {</span>
+          <span class="ruby-comment">#                               :tagtype =&gt; :Dish,</span>
+          <span class="ruby-comment">#                               :page_link =&gt; url,</span>
+          <span class="ruby-comment">#                               :image_link =&gt; image_link</span>
+          <span class="ruby-comment">#                           }.compact</span>
+          <span class="ruby-comment"># ) unless tag.typesym == :Dish</span>
+          <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span>( <span class="ruby-identifier">tagname</span>, <span class="ruby-value">:Dish</span>, <span class="ruby-identifier">url</span>, <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span> ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Dish</span>
           <span class="ruby-identifier">accordions</span> <span class="ruby-node">&quot;div.grouped-resource-list-module:nth-of-type(#{n})&quot;</span>, <span class="ruby-string">&#39;Dish&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">tagname</span>
         <span class="ruby-keyword">when</span> <span class="ruby-regexp">/Recipes using/</span>
-          <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">tagname</span>, {
-                                        <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Ingredient</span>,
-                                        <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>,
-                                        <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span>
-                                    }.<span class="ruby-identifier">compact</span>
-          ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Ingredient</span>
+          <span class="ruby-comment"># TagServices.define(tagname, {</span>
+          <span class="ruby-comment">#                               :tagtype =&gt; :Ingredient,</span>
+          <span class="ruby-comment">#                               :page_link =&gt; url,</span>
+          <span class="ruby-comment">#                               :image_link =&gt; image_link</span>
+          <span class="ruby-comment">#                           }.compact</span>
+          <span class="ruby-comment"># ) unless tag.typesym == :Ingredient</span>
+          <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span>( <span class="ruby-identifier">tagname</span>, <span class="ruby-value">:Ingredient</span>, <span class="ruby-identifier">url</span>, <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">image_link</span> ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">typesym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Ingredient</span>
           <span class="ruby-identifier">accordions</span> <span class="ruby-node">&quot;div.grouped-resource-list-module:nth-of-type(#{n})&quot;</span>, <span class="ruby-string">&#39;Ingredient&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">tagname</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
@@ -1056,24 +1066,31 @@
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div#related-foods h3&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">title</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">case</span> <span class="ruby-identifier">title</span>
       <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^Other(.*)$/</span>
-        <span class="ruby-identifier">parent_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-node">$1</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>)
-        <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">parent_tag</span>).<span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">tag</span>
+        <span class="ruby-comment"># parent_tag = TagServices.define($1, tagtype: tag.tagtype)</span>
+        <span class="ruby-identifier">parent_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-node">$1</span>, <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">child_of</span><span class="ruby-operator">:</span> <span class="ruby-identifier">parent_tag</span>
+        <span class="ruby-comment"># TagServices.new(parent_tag).make_parent_of tag</span>
       <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^Also made with(.*)$/</span>
         <span class="ruby-comment"># An ingredient that suggests this dish</span>
-        <span class="ruby-identifier">ingred_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-node">$1</span>.<span class="ruby-identifier">strip</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">:Ingredient</span>)
-        <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">ingred_tag</span>).<span class="ruby-identifier">suggests</span> <span class="ruby-identifier">tag</span>
+        <span class="ruby-comment"># ingred_tag = TagServices.define($1.strip, tagtype: :Ingredient)</span>
+        <span class="ruby-identifier">ingred_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-node">$1</span>.<span class="ruby-identifier">strip</span>, <span class="ruby-value">:Ingredient</span>, <span class="ruby-identifier">suggests</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>
+        <span class="ruby-comment"># TagServices.new(ingred_tag).suggests tag</span>
       <span class="ruby-keyword">when</span> <span class="ruby-regexp">/^Typically made with(.*)$/</span>
         <span class="ruby-comment"># An ingredient that suggests this dish</span>
-        <span class="ruby-identifier">dish_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">li</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">downcase</span>,
-                                      <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">:Dish</span>,
-                                      <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>)
-        <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">tag</span>).<span class="ruby-identifier">suggests</span> <span class="ruby-identifier">dish_tag</span>
+        <span class="ruby-comment"># dish_tag = TagServices.define li.content.strip.downcase,</span>
+        <span class="ruby-comment">#                               tagtype: :Dish,</span>
+        <span class="ruby-comment">#                               page_link: absolutize(li.search(&#39;a&#39;).first)</span>
+        <span class="ruby-identifier">dish_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">li</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">downcase</span>,
+                                          <span class="ruby-value">:Dish</span>,
+                                          <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>,
+                                          <span class="ruby-identifier">suggested_by</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>
+        <span class="ruby-comment"># TagServices.new(tag).suggests dish_tag</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-comment"># A see-also section within a &#39;links-module&#39; div</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div.links-module a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">see_also_link</span><span class="ruby-operator">|</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>))
+    <span class="ruby-comment"># TagServices.define tag, page_link: absolutize(see_also_link.attribute(&#39;href&#39;))</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">see_also_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
   }
 
 <span class="ruby-keyword">end</span></pre>
@@ -1106,22 +1123,23 @@
 
           
           <div class="method-source-code" id="bbc_food_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 337</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 436</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_food_page</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;dt#special-diets&#39;</span>, <span class="ruby-string">&#39;dd&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">header_text</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">diet_atag</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
-      <span class="ruby-identifier">diet_url</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">diet_atag</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
       <span class="ruby-identifier">diet_name</span> = <span class="ruby-identifier">diet_atag</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\s*recipes$/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39; &#39;</span>, <span class="ruby-string">&#39;-&#39;</span>
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">diet_name</span>.<span class="ruby-identifier">downcase</span>,
-                         <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Diet</span>,
-                         <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">diet_url</span>
-      <span class="ruby-identifier">launch</span> <span class="ruby-identifier">diet_url</span>
+      <span class="ruby-comment"># diet_url = absolutize diet_atag.attribute(&#39;href&#39;)</span>
+      <span class="ruby-comment"># TagServices.define diet_name.downcase,</span>
+      <span class="ruby-comment">#                    :tagtype =&gt; :Diet,</span>
+      <span class="ruby-comment">#                    :page_link =&gt; diet_url</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">diet_name</span>.<span class="ruby-identifier">downcase</span>, <span class="ruby-value">:Diet</span>, <span class="ruby-identifier">diet_atag</span>
+      <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">diet_atag</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;ol#site-nav a&#39;</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/.*\/food\/(\w*)\b/</span>
     <span class="ruby-keyword">if</span> (<span class="ruby-identifier">topic</span> = <span class="ruby-node">$1</span>).<span class="ruby-identifier">present?</span>
-      <span class="ruby-identifier">launch</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">link</span>) <span class="ruby-keyword">unless</span> <span class="ruby-node">%w{ my about ingredients }</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">topic</span>
+      <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">link</span> <span class="ruby-keyword">unless</span> <span class="ruby-node">%w{ my about ingredients }</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">topic</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1154,7 +1172,7 @@
 
           
           <div class="method-source-code" id="bbc_ingredients_by_letter-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 614</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 721</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_ingredients_by_letter</span>
   <span class="ruby-comment"># e.g., http://www.bbc.co.uk/food/ingredients/by/letter/o</span>
   <span class="ruby-identifier">ingredient_links</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;li.resource.food a&#39;</span>)
@@ -1163,11 +1181,15 @@
     <span class="ruby-keyword">unless</span> <span class="ruby-identifier">path</span>.<span class="ruby-identifier">match</span>(<span class="ruby-node">/\A\/food\/([-\w]+)#related-foods\z/</span>)
       <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">link</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>
       <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">img_link</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">img_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;alt&#39;</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">downcase</span>
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tagname</span>,
-                         <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Ingredient</span>,
-                         <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">link</span>),
-                         <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">img_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">img_link</span>)
-      <span class="ruby-identifier">launch</span> <span class="ruby-identifier">link</span>
+      <span class="ruby-comment"># TagServices.define tagname,</span>
+      <span class="ruby-comment">#                    :tagtype =&gt; :Ingredient,</span>
+      <span class="ruby-comment">#                    :page_link =&gt; absolutize(link),</span>
+      <span class="ruby-comment">#                    :image_link =&gt; (absolutize(img_link.attribute(&#39;src&#39;)) if img_link)</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tagname</span>,
+                             <span class="ruby-value">:Ingredient</span>,
+                             <span class="ruby-identifier">link</span>,
+                             <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">img_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">img_link</span>)
+      <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">link</span>
     <span class="ruby-keyword">end</span>
   }
 <span class="ruby-keyword">end</span></pre>
@@ -1200,9 +1222,9 @@
 
           
           <div class="method-source-code" id="bbc_ingredients_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 608</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 715</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_ingredients_page</span>
-  <span class="ruby-identifier">launch</span> (<span class="ruby-string">&#39;a&#39;</span><span class="ruby-operator">..</span><span class="ruby-string">&#39;z&#39;</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">letter</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">scrape</span> (<span class="ruby-string">&#39;a&#39;</span><span class="ruby-operator">..</span><span class="ruby-string">&#39;z&#39;</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">letter</span><span class="ruby-operator">|</span>
            <span class="ruby-string">&#39;http://www.bbc.co.uk/food/ingredients/by/letter/&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">letter</span>
          }
 <span class="ruby-keyword">end</span></pre>
@@ -1235,7 +1257,7 @@
 
           
           <div class="method-source-code" id="bbc_keyword_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 510</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 614</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_keyword_recipes_page</span> <span class="ruby-comment"># Because an ingredient search is denoted like keywords[]=</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Ingredient</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1268,13 +1290,14 @@
 
           
           <div class="method-source-code" id="bbc_occasion_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1058</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1199</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_occasion_home_page</span>
   <span class="ruby-identifier">occ_name</span> = <span class="ruby-identifier">find_by_selector</span>(<span class="ruby-string">&#39;h1&#39;</span>).<span class="ruby-identifier">strip</span>
   <span class="ruby-identifier">occ_name</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/\b\s*recipes.*$/</span>, <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-identifier">occ_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">occ_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-value">:Occasion</span>), <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-comment"># occ_tag = TagServices.define occ_name, tagtype: Tag.typenum(:Occasion), page_link: url</span>
+  <span class="ruby-identifier">occ_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">occ_name</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">seemore</span> = <span class="ruby-identifier">find_by_selector</span>(<span class="ruby-string">&#39;p.see-more a.see-all-search&#39;</span>, <span class="ruby-value">:href</span>)
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">seemore</span>
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">seemore</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">accordions</span> <span class="ruby-string">&#39;Occasion&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">occ_name</span>
   <span class="ruby-identifier">occ_svcs</span> = <span class="ruby-keyword">nil</span>
@@ -1318,7 +1341,7 @@
 
           
           <div class="method-source-code" id="bbc_occasion_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 478</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 582</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_occasion_recipes_page</span>
    <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Occasion</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1351,7 +1374,7 @@
 
           
           <div class="method-source-code" id="bbc_occasions_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1041</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1182</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_occasions_page</span>
     (<span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;ul.occasions li&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;ul#other-occasions li&#39;</span>)).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">li_elmt</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">occ_link</span> = <span class="ruby-identifier">li_elmt</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;h4 a&#39;</span>).<span class="ruby-identifier">first</span>
@@ -1359,13 +1382,13 @@
       <span class="ruby-identifier">occ_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">occ_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
     <span class="ruby-keyword">end</span>
     (<span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">li_elmt</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;h4 a img&#39;</span>).<span class="ruby-identifier">first</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">img_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>))
-    <span class="ruby-identifier">definitions</span> = {
-        <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">:Occasion</span>,
-        <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">occ_link</span>,
-        <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">img_link</span>)
-    }.<span class="ruby-identifier">compact</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">occ_name</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">definitions</span>
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">occ_link</span>
+    <span class="ruby-comment"># TagServices.define occ_name.to_s, {</span>
+    <span class="ruby-comment">#                                     tagtype: :Occasion,</span>
+    <span class="ruby-comment">#                                     page_link: occ_link,</span>
+    <span class="ruby-comment">#                                     image_link: absolutize(img_link)</span>
+    <span class="ruby-comment">#                                 }.compact</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">occ_name</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-identifier">occ_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">occ_link</span>
   }
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1397,7 +1420,7 @@
 
           
           <div class="method-source-code" id="bbc_programme_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 977</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1109</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_programme_home_page</span>
   <span class="ruby-comment"># The programme_link is the home page of the program on the BBC</span>
   <span class="ruby-identifier">programme_name</span> =
@@ -1409,20 +1432,26 @@
 
   <span class="ruby-identifier">programme_description</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#episode-detail p&#39;</span>).<span class="ruby-identifier">first</span>
   <span class="ruby-identifier">programme_image</span> = <span class="ruby-identifier">find_by_selector</span>(<span class="ruby-string">&#39;div#programme-brand img&#39;</span>, <span class="ruby-value">:src</span>)
-  <span class="ruby-identifier">programme_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">programme_name</span>,
-                                     {
-                                         <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Source</span>,
+  <span class="ruby-comment"># programme_tag = TagServices.define(programme_name,</span>
+  <span class="ruby-comment">#                                    {</span>
+  <span class="ruby-comment">#                                        :tagtype =&gt; :Source,</span>
+  <span class="ruby-comment">#                                        :description =&gt; (programme_description.text.strip if programme_description),</span>
+  <span class="ruby-comment">#                                        :page_link =&gt; url,</span>
+  <span class="ruby-comment">#                                        :image_link =&gt; (programme_image if programme_image.present?)</span>
+  <span class="ruby-comment">#                                    }.compact</span>
+  <span class="ruby-comment"># )</span>
+  <span class="ruby-identifier">programme_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">programme_name</span>,
+                                         <span class="ruby-value">:Source</span>,
+                                         <span class="ruby-identifier">url</span>,
                                          <span class="ruby-value">:description</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">programme_description</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">programme_description</span>),
-                                         <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>,
                                          <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">programme_image</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">programme_image</span>.<span class="ruby-identifier">present?</span>)
-                                     }.<span class="ruby-identifier">compact</span>
-  )
   <span class="ruby-comment"># Define the reference to the program page</span>
-  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">programme_tag</span>, <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span>
-                                      (<span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">programme_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">programme_link</span>) <span class="ruby-operator">||</span>
-                                          <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-string">&#39;/food/programmes/&#39;</span>, <span class="ruby-string">&#39;/programmes/&#39;</span>)
-
-
+  <span class="ruby-comment"># TagServices.define programme_tag, page_link:</span>
+  <span class="ruby-comment">#                                     (absolutize(programme_link.attribute(&#39;href&#39;)) if programme_link) ||</span>
+  <span class="ruby-comment">#                                         url.sub(&#39;/food/programmes/&#39;, &#39;/programmes/&#39;)</span>
+  <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">programme_tag</span>, (<span class="ruby-identifier">programme_link</span> <span class="ruby-operator">?</span>
+                                      <span class="ruby-identifier">programme_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>) <span class="ruby-operator">:</span>
+                                      <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-string">&#39;/food/programmes/&#39;</span>, <span class="ruby-string">&#39;/programmes/&#39;</span>))
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div.related-resources-module h2&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">header_name</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">header_name</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Related chefs&#39;</span>
       <span class="ruby-identifier">link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
@@ -1430,18 +1459,19 @@
       <span class="ruby-identifier">chef_name</span> = <span class="ruby-identifier">img</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;alt&#39;</span>).<span class="ruby-identifier">to_s</span>
       <span class="ruby-identifier">chef_img</span> = <span class="ruby-identifier">img</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>).<span class="ruby-identifier">to_s</span>
       <span class="ruby-identifier">chef_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>
-      <span class="ruby-identifier">chef_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">chef_name</span>, {
-                                                 <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">:Author</span>,
-                                                 <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">chef_link</span>,
-                                                 <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">chef_img</span>
-                                             }.<span class="ruby-identifier">compact</span>
+      <span class="ruby-comment"># chef_tag = TagServices.define chef_name, {</span>
+      <span class="ruby-comment">#                                            tagtype: :Author,</span>
+      <span class="ruby-comment">#                                            page_link: chef_link,</span>
+      <span class="ruby-comment">#                                            image_link: chef_img</span>
+      <span class="ruby-comment">#                                        }.compact</span>
+      <span class="ruby-identifier">chef_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">chef_name</span>, <span class="ruby-value">:Author</span>, <span class="ruby-identifier">chef_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">chef_img</span>
       <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">programme_tag</span>).<span class="ruby-identifier">suggests</span> <span class="ruby-identifier">chef_tag</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-comment"># The seemore link finds all recipes under that programme</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">seemore</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;p.see-all a.see-all-search&#39;</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">seemore</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">seemore</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
   <span class="ruby-keyword">end</span>
 
 <span class="ruby-keyword">end</span></pre>
@@ -1474,7 +1504,7 @@
 
           
           <div class="method-source-code" id="bbc_programme_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 486</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 590</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_programme_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Source</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1507,16 +1537,16 @@
 
           
           <div class="method-source-code" id="bbc_programmes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 631</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 742</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_programmes_page</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;li#all-programmes li a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">pid</span> = <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/.*food\/programmes\/(\w*)\b.*$/</span>, <span class="ruby-string">&#39;\1&#39;</span>
     <span class="ruby-keyword">if</span> (<span class="ruby-identifier">pname</span> = <span class="ruby-identifier">a</span>.<span class="ruby-identifier">content</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">pname</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^Series/</span>)
       <span class="ruby-identifier">page_link</span> = <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">a</span>)
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">pname</span>,
-                         <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-value">:Source</span>)
-      <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page_link</span>
-      <span class="ruby-identifier">launch</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-string">&#39;/food/recipes/search?programmes[]=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">pid</span>)
+      <span class="ruby-comment"># TagServices.define pname, tagtype: Tag.typenum(:Source)</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">pname</span>, <span class="ruby-value">:Source</span>
+      <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page_link</span>
+      <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-string">&#39;/food/recipes/search?programmes[]=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">pid</span>)
     <span class="ruby-keyword">end</span>
   }
 <span class="ruby-keyword">end</span></pre>
@@ -1549,7 +1579,7 @@
 
           
           <div class="method-source-code" id="bbc_recipe_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 568</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 673</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_recipe_home_page</span>
   <span class="ruby-comment"># e.g., http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>
@@ -1571,21 +1601,23 @@
           <span class="ruby-keyword">if</span> <span class="ruby-identifier">m</span> = <span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/chefs(\[[^\]]*\]=|\/)([^&amp;]*)/</span>)
             <span class="ruby-identifier">m</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">to_s</span>
           <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Author&#39;</span>] = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">to_s</span>,
-                                                      <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Author&#39;</span>,
-                                                      <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>)).<span class="ruby-identifier">name</span>
+      <span class="ruby-comment"># extractions[&#39;Author&#39;] = TagServices.define(link.to_s,</span>
+      <span class="ruby-comment">#                                                 tagtype: &#39;Author&#39;,</span>
+      <span class="ruby-comment">#                                                 page_link: absolutize(link.href)).name</span>
+      <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Author&#39;</span>] = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-value">:Author</span>, <span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>).<span class="ruby-identifier">name</span>
     <span class="ruby-keyword">end</span>
 
     <span class="ruby-comment"># Glean ingredient links from the page, meanwhile ensuring the tag is defined</span>
     <span class="ruby-identifier">extractions</span>[<span class="ruby-value">:Ingredients</span>] = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links_with</span>(<span class="ruby-identifier">dom_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;recipe-ingredients__link&#39;</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span>
-      <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">to_s</span>,
-                         <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Ingredient&#39;</span>,
-                         <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>)).<span class="ruby-identifier">name</span>
+      <span class="ruby-comment"># TagServices.define(link.to_s,</span>
+      <span class="ruby-comment">#                    tagtype: &#39;Ingredient&#39;,</span>
+      <span class="ruby-comment">#                    page_link: absolutize(link.href)).name</span>
+      <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span>(<span class="ruby-identifier">link</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-value">:Ingredient</span>, <span class="ruby-identifier">link</span>.<span class="ruby-identifier">href</span>).<span class="ruby-identifier">name</span>
     }.<span class="ruby-identifier">join</span> <span class="ruby-string">&#39;, &#39;</span>
 
-    <span class="ruby-identifier">r</span> = <span class="ruby-identifier">propose_recipe</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">compact</span>
+    <span class="ruby-identifier">r</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_recipe</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">compact</span>
     <span class="ruby-comment"># Apply the findings, in case the recipe already existed</span>
-    <span class="ruby-identifier">r</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">findings</span> <span class="ruby-identifier">extractions</span>
+    <span class="ruby-identifier">r</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">from_extractions</span> <span class="ruby-identifier">extractions</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1617,7 +1649,7 @@
 
           
           <div class="method-source-code" id="bbc_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 754</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 870</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_recipes_page</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div.recipe-collections__list a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">collection_link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">cpic</span> = <span class="ruby-identifier">collection_link</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>
@@ -1655,17 +1687,19 @@
 
           
           <div class="method-source-code" id="bbc_season_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1025</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 1164</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_season_home_page</span>
   <span class="ruby-identifier">month_name</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/.*\s([-\w]*\z)/</span>, <span class="ruby-string">&#39;\1&#39;</span>
-  <span class="ruby-identifier">month_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">month_name</span>,
-                                 <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Occasion</span>,
-                                 <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>)
+  <span class="ruby-comment"># month_tag = TagServices.define(month_name,</span>
+  <span class="ruby-comment">#                                :tagtype =&gt; :Occasion,</span>
+  <span class="ruby-comment">#                                :page_link =&gt; url)</span>
+  <span class="ruby-identifier">month_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">month_name</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">accordions</span> <span class="ruby-string">&#39;Occasion&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">month_name</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#related-ingredients li a&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">page_link</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">ingred_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>( <span class="ruby-identifier">page_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">downcase</span>,
-                                     <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Ingredient</span>,
-                                     <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">page_link</span>))
+    <span class="ruby-comment"># ingred_tag = TagServices.define( page_link.text.downcase,</span>
+    <span class="ruby-comment">#                                  :tagtype =&gt; :Ingredient,</span>
+    <span class="ruby-comment">#                                  :page_link =&gt; absolutize(page_link))</span>
+    <span class="ruby-identifier">ingred_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">page_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">downcase</span>, <span class="ruby-value">:Ingredient</span>, <span class="ruby-identifier">page_link</span>
     <span class="ruby-identifier">month_tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tr</span><span class="ruby-operator">|</span>
       <span class="ruby-identifier">tr</span>.<span class="ruby-identifier">ingredient_referents</span> = (<span class="ruby-identifier">tr</span>.<span class="ruby-identifier">ingredient_referents</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">ingred_tag</span>.<span class="ruby-identifier">referents</span>).<span class="ruby-identifier">uniq</span>
     }
@@ -1700,15 +1734,16 @@
 
           
           <div class="method-source-code" id="bbc_seasons_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 682</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 796</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_seasons_page</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.season-image&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">season_link</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">tag_name</span> = <span class="ruby-identifier">season_link</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&#39;span.season-name&#39;</span>).<span class="ruby-identifier">text</span>
     <span class="ruby-identifier">page_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">season_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>
     <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">season_link</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>).<span class="ruby-identifier">to_s</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tag_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Occasion&#39;</span>, <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">page_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>
+    <span class="ruby-comment"># TagServices.define tag_name, tagtype: &#39;Occasion&#39;, page_link: page_link, image_link: img_link</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tag_name</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-identifier">page_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>
     <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Tag &#39;#{tag_name}&#39; -&gt; #{page_link} and image link #{img_link}&quot;</span>
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page_link</span>
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page_link</span>
   }
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1741,7 +1776,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="bbc_tag_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 431</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 533</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-identifier">tagtype</span>
   <span class="ruby-identifier">tag</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">typesym</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typesym</span> <span class="ruby-identifier">tagtype</span>
@@ -1764,16 +1799,18 @@ the type of tag)</p>
     <span class="ruby-identifier">tagname</span>.<span class="ruby-identifier">strip!</span>
     <span class="ruby-keyword">unless</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/page=/</span>
       <span class="ruby-identifier">link_text</span> = <span class="ruby-identifier">taghead</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\.\s*$/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\s+/</span>, <span class="ruby-string">&#39; &#39;</span>)
-      <span class="ruby-identifier">tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tagname</span>,
-                               <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">typesym</span>,
-                               <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>,
-                               <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">link_text</span>
+      <span class="ruby-comment"># tag = TagServices.define tagname,</span>
+      <span class="ruby-comment">#                          tagtype: typesym,</span>
+      <span class="ruby-comment">#                          page_link: url,</span>
+      <span class="ruby-comment">#                          link_text: link_text</span>
+      <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">typesym</span>, <span class="ruby-identifier">url</span>, <span class="ruby-identifier">link_text</span><span class="ruby-operator">:</span> <span class="ruby-identifier">link_text</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">taglink</span> = <span class="ruby-identifier">taghead</span>.<span class="ruby-identifier">search</span> <span class="ruby-string">&#39;a&#39;</span> <span class="ruby-comment"># See if there&#39;s a link to the entity</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">taglink</span> = <span class="ruby-identifier">taglink</span>.<span class="ruby-identifier">first</span>
-      <span class="ruby-identifier">tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tagname</span>,
-                               <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">typesym</span>,
-                               <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">taglink</span>)
+      <span class="ruby-comment"># tag = TagServices.define tagname,</span>
+      <span class="ruby-comment">#                          tagtype: typesym,</span>
+      <span class="ruby-comment">#                          page_link: absolutize(taglink)</span>
+      <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">typesym</span>, <span class="ruby-identifier">taglink</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">extractions</span> = {}
@@ -1781,7 +1818,7 @@ the type of tag)</p>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#article-list li&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">recipe_item</span> <span class="ruby-identifier">li</span>, <span class="ruby-identifier">extractions</span>
   }
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links</span>.<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">rel?</span>(<span class="ruby-string">&#39;next&#39;</span>) }
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page</span>.<span class="ruby-identifier">links</span>.<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">link</span><span class="ruby-operator">|</span> <span class="ruby-identifier">link</span>.<span class="ruby-identifier">rel?</span>(<span class="ruby-string">&#39;next&#39;</span>) }
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/[?&amp;]page=/</span> <span class="ruby-comment"># Only scrape the tags on the first page, and only courses</span>
     <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#filter-results div#courses-filters ul li&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
       <span class="ruby-identifier">define_linked_tag</span> <span class="ruby-string">&#39;courses&#39;</span>, <span class="ruby-identifier">li</span> <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">li</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">match</span> <span class="ruby-string">&#39;Other&#39;</span>)
@@ -1817,7 +1854,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="bbc_technique_home_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 763</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 879</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_technique_home_page</span>
   <span class="ruby-identifier">author_tag</span> =
       <span class="ruby-keyword">if</span> (<span class="ruby-identifier">author_link</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span> <span class="ruby-string">&#39;div#chef-details h2 a&#39;</span>).<span class="ruby-identifier">present?</span>
@@ -1826,31 +1863,35 @@ the type of tag)</p>
         <span class="ruby-keyword">if</span> <span class="ruby-identifier">author_pic_link</span> = <span class="ruby-identifier">author_link</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>
           <span class="ruby-identifier">author_pic_link</span> = <span class="ruby-identifier">author_pic_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;src&#39;</span>).<span class="ruby-identifier">to_s</span>
         <span class="ruby-keyword">end</span>
-        <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">author_name</span>, {
-                                          <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Author</span>,
-                                          <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">author_page</span>,
-                                          <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">author_pic_link</span>
-                                      }.<span class="ruby-identifier">compact</span>
+        <span class="ruby-comment"># TagServices.define author_name, {</span>
+        <span class="ruby-comment">#                                   :tagtype =&gt; :Author,</span>
+        <span class="ruby-comment">#                                   :page_link =&gt; author_page,</span>
+        <span class="ruby-comment">#                                   :image_link =&gt; author_pic_link</span>
+        <span class="ruby-comment">#                               }.compact</span>
+        <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">author_name</span>, <span class="ruby-value">:Author</span>, <span class="ruby-identifier">author_page</span>, <span class="ruby-value">:image_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">author_pic_link</span>
       <span class="ruby-keyword">end</span>
 
   <span class="ruby-identifier">technique_name</span> = <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#column-1 h1&#39;</span>).<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">downcase</span>
-  <span class="ruby-identifier">technique_tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">technique_name</span>, {
-                                                       <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:Process</span>,
-                                                       <span class="ruby-value">:page_link</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">url</span>,
-                                                       <span class="ruby-value">:suggested_by</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">author_tag</span>
-                                                   }.<span class="ruby-identifier">compact</span>
-
+  <span class="ruby-comment"># technique_tag = TagServices.define technique_name, {</span>
+  <span class="ruby-comment">#                                                      :tagtype =&gt; :Process,</span>
+  <span class="ruby-comment">#                                                      :page_link =&gt; url,</span>
+  <span class="ruby-comment">#                                                      :suggested_by =&gt; author_tag</span>
+  <span class="ruby-comment">#                                                  }.compact</span>
+  <span class="ruby-identifier">technique_tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">technique_name</span>, <span class="ruby-value">:Process</span>, <span class="ruby-identifier">url</span>, <span class="ruby-value">:suggested_by</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">author_tag</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;div#information-box h2&#39;</span>, <span class="ruby-string">&#39;ul&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">header_text</span>, <span class="ruby-identifier">tool_li</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">toolname</span> = <span class="ruby-identifier">tool_li</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">downcase</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">toolname</span>,
-                       <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Tool&#39;</span>,
-                       <span class="ruby-identifier">suggests</span><span class="ruby-operator">:</span> <span class="ruby-identifier">technique_tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">toolname</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">header_text</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Equipment you will need for this technique&#39;</span>
+    <span class="ruby-comment"># TagServices.define toolname,</span>
+    <span class="ruby-comment">#                    tagtype: &#39;Tool&#39;,</span>
+    <span class="ruby-comment">#                    suggests: technique_tag if toolname.present? &amp;&amp; header_text == &#39;Equipment you will need for this technique&#39;</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">toolname</span>,
+                           <span class="ruby-value">:Tool</span>,
+                           <span class="ruby-identifier">suggests</span><span class="ruby-operator">:</span> <span class="ruby-identifier">technique_tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">toolname</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">header_text</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Equipment you will need for this technique&#39;</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;div#overview h4&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">h4</span><span class="ruby-operator">|</span> <span class="ruby-identifier">recipe_item</span> <span class="ruby-identifier">h4</span>, <span class="ruby-string">&#39;Process&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">technique_name</span> }
 
   <span class="ruby-identifier">accordions</span> <span class="ruby-string">&#39;div#recipes-list-module&#39;</span>, <span class="ruby-string">&#39;Process&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">technique_name</span>
 
-  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">launch</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>), <span class="ruby-value">:bbc_technique_recipes_page</span> }
+  <span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a.see-all-search&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">a</span><span class="ruby-operator">|</span> <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">a</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>), <span class="ruby-value">:bbc_technique_recipes_page</span> }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1881,7 +1922,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="bbc_technique_recipes_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 482</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 586</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_technique_recipes_page</span>
   <span class="ruby-identifier">bbc_tag_recipes_page</span> <span class="ruby-value">:Process</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1914,7 +1955,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="bbc_techniques_page-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 644</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 755</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bbc_techniques_page</span>
   <span class="ruby-identifier">header_tag_services</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">headered_list_items</span> <span class="ruby-string">&#39;dl dt&#39;</span>, <span class="ruby-string">&#39;dd&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">header_name</span>, <span class="ruby-identifier">li</span><span class="ruby-operator">|</span>
@@ -1922,18 +1963,20 @@ the type of tag)</p>
       <span class="ruby-identifier">header_tag_services</span> = <span class="ruby-keyword">nil</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-identifier">header_tag_services</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(
-          <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">header_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-value">:Process</span>)
+          <span class="ruby-comment"># TagServices.define header_name, tagtype: Tag.typenum(:Process)</span>
+          <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">header_name</span>, <span class="ruby-value">:Process</span>
       ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">header_tag_services</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">header_tag_services</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">header_name</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">tech_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
     <span class="ruby-identifier">tag_name</span> = <span class="ruby-identifier">tech_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
     <span class="ruby-identifier">page_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">tech_link</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>).<span class="ruby-identifier">to_s</span>
     <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;!!!Scraper Defined Tag Link for &#39;#{tag_name}&#39; -&gt; #{page_link}&quot;</span>
-    <span class="ruby-identifier">tag</span> = <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>  <span class="ruby-identifier">tag_name</span>,
-                              <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Process&#39;</span>,
-                              <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">page_link</span>
+    <span class="ruby-comment"># tag = TagServices.define  tag_name,</span>
+    <span class="ruby-comment">#                           tagtype: &#39;Process&#39;,</span>
+    <span class="ruby-comment">#                           page_link: page_link</span>
+    <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tag_name</span>, <span class="ruby-value">:Process</span>, <span class="ruby-identifier">page_link</span>
     <span class="ruby-identifier">header_tag_services</span>.<span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">header_tag_services</span>
-    <span class="ruby-identifier">launch</span> <span class="ruby-identifier">page_link</span>
+    <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">page_link</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1965,7 +2008,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="define_linked_tag-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 514</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 618</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">define_linked_tag</span> <span class="ruby-identifier">header_name</span>, <span class="ruby-identifier">li</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
     <span class="ruby-comment"># Translate from BBC tag types to the RP equivalent</span>
@@ -2009,14 +2052,15 @@ the type of tag)</p>
         <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag_id</span>
-        <span class="ruby-identifier">launch</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-node">&quot;/food/#{tag_id}&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Dish</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Ingredient</span>  <span class="ruby-comment"># Most home pages can be reached via indexing, but not Dishes&#39;</span>
+        <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-node">&quot;/food/#{tag_id}&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Dish</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">:Ingredient</span>  <span class="ruby-comment"># Most home pages can be reached via indexing, but not Dishes&#39;</span>
         <span class="ruby-identifier">query</span> <span class="ruby-operator">||=</span> <span class="ruby-node">&quot;#{key_name_type}[]=#{tag_id}&quot;</span>
-        <span class="ruby-identifier">launch</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-node">&quot;/food/recipes/search?#{query}&quot;</span>)
+        <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">absolutize</span>(<span class="ruby-node">&quot;/food/recipes/search?#{query}&quot;</span>)
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-identifier">x</span>=<span class="ruby-value">2</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">tagtype</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
+    <span class="ruby-comment"># TagServices.define tagname, :tagtype =&gt; Tag.typenum(tagtype) if tagtype</span>
+    <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">tagtype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -2048,7 +2092,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="headered_list_items-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 694</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 809</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">headered_list_items</span> <span class="ruby-identifier">header_selector</span>, <span class="ruby-identifier">sibling_tag</span>=<span class="ruby-string">&#39;ul&#39;</span>, <span class="ruby-identifier">title</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
   (<span class="ruby-identifier">page</span>.<span class="ruby-identifier">search</span>(<span class="ruby-identifier">header_selector</span>)).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">hdr</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">hdr_text</span> = <span class="ruby-identifier">hdr</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">strip</span>
@@ -2094,7 +2138,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="recipe_item-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 224</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 321</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">recipe_item</span> <span class="ruby-identifier">li</span>, <span class="ruby-identifier">extractions_from_context</span>={}
   <span class="ruby-comment"># Clone the extractions, ensuring that keys are strings</span>
   <span class="ruby-identifier">extractions</span> = {}
@@ -2103,7 +2147,7 @@ the type of tag)</p>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipe_link</span>[<span class="ruby-string">&#39;href&#39;</span>].<span class="ruby-identifier">match</span> <span class="ruby-regexp">/food\/recipes\//</span>
   <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Title&#39;</span>] = <span class="ruby-identifier">recipe_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Image&#39;</span>] = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">img_link</span>, <span class="ruby-value">:src</span>
+    <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Image&#39;</span>] = <span class="ruby-identifier">registrar</span>.<span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">img_link</span>, <span class="ruby-value">:src</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">chef_name</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;span.chef-name&#39;</span>).<span class="ruby-identifier">first</span>
     <span class="ruby-identifier">extractions</span>[<span class="ruby-string">&#39;Author&#39;</span>] = <span class="ruby-identifier">chef_name</span>.<span class="ruby-identifier">text</span>
@@ -2146,7 +2190,7 @@ the type of tag)</p>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
   }
-  <span class="ruby-identifier">propose_recipe</span> <span class="ruby-identifier">recipe_link</span>, <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">compact</span>
+  <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_recipe</span> <span class="ruby-identifier">recipe_link</span>, <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">compact</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -2177,7 +2221,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="tag_def_label-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 424</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 526</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_def_label</span> <span class="ruby-identifier">result_type</span>, <span class="ruby-identifier">typesym</span>, <span class="ruby-identifier">tagname</span>
   <span class="ruby-identifier">label</span> = <span class="ruby-constant">ApplicationController</span>.<span class="ruby-identifier">helpers</span>.<span class="ruby-identifier">t</span>(<span class="ruby-node">&quot;definition_reference.label.tag.#{typesym}&quot;</span>, <span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">result_type</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">pluralize</span>, <span class="ruby-identifier">tagname</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagname</span>)
   <span class="ruby-identifier">label</span>[<span class="ruby-value">0</span>] = <span class="ruby-identifier">label</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">upcase</span>
@@ -2212,13 +2256,10 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="tag_item-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 279</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 376</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_item</span> <span class="ruby-identifier">li</span>, <span class="ruby-identifier">tagtype</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">entity_page</span> = <span class="ruby-identifier">absolutize</span>(<span class="ruby-identifier">entity_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-identifier">img_link</span> = <span class="ruby-identifier">absolutize</span> <span class="ruby-identifier">img_link</span>, <span class="ruby-value">:src</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">launch</span> <span class="ruby-identifier">entity_page</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recur</span>
+  <span class="ruby-identifier">entity_link</span> = <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>
+  <span class="ruby-identifier">scrape</span> <span class="ruby-identifier">entity_link</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recur</span>
   <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">entity_link</span>.<span class="ruby-identifier">text</span>.<span class="ruby-identifier">strip</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
     <span class="ruby-comment"># Dishes and ingredients are downcased</span>
@@ -2227,7 +2268,7 @@ the type of tag)</p>
     <span class="ruby-identifier">tagtype</span> =
         <span class="ruby-comment"># How to tag the link depends on what the target page denotes</span>
         <span class="ruby-comment"># For that, we depend on the #handler method parsing the URL to tell us what kind of link it is</span>
-        <span class="ruby-keyword">case</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">handler</span>(<span class="ruby-identifier">entity_page</span>)
+        <span class="ruby-keyword">case</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">handler</span>(<span class="ruby-identifier">entity_link</span>)
           <span class="ruby-keyword">when</span> <span class="ruby-value">:bbc_chef_home_page</span>
             <span class="ruby-value">:Author</span>
           <span class="ruby-keyword">when</span> <span class="ruby-value">:bbc_occasion_home_page</span>
@@ -2238,11 +2279,15 @@ the type of tag)</p>
             <span class="ruby-value">:Occasion</span>
         <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># if img_link = li.search(&#39;img&#39;).first</span>
+  <span class="ruby-comment">#   img_link = absolutize img_link, :src</span>
+  <span class="ruby-comment"># end</span>
   <span class="ruby-comment"># These are home pages, so they&#39;ll just be given the name of the tag</span>
-  <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">define</span>(<span class="ruby-identifier">tagname</span>,
-                     <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">tagtype</span>),
-                     <span class="ruby-identifier">page_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity_page</span>,
-                     <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">img_link</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
+  <span class="ruby-comment"># TagServices.define(tagname,</span>
+  <span class="ruby-comment">#                    tagtype: Tag.typenum(tagtype),</span>
+  <span class="ruby-comment">#                    page_link: absolutize(entity_link),</span>
+  <span class="ruby-comment">#                    image_link: img_link) if tagtype</span>
+  <span class="ruby-constant">Registrar</span>.<span class="ruby-identifier">register_tag</span>(<span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">entity_link</span>, <span class="ruby-identifier">image_link</span><span class="ruby-operator">:</span> <span class="ruby-identifier">li</span>.<span class="ruby-identifier">search</span>(<span class="ruby-string">&#39;img&#39;</span>).<span class="ruby-identifier">first</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -2273,7 +2318,7 @@ the type of tag)</p>
 
           
           <div class="method-source-code" id="tidy_name-source">
-            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 419</span>
+            <pre><span class="ruby-comment"># File app/models/scraper.rb, line 521</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tidy_name</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">typesym</span>
   <span class="ruby-identifier">name</span>.<span class="ruby-identifier">downcase!</span> <span class="ruby-keyword">if</span> [<span class="ruby-value">:Dish</span>, <span class="ruby-value">:Course</span>, <span class="ruby-value">:Diet</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">typesym</span>)
   <span class="ruby-identifier">name</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/\b\s*recipes$/</span>, <span class="ruby-string">&#39;&#39;</span>
@@ -2296,7 +2341,7 @@ the type of tag)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

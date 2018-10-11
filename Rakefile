@@ -18,6 +18,7 @@ Rake::Application.send :include, TempFixForRakeLastComment
 RP::Application.load_tasks
 
 require 'rake/testtask'
+require 'rdoc/task'
 
 Rake::TestTask.new do |t|
   t.libs << 'test'

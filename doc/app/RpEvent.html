@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -62,7 +63,18 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><a class="include" href="Backgroundable.html">Backgroundable</a>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
@@ -70,7 +82,25 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-after">::after</a>
+    
+    <li ><a href="#method-c-before">::before</a>
+    
+    <li ><a href="#method-c-during">::during</a>
+    
+    <li ><a href="#method-c-event_trigger_data">::event_trigger_data</a>
+    
+    <li ><a href="#method-c-post">::post</a>
+    
+    <li ><a href="#method-c-trigger_event">::trigger_event</a>
+    
     <li ><a href="#method-c-user_stats">::user_stats</a>
+    
+    <li ><a href="#method-i-act">#act</a>
+    
+    <li ><a href="#method-i-notifiable_path">#notifiable_path</a>
+    
+    <li ><a href="#method-i-title_of">#title_of</a>
     
   </ul>
 </div>
@@ -106,6 +136,219 @@
        </header>
 
     
+      <div id="method-c-after" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">after</span><span
+            class="method-args">(time)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Events occuring after the given time</p>
+          
+          
+
+          
+          <div class="method-source-code" id="after-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 70</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">after</span> <span class="ruby-identifier">time</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span> <span class="ruby-string">&#39;created_at &gt; :time&#39;</span>, <span class="ruby-value">:time</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">time</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-before" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">before</span><span
+            class="method-args">(time)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Events occuring before the given time</p>
+          
+          
+
+          
+          <div class="method-source-code" id="before-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 65</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">before</span> <span class="ruby-identifier">time</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span> <span class="ruby-string">&#39;created_at &lt; :time&#39;</span>, <span class="ruby-value">:time</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">time</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-during" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">during</span><span
+            class="method-args">(timerange)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="during-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 60</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">during</span> <span class="ruby-identifier">timerange</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">created_at</span><span class="ruby-operator">:</span> <span class="ruby-identifier">timerange</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-event_trigger_data" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">event_trigger_data</span><span
+            class="method-args">( subject, direct_object=nil, indirect_object=nil, data = {} )</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a structure for embedding a trigger in a URL for automatically
+firing an event upon a click</p>
+          
+          
+
+          
+          <div class="method-source-code" id="event_trigger_data-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">event_trigger_data</span>( <span class="ruby-identifier">subject</span>, <span class="ruby-identifier">direct_object</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">indirect_object</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">data</span> = {} )
+  <span class="ruby-identifier">h</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assemble_attributes</span> <span class="ruby-identifier">subject</span>, <span class="ruby-identifier">direct_object</span>, <span class="ruby-identifier">indirect_object</span>
+  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">merge!</span>( <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> <span class="ruby-identifier">data</span> ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">data</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-identifier">h</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-post" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">post</span><span
+            class="method-args">(subject, direct_object=nil, indirect_object=nil, data={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>post an event of the given type, avoiding duplicates</p>
+          
+          
+
+          
+          <div class="method-source-code" id="post-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 32</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">subject</span>, <span class="ruby-identifier">direct_object</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">indirect_object</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">data</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">direct_object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">data</span>, <span class="ruby-identifier">direct_object</span> = <span class="ruby-identifier">direct_object</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">indirect_object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">data</span>, <span class="ruby-identifier">indirect_object</span> = <span class="ruby-identifier">indirect_object</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">args</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assemble_attributes</span>(<span class="ruby-identifier">subject</span>, <span class="ruby-identifier">direct_object</span>, <span class="ruby-identifier">indirect_object</span>)
+  <span class="ruby-identifier">posted</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">create_with</span>(<span class="ruby-identifier">data</span><span class="ruby-operator">:</span> <span class="ruby-identifier">data</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first_or_create</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">posted</span>.<span class="ruby-identifier">data</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">data</span>)
+    <span class="ruby-identifier">posted</span>.<span class="ruby-identifier">data</span> = <span class="ruby-identifier">data</span>
+    <span class="ruby-identifier">posted</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">posted</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-trigger_event" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">trigger_event</span><span
+            class="method-args">(params)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>In response to a trigger in a URL, post an event</p>
+          
+          
+
+          
+          <div class="method-source-code" id="trigger_event-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 55</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">trigger_event</span> <span class="ruby-identifier">params</span>
+  <span class="ruby-identifier">klass</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:type</span>].<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:type</span>).<span class="ruby-identifier">constantize</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>
+  <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find_or_create_by</span> <span class="ruby-identifier">params</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-c-user_stats" class="method-detail ">
         
         <div class="method-heading">
@@ -125,9 +368,9 @@
 
           
           <div class="method-source-code" id="user_stats-source">
-            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 41</span>
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 19</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">user_stats</span> <span class="ruby-identifier">user</span>, <span class="ruby-identifier">interval</span>
-  <span class="ruby-identifier">serve_scope</span> = <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">session</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">subject_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">serve_scope</span> = <span class="ruby-constant">LoginEvent</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">subject_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">last_visit</span> = <span class="ruby-identifier">serve_scope</span>.<span class="ruby-identifier">order</span>(<span class="ruby-value">:updated_at</span>).<span class="ruby-identifier">last</span> <span class="ruby-comment"># self.last(:serve, user)</span>
     {
         <span class="ruby-identifier">last_visit</span><span class="ruby-operator">:</span> <span class="ruby-identifier">last_visit</span>.<span class="ruby-identifier">created_at</span>,
@@ -149,13 +392,121 @@
     
     </section>
   
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-act" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">act</span><span
+            class="method-args">(notification, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The target user of the notification responds to the event. Do something…</p>
+          
+          
+
+          
+          <div class="method-source-code" id="act-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 75</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">act</span> <span class="ruby-identifier">notification</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-comment"># ...or nothing</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-notifiable_path" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">notifiable_path</span><span
+            class="method-args">(event, key)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>notifiable path defaults to nil, subject to override</p>
+          
+          
+
+          
+          <div class="method-source-code" id="notifiable_path-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 80</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">notifiable_path</span> <span class="ruby-identifier">event</span>, <span class="ruby-identifier">key</span>
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-title_of" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">title_of</span><span
+            class="method-args">(attribute) { |decorator) : title| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a string for</p>
+          
+          
+
+          
+          <div class="method-source-code" id="title_of-source">
+            <pre><span class="ruby-comment"># File app/models/rp_event.rb, line 85</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">title_of</span> <span class="ruby-identifier">attribute</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">decorator</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">attribute</span>).<span class="ruby-identifier">call</span>.<span class="ruby-identifier">decorate</span>
+  <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> (<span class="ruby-keyword">yield</span> <span class="ruby-identifier">decorator</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
   </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

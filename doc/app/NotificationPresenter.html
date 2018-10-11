@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -58,7 +59,7 @@
   <h3>Parent</h3>
 
   
-  <p class="link"><a href="BasePresenter.html">BasePresenter</a>
+  <p class="link"><a href="Object.html">Object</a>
   
 </div>
 
@@ -70,17 +71,15 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-i-accept_path">#accept_path</a>
+    <li ><a href="#method-c-new">::new</a>
     
-    <li ><a href="#method-i-act_path">#act_path</a>
+    <li ><a href="#method-i-cssclass">#cssclass</a>
     
-    <li ><a href="#method-i-action_path">#action_path</a>
+    <li ><a href="#method-i-referral_path">#referral_path</a>
     
-    <li ><a href="#method-i-report_accepted">#report_accepted</a>
+    <li ><a href="#method-i-render">#render</a>
     
-    <li ><a href="#method-i-response_label">#response_label</a>
-    
-    <li ><a href="#method-i-verbalization">#verbalization</a>
+    <li ><a href="#method-i-selector">#selector</a>
     
   </ul>
 </div>
@@ -108,18 +107,108 @@
     
 
     
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-notification" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">notification</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-template" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">template</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-viewer" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">viewer</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
 
     
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-new" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">new</span><span
+            class="method-args">(notification, template, viewer)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="new-source">
+            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">notification</span>, <span class="ruby-identifier">template</span>, <span class="ruby-identifier">viewer</span>
+  <span class="ruby-ivar">@notification</span> = <span class="ruby-identifier">notification</span>
+  <span class="ruby-ivar">@template</span> = <span class="ruby-identifier">template</span>
+  <span class="ruby-ivar">@viewer</span> = <span class="ruby-identifier">viewer</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
 
     
-      <div id="method-i-accept_path" class="method-detail ">
+      <div id="method-i-cssclass" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">accept_path</span><span
+          <span class="method-name">cssclass</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -129,15 +218,15 @@
 
         <div class="method-description">
           
-          <p>Path to accept the notification without acting on it</p>
+          
           
           
 
           
-          <div class="method-source-code" id="accept_path-source">
-            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 6</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">accept_path</span>
-  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">notifications_accept_path</span> <span class="ruby-identifier">notification_token</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notification_token</span>
+          <div class="method-source-code" id="cssclass-source">
+            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 31</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">cssclass</span>
+  <span class="ruby-node">&quot;notification_#{notification.id}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -149,10 +238,10 @@
       </div>
 
     
-      <div id="method-i-act_path" class="method-detail ">
+      <div id="method-i-referral_path" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">act_path</span><span
+          <span class="method-name">referral_path</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -162,53 +251,20 @@
 
         <div class="method-description">
           
-          <p>Path to BOTH accept the notification and act on it</p>
+          <p>If the notification has a preferred page to present when answered, it&#39;s
+declared here</p>
           
           
 
           
-          <div class="method-source-code" id="act_path-source">
+          <div class="method-source-code" id="referral_path-source">
             <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 11</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">act_path</span>
-  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">notifications_act_path</span> <span class="ruby-identifier">notification_token</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notification_token</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-action_path" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">action_path</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Where to go when the notification is to be acted upon. NB: for the use of
-NotificationController only</p>
-          
-          
-
-          
-          <div class="method-source-code" id="action_path-source">
-            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 16</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">action_path</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">typesym</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:share</span>
-      <span class="ruby-identifier">polymorphic_path</span> [<span class="ruby-value">:collect</span>, <span class="ruby-identifier">shared</span>]
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:make_friend</span>
-      <span class="ruby-identifier">polymorphic_path</span> [<span class="ruby-value">:collect</span>, <span class="ruby-identifier">source</span>]
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">referral_path</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">evt</span> = <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">target</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">InvitationSentEvent</span>
+      <span class="ruby-identifier">polymorphic_path</span>( [<span class="ruby-value">:show</span>, <span class="ruby-identifier">evt</span>.<span class="ruby-identifier">shared</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">evt</span>.<span class="ruby-identifier">shared</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">SharedEvent</span>
+      <span class="ruby-identifier">polymorphic_path</span> [<span class="ruby-value">:show</span>, <span class="ruby-identifier">evt</span>.<span class="ruby-identifier">shared</span>]
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -221,10 +277,10 @@ NotificationController only</p>
       </div>
 
     
-      <div id="method-i-report_accepted" class="method-detail ">
+      <div id="method-i-render" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">report_accepted</span><span
+          <span class="method-name">render</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -239,15 +295,12 @@ NotificationController only</p>
           
 
           
-          <div class="method-source-code" id="report_accepted-source">
-            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 34</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">report_accepted</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">typesym</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:share</span>
-      <span class="ruby-identifier">collection_str</span> = (<span class="ruby-identifier">viewer</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">source</span>) <span class="ruby-operator">?</span> <span class="ruby-string">&#39;your collection&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-node">&quot;the collection of #{homelink source}.&quot;</span>
-      <span class="ruby-node">&quot;#{homelink shared} now appearing in #{collection_str}&quot;</span>.<span class="ruby-identifier">html_safe</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:make_friend</span>
-      <span class="ruby-node">&quot;#{homelink source, link_options} followed you&quot;</span>.<span class="ruby-identifier">html_safe</span>
+          <div class="method-source-code" id="render-source">
+            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">render</span>
+  <span class="ruby-comment"># Construct the path to the notification partial</span>
+  <span class="ruby-identifier">template</span>.<span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">template</span>.<span class="ruby-identifier">render</span> <span class="ruby-node">&quot;activity_notification/notifications/default/#{notification.key.gsub /\./, &#39;/&#39;}&quot;</span>, <span class="ruby-identifier">notification</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notification</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -260,10 +313,10 @@ NotificationController only</p>
       </div>
 
     
-      <div id="method-i-response_label" class="method-detail ">
+      <div id="method-i-selector" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">response_label</span><span
+          <span class="method-name">selector</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -278,53 +331,10 @@ NotificationController only</p>
           
 
           
-          <div class="method-source-code" id="response_label-source">
-            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 44</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">response_label</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">typesym</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:share</span>
-      <span class="ruby-string">&#39;Collect&#39;</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:make_friend</span>
-      <span class="ruby-node">&quot;Follow #{source.handle}&quot;</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-verbalization" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">verbalization</span><span
-            class="method-args">(link_options={})</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="verbalization-source">
-            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 25</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">verbalization</span> <span class="ruby-identifier">link_options</span>={}
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">typesym</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:share</span>
-      <span class="ruby-node">&quot;#{homelink source, link_options} shared &lt;br&gt;#{homelink shared, link_options}&quot;</span>.<span class="ruby-identifier">html_safe</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:make_friend</span>
-      <span class="ruby-node">&quot;#{homelink source, link_options} followed you&quot;</span>.<span class="ruby-identifier">html_safe</span>
-  <span class="ruby-keyword">end</span>
+          <div class="method-source-code" id="selector-source">
+            <pre><span class="ruby-comment"># File app/presenters/notification_presenter.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">selector</span>
+  <span class="ruby-node">&quot;div.#{cssclass}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -344,7 +354,7 @@ NotificationController only</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

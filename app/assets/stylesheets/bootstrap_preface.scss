@@ -9,10 +9,6 @@ $navbarBackgroundHighlight: #888;
 $navbarLinkColor: #eee;
 $navbar-default-color: #fff;
 
-$guideText: #AB812E !default;
-$guideBackground: #FAD8A7 !default;
-$guideBorder: darken(adjust-hue($guideBackground, -10), 7%) !default;
-
 .masonry-container {
   div.popover {
     max-width: 330px;

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -81,9 +82,7 @@
 
   <ul class="link-list" role="directory">
     
-    <li class="calls-super" ><a href="#method-i-assert_gleaning">#assert_gleaning</a>
-    
-    <li class="calls-super" ><a href="#method-i-attribute_for">#attribute_for</a>
+    <li class="calls-super" ><a href="#method-c-attrmap">::attrmap</a>
     
     <li class="calls-super" ><a href="#method-i-eligible_tagtypes">#eligible_tagtypes</a>
     
@@ -125,92 +124,56 @@
     
 
     
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Class Methods</h3>
+       </header>
+
+    
+      <div id="method-c-attrmap" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">attrmap</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="ModelDecorator.html#method-c-attrmap">ModelDecorator.attrmap</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="attrmap-source">
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 6</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">attrmap</span>
+  <span class="ruby-keyword">super</span>.<span class="ruby-identifier">merge</span> <span class="ruby-value">:picurl</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:image</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
        <header>
          <h3>Public Instance Methods</h3>
        </header>
-
-    
-      <div id="method-i-assert_gleaning" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">assert_gleaning</span><span
-            class="method-args">(gleaning)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-            <div class="method-calls-super">
-              Calls superclass method
-              <a href="CollectibleDecorator.html#method-i-assert_gleaning">CollectibleDecorator#assert_gleaning</a>
-            </div>
-          
-
-          
-          <div class="method-source-code" id="assert_gleaning-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 31</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_gleaning</span> <span class="ruby-identifier">gleaning</span>
-  <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
-  <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">extract1</span> <span class="ruby-string">&#39;URI&#39;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">url</span> = <span class="ruby-identifier">value</span> <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-attribute_for" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">attribute_for</span><span
-            class="method-args">(label)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-            <div class="method-calls-super">
-              Calls superclass method
-              <a href="CollectibleDecorator.html#method-i-attribute_for">CollectibleDecorator#attribute_for</a>
-            </div>
-          
-
-          
-          <div class="method-source-code" id="attribute_for-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 6</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">attribute_for</span> <span class="ruby-identifier">label</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">default</span> = <span class="ruby-keyword">super</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:image</span>
-      <span class="ruby-value">:picurl</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">default</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
 
     
       <div id="method-i-eligible_tagtypes" class="method-detail ">
@@ -237,7 +200,7 @@
 
           
           <div class="method-source-code" id="eligible_tagtypes-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">eligible_tagtypes</span>
   ([ <span class="ruby-value">:Ingredient</span>, <span class="ruby-value">:Genre</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-value">:Dish</span>, <span class="ruby-value">:Process</span>, <span class="ruby-value">:Tool</span>, <span class="ruby-value">:Course</span>, <span class="ruby-value">:Diet</span> ] <span class="ruby-operator">+</span> <span class="ruby-keyword">super</span>).<span class="ruby-identifier">uniq</span> <span class="ruby-comment"># , :Dish, :Process, :Tool, :Course, :Diet</span>
 <span class="ruby-keyword">end</span></pre>
@@ -270,7 +233,7 @@
 
           
           <div class="method-source-code" id="external_link-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 23</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 18</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">external_link</span>
   <span class="ruby-identifier">url</span>
 <span class="ruby-keyword">end</span></pre>
@@ -308,7 +271,7 @@
 
           
           <div class="method-source-code" id="finderlabels-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 22</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">finderlabels</span>
   <span class="ruby-keyword">super</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;URI&#39;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -341,7 +304,7 @@
 
           
           <div class="method-source-code" id="image-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 15</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 10</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">image</span>
   <span class="ruby-identifier">object</span>.<span class="ruby-identifier">picurl</span>
 <span class="ruby-keyword">end</span></pre>
@@ -374,7 +337,7 @@
 
           
           <div class="method-source-code" id="image-3D-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 19</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 14</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">image=</span><span class="ruby-identifier">img</span>
   <span class="ruby-identifier">object</span>.<span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">img</span>
 <span class="ruby-keyword">end</span></pre>
@@ -412,7 +375,7 @@
 
           
           <div class="method-source-code" id="individual_tagtypes-source">
-            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 40</span>
+            <pre><span class="ruby-comment"># File app/decorators/recipe_decorator.rb, line 30</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">individual_tagtypes</span>
   ([ <span class="ruby-value">:Ingredient</span>, <span class="ruby-value">:Genre</span>, <span class="ruby-value">:Occasion</span> ] <span class="ruby-operator">+</span> <span class="ruby-keyword">super</span>).<span class="ruby-identifier">uniq</span> <span class="ruby-comment"># , :Dish, :Process, :Tool, :Course, :Diet</span>
 <span class="ruby-keyword">end</span></pre>
@@ -434,7 +397,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

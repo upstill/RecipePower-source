@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -136,7 +137,7 @@
 
           
           <div class="method-source-code" id="feed_buttons_replacement-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 98</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 76</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_buttons_replacement</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
   [ <span class="ruby-node">&quot;div.collectible-buttons##{dom_id decorator}&quot;</span>, <span class="ruby-identifier">feed_collectible_buttons</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>) ]
 <span class="ruby-keyword">end</span></pre>
@@ -169,7 +170,7 @@
 
           
           <div class="method-source-code" id="feed_collectible_buttons-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 92</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 70</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_collectible_buttons</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">collectible_buttons_panel</span> <span class="ruby-ivar">@decorator</span>, <span class="ruby-identifier">options</span> <span class="ruby-keyword">do</span> 
     <span class="ruby-identifier">feed_subscribe_button</span> <span class="ruby-ivar">@feed</span>, <span class="ruby-identifier">options</span>
@@ -198,34 +199,13 @@
 
         <div class="method-description">
           
-          <pre>def feed_update_trigger feed, force=false
-  if (Time.now - feed.updated_at) &gt; 3600
-    feed.bkg_enqueue # Set a job running to update the feed
-    last_entry = feed.feed_entries.order(&#39;published_at DESC&#39;).first
-    last_entry_id = last_entry ? last_entry.id : 0
-    link_to_submit &#39;Check for Updates&#39;,
-                   contents_feed_path(feed, last_entry_id: last_entry_id ),
-                   class: &#39;label-button&#39; # :button_size =&gt; &#39;xs&#39;
-  else
-    content_tag :span, &#39;Feed is up to date...&#39;, class: &#39;label-button&#39;
-  end</pre>
-
-<h1 id="method-i-feed_entries_report-label-begin">begin<span><a href="#method-i-feed_entries_report-label-begin">&para;</a> <a href="#top">&uarr;</a></span></h1>
-
-<pre class="ruby"><span class="ruby-identifier">querify_item</span> <span class="ruby-string">&#39;Check for Updates&#39;</span>,
-             { <span class="ruby-identifier">last_entry_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">last_entry_id</span> },
-             <span class="ruby-identifier">feed_wait_msg</span>(<span class="ruby-identifier">feed</span>, <span class="ruby-identifier">force</span>).<span class="ruby-identifier">merge</span>(:<span class="ruby-identifier">button_size</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;xs&#39;</span>)
-</pre>
-
-<h1 id="method-i-feed_entries_report-label-end">end<span><a href="#method-i-feed_entries_report-label-end">&para;</a> <a href="#top">&uarr;</a></span></h1>
-
-<pre>end</pre>
+          
           
           
 
           
           <div class="method-source-code" id="feed_entries_report-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 51</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 29</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_entries_report</span> <span class="ruby-identifier">feed</span>
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">nmatches</span> = <span class="ruby-identifier">feed</span>.<span class="ruby-identifier">feed_entries</span>.<span class="ruby-identifier">size</span>
     <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
@@ -265,7 +245,7 @@
 
           
           <div class="method-source-code" id="feed_entries_status-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 71</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_entries_status</span> <span class="ruby-identifier">feed</span>
   <span class="ruby-identifier">result</span> = <span class="ruby-identifier">feed_entries_report</span> <span class="ruby-identifier">feed</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">feed</span>.<span class="ruby-identifier">feed_entries</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">feed</span>.<span class="ruby-identifier">last_post_date</span>
@@ -351,7 +331,7 @@
 
           
           <div class="method-source-code" id="feed_status_report_replacement-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 67</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 45</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_status_report_replacement</span> <span class="ruby-identifier">feed</span>, <span class="ruby-identifier">querytags</span>
   [ <span class="ruby-string">&#39;span.feed-status-report&#39;</span>, <span class="ruby-identifier">feed_status_report</span>(<span class="ruby-identifier">feed</span>, <span class="ruby-identifier">querytags</span>) ]
 <span class="ruby-keyword">end</span></pre>
@@ -384,7 +364,7 @@
 
           
           <div class="method-source-code" id="feed_status_summary-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 63</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 41</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_status_summary</span> <span class="ruby-identifier">feed</span>
   <span class="ruby-identifier">feed_entries_status</span>(<span class="ruby-identifier">feed</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">feed_update_button</span>(<span class="ruby-identifier">feed</span>, <span class="ruby-keyword">true</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -417,7 +397,7 @@
 
           
           <div class="method-source-code" id="feed_subscribe_button-source">
-            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 82</span>
+            <pre><span class="ruby-comment"># File app/helpers/feeds_helper.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feed_subscribe_button</span> <span class="ruby-identifier">item</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">collectible_collected?</span> <span class="ruby-identifier">current_user_or_guest_id</span>
     <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span> = <span class="ruby-string">&#39;Unsubscribe&#39;</span>, <span class="ruby-identifier">collect_feed_path</span>(<span class="ruby-identifier">item</span>, <span class="ruby-identifier">in_collection</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>)
@@ -512,7 +492,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

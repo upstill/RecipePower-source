@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -119,105 +120,13 @@
 
         <div class="method-description">
           
-          <p>layout :rs_layout # Let response_service pick the layout # before_filter
-:setup_collection # , except: [ :index ] # after_filter :save_browser</p>
-
-<p>def save_browser</p>
-
-<pre class="ruby"><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span>
-</pre>
-
-<p>end</p>
-
-<p>def user_only</p>
-
-<pre class="ruby"><span class="ruby-keyword">if</span> <span class="ruby-identifier">user_signed_in?</span>
-  <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;index&#39;</span>
-<span class="ruby-keyword">else</span>
-            <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">keep</span>
-  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">home_path</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
-
-<p>def index</p>
-
-<pre class="ruby"><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-string">&quot;Collections&quot;</span>
-<span class="ruby-ivar">@rp_old</span> = <span class="ruby-keyword">false</span>
-<span class="ruby-identifier">seeker_result</span> <span class="ruby-string">&quot;Content&quot;</span>, <span class="ruby-string">&#39;div.collection&#39;</span> <span class="ruby-comment"># , clear_tags: true</span>
-</pre>
-
-<p>end</p>
-
-<p>def show end</p>
-
-<p># GET /collection/new # GET /collection/new.xml def new</p>
-
-<pre class="ruby"><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-string">&quot;Tags&quot;</span>
-<span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>
-<span class="ruby-identifier">smartrender</span>
-</pre>
-
-<p>end</p>
-
-<p>def edit end</p>
-
-<p># POST /collection # POST /collection.xml def create</p>
-
-<pre class="ruby"><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-string">&quot;New Collection&quot;</span>
-<span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">tag</span>][:<span class="ruby-identifier">name</span>], <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span>)
-    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">add_collection</span> <span class="ruby-ivar">@tag</span>
-    <span class="ruby-comment"># Create the collection, private to user</span>
-    <span class="ruby-comment"># Make the collection current in the browser</span>
-    <span class="ruby-identifier">notice</span> = <span class="ruby-node">&quot;You now have a &#39;#{@tag.name}&#39; Collection, and you can add any recipe to it.&quot;</span>
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">controller</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;collection&quot;</span>, <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;index&quot;</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notice</span> }
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> :<span class="ruby-identifier">json</span> =<span class="ruby-operator">&gt;</span> { <span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notice</span>, <span class="ruby-identifier">redirect</span><span class="ruby-operator">:</span> <span class="ruby-identifier">collection_path</span> } }
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> :<span class="ruby-identifier">xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span>, :<span class="ruby-identifier">status</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">created</span>, :<span class="ruby-identifier">location</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span> }
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-ivar">@tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">tag</span>][:<span class="ruby-identifier">name</span>])
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span>
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span>
-    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">xml</span>  { <span class="ruby-identifier">render</span> :<span class="ruby-identifier">xml</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@tag</span>.<span class="ruby-identifier">errors</span>, :<span class="ruby-identifier">status</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">unprocessable_entity</span> }
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
-
-<p>def update end</p>
-
-<p># Update the collection to reflect any changes def refresh</p>
-
-<pre class="ruby"><span class="ruby-ivar">@seeker</span>.<span class="ruby-identifier">refresh</span> <span class="ruby-comment"># Set the refresh process going</span>
-<span class="ruby-identifier">seeker_result</span> <span class="ruby-string">&quot;Content&quot;</span>, <span class="ruby-string">&#39;div.collection&#39;</span>
-</pre>
-
-<p>end</p>
-
-<p># Render the results for the current state of the query and selected
-collection def relist</p>
-
-<pre class="ruby"><span class="ruby-identifier">otime</span> = <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">mod_time</span>] 
-<span class="ruby-identifier">ntime</span> = <span class="ruby-ivar">@seeker</span>.<span class="ruby-identifier">updated_at</span>.<span class="ruby-identifier">to_s</span>
-<span class="ruby-comment"># flash.now[:guide] = @seeker.guide</span>
-<span class="ruby-keyword">if</span> <span class="ruby-identifier">otime</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">ntime</span> <span class="ruby-comment"># awaiting update</span>
-  <span class="ruby-identifier">render</span> :<span class="ruby-identifier">nothing</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>, :<span class="ruby-identifier">status</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">no_content</span>
-<span class="ruby-keyword">else</span>
-  <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[:<span class="ruby-identifier">success</span>] = <span class="ruby-string">&quot;This feed is now up to date.&quot;</span>
-  <span class="ruby-identifier">seeker_result</span> <span class="ruby-string">&quot;Content&quot;</span>, <span class="ruby-string">&#39;div.collection&#39;</span>
-  <span class="ruby-comment"># render :index, :layout=&gt;false, :locals =&gt; { :feed =&gt; @feed }</span>
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
+          
           
           
 
           
           <div class="method-source-code" id="index-source">
-            <pre><span class="ruby-comment"># File app/controllers/collection_controller.rb, line 85</span>
+            <pre><span class="ruby-comment"># File app/controllers/collection_controller.rb, line 2</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
   <span class="ruby-identifier">smartrender</span>
 <span class="ruby-keyword">end</span></pre>
@@ -239,7 +148,7 @@ collection def relist</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

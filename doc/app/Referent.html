@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,7 +69,7 @@
   <ul class="link-list">
   
   
-    <li><a class="include" href="Picable.html">Picable</a>
+    <li><a class="include" href="Collectible.html">Collectible</a>
   
   
   </ul>
@@ -87,8 +88,6 @@
     
     <li ><a href="#method-c-express">::express</a>
     
-    <li ><a href="#method-c-find_by_tag">::find_by_tag</a>
-    
     <li ><a href="#method-c-referent_class_for_tagtype">::referent_class_for_tagtype</a>
     
     <li ><a href="#method-c-related">::related</a>
@@ -105,13 +104,19 @@
     
     <li ><a href="#method-i-add_expression-3D">#add_expression=</a>
     
+    <li ><a href="#method-i-affiliates">#affiliates</a>
+    
     <li ><a href="#method-i-associate">#associate</a>
+    
+    <li class="calls-super" ><a href="#method-i-canonical_expression-3D">#canonical_expression=</a>
+    
+    <li ><a href="#method-i-child_tag_tokens">#child_tag_tokens</a>
+    
+    <li ><a href="#method-i-child_tag_tokens-3D">#child_tag_tokens=</a>
     
     <li ><a href="#method-i-child_tags">#child_tags</a>
     
-    <li ><a href="#method-i-child_tokens">#child_tokens</a>
-    
-    <li ><a href="#method-i-child_tokens-3D">#child_tokens=</a>
+    <li ><a href="#method-i-detached-3F">#detached?</a>
     
     <li ><a href="#method-i-drop">#drop</a>
     
@@ -123,8 +128,6 @@
     
     <li ><a href="#method-i-expression">#expression</a>
     
-    <li ><a href="#method-i-fix_references">#fix_references</a>
-    
     <li ><a href="#method-i-longname">#longname</a>
     
     <li ><a href="#method-i-make_parent_of">#make_parent_of</a>
@@ -135,13 +138,19 @@
     
     <li ><a href="#method-i-normalized_name">#normalized_name</a>
     
+    <li ><a href="#method-i-parent_tag_tokens">#parent_tag_tokens</a>
+    
+    <li ><a href="#method-i-parent_tag_tokens-3D">#parent_tag_tokens=</a>
+    
     <li ><a href="#method-i-parent_tags">#parent_tags</a>
     
-    <li ><a href="#method-i-parent_tokens">#parent_tokens</a>
-    
-    <li ><a href="#method-i-parent_tokens-3D">#parent_tokens=</a>
-    
     <li ><a href="#method-i-paths_to">#paths_to</a>
+    
+    <li ><a href="#method-i-related_tag_tokens">#related_tag_tokens</a>
+    
+    <li ><a href="#method-i-related_tag_tokens-3D">#related_tag_tokens=</a>
+    
+    <li ><a href="#method-i-related_tags">#related_tags</a>
     
     <li ><a href="#method-i-suggests">#suggests</a>
     
@@ -238,7 +247,7 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 341</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 423</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">create</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">params</span>)
   <span class="ruby-identifier">parentid</span> = <span class="ruby-value">0</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">first</span>
@@ -285,7 +294,7 @@
 
           
           <div class="method-source-code" id="dump-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 142</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 176</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">dump</span> <span class="ruby-identifier">tagtype</span>=<span class="ruby-value">4</span>
   <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typenum</span><span class="ruby-operator">==</span><span class="ruby-identifier">tagtype</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">ref</span> }.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tl</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tl</span>.<span class="ruby-identifier">dump</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tl</span> }
 <span class="ruby-keyword">end</span></pre>
@@ -303,7 +312,7 @@
         
         <div class="method-heading">
           <span class="method-name">express</span><span
-            class="method-args">(tag, tagtype = nil, args = {})</span>
+            class="method-args">(tag_or_id_or_string, tagtype = nil, args = {})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -313,72 +322,43 @@
         <div class="method-description">
           
           <p>Class method to create a referent of a given type under the given tag, or
-to find an existing one. WARNING: while some effort is made to find an
-existing referent and use that,</p>
+to find an existing one. Parameters: – &#39;tag_or_id_or_string&#39; may be
+an extant tag, or the id of a tag, or a string – &#39;tagtype&#39; may be a
+symbol, an integer or a string, according to the typing of Tags</p>
 
-<pre>this procedure lends itself to redundancy in the dictionary</pre>
+<pre>(Since you can&#39;t #express a free tag (type 0) &#39;tagtype&#39; must not be :Free if creating a tag)</pre>
           
           
 
           
           <div class="method-source-code" id="express-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 244</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">express</span> (<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">tagtype</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">args</span> = {})
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">Tag</span> <span class="ruby-comment"># Creating it if need be, and/or making it global</span>
-    <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>)
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 299</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">express</span> (<span class="ruby-identifier">tag_or_id_or_string</span>, <span class="ruby-identifier">tagtype</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">args</span> = {})
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">args</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">tagtype</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">ref</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||</span>
-      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span>
-      <span class="ruby-comment"># We don&#39;t immediately have a referent for this tag</span>
-      <span class="ruby-comment">#...but there may already be one as a plural or a singular</span>
-      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">first</span> }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span>
-      <span class="ruby-comment"># Tag doesn&#39;t have an existing referent, so need to make one</span>
-      <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">referent_class_for_tagtype</span>(<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>).<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Successfully created</span>
-    <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">args</span>
-    <span class="ruby-identifier">ref</span>
+  <span class="ruby-identifier">typenum</span> =
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag_or_id_or_string</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Tag</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">tagtype</span>
+        <span class="ruby-identifier">tag_or_id_or_string</span>.<span class="ruby-identifier">tagtype</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-identifier">tagtype</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># The tagtype must be something other than 0 unless the tag already has such a type</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">typenum</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>
+    <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">transaction</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-comment"># Creating it if need be, and/or making it global</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">tag_or_id_or_string</span>, <span class="ruby-identifier">typenum</span>)
+        <span class="ruby-comment"># We may not immediately have a referent for this tag</span>
+        <span class="ruby-comment">#...but there may already be one as a plural or a singular</span>
+        <span class="ruby-identifier">ref</span> = (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">meaning</span> <span class="ruby-operator">||</span>
+            <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:meaning</span>).<span class="ruby-identifier">find</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:&#39;present?&#39;</span>)) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">args</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:force</span>)
+        <span class="ruby-comment"># Tag doesn&#39;t have an existing referent (or we&#39;re forcing), so need to make one</span>
+        <span class="ruby-identifier">ref</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">referent_class_for_tagtype</span>(<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span>).<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">canonical_expression</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>)
+        <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">args</span>
+        <span class="ruby-identifier">ref</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-c-find_by_tag" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">find_by_tag</span><span
-            class="method-args">(tag, tagtype)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Find a referent from a tag string of a given type. This is a search for ANY
-tag that refers to the the referent, not just the canonical one</p>
-          
-          
-
-          
-          <div class="method-source-code" id="find_by_tag-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 405</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_tag</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">tagtype</span>
-  <span class="ruby-comment"># Find or create the tag</span>
-
-  <span class="ruby-comment"># We now have a list of qualifying tags. Choose the one which has</span>
-  <span class="ruby-comment"># an existing referent, if any</span>
-
-  <span class="ruby-comment"># Find or create an appropriate referent for the tag</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -409,7 +389,7 @@ tag that refers to the the referent, not just the canonical one</p>
 
           
           <div class="method-source-code" id="referent_class_for_tagtype-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 236</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 289</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent_class_for_tagtype</span>(<span class="ruby-identifier">typenum</span>)
   (((<span class="ruby-identifier">typenum</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">?</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typesym</span>(<span class="ruby-identifier">typenum</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;Referent&#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -438,13 +418,14 @@ tag that refers to the the referent, not just the canonical one</p>
           
           <p>Return a list of all tags that are related to the one provided. This means:
 …all the synonyms (if required) and …all the parents (if required) of …all
-the children (if required) of …all the referents of this tag</p>
+the children (if required) of …all the referents of this tag TODO:
+currently unused; should be optimized and employed in searching by tags</p>
           
           
 
           
           <div class="method-source-code" id="related-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 303</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 385</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">related</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">doSynonyms</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">doParents</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">doChildren</span> = <span class="ruby-keyword">false</span>
   <span class="ruby-identifier">unique_referents</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
     [(<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">parents</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">doParents</span>), (<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">children</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">doChildren</span>)]
@@ -482,7 +463,7 @@ the children (if required) of …all the referents of this tag</p>
 
           
           <div class="method-source-code" id="show_tree-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 328</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 410</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">show_tree</span>(<span class="ruby-identifier">key</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">level</span> = <span class="ruby-value">0</span>)
   <span class="ruby-identifier">children</span> = []
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">key</span>
@@ -524,7 +505,7 @@ the children (if required) of …all the referents of this tag</p>
 
           
           <div class="method-source-code" id="strscopes-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 91</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 122</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
   [
       (<span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>).<span class="ruby-identifier">joins</span>(<span class="ruby-value">:tags</span>).<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;tags&quot;.&quot;name&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>)
@@ -559,7 +540,7 @@ the children (if required) of …all the referents of this tag</p>
 
           
           <div class="method-source-code" id="type_to_class-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 312</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 394</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">type_to_class</span> <span class="ruby-identifier">type</span>
   (<span class="ruby-identifier">type</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">type</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typesym</span>(<span class="ruby-identifier">type</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typesym</span>(<span class="ruby-identifier">type</span>).<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;Referent&quot;</span>).<span class="ruby-identifier">constantize</span>) <span class="ruby-operator">||</span> <span class="ruby-constant">Referent</span>
 <span class="ruby-keyword">end</span></pre>
@@ -600,7 +581,7 @@ the children (if required) of …all the referents of this tag</p>
 
           
           <div class="method-source-code" id="absorb-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 97</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 149</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>, <span class="ruby-identifier">nuke_it</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">type</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">id</span>
@@ -652,7 +633,7 @@ just ignore it</p>
 
           
           <div class="method-source-code" id="add_expression-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 182</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 215</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_expression</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -684,8 +665,58 @@ just ignore it</p>
 
           
           <div class="method-source-code" id="add_expression-3D-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 185</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 218</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_expression=</span>(<span class="ruby-identifier">tag</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-affiliates" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">affiliates</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="affiliates-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 128</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">affiliates</span>
+  <span class="ruby-ivar">@affiliates</span> <span class="ruby-operator">||=</span>
+      <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:referee_type</span>, <span class="ruby-value">:referee_id</span>).<span class="ruby-identifier">inject</span>({}) { <span class="ruby-operator">|</span><span class="ruby-identifier">memo</span>, <span class="ruby-identifier">rfm</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">classname</span> = <span class="ruby-identifier">rfm</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/.*Referent/</span>, <span class="ruby-string">&#39;Referent&#39;</span>)
+        <span class="ruby-identifier">memo</span>[<span class="ruby-identifier">classname</span>] <span class="ruby-operator">||=</span> []
+        <span class="ruby-identifier">memo</span>[<span class="ruby-identifier">classname</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">rfm</span>.<span class="ruby-identifier">last</span>
+        <span class="ruby-identifier">memo</span>
+      }.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">classname</span>, <span class="ruby-identifier">ids</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">scope</span> =
+            <span class="ruby-keyword">case</span> <span class="ruby-identifier">classname</span>
+              <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Referent&#39;</span>
+                <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">includes</span> <span class="ruby-value">:canonical_expression</span>
+              <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Recipe&#39;</span>
+                <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span> <span class="ruby-value">:page_ref</span>
+              <span class="ruby-keyword">else</span>
+                <span class="ruby-identifier">classname</span>.<span class="ruby-identifier">constantize</span>
+            <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ids</span>).<span class="ruby-identifier">to_a</span>
+      }.<span class="ruby-identifier">flatten</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -718,9 +749,128 @@ Sources have one</p>
 
           
           <div class="method-source-code" id="associate-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 137</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 171</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">associate</span>
   <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-canonical_expression-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">canonical_expression=</span><span
+            class="method-args">(tag_or_string)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>alias_method :orig_canonical_expression=, :canonical_expression=</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="canonical_expression-3D-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 362</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">canonical_expression=</span> <span class="ruby-identifier">tag_or_string</span>
+  <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">tag_or_string</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">tag_or_string</span>, <span class="ruby-identifier">typenum</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_string</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">typenum</span>)
+    <span class="ruby-keyword">super</span> <span class="ruby-identifier">tag</span>
+    <span class="ruby-identifier">update_attribute</span>(<span class="ruby-value">:tag_id</span>, <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag_id_changed?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Save for later</span>
+    <span class="ruby-identifier">express</span> <span class="ruby-identifier">tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">persisted?</span> <span class="ruby-comment"># Ensure the tag is listed among the expressions</span>
+    <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">tag</span>
+    <span class="ruby-comment"># It is an error to assign a tag to a referent of the wrong type</span>
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:canonical_expression</span>, <span class="ruby-node">&quot;#{tag.typename} tag can&#39;t express #{typename} referent&quot;</span>
+    <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-comment"># There&#39;s not even a bloody tag!</span>
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:canonical_expression</span>, <span class="ruby-node">&quot;#{tag_or_string} can&#39;t express #{typename} referent&quot;</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-child_tag_tokens" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">child_tag_tokens</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="child_tag_tokens-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 241</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">child_tag_tokens</span>
+  <span class="ruby-identifier">child_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-child_tag_tokens-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">child_tag_tokens=</span><span
+            class="method-args">(tokenlist)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="child_tag_tokens-3D-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 249</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">child_tag_tokens=</span>(<span class="ruby-identifier">tokenlist</span>)
+  <span class="ruby-comment"># After collecting tags, scan list to eliminate references to self</span>
+  <span class="ruby-identifier">tokenlist</span> = <span class="ruby-identifier">tokenlist</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">children</span> = <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokenlist</span>).<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:children</span>, <span class="ruby-string">&quot;Can&#39;t be its own child.&quot;</span>) }.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -751,7 +901,7 @@ Sources have one</p>
 
           
           <div class="method-source-code" id="child_tags-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 209</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 245</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">child_tags</span>
   <span class="ruby-identifier">tags_from_referents</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">children</span>
 <span class="ruby-keyword">end</span></pre>
@@ -765,10 +915,10 @@ Sources have one</p>
       </div>
 
     
-      <div id="method-i-child_tokens" class="method-detail ">
+      <div id="method-i-detached-3F" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">child_tokens</span><span
+          <span class="method-name">detached?</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -778,50 +928,15 @@ Sources have one</p>
 
         <div class="method-description">
           
-          
-          
-          
-
-          
-          <div class="method-source-code" id="child_tokens-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 205</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">child_tokens</span>
-  <span class="ruby-identifier">child_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-child_tokens-3D" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">child_tokens=</span><span
-            class="method-args">(tokenlist)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
+          <p>Can the referent be destroyed, ie., is it empty of all connections?</p>
           
           
 
           
-          <div class="method-source-code" id="child_tokens-3D-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 213</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">child_tokens=</span>(<span class="ruby-identifier">tokenlist</span>)
-  <span class="ruby-comment"># After collecting tags, scan list to eliminate references to self</span>
-  <span class="ruby-identifier">tokenlist</span> = <span class="ruby-identifier">tokenlist</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>)
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">children</span> = <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokenlist</span>).<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:children</span>, <span class="ruby-string">&quot;Can&#39;t be its own child.&quot;</span>) }.<span class="ruby-identifier">uniq</span>
+          <div class="method-source-code" id="detached-3F-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 602</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">detached?</span>
+  <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">parents</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">children</span>.<span class="ruby-identifier">empty?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -837,7 +952,7 @@ Sources have one</p>
         
         <div class="method-heading">
           <span class="method-name">drop</span><span
-            class="method-args">(tag)</span>
+            class="method-args">(tag_or_id)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -846,21 +961,22 @@ Sources have one</p>
 
         <div class="method-description">
           
-          <p>Remove uses of this tag by this referent</p>
+          <p>Remove uses of this tag by this referent A tagid may be passed</p>
           
           
 
           
           <div class="method-source-code" id="drop-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 415</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">drop</span> <span class="ruby-identifier">tag</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
-    <span class="ruby-comment"># Need to find another tag to use for canonical string</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">replacement_tag</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">candidate</span><span class="ruby-operator">|</span> <span class="ruby-identifier">candidate</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> }
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical_expression</span> = <span class="ruby-identifier">replacement_tag</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 514</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">drop</span> <span class="ruby-identifier">tag_or_id</span>
+  <span class="ruby-identifier">id_to_drop</span> = (<span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Tag</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">tag_id</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">tag_id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">id_to_drop</span>)
+    <span class="ruby-comment"># Need to find another tag to use for canonical string; reuse the dropped tag iff it&#39;s valid</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> = (<span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">-</span> [<span class="ruby-identifier">id_to_drop</span>]).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">id_to_drop</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>).<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">id_to_drop</span>))
   <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">tag</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-identifier">expr_to_nuke</span> = <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">id_to_drop</span>) <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">id_to_drop</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">destroy</span> <span class="ruby-identifier">expr_to_nuke</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">expr_to_nuke</span>
+  <span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">changed?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -891,7 +1007,7 @@ Sources have one</p>
 
           
           <div class="method-source-code" id="dump-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 147</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 181</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dump</span> <span class="ruby-identifier">indent</span> = <span class="ruby-string">&quot;&quot;</span>, <span class="ruby-identifier">path</span> = []
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span>.<span class="ruby-identifier">include?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>
     <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{indent}!!Loop back to #{self.id.to_s}: #{self.name}&quot;</span>
@@ -934,7 +1050,7 @@ Sources have one</p>
 
           
           <div class="method-source-code" id="ensure_tagtypes-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 162</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 196</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">ensure_tagtypes</span>
   <span class="ruby-identifier">mytype</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
@@ -944,7 +1060,6 @@ Sources have one</p>
         <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:tags</span>, <span class="ruby-node">&quot;#{tag.name} is a &#39;#{tag.typename}&#39;, not &#39;#{Tag.typename(mytype)}&#39;&quot;</span>)
       <span class="ruby-keyword">else</span>
         <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">mytype</span>
-        <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-keyword">self</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-comment"># Give tag this meaning if there&#39;s no other</span>
         <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">isGlobal</span> = <span class="ruby-keyword">true</span>
         <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
       <span class="ruby-keyword">end</span>
@@ -965,7 +1080,7 @@ Sources have one</p>
         
         <div class="method-heading">
           <span class="method-name">express</span><span
-            class="method-args">(tag, args = {})</span>
+            class="method-args">(tag_or_id_or_name, args = {})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -980,39 +1095,38 @@ Sources have one</p>
 
           
           <div class="method-source-code" id="express-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 264</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">express</span>(<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">args</span> = {})
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 328</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">express</span>(<span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">args</span> = {})
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">persisted?</span>
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:tags</span>, <span class="ruby-string">&quot;can&#39;t be used as expressions until referent is saved&quot;</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
   <span class="ruby-comment"># We assert the tag in case it&#39;s</span>
   <span class="ruby-comment"># 1) specified by string or id, rather than a tag object</span>
   <span class="ruby-comment"># 2) of a different type, or</span>
   <span class="ruby-comment"># 3) not already global</span>
-  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>
-  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">name</span>
-    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> = <span class="ruby-identifier">name</span> <span class="ruby-comment"># We may be setting the name to something that matches an existing tag</span>
-    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span>) <span class="ruby-comment"># Ensure that there&#39;s a tag of OUR type</span>
 
-  <span class="ruby-comment"># Promote the tag to the canonical expression on this referent if needed</span>
-  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">args</span>[<span class="ruby-value">:form</span>] <span class="ruby-operator">==</span> <span class="ruby-value">:generic</span>) <span class="ruby-operator">||</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical_expression</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical_expression</span> = <span class="ruby-identifier">tag</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-keyword">end</span>
+    <span class="ruby-comment"># Promote the tag to the canonical expression on this referent if needed</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">args</span>[<span class="ruby-value">:form</span>] <span class="ruby-operator">==</span> <span class="ruby-value">:generic</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">canonical_expression</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">tag</span>)
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical_expression</span> = <span class="ruby-identifier">tag</span>
+      <span class="ruby-identifier">update_attribute</span> <span class="ruby-value">:tag_id</span>, <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
+    <span class="ruby-keyword">end</span>
 
-  <span class="ruby-comment"># Find or create an expression of this referent on this tag. If locale</span>
-  <span class="ruby-comment"># or form aren&#39;t specified, match any expression</span>
-  <span class="ruby-identifier">args</span>[<span class="ruby-value">:form</span>] = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">formnum</span>(<span class="ruby-value">:generic</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">args</span>[<span class="ruby-value">:form</span>]
-  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>
-    <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">args</span>
-  <span class="ruby-keyword">elsif</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># We&#39;re not saved, so have no id</span>
-    <span class="ruby-identifier">args</span>[<span class="ruby-value">:tag_id</span>] = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
-    <span class="ruby-identifier">expr</span> = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">args</span>)
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">expr</span>
+    <span class="ruby-comment"># Find or create an expression of this referent on this tag. If locale</span>
+    <span class="ruby-comment"># or form aren&#39;t specified, match any expression</span>
+    <span class="ruby-identifier">args</span>[<span class="ruby-value">:form</span>] <span class="ruby-operator">||=</span> <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">formnum</span> <span class="ruby-value">:generic</span>
+    <span class="ruby-identifier">scrubbed_args</span> = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">scrub_args</span>(<span class="ruby-identifier">args</span>).<span class="ruby-identifier">merge</span> <span class="ruby-identifier">tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">referent</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>)
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">scrubbed_args</span>)
+      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">changed?</span>
+      <span class="ruby-identifier">expr</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">scrubbed_args</span>)
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">expr</span>
+      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">reload</span> <span class="ruby-comment"># To ensure the tag&#39;s referents are current</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:tags</span>, <span class="ruby-string">&quot;won&#39;t take bogus tag as expression&quot;</span>
   <span class="ruby-keyword">end</span>
-
-  <span class="ruby-comment"># Point the tag back at this referent, if needed</span>
-  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">admit_meaning</span>(<span class="ruby-keyword">self</span>)
-  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">tag</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1044,59 +1158,16 @@ locale, if any</p>
 
           
           <div class="method-source-code" id="expression-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 426</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">expression</span>(<span class="ruby-identifier">args</span> = {})
-  <span class="ruby-identifier">args</span> = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">scrub_args</span> <span class="ruby-identifier">args</span>
-  ((<span class="ruby-identifier">args</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">expr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">args</span>).<span class="ruby-identifier">first</span>)) <span class="ruby-operator">?</span>
-      <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">:</span>
-      <span class="ruby-identifier">canonical_expression</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-fix_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">fix_references</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Callback before destroying this referent, to fix any tags that use it as
-primary meaning</p>
-          
-          
-
-          
-          <div class="method-source-code" id="fix_references-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 118</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">fix_references</span>
-  <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>
-      <span class="ruby-comment"># Choose a new primary meaning</span>
-      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">referent</span><span class="ruby-operator">|</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">referent</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">self</span>
-          <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-identifier">referent</span>
-          <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
-          <span class="ruby-keyword">return</span>
-        <span class="ruby-keyword">end</span>
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-keyword">nil</span>
-      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
-    <span class="ruby-keyword">end</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 526</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">expression</span> <span class="ruby-identifier">args</span> = {}
+  <span class="ruby-identifier">args</span> = <span class="ruby-operator">::</span><span class="ruby-constant">Expression</span>.<span class="ruby-identifier">scrub_args</span> <span class="ruby-identifier">args</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">args</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">expr</span> = <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">args</span>)
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span><span class="ruby-identifier">canonical_expression</span>
+    <span class="ruby-identifier">expr</span> = <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-constant">Expression</span>.<span class="ruby-identifier">scrub_args</span> <span class="ruby-value">:form</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:generic</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">first</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">canonical_expression</span> = <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">expr</span>
   <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">canonical_expression</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1127,7 +1198,7 @@ primary meaning</p>
 
           
           <div class="method-source-code" id="longname-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 449</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 553</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">longname</span>
   <span class="ruby-identifier">result</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>
   <span class="ruby-identifier">aliases</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> }.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;, &quot;</span>)
@@ -1148,7 +1219,7 @@ primary meaning</p>
         
         <div class="method-heading">
           <span class="method-name">make_parent_of</span><span
-            class="method-args">(child_ref)</span>
+            class="method-args">(child_ref, move=true)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -1157,15 +1228,41 @@ primary meaning</p>
 
         <div class="method-description">
           
-          
+          <p>Assert a parent-child relationship in the tree, taking care not to
+introduce cycles If &#39;move&#39; is true, we&#39;re unplugging before
+moving within the tree, otherwise copying the ref into a new place.</p>
           
           
 
           
           <div class="method-source-code" id="make_parent_of-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 456</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">child_ref</span>
-  <span class="ruby-identifier">children</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">child_ref</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">children</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">child_ref</span>)
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 562</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">make_parent_of</span> <span class="ruby-identifier">child_ref</span>, <span class="ruby-identifier">move</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">child_ref</span> <span class="ruby-comment"># Synonyms of the same referent =&gt; split off a new referent to establish the child</span>
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:children</span>, <span class="ruby-string">&quot;can&#39;t make them parent and child: they&#39;re the same!&quot;</span>
+    <span class="ruby-keyword">return</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span> = <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-keyword">self</span>).<span class="ruby-identifier">ancestor_path_to</span>(<span class="ruby-identifier">child_ref</span>)
+    <span class="ruby-identifier">report</span> = <span class="ruby-node">&quot;Referent ##{child_ref.id} (#{child_ref.name}) can&#39;t be adopted as a child of ##{id} (#{name}): it&#39;s an ancestor!\n&quot;</span>
+    <span class="ruby-identifier">ellipsis</span> = <span class="ruby-string">&#39;Path:&#39;</span>
+    <span class="ruby-identifier">path</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">report</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;  #{ellipsis} Referent ##{ref.id} (#{ref.name})\n&quot;</span>
+      <span class="ruby-identifier">ellipsis</span> = <span class="ruby-string">&#39;...has child&#39;</span>
+    }
+    <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:ancestor</span>, <span class="ruby-identifier">report</span>
+    <span class="ruby-keyword">return</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">children</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">child_ref</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">move</span>
+      <span class="ruby-identifier">child_ref</span>.<span class="ruby-identifier">parents</span> = [<span class="ruby-keyword">self</span>]
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">child_ref</span>.<span class="ruby-identifier">parents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">children</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">child_ref</span>
+    <span class="ruby-identifier">save</span>
+    <span class="ruby-identifier">child_ref</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1196,8 +1293,8 @@ primary meaning</p>
 
           
           <div class="method-source-code" id="name-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 439</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span>(<span class="ruby-identifier">args</span> = {})
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 543</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span> <span class="ruby-identifier">args</span> = {}
   (<span class="ruby-identifier">tag</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression</span> <span class="ruby-identifier">args</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;**no tag**&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1229,7 +1326,7 @@ primary meaning</p>
 
           
           <div class="method-source-code" id="names-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 444</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 548</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">names</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:name</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -1262,9 +1359,83 @@ primary meaning</p>
 
           
           <div class="method-source-code" id="normalized_name-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 434</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">normalized_name</span>(<span class="ruby-identifier">args</span> = {})
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 538</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">normalized_name</span> <span class="ruby-identifier">args</span> = {}
   (<span class="ruby-identifier">tag</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression</span> <span class="ruby-identifier">args</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">normalized_name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;**no tag**&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-parent_tag_tokens" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parent_tag_tokens</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Virtual attributes for parent, child and related referents. These are
+represented by tags, so getting and setting involves token lookup. Since
+parents and children are both just sets of referents, these v.a.s go
+through a single pair of methods</p>
+          
+          
+
+          
+          <div class="method-source-code" id="parent_tag_tokens-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 224</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_tag_tokens</span>
+  <span class="ruby-identifier">parent_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-parent_tag_tokens-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">parent_tag_tokens=</span><span
+            class="method-args">(tokenlist)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="parent_tag_tokens-3D-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 232</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_tag_tokens=</span>(<span class="ruby-identifier">tokenlist</span>)
+  <span class="ruby-comment"># After collecting tags, scan list to eliminate references to self</span>
+  <span class="ruby-identifier">tokenlist</span> = <span class="ruby-identifier">tokenlist</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_ids</span> = <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokenlist</span>).
+      <span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:parents</span>, <span class="ruby-string">&#39;Can\t be its own parent.&#39;</span>) }.
+      <span class="ruby-identifier">uniq</span>.
+      <span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1295,80 +1466,9 @@ primary meaning</p>
 
           
           <div class="method-source-code" id="parent_tags-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 195</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 228</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_tags</span>
   <span class="ruby-identifier">tags_from_referents</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parents</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-parent_tokens" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">parent_tokens</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Virtual attributes for parent and child referents. These are represented by
-tags, so getting and setting involves token lookup. Since parents and
-children are both just sets of referents, these v.a.s go through a single
-pair of methods</p>
-          
-          
-
-          
-          <div class="method-source-code" id="parent_tokens-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 191</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_tokens</span>
-  <span class="ruby-identifier">parent_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-parent_tokens-3D" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">parent_tokens=</span><span
-            class="method-args">(tokenlist)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="parent_tokens-3D-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 199</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">parent_tokens=</span>(<span class="ruby-identifier">tokenlist</span>)
-  <span class="ruby-comment"># After collecting tags, scan list to eliminate references to self</span>
-  <span class="ruby-identifier">tokenlist</span> = <span class="ruby-identifier">tokenlist</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>)
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parents</span> = <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokenlist</span>).<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:parents</span>, <span class="ruby-string">&#39;Can\t be its own parent.&#39;</span>) }.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1399,7 +1499,7 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="paths_to-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 360</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 442</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">paths_to</span> <span class="ruby-identifier">inText</span> = <span class="ruby-keyword">true</span>, <span class="ruby-identifier">collected</span> = []
   <span class="ruby-identifier">paths</span> = []
   (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_ids</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">collected</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">parent_id</span><span class="ruby-operator">|</span>
@@ -1409,6 +1509,107 @@ pair of methods</p>
   <span class="ruby-identifier">paths</span> = <span class="ruby-identifier">paths</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> [[<span class="ruby-keyword">self</span>]] <span class="ruby-operator">:</span> <span class="ruby-identifier">paths</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">path</span><span class="ruby-operator">|</span> <span class="ruby-identifier">path</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span> }
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">paths</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">inText</span>
   <span class="ruby-identifier">paths</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">path</span><span class="ruby-operator">|</span> <span class="ruby-identifier">path</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">node</span><span class="ruby-operator">|</span> <span class="ruby-identifier">node</span>.<span class="ruby-identifier">name</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;/&#39;</span>) }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-related_tag_tokens" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">related_tag_tokens</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="related_tag_tokens-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 255</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">related_tag_tokens</span>
+  <span class="ruby-identifier">related_tags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:attributes</span>).<span class="ruby-identifier">to_json</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-related_tag_tokens-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">related_tag_tokens=</span><span
+            class="method-args">(tokenlist)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="related_tag_tokens-3D-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 263</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">related_tag_tokens=</span>(<span class="ruby-identifier">tokenlist</span>)
+  <span class="ruby-comment"># After collecting tags, scan list to eliminate references to self</span>
+  <span class="ruby-identifier">tokenlist</span> = <span class="ruby-identifier">tokenlist</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">relateds</span> = <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokenlist</span>).<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span> (<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:related</span>, <span class="ruby-string">&quot;Can&#39;t suggest itself.&quot;</span>) }.<span class="ruby-identifier">uniq</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-related_tags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">related_tags</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="related_tags-source">
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 259</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">related_tags</span>
+  <span class="ruby-identifier">tags_from_referents</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">relateds</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1433,18 +1634,17 @@ pair of methods</p>
 
         <div class="method-description">
           
-          
+          <p>Declare a relationship between two referents</p>
           
           
 
           
           <div class="method-source-code" id="suggests-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 460</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 591</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">suggests</span> <span class="ruby-identifier">target_ref</span>
   <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">id</span>
   <span class="ruby-comment"># author_referents &lt;&lt; target_ref unless author_referents.include?(target_ref)</span>
-  <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">referee_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">id</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">referee_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">exists?</span>
-  <span class="ruby-identifier">x</span>=<span class="ruby-value">2</span>
+  <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">referee</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">suggests?</span>(<span class="ruby-identifier">target_ref</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1475,9 +1675,9 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="suggests-3F-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 467</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 597</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">suggests?</span> <span class="ruby-identifier">target_ref</span>
-  <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">referee_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">type</span>, <span class="ruby-identifier">referee_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">referments</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">referee</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target_ref</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1508,14 +1708,17 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="tag_tokens_to_referents-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 225</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 275</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_tokens_to_referents</span>(<span class="ruby-identifier">tokens</span>, <span class="ruby-identifier">use_existing</span>=<span class="ruby-keyword">true</span>)
-  <span class="ruby-identifier">refs</span> = <span class="ruby-identifier">tokens</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">refs</span> = <span class="ruby-identifier">tokens</span>.<span class="ruby-identifier">inject</span>([]) { <span class="ruby-operator">|</span><span class="ruby-identifier">set</span>, <span class="ruby-identifier">token</span><span class="ruby-operator">|</span>
     <span class="ruby-comment"># We either match the referent to token or create a new one</span>
     <span class="ruby-identifier">token</span>.<span class="ruby-identifier">strip!</span>
     <span class="ruby-identifier">token</span> = <span class="ruby-identifier">token</span>.<span class="ruby-identifier">to_i</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">token</span>.<span class="ruby-identifier">sub!</span>(<span class="ruby-regexp">/^\(.*)\$/</span>, <span class="ruby-string">&#39;\1&#39;</span>)
-    <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">token</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span>
-  }.<span class="ruby-identifier">compact</span> <span class="ruby-comment"># Blow off failed referents</span>
+    <span class="ruby-identifier">ref</span> = <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">token</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span>
+    <span class="ruby-comment"># Ignore failed referents and eliminate redundancies</span>
+    <span class="ruby-identifier">set</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">ref</span> <span class="ruby-keyword">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">ref</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">collected</span><span class="ruby-operator">|</span> <span class="ruby-identifier">collected</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">id</span> }
+    <span class="ruby-identifier">set</span>
+  }
   <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Tokens converted to referents: &#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">refs</span>.<span class="ruby-identifier">inspect</span>
   <span class="ruby-identifier">refs</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1548,9 +1751,9 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="tags_from_referents-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 220</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 270</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tags_from_referents</span>(<span class="ruby-identifier">referents</span>)
-  <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">canonical_expression</span> }
+  <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">map</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:expression</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1581,7 +1784,7 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="typename-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 320</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 402</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typename</span>
   <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typename</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typesym</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1614,7 +1817,7 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="typenum-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 324</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 406</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typenum</span>
   <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typesym</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1647,7 +1850,7 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="typesym-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 316</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 398</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typesym</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">type</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">type</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/Referent/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">to_sym</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1685,9 +1888,36 @@ pair of methods</p>
 
           
           <div class="method-source-code" id="update_attributes-source">
-            <pre><span class="ruby-comment"># File app/models/referent.rb, line 371</span>
+            <pre><span class="ruby-comment"># File app/models/referent.rb, line 453</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update_attributes</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">params</span>)
   <span class="ruby-identifier">actuals</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">first</span>
+
+  <span class="ruby-comment"># We take care of the page_refs list here</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">pras</span> = <span class="ruby-identifier">actuals</span>[<span class="ruby-string">&#39;page_refs_attributes&#39;</span>]
+    <span class="ruby-comment"># Ensure that we have Referments for each PageRef that hasn&#39;t been deleted</span>
+    <span class="ruby-identifier">pras</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span>, <span class="ruby-identifier">values</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">prid</span> = <span class="ruby-identifier">values</span>[<span class="ruby-string">&#39;id&#39;</span>].<span class="ruby-identifier">to_i</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">values</span>[<span class="ruby-string">&#39;_destroy&#39;</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;false&#39;</span>
+        <span class="ruby-comment"># Keep it/add it</span>
+        <span class="ruby-identifier">pr</span> =
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">prid</span>
+          <span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">prid</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">page_refs</span> <span class="ruby-operator">&lt;&lt;</span> (<span class="ruby-identifier">pr</span> = <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">prid</span>)
+          <span class="ruby-identifier">pr</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-comment"># Make sure the type matches</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">kind</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">values</span>[<span class="ruby-string">&#39;kind&#39;</span>]
+          <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">update_attribute</span> <span class="ruby-value">:kind</span>, <span class="ruby-identifier">values</span>[<span class="ruby-string">&#39;kind&#39;</span>]
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">prid</span>)
+        <span class="ruby-comment"># Nuke it</span>
+        <span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">prid</span>).<span class="ruby-identifier">first</span>
+      <span class="ruby-keyword">end</span>
+    }
+    <span class="ruby-identifier">actuals</span>.<span class="ruby-identifier">delete</span> <span class="ruby-string">&#39;page_refs_attributes&#39;</span>
+  <span class="ruby-keyword">end</span>
+
   <span class="ruby-comment"># If the parent id is changing, we need to make sure the tree stays sound</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">actuals</span>[<span class="ruby-value">:parent_id</span>]
     <span class="ruby-comment"># We&#39;re specifying a new parent:</span>
@@ -1735,7 +1965,7 @@ pair of methods</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

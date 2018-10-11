@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -72,13 +73,9 @@
     
     <li ><a href="#method-i-feedback">#feedback</a>
     
-    <li ><a href="#method-i-invitation_accepted_email">#invitation_accepted_email</a>
-    
-    <li ><a href="#method-i-sharing_notice">#sharing_notice</a>
+    <li ><a href="#method-i-newsletter">#newsletter</a>
     
     <li ><a href="#method-i-user_to_user">#user_to_user</a>
-    
-    <li ><a href="#method-i-welcome_email">#welcome_email</a>
     
   </ul>
 </div>
@@ -133,7 +130,7 @@
 
           
           <div class="method-source-code" id="feedback-source">
-            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 7</span>
+            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feedback</span>(<span class="ruby-identifier">feedback</span>)
   <span class="ruby-identifier">recipients</span>  = <span class="ruby-string">&#39;recipepowerfeedback@gmail.com&#39;</span>
   <span class="ruby-identifier">subject</span>     = <span class="ruby-node">&quot;#{feedback.subject} ##{feedback.id}&quot;</span>
@@ -151,11 +148,11 @@
       </div>
 
     
-      <div id="method-i-invitation_accepted_email" class="method-detail ">
+      <div id="method-i-newsletter" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">invitation_accepted_email</span><span
-            class="method-args">(invitee)</span>
+          <span class="method-name">newsletter</span><span
+            class="method-args">(edition, recipient)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -169,57 +166,15 @@
           
 
           
-          <div class="method-source-code" id="invitation_accepted_email-source">
-            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 22</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_accepted_email</span> <span class="ruby-identifier">invitee</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">invited_by</span>
-  <span class="ruby-ivar">@invitee</span> = <span class="ruby-identifier">invitee</span>
-  <span class="ruby-ivar">@profile_url</span> = <span class="ruby-identifier">rp_url</span> <span class="ruby-string">&#39;/users/profile&#39;</span>
-  <span class="ruby-identifier">mail</span> <span class="ruby-identifier">to</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">invited_by</span>.<span class="ruby-identifier">email</span>, <span class="ruby-value">:from</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;support@recipepower.com&#39;</span>, <span class="ruby-value">:subject</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Your invitation was accepted&#39;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-sharing_notice" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">sharing_notice</span><span
-            class="method-args">(notification, opts={})</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Notify the user via email of a recipe share</p>
-          
-          
-
-          
-          <div class="method-source-code" id="sharing_notice-source">
-            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 30</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">sharing_notice</span>(<span class="ruby-identifier">notification</span>, <span class="ruby-identifier">opts</span>={})
-  <span class="ruby-ivar">@notification</span> = <span class="ruby-identifier">notification</span>
-  <span class="ruby-ivar">@recipe</span> = <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">shared</span>
-  <span class="ruby-ivar">@sender</span> = <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">source</span>
-  <span class="ruby-ivar">@recipient</span> = <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">target</span>
-  <span class="ruby-ivar">@recipient</span>.<span class="ruby-identifier">shared</span> = <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">shared</span>
-  <span class="ruby-comment"># Add an attachment for the shared entity&#39;s image, if available</span>
-  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">imgdata</span> = <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">imgdata</span>).<span class="ruby-identifier">present?</span>
-    <span class="ruby-identifier">attachments</span>[<span class="ruby-string">&#39;collectible_image&#39;</span>] = <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">decode64</span>(<span class="ruby-identifier">imgdata</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^data:image\/png;base64,/</span>,<span class="ruby-string">&#39;&#39;</span>))
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">mail</span> <span class="ruby-identifier">to</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@recipient</span>.<span class="ruby-identifier">email</span>,
-    <span class="ruby-identifier">from</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@sender</span>.<span class="ruby-identifier">polite_name</span><span class="ruby-operator">+</span><span class="ruby-node">&quot; on RecipePower &lt;#{@sender.email}&gt;&quot;</span>,
-    <span class="ruby-identifier">subject</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@sender</span>.<span class="ruby-identifier">polite_name</span><span class="ruby-operator">+</span><span class="ruby-string">&quot; has something tasty for you&quot;</span>
+          <div class="method-source-code" id="newsletter-source">
+            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">newsletter</span> <span class="ruby-identifier">edition</span>, <span class="ruby-identifier">recipient</span>
+  <span class="ruby-ivar">@edition</span> = <span class="ruby-identifier">edition</span>
+  <span class="ruby-ivar">@recipient</span> = <span class="ruby-identifier">recipient</span>
+  <span class="ruby-ivar">@markdown</span> = <span class="ruby-constant">Redcarpet</span><span class="ruby-operator">::</span><span class="ruby-constant">Markdown</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">Redcarpet</span><span class="ruby-operator">::</span><span class="ruby-constant">Render</span><span class="ruby-operator">::</span><span class="ruby-constant">HTML</span>
+  <span class="ruby-ivar">@unsubscribe</span> = <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">message_verifier</span>(<span class="ruby-value">:unsubscribe</span>).<span class="ruby-identifier">generate</span> <span class="ruby-ivar">@recipient</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-ivar">@touch_id</span> = <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">message_verifier</span>(<span class="ruby-value">:touch</span>).<span class="ruby-identifier">generate</span> <span class="ruby-ivar">@recipient</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">mail</span> <span class="ruby-value">:to</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">recipient</span>.<span class="ruby-identifier">email</span>, <span class="ruby-value">:from</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;&quot;RecipePower&quot; &lt;recipepowerfeedback@gmail.com&gt;&#39;</span>, <span class="ruby-value">:subject</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Cooking Smarts&quot;</span> <span class="ruby-comment"># edition.banner</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -250,7 +205,7 @@
 
           
           <div class="method-source-code" id="user_to_user-source">
-            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 45</span>
+            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">user_to_user</span>(<span class="ruby-identifier">from</span>, <span class="ruby-identifier">to</span>)
   <span class="ruby-ivar">@sender</span> = <span class="ruby-identifier">from</span>
   <span class="ruby-ivar">@recipient</span> = <span class="ruby-identifier">to</span>
@@ -258,42 +213,6 @@
   <span class="ruby-identifier">mail</span> <span class="ruby-identifier">to</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@recipient</span>.<span class="ruby-identifier">email</span>,
        <span class="ruby-identifier">from</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@sender</span>.<span class="ruby-identifier">polite_name</span><span class="ruby-operator">+</span><span class="ruby-node">&quot; on RecipePower &lt;#{@sender.email}&gt;&quot;</span>,
        <span class="ruby-identifier">subject</span><span class="ruby-operator">:</span> <span class="ruby-identifier">to</span>.<span class="ruby-identifier">mail_subject</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-welcome_email" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">welcome_email</span><span
-            class="method-args">(user)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="welcome_email-source">
-            <pre><span class="ruby-comment"># File app/mailers/rp_mailer.rb, line 15</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">welcome_email</span>(<span class="ruby-identifier">user</span>)
-  <span class="ruby-ivar">@inviter</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">invited_by</span>
-  <span class="ruby-ivar">@invitee</span> = <span class="ruby-identifier">user</span>
-  <span class="ruby-ivar">@login_url</span>  = <span class="ruby-identifier">rp_url</span> <span class="ruby-string">&#39;/login&#39;</span>
-  <span class="ruby-identifier">mail</span> <span class="ruby-value">:to</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">email</span>, <span class="ruby-value">:from</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;support@recipepower.com&#39;</span>, <span class="ruby-value">:subject</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;Welcome to RecipePower&#39;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -313,7 +232,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

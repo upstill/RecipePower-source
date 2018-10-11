@@ -314,8 +314,13 @@ class CollectibleController < ApplicationController
         }
       end
     else # failure (not a valid collectible) => return to new
-      # Since only url errors will show up in the dialog, add them to the base
-      view_context.make_base_errors_except entity, :url
+      # For a form where resource errors might be triggered by unavailable fields, add the errors to :base
+      # Since only url errors will show up in the dialog, add other errors to the base
+      (entity.errors.keys - [:base, :url]).each { |key|
+        entity.errors[key].each { |error|
+          entity.errors.add :base, "#{key} #{error}"
+        }
+      }
       response_service.title = 'Cookmark a ' + entity.class.to_s
       @nav_current = :addcookmark
       @decorator.url = params[response_service.controller_model_name][:url]

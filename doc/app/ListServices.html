@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -88,6 +89,10 @@
     
     <li ><a href="#method-c-visible_lists">::visible_lists</a>
     
+    <li ><a href="#method-i-entities">#entities</a>
+    
+    <li ><a href="#method-i-entity_scope">#entity_scope</a>
+    
     <li ><a href="#method-i-exclude">#exclude</a>
     
     <li ><a href="#method-i-exclude_by">#exclude_by</a>
@@ -102,7 +107,7 @@
     
     <li ><a href="#method-i-pulled_tags">#pulled_tags</a>
     
-    <li ><a href="#method-i-tagging_scope">#tagging_scope</a>
+    <li ><a href="#method-i-tagging_query">#tagging_query</a>
     
   </ul>
 </div>
@@ -219,7 +224,7 @@ of lists</p>
   (<span class="ruby-identifier">ntags</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">otags</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list_tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">assert_tagging</span> <span class="ruby-identifier">list_tag</span>, <span class="ruby-identifier">uid</span> }
   (<span class="ruby-identifier">otags</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">ntags</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">list_tag</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">owned_list</span> = <span class="ruby-identifier">list_tag</span>.<span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>).<span class="ruby-identifier">first</span>
-      <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owned_list</span>).<span class="ruby-identifier">exclude</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">uid</span>
+      <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owned_list</span>).<span class="ruby-identifier">exclude</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>, <span class="ruby-identifier">uid</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">refute_tagging</span> <span class="ruby-identifier">list_tag</span>, <span class="ruby-identifier">uid</span>
     <span class="ruby-keyword">end</span>
@@ -330,13 +335,13 @@ uniquifying the lists</p>
         <span class="ruby-comment"># List tag but no list! Assert the list as owned by the user UNLESS there&#39;s already an invisible list by that name</span>
         (<span class="ruby-identifier">accept_if</span>(<span class="ruby-constant">List</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">name_tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user_tag</span>, <span class="ruby-identifier">owner</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>), <span class="ruby-value">:owned</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">list_scope</span>.<span class="ruby-identifier">exists?</span>)
   } <span class="ruby-operator">+</span>
-  <span class="ruby-comment"># The item may also be included in the list by</span>
-  <span class="ruby-comment"># -- its owner (if they allow it to be seen) =&gt; :friends</span>
-  <span class="ruby-comment"># -- or publicly =&gt; :public</span>
-  (<span class="ruby-identifier">ts</span>.<span class="ruby-identifier">tags</span>(<span class="ruby-value">:List</span>) <span class="ruby-operator">-</span> <span class="ruby-identifier">user_tags</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other_tag</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">accept_if</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">friend_lists_on_tag</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">other_tag</span>, <span class="ruby-identifier">user</span>).<span class="ruby-identifier">first</span>, <span class="ruby-value">:friends</span>) <span class="ruby-operator">||</span>
-        <span class="ruby-identifier">accept_if</span>(<span class="ruby-identifier">other_tag</span>.<span class="ruby-identifier">public_lists</span>.<span class="ruby-identifier">first</span>, <span class="ruby-value">:public</span>) <span class="ruby-comment"># There&#39;s at least one publicly available list using this tag as title</span>
-  }).<span class="ruby-identifier">compact</span>
+      <span class="ruby-comment"># The item may also be included in the list by</span>
+      <span class="ruby-comment"># -- its owner (if they allow it to be seen) =&gt; :friends</span>
+      <span class="ruby-comment"># -- or publicly =&gt; :public</span>
+      (<span class="ruby-identifier">ts</span>.<span class="ruby-identifier">tags</span>(<span class="ruby-value">:List</span>) <span class="ruby-operator">-</span> <span class="ruby-identifier">user_tags</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other_tag</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">accept_if</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">friend_lists_on_tag</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">other_tag</span>, <span class="ruby-identifier">user</span>).<span class="ruby-identifier">first</span>, <span class="ruby-value">:friends</span>) <span class="ruby-operator">||</span>
+            <span class="ruby-identifier">accept_if</span>(<span class="ruby-identifier">other_tag</span>.<span class="ruby-identifier">public_lists</span>.<span class="ruby-identifier">first</span>, <span class="ruby-value">:public</span>) <span class="ruby-comment"># There&#39;s at least one publicly available list using this tag as title</span>
+      }).<span class="ruby-identifier">compact</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -458,7 +463,7 @@ uniquifying the lists</p>
         
         <div class="method-heading">
           <span class="method-name">new</span><span
-            class="method-args">(list)</span>
+            class="method-args">(list_or_decorator)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -474,8 +479,8 @@ uniquifying the lists</p>
           
           <div class="method-source-code" id="new-source">
             <pre><span class="ruby-comment"># File app/services/list_services.rb, line 7</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">list</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">list</span> = <span class="ruby-identifier">list</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">list_or_decorator</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">list</span> = <span class="ruby-identifier">list_or_decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">list_or_decorator</span>.<span class="ruby-identifier">object</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">list_or_decorator</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -506,7 +511,7 @@ uniquifying the lists</p>
 
           
           <div class="method-source-code" id="study_users-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 216</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 208</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">study_users</span>
   <span class="ruby-constant">User</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">user</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">user</span>.<span class="ruby-identifier">collection_tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
@@ -573,6 +578,74 @@ uniquifying the lists</p>
        </header>
 
     
+      <div id="method-i-entities" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">entities</span><span
+            class="method-args">(viewerid=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return an array of the entities in the list, visible to the given viewer</p>
+          
+          
+
+          
+          <div class="method-source-code" id="entities-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 165</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">entities</span> <span class="ruby-identifier">viewerid</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">tagging_query</span>(<span class="ruby-identifier">viewerid</span>).<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:entity</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-entity_scope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">entity_scope</span><span
+            class="method-args">(type, viewer)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a scope on a given type of entity for list members visible by the
+viewer</p>
+          
+          
+
+          
+          <div class="method-source-code" id="entity_scope-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 203</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_scope</span> <span class="ruby-identifier">type</span>, <span class="ruby-identifier">viewer</span>
+  <span class="ruby-comment"># type.constantize.tagged_by list.name_tag, [ list.owner_id, viewer.id ]</span>
+  <span class="ruby-identifier">type</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-value">:taggings</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">list_scope</span> <span class="ruby-ivar">@list</span>, <span class="ruby-identifier">viewer</span>.<span class="ruby-identifier">id</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-exclude" class="method-detail ">
         
         <div class="method-heading">
@@ -592,7 +665,7 @@ uniquifying the lists</p>
 
           
           <div class="method-source-code" id="exclude-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 171</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 176</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">exclude</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_or_id</span>
   <span class="ruby-identifier">uid</span> = (<span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">user_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">id</span>)
   <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">remove</span> <span class="ruby-identifier">entity</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">owner_id</span>
@@ -627,7 +700,7 @@ uniquifying the lists</p>
 
           
           <div class="method-source-code" id="exclude_by-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 178</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 183</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">exclude_by</span> <span class="ruby-identifier">entity_type</span>, <span class="ruby-identifier">entity_id</span>, <span class="ruby-identifier">user_id</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_id</span>)
     <span class="ruby-identifier">exclude</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_id</span>
@@ -710,7 +783,7 @@ tags AND the entity is tagged by the list&#39;s tags</p>
   <span class="ruby-identifier">uid</span> = <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">user_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">user_or_id</span>.<span class="ruby-identifier">id</span>
   <span class="ruby-identifier">ts</span> = <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">entity</span>
   <span class="ruby-comment"># It&#39;s included if the owner or this user has tagged it with the name tag</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag_id</span>, (<span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">:</span> [ <span class="ruby-identifier">uid</span>, <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span> ])
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag_id</span>, (<span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">:</span> [<span class="ruby-identifier">uid</span>, <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>])
   <span class="ruby-comment"># If not directly tagged, it&#39;s included if it&#39;s tagged with any of the list&#39;s tags, BY ANYONE (?)</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">with_pullins</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span>
   <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">pulled_tag_ids</span>
@@ -744,7 +817,7 @@ tags AND the entity is tagged by the list&#39;s tags</p>
 
           
           <div class="method-source-code" id="include_by-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 165</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 170</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">include_by</span> <span class="ruby-identifier">entity_type</span>, <span class="ruby-identifier">entity_id</span>, <span class="ruby-identifier">user_id</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">entity_id</span>)
     <span class="ruby-identifier">include</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">user_id</span>
@@ -779,7 +852,7 @@ tags AND the entity is tagged by the list&#39;s tags</p>
 
           
           <div class="method-source-code" id="pulled_tag_ids-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 189</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 194</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">pulled_tag_ids</span>
   <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span> <span class="ruby-operator">?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag_id</span>) <span class="ruby-operator">:</span> []
 <span class="ruby-keyword">end</span></pre>
@@ -813,7 +886,7 @@ applied by the list owner</p>
 
           
           <div class="method-source-code" id="pulled_tags-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 185</span>
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 190</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">pulled_tags</span>
   <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span> <span class="ruby-operator">?</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>).<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag</span>) <span class="ruby-operator">:</span> []
 <span class="ruby-keyword">end</span></pre>
@@ -827,10 +900,10 @@ applied by the list owner</p>
       </div>
 
     
-      <div id="method-i-tagging_scope" class="method-detail ">
+      <div id="method-i-tagging_query" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">tagging_scope</span><span
+          <span class="method-name">tagging_query</span><span
             class="method-args">(viewerid=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -840,34 +913,15 @@ applied by the list owner</p>
 
         <div class="method-description">
           
-          <p>Return a scope on the <a href="Tagging.html">Tagging</a> table for the
-unfiltered contents of the list</p>
+          
           
           
 
           
-          <div class="method-source-code" id="tagging_scope-source">
-            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 194</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_scope</span> <span class="ruby-identifier">viewerid</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-comment"># We get everything tagged either directly by the list tag, or indirectly via</span>
-  <span class="ruby-comment"># the included tags, EXCEPT for other users&#39; tags using the list&#39;s tag</span>
-  <span class="ruby-identifier">tag_ids</span> = [<span class="ruby-ivar">@list</span>.<span class="ruby-identifier">name_tag_id</span>]
-  <span class="ruby-identifier">tagger_id_or_ids</span> = [<span class="ruby-ivar">@list</span>.<span class="ruby-identifier">owner_id</span>, <span class="ruby-identifier">viewerid</span>].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>
-  <span class="ruby-identifier">whereclause</span> = <span class="ruby-identifier">tagger_id_or_ids</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span>
-      <span class="ruby-node">&quot;(user_id in (#{tagger_id_or_ids.join &#39;,&#39;}))&quot;</span> <span class="ruby-operator">:</span>
-      <span class="ruby-node">&quot;(user_id = #{tagger_id_or_ids = tagger_id_or_ids.first})&quot;</span>
-  <span class="ruby-identifier">whereclause</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; or (tag_id != #{@list.name_tag_id})&quot;</span>
-  <span class="ruby-comment"># If the pullin flag is on, we also include material tagged with the list&#39;s included_tags</span>
-  <span class="ruby-comment"># BY ITS OWNER</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">pullin</span>
-    <span class="ruby-ivar">@list</span>.<span class="ruby-identifier">included_tags</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">it</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">it</span>.<span class="ruby-identifier">id</span>
-      <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">it</span>).<span class="ruby-identifier">similar_ids</span>
-    <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">whereclause</span> = <span class="ruby-node">&quot;(#{whereclause}) and not (entity_type = &#39;List&#39; and entity_id = #{@list.id})&quot;</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">scope</span> = <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">count</span><span class="ruby-operator">&gt;</span><span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_ids</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">first</span>)).<span class="ruby-identifier">where</span> <span class="ruby-identifier">whereclause</span>
-  <span class="ruby-identifier">scope</span>
+          <div class="method-source-code" id="tagging_query-source">
+            <pre><span class="ruby-comment"># File app/services/list_services.rb, line 198</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_query</span> <span class="ruby-identifier">viewerid</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">list_scope</span> <span class="ruby-ivar">@list</span>, <span class="ruby-identifier">viewerid</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -887,7 +941,7 @@ unfiltered contents of the list</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

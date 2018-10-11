@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,7 +69,15 @@
   <ul class="link-list">
   
   
-    <li><a class="include" href="TaggingCache.html">TaggingCache</a>
+    <li><a class="include" href="TaggableSearch.html">TaggableSearch</a>
+  
+  
+  
+    <li><a class="include" href="ModelSearch.html">ModelSearch</a>
+  
+  
+  
+    <li><a class="include" href="CollectibleSearch.html">CollectibleSearch</a>
   
   
   </ul>
@@ -83,9 +92,15 @@
     
     <li ><a href="#method-i-itemscope">#itemscope</a>
     
+    <li ><a href="#method-i-itemscopes">#itemscopes</a>
+    
     <li ><a href="#method-i-list">#list</a>
     
+    <li class="calls-super" ><a href="#method-i-orderingscope">#orderingscope</a>
+    
     <li ><a href="#method-i-stream_id">#stream_id</a>
+    
+    <li ><a href="#method-i-supported_org_options">#supported_org_options</a>
     
   </ul>
 </div>
@@ -115,6 +130,27 @@
     
 
     
+    <section class="attribute-method-details" class="method-section">
+      <header>
+        <h3>Attributes</h3>
+      </header>
+
+      
+      <div id="attribute-i-list_services" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">list_services</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+    </section>
+    
 
     
      <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
@@ -136,17 +172,64 @@
 
         <div class="method-description">
           
-          <p>The itemscope is the initial query for all possible items, subject to
-subqueries via count_tag</p>
+          <p>The itemscope is the initial query for all possible items</p>
           
           
 
           
           <div class="method-source-code" id="itemscope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 923</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1191</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscope</span>
-  <span class="ruby-ivar">@itemscope</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">list</span>).<span class="ruby-identifier">tagging_scope</span> <span class="ruby-ivar">@viewerid</span>
+  <span class="ruby-ivar">@itemscope</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">list_services</span>.<span class="ruby-identifier">tagging_query</span> <span class="ruby-ivar">@viewerid</span>
 <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-itemscopes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">itemscopes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="itemscopes-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1158</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscopes</span>
+    <span class="ruby-comment"># Create a scope for each type of object collected</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-ivar">@itemscopes</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@itemscopes</span>
+<span class="ruby-comment">        NestedBenchmark.measure &quot;Counted ListsShowCache#itemscopes via :pluck&quot; do
+          itemscope.pluck(:entity_type, :entity_id).inject(Hash.new) { |memo, pair|
+            memo[pair.first] = (memo[pair.first] ||= []) &lt;&lt; pair.last
+            memo
+          }.collect { |entity, ids|
+            entity.constantize.where(id: ids)
+          }
+        end
+</span>    <span class="ruby-ivar">@itemscopes</span> =
+    <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-node">&quot;Counted ListsShowCache#itemscopes by entity type and id&quot;</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-identifier">itemscope</span>.<span class="ruby-identifier">group</span>(<span class="ruby-value">:entity_type</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:entity_type</span>).<span class="ruby-identifier">collect</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">type</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">list_services</span>.<span class="ruby-identifier">entity_scope</span> <span class="ruby-identifier">type</span>, <span class="ruby-identifier">viewer</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -176,9 +259,53 @@ subqueries via count_tag</p>
 
           
           <div class="method-source-code" id="list-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 918</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1150</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">list</span>
   <span class="ruby-ivar">@list</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">find</span> <span class="ruby-ivar">@entity_id</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-orderingscope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">orderingscope</span><span
+            class="method-args">(iscope=itemscope)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>TODO: offer option of ordering by list order</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="CollectibleSearch.html#method-i-orderingscope">CollectibleSearch#orderingscope</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="orderingscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1180</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">orderingscope</span> <span class="ruby-identifier">iscope</span>=<span class="ruby-identifier">itemscope</span>
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">org</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:newest</span>
+          <span class="ruby-comment"># Newest in the list</span>
+          [ <span class="ruby-identifier">iscope</span>, <span class="ruby-string">&#39;taggings.created_at&#39;</span> ]
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-keyword">super</span>
+      <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -209,9 +336,50 @@ subqueries via count_tag</p>
 
           
           <div class="method-source-code" id="stream_id-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 927</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">stream_id</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1195</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">stream_id</span> <span class="ruby-comment"># public</span>
   <span class="ruby-node">&quot;list_#{@entity_id}_contents&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-supported_org_options" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">supported_org_options</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="supported_org_options-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1201</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">supported_org_options</span>
+  [ ]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -231,7 +399,7 @@ subqueries via count_tag</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

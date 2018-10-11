@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -70,7 +71,13 @@
 
   <ul class="link-list" role="directory">
     
-    <li class="calls-super" ><a href="#method-i-ordereditemscope">#ordereditemscope</a>
+    <li class="calls-super" ><a href="#method-c-params_needed">::params_needed</a>
+    
+    <li ><a href="#method-i-itemscope">#itemscope</a>
+    
+    <li class="calls-super" ><a href="#method-i-orderingscope">#orderingscope</a>
+    
+    <li ><a href="#method-i-supported_org_options">#supported_org_options</a>
     
   </ul>
 </div>
@@ -100,16 +107,16 @@
     
 
     
-     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+     <section id="public-class-5Buntitled-5D-method-details" class="method-section">
        <header>
-         <h3>Public Instance Methods</h3>
+         <h3>Public Class Methods</h3>
        </header>
 
     
-      <div id="method-i-ordereditemscope" class="method-detail ">
+      <div id="method-c-params_needed" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">ordereditemscope</span><span
+          <span class="method-name">params_needed</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -124,19 +131,143 @@
           
             <div class="method-calls-super">
               Calls superclass method
-              <a href="CollectionCache.html#method-i-ordereditemscope">CollectionCache#ordereditemscope</a>
+              <a href="ResultTyping.html#method-c-params_needed">ResultTyping.params_needed</a>
             </div>
           
 
           
-          <div class="method-source-code" id="ordereditemscope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 825</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">ordereditemscope</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@org</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-ivar">@org</span>.<span class="ruby-identifier">to_sym</span> <span class="ruby-operator">==</span> <span class="ruby-value">:updated</span>)
-    <span class="ruby-identifier">uniqueitemscope</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-value">:feeds</span>).<span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;&quot;feeds&quot;.&quot;last_post_date&quot;&#39;</span> <span class="ruby-operator">+</span> (<span class="ruby-ivar">@sort_direction</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;DESC&#39;</span>))
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">super</span>
+          <div class="method-source-code" id="params_needed-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1030</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">params_needed</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-operator">+</span> [ [<span class="ruby-value">:org</span>, <span class="ruby-value">:posted</span>] ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-itemscope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">itemscope</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="itemscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1043</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscope</span>
+  <span class="ruby-comment"># If we&#39;re looking at the feeds with the latest post, ignore those</span>
+  <span class="ruby-comment"># with no posts, which would otherwise come up first</span>
+  <span class="ruby-identifier">scope</span> = <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">collected_by_user</span> <span class="ruby-ivar">@entity_id</span>, <span class="ruby-ivar">@viewerid</span>
+  <span class="ruby-identifier">org</span> <span class="ruby-operator">==</span> <span class="ruby-value">:posted</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">last_post_date</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">scope</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-orderingscope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">orderingscope</span><span
+            class="method-args">(iscope=itemscope)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="DefaultSearch.html#method-i-orderingscope">DefaultSearch#orderingscope</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="orderingscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1034</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">orderingscope</span> <span class="ruby-identifier">iscope</span>=<span class="ruby-identifier">itemscope</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">org</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:posted</span>
+      [ <span class="ruby-identifier">iscope</span>, <span class="ruby-string">&#39;last_post_date&#39;</span> ]
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">super</span>
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
+     <section id="protected-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Protected Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-supported_org_options" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">supported_org_options</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="supported_org_options-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1052</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">supported_org_options</span>
+  [ <span class="ruby-value">:posted</span>, <span class="ruby-value">:newest</span> ]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -156,7 +287,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

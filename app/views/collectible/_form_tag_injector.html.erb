@@ -1,6 +1,6 @@
 <% @entity = @decorator.object %>
 <%= form_for @entity, :url => polymorphic_path([:tag, @decorator], params.slice(:extractions).merge(:mode => :injector) ), :html => {style: 'width:auto;height:auto'} do |f| %>
-    <%= form_errors_helper f, @entity, false %>
+    <%= form_errors_helper f, @entity %>
 
     <div class="left">
       <div class="pic_picker_field">
@@ -16,7 +16,7 @@
 
     <div class="middle">
       <div class="notifications-panel">
-        <%= flash_notifications_div 'flash_notifications', false %>
+        <%= flash_notifications_div %>
       </div>
       <div class="edit_recipe_field text">
         <%= f.label @decorator.attribute_for(:title), 'Title' -%>

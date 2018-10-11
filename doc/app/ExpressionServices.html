@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -70,7 +71,11 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-change_tag">::change_tag</a>
+    
     <li ><a href="#method-c-child_ids_of_tags">::child_ids_of_tags</a>
+    
+    <li ><a href="#method-c-copy_tag">::copy_tag</a>
     
     <li ><a href="#method-c-expression_ids">::expression_ids</a>
     
@@ -122,11 +127,11 @@
        </header>
 
     
-      <div id="method-c-child_ids_of_tags" class="method-detail ">
+      <div id="method-c-change_tag" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">child_ids_of_tags</span><span
-            class="method-args">(tag_ids)</span>
+          <span class="method-name">change_tag</span><span
+            class="method-args">(from_id, to_id)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -135,18 +140,95 @@
 
         <div class="method-description">
           
-          <p>Return all the semantic children of the tag(s) as an array of arrays</p>
+          <p>Transfer the expressions of a tag to another by revising their tag_id</p>
+          
+          
+
+          
+          <div class="method-source-code" id="change_tag-source">
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 7</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">change_tag</span> <span class="ruby-identifier">from_id</span>, <span class="ruby-identifier">to_id</span>
+  <span class="ruby-identifier">extant_refids</span> = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">to_id</span>).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:referent_id</span>
+  <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">from_id</span>).<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">extant_refids</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">update_attribute</span> <span class="ruby-value">:tag_id</span>, <span class="ruby-identifier">to_id</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-child_ids_of_tags" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">child_ids_of_tags</span><span
+            class="method-args">(tag_ids, unique=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return all the semantic children of the tag(s) as an array of arrays
+&#39;unique&#39; stipulates that there should only be one expression–one
+tag–per referent</p>
           
           
 
           
           <div class="method-source-code" id="child_ids_of_tags-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 29</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">child_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>)
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">child_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>)
   <span class="ruby-comment"># Get all the referents of all the tags</span>
   <span class="ruby-identifier">refids</span> = <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>
   <span class="ruby-identifier">child_refids</span> = <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">direct_child_ids</span> <span class="ruby-identifier">refids</span>
-  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-identifier">child_refids</span>
+  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-identifier">child_refids</span>, <span class="ruby-identifier">unique</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-copy_tag" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">copy_tag</span><span
+            class="method-args">(from_id, to_id)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Duplicate the expressions of a tag by fetching all of its expressions and
+assigning copies to the other</p>
+          
+          
+
+          
+          <div class="method-source-code" id="copy_tag-source">
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">copy_tag</span> <span class="ruby-identifier">from_id</span>, <span class="ruby-identifier">to_id</span>
+  <span class="ruby-identifier">extant_refids</span> = <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">to_id</span>).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:referent_id</span>
+  <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">from_id</span>).<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">extant_refids</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">new</span> = <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">dup</span>
+    <span class="ruby-identifier">new</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">to_id</span>
+    <span class="ruby-identifier">new</span>.<span class="ruby-identifier">save</span>
+  }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -162,7 +244,7 @@
         
         <div class="method-heading">
           <span class="method-name">expression_ids</span><span
-            class="method-args">(ref_ids)</span>
+            class="method-args">(ref_ids, unique=false)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -177,9 +259,11 @@
 
           
           <div class="method-source-code" id="expression_ids-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 11</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression_ids</span>(<span class="ruby-identifier">ref_ids</span>)
-  <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:tag_id</span>
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 29</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-identifier">ref_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">unique</span> <span class="ruby-operator">?</span>
+      <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:tag_id</span>) <span class="ruby-operator">:</span>
+      <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:tag_id</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -195,7 +279,7 @@
         
         <div class="method-heading">
           <span class="method-name">expression_tags_from_ids</span><span
-            class="method-args">(ref_ids)</span>
+            class="method-args">(ref_ids, unique=false)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -210,9 +294,11 @@
 
           
           <div class="method-source-code" id="expression_tags_from_ids-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 15</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression_tags_from_ids</span>(<span class="ruby-identifier">ref_ids</span>)
-  <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag</span>)
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 35</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">expression_tags_from_ids</span> <span class="ruby-identifier">ref_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">unique</span> <span class="ruby-operator">?</span>
+      <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:tag_id</span>)) <span class="ruby-operator">:</span>
+      <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">referent_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_ids</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:tag</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -243,7 +329,7 @@
 
           
           <div class="method-source-code" id="meaning_ids-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 7</span>
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 25</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">meaning_ids</span>(<span class="ruby-identifier">tag_ids</span>)
   <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:referent_id</span>
 <span class="ruby-keyword">end</span></pre>
@@ -294,7 +380,7 @@
         
         <div class="method-heading">
           <span class="method-name">parent_ids_of_tags</span><span
-            class="method-args">(tag_ids)</span>
+            class="method-args">(tag_ids, unique=false)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -309,10 +395,10 @@
 
           
           <div class="method-source-code" id="parent_ids_of_tags-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 37</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>)
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 61</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>)
   <span class="ruby-comment"># Get all the referents of all the tags</span>
-  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">direct_parent_ids</span>(<span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>)
+  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">direct_parent_ids</span>(<span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>), <span class="ruby-identifier">unique</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -328,7 +414,7 @@
         
         <div class="method-heading">
           <span class="method-name">parent_tags_of_tags</span><span
-            class="method-args">(tag_ids)</span>
+            class="method-args">(tag_ids, unique=false)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -343,10 +429,10 @@
 
           
           <div class="method-source-code" id="parent_tags_of_tags-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 43</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_tags_of_tags</span>(<span class="ruby-identifier">tag_ids</span>)
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">parent_tags_of_tags</span>(<span class="ruby-identifier">tag_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>)
   <span class="ruby-comment"># Get all the referents of all the tags</span>
-  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_tags_from_ids</span> <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">direct_parent_ids</span>(<span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>)
+  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_tags_from_ids</span> <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">direct_parent_ids</span>(<span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>), <span class="ruby-identifier">unique</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -377,7 +463,7 @@
 
           
           <div class="method-source-code" id="sibling_ids_of_tags-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 49</span>
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 73</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">sibling_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>)
   <span class="ruby-comment"># Get all the referents of all the tags</span>
   <span class="ruby-identifier">refids</span> = <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>
@@ -399,7 +485,7 @@
         
         <div class="method-heading">
           <span class="method-name">synonym_ids_of_tags</span><span
-            class="method-args">(tag_ids)</span>
+            class="method-args">(tag_ids, unique=false)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -415,12 +501,13 @@ already in the set</p>
 
           
           <div class="method-source-code" id="synonym_ids_of_tags-source">
-            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 21</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">synonym_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>)
+            <pre><span class="ruby-comment"># File app/services/expression_services.rb, line 43</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">synonym_ids_of_tags</span>(<span class="ruby-identifier">tag_ids</span>, <span class="ruby-identifier">unique</span>=<span class="ruby-keyword">false</span>)
   <span class="ruby-comment"># Get all the referents of all the tags</span>
   <span class="ruby-identifier">refids</span> = <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">meaning_ids</span> <span class="ruby-identifier">tag_ids</span>
   <span class="ruby-comment"># Return all the tags referred to by those</span>
-  <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-identifier">refids</span>
+  <span class="ruby-identifier">result</span> = <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">expression_ids</span> <span class="ruby-identifier">refids</span>
+  <span class="ruby-identifier">unique</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">result</span> <span class="ruby-operator">-</span> ((<span class="ruby-identifier">tag_ids</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> [<span class="ruby-identifier">tag_ids</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">result</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -440,7 +527,7 @@ already in the set</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

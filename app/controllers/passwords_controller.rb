@@ -13,8 +13,6 @@ class PasswordsController < Devise::PasswordsController
   
   # GET /resource/password/new
   def new
-    # session[:on_tour] = true
-    fh = view_context.flash_hash
     super
     resource.login = params[:user][:login] if params[:user]
     smartrender
@@ -56,7 +54,7 @@ class PasswordsController < Devise::PasswordsController
         format.html {
           redirect_to new_user_password_path(user: { login: params[:user][:login] })
         }
-        format.json { render 'alerts/popup', locals: { method: :push, alert_hdr: "HOW'S THAT AGAIN?" } }
+        format.json { render :errors }
       end
     end
   end

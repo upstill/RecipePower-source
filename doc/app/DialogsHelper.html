@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -63,11 +64,21 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-i-choice_alert">#choice_alert</a>
+    
     <li ><a href="#method-i-dialogFooter">#dialogFooter</a>
     
     <li ><a href="#method-i-dialogHeader">#dialogHeader</a>
     
+    <li ><a href="#method-i-dialog_answer_button">#dialog_answer_button</a>
+    
     <li ><a href="#method-i-dialog_cancel_button">#dialog_cancel_button</a>
+    
+    <li ><a href="#method-i-dialog_close_button">#dialog_close_button</a>
+    
+    <li ><a href="#method-i-dialog_pane">#dialog_pane</a>
+    
+    <li ><a href="#method-i-dialog_pane_buttons">#dialog_pane_buttons</a>
     
     <li ><a href="#method-i-dialog_submit_button">#dialog_submit_button</a>
     
@@ -82,6 +93,8 @@
     <li ><a href="#method-i-modal_footer">#modal_footer</a>
     
     <li ><a href="#method-i-modal_header">#modal_header</a>
+    
+    <li ><a href="#method-i-pane_dialog">#pane_dialog</a>
     
     <li ><a href="#method-i-simple_modal">#simple_modal</a>
     
@@ -121,6 +134,56 @@
        </header>
 
     
+      <div id="method-i-choice_alert" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">choice_alert</span><span
+            class="method-args">(title, style, options={}) { |f| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Construct a dialog that offers the user a choice of actions. Each choice
+will be expressed as a button with a label that will be passed back to the
+controller under :button_name title: the header string in the dialog style:
+the style options:</p>
+
+<pre>:entity: either a string for a path, or an entity which will be hit with a PATCH directive that handles the
+          patch in accordance with the button name
+:choices: an array of strings, or string/button style pairs, for the buttons. The possible styles
+          are according to Bootstrap: https://www.w3schools.com/bootstrap/bootstrap_buttons.asp
+:prompt: the question being posed to the user</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="choice_alert-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 62</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">choice_alert</span> <span class="ruby-identifier">title</span>, <span class="ruby-identifier">style</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">styles</span> = <span class="ruby-node">%w{ success primary }</span>
+  <span class="ruby-identifier">button_options</span> = (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:choices</span>) <span class="ruby-operator">||</span> []).<span class="ruby-identifier">reverse</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">choice</span><span class="ruby-operator">|</span> <span class="ruby-identifier">choice</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">choice</span> <span class="ruby-operator">:</span> [ <span class="ruby-identifier">choice</span>, (<span class="ruby-identifier">styles</span>.<span class="ruby-identifier">pop</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;default&#39;</span>)]}
+  <span class="ruby-identifier">prompt</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:prompt</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
+  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:entity</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] =
+      <span class="ruby-identifier">render</span> <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;application/alert_body&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">prompt</span><span class="ruby-operator">:</span> <span class="ruby-identifier">prompt</span>, <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">button_options</span><span class="ruby-operator">:</span> <span class="ruby-identifier">button_options</span> } <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">yield</span> <span class="ruby-identifier">f</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">modal_dialog</span> <span class="ruby-identifier">style</span>, <span class="ruby-identifier">title</span>, <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-dialogFooter" class="method-detail ">
         
         <div class="method-heading">
@@ -140,7 +203,7 @@
 
           
           <div class="method-source-code" id="dialogFooter-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 127</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 211</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dialogFooter</span>()
   <span class="ruby-string">&quot;&lt;/div&gt;&lt;br class=&#39;clear&#39;&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
 <span class="ruby-keyword">end</span></pre>
@@ -179,7 +242,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="dialogHeader-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 109</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 193</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dialogHeader</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={})
   <span class="ruby-identifier">classes</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;dialogHeader for #{globstring({dialog: which, format: response_service.format_class, ttl: ttl})}&quot;</span>
@@ -196,6 +259,52 @@ Currently handled this way (e.g., symbols that have been supported)</p>
           )
   <span class="ruby-identifier">hdr</span> <span class="ruby-operator">&lt;&lt;=</span> (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">flash_all</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:noflash</span>]
   <span class="ruby-identifier">hdr</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_answer_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_answer_button</span><span
+            class="method-args">(label = nil, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_answer_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 240</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_answer_button</span> <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">options</span>, <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">bootstrap_button_options</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(
+                                         <span class="ruby-identifier">button_style</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:button_style</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;success&#39;</span>),
+                                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} #{options[:style] || &#39;form-button&#39;}&quot;</span>
+                                     )
+  <span class="ruby-comment"># submit_tag label, name: label, data: { name: label }</span>
+  <span class="ruby-identifier">tag</span> <span class="ruby-value">:input</span>,
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} dialog-submit-button&quot;</span>,
+      <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;commit&#39;</span>,
+      <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;submit&#39;</span>,
+      <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span><span class="ruby-operator">||</span><span class="ruby-string">&#39;Save&#39;</span>,
+      <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:method</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;post&#39;</span> }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -226,7 +335,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="dialog_cancel_button-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 156</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 264</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_cancel_button</span> <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
     <span class="ruby-identifier">options</span>, <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label</span>, <span class="ruby-keyword">nil</span>
@@ -241,6 +350,135 @@ Currently handled this way (e.g., symbols that have been supported)</p>
       <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;commit&#39;</span>,
       <span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;submit&#39;</span>,
       <span class="ruby-identifier">value</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span><span class="ruby-operator">||</span><span class="ruby-string">&#39;Cancel&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_close_button" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_close_button</span><span
+            class="method-args">(do_cancel = true, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Present an &#39;X&#39; close button at the top right of a dialog</p>
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_close_button-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 258</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_close_button</span> <span class="ruby-identifier">do_cancel</span> = <span class="ruby-keyword">true</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:button</span>,
+              <span class="ruby-string">&#39;x&#39;</span>,
+              <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{options[:class]} close dialog-x-box #{&#39;dialog-cancel-button&#39; if do_cancel}&quot;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_pane" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_pane</span><span
+            class="method-args">(pane_spec, inner_col=true, form_params={}, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_pane-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 170</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_pane</span>(<span class="ruby-identifier">pane_spec</span>, <span class="ruby-identifier">inner_col</span>=<span class="ruby-keyword">true</span>, <span class="ruby-identifier">form_params</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">inner_col</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">inner_col</span>, <span class="ruby-identifier">form_params</span> = <span class="ruby-keyword">true</span>, <span class="ruby-identifier">inner_col</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">render</span>(<span class="ruby-string">&#39;form_content&#39;</span>, <span class="ruby-identifier">form_params</span>)
+  <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                         <span class="ruby-identifier">contents</span>,
+                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;col-md-12&#39;</span>
+  ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">inner_col</span>
+  <span class="ruby-identifier">name</span> = <span class="ruby-identifier">pane_spec</span>[<span class="ruby-value">:css_class</span>]
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+              <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;row&#39;</span>),
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{name} pane&quot;</span>,
+              <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{name}-pane&quot;</span>
+  ).<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_pane_buttons" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_pane_buttons</span><span
+            class="method-args">(decorator)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Declare the buttons for switching amongst panes in the dialog</p>
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_pane_buttons-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 151</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_pane_buttons</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">input</span> = <span class="ruby-string">&#39;&lt;input type=&quot;radio&quot; name=&quot;options&quot; autocomplete=&quot;off&quot; checked &#39;</span>
+  <span class="ruby-identifier">active</span> = <span class="ruby-string">&#39;active&#39;</span> <span class="ruby-comment"># Marks the input</span>
+  <span class="ruby-identifier">btns</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">dialog_pane_list</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">spec</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">label</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:label</span>,
+                          (<span class="ruby-identifier">input</span> <span class="ruby-operator">+</span> <span class="ruby-node">&quot;data-pane=&#39;#{spec[:css_class]}&#39;&gt; &quot;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">spec</span>[<span class="ruby-value">:label</span>]).<span class="ruby-identifier">html_safe</span>,
+                          <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;btn btn-primary &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">active</span>
+    <span class="ruby-identifier">active</span> = <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-identifier">input</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-string">&#39;checked&#39;</span>, <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-identifier">label</span>
+  }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                <span class="ruby-identifier">safe_join</span>(<span class="ruby-identifier">btns</span>),
+                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;btn-group&#39;</span>,
+                <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;paneButtons&#39;</span>,
+                <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">toggle</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;buttons&#39;</span>},
+                <span class="ruby-identifier">role</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;group&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">btns</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -271,7 +509,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="dialog_submit_button-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 140</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 224</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_submit_button</span> <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
     <span class="ruby-identifier">options</span>, <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label</span>, <span class="ruby-keyword">nil</span>
@@ -316,7 +554,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="injector_cancel_button-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 131</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 215</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">injector_cancel_button</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">xlink</span> = <span class="ruby-identifier">link_to</span> <span class="ruby-string">&#39;&amp;nbsp;X&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span>,
                   <span class="ruby-string">&#39;#&#39;</span>,
@@ -368,7 +606,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
                   <span class="ruby-identifier">image_tag</span>(<span class="ruby-identifier">rp_url</span>(<span class="ruby-identifier">image_path</span> <span class="ruby-string">&#39;RP-logo-small-HC.png&#39;</span> ), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;small_logo&#39;</span>, <span class="ruby-value">:alt</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RecipePower&#39;</span>),
                   <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;small_logo&#39;</span>
   <span class="ruby-identifier">body_content</span> = <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
-  <span class="ruby-identifier">alert</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:noflash</span>] <span class="ruby-operator">?</span> <span class="ruby-string">&#39;&#39;</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>).<span class="ruby-identifier">html_safe</span><span class="ruby-operator">+</span><span class="ruby-identifier">flash_all</span>(<span class="ruby-keyword">false</span>))
+  <span class="ruby-identifier">alert</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:noflash</span>] <span class="ruby-operator">?</span> <span class="ruby-string">&#39;&#39;</span> <span class="ruby-operator">:</span> (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>).<span class="ruby-identifier">html_safe</span><span class="ruby-operator">+</span><span class="ruby-identifier">flash_all</span>)
 
   <span class="ruby-identifier">content</span> = <span class="ruby-identifier">injector_cancel_button</span>(<span class="ruby-string">&#39;X&#39;</span>) <span class="ruby-operator">+</span>
       <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
@@ -420,7 +658,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="modal_body-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 87</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 121</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_body</span> <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
   <span class="ruby-identifier">contents</span> = <span class="ruby-string">&#39;&#39;</span>
   <span class="ruby-identifier">contents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">flash_notifications_div</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:noflash</span>)
@@ -454,32 +692,42 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
         <div class="method-description">
           
-          
+          <p>Present a modal dialog which: CSS class for dialog, including color scheme,
+one of &#39;green&#39;, &#39;salmon&#39;, &#39;purple&#39;, &#39;blue&#39;,
+&#39;list-dialog&#39;, &#39;feed-dialog&#39; ttl: the title to be displayed
+in the header block: declares the contents options:</p>
+
+<pre>dialog_class:
+header_contents:
+requires: JS modules this dialog requires
+body_contents: (passed to modal_body) declares body directly, obviating call to &amp;block
+prompt: (passed to modal_body)
+noflash: (passed to modal_body)
+body_class: (passed to modal_body)</pre>
           
           
 
           
           <div class="method-source-code" id="modal_dialog-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 52</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 86</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_dialog</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">ttl</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">ttl</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
     <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">ttl</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">dialog_class</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:dialog_class</span>]
-  <span class="ruby-identifier">header</span> = <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>
-  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
+  <span class="ruby-identifier">header</span> = <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">header_contents</span><span class="ruby-operator">:</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:header_contents</span>)
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>).<span class="ruby-identifier">if_present</span>
   <span class="ruby-identifier">body</span> = <span class="ruby-identifier">modal_body</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:prompt</span>, <span class="ruby-value">:body_contents</span>, <span class="ruby-value">:noflash</span>, <span class="ruby-value">:body_class</span>)
   <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] =
-      [<span class="ruby-string">&#39;dialog&#39;</span>,
+      [<span class="ruby-string">&#39;dialog hide&#39;</span>,
        <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_s</span>,
        <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">format_class</span>,
-       (<span class="ruby-string">&#39;hide&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:show</span>]),
-       (<span class="ruby-string">&#39;modal-pending fade&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:show</span>]),
+       (<span class="ruby-string">&#39;modal-pending fade&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span>),
        <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>]
       ].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; &#39;</span>)
   <span class="ruby-comment"># The :requires option specifies JS modules that this dialog uses</span>
   <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] = {<span class="ruby-value">:&#39;dialog-requires&#39;</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:requires</span>]} <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:requires</span>]
-  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice!</span> <span class="ruby-value">:show</span>, <span class="ruby-value">:noflash</span>, <span class="ruby-value">:body_contents</span>, <span class="ruby-value">:body_class</span>, <span class="ruby-value">:requires</span>, <span class="ruby-value">:dialog_class</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice!</span> <span class="ruby-value">:noflash</span>, <span class="ruby-value">:body_contents</span>, <span class="ruby-value">:body_class</span>, <span class="ruby-value">:requires</span>, <span class="ruby-value">:dialog_class</span>
   <span class="ruby-identifier">options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">ttl</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ttl</span>
   <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-comment"># Outer block: dialog</span>
               <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-comment"># modal-dialog</span>
@@ -516,7 +764,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="modal_footer-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 98</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 132</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_footer</span>(<span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">ft</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:body_contents</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">with_output_buffer</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">ft</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;modal-footer row #{options[:class]}&quot;</span>
@@ -535,7 +783,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
         
         <div class="method-heading">
           <span class="method-name">modal_header</span><span
-            class="method-args">(ttl)</span>
+            class="method-args">(ttl, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -550,13 +798,56 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
           
           <div class="method-source-code" id="modal_header-source">
-            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 79</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 112</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">modal_header</span> <span class="ruby-identifier">ttl</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:header_contents</span>] <span class="ruby-operator">||</span>
+      (<span class="ruby-identifier">ttl</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">ttl</span>)) <span class="ruby-operator">||</span>
+      <span class="ruby-string">&#39;&#39;</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span> <span class="ruby-operator">?</span>
       <span class="ruby-identifier">injector_cancel_button</span>(<span class="ruby-string">&#39;X&#39;</span>) <span class="ruby-operator">:</span>
-      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
-                  <span class="ruby-identifier">ttl</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h3</span>, <span class="ruby-identifier">ttl</span>) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>,
-                  <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-header&#39;</span>)
+      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-header&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pane_dialog" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pane_dialog</span><span
+            class="method-args">(decorator, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Produce a modal dialog divided into panes according to the decorator, as
+provided by the <a href="DialogPanes.html">DialogPanes</a> module</p>
+          
+          
+
+          
+          <div class="method-source-code" id="pane_dialog-source">
+            <pre><span class="ruby-comment"># File app/helpers/dialogs_helper.rb, line 138</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pane_dialog</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">colorscheme</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:colorscheme</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;green&#39;</span>
+  <span class="ruby-identifier">bc</span> = <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">flash_notifications_div</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifications-panel&#39;</span>)<span class="ruby-operator">+</span>
+      <span class="ruby-identifier">render</span>(<span class="ruby-string">&#39;form&#39;</span>, <span class="ruby-identifier">decorator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">in_panes</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>)
+
+  <span class="ruby-identifier">modal_dialog</span> <span class="ruby-node">&quot;pane_runner #{options[:dialog_class]} new-style #{colorscheme}&quot;</span>,
+               <span class="ruby-node">&quot;Edit #{decorator.object.class}&quot;</span>,
+               <span class="ruby-identifier">header_contents</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dialog_pane_buttons</span>(<span class="ruby-identifier">decorator</span>),
+               <span class="ruby-identifier">dialog_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal-lg&#39;</span>,
+               <span class="ruby-identifier">body_contents</span><span class="ruby-operator">:</span> <span class="ruby-identifier">bc</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -615,7 +906,7 @@ Currently handled this way (e.g., symbols that have been supported)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

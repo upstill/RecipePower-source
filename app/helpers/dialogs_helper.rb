@@ -15,7 +15,7 @@ module DialogsHelper
                     image_tag(rp_url(image_path 'RP-logo-small-HC.png' ), class: 'small_logo', :alt => 'RecipePower'),
                     class: 'small_logo'
     body_content = with_output_buffer(&block)
-    alert = options[:noflash] ? '' : (content_tag(:div, '', class: 'notifications-panel').html_safe+flash_all(false))
+    alert = options[:noflash] ? '' : (content_tag(:div, '', class: 'notifications-panel').html_safe+flash_all)
 
     content = injector_cancel_button('X') +
         content_tag(:div,

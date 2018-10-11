@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,6 +69,14 @@
   <ul class="link-list">
   
   
+    <li><a class="include" href="Collectible.html">Collectible</a>
+  
+  
+  
+    <li><a class="include" href="Referrable.html">Referrable</a>
+  
+  
+  
     <li><a class="include" href="Backgroundable.html">Backgroundable</a>
   
   
@@ -81,6 +90,8 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-c-build_by_url">::build_by_url</a>
+    
     <li ><a href="#method-c-fetch">::fetch</a>
     
     <li ><a href="#method-c-find_by_url">::find_by_url</a>
@@ -89,11 +100,23 @@
     
     <li ><a href="#method-c-strscopes">::strscopes</a>
     
-    <li ><a href="#method-c-types">::types</a>
-    
     <li ><a href="#method-c-url_path_query">::url_path_query</a>
     
     <li ><a href="#method-c-url_query">::url_query</a>
+    
+    <li ><a href="#method-i-answers_to-3F">#answers_to?</a>
+    
+    <li ><a href="#method-i-assert_referent">#assert_referent</a>
+    
+    <li class="calls-super" ><a href="#method-i-bkg_land">#bkg_land</a>
+    
+    <li class="calls-super" ><a href="#method-i-bkg_launch">#bkg_launch</a>
+    
+    <li ><a href="#method-i-host">#host</a>
+    
+    <li ><a href="#method-i-kind_as_fixnum">#kind_as_fixnum</a>
+    
+    <li ><a href="#method-i-page_ref">#page_ref</a>
     
     <li ><a href="#method-i-perform">#perform</a>
     
@@ -141,6 +164,19 @@ extracts a canonical URL, many URLs could lead to that single referent.</p>
       </header>
 
       
+      <div id="attribute-i-entity" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">entity</span><span
+            class="attribute-access-type">[RW]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
       <div id="attribute-i-extant_pr" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">extant_pr</span><span
@@ -162,6 +198,55 @@ extracts a canonical URL, many URLs could lead to that single referent.</p>
        <header>
          <h3>Public Class Methods</h3>
        </header>
+
+    
+      <div id="method-c-build_by_url" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">build_by_url</span><span
+            class="method-args">(url)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Make a new <a href="PageRef.html">PageRef</a> (poss. of some subclass),
+carefully avoiding any extant URL</p>
+          
+          
+
+          
+          <div class="method-source-code" id="build_by_url-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 296</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">build_by_url</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-identifier">mp</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">indexing_url</span>(<span class="ruby-identifier">url</span>)
+  <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">sync</span>
+  <span class="ruby-comment"># The sync process follows redirects, accumulating aliases along the way.</span>
+  <span class="ruby-comment"># It may turn up a URL used by another object, in which case we return that instead</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">mp</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">extant_pr</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">extant</span> = <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">extant_pr</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">mp</span>.<span class="ruby-identifier">url</span>) <span class="ruby-comment"># Check for duplicate URL</span>
+      <span class="ruby-comment"># Found =&gt; fold the extracted page data into the existing page</span>
+      <span class="ruby-identifier">extant</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">|=</span> <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">-</span> [<span class="ruby-identifier">extant</span>.<span class="ruby-identifier">url</span>]
+      <span class="ruby-identifier">mp</span> = <span class="ruby-identifier">extant</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Ensure that we can always get back to this record via the indexing url</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">mp</span>.<span class="ruby-identifier">url</span> <span class="ruby-operator">!=</span> (<span class="ruby-identifier">iu</span> = <span class="ruby-identifier">indexing_url</span> <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">mp</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">iu</span>)
+    <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">iu</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">mp</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-c-fetch" class="method-detail ">
@@ -186,21 +271,9 @@ the returned record may not have the same url as the request</p>
 
           
           <div class="method-source-code" id="fetch-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 187</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 291</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">url</span>
-  <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-node">/\#[^#]*$/</span>, <span class="ruby-string">&#39;&#39;</span> <span class="ruby-comment"># Elide the target for purposes of finding</span>
-  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">mp</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">url</span>)
-    <span class="ruby-identifier">mp</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
-    <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">sync</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">mp</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">extant_pr</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">extant</span> = <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">extant_pr</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">mp</span>.<span class="ruby-identifier">url</span>) <span class="ruby-comment"># Check for duplicate URL</span>
-        <span class="ruby-comment"># Found =&gt; fold the extracted page data into the existing page</span>
-        <span class="ruby-identifier">extant</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">|=</span> <span class="ruby-identifier">mp</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">-</span> [<span class="ruby-identifier">extant</span>.<span class="ruby-identifier">url</span>]
-        <span class="ruby-identifier">mp</span> = <span class="ruby-identifier">extant</span>
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">mp</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">url</span>) <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">build_by_url</span>(<span class="ruby-identifier">url</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -226,14 +299,17 @@ the returned record may not have the same url as the request</p>
         <div class="method-description">
           
           <p>Lookup a <a href="PageRef.html">PageRef</a>. We undergo two queries, on the
-theory that a direct lookup is faster</p>
+theory that</p>
+
+<pre>a direct lookup is faster if the search url is likely to be found in the url attribute</pre>
           
           
 
           
           <div class="method-source-code" id="find_by_url-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 177</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 280</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">single_query</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">indexing_url</span>(<span class="ruby-identifier">url</span>)
   <span class="ruby-identifier">single_query</span> <span class="ruby-operator">?</span>
       <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">url_query</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">:</span>
       (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:aliases</span>].<span class="ruby-identifier">overlap</span> [<span class="ruby-identifier">url</span>]))
@@ -267,7 +343,7 @@ theory that a direct lookup is faster</p>
 
           
           <div class="method-source-code" id="mercury_attributes-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 94</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">mercury_attributes</span>
   <span class="ruby-identifier">@@mercury_attributes</span> <span class="ruby-operator">+</span> [ <span class="ruby-value">:extraneity</span> ]
 <span class="ruby-keyword">end</span></pre>
@@ -300,45 +376,12 @@ theory that a direct lookup is faster</p>
 
           
           <div class="method-source-code" id="strscopes-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 204</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 316</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
-  <span class="ruby-identifier">ar</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:domain</span>].<span class="ruby-identifier">matches</span> <span class="ruby-node">&quot;%#{matcher}%&quot;</span>
+  <span class="ruby-identifier">ar</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:domain</span>].<span class="ruby-identifier">matches</span> <span class="ruby-identifier">matcher</span>
   [
       (<span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">ar</span>)
   ]
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-c-types" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">types</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="types-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 40</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">types</span>
-  <span class="ruby-identifier">@@prtypes</span> <span class="ruby-operator">||=</span> <span class="ruby-node">%w{ recipe definition article newsitem tip video homepage product offering event }</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -370,8 +413,8 @@ url path</p>
 
           
           <div class="method-source-code" id="url_path_query-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 170</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">url_path_query</span>(<span class="ruby-identifier">urlpath</span>)
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 272</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">url_path_query</span> <span class="ruby-identifier">urlpath</span>
   <span class="ruby-identifier">urls</span> = [ <span class="ruby-node">&quot;http://#{urlpath}%&quot;</span>, <span class="ruby-node">&quot;https://#{urlpath}%&quot;</span> ]
   <span class="ruby-identifier">url_node</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:url</span>]
   <span class="ruby-identifier">url_query</span> = <span class="ruby-identifier">url_node</span>.<span class="ruby-identifier">matches</span>(<span class="ruby-node">&quot;http://#{urlpath}%&quot;</span>).<span class="ruby-identifier">or</span> <span class="ruby-identifier">url_node</span>.<span class="ruby-identifier">matches</span>(<span class="ruby-node">&quot;https://#{urlpath}%&quot;</span>)
@@ -406,14 +449,16 @@ url</p>
 
           
           <div class="method-source-code" id="url_query-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 159</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 259</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">url_query</span> <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">url</span> = <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span> <span class="ruby-node">/\#[^#]*$/</span>, <span class="ruby-string">&#39;&#39;</span> <span class="ruby-comment"># Elide the target for purposes of finding</span>
+  <span class="ruby-identifier">urlpair</span> = [ <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^http:/</span>, <span class="ruby-string">&#39;https:&#39;</span>), <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^https:/</span>, <span class="ruby-string">&#39;http:&#39;</span>) ]
   <span class="ruby-identifier">url_node</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:url</span>]
+  <span class="ruby-identifier">url_query</span> = <span class="ruby-identifier">url_node</span>.<span class="ruby-identifier">eq</span>(<span class="ruby-identifier">urlpair</span>.<span class="ruby-identifier">first</span>).<span class="ruby-identifier">or</span> <span class="ruby-identifier">url_node</span>.<span class="ruby-identifier">eq</span>(<span class="ruby-identifier">urlpair</span>.<span class="ruby-identifier">last</span>)
+
   <span class="ruby-identifier">aliases_node</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>[<span class="ruby-value">:aliases</span>]
-  <span class="ruby-identifier">aliases_query</span> = <span class="ruby-identifier">aliases_node</span>.<span class="ruby-identifier">overlap</span> [<span class="ruby-identifier">url</span>]
-  <span class="ruby-identifier">url_query</span> = <span class="ruby-identifier">url_node</span>.<span class="ruby-identifier">eq</span>(<span class="ruby-identifier">url</span>)
-  <span class="ruby-identifier">aliases_query</span> = <span class="ruby-identifier">aliases_node</span>.<span class="ruby-identifier">overlap</span> [<span class="ruby-identifier">url</span>]
+  <span class="ruby-identifier">aliases_query</span> = <span class="ruby-identifier">aliases_node</span>.<span class="ruby-identifier">overlap</span> <span class="ruby-identifier">urlpair</span> <span class="ruby-comment"># [url]</span>
+
   <span class="ruby-identifier">url_query</span>.<span class="ruby-identifier">or</span> <span class="ruby-identifier">aliases_query</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -432,6 +477,275 @@ url</p>
        <header>
          <h3>Public Instance Methods</h3>
        </header>
+
+    
+      <div id="method-i-answers_to-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">answers_to?</span><span
+            class="method-args">(qurl, kind=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Will this <a href="PageRef.html#method-i-page_ref">#page_ref</a> be found
+when looking for a <a href="PageRef.html#method-i-page_ref">#page_ref</a>
+of the given type and url?</p>
+          
+          
+
+          
+          <div class="method-source-code" id="answers_to-3F-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 324</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">answers_to?</span> <span class="ruby-identifier">qurl</span>, <span class="ruby-identifier">kind</span>=<span class="ruby-keyword">nil</span>
+  (<span class="ruby-operator">!</span><span class="ruby-identifier">kind</span> <span class="ruby-operator">||</span> (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">kind</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">kind</span>)) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^https/</span>,<span class="ruby-string">&#39;http&#39;</span>) <span class="ruby-operator">==</span> <span class="ruby-identifier">qurl</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^https/</span>,<span class="ruby-string">&#39;http&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">qurl</span>))
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-assert_referent" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">assert_referent</span><span
+            class="method-args">(rft)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Associate this <a href="PageRef.html#method-i-page_ref">#page_ref</a> with
+the given referent. NB: had better be a ReferrableReferent or subclass
+thereof</p>
+          
+          
+
+          
+          <div class="method-source-code" id="assert_referent-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 330</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_referent</span> <span class="ruby-identifier">rft</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">rft</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">rft</span>.<span class="ruby-identifier">id</span>)
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">rft</span>
+    <span class="ruby-comment"># Saving the page_ref appears to be the only way to ensure that the list of referents is current</span>
+    <span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_land" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_land</span><span
+            class="method-args">(force=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Glean info synchronously, i.e. don&#39;t return until it&#39;s done force
+=&gt; do the job even if it was priorly complete</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Backgroundable.html#method-i-bkg_land">Backgroundable#bkg_land</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="bkg_land-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 125</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_land</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-identifier">needs_gleaning?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">needs_mercury?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">force</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_launch" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_launch</span><span
+            class="method-args">(force=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Glean info from the page in background as a DelayedJob job force =&gt; do
+the job even if it was priorly complete</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Backgroundable.html#method-i-bkg_launch">Backgroundable#bkg_launch</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="bkg_launch-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 115</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_launch</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">force</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">virgin?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">needs_gleaning?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">needs_mercury?</span> <span class="ruby-comment"># Once we&#39;ve executed once, don&#39;t do it again unless forced</span>
+    <span class="ruby-comment"># Enqueue the gleaning as necessary and set up to process if so</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">create_gleaning</span>(<span class="ruby-identifier">page_ref</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">needs_gleaning?</span>
+    <span class="ruby-keyword">super</span> <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-host" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">host</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>alias_method :host, :domain</p>
+          
+          
+
+          
+          <div class="method-source-code" id="host-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 58</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">host</span>
+  <span class="ruby-identifier">domain</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-kind_as_fixnum" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">kind_as_fixnum</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="kind_as_fixnum-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">kind_as_fixnum</span>
+  <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">kinds</span>[<span class="ruby-identifier">kind</span>]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-page_ref" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">page_ref</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>def self.types</p>
+
+<pre class="ruby"><span class="ruby-identifier">@@prtypes</span> <span class="ruby-operator">||=</span> <span class="ruby-node">%w{ recipe definition article newsitem tip video homepage product offering event }</span>
+</pre>
+
+<p>end</p>
+
+<p># When a <a href="PageRef.html">PageRef</a> (or its other) is tagged, the
+user may change its type def type= newtype</p>
+
+<pre class="ruby"><span class="ruby-keyword">super</span>
+</pre>
+
+<p>end</p>
+          
+          
+
+          
+          <div class="method-source-code" id="page_ref-source">
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 109</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_ref</span>
+  <span class="ruby-keyword">self</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-i-perform" class="method-detail ">
@@ -453,20 +767,20 @@ url</p>
 
           
           <div class="method-source-code" id="perform-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 44</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 129</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">perform</span>
-  <span class="ruby-identifier">bkg_execute</span> {
-    <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">sync</span>
-    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">err</span>
-      <span class="ruby-comment"># Failed to complete properly</span>
-      <span class="ruby-identifier">err</span> = ([<span class="ruby-identifier">err</span>] <span class="ruby-operator">+</span> <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">full_messages</span>).<span class="ruby-identifier">join</span> <span class="ruby-string">&quot;\n\t&quot;</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-node">&quot;Fatal error in PageRef#sync: #{err}&quot;</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">http_status</span> = <span class="ruby-value">666</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span> = <span class="ruby-value">:bad</span>
-      <span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">sync</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">needs_mercury?</span>
+  <span class="ruby-comment"># Pick up any attributes from the gleaning</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">needs_gleaning?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">create_gleaning</span>(<span class="ruby-identifier">page_ref</span><span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>)).<span class="ruby-identifier">bkg_land</span> <span class="ruby-comment"># Ensure the gleaning has happened</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Title&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">picurl</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">pu</span> = <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Image&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">lead_image_url</span>).<span class="ruby-identifier">present?</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">pu</span>
     <span class="ruby-keyword">end</span>
-  }
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">author</span> = <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Author&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">author</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;Description&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">description</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:url</span>, <span class="ruby-string">&#39;can\t be gleaned&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">bad?</span>
+  <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span>(<span class="ruby-value">:url</span>, <span class="ruby-string">&#39;is inaccessible to Mercury&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">needs_mercury?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -512,18 +826,17 @@ should not (probably cannot) be saved.</p>
 
           
           <div class="method-source-code" id="sync-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 68</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 153</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sync</span>
-  <span class="ruby-identifier">extant_pr</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># This identifies (unpersistently) a PageRef which clashes with a derived URL</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">extant_pr</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># This identifies (unpersistently) a PageRef which clashes with a derived URL</span>
   <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">data</span> = <span class="ruby-identifier">try_mercury</span> <span class="ruby-identifier">url</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;error&#39;</span>]
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;messages&#39;</span>])
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;errorMessage&#39;</span>]
+    <span class="ruby-ivar">@data</span> = <span class="ruby-identifier">try_mercury</span> <span class="ruby-identifier">url</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;domain&#39;</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;www.answers.com&#39;</span>
+      <span class="ruby-comment"># We can&#39;t trust answers.com to provide a straight url, so we have to special-case it</span>
+      <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-identifier">url</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">http_status</span> =
-        <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span>.<span class="ruby-identifier">blank?</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;mercury_error&#39;</span>].<span class="ruby-identifier">blank?</span> <span class="ruby-comment"># All good from Mercury</span>
           <span class="ruby-value">200</span>
         <span class="ruby-keyword">else</span>
           <span class="ruby-comment"># Check the header for the url from the server.</span>
@@ -531,53 +844,59 @@ should not (probably cannot) be saved.</p>
           <span class="ruby-comment"># otherwise, it&#39;s an HTTP code</span>
           <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Checking direct access of PageRef ##{id} at &#39;#{url}&#39;&quot;</span>
           <span class="ruby-identifier">redirected_from</span> = <span class="ruby-keyword">nil</span>
-          <span class="ruby-keyword">while</span> <span class="ruby-identifier">hr</span> = <span class="ruby-identifier">header_result</span>(<span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>])
+          <span class="ruby-comment"># Loop over the redirects from the link, adding each to the record.</span>
+          <span class="ruby-comment"># Stop when we get to the final page or an error occurs</span>
+          <span class="ruby-keyword">while</span> <span class="ruby-identifier">hr</span> = <span class="ruby-identifier">header_result</span>(<span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>])
+            <span class="ruby-comment"># header_result returns either</span>
+            <span class="ruby-comment"># an integer result code (final result), or</span>
+            <span class="ruby-comment"># a string url for redirection</span>
             <span class="ruby-keyword">if</span> <span class="ruby-identifier">hr</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>)
               <span class="ruby-keyword">if</span> (<span class="ruby-identifier">hr</span> <span class="ruby-operator">==</span> <span class="ruby-value">404</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">redirected_from</span>
                 <span class="ruby-comment"># Got a redirect via Mercury, but the target failed</span>
-                <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">redirected_from</span>)
+                <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">redirected_from</span>)
                 <span class="ruby-identifier">hr</span> = <span class="ruby-value">303</span>
               <span class="ruby-keyword">end</span>
               <span class="ruby-keyword">break</span>;
             <span class="ruby-keyword">end</span>
-            <span class="ruby-identifier">hr</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>], <span class="ruby-identifier">hr</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">hr</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^http/</span>) <span class="ruby-comment"># The redirect URL may only be a path</span>
-            <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">hr</span>)
-            <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Redirecting from #{data[&#39;url&#39;]} to #{hr}&quot;</span>
+            <span class="ruby-identifier">hr</span> = <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>], <span class="ruby-identifier">hr</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">hr</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^http/</span>) <span class="ruby-comment"># The redirect URL may only be a path</span>
+            <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">hr</span>) <span class="ruby-comment"># Time to give up when the url has been tried (it already appears among the aliases)</span>
+            <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Redirecting from #{@data[&#39;url&#39;]} to #{hr}&quot;</span>
             <span class="ruby-keyword">begin</span>
-              <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">|=</span> [<span class="ruby-identifier">redirected_from</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>]] <span class="ruby-comment"># Stash the redirection source in the aliases</span>
-              <span class="ruby-identifier">data</span> = <span class="ruby-identifier">try_mercury</span> <span class="ruby-identifier">hr</span>
-              <span class="ruby-keyword">if</span> (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;errorMessage&#39;</span>]).<span class="ruby-identifier">blank?</span> <span class="ruby-comment"># Success on redirect</span>
+              <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">|=</span> [<span class="ruby-identifier">redirected_from</span> = <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>]] <span class="ruby-comment"># Stash the redirection source in the aliases</span>
+              <span class="ruby-ivar">@data</span> = <span class="ruby-identifier">try_mercury</span> <span class="ruby-identifier">hr</span>
+              <span class="ruby-keyword">if</span> (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;mercury_error&#39;</span>]).<span class="ruby-identifier">blank?</span> <span class="ruby-comment"># Success on redirect</span>
                 <span class="ruby-identifier">hr</span> = <span class="ruby-value">200</span>
                 <span class="ruby-keyword">break</span>;
               <span class="ruby-keyword">end</span>
             <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
               <span class="ruby-comment"># Bad URL =&gt; Restore the last alias</span>
-              <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">redirected_from</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">redirected_from</span>
+              <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">redirected_from</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">redirected_from</span>
               <span class="ruby-identifier">hr</span> = <span class="ruby-value">400</span>
             <span class="ruby-keyword">end</span>
           <span class="ruby-keyword">end</span>
           <span class="ruby-identifier">hr</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> <span class="ruby-value">666</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">hr</span>
         <span class="ruby-keyword">end</span>
-    <span class="ruby-comment"># Did the url change to a collision with an existing PageRef of the same type?</span>
-    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] <span class="ruby-operator">!=</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">extant_pr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>]))
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-node">&quot;Sync&#39;ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url &#39;#{data[&#39;url&#39;]}&#39;&quot;</span>
-      <span class="ruby-identifier">puts</span> <span class="ruby-identifier">error_message</span>
+    <span class="ruby-comment"># Does the extracted url change to a collision with an existing PageRef of the same type?</span>
+    <span class="ruby-identifier">new_url</span> = <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>]
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">new_url</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">&amp;&amp;</span>
+        <span class="ruby-operator">!</span><span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">new_url</span>) <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">expr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">find_by_url</span>(<span class="ruby-identifier">new_url</span>)) <span class="ruby-operator">&amp;&amp;</span>
+        (<span class="ruby-identifier">expr</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>)
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">extant_pr</span> = <span class="ruby-identifier">expr</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Sync&#39;ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url &#39;#{new_url}&#39;&quot;</span>
       <span class="ruby-keyword">self</span>.<span class="ruby-identifier">http_status</span> = <span class="ruby-value">666</span>
-      <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-identifier">url</span>
-      <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-node">&quot;has already been taken by #{self.class} ##{extant_pr.id}&quot;</span>
+      <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-identifier">url</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-node">&quot;URL has already been taken by #{self.class} ##{extant_pr.id}&quot;</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;content&#39;</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;&#39;</span>
-    <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;content&#39;</span>].<span class="ruby-identifier">tr!</span> <span class="ruby-string">&quot;\x00&quot;</span>, <span class="ruby-string">&#39; &#39;</span> <span class="ruby-comment"># Mercury can return strings with null bytes for some reason</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">extraneity</span> = <span class="ruby-identifier">data</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-operator">*</span>(<span class="ruby-identifier">@@extraneous_attribs</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>)))
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">url</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] <span class="ruby-operator">!=</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">aliases</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">url</span>)) <span class="ruby-comment"># Record the url in the aliases if not already there</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assign_attributes</span> <span class="ruby-identifier">data</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-operator">*</span>(<span class="ruby-identifier">@@mercury_attributes</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>)))
+    <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;content&#39;</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;&#39;</span>
+    <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;content&#39;</span>].<span class="ruby-identifier">tr!</span> <span class="ruby-string">&quot;\x00&quot;</span>, <span class="ruby-string">&#39; &#39;</span> <span class="ruby-comment"># Mercury can return strings with null bytes for some reason</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">extraneity</span> = <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-operator">*</span>(<span class="ruby-identifier">@@extraneous_attribs</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>)))
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">aliases</span> <span class="ruby-operator">|=</span> [<span class="ruby-identifier">url</span>] <span class="ruby-keyword">if</span> <span class="ruby-ivar">@data</span>[<span class="ruby-string">&#39;url&#39;</span>] <span class="ruby-operator">!=</span> <span class="ruby-identifier">url</span> <span class="ruby-comment"># Record the existing url in the aliases if not already there</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assign_attributes</span> <span class="ruby-ivar">@data</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-operator">*</span>(<span class="ruby-identifier">@@mercury_attributes</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>)))
   <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-node">&quot;Bad URL &#39;#{url}&#39;: #{e}&quot;</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">error_message</span> = <span class="ruby-node">&quot;Bad URL &#39;#{url}&#39;: #{e}&quot;</span>
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">http_status</span> = <span class="ruby-value">400</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-comment"># We record the status here, in case we&#39;re being called outside the background mechanism</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span> = (<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">error_message</span>.<span class="ruby-identifier">present?</span>) <span class="ruby-operator">?</span> <span class="ruby-value">:bad</span> <span class="ruby-operator">:</span> <span class="ruby-value">:good</span>
-  <span class="ruby-identifier">good?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -608,7 +927,7 @@ should not (probably cannot) be saved.</p>
 
           
           <div class="method-source-code" id="table-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 154</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 254</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">table</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">arel_table</span>
 <span class="ruby-keyword">end</span></pre>
@@ -641,23 +960,33 @@ should not (probably cannot) be saved.</p>
 
           
           <div class="method-source-code" id="try_mercury-source">
-            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 135</span>
+            <pre><span class="ruby-comment"># File app/models/page_ref.rb, line 225</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">try_mercury</span> <span class="ruby-identifier">url</span>
-  <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;https://mercury.postlight.com/parser?url=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span> <span class="ruby-string">&#39;http://mercury.postlight.com/parser?url=&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">http</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>, <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">port</span>)
-  <span class="ruby-identifier">http</span>.<span class="ruby-identifier">use_ssl</span> = <span class="ruby-keyword">true</span>
+  <span class="ruby-comment"># http.use_ssl = true</span>
 
   <span class="ruby-identifier">req</span> = <span class="ruby-constant">Net</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTP</span><span class="ruby-operator">::</span><span class="ruby-constant">Get</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
   <span class="ruby-identifier">req</span>[<span class="ruby-string">&#39;x-api-key&#39;</span>] = <span class="ruby-constant">ENV</span>[<span class="ruby-string">&#39;MERCURY_API_KEY&#39;</span>]
 
   <span class="ruby-identifier">response</span> = <span class="ruby-identifier">http</span>.<span class="ruby-identifier">request</span> <span class="ruby-identifier">req</span>
-
-  <span class="ruby-identifier">data</span> = <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">response</span>.<span class="ruby-identifier">body</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">content</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">errorMessage</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Empty Page&#39;</span>)
+  <span class="ruby-identifier">data</span> =
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">response</span>.<span class="ruby-identifier">code</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;401&#39;</span>
+      <span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">content</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">errorMessage</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;401 Unauthorized&#39;</span>)
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-constant">JSON</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">response</span>.<span class="ruby-identifier">body</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-constant">HashWithIndifferentAccess</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">content</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">errorMessage</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Empty Page&#39;</span>)
+  <span class="ruby-keyword">end</span>
 
   <span class="ruby-comment"># Do QA on the reported URL</span>
-  <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>].<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">url</span>, <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>]) <span class="ruby-operator">:</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">url</span>) <span class="ruby-comment"># URL may be relative, in which case parse in light of provided URL</span>
+  <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>].<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">url</span>, <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>]) <span class="ruby-operator">:</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">url</span>) <span class="ruby-comment"># URL may be relative, in which case parse in light of provided URL</span>
   <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;url&#39;</span>] = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
   <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;domain&#39;</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>
+  <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;response_code&#39;</span>] = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">code</span>
+  <span class="ruby-comment"># Merge different error states into a mercury_error</span>
+  <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;mercury_error&#39;</span>] = <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;errorMessage&#39;</span>].<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">data</span>[<span class="ruby-string">&#39;error&#39;</span>].<span class="ruby-identifier">if_present</span>
+  <span class="ruby-identifier">data</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:errorMessage</span>
+  <span class="ruby-identifier">data</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:error</span>
   <span class="ruby-identifier">data</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -678,7 +1007,7 @@ should not (probably cannot) be saved.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

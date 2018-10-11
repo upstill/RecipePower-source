@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -153,7 +154,7 @@
           <span class="ruby-comment"># set_flash_message :notice, :signed_up if is_navigational_format?</span>
           <span class="ruby-identifier">sign_up</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">resource</span>)
           <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span> = <span class="ruby-identifier">resource</span>
-          <span class="ruby-constant">RpMailer</span>.<span class="ruby-identifier">welcome_email</span>(<span class="ruby-identifier">resource</span>).<span class="ruby-identifier">deliver</span> <span class="ruby-keyword">unless</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">env</span>.<span class="ruby-identifier">staging?</span>
+          <span class="ruby-constant">SignupEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">resource</span> <span class="ruby-comment"># RpMailer.welcome_email(resource).deliver unless Rails.env.staging?</span>
           <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_sign_up_path_for</span>(<span class="ruby-identifier">resource</span>)
         <span class="ruby-keyword">else</span>
           <span class="ruby-identifier">set_flash_message</span> <span class="ruby-value">:notice</span>, <span class="ruby-value">:&quot;signed_up_but_#{resource.inactive_message}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">is_navigational_format?</span>
@@ -163,14 +164,10 @@
       <span class="ruby-keyword">else</span>
         <span class="ruby-identifier">clean_up_passwords</span> <span class="ruby-identifier">resource</span>
         <span class="ruby-identifier">respond_with</span> <span class="ruby-identifier">resource</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-          <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { }
-          <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { 
-            <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { 
-                      <span class="ruby-identifier">replacements</span><span class="ruby-operator">:</span> [
-                        [<span class="ruby-string">&quot;form.new_user&quot;</span>, <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;registrations/form&quot;</span> }]
-                      ]
-                    }
+          <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> {
+            <span class="ruby-identifier">smartrender</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;new&#39;</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;signup&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:header</span>] }
           }
+          <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">with_popup</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span> } }
         <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">session</span>[<span class="ruby-value">:omniauth</span>] = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">new_record?</span>
@@ -239,11 +236,11 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 57</span>
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 53</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">omniauth_pending</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:clear_omniauth</span>])
   <span class="ruby-identifier">build_resource</span>({})
-  <span class="ruby-identifier">smartrender</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;new&quot;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:header</span>] }
+  <span class="ruby-identifier">smartrender</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;new&#39;</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;signin&#39;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:header</span>] }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -275,13 +272,13 @@ want to change the current user in place.</p>
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 66</span>
+            <pre><span class="ruby-comment"># File app/controllers/registrations_controller.rb, line 62</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
   <span class="ruby-identifier">account_update_params</span> = <span class="ruby-identifier">devise_parameter_sanitizer</span>.<span class="ruby-identifier">sanitize</span>(<span class="ruby-value">:account_update</span>)
   <span class="ruby-comment"># required for settings form to submit when password is left blank</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">account_update_params</span>[<span class="ruby-value">:password</span>].<span class="ruby-identifier">blank?</span>
-    <span class="ruby-identifier">account_update_params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;password&quot;</span>)
-    <span class="ruby-identifier">account_update_params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&quot;password_confirmation&quot;</span>)
+    <span class="ruby-identifier">account_update_params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&#39;password&#39;</span>)
+    <span class="ruby-identifier">account_update_params</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-string">&#39;password_confirmation&#39;</span>)
   <span class="ruby-keyword">end</span>
 
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">to_adapter</span>.<span class="ruby-identifier">get!</span>(<span class="ruby-identifier">send</span>(<span class="ruby-value">:&quot;current_#{resource_name}&quot;</span>).<span class="ruby-identifier">to_key</span>)
@@ -321,7 +318,7 @@ want to change the current user in place.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -72,9 +73,15 @@
     
     <li ><a href="#method-c-convert_all_to_references">::convert_all_to_references</a>
     
+    <li ><a href="#method-c-fix_names">::fix_names</a>
+    
+    <li ><a href="#method-c-fix_user">::fix_user</a>
+    
+    <li ><a href="#method-c-glean_names">::glean_names</a>
+    
     <li ><a href="#method-c-new">::new</a>
     
-    <li ><a href="#method-i-analyze_invitees">#analyze_invitees</a>
+    <li ><a href="#method-i-glean_names">#glean_names</a>
     
     <li ><a href="#method-i-sign_up">#sign_up</a>
     
@@ -173,6 +180,138 @@
       </div>
 
     
+      <div id="method-c-fix_names" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fix_names</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="fix_names-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fix_names</span>
+  <span class="ruby-comment"># Interactively sort out names</span>
+  <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">first_name</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{u.id}(#{u.email}): #{u.first_name} | #{u.last_name} | #{u.fullname}&quot;</span>
+    <span class="ruby-identifier">name</span> = <span class="ruby-identifier">gets</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">name</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+    <span class="ruby-identifier">name</span>.<span class="ruby-identifier">chomp!</span>
+    <span class="ruby-constant">UserServices</span>.<span class="ruby-identifier">fix_user</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">name</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+  }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-fix_user" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">fix_user</span><span
+            class="method-args">(id, name)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="fix_user-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fix_user</span> <span class="ruby-identifier">id</span>, <span class="ruby-identifier">name</span>
+  <span class="ruby-identifier">names</span> = <span class="ruby-identifier">name</span>.<span class="ruby-identifier">split</span>
+  <span class="ruby-identifier">first_name</span> = <span class="ruby-identifier">names</span>.<span class="ruby-identifier">first</span>
+  <span class="ruby-identifier">last_name</span> = (<span class="ruby-identifier">names</span>.<span class="ruby-identifier">last</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">names</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>)
+  <span class="ruby-identifier">u</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">id</span>
+  <span class="ruby-identifier">u</span>.<span class="ruby-identifier">first_name</span> = <span class="ruby-identifier">first_name</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">last_name</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">u</span>.<span class="ruby-identifier">last_name</span> = <span class="ruby-identifier">last_name</span>
+    <span class="ruby-identifier">u</span>.<span class="ruby-identifier">fullname</span> = <span class="ruby-node">&quot;#{first_name} #{last_name}&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">u</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-glean_names" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">glean_names</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="glean_names-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">glean_names</span>
+  <span class="ruby-identifier">changed</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">to_a</span>.<span class="ruby-identifier">keep_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">keep</span> = <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">first_name</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">fullname</span>.<span class="ruby-identifier">present?</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}&quot;</span>
+        <span class="ruby-identifier">keep</span> = <span class="ruby-constant">UserServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">u</span>).<span class="ruby-identifier">glean_names</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot; =&gt; #{u.first_name} | #{u.last_name}&quot;</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Dud: #{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}&quot;</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">keep</span>
+  }
+  <span class="ruby-identifier">changed</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;&#39;#{u.fullname}&#39; =&gt; #{u.first_name} | #{u.last_name} (#{u.id}/#{u.email}/#{u.username})&quot;</span>
+  }
+  <span class="ruby-keyword">nil</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-c-new" class="method-detail ">
         
         <div class="method-heading">
@@ -214,11 +353,11 @@
        </header>
 
     
-      <div id="method-i-analyze_invitees" class="method-detail ">
+      <div id="method-i-glean_names" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">analyze_invitees</span><span
-            class="method-args">(sender)</span>
+          <span class="method-name">glean_names</span><span
+            class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -227,52 +366,25 @@
 
         <div class="method-description">
           
-          
+          <p>Infer default first and last names from the full name, and vice versa</p>
           
           
 
           
-          <div class="method-source-code" id="analyze_invitees-source">
-            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 25</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">analyze_invitees</span>(<span class="ruby-identifier">sender</span>)
-  <span class="ruby-identifier">result</span> = {
-    <span class="ruby-identifier">redundancies</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Current friends (member&#39;s share notice sent)</span>
-    <span class="ruby-identifier">pending</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Invited but not yet confirmed</span>
-    <span class="ruby-identifier">new_friends</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Newly-added friends (member&#39;s share notice sent)</span>
-    <span class="ruby-identifier">to_invite</span><span class="ruby-operator">:</span>  []
-  }
-  <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">invitee</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">u</span> = 
-    <span class="ruby-keyword">case</span> <span class="ruby-identifier">invitee</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-constant">Fixnum</span> <span class="ruby-comment"># ID of existing friend</span>
-      <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">invitee</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span> <span class="ruby-comment"># email address which may or may not be external</span>
-      <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">downcase</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span>
-      <span class="ruby-comment"># Existing user, whether signed up or not, friend or not</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">sender</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Existing friend: redundant</span>
-        <span class="ruby-identifier">result</span>[<span class="ruby-value">:redundancies</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
-      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">last_sign_in_at</span> <span class="ruby-comment"># The user has ever signed in (not a pending invitation)</span>
-        <span class="ruby-identifier">result</span>[<span class="ruby-value">:new_friends</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
-      <span class="ruby-keyword">else</span> <span class="ruby-comment"># User never signed in -&gt; invitation is pending</span>
-        <span class="ruby-identifier">result</span>[<span class="ruby-value">:pending</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">result</span>[<span class="ruby-value">:to_invite</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">invitee</span>
-    <span class="ruby-keyword">end</span>
+          <div class="method-source-code" id="glean_names-source">
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 113</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">glean_names</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">fullname</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">names</span> = <span class="ruby-identifier">fullname</span>.<span class="ruby-identifier">split</span>
+    <span class="ruby-comment"># if names.count &gt; 1</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">first_name</span> = <span class="ruby-identifier">names</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">first_name</span>.<span class="ruby-identifier">present?</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">last_name</span> = <span class="ruby-identifier">names</span>.<span class="ruby-identifier">last</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">names</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">last_name</span>.<span class="ruby-identifier">blank?</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">save</span>
+    <span class="ruby-comment"># end</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">first_name</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">last_name</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">user</span>.<span class="ruby-identifier">fullname</span> = <span class="ruby-node">&quot;#{first_name} #{last_name}&quot;</span>
+    <span class="ruby-identifier">user</span>.<span class="ruby-identifier">save</span>
   <span class="ruby-keyword">end</span>
-  
-  <span class="ruby-comment"># Define a singleton method on the hash for reporting out the results</span>
-  <span class="ruby-keyword">def</span> <span class="ruby-identifier">result</span>.<span class="ruby-identifier">report</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">selector</span> = <span class="ruby-keyword">nil</span>) 
-    <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">items</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">which</span>]).<span class="ruby-identifier">empty?</span>
-      <span class="ruby-identifier">count</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">size</span>
-      <span class="ruby-identifier">items</span> = <span class="ruby-identifier">liststrs</span>(<span class="ruby-identifier">items</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">selector</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">selector</span>
-      <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">items</span>, <span class="ruby-identifier">count</span>)
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-  
-  <span class="ruby-identifier">result</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -297,13 +409,55 @@
 
         <div class="method-description">
           
-          <p>Called on signup to initialize the user</p>
+          <pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">analyze_invitees</span>(<span class="ruby-identifier">sender</span>)
+  <span class="ruby-identifier">result</span> = {
+    <span class="ruby-identifier">redundancies</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Current friends (member&#39;s share notice sent)</span>
+    <span class="ruby-identifier">pending</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Invited but not yet confirmed</span>
+    <span class="ruby-identifier">new_friends</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Newly-added friends (member&#39;s share notice sent)</span>
+    <span class="ruby-identifier">to_invite</span><span class="ruby-operator">:</span>  []
+  }
+  <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">invitee</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">u</span> = 
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Fixnum</span> <span class="ruby-comment"># ID of existing friend</span>
+      <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span> <span class="ruby-comment"># email address which may or may not be external</span>
+      <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">downcase</span>).<span class="ruby-identifier">first</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-comment"># Existing user, whether signed up or not, friend or not</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">sender</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Existing friend: redundant</span>
+        <span class="ruby-identifier">result</span>[:<span class="ruby-identifier">redundancies</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">last_sign_in_at</span> <span class="ruby-comment"># The user has ever signed in (not a pending invitation)</span>
+        <span class="ruby-identifier">result</span>[:<span class="ruby-identifier">new_friends</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">else</span> <span class="ruby-comment"># User never signed in -&gt; invitation is pending</span>
+        <span class="ruby-identifier">result</span>[:<span class="ruby-identifier">pending</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">result</span>[:<span class="ruby-identifier">to_invite</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">invitee</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Define a singleton method on the hash for reporting out the results</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">result</span>.<span class="ruby-identifier">report</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">selector</span> = <span class="ruby-keyword">nil</span>) 
+    <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">items</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">which</span>]).<span class="ruby-identifier">empty?</span>
+      <span class="ruby-identifier">count</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">size</span>
+      <span class="ruby-identifier">items</span> = <span class="ruby-identifier">liststrs</span>(<span class="ruby-identifier">items</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">selector</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">selector</span>
+      <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">items</span>, <span class="ruby-identifier">count</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">result</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p># Called on signup to initialize the user</p>
           
           
 
           
           <div class="method-source-code" id="sign_up-source">
-            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 67</span>
+            <pre><span class="ruby-comment"># File app/services/user_services.rb, line 69</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sign_up</span>
   <span class="ruby-comment"># Give the user a starting set of collections and friends</span>
   <span class="ruby-constant">List</span>.<span class="ruby-identifier">assert</span> <span class="ruby-string">&#39;Now Cooking&#39;</span>, <span class="ruby-identifier">user</span>
@@ -330,7 +484,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

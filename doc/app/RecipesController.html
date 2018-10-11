@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -125,85 +126,8 @@
 
         <div class="method-description">
           
-          <p>def capture # Collect URL from foreign site, asking whether to re-direct to
-edit</p>
-
-<pre class="ruby"><span class="ruby-comment"># return if need_login true</span>
-<span class="ruby-comment"># Here is where we take a hit on the &quot;Add to RecipePower&quot; widget,</span>
-<span class="ruby-comment"># and also invoke the &#39;new cookmark&#39; dialog. The difference is whether</span>
-<span class="ruby-comment"># parameters are supplied for url, title and note (though only URI is required).</span>
-<span class="ruby-identifier">x</span>=<span class="ruby-value">2</span>
-<span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-  <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-comment"># This is for capturing a new recipe and tagging it using a new page.</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
-      <span class="ruby-ivar">@resource</span> = <span class="ruby-constant">CollectibleServices</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-identifier">params</span>[<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_name</span>]<span class="ruby-operator">||</span>{},
-                                                     <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">extractions</span>],
-                                                     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_class</span>
-      <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-ivar">@resource</span>, <span class="ruby-keyword">true</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">id</span>
-        <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">collect</span> <span class="ruby-ivar">@resource</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span>
-          <span class="ruby-identifier">smartrender</span> :<span class="ruby-identifier">action</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">tag</span>
-        <span class="ruby-keyword">else</span>
-          <span class="ruby-comment"># If we&#39;re collecting a recipe outside the context of the iframe, redirect to</span>
-          <span class="ruby-comment"># the collection page with an embedded modal dialog invocation</span>
-          <span class="ruby-identifier">tag_path</span> = <span class="ruby-identifier">polymorphic_path</span> [:<span class="ruby-identifier">tag</span>, <span class="ruby-ivar">@resource</span>]
-          <span class="ruby-identifier">redirect_to_modal</span> <span class="ruby-identifier">tag_path</span>
-        <span class="ruby-keyword">end</span>
-      <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;pages/resource_errors&#39;</span>, <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">render_params</span>
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-comment"># Defer request, redirecting it for JSON</span>
-      <span class="ruby-identifier">login_required</span> :<span class="ruby-identifier">json</span>
-    <span class="ruby-keyword">end</span>
-  }
-  <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
-      <span class="ruby-ivar">@resource</span> = <span class="ruby-constant">CollectibleServices</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-identifier">params</span>[<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_name</span>]<span class="ruby-operator">||</span>{},
-                                                     <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">extractions</span>],
-                                                     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_class</span>
-      <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-ivar">@resource</span>, <span class="ruby-keyword">true</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
-        <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">collect</span> <span class="ruby-ivar">@resource</span>
-        <span class="ruby-comment"># Recipe all captured and everything. Let&#39;s go tag it.</span>
-        <span class="ruby-identifier">smartrender</span> :<span class="ruby-identifier">action</span> =<span class="ruby-operator">&gt;</span> :<span class="ruby-identifier">tag</span>
-      <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">render</span> :<span class="ruby-identifier">errors</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@resource</span> }
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">login_required</span>
-    <span class="ruby-keyword">end</span>
-  }
-  <span class="ruby-identifier">format</span>.<span class="ruby-identifier">js</span> {
-    <span class="ruby-comment"># Produce javascript in response to the bookmarklet, to build minimal javascript into the host page</span>
-    <span class="ruby-comment"># (from capture.js) which then renders the recipe editor into an iframe, powered by injector.js</span>
-    <span class="ruby-comment"># We need a domain to pass as sourcehome, so the injected iframe can communicate with the browser.</span>
-    <span class="ruby-comment"># This gets extracted from the href passed as a parameter</span>
-    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">is_injector</span>
-    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">params</span>[:<span class="ruby-identifier">recipe</span>][:<span class="ruby-identifier">url</span>])
-    <span class="ruby-identifier">sourcehome</span> = <span class="ruby-node">&quot;#{uri.scheme}://#{uri.host}&quot;</span>
-    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
-    <span class="ruby-identifier">msg</span> = <span class="ruby-node">%Q{&quot;Sorry, but RecipePower won&#39;t make sense of the cookmark &#39;#{url}&#39;&quot;}</span>
-    <span class="ruby-keyword">begin</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">host_forbidden</span> <span class="ruby-identifier">url</span> <span class="ruby-comment"># Compare the host to the current domain (minus the port)</span>
-        <span class="ruby-identifier">render</span> <span class="ruby-identifier">js</span><span class="ruby-operator">:</span> <span class="ruby-string">%Q{alert(&quot;Sorry, but RecipePower doesn&#39;t cookmark its own pages (does that even make sense?)&quot;) ; }</span>
-      <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>(<span class="ruby-ivar">@site</span> = <span class="ruby-constant">Site</span>.<span class="ruby-identifier">find_or_create</span>(<span class="ruby-identifier">url</span>))
-        <span class="ruby-comment"># If we couldn&#39;t even get the site from the domain, we just bail entirely</span>
-        <span class="ruby-identifier">render</span> <span class="ruby-identifier">js</span><span class="ruby-operator">:</span> <span class="ruby-node">%Q{alert(#{msg});}</span>
-      <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">recipe</span>][:<span class="ruby-identifier">title</span>] = <span class="ruby-string">&#39;Recipe from &#39;</span><span class="ruby-operator">+</span><span class="ruby-ivar">@site</span>.<span class="ruby-identifier">name</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[:<span class="ruby-identifier">recipe</span>][:<span class="ruby-identifier">title</span>].<span class="ruby-identifier">blank?</span>
-        <span class="ruby-ivar">@url</span> = <span class="ruby-identifier">capture_recipes_url</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">redirect_params</span>( <span class="ruby-identifier">params</span>.<span class="ruby-identifier">slice</span>(:<span class="ruby-identifier">recipe</span>).<span class="ruby-identifier">merge</span> <span class="ruby-identifier">sourcehome</span><span class="ruby-operator">:</span> <span class="ruby-identifier">sourcehome</span>)
-        <span class="ruby-identifier">render</span>
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-      <span class="ruby-identifier">render</span> <span class="ruby-identifier">js</span><span class="ruby-operator">:</span> <span class="ruby-node">%Q{alert(#{msg});}</span>
-    <span class="ruby-keyword">end</span>
-  }
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
+          <p>include <a href="ApplicationHelper.html">ApplicationHelper</a> include
+ActionView::Helpers::TextHelper</p>
           
           
             <div class="method-calls-super">
@@ -214,7 +138,7 @@ edit</p>
 
           
           <div class="method-source-code" id="capture-source">
-            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 88</span>
+            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 10</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">capture</span>
   <span class="ruby-keyword">super</span>
 <span class="ruby-keyword">end</span></pre>
@@ -247,7 +171,7 @@ edit</p>
 
           
           <div class="method-source-code" id="index-source">
-            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 92</span>
+            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 14</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">index</span>
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">default_next_path</span>
   <span class="ruby-comment"># return if need_login true</span>
@@ -284,7 +208,7 @@ edit</p>
 
           
           <div class="method-source-code" id="parse-source">
-            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 118</span>
+            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 40</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">parse</span>
     <span class="ruby-comment"># In general the text is free of HTML formatting, except that 1) presumably</span>
     <span class="ruby-comment"># spans denoting microformat data are preserved, and 2) prior</span>
@@ -324,7 +248,7 @@ edit</p>
 
           
           <div class="method-source-code" id="revise-source">
-            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 98</span>
+            <pre><span class="ruby-comment"># File app/controllers/recipes_controller.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">revise</span> <span class="ruby-comment"># modify current recipe to reflect a client-side change</span>
   <span class="ruby-ivar">@recipe</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
   <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">current_user</span> = <span class="ruby-identifier">current_user_or_guest_id</span> <span class="ruby-comment"># session[:user_id]</span>
@@ -360,7 +284,7 @@ edit</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

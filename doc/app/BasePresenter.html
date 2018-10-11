@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -71,6 +72,12 @@
   <ul class="link-list" role="directory">
     
     <li ><a href="#method-c-new">::new</a>
+    
+    <li ><a href="#method-i-card_label">#card_label</a>
+    
+    <li ><a href="#method-i-content">#content</a>
+    
+    <li ><a href="#method-i-ribbon">#ribbon</a>
     
   </ul>
 </div>
@@ -183,13 +190,129 @@
     
     </section>
   
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-card_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_label</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Recipes don&#39;t have a tab on their card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_label-source">
+            <pre><span class="ruby-comment"># File app/presenters/base_presenter.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_label</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+                      <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">human_name</span>,
+                      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;card-label&#39;</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+      <span class="ruby-identifier">label</span>,
+      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;label-rotator rotate&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-content" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">content</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="content-source">
+            <pre><span class="ruby-comment"># File app/presenters/base_presenter.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">content</span>
+  <span class="ruby-comment"># Individual presenters may override to present content</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ribbon" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ribbon</span><span
+            class="method-args">(ribbon_class=nil, name=@decorator.human_name) { |content| ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="ribbon-source">
+            <pre><span class="ruby-comment"># File app/presenters/base_presenter.rb, line 18</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ribbon</span> <span class="ruby-identifier">ribbon_class</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">name</span>=<span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">human_name</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-identifier">content</span> = <span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
+                <span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-identifier">name</span>),
+                <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;ribbon #{ribbon_class}&quot;</span>
+  <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">content</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">content</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
   </section>
 </main>
 
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

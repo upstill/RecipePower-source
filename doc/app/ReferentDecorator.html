@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -58,7 +59,7 @@
   <h3>Parent</h3>
 
   
-  <p class="link">Draper::Decorator
+  <p class="link"><a href="CollectibleDecorator.html">CollectibleDecorator</a>
   
 </div>
 
@@ -71,6 +72,10 @@
     <li><a class="include" href="Templateer.html">Templateer</a>
   
   
+  
+    <li><a class="include" href="DialogPanes.html">DialogPanes</a>
+  
+  
   </ul>
 </div>
 
@@ -81,7 +86,21 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-i-dialog_pane_list">#dialog_pane_list</a>
+    
+    <li ><a href="#method-i-dialog_pane_spec">#dialog_pane_spec</a>
+    
+    <li ><a href="#method-i-human_name">#human_name</a>
+    
+    <li ><a href="#method-i-imgdata">#imgdata</a>
+    
+    <li ><a href="#method-i-page_refs">#page_refs</a>
+    
+    <li ><a href="#method-i-tagged_entities">#tagged_entities</a>
+    
     <li ><a href="#method-i-title">#title</a>
+    
+    <li ><a href="#method-i-visible_tags_of_kind">#visible_tags_of_kind</a>
     
   </ul>
 </div>
@@ -117,6 +136,280 @@
        </header>
 
     
+      <div id="method-i-dialog_pane_list" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_pane_list</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_pane_list-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 53</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_pane_list</span>
+  <span class="ruby-ivar">@button_list</span> <span class="ruby-operator">||=</span> <span class="ruby-comment"># A memoized list of buttons/panels to offer</span>
+      [
+          (<span class="ruby-identifier">dialog_pane_spec</span>(<span class="ruby-value">:description</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">true</span>),
+          (<span class="ruby-identifier">dialog_pane_spec</span>(<span class="ruby-value">:family</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">true</span>),
+          (<span class="ruby-identifier">dialog_pane_spec</span>(<span class="ruby-value">:expressions</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">true</span>),
+          (<span class="ruby-identifier">dialog_pane_spec</span>(<span class="ruby-value">:referments</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">true</span>),
+          (<span class="ruby-identifier">dialog_pane_spec</span>(<span class="ruby-value">:pic</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">true</span>)
+      ].<span class="ruby-identifier">compact</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-dialog_pane_spec" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">dialog_pane_spec</span><span
+            class="method-args">(topic)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="dialog_pane_spec-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 64</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">dialog_pane_spec</span> <span class="ruby-identifier">topic</span>
+    <span class="ruby-ivar">@pane_specs</span> <span class="ruby-operator">||=</span>
+        {
+            <span class="ruby-identifier">description</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-value">:&quot;edit_#{object.class.base_class.to_s.downcase}&quot;</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Description&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_description&#39;</span>
+            },
+            <span class="ruby-identifier">family</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;edit_family&#39;</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Family&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_family&#39;</span>
+            },
+            <span class="ruby-identifier">expressions</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;edit_expressions&#39;</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Expressions&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_expressions&#39;</span>
+            },
+            <span class="ruby-identifier">referments</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;edit_referments&#39;</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;References&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_referments&#39;</span>
+            },
+<span class="ruby-comment">            tags: {
+                css_class: :&#39;tag-collectible&#39;,
+                label: &#39;Tags&#39;,
+                partial: &#39;pane_tag&#39;
+            },
+            lists: {
+                css_class: :lists_collectible,
+                label: &#39;Treasuries&#39;,
+                partial: &#39;pane_lists_collectible&#39;
+            },
+</span>            <span class="ruby-identifier">pic</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-value">:pic_picker</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Picture&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_editpic&#39;</span>
+            },
+            <span class="ruby-identifier">comment</span><span class="ruby-operator">:</span> {
+                <span class="ruby-identifier">css_class</span><span class="ruby-operator">:</span> <span class="ruby-value">:&#39;comment-collectible&#39;</span>,
+                <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Comment&#39;</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;pane_comment_collectible&#39;</span>
+            }
+        }.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">topic</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-identifier">value</span>[<span class="ruby-value">:topic</span>] = <span class="ruby-identifier">topic</span> }
+    <span class="ruby-ivar">@pane_specs</span>[<span class="ruby-identifier">topic</span>]
+  <span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-human_name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">human_name</span><span
+            class="method-args">(plural=false, capitalize=true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="human_name-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 10</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">human_name</span> <span class="ruby-identifier">plural</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">capitalize</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/Referent/</span>, <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-imgdata" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">imgdata</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>A referent gets its picture from either 1) a directly-associated <a
+href="ImageReference.html">ImageReference</a>, or an image from one of its
+PageRefs</p>
+          
+          
+
+          
+          <div class="method-source-code" id="imgdata-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 16</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">imgdata</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ir</span> = <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">picture</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">image_refs</span>.<span class="ruby-identifier">first</span>
+    <span class="ruby-identifier">ir</span>.<span class="ruby-identifier">imgdata</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">piced_pr</span> = <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">picture_id</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span>
+      <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">tagged_by</span>(<span class="ruby-ivar">@object</span>.<span class="ruby-identifier">tag_ids</span>).<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">picture_id</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">first</span>
+    <span class="ruby-identifier">piced_pr</span>.<span class="ruby-identifier">imgdata</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-page_refs" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">page_refs</span><span
+            class="method-args">(kind=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide the PageRef&#39;s associated with a referent. These come directly
+from Referments, and indirectly via taggings on any of the referent&#39;s
+tags</p>
+          
+          
+
+          
+          <div class="method-source-code" id="page_refs-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 27</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_refs</span> <span class="ruby-identifier">kind</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">kind_int</span> = <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">kinds</span>[<span class="ruby-identifier">kind</span>]
+  <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">kind</span><span class="ruby-operator">:</span> <span class="ruby-identifier">kind_int</span>).<span class="ruby-identifier">to_a</span> <span class="ruby-operator">+</span>
+  <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">tagged_by</span>(<span class="ruby-ivar">@object</span>.<span class="ruby-identifier">tag_ids</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">kind</span><span class="ruby-operator">:</span> <span class="ruby-identifier">kind_int</span>).<span class="ruby-identifier">to_a</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-tagged_entities" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">tagged_entities</span><span
+            class="method-args">(type, who=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide the set of entities of a given type that are acquired either: –
+directly, via the Referments, or – indirectly, via taggings on the
+Referent&#39;s expressions</p>
+          
+          
+
+          
+          <div class="method-source-code" id="tagged_entities-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 36</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">tagged_entities</span> <span class="ruby-identifier">type</span>, <span class="ruby-identifier">who</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">entity_ids</span> = <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">camelize</span>, <span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_ids</span>).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:entity_id</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:list</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity_ids</span>).<span class="ruby-identifier">to_a</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:feed</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity_ids</span>).<span class="ruby-identifier">to_a</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:recipe</span>
+      <span class="ruby-keyword">return</span> <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">recipes</span> <span class="ruby-comment"># Recipe.where(id: @object.referments.where(referee_type: &#39;Recipe&#39;).pluck :referee_id)</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:site</span>
+      <span class="ruby-identifier">entity_ids</span> <span class="ruby-operator">+=</span> <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">page_refs</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">kind</span><span class="ruby-operator">:</span> <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">kinds</span>[<span class="ruby-value">:site</span>]).<span class="ruby-identifier">pluck</span> <span class="ruby-value">:site_id</span>
+      <span class="ruby-constant">Site</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity_ids</span>).<span class="ruby-identifier">to_a</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">kind</span><span class="ruby-operator">:</span> <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">kinds</span>[<span class="ruby-identifier">type</span>], <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity_ids</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-title" class="method-detail ">
         
         <div class="method-heading">
@@ -136,9 +429,54 @@
 
           
           <div class="method-source-code" id="title-source">
-            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 5</span>
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 6</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">title</span>
-  (<span class="ruby-identifier">tag</span> = <span class="ruby-identifier">object</span>.<span class="ruby-identifier">canonical_expression</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">object</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">first</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;** no tag **&#39;</span>
+  (<span class="ruby-identifier">tag</span> = <span class="ruby-identifier">object</span>.<span class="ruby-identifier">expression</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;** no tag **&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-visible_tags_of_kind" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">visible_tags_of_kind</span><span
+            class="method-args">(kind, viewer=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Return a list of tags and a label for the collection TODO: these should be
+the tags visible to the given user, not all tags</p>
+          
+          
+
+          
+          <div class="method-source-code" id="visible_tags_of_kind-source">
+            <pre><span class="ruby-comment"># File app/decorators/referent_decorator.rb, line 115</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">visible_tags_of_kind</span> <span class="ruby-identifier">kind</span>, <span class="ruby-identifier">viewer</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">kind</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:parents</span>
+      <span class="ruby-identifier">parent_tags</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:children</span>
+      <span class="ruby-identifier">child_tags</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:relateds</span>
+      <span class="ruby-identifier">related_tags</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:expressions</span>
+      <span class="ruby-identifier">tags</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:synonyms</span>
+      <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_id</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -158,7 +496,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

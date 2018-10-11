@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -75,6 +76,8 @@
   <ul class="link-list" role="directory">
     
     <li class="calls-super" ><a href="#method-i-absorb">#absorb</a>
+    
+    <li class="calls-super" ><a href="#method-i-adopt_gleaning">#adopt_gleaning</a>
     
     <li ><a href="#method-i-assert_tagging">#assert_tagging</a>
     
@@ -160,11 +163,56 @@
 
           
           <div class="method-source-code" id="absorb-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 104</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 122</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>
   <span class="ruby-comment"># Take taggings from the other taggable</span>
   <span class="ruby-identifier">other</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tagging</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag_with</span> <span class="ruby-identifier">tagging</span>.<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">tagging</span>.<span class="ruby-identifier">user_id</span> }
   <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-adopt_gleaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">adopt_gleaning</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>We can&#39;t get here if we&#39;re not <a
+href="Pagerefable.html">Pagerefable</a></p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="adopt_gleaning-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 95</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">adopt_gleaning</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tagstrings</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">results_for</span>(<span class="ruby-string">&#39;Tags&#39;</span>))
+    <span class="ruby-identifier">ts</span> = <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-keyword">self</span>
+    <span class="ruby-identifier">tagstrings</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tagstring</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">tagstring</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:strip</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tagname</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ts</span>.<span class="ruby-identifier">tag_with</span> <span class="ruby-identifier">tagname</span>, <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span> }
+    }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-keyword">super</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -195,7 +243,7 @@
 
           
           <div class="method-source-code" id="incoming_attributes-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 110</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 128</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">incoming_attributes</span> <span class="ruby-identifier">keys</span>
   <span class="ruby-identifier">token_attributes</span> = <span class="ruby-identifier">keys</span>.<span class="ruby-identifier">select</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span> <span class="ruby-identifier">key</span>[<span class="ruby-regexp">/^(visible_|editable_|locked_)?((not?_)?[^_]*_)*(tags|tag_tokens)$/</span>] }.<span class="ruby-identifier">reverse</span>.<span class="ruby-identifier">map</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:to_sym</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class_eval</span> { <span class="ruby-identifier">attr_accessible</span> <span class="ruby-operator">*</span><span class="ruby-identifier">token_attributes</span> }
@@ -237,7 +285,7 @@ means the user can see but not edit</p>
 
           
           <div class="method-source-code" id="method_missing-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 119</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span> <span class="ruby-identifier">namesym</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>
   <span class="ruby-identifier">namestr</span> = <span class="ruby-identifier">namesym</span>.<span class="ruby-identifier">to_s</span>
   <span class="ruby-identifier">is_assignment</span> = <span class="ruby-identifier">namestr</span>.<span class="ruby-identifier">sub!</span>(<span class="ruby-regexp">/=$/</span>, <span class="ruby-string">&#39;&#39;</span>)
@@ -327,7 +375,7 @@ means the user can see but not edit</p>
 
           
           <div class="method-source-code" id="shed_tag-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 99</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 117</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">shed_tag</span> <span class="ruby-identifier">tag_or_id</span>, <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">refute_tagging</span> <span class="ruby-identifier">tag_or_id</span>, (<span class="ruby-identifier">uid</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@tagging_user_id</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -367,7 +415,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="tag_with-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 95</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 113</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_with</span> <span class="ruby-identifier">tag_or_id</span>, <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">assert_tagging</span> <span class="ruby-identifier">tag_or_id</span>, (<span class="ruby-identifier">uid</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@tagging_user_id</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -400,7 +448,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="tagging_tags-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 81</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 88</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_tags</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">filtered_tags</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(
                     <span class="ruby-value">:tagtype_x</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-identifier">options</span>[<span class="ruby-value">:tagtype_x</span>], <span class="ruby-value">:List</span>].<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>
@@ -435,7 +483,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="tagging_tags_of_type-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 76</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 83</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_tags_of_type</span> <span class="ruby-identifier">type_or_types</span>
   <span class="ruby-identifier">filtered_tags</span> <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type_or_types</span>
 <span class="ruby-keyword">end</span></pre>
@@ -468,7 +516,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="tagging_user_id-3D-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 51</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 58</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagging_user_id=</span> <span class="ruby-identifier">id</span>
   <span class="ruby-ivar">@tagging_user_id</span> =
       <span class="ruby-keyword">case</span> <span class="ruby-identifier">id</span>
@@ -512,7 +560,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="uid-3D-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 62</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 69</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">uid=</span> <span class="ruby-identifier">user_id</span>
   <span class="ruby-ivar">@tagging_user_id</span> = <span class="ruby-identifier">user_id</span>.<span class="ruby-identifier">to_i</span>
   <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
@@ -546,7 +594,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="visible_tags-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 68</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 75</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">visible_tags</span> <span class="ruby-identifier">user_id</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">user_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
     <span class="ruby-identifier">user_id</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">user_id</span>
@@ -591,7 +639,7 @@ tag&#39;s current owner if not given)</p>
 
           
           <div class="method-source-code" id="assert_tagging-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 209</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 227</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_tagging</span> <span class="ruby-identifier">tag_or_id</span>, <span class="ruby-identifier">uid</span>
   <span class="ruby-constant">Tagging</span>.<span class="ruby-identifier">find_or_create_by</span> <span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>,
                             <span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">id</span>),
@@ -630,7 +678,7 @@ restricted</p>
 
           
           <div class="method-source-code" id="filtered_tags-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 187</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 205</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">filtered_tags</span> <span class="ruby-identifier">opts</span> = {}
   <span class="ruby-identifier">tagscope</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">unscoped</span>
   <span class="ruby-identifier">tagscope</span> = <span class="ruby-identifier">tagscope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>])) <span class="ruby-keyword">if</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>]
@@ -668,7 +716,7 @@ restricted</p>
 
           
           <div class="method-source-code" id="refute_tagging-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 215</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 233</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">refute_tagging</span> <span class="ruby-identifier">tag_or_id</span>, <span class="ruby-identifier">uid</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">scope</span> = <span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">tag_id</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_or_id</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id</span>.<span class="ruby-identifier">id</span>)
   <span class="ruby-identifier">scope</span> = <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">uid</span>
@@ -703,7 +751,7 @@ restricted</p>
 
           
           <div class="method-source-code" id="set_tag_ids-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 197</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/taggable.rb, line 215</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_tag_ids</span> <span class="ruby-identifier">nids</span>
   <span class="ruby-comment"># Ensure that the user&#39;s tags are all and only those in nids</span>
   <span class="ruby-identifier">oids</span> = <span class="ruby-identifier">tagging_tags</span>.<span class="ruby-identifier">pluck</span> <span class="ruby-value">:id</span>
@@ -732,7 +780,7 @@ restricted</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

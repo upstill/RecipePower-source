@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -99,8 +100,6 @@
     
     <li ><a href="#method-i-absorb">#absorb</a>
     
-    <li ><a href="#method-i-admit_meaning">#admit_meaning</a>
-    
     <li ><a href="#method-i-admit_user">#admit_user</a>
     
     <li ><a href="#method-i-aliases">#aliases</a>
@@ -109,11 +108,15 @@
     
     <li ><a href="#method-i-clashing_tag">#clashing_tag</a>
     
-    <li ><a href="#method-i-disappear">#disappear</a>
+    <li ><a href="#method-i-clashing_tag-3F">#clashing_tag?</a>
+    
+    <li ><a href="#method-i-elide_meaning">#elide_meaning</a>
+    
+    <li ><a href="#method-i-meaning">#meaning</a>
+    
+    <li ><a href="#method-i-meaning-3D">#meaning=</a>
     
     <li class="calls-super" ><a href="#method-i-method_missing">#method_missing</a>
-    
-    <li ><a href="#method-i-project">#project</a>
     
     <li ><a href="#method-i-safe_destroy">#safe_destroy</a>
     
@@ -163,7 +166,7 @@
         
         <div class="method-heading">
           <span class="method-name">assert</span><span
-            class="method-args">(t, opts = {})</span>
+            class="method-args">(tag_or_id_or_name, tagtype=nil, opts = {})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -175,43 +178,64 @@
           <p>Taking either a tag, a string or an id, make sure there&#39;s a
 corresponding tag</p>
 
-<pre>of the given type that&#39;s available to the named user. NB: &#39;t&#39; may be a Tag, but
-not necessarily of the given type, or one available to the user.</pre>
+<pre>of the given type that&#39;s available to the named user. If no type is asserted,
+any type will do.
+
+NB: if a tag is presented, it&#39;s
+not necessarily of the given type, or available to the user. If a type conversion
+is required, the tag returned may differ from that provided.
+
+One wrinkle: if there is a free tag (tagtype=0) that matches the given name (or the name
+of the given tag), it will be retyped to the requested type</pre>
           
           
 
           
           <div class="method-source-code" id="assert-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 249</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">t</span>, <span class="ruby-identifier">opts</span> = {})
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 325</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">tagtype</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">opts</span> = {}
+  <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">opts</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">tagtype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
   <span class="ruby-comment"># Convert tag type, if any, into internal form</span>
-  <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>] = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span>(<span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>]
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">t</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">Fixnum</span>
-    <span class="ruby-comment"># Fetch an existing tag</span>
-    <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">t</span>
-    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-      <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">tagtype</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
+  <span class="ruby-identifier">extant_only</span> = <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:extant_only</span>
+  <span class="ruby-identifier">tag</span> =
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">tag_or_id_or_name</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Fixnum&#39;</span>
+          <span class="ruby-comment"># Fetch an existing tag</span>
+          <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id_or_name</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Tag&#39;</span>
+          <span class="ruby-identifier">tag_or_id_or_name</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">opts</span>[<span class="ruby-value">:matchall</span>] = <span class="ruby-keyword">true</span>
+          <span class="ruby-identifier">opts</span>[<span class="ruby-value">:assert</span>] = <span class="ruby-operator">!</span><span class="ruby-identifier">extant_only</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
+            <span class="ruby-comment"># Look for a matching tag of the correct type, then for an untyped match, then create one</span>
+            <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>) <span class="ruby-operator">||</span>
+                (<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">0</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>) <span class="ruby-operator">||</span>
+                <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">opts</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>)).<span class="ruby-identifier">first</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-comment"># Any type will do (but prefer an extant free tag)</span>
+            <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">tag_or_id_or_name</span>, <span class="ruby-identifier">opts</span>).<span class="ruby-identifier">first</span>
+          <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">nil?</span>
+  <span class="ruby-comment"># Now we&#39;ve found/created a tag, we need to ensure it&#39;s the right type</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">tagtype</span>)
+    <span class="ruby-comment"># We have to be wary of a clash with an existing tag of the target type</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">t</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>)
+      <span class="ruby-comment"># Resolve the clash by using the existing one, absorbing the original if it&#39;s untyped</span>
+      <span class="ruby-identifier">t</span>.<span class="ruby-identifier">absorb</span> <span class="ruby-identifier">tag</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">persisted?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>)
+      <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">t</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-comment"># Clone the tag for another type, but if it&#39;s a free tag, just change types</span>
+      <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">dup</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">persisted?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>)
+      <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">tagtype</span>
     <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">t</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">Tag</span>
-    <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">t</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">opts</span>[<span class="ruby-value">:assert</span>] = <span class="ruby-keyword">true</span>
-    <span class="ruby-identifier">opts</span>[<span class="ruby-value">:matchall</span>] = <span class="ruby-keyword">true</span>
-    <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">t</span>, <span class="ruby-identifier">opts</span>).<span class="ruby-identifier">first</span> <span class="ruby-comment"># strmatch will create a tag if none exists</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">nil?</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-comment"># Now we&#39;ve found/created a tag, we need to ensure it&#39;s the right type (if we care)</span>
-  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">typematch</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>]
-    <span class="ruby-comment"># Clone the tag for another type, but if it&#39;s a free tag, just change types</span>
-    <span class="ruby-identifier">tag</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">dup</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span> <span class="ruby-comment"># If free tag, just change type</span>
-    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>].<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>].<span class="ruby-identifier">first</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:tagtype</span>]
-    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">isGlobal</span> = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:userid</span>].<span class="ruby-identifier">nil?</span> <span class="ruby-comment"># If userid not asserted, globalize it</span>
-    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-comment"># Ensure that the tag is available to the user (or globally, depending)</span>
   <span class="ruby-comment"># NB: Tag.strmatch does this, but not the other ways of getting here</span>
-  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">admit_user</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:userid</span>]
+  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">admit_user</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:userid</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:userid</span>]
+  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save!</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">changed?</span>
   <span class="ruby-identifier">tag</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -246,7 +270,7 @@ not visible to that user</p>
 
           
           <div class="method-source-code" id="available-3F-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 74</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 129</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">available?</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">type_or_types</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">type_or_types</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
     <span class="ruby-identifier">type_or_types</span>, <span class="ruby-identifier">options</span> = <span class="ruby-value">0</span>, <span class="ruby-identifier">type_or_types</span>
@@ -288,7 +312,7 @@ not visible to that user</p>
 
           
           <div class="method-source-code" id="convertTypesByIndex-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 456</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 537</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convertTypesByIndex</span>(<span class="ruby-identifier">tagids</span>, <span class="ruby-identifier">fromindex</span>, <span class="ruby-identifier">toindex</span>, <span class="ruby-identifier">globalize</span> = <span class="ruby-keyword">false</span>)
   <span class="ruby-comment"># Iterate through the tags, keeping those we successfully change.</span>
   <span class="ruby-comment"># XXX We&#39;re assuming that these tags have no semantic information,</span>
@@ -333,7 +357,7 @@ for search purposes</p>
 
           
           <div class="method-source-code" id="normalizeName-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 158</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 212</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">normalizeName</span>(<span class="ruby-identifier">str</span>)
   <span class="ruby-identifier">str</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/[.,&#39;‘’“”&#39;&quot;]+/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">parameterize</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;-&#39;</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">word</span><span class="ruby-operator">|</span> <span class="ruby-identifier">@@wordmap</span>[<span class="ruby-identifier">word</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">word</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;-&#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -368,7 +392,7 @@ making a new tag, but only opening an existing tag to the given user</p>
 
           
           <div class="method-source-code" id="strmatch-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 319</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 404</span>
   <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">opts</span> = {})
     <span class="ruby-identifier">uid</span> = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:userid</span>]
     <span class="ruby-comment"># private_scope = uid ? Tag.find(TagOwner.where(user_id: uid).map(&amp;:tag_id)) : nil</span>
@@ -380,56 +404,52 @@ making a new tag, but only opening an existing tag to the given user</p>
     <span class="ruby-identifier">do_fold</span> = <span class="ruby-identifier">opts</span>[<span class="ruby-value">:fold</span>]
     <span class="ruby-comment"># Case-insensitive lookup</span>
     <span class="ruby-identifier">fuzzyname</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">normalizeName</span> <span class="ruby-identifier">name</span>
+    <span class="ruby-identifier">tags</span> =
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">opts</span>[<span class="ruby-value">:matchall</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">assert</span>
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type</span>
       <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">type_x</span> <span class="ruby-comment"># Specific collection of types</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type_x</span>).<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">type_x</span>).<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>
       <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fuzzyname</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">else</span> <span class="ruby-comment"># Substring match</span>
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>
-        <span class="ruby-identifier">typelist</span> = (<span class="ruby-identifier">type</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">to_s</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-node">&quot;normalized_name like ? AND tagtype IN (#{typelist})&quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
+        <span class="ruby-identifier">typelist</span> = [<span class="ruby-identifier">type</span>].<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>)
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-node">&quot;normalized_name like ? AND tagtype IN (#{typelist})&quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
       <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">type_x</span> <span class="ruby-comment"># Specific collection of types</span>
-        <span class="ruby-identifier">typelist</span> = (<span class="ruby-identifier">type_x</span>.<span class="ruby-identifier">kind_of?</span> <span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">type_x</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">type_x</span>.<span class="ruby-identifier">to_s</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-node">&quot;tagtype IN (#{typelist})&quot;</span>).<span class="ruby-identifier">where</span> <span class="ruby-string">&quot;normalized_name like ?&quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
+        <span class="ruby-identifier">typelist</span> = [<span class="ruby-identifier">type_x</span>].<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:to_s</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>)
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>.<span class="ruby-identifier">not</span>(<span class="ruby-node">&quot;tagtype IN (#{typelist})&quot;</span>).<span class="ruby-identifier">where</span> <span class="ruby-string">&quot;normalized_name like ?&quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
       <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">tags</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-string">&quot;normalized_name like ? &quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span> <span class="ruby-string">&quot;normalized_name like ? &quot;</span>, <span class="ruby-node">&quot;%#{fuzzyname}%&quot;</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">tags</span> = <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">limit</span>(<span class="ruby-value">50</span>)
+    <span class="ruby-identifier">tags</span> = <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">limit</span> <span class="ruby-value">75</span>
     <span class="ruby-comment"># We now have a list of tags which match the input, perhaps fuzzily.</span>
     <span class="ruby-comment"># If we don&#39;t need to assert the full string, we&#39;re done</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">assert</span>
       <span class="ruby-comment"># The tag set will be those which totally match the input. If there are none such, we need to create one</span>
-      <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">empty?</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">present?</span>
         <span class="ruby-comment"># Since these match, we only need to make them visible to the user, if necessary</span>
         <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">admit_user</span> <span class="ruby-identifier">uid</span> } <span class="ruby-keyword">if</span> <span class="ruby-identifier">uid</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">uid</span> <span class="ruby-operator">!=</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>)
       <span class="ruby-keyword">else</span>
         <span class="ruby-comment"># We are to create a tag on the given string (after cleanup), and make it visible to the given user</span>
         <span class="ruby-identifier">name</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">tidyName</span> <span class="ruby-identifier">name</span> <span class="ruby-comment"># Strip/collapse whitespace and commas</span>
         <span class="ruby-keyword">return</span> [] <span class="ruby-keyword">if</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">blank?</span>
-        <span class="ruby-identifier">tag</span> = <span class="ruby-keyword">nil</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-comment"># No type specified</span>
-          <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_or_create_by</span> <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">0</span> <span class="ruby-comment"># It&#39;ll be a free tag, but if you don&#39;t care enough to specify...</span>
-        <span class="ruby-keyword">else</span>
-          <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-comment"># Look for the tag among the given types</span>
-            <span class="ruby-identifier">type</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span> <span class="ruby-keyword">break</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by_name_and_tagtype</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">t</span>) }
-          <span class="ruby-keyword">else</span>
-            <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by_name_and_tagtype</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">type</span>)
-          <span class="ruby-keyword">end</span>
-          <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">nil?</span>
-            <span class="ruby-identifier">type</span> = <span class="ruby-identifier">type</span>.<span class="ruby-identifier">first</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">Array</span>)
-            <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by_name_and_tagtype</span>(<span class="ruby-identifier">name</span>, <span class="ruby-value">0</span>) <span class="ruby-comment"># Convert a free tag to the type, if avail.</span>
-              <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">type</span>
-              <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">save</span>
-            <span class="ruby-keyword">else</span>
-              <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">create</span> <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">name</span>, <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">type</span>
+        <span class="ruby-identifier">tag</span> =
+            <span class="ruby-keyword">if</span> <span class="ruby-identifier">type</span>
+              <span class="ruby-comment"># &#39;type&#39; could be singular or an array</span>
+              <span class="ruby-identifier">types</span> = [<span class="ruby-identifier">type</span>].<span class="ruby-identifier">flatten</span>
+              <span class="ruby-identifier">types</span>.<span class="ruby-identifier">find</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t</span><span class="ruby-operator">|</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by_name_and_tagtype</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">t</span> } <span class="ruby-operator">||</span>
+                  <span class="ruby-keyword">if</span> <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by_name_and_tagtype</span>(<span class="ruby-identifier">name</span>, <span class="ruby-value">0</span>) <span class="ruby-comment"># Convert a free tag to the type, if avail.</span>
+                    <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">update_attribute</span> <span class="ruby-value">:tagtype</span>, <span class="ruby-identifier">types</span>.<span class="ruby-identifier">first</span>
+                    <span class="ruby-identifier">tag</span>
+                  <span class="ruby-keyword">else</span>
+                    <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">create</span> <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">name</span>, <span class="ruby-value">:tagtype</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">types</span>.<span class="ruby-identifier">first</span>
+                  <span class="ruby-keyword">end</span>
+            <span class="ruby-keyword">else</span> <span class="ruby-comment"># No type specified</span>
+              <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_or_create_by</span> <span class="ruby-value">:name</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-value">0</span> <span class="ruby-comment"># It&#39;ll be a free tag, but if you don&#39;t care enough to specify...</span>
             <span class="ruby-keyword">end</span>
-          <span class="ruby-keyword">end</span>
-        <span class="ruby-keyword">end</span>
         <span class="ruby-comment"># If it&#39;s private, make it visible to this user</span>
         <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">admit_user</span> <span class="ruby-identifier">uid</span>
         <span class="ruby-identifier">tags</span> = [<span class="ruby-identifier">tag</span>]
@@ -520,7 +540,7 @@ making a new tag, but only opening an existing tag to the given user</p>
 
           
           <div class="method-source-code" id="strscopes-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 63</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 118</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
   [
     (<span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>).<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;tags&quot;.&quot;normalized_name&quot; LIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>.<span class="ruby-identifier">downcase</span>)
@@ -557,7 +577,7 @@ module when it is included in a taggable</p>
 
           
           <div class="method-source-code" id="taggable-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 89</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 144</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">taggable</span> <span class="ruby-identifier">taggable_class</span>
 
   <span class="ruby-identifier">taggable_type</span> = <span class="ruby-identifier">taggable_class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">underscore</span>
@@ -608,7 +628,7 @@ standards:</p>
 
           
           <div class="method-source-code" id="tidyName-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 137</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 191</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tidyName</span>(<span class="ruby-identifier">str</span>)
   <span class="ruby-identifier">str</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^[\s,]*/</span>,<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/[,\s]*$/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\s+/</span>, <span class="ruby-string">&#39; &#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -634,7 +654,7 @@ standards:</p>
         
         <div class="method-heading">
           <span class="method-name">absorb</span><span
-            class="method-args">(other)</span>
+            class="method-args">(other, delete=true)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -643,76 +663,71 @@ standards:</p>
 
         <div class="method-description">
           
-          
+          <p>Use this tag instead of &#39;other&#39;, i.e., absorb its taggings,
+referents, etc. Either delete the other, or make it a synonym, according to
+&#39;delete&#39; Since either of the tags may disappear, return the
+survivor</p>
           
           
 
           
           <div class="method-source-code" id="absorb-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 180</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 219</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>, <span class="ruby-identifier">delete</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">other</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">id</span>
-  <span class="ruby-comment"># Normal procedure:</span>
-  <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">change_tag</span>(<span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>)
-  <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">change_tag</span>(<span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">id</span>) <span class="ruby-comment"># Change the canonical expression of any referent which uses us</span>
-  <span class="ruby-comment"># Merge the general uses of other as an expression into those of the target</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent_ids</span> = (<span class="ruby-identifier">other</span>.<span class="ruby-identifier">referent_ids</span><span class="ruby-operator">+</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent_ids</span>).<span class="ruby-identifier">uniq</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">primary_meaning</span>
-
-  <span class="ruby-comment"># Take on all owners of the absorbee unless one of them is global</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">isGlobal</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">isGlobal</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">owners</span>.<span class="ruby-identifier">clear</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">owner_ids</span> = (<span class="ruby-identifier">other</span>.<span class="ruby-identifier">owner_ids</span> <span class="ruby-operator">+</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">owner_ids</span>).<span class="ruby-identifier">uniq</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-operator">!</span><span class="ruby-identifier">meaning</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">meaning</span>) <span class="ruby-operator">||</span> ((<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">other</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>)) <span class="ruby-comment"># Make it easy for an unbound tag</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">absorb</span>(<span class="ruby-keyword">self</span>, <span class="ruby-identifier">delete</span>)
   <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
-    <span class="ruby-comment"># Failure: copy errors into the original record and return it</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">v</span> }
-    <span class="ruby-identifier">other</span>
-  <span class="ruby-keyword">else</span>
+  <span class="ruby-comment"># The other may clash with an existing tag of the target type,</span>
+  <span class="ruby-comment"># So get either the other, or its equivalent in the appropriate type</span>
+  <span class="ruby-identifier">other</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">other</span>, <span class="ruby-identifier">tagtype</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">delete</span>
+  <span class="ruby-comment"># ...which may indeed be the original</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-comment"># Normal procedure:</span>
     <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">transaction</span> <span class="ruby-keyword">do</span>
-      <span class="ruby-identifier">other</span>.<span class="ruby-identifier">destroy</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save</span>
+      <span class="ruby-comment"># The important thing here is that we&#39;re making all requisite changes (to Taggings, Referents and Expressions)</span>
+      <span class="ruby-comment"># directly in the database, to ensure consistency</span>
+      <span class="ruby-comment"># Take on all owners of the absorbee unless one of them is global</span>
+      <span class="ruby-identifier">tag_owners</span>.<span class="ruby-identifier">delete_all</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">isGlobal</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">isGlobal</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">delete</span>
+        <span class="ruby-comment"># Redirect taggings, referents and expressions hither</span>
+        <span class="ruby-constant">TagOwnerServices</span>.<span class="ruby-identifier">change_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">isGlobal</span> <span class="ruby-comment"># self.owner_ids = (other.owner_ids + owner_ids).uniq</span>
+        <span class="ruby-constant">TaggingServices</span>.<span class="ruby-identifier">change_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span>
+        <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">change_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span> <span class="ruby-comment"># Change the canonical expression of any referent which uses us</span>
+        <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">change_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-constant">TagOwnerServices</span>.<span class="ruby-identifier">copy_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">isGlobal</span> <span class="ruby-comment"># self.owner_ids = (other.owner_ids + owner_ids).uniq</span>
+        <span class="ruby-comment"># Make this tag synonymous with the other =&gt; Ensure it has a matching set of referents and expressions</span>
+        <span class="ruby-comment"># (taggings are unnecessary b/c the original is surviving)</span>
+        <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">copy_tag</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">id</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-comment"># Merge the general uses of other as an expression into those of the target</span>
+      <span class="ruby-comment"># TODO Need to move any lists named by the other</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">delete</span>
+        <span class="ruby-identifier">other</span>.<span class="ruby-identifier">reload</span>
+        <span class="ruby-identifier">other</span>.<span class="ruby-identifier">destroy</span>
+        <span class="ruby-identifier">other</span> = <span class="ruby-keyword">self</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">other</span> <span class="ruby-operator">!=</span> <span class="ruby-keyword">self</span> <span class="ruby-comment"># No need to monkey with referents if the projection devolved on us</span>
+        <span class="ruby-comment"># Make this tag synonymous with the other by ensuring it has the other&#39;s referents</span>
+        <span class="ruby-comment"># Ensure that we have at least one referent</span>
+        <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">express</span>(<span class="ruby-keyword">self</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">first</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">valid?</span>
+          <span class="ruby-comment"># Failure: copy errors into the original record and return it</span>
+          <span class="ruby-identifier">errors</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">v</span> }
+          <span class="ruby-identifier">raise</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">full_messages</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-comment"># Leave the other as a synonym</span>
+        <span class="ruby-identifier">other</span>.<span class="ruby-identifier">update_attribute</span>(<span class="ruby-value">:referent_id</span>, <span class="ruby-identifier">referent_id</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">referent_id</span>
+        <span class="ruby-constant">ExpressionServices</span>.<span class="ruby-identifier">copy_tag</span> <span class="ruby-identifier">id</span>, <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>
+        <span class="ruby-identifier">other</span>.<span class="ruby-identifier">reload</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">reload</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">self</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+    <span class="ruby-comment"># Errors should be present in the other record</span>
   <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-admit_meaning" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">admit_meaning</span><span
-            class="method-args">(ref, force=false)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Give this tag a primary meaning if it doesn&#39;t already have one or
-we&#39;re forcing the issue</p>
-          
-          
-
-          
-          <div class="method-source-code" id="admit_meaning-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 300</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">admit_meaning</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">force</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-identifier">ref</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">other</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -744,20 +759,14 @@ global</p>
 
           
           <div class="method-source-code" id="admit_user-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 282</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 372</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">admit_user</span>(<span class="ruby-identifier">uid</span> = <span class="ruby-keyword">nil</span>)
-  <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">isGlobal</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">isGlobal</span>
     <span class="ruby-keyword">if</span> (<span class="ruby-identifier">uid</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">uid</span> <span class="ruby-operator">==</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">super_id</span>))
       <span class="ruby-keyword">self</span>.<span class="ruby-identifier">isGlobal</span> = <span class="ruby-keyword">true</span>
-    <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">owners</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">uid</span>) <span class="ruby-comment"># Reality check on the user id</span>
-      <span class="ruby-keyword">begin</span>
-        <span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">uid</span>)
-        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">owners</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">user</span>
-      <span class="ruby-keyword">rescue</span>
-        <span class="ruby-comment"># Take no other action</span>
-      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span><span class="ruby-identifier">owners</span>.<span class="ruby-identifier">exists?</span>(<span class="ruby-identifier">uid</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">uid</span>) <span class="ruby-comment"># Reality check on the user id</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">owners</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">user</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">save</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -790,7 +799,7 @@ losing the distinction between singular and plural</p>
 
           
           <div class="method-source-code" id="aliases-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 446</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 527</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">aliases</span>
   <span class="ruby-identifier">plural</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">pluralize</span>
   <span class="ruby-identifier">singular</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">singularize</span>
@@ -828,7 +837,7 @@ losing the distinction between singular and plural</p>
 
           
           <div class="method-source-code" id="can_absorb-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 58</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 113</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">can_absorb</span> <span class="ruby-identifier">other</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">referent_ids</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">referent_ids</span>)
   (<span class="ruby-identifier">other</span>.<span class="ruby-identifier">normalized_name</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">normalized_name</span>) <span class="ruby-operator">&amp;&amp;</span> ((<span class="ruby-identifier">other</span>.<span class="ruby-identifier">tagtype</span><span class="ruby-operator">==</span><span class="ruby-value">0</span>) <span class="ruby-operator">||</span> (<span class="ruby-identifier">other</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tagtype</span>))
@@ -856,15 +865,16 @@ losing the distinction between singular and plural</p>
 
         <div class="method-description">
           
-          
+          <p>Identify a tag that clashes with the (probably new) name and type of this
+one (if any)</p>
           
           
 
           
           <div class="method-source-code" id="clashing_tag-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 162</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 85</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">clashing_tag</span>
-  <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> [<span class="ruby-identifier">tagtype</span>, <span class="ruby-value">0</span>]).<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other</span><span class="ruby-operator">|</span> <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">id</span> }
+  <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">clashes</span>(<span class="ruby-keyword">self</span>).<span class="ruby-identifier">first</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -876,10 +886,10 @@ losing the distinction between singular and plural</p>
       </div>
 
     
-      <div id="method-i-disappear" class="method-detail ">
+      <div id="method-i-clashing_tag-3F" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">disappear</span><span
+          <span class="method-name">clashing_tag?</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -889,27 +899,120 @@ losing the distinction between singular and plural</p>
 
         <div class="method-description">
           
-          <p>self can&#39;t be saved because some other tag already has its name/type
-combination. Find that tag and make self disappear into it, UNLESS self
-already is typed and the other isn&#39;t, in which case the other
-disappears into self. In any case, nuke the disappeared tag, and save and
-return the survivor NB: this method functions like save but returns either
-the surviving tag (in case of success)</p>
-
-<pre>or the original tag, with errors</pre>
+          <p>Is there a tag that clashes with the (probably new) name and type of this
+one?</p>
           
           
 
           
-          <div class="method-source-code" id="disappear-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 171</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">disappear</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">target</span> = <span class="ruby-identifier">clashing_tag</span>
-    ((<span class="ruby-identifier">target</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>)) <span class="ruby-operator">?</span> <span class="ruby-identifier">absorb</span>(<span class="ruby-identifier">target</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">target</span>.<span class="ruby-identifier">absorb</span>(<span class="ruby-keyword">self</span>)
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">save</span>
-    <span class="ruby-keyword">self</span>
+          <div class="method-source-code" id="clashing_tag-3F-source">
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 80</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">clashing_tag?</span>
+  <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">clashes</span>(<span class="ruby-keyword">self</span>).<span class="ruby-identifier">exists?</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-elide_meaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">elide_meaning</span><span
+            class="method-args">(ref)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure that we no longer use this ref as a meaning</p>
+          
+          
+
+          
+          <div class="method-source-code" id="elide_meaning-source">
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 383</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">elide_meaning</span> <span class="ruby-identifier">ref</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">ref</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">ref</span>
+    <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">delete</span> <span class="ruby-identifier">ref</span>
+    <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span> <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-identifier">expr</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">referent</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">ref</span> }
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-meaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">meaning</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="meaning-source">
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">meaning</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> <span class="ruby-operator">||=</span> (<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">referents</span>.<span class="ruby-identifier">first</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-meaning-3D" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">meaning=</span><span
+            class="method-args">(ref)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="meaning-3D-source">
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 102</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">meaning=</span><span class="ruby-identifier">ref</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">primary_meaning</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referents</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">ref</span> <span class="ruby-keyword">unless</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent_ids</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">id</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -955,64 +1058,26 @@ of that class, and hence the defining of the access methods.</p>
 
           
           <div class="method-source-code" id="method_missing-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 111</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 166</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">method_missing</span>(<span class="ruby-identifier">meth</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>)
   <span class="ruby-identifier">meth</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">to_s</span>
   <span class="ruby-comment"># methstr = meth</span>
   <span class="ruby-comment"># methstr = &quot;:#{methstr}&quot; if meth.is_a? Symbol</span>
   <span class="ruby-comment"># puts &quot;Tag method &#39;#{methstr}&#39; missing&quot;</span>
-  <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">taggable_class</span> = ((<span class="ruby-identifier">match</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/(.+)_ids/</span>)) <span class="ruby-operator">?</span> <span class="ruby-identifier">match</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">meth</span>).<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>
-    <span class="ruby-identifier">proof_method</span> = <span class="ruby-value">:tag_with</span>
-    <span class="ruby-comment"># puts &quot;Extracted taggable_class &#39;#{taggable_class}&#39;&quot;</span>
-    <span class="ruby-comment"># puts &quot;#{taggable_class} &quot;+(taggable_class.method_defined?(proof_method) ? &quot;has &quot; : &quot;does not have &quot;)+&quot;&#39;#{proof_method}&#39; method&quot;</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">taggable_class</span>.<span class="ruby-identifier">method_defined?</span>(<span class="ruby-identifier">proof_method</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">method_defined?</span>(<span class="ruby-identifier">meth</span>)
+  <span class="ruby-identifier">taggable_class</span> = ((<span class="ruby-identifier">match</span> = <span class="ruby-identifier">meth</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/(.+)_ids/</span>)) <span class="ruby-operator">?</span> <span class="ruby-identifier">match</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">meth</span>).<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">camelize</span>.<span class="ruby-identifier">constantize</span>
+  <span class="ruby-identifier">proof_method</span> = <span class="ruby-value">:tag_with</span>
+  <span class="ruby-comment"># puts &quot;Extracted taggable_class &#39;#{taggable_class}&#39;&quot;</span>
+  <span class="ruby-comment"># puts &quot;#{taggable_class} &quot;+(taggable_class.method_defined?(proof_method) ? &quot;has &quot; : &quot;does not have &quot;)+&quot;&#39;#{proof_method}&#39; method&quot;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">taggable_class</span>.<span class="ruby-identifier">method_defined?</span>(<span class="ruby-identifier">proof_method</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">method_defined?</span>(<span class="ruby-identifier">meth</span>)
+    <span class="ruby-keyword">begin</span>
       <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">meth</span>).<span class="ruby-identifier">call</span> <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-comment"># puts &quot;Failed to define method &#39;#{methstr}&#39;&quot;</span>
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-comment"># puts &quot;D&#39;OH! Couldn&#39;t create association between Tag and #{taggable_class}&quot;</span>
       <span class="ruby-keyword">super</span>
     <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-    <span class="ruby-comment"># puts &quot;D&#39;OH! Couldn&#39;t create association between Tag and #{taggable_class}&quot;</span>
+  <span class="ruby-keyword">else</span>
     <span class="ruby-keyword">super</span>
   <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-project" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">project</span><span
-            class="method-args">(tt)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Move the tag to a new type, possibly merging it with another tag of
-identical spelling</p>
-          
-          
-
-          
-          <div class="method-source-code" id="project-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 239</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">project</span>(<span class="ruby-identifier">tt</span>)
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">self</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">typematch</span>(<span class="ruby-identifier">tt</span>) <span class="ruby-comment"># We&#39;re already in the target type!</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">typenum</span> = <span class="ruby-identifier">tt</span>
-  <span class="ruby-identifier">save</span>
-  <span class="ruby-identifier">clashing_tag</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">disappear</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1043,7 +1108,7 @@ identical spelling</p>
 
           
           <div class="method-source-code" id="safe_destroy-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 53</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 108</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">safe_destroy</span>
   <span class="ruby-identifier">destroy</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">empty?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1076,7 +1141,7 @@ identical spelling</p>
 
           
           <div class="method-source-code" id="synonyms-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 472</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 553</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">synonyms</span>(<span class="ruby-identifier">opts</span> = {})
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">tags</span> }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1110,17 +1175,21 @@ ensuring the tagtype has a value</p>
 
           
           <div class="method-source-code" id="tagqa-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 210</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 278</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagqa</span>
   <span class="ruby-comment"># Clean up the name by removing/collapsing whitespace</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;Running &#39;tagqa&#39;&quot;</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">tidyName</span> <span class="ruby-identifier">name</span>
   <span class="ruby-comment"># ...and setting the normalized name</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">normalized_name</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">normalizeName</span> <span class="ruby-identifier">name</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tagtype</span> = <span class="ruby-value">0</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tagtype</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">clashing_tag</span>
-  <span class="ruby-comment"># Shouldn&#39;t be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:key</span>] = <span class="ruby-string">&quot;Tag can&#39;t be saved because of possible redundancy&quot;</span>
-  <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">clashing_tag?</span>
+    <span class="ruby-comment"># Shouldn&#39;t be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:key</span>] = <span class="ruby-string">&quot;Tag can&#39;t be saved because of possible redundancy&quot;</span>
+    <span class="ruby-keyword">false</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1152,11 +1221,16 @@ ambiguities</p>
 
           
           <div class="method-source-code" id="typedname-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 225</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 297</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typedname</span> <span class="ruby-identifier">include_type</span>=<span class="ruby-keyword">false</span>, <span class="ruby-identifier">include_ref</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-identifier">name</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">include_type</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">typenum</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>)
-  <span class="ruby-identifier">referent_str</span> = (<span class="ruby-identifier">include_ref</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">referent_id</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-string">&#39; &#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">referent_id</span>.<span class="ruby-identifier">to_s</span>)) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-node">%Q{#{name} [#{typename}#{referent_str}]}</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">name</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">include_type</span>
+  <span class="ruby-identifier">type_label</span> =
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">include_ref</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">meaning</span>
+    <span class="ruby-node">&quot;#{meaning.model_name.human} ##{meaning.id}&quot;</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">typename</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-node">%Q{#{name} [#{type_label}]}</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1187,7 +1261,7 @@ ambiguities</p>
 
           
           <div class="method-source-code" id="typenum-3D-source">
-            <pre><span class="ruby-comment"># File app/models/tag.rb, line 231</span>
+            <pre><span class="ruby-comment"># File app/models/tag.rb, line 308</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typenum=</span>(<span class="ruby-identifier">tt</span>)
   <span class="ruby-comment"># Need to be careful: the tag needs to agree in type with any expressions that include it</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">typenum</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">typematch</span>(<span class="ruby-identifier">tt</span>) <span class="ruby-comment"># Don&#39;t do anything if the type isn&#39;t changing</span>
@@ -1212,7 +1286,7 @@ ambiguities</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -63,15 +64,21 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-i-block_to_submit">#block_to_submit</a>
+    
     <li ><a href="#method-i-button_to_submit">#button_to_submit</a>
     
     <li ><a href="#method-i-homelink">#homelink</a>
+    
+    <li ><a href="#method-i-link_to_dialog">#link_to_dialog</a>
     
     <li ><a href="#method-i-link_to_submit">#link_to_submit</a>
     
     <li ><a href="#method-i-linkpath">#linkpath</a>
     
     <li ><a href="#method-i-linkto_options">#linkto_options</a>
+    
+    <li ><a href="#method-i-polymorphic_link">#polymorphic_link</a>
     
     <li ><a href="#method-i-touchpath">#touchpath</a>
     
@@ -107,6 +114,41 @@
        <header>
          <h3>Public Instance Methods</h3>
        </header>
+
+    
+      <div id="method-i-block_to_submit" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">block_to_submit</span><span
+            class="method-args">(path_or_options, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="block_to_submit-source">
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 38</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">block_to_submit</span> <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">link_options</span> = <span class="ruby-identifier">linkto_options</span> <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">path</span> = <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:path</span>
+  <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">path</span>, <span class="ruby-identifier">link_options</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-i-button_to_submit" class="method-detail ">
@@ -155,7 +197,10 @@ size: large, small, mini</p>
   <span class="ruby-identifier">path</span> = <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:path</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">with_form</span>
     <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:class</span>].<span class="ruby-identifier">sub!</span> <span class="ruby-regexp">/\bsubmit\b/</span>, <span class="ruby-string">&#39;&#39;</span> <span class="ruby-comment"># Remove the &#39;submit&#39; class from the button</span>
-    <span class="ruby-identifier">button_to</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-value">:remote</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>, <span class="ruby-value">:form_class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;ujs-submit&#39;</span>)
+    <span class="ruby-identifier">button_to</span> <span class="ruby-identifier">label</span>,
+              <span class="ruby-identifier">path_or_options</span>,
+              <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-value">:remote</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>,
+                                 <span class="ruby-value">:form_class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;inline ujs-submit&#39;</span>)
   <span class="ruby-keyword">else</span> <span class="ruby-comment"># If the submission isn&#39;t a simple get request, we use a (secure) form</span>
     <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span>, <span class="ruby-identifier">link_options</span>
   <span class="ruby-keyword">end</span>
@@ -191,16 +236,26 @@ methods, as available</p>
 
           
           <div class="method-source-code" id="homelink-source">
-            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 123</span>
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 162</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">decorator</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">decorate</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>)
+  <span class="ruby-comment">#### Special processing for various models</span>
+  <span class="ruby-identifier">action</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:action</span>]
+  <span class="ruby-identifier">cssclass</span> = <span class="ruby-node">&quot;#{options[:class]} entity #{decorator.object.class.to_s.underscore}&quot;</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">User</span>
+      <span class="ruby-comment"># homelink user, options.merge(:action =&gt; :collection, :class =&gt; &quot;#{options[:class]} #{user_subclass user}&quot;)</span>
+      <span class="ruby-identifier">action</span> = <span class="ruby-value">:collection</span>
+      <span class="ruby-identifier">cssclass</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39; &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">user_subclass</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>) <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-identifier">user_subclass</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Referent</span>
+      <span class="ruby-comment"># decorator.object = decorator.object.becomes(Referent)</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Site</span>, <span class="ruby-constant">Tag</span>
+      <span class="ruby-identifier">action</span> = <span class="ruby-value">:associated</span>
+  <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">data</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] <span class="ruby-operator">||</span> {}
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:report</span>] = <span class="ruby-identifier">touchpath</span> <span class="ruby-identifier">decorator</span>
-  <span class="ruby-identifier">classname</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">underscore</span>
+  <span class="ruby-identifier">data</span>[<span class="ruby-value">:report</span>] = <span class="ruby-identifier">touchpath</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:for_user</span>]
 
-  <span class="ruby-identifier">cssclass</span> = <span class="ruby-node">&quot;#{options[:class]} entity #{classname}&quot;</span>
-
-  <span class="ruby-identifier">title</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span>
+  <span class="ruby-identifier">title</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||</span> (<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">title</span> <span class="ruby-keyword">rescue</span> <span class="ruby-node">&quot;Untitled #{decorator.human_name}&quot;</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:truncate</span>]
     <span class="ruby-identifier">title</span> = <span class="ruby-identifier">title</span>.<span class="ruby-identifier">truncate</span>(<span class="ruby-identifier">options</span>[<span class="ruby-value">:truncate</span>])
   <span class="ruby-keyword">end</span>
@@ -222,14 +277,19 @@ methods, as available</p>
           <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>, <span class="ruby-identifier">title</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">cssclass</span>
         <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">link</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">title</span>,
-                          <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:action</span>]),
-                          {<span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-value">:partial</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Open Locally&#39;</span> }.
-                              <span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>).
-                              <span class="ruby-identifier">merge</span>(<span class="ruby-identifier">data</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">data</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">data</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">empty?</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">cssclass</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; clicker&#39;</span>).
-                              <span class="ruby-identifier">except</span>(<span class="ruby-value">:action</span>, <span class="ruby-value">:truncate</span>).
-                              <span class="ruby-identifier">compact</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:external_link</span>)
+    <span class="ruby-identifier">link</span> =
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">lp</span> = <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">action</span>)
+          <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">title</span>,
+                         <span class="ruby-identifier">lp</span>,
+                         {<span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-value">:partial</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Open Locally&#39;</span>}.
+                             <span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>).
+                             <span class="ruby-identifier">merge</span>(<span class="ruby-identifier">data</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">data</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">data</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">empty?</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">cssclass</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; clicker&#39;</span>).
+                             <span class="ruby-identifier">except</span>(<span class="ruby-value">:action</span>, <span class="ruby-value">:truncate</span>).
+                             <span class="ruby-identifier">compact</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">title</span>.<span class="ruby-identifier">html_safe</span>
+        <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:local_only</span>] <span class="ruby-operator">||</span> <span class="ruby-operator">!</span><span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:external_link</span>)
       <span class="ruby-identifier">link</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
           <span class="ruby-identifier">link_to</span>(<span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">external_link</span>,
                   {
@@ -242,7 +302,7 @@ methods, as available</p>
           )
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:nuke_button</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:nuke_button</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-identifier">response_service</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>
     <span class="ruby-identifier">link</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&#39;&#39;</span>,
                            <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>,
                            <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;glyphicon glyphicon-remove&#39;</span>,
@@ -255,6 +315,39 @@ methods, as available</p>
   <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>,
               <span class="ruby-identifier">link</span>,
               <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{item_partial_class :homelink, decorator}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-link_to_dialog" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">link_to_dialog</span><span
+            class="method-args">(label, path, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a link to run a dialog</p>
+          
+          
+
+          
+          <div class="method-source-code" id="link_to_dialog-source">
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 51</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">link_to_dialog</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:json</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -285,11 +378,11 @@ methods, as available</p>
 
           
           <div class="method-source-code" id="link_to_submit-source">
-            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 35</span>
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-identifier">link_options</span> = <span class="ruby-identifier">linkto_options</span> <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">options</span>
-  <span class="ruby-identifier">path</span> = <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:path</span>
-  <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span>, <span class="ruby-identifier">link_options</span>
+      <span class="ruby-identifier">path</span> = <span class="ruby-identifier">link_options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:path</span>
+      <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">path</span>, <span class="ruby-identifier">link_options</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -305,7 +398,7 @@ methods, as available</p>
         
         <div class="method-heading">
           <span class="method-name">linkpath</span><span
-            class="method-args">(object, action=nil)</span>
+            class="method-args">(object_or_decorator, action=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -314,19 +407,20 @@ methods, as available</p>
 
         <div class="method-description">
           
-          
+          <p>Provide a sensible internal link to the object</p>
           
           
 
           
           <div class="method-source-code" id="linkpath-source">
-            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 110</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">linkpath</span> <span class="ruby-identifier">object</span>, <span class="ruby-identifier">action</span>=<span class="ruby-keyword">nil</span>
-  (<span class="ruby-identifier">action</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-identifier">action</span>, <span class="ruby-identifier">object</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
-      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:collection</span>, <span class="ruby-identifier">object</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
-      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:contents</span>, <span class="ruby-identifier">object</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
-      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:associated</span>, <span class="ruby-identifier">object</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
-      <span class="ruby-identifier">polymorphic_path</span>(<span class="ruby-identifier">object</span>)
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 125</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">linkpath</span> <span class="ruby-identifier">object_or_decorator</span>, <span class="ruby-identifier">action</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">action</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> [<span class="ruby-string">&#39;show&#39;</span>, <span class="ruby-value">:show</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">action</span>
+  (<span class="ruby-identifier">action</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-identifier">action</span>, <span class="ruby-identifier">object_or_decorator</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
+      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:collection</span>, <span class="ruby-identifier">object_or_decorator</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
+      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:contents</span>, <span class="ruby-identifier">object_or_decorator</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
+      (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:associated</span>, <span class="ruby-identifier">object_or_decorator</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-operator">||</span>
+      (<span class="ruby-identifier">polymorphic_path</span>(<span class="ruby-identifier">object_or_decorator</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -369,18 +463,18 @@ folded into the data attribute of the link</p>
 
           
           <div class="method-source-code" id="linkto_options-source">
-            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 51</span>
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 65</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">linkto_options</span> <span class="ruby-identifier">path_or_options</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">query_option_names</span> = [ <span class="ruby-value">:mode</span> ] <span class="ruby-comment"># These get folded into the query UNLESS we&#39;re going to a page</span>
-  <span class="ruby-identifier">class_option_names</span> = [ <span class="ruby-value">:trigger</span>, <span class="ruby-value">:submit</span>, <span class="ruby-value">:preload</span> ]
-  <span class="ruby-identifier">attribute_names</span> = [ <span class="ruby-value">:id</span>, <span class="ruby-value">:class</span>, <span class="ruby-value">:style</span>, <span class="ruby-value">:data</span>, <span class="ruby-value">:onclick</span>, <span class="ruby-value">:onload</span>, <span class="ruby-value">:method</span>, <span class="ruby-value">:rel</span>, <span class="ruby-value">:title</span> ]
+  <span class="ruby-identifier">query_option_names</span> = [<span class="ruby-value">:mode</span>] <span class="ruby-comment"># These get folded into the query UNLESS we&#39;re going to a page</span>
+  <span class="ruby-identifier">class_option_names</span> = [<span class="ruby-value">:trigger</span>, <span class="ruby-value">:submit</span>, <span class="ruby-value">:preload</span>]
+  <span class="ruby-identifier">attribute_names</span> = [<span class="ruby-value">:id</span>, <span class="ruby-value">:class</span>, <span class="ruby-value">:style</span>, <span class="ruby-value">:data</span>, <span class="ruby-value">:onclick</span>, <span class="ruby-value">:onload</span>, <span class="ruby-value">:method</span>, <span class="ruby-value">:rel</span>, <span class="ruby-value">:title</span>]
   <span class="ruby-comment"># We do NOT want a remote response: it asks for Javascript</span>
   <span class="ruby-identifier">options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">clone</span>
   <span class="ruby-identifier">handler_class</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:handler_class</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;submit&#39;</span>
   <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:remote</span>
 
   <span class="ruby-comment"># Pull out button options and set classes appropriately to express the link as a button</span>
-  <span class="ruby-identifier">bootstrap_button_options</span> <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">bootstrap_button_options</span> <span class="ruby-identifier">options</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-identifier">bootstrap_button_options</span>) <span class="ruby-comment"># Not in the mailer context</span>
 
   <span class="ruby-identifier">query</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:query</span>) <span class="ruby-operator">||</span> {} <span class="ruby-comment"># Remove the query options from consideration and include them in the path</span>
   <span class="ruby-identifier">format</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:format</span>) <span class="ruby-operator">||</span> <span class="ruby-value">:json</span> <span class="ruby-comment"># Submitting for JSON unless otherwise stipulated</span>
@@ -390,7 +484,7 @@ folded into the data attribute of the link</p>
   <span class="ruby-keyword">else</span>
     <span class="ruby-comment"># These options get included in the link&#39;s class</span>
     <span class="ruby-comment"># Pull out all class options and assert class &quot;submit&quot; to attract Javascript handling</span>
-    <span class="ruby-identifier">class_list</span> = [ <span class="ruby-identifier">handler_class</span> ]
+    <span class="ruby-identifier">class_list</span> = [<span class="ruby-identifier">handler_class</span>]
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">class_options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">class_option_names</span>)
       <span class="ruby-identifier">class_list</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">class_options</span>.<span class="ruby-identifier">keep_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">v</span> }.<span class="ruby-identifier">keys</span>
     <span class="ruby-keyword">end</span>
@@ -409,7 +503,7 @@ folded into the data attribute of the link</p>
 
   <span class="ruby-comment"># Sequester all options except HTML standard link options in the data attribute</span>
   <span class="ruby-identifier">link_options</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span> <span class="ruby-operator">*</span><span class="ruby-identifier">attribute_names</span>
-  <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&quot;Your Tooltip Here&quot;</span>
+  <span class="ruby-identifier">link_options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;Your Tooltip Here&#39;</span>
   <span class="ruby-identifier">data</span> = (<span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] <span class="ruby-operator">||=</span> {}).<span class="ruby-identifier">merge</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">except</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">attribute_names</span>)
   <span class="ruby-identifier">data</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
     <span class="ruby-comment"># data with keys of the form &#39;data-.*&#39; get folded in directly</span>
@@ -438,11 +532,61 @@ folded into the data attribute of the link</p>
       </div>
 
     
+      <div id="method-i-polymorphic_link" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">polymorphic_link</span><span
+            class="method-args">(object_or_decorator, absolute_or_relative=:relative, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Like polymorphic_path and <a
+href="LinkHelper.html#method-i-polymorphic_link">polymorphic_link</a>,
+except – the choice of …path or …link is given by a flag,
+absolute_or_relative, taking :absolute or :relative – accommodates the case
+in which the object is really a decorator – uses the base class of the
+object</p>
+          
+          
+
+          
+          <div class="method-source-code" id="polymorphic_link-source">
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 144</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">polymorphic_link</span> <span class="ruby-identifier">object_or_decorator</span>, <span class="ruby-identifier">absolute_or_relative</span>=<span class="ruby-value">:relative</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">absolute_or_relative</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">absolute_or_relative</span>, <span class="ruby-identifier">options</span> = <span class="ruby-value">:relative</span>, <span class="ruby-identifier">absolute_or_relative</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Derive the object as a member of its base class</span>
+  <span class="ruby-identifier">obj</span> = <span class="ruby-identifier">object_or_decorator</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">object_or_decorator</span>.<span class="ruby-identifier">object</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">object_or_decorator</span>
+  <span class="ruby-identifier">bc</span> = <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">base_class</span>
+  <span class="ruby-identifier">obj</span> = <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-identifier">bc</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">bc</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">class</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">absolute_or_relative</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:relative</span>
+      <span class="ruby-identifier">polymorphic_path</span> <span class="ruby-identifier">obj</span>, <span class="ruby-identifier">options</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:absolute</span>
+      <span class="ruby-identifier">polymorphic_url</span> <span class="ruby-identifier">obj</span>, <span class="ruby-identifier">options</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-touchpath" class="method-detail ">
         
         <div class="method-heading">
           <span class="method-name">touchpath</span><span
-            class="method-args">(decorator)</span>
+            class="method-args">(decorator, for_user=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -457,9 +601,11 @@ folded into the data attribute of the link</p>
 
           
           <div class="method-source-code" id="touchpath-source">
-            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 118</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">touchpath</span> <span class="ruby-identifier">decorator</span>
-  (<span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:touch</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>]) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+            <pre><span class="ruby-comment"># File app/helpers/link_helper.rb, line 134</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">touchpath</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">for_user</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">for_user</span> <span class="ruby-operator">||=</span> (<span class="ruby-keyword">defined?</span>(<span class="ruby-identifier">current_user</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">current_user</span>) <span class="ruby-comment"># Who will get the touch</span>
+    <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:touch</span>, <span class="ruby-identifier">decorator</span>], <span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">for_user</span>.<span class="ruby-identifier">id</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -479,7 +625,7 @@ folded into the data attribute of the link</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

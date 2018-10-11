@@ -157,7 +157,7 @@ class ApplicationController < ActionController::Base
       params[:flash].each { |k, v| flash.now[k.to_sym] = v }
     end
     logger.debug "FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):"
-    view_context.flash_hash.each { |k, v| logger.debug "   #{k}: #{v}" }
+    flash.each { |type, message| logger.debug "   #{type}: #{message}" }
   end
 
   def report_cookie_string

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -172,7 +173,7 @@ THE CURRENT USER</p>
             <pre><span class="ruby-comment"># File app/models/list.rb, line 84</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert</span> <span class="ruby-identifier">name</span>, <span class="ruby-identifier">user</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-constant">STDERR</span>.<span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Asserting tag &#39;#{name}&#39; for user ##{user.id} (#{user.name})&quot;</span>
-  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;List&#39;</span>, <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>)
+  <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">name</span>, <span class="ruby-string">&#39;List&#39;</span>, <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>)
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;...asserted with id #{tag.id}&quot;</span>
   <span class="ruby-identifier">l</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">owner_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">name_tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">owner</span><span class="ruby-operator">:</span> <span class="ruby-identifier">user</span>, <span class="ruby-identifier">name_tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>)
   <span class="ruby-identifier">l</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:create</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">l</span>.<span class="ruby-identifier">id</span>
@@ -207,7 +208,7 @@ THE CURRENT USER</p>
 
           
           <div class="method-source-code" id="excluded_tag_types-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 107</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 108</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">excluded_tag_types</span>
   [ <span class="ruby-value">:Unit</span>, <span class="ruby-value">:PantrySection</span>, <span class="ruby-value">:StoreSection</span>, <span class="ruby-value">:Question</span>, <span class="ruby-value">:List</span>, <span class="ruby-value">:Epitaph</span>, <span class="ruby-value">:Time</span> ]
 <span class="ruby-keyword">end</span></pre>
@@ -244,6 +245,7 @@ THE CURRENT USER</p>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
   <span class="ruby-identifier">onscope</span> = <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">unscoped</span>
   [
+      <span class="ruby-identifier">onscope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;lists&quot;.&quot;description&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>)
   ] <span class="ruby-operator">+</span>
   <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strscopes</span>(<span class="ruby-identifier">matcher</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">inward</span>=<span class="ruby-keyword">nil</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">joinspec</span> = <span class="ruby-identifier">inward</span> <span class="ruby-operator">?</span> {<span class="ruby-value">:name_tag</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">inward</span>} <span class="ruby-operator">:</span> <span class="ruby-value">:name_tag</span>
@@ -292,7 +294,7 @@ can&#39;t be fetched to cache</p>
 
           
           <div class="method-source-code" id="entities-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 142</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">entities</span>
   <span class="ruby-identifier">ordering</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:entity</span>).<span class="ruby-identifier">compact</span>
 <span class="ruby-keyword">end</span></pre>
@@ -325,7 +327,7 @@ can&#39;t be fetched to cache</p>
 
           
           <div class="method-source-code" id="entity_count-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 146</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 147</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_count</span>
   <span class="ruby-identifier">ordering</span>.<span class="ruby-identifier">count</span>
 <span class="ruby-keyword">end</span></pre>
@@ -358,7 +360,7 @@ can&#39;t be fetched to cache</p>
 
           
           <div class="method-source-code" id="included_tag_tokens-3D-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 111</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 112</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">included_tag_tokens=</span><span class="ruby-identifier">idstring</span>
   <span class="ruby-identifier">filter_options</span> = { <span class="ruby-identifier">user_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagging_user_id</span>, <span class="ruby-identifier">assert</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">tagtype_x</span><span class="ruby-operator">:</span> <span class="ruby-constant">List</span>.<span class="ruby-identifier">excluded_tag_types</span> }
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">included_tag_ids</span> = <span class="ruby-constant">TokenInput</span>.<span class="ruby-identifier">parse_tokens</span>(<span class="ruby-identifier">idstring</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span> <span class="ruby-comment"># parse_tokens analyzes each token in the list as either integer or string</span>
@@ -394,7 +396,7 @@ can&#39;t be fetched to cache</p>
 
           
           <div class="method-source-code" id="name-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 118</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 119</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span>
   (<span class="ruby-identifier">name_tag</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">name_tag</span>.<span class="ruby-identifier">name</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&quot;&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -431,11 +433,11 @@ can&#39;t be fetched to cache</p>
 
           
           <div class="method-source-code" id="name-3D-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 123</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 124</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">name=</span>(<span class="ruby-identifier">new_name</span>)
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Setting name &#39;#{new_name}&#39;&quot;</span>
   <span class="ruby-identifier">oname</span> = <span class="ruby-identifier">name_tag</span>
-  <span class="ruby-identifier">newname</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">new_name</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;List&quot;</span>, <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">owner</span>.<span class="ruby-identifier">id</span>)
+  <span class="ruby-identifier">newname</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">assert</span>(<span class="ruby-identifier">new_name</span>, <span class="ruby-string">&quot;List&quot;</span>, <span class="ruby-identifier">userid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">owner</span>.<span class="ruby-identifier">id</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">oname</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">newname</span>
     <span class="ruby-identifier">oname</span>.<span class="ruby-identifier">dependent_lists</span>.<span class="ruby-identifier">delete</span> <span class="ruby-keyword">self</span>
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">name_tag</span> = <span class="ruby-identifier">newname</span>
@@ -479,7 +481,7 @@ private</p>
 
           
           <div class="method-source-code" id="propagate_privacy-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 171</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 172</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">propagate_privacy</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">name_tag</span>
   <span class="ruby-identifier">name_tag</span>.<span class="ruby-identifier">isGlobal</span> = <span class="ruby-constant">List</span>.<span class="ruby-identifier">exists?</span> <span class="ruby-identifier">name_tag_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">name_tag_id</span>, <span class="ruby-identifier">availability</span><span class="ruby-operator">:</span> [<span class="ruby-value">0</span>,<span class="ruby-value">1</span>]
@@ -514,7 +516,7 @@ private</p>
 
           
           <div class="method-source-code" id="remove-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 164</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 165</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">remove</span> <span class="ruby-identifier">entity</span>
   <span class="ruby-identifier">ordering</span>.<span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">stores?</span> <span class="ruby-identifier">entity</span> }
   <span class="ruby-identifier">save</span>
@@ -548,7 +550,7 @@ private</p>
 
           
           <div class="method-source-code" id="store-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 156</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 157</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">store</span> <span class="ruby-identifier">entity</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">stores?</span> <span class="ruby-identifier">entity</span>
     <span class="ruby-identifier">ordering</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-constant">ListItem</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>)
@@ -585,7 +587,7 @@ private</p>
 
           
           <div class="method-source-code" id="stores-3F-source">
-            <pre><span class="ruby-comment"># File app/models/list.rb, line 151</span>
+            <pre><span class="ruby-comment"># File app/models/list.rb, line 152</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">stores?</span> <span class="ruby-identifier">entity</span>
   <span class="ruby-identifier">ordering</span>.<span class="ruby-identifier">any?</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">stores?</span> <span class="ruby-identifier">entity</span> }
 <span class="ruby-keyword">end</span></pre>
@@ -635,7 +637,7 @@ private</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

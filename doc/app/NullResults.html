@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,7 +69,7 @@
   <ul class="link-list">
   
   
-    <li><a class="include" href="NullCache.html">NullCache</a>
+    <li><a class="include" href="DefaultSearch.html">DefaultSearch</a>
   
   
   
@@ -91,6 +92,8 @@
     
     <li ><a href="#method-i-has_query-3F">#has_query?</a>
     
+    <li ><a href="#method-i-itemscope">#itemscope</a>
+    
   </ul>
 </div>
 
@@ -104,8 +107,8 @@
 
   <section class="description">
     
-<p>A <a href="NullCache.html">NullCache</a> is a shell for handling the case
-where there ARE no results to manage (eg., in a show action)</p>
+<p>A <a href="DefaultSearch.html">DefaultSearch</a> is a shell for handling
+the case where there ARE no results to manage (eg., in a show action)</p>
 
   </section>
 
@@ -129,6 +132,19 @@ where there ARE no results to manage (eg., in a show action)</p>
       <div id="attribute-i-admin_view" class="method-detail">
         <div class="method-heading attribute-method-heading">
           <span class="method-name">admin_view</span><span
+            class="attribute-access-type">[R]</span>
+        </div>
+
+        <div class="method-description">
+        
+        
+        
+        </div>
+      </div>
+      
+      <div id="attribute-i-org" class="method-detail">
+        <div class="method-heading attribute-method-heading">
+          <span class="method-name">org</span><span
             class="attribute-access-type">[R]</span>
         </div>
 
@@ -194,7 +210,7 @@ where there ARE no results to manage (eg., in a show action)</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 433</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 547</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">params</span>={}
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">send</span> <span class="ruby-value">:&#39;params=&#39;</span>, <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">extract_params</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-comment"># We blow off any querytags, but respond with an empty array</span>
@@ -230,10 +246,10 @@ where there ARE no results to manage (eg., in a show action)</p>
 
           
           <div class="method-source-code" id="params_needed-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 428</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 542</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">params_needed</span>
   <span class="ruby-comment"># [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, &#39;&#39; ] ]</span>
-  [ <span class="ruby-value">:admin_view</span> ]
+  [<span class="ruby-value">:admin_view</span>, [<span class="ruby-value">:org</span>, <span class="ruby-value">:newest</span>]]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -272,9 +288,44 @@ where there ARE no results to manage (eg., in a show action)</p>
 
           
           <div class="method-source-code" id="has_query-3F-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 440</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_query?</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 554</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">has_query?</span> <span class="ruby-comment"># public</span>
   <span class="ruby-keyword">false</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-itemscope" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">itemscope</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Every meaningful <a href="ResultsCache.html">ResultsCache</a> MUST define
+an itemscope for the base set of results Return a scope or array for the
+entire collection of items</p>
+          
+          
+
+          
+          <div class="method-source-code" id="itemscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 560</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscope</span>
+  <span class="ruby-identifier">raise</span> <span class="ruby-string">&#39;Abstract Method itemscope&#39;</span> <span class="ruby-comment">#  needs to be overridden</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -294,7 +345,7 @@ where there ARE no results to manage (eg., in a show action)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

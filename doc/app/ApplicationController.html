@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -101,8 +102,6 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-i-after_sign_in_path_for">#after_sign_in_path_for</a>
-    
     <li ><a href="#method-i-approve">#approve</a>
     
     <li class="calls-super" ><a href="#method-i-build_resource">#build_resource</a>
@@ -111,15 +110,19 @@
     
     <li ><a href="#method-i-default_next_path">#default_next_path</a>
     
+    <li ><a href="#method-i-defer_invitation">#defer_invitation</a>
+    
     <li ><a href="#method-i-defer_welcome_dialogs">#defer_welcome_dialogs</a>
     
-    <li ><a href="#method-i-log_serve">#log_serve</a>
+    <li ><a href="#method-i-destroy">#destroy</a>
+    
+    <li ><a href="#method-i-edit">#edit</a>
     
     <li ><a href="#method-i-login_required">#login_required</a>
     
-    <li ><a href="#method-i-no_action_error">#no_action_error</a>
+    <li ><a href="#method-i-menu">#menu</a>
     
-    <li ><a href="#method-i-notifiable_notification">#notifiable_notification</a>
+    <li ><a href="#method-i-no_action_error">#no_action_error</a>
     
     <li ><a href="#method-i-orphantagid">#orphantagid</a>
     
@@ -128,8 +131,6 @@
     <li ><a href="#method-i-present">#present</a>
     
     <li ><a href="#method-i-redirect_to_modal">#redirect_to_modal</a>
-    
-    <li ><a href="#method-i-redirect_to_target_or_default">#redirect_to_target_or_default</a>
     
     <li ><a href="#method-i-render_fp">#render_fp</a>
     
@@ -189,44 +190,6 @@
        </header>
 
     
-      <div id="method-i-after_sign_in_path_for" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">after_sign_in_path_for</span><span
-            class="method-args">(resource_or_scope)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>This is an override of the Devise method to determine where to go after
-login. If there was a redirect to the login page, we go back to the source
-of the redirect. Otherwise, new users go to the welcome page and
-previously-logged-in users to the queries page.</p>
-          
-          
-
-          
-          <div class="method-source-code" id="after_sign_in_path_for-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 409</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">after_sign_in_path_for</span> <span class="ruby-identifier">resource_or_scope</span>
-  <span class="ruby-comment"># Process any pending notifications</span>
-  <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">issue_notifications</span> <span class="ruby-identifier">current_user</span>
-  <span class="ruby-identifier">stored_location_for</span>(<span class="ruby-identifier">resource_or_scope</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-i-approve" class="method-detail ">
         
         <div class="method-heading">
@@ -246,7 +209,7 @@ previously-logged-in users to the queries page.</p>
 
           
           <div class="method-source-code" id="approve-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 44</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">approve</span>
   <span class="ruby-identifier">update_and_decorate</span>
   <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">approved</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:approve</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Y&#39;</span>
@@ -287,7 +250,7 @@ previously-logged-in users to the queries page.</p>
 
           
           <div class="method-source-code" id="build_resource-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 380</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 413</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">build_resource</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
   <span class="ruby-keyword">super</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">omniauth</span> = <span class="ruby-identifier">session</span>[<span class="ruby-value">:omniauth</span>]
@@ -325,7 +288,7 @@ previously-logged-in users to the queries page.</p>
 
           
           <div class="method-source-code" id="check_flash-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 155</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 153</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">check_flash</span>
   <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:notice</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:notice</span>]
   <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:error</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:error</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:error</span>]
@@ -333,7 +296,7 @@ previously-logged-in users to the queries page.</p>
     <span class="ruby-identifier">params</span>[<span class="ruby-value">:flash</span>].<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>] = <span class="ruby-identifier">v</span> }
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;FLASH messages extant for #{params[:controller]}##{params[:action]} (check_flash):&quot;</span>
-  <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">flash_hash</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;   #{k}: #{v}&quot;</span> }
+  <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;   #{type}: #{message}&quot;</span> }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -365,12 +328,42 @@ current user&#39;s collection or home</p>
 
           
           <div class="method-source-code" id="default_next_path-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 101</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">default_next_path</span>
-  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">notif</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">notif</span>.<span class="ruby-identifier">shared</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">linkpath</span> <span class="ruby-identifier">notif</span>.<span class="ruby-identifier">shared</span>
-  <span class="ruby-keyword">end</span>
-    (<span class="ruby-identifier">current_user</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">home_path</span>)
+  <span class="ruby-identifier">current_user</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">home_path</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-defer_invitation" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">defer_invitation</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Simple path to remove a pending invitation (can still be re-invoked later)</p>
+          
+          
+
+          
+          <div class="method-source-code" id="defer_invitation-source">
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 72</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">defer_invitation</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -395,16 +388,27 @@ current user&#39;s collection or home</p>
 
         <div class="method-description">
           
-          <p>When a user signs up or accepts an invitation, they&#39;ll see these
+          <pre class="ruby"><span class="ruby-comment"># This is an override of the Devise method to determine where to go after login.</span>
+<span class="ruby-comment"># If there was a redirect to the login page, we go back to the source of the redirect.</span>
+<span class="ruby-comment"># Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">after_sign_in_path_for</span> <span class="ruby-identifier">resource_or_scope</span>
+  <span class="ruby-comment"># Process any pending notifications</span>
+  <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">issue_notifications</span> <span class="ruby-identifier">current_user</span>
+  <span class="ruby-identifier">stored_location_for</span>(<span class="ruby-identifier">resource_or_scope</span>)
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p># When a user signs up or accepts an invitation, they&#39;ll see these
 dialogs, in reverse order</p>
           
           
 
           
           <div class="method-source-code" id="defer_welcome_dialogs-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 422</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 453</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">defer_welcome_dialogs</span>
-  <span class="ruby-identifier">defer_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;/cookmark&quot;</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>, <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:json</span>
+  <span class="ruby-identifier">dialog</span> = <span class="ruby-identifier">specs_matching</span>(<span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;/collect&#39;</span>, <span class="ruby-identifier">format</span><span class="ruby-operator">:</span> <span class="ruby-value">:html</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">new_page_ref_path</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;/cookmark&#39;</span>
+  <span class="ruby-identifier">defer_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dialog</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>, <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:json</span>
   <span class="ruby-comment"># defer_request path: &quot;/popup/need_to_know?context=signup&quot;, :mode =&gt; :modal, :format =&gt; :json</span>
   <span class="ruby-comment"># defer_request path: &quot;/popup/starting_step3?context=signup&quot;, :mode =&gt; :modal, :format =&gt; :json</span>
   <span class="ruby-comment"># defer_request path: &quot;/popup/starting_step2?context=signup&quot;, :mode =&gt; :modal, :format =&gt; :json</span>
@@ -419,10 +423,10 @@ dialogs, in reverse order</p>
       </div>
 
     
-      <div id="method-i-log_serve" class="method-detail ">
+      <div id="method-i-destroy" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">log_serve</span><span
+          <span class="method-name">destroy</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -432,35 +436,60 @@ dialogs, in reverse order</p>
 
         <div class="method-description">
           
-          <p>Track the session, saving session events when the session goes stale</p>
+          <p>Generic action for destroying an entity</p>
           
           
 
           
-          <div class="method-source-code" id="log_serve-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 126</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">log_serve</span>
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">%Q{RPEVENT\tServe\t#{current_user.id if current_user}\t#{params[:controller]}\t#{params[:action]}\t#{params[:id]}}</span>
-  <span class="ruby-comment"># Call RpEvent to heed the passback data for an event trigger</span>
-  <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">trigger_event</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:rpevent</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:rpevent</span>]
-  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">current_user</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:start_time</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:last_time</span>]
-    <span class="ruby-identifier">time_now</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
-    <span class="ruby-identifier">elapsed_time</span> = <span class="ruby-identifier">time_now</span> <span class="ruby-operator">-</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:last_time</span>]
-    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">elapsed_time</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">10</span>.<span class="ruby-identifier">minutes</span>)
-      <span class="ruby-identifier">session</span>[<span class="ruby-value">:last_time</span>] = <span class="ruby-identifier">time_now</span>
-      <span class="ruby-identifier">session</span>[<span class="ruby-value">:serve_count</span>] <span class="ruby-operator">+=</span> <span class="ruby-value">1</span>
-      <span class="ruby-keyword">return</span>
-    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">last_serve</span> = <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">serve</span>.<span class="ruby-identifier">last</span>(<span class="ruby-identifier">current_user</span>)
-      <span class="ruby-comment"># Close out and update the previous session to record serve count and last time</span>
-      <span class="ruby-identifier">last_serve</span>.<span class="ruby-identifier">data</span> = {<span class="ruby-identifier">serve_count</span><span class="ruby-operator">:</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:serve_count</span>]}
-      <span class="ruby-identifier">last_serve</span>.<span class="ruby-identifier">updated_at</span> = <span class="ruby-identifier">session</span>[<span class="ruby-value">:last_time</span>]
-      <span class="ruby-identifier">last_serve</span>.<span class="ruby-identifier">save</span>
+          <div class="method-source-code" id="destroy-source">
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 56</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">update_and_decorate</span>
+    <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">destroy</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-comment"># resource_errors_to_flash(@decorator.object)</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">object</span> }
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">flash</span>[<span class="ruby-value">:popup</span>] = <span class="ruby-node">&quot;#{@decorator.human_name} is no more.&quot;</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:update</span>
     <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-node">&quot;Can&#39;t locate #{params[:controller].singularize} ##{params[:id] || &#39;&lt;unknown&gt;&#39;}&quot;</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">last_serve</span> = <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">current_user</span>, <span class="ruby-value">:serve</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">nil</span>, <span class="ruby-value">:serve_count</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
-  <span class="ruby-identifier">session</span>[<span class="ruby-value">:serve_count</span>] = <span class="ruby-value">1</span>
-  <span class="ruby-identifier">session</span>[<span class="ruby-value">:start_time</span>] = <span class="ruby-identifier">session</span>[<span class="ruby-value">:last_time</span>] = <span class="ruby-identifier">last_serve</span>.<span class="ruby-identifier">created_at</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-edit" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">edit</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="edit-source">
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 42</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
+  <span class="ruby-identifier">update_and_decorate</span>
+  <span class="ruby-identifier">smartrender</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -476,7 +505,7 @@ dialogs, in reverse order</p>
         
         <div class="method-heading">
           <span class="method-name">login_required</span><span
-            class="method-args">(format=nil)</span>
+            class="method-args">(options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -491,8 +520,8 @@ dialogs, in reverse order</p>
 
           
           <div class="method-source-code" id="login_required-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 351</span>
-<span class="ruby-keyword">def</span>  <span class="ruby-identifier">login_required</span> <span class="ruby-identifier">format</span>=<span class="ruby-keyword">nil</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 379</span>
+<span class="ruby-keyword">def</span>  <span class="ruby-identifier">login_required</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">logged_in?</span>
     <span class="ruby-identifier">summary</span> = <span class="ruby-identifier">action_summary</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:controller</span>], <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
     <span class="ruby-identifier">alert</span> = <span class="ruby-node">&quot;You need to be logged in to an account on RecipePower to #{summary}.&quot;</span>
@@ -501,22 +530,70 @@ dialogs, in reverse order</p>
       <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">uuid</span> = <span class="ruby-identifier">session</span>.<span class="ruby-identifier">id</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">true</span>
-      <span class="ruby-identifier">defer_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">fullpath</span>, <span class="ruby-identifier">format</span><span class="ruby-operator">:</span> <span class="ruby-identifier">format</span><span class="ruby-operator">||</span><span class="ruby-identifier">request</span>.<span class="ruby-identifier">format</span>.<span class="ruby-identifier">symbol</span>
+      <span class="ruby-identifier">request_options</span> = { <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">fullpath</span>,
+          <span class="ruby-identifier">format</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:injector</span> <span class="ruby-operator">?</span> <span class="ruby-value">:json</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">format</span>.<span class="ruby-identifier">symbol</span>)
+      }.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span> <span class="ruby-value">:path</span>, <span class="ruby-value">:format</span>)
+      <span class="ruby-identifier">defer_request</span> <span class="ruby-identifier">request_options</span>
       <span class="ruby-identifier">redirect_to</span>(<span class="ruby-keyword">if</span> (<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">format</span> <span class="ruby-operator">==</span> <span class="ruby-value">:json</span>)
                     <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-identifier">alert</span>
-                    <span class="ruby-identifier">new_user_registration_url</span>(<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">redirect_params</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:sourcehome</span>))
+                    <span class="ruby-identifier">defer_invitation_path</span>(<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">redirect_params</span>(<span class="ruby-identifier">params</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:sourcehome</span>)).<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">notif</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;signup&#39;</span>))
                   <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:injector</span>
                     <span class="ruby-identifier">new_user_session_url</span>(<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">redirect_params</span> <span class="ruby-identifier">params</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-value">:sourcehome</span>))
+                  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:login_direct</span>]
+                    <span class="ruby-identifier">new_user_registration_url</span> <span class="ruby-identifier">notif</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;signin&#39;</span>, <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sorry, members only&#39;</span>, <span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">alert</span><span class="ruby-operator">:</span> <span class="ruby-identifier">alert</span>}
                   <span class="ruby-keyword">else</span>
                     <span class="ruby-comment"># Redirect to the home page with a login popup trigger</span>
-                    <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">page_with_trigger</span> <span class="ruby-identifier">home_path</span>, <span class="ruby-identifier">new_user_registration_url</span>(<span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sorry, members only&#39;</span>, <span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">alert</span><span class="ruby-operator">:</span> <span class="ruby-identifier">alert</span>})
+                    <span class="ruby-identifier">home_path</span>
                   <span class="ruby-keyword">end</span>
       )
     <span class="ruby-keyword">else</span>
       <span class="ruby-identifier">report_cookie_string</span>
-      <span class="ruby-identifier">report_session</span>
+      <span class="ruby-identifier">report_session</span> <span class="ruby-string">&quot;Unauthorized Login:&quot;</span>
       <span class="ruby-identifier">raise</span> <span class="ruby-identifier">alert</span>
       <span class="ruby-identifier">render</span> <span class="ruby-value">:file</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;public/401.html&quot;</span>, <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:unauthorized</span>
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-menu" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">menu</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Generate a navtab menu as denoted by <a href="which">params</a> NB: JSON
+ONLY!!!</p>
+          
+          
+
+          
+          <div class="method-source-code" id="menu-source">
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 78</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">menu</span>
+  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> <span class="ruby-keyword">do</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-node">%w{ collections friends my_lists feeds home }</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:which</span>]
+        <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">replacements</span><span class="ruby-operator">:</span> [ <span class="ruby-identifier">navmenu_replacement</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:which</span>].<span class="ruby-identifier">to_sym</span>) ] }.<span class="ruby-identifier">to_json</span>, <span class="ruby-value">:content_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;application/json&#39;</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-node">&quot;Unknown menu type &#39;#{params[:which]}&#39;&quot;</span>
+        <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>
+      <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -549,54 +626,9 @@ dialogs, in reverse order</p>
 
           
           <div class="method-source-code" id="no_action_error-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 308</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 336</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">no_action_error</span>
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">home_path</span>, <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Sorry, action not found&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-notifiable_notification" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">notifiable_notification</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="notifiable_notification-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 108</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">notifiable_notification</span>
-  <span class="ruby-comment"># Check for a pending notification. If it&#39;s to be autosaved, do that and simply set a flash notice. Otherwise, return it</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">notification_token</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">notif</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>)
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">notif</span>.<span class="ruby-identifier">autosave</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">msg</span> = <span class="ruby-identifier">notif</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">act</span>
-        <span class="ruby-comment"># All is well; clear the pending notification</span>
-        <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">notification_token</span> = <span class="ruby-keyword">nil</span>
-        <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:notice</span>] = <span class="ruby-identifier">msg</span>
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-keyword">nil</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">notif</span>
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -627,7 +659,7 @@ dialogs, in reverse order</p>
 
           
           <div class="method-source-code" id="orphantagid-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 336</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 364</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">orphantagid</span>(<span class="ruby-identifier">tagid</span>)
   <span class="ruby-string">&quot;orphantag_&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">tagid</span>.<span class="ruby-identifier">to_s</span>
 <span class="ruby-keyword">end</span></pre>
@@ -660,7 +692,7 @@ dialogs, in reverse order</p>
 
           
           <div class="method-source-code" id="permission_denied-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 285</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 313</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">permission_denied</span>
   <span class="ruby-identifier">action</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
              <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;index&quot;</span>
@@ -706,15 +738,16 @@ dialogs, in reverse order</p>
 
         <div class="method-description">
           
-          <p>Get a presenter for the object from within a controller</p>
+          <p>Get a presenter for the object from within a controller TODO Should we be
+detecting a presenter on the subclass if such?</p>
           
           
 
           
           <div class="method-source-code" id="present-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 151</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 149</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">present</span> <span class="ruby-identifier">object</span>
-  <span class="ruby-node">&quot;#{object.class}Presenter&quot;</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">object</span>, <span class="ruby-identifier">view_context</span>
+  <span class="ruby-node">&quot;#{object.class.base_class.to_s}Presenter&quot;</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">object</span>, <span class="ruby-identifier">view_context</span>, <span class="ruby-identifier">current_user_or_guest</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -746,46 +779,12 @@ then redirecting to it</p>
 
           
           <div class="method-source-code" id="redirect_to_modal-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 343</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 371</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">redirect_to_modal</span> <span class="ruby-identifier">dialog</span>, <span class="ruby-identifier">page</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-comment"># Transfer the contents of the flash to the trigger</span>
   <span class="ruby-identifier">options</span> = {<span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-value">:modal</span>}
   <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">type</span>, <span class="ruby-identifier">message</span><span class="ruby-operator">|</span> <span class="ruby-identifier">options</span>[<span class="ruby-node">&quot;flash[#{type}]&quot;</span>] = <span class="ruby-identifier">message</span> } <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-identifier">flash</span>)
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">page_with_trigger</span>(<span class="ruby-identifier">page</span>, <span class="ruby-identifier">assert_query</span>(<span class="ruby-identifier">dialog</span>, <span class="ruby-identifier">options</span>))
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-redirect_to_target_or_default" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">redirect_to_target_or_default</span><span
-            class="method-args">(default, *args)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>This overrides the method for returning to a request after logging in.
-Formerly, <a href=":return_to">session</a> handled this recovery</p>
-          
-          
-
-          
-          <div class="method-source-code" id="redirect_to_target_or_default-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 417</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">redirect_to_target_or_default</span>(<span class="ruby-identifier">default</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">args</span>)
-  <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">deferred_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">default</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -817,7 +816,7 @@ streaming items</p>
 
           
           <div class="method-source-code" id="render_fp-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 241</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 252</span>
   <span class="ruby-keyword">def</span> <span class="ruby-identifier">render_fp</span> <span class="ruby-identifier">fp</span>
     <span class="ruby-ivar">@filtered_presenter</span> = <span class="ruby-identifier">fp</span>
     <span class="ruby-ivar">@decorator</span> = <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">decorator</span>
@@ -836,8 +835,25 @@ streaming items</p>
         <span class="ruby-identifier">render</span> <span class="ruby-value">:show</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">decorator</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@decorator</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">viewparams</span> }
       <span class="ruby-keyword">when</span> <span class="ruby-value">:items</span> <span class="ruby-comment"># Stream items into the stream&#39;s container</span>
         <span class="ruby-identifier">renderings</span> = [ { <span class="ruby-identifier">deletions</span><span class="ruby-operator">:</span> [<span class="ruby-node">&quot;.stream-tail.#{fp.stream_id}&quot;</span>] } ]
-        <span class="ruby-keyword">while</span> <span class="ruby-identifier">item</span> = <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">next_item</span> <span class="ruby-keyword">do</span>
-          <span class="ruby-identifier">renderings</span> <span class="ruby-operator">&lt;&lt;</span> { <span class="ruby-identifier">elmt</span><span class="ruby-operator">:</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">render_item</span> <span class="ruby-identifier">item</span>, <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">item_mode</span> } }
+        <span class="ruby-identifier">items</span> = []
+        <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;Fetch items for display: &#39;</span> <span class="ruby-keyword">do</span>
+          <span class="ruby-keyword">while</span> <span class="ruby-identifier">item</span> = <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">next_item</span> <span class="ruby-keyword">do</span>
+            <span class="ruby-identifier">items</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">item</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">items</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">renderings</span> <span class="ruby-operator">&lt;&lt;</span> {
+              <span class="ruby-identifier">elmt</span><span class="ruby-operator">:</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) {
+                <span class="ruby-identifier">admin_sensitive</span> = [<span class="ruby-value">:table</span>, <span class="ruby-value">:card</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">item_mode</span>
+                <span class="ruby-comment"># cache item do</span>
+                <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-node">&quot;Render item ##{item.id}: &quot;</span> <span class="ruby-keyword">do</span>
+                  <span class="ruby-identifier">cache</span> [<span class="ruby-identifier">item</span>, <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">item_mode</span>, <span class="ruby-identifier">admin_sensitive</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>] <span class="ruby-keyword">do</span>
+                    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Cache miss rendering element #{item}&quot;</span>
+                    <span class="ruby-identifier">view_context</span>.<span class="ruby-identifier">render_item</span> <span class="ruby-identifier">item</span>, <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">item_mode</span>
+                  <span class="ruby-keyword">end</span>
+                <span class="ruby-keyword">end</span>
+              }
+          }
         <span class="ruby-keyword">end</span>
         <span class="ruby-identifier">renderings</span> <span class="ruby-operator">&lt;&lt;</span> { <span class="ruby-identifier">elmt</span><span class="ruby-operator">:</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;filtered_presenter/present/#{fp.tail_partial}&quot;</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">decorator</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@decorator</span>, <span class="ruby-identifier">viewparams</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">viewparams</span> } } } <span class="ruby-keyword">if</span> <span class="ruby-identifier">fp</span>.<span class="ruby-identifier">next_path</span>
         <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> <span class="ruby-identifier">renderings</span>
@@ -894,7 +910,7 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
 
           
           <div class="method-source-code" id="render_to_string-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 192</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 197</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">render_to_string</span>(<span class="ruby-operator">*</span>)
   <span class="ruby-identifier">orig_stream</span> = <span class="ruby-identifier">response</span>.<span class="ruby-identifier">stream</span>
   <span class="ruby-keyword">super</span>
@@ -932,7 +948,7 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
 
           
           <div class="method-source-code" id="report_cookie_string-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 165</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 163</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">report_cookie_string</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;COOKIE_STRING:&quot;</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">cs</span> = <span class="ruby-identifier">request</span>.<span class="ruby-identifier">env</span>[<span class="ruby-string">&quot;rack.request.cookie_string&quot;</span>]
@@ -953,7 +969,7 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
         
         <div class="method-heading">
           <span class="method-name">report_session</span><span
-            class="method-args">()</span>
+            class="method-args">(context)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -968,13 +984,15 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
 
           
           <div class="method-source-code" id="report_session-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 172</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">report_session</span>
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;COOKIES:&quot;</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 170</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">report_session</span> <span class="ruby-identifier">context</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;XXXXXXXXXXXXXXXX #{context} at #{Time.now}: XXXXXXXXXXXXXXXX&quot;</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;COOKIES: &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;</span>
   <span class="ruby-identifier">response</span>.<span class="ruby-identifier">cookies</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span>, <span class="ruby-identifier">v</span><span class="ruby-operator">|</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;#{k}: #{v}&quot;</span> }
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; COOKIES&quot;</span>
   <span class="ruby-keyword">begin</span>
     <span class="ruby-identifier">sessid</span> = <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>
-      (<span class="ruby-identifier">session</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:id</span>] <span class="ruby-operator">:</span> (<span class="ruby-identifier">session</span>.<span class="ruby-identifier">id</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:id</span>))) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&lt;NO id for SESSION&gt;&#39;</span>
+      (<span class="ruby-identifier">session</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:id</span>] <span class="ruby-operator">:</span> (<span class="ruby-identifier">session</span>.<span class="ruby-identifier">id</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:id</span>))) <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&lt;SESSION with no id&gt;&#39;</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-string">&#39;&lt;NO SESSION&gt;&#39;</span>
     <span class="ruby-keyword">end</span>
@@ -982,8 +1000,13 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
   <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
     <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;DANGER! Accessing session caused error &#39;#{e}&#39;&quot;</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;SESSION Contents:&quot;</span>
-  <span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;rack.session&#39;</span>].<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;\t#{key}: &#39;#{env[&#39;rack.session&#39;][key]}&#39;&quot;</span>}
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;SESSION Contents: &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">sess</span> = <span class="ruby-identifier">env</span>[<span class="ruby-string">&#39;rack.session&#39;</span>]
+                <span class="ruby-identifier">sess</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span> <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;\t#{key}: &#39;#{sess[key]}&#39;&quot;</span>}
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;NO env[&#39;rack.session&#39;]!!!&quot;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt; SESSION&quot;</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;UUID: #{response_service.uuid}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1015,7 +1038,7 @@ href="http://blog.sorah.jp/2013/07/28/render_to_string-in-ac-live">blog.sorah.jp
 
           
           <div class="method-source-code" id="rescue_action_in_public-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 316</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 344</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">rescue_action_in_public</span>
   <span class="ruby-identifier">x</span>=<span class="ruby-value">2</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1049,7 +1072,7 @@ context</p>
 
           
           <div class="method-source-code" id="response_service-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 332</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 360</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">response_service</span>
   <span class="ruby-ivar">@response_service</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">setup_response_service</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1082,7 +1105,7 @@ context</p>
 
           
           <div class="method-source-code" id="setup_response_service-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 322</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 350</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">setup_response_service</span>
   <span class="ruby-comment"># @user = current_user_or_guest</span>
   <span class="ruby-ivar">@response_service</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">ResponseServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">params</span>, <span class="ruby-identifier">session</span>, <span class="ruby-identifier">request</span>
@@ -1120,41 +1143,47 @@ context</p>
 
           
           <div class="method-source-code" id="smartrender-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 202</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 207</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">smartrender</span> <span class="ruby-identifier">renderopts</span>={}
-  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span> = <span class="ruby-identifier">renderopts</span>[<span class="ruby-value">:action</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
-  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">renderopts</span>[<span class="ruby-value">:url</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">original_url</span>
-  <span class="ruby-identifier">renderopts</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">render_params</span> <span class="ruby-identifier">renderopts</span>
-  <span class="ruby-comment"># Give the stream a crack at it</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">fp</span> = <span class="ruby-constant">FilteredPresenter</span>.<span class="ruby-identifier">build</span>(<span class="ruby-identifier">view_context</span>,
-                                  <span class="ruby-identifier">response_service</span>,
-                                  <span class="ruby-identifier">params</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">viewerid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">current_user_or_guest_id</span>, <span class="ruby-identifier">admin_view</span><span class="ruby-operator">:</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>),
-                                  <span class="ruby-ivar">@decorator</span>)
-    <span class="ruby-identifier">render_fp</span> <span class="ruby-identifier">fp</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> <span class="ruby-keyword">do</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:modal</span>
-          <span class="ruby-comment"># Run the request as a dialog within the home or collection page</span>
-          <span class="ruby-identifier">redirect_to_modal</span> <span class="ruby-identifier">url</span>
-        <span class="ruby-keyword">else</span>
-          <span class="ruby-identifier">render</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span>, <span class="ruby-identifier">renderopts</span>
-        <span class="ruby-keyword">end</span>
+  <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;smartrender&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span> = <span class="ruby-identifier">renderopts</span>[<span class="ruby-value">:action</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">renderopts</span>[<span class="ruby-value">:url</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">original_url</span>
+    <span class="ruby-identifier">renderopts</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">render_params</span> <span class="ruby-identifier">renderopts</span>
+    <span class="ruby-comment"># Give the stream a crack at it</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">fp</span> = <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span>(<span class="ruby-string">&#39;Building FilteredPresenter&#39;</span>) <span class="ruby-keyword">do</span>
+      <span class="ruby-constant">FilteredPresenter</span>.<span class="ruby-identifier">build</span> <span class="ruby-identifier">view_context</span>,
+                              <span class="ruby-identifier">response_service</span>,
+                              <span class="ruby-identifier">params</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">viewerid</span><span class="ruby-operator">:</span> <span class="ruby-identifier">current_user_or_guest_id</span>, <span class="ruby-identifier">admin_view</span><span class="ruby-operator">:</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>),
+                              <span class="ruby-ivar">@decorator</span>
+    <span class="ruby-keyword">end</span>
+      <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-node">&quot;Rendering #{fp.class}&quot;</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-identifier">render_fp</span> <span class="ruby-identifier">fp</span>
       <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
-        <span class="ruby-keyword">case</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span>
-          <span class="ruby-keyword">when</span> <span class="ruby-value">:modal</span>, <span class="ruby-value">:injector</span>
-            <span class="ruby-identifier">dialog</span> = <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">renderopts</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> (<span class="ruby-ivar">@layout</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">false</span>), <span class="ruby-identifier">formats</span><span class="ruby-operator">:</span> [<span class="ruby-string">&#39;html&#39;</span>])
-            <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">dlog</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dialog</span>, <span class="ruby-identifier">how</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;bootstrap&#39;</span> }.<span class="ruby-identifier">to_json</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:content_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;application/json&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> <span class="ruby-keyword">do</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span> <span class="ruby-operator">==</span> <span class="ruby-value">:modal</span>
+            <span class="ruby-comment"># Run the request as a dialog within the home or collection page</span>
+            <span class="ruby-identifier">redirect_to_modal</span> <span class="ruby-identifier">url</span>
           <span class="ruby-keyword">else</span>
-            <span class="ruby-comment"># Render a replacement for the pagelet partial, as if it were rendered on the page</span>
-            <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;layouts/pagelet&#39;</span> <span class="ruby-comment"># Respond with JSON instructions to replace the pagelet appropriately</span>
+            <span class="ruby-identifier">render</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span>, <span class="ruby-identifier">renderopts</span>
+          <span class="ruby-keyword">end</span>
         <span class="ruby-keyword">end</span>
-      }
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">js</span> {
-        <span class="ruby-comment"># XXX??? Must have set @partial in preparation</span>
-        <span class="ruby-identifier">render</span> <span class="ruby-identifier">renderopts</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;capture&#39;</span>)
-      }
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
+          <span class="ruby-keyword">case</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">mode</span>
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:modal</span>, <span class="ruby-value">:injector</span>
+              <span class="ruby-identifier">dialog</span> = <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">renderopts</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">action</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> (<span class="ruby-ivar">@layout</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">false</span>), <span class="ruby-identifier">formats</span><span class="ruby-operator">:</span> [<span class="ruby-string">&#39;html&#39;</span>])
+              <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">dlog</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dialog</span>, <span class="ruby-identifier">how</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;bootstrap&#39;</span>}.<span class="ruby-identifier">to_json</span>, <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:content_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;application/json&#39;</span>
+            <span class="ruby-keyword">else</span>
+              <span class="ruby-comment"># Render a replacement for the pagelet partial, as if it were rendered on the page</span>
+              <span class="ruby-identifier">render</span> <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;layouts/pagelet&#39;</span> <span class="ruby-comment"># Respond with JSON instructions to replace the pagelet appropriately</span>
+          <span class="ruby-keyword">end</span>
+        }
+        <span class="ruby-identifier">format</span>.<span class="ruby-identifier">js</span> {
+          <span class="ruby-comment"># XXX??? Must have set @partial in preparation</span>
+          <span class="ruby-identifier">render</span> <span class="ruby-identifier">renderopts</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;capture&#39;</span>)
+        }
+      <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1192,18 +1221,20 @@ context</p>
 
           
           <div class="method-source-code" id="stored_location_for-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 391</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 424</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">stored_location_for</span>(<span class="ruby-identifier">resource_or_scope</span>)
   <span class="ruby-comment"># If user is logging in to complete some process, we return</span>
   <span class="ruby-comment"># the path to completing the capture/tagging process</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span>
     <span class="ruby-identifier">deferred_request</span>
   <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">sign_in_count</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">2</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">specs</span> = <span class="ruby-identifier">specs_matching</span>(<span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:html</span>)
+      <span class="ruby-identifier">deferred_request</span> <span class="ruby-identifier">specs</span>
+    <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">sign_in_count</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">2</span>
       <span class="ruby-identifier">flash</span> = {<span class="ruby-identifier">success</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above.&quot;</span>}
-      <span class="ruby-identifier">deferred_request</span>(<span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> <span class="ruby-identifier">flash</span>), <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:html</span>)
+      <span class="ruby-identifier">deferred_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> <span class="ruby-identifier">flash</span>), <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:html</span>
     <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">deferred_request</span>(<span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>), <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:html</span>)
+      <span class="ruby-identifier">deferred_request</span> <span class="ruby-identifier">path</span><span class="ruby-operator">:</span> <span class="ruby-identifier">collection_user_path</span>(<span class="ruby-identifier">current_user</span>), <span class="ruby-value">:format</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:html</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">super</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1236,7 +1267,7 @@ context</p>
 
           
           <div class="method-source-code" id="timeout_error-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 312</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 340</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">timeout_error</span>
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">authentications_path</span>, <span class="ruby-value">:notice</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;Sorry, access to that page took too long.&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1254,7 +1285,7 @@ context</p>
         
         <div class="method-heading">
           <span class="method-name">update_and_decorate</span><span
-            class="method-args">(entity=nil, do_touch=false)</span>
+            class="method-args">(entity=nil, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -1277,21 +1308,22 @@ variable for the entity according to its class,</p>
 
           
           <div class="method-source-code" id="update_and_decorate-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 57</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-identifier">entity</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">do_touch</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">TrueClass</span> <span class="ruby-keyword">or</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">FalseClass</span>
-    <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">do_touch</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">entity</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">do_touch</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-comment"># An entity is given =&gt; assume we don&#39;t touch</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 97</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-identifier">entity</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
+    <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">options</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">entity</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Draper</span><span class="ruby-operator">::</span><span class="ruby-constant">Decorator</span>
     <span class="ruby-ivar">@decorator</span> = <span class="ruby-identifier">entity</span>
     <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">object</span>
   <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Finish whatever background task is associated with the entity</span>
+  <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">bkg_land</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Backgroundable</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">dj</span>
   <span class="ruby-identifier">attribute_params</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>
     <span class="ruby-comment"># If the entity is provided, ignore parameters</span>
     <span class="ruby-identifier">modelname</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">underscore</span>
+    <span class="ruby-identifier">attribute_params</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">modelname</span>.<span class="ruby-identifier">to_sym</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:update_attributes</span>]
   <span class="ruby-keyword">else</span> <span class="ruby-comment"># If entity not provided, find/build it and update attributes</span>
     <span class="ruby-identifier">modelname</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_name</span> <span class="ruby-comment"># params[:controller].sub(/_controller$/, &#39;&#39;).singularize</span>
     <span class="ruby-identifier">objclass</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">controller_model_class</span>
@@ -1301,7 +1333,7 @@ variable for the entity according to its class,</p>
   <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">uid</span> = <span class="ruby-identifier">current_user_or_guest_id</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">respond_to?</span> <span class="ruby-value">:&quot;uid=&quot;</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-comment"># No probs. so far</span>
       <span class="ruby-identifier">current_user</span> <span class="ruby-comment"># Only the current user gets to touch/modify a model</span>
-    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">touch</span>(<span class="ruby-identifier">entity</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">do_touch</span>
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">touch</span>(<span class="ruby-identifier">entity</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:touch</span>]
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">attribute_params</span>
       <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">incoming_attributes</span> <span class="ruby-identifier">attribute_params</span>.<span class="ruby-identifier">keys</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Taggable</span>
       <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">update_attributes</span> <span class="ruby-identifier">attribute_params</span> <span class="ruby-comment"># There are parameters to update</span>
@@ -1318,6 +1350,7 @@ variable for the entity according to its class,</p>
   <span class="ruby-keyword">elsif</span> <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:title</span>)
     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = (<span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">title</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">truncate</span>(<span class="ruby-value">20</span>)
   <span class="ruby-keyword">end</span>
+  <span class="ruby-ivar">@presenter</span> = <span class="ruby-identifier">present</span>(<span class="ruby-identifier">entity</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span> <span class="ruby-comment"># Produce a presenter if possible</span>
   <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># ...and report back status</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1357,10 +1390,10 @@ variable for the entity according to its class,</p>
 
           
           <div class="method-source-code" id="render_optional_error_file-source">
-            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 433</span>
+            <pre><span class="ruby-comment"># File app/controllers/application_controller.rb, line 465</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">render_optional_error_file</span>(<span class="ruby-identifier">status_code</span>)
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&quot;Logger sez: Error 500&quot;</span>
-  <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;errors/500&quot;</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">500</span>, <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;application&#39;</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-string">&#39;Logger sez: Error 500&#39;</span>
+  <span class="ruby-identifier">render</span> <span class="ruby-value">:template</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;errors/500&#39;</span>, <span class="ruby-value">:status</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">500</span>, <span class="ruby-value">:layout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;application&#39;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1380,7 +1413,7 @@ variable for the entity according to its class,</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -71,8 +72,6 @@
   <ul class="link-list" role="directory">
     
     <li ><a href="#method-c-assert_image_for_referent">::assert_image_for_referent</a>
-    
-    <li ><a href="#method-c-convert_references">::convert_references</a>
     
     <li ><a href="#method-c-convert_to_sti">::convert_to_sti</a>
     
@@ -154,7 +153,7 @@
 
           
           <div class="method-source-code" id="assert_image_for_referent-source">
-            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 13</span>
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">assert_image_for_referent</span>(<span class="ruby-identifier">uri</span>, <span class="ruby-identifier">tag_or_referent</span>)
     <span class="ruby-identifier">refs</span> = <span class="ruby-constant">Reference</span><span class="ruby-operator">::</span><span class="ruby-constant">ImageReference</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">uri</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">refs</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
@@ -185,42 +184,6 @@
       </div>
 
     
-      <div id="method-c-convert_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">convert_references</span><span
-            class="method-args">(klass=nil)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="convert_references-source">
-            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 34</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_references</span> <span class="ruby-identifier">klass</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">puts</span> <span class="ruby-constant">DefinitionReference</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
-         <span class="ruby-identifier">pr</span> = <span class="ruby-constant">DefinitionPageRef</span>.<span class="ruby-identifier">fetch</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">url</span>
-         <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
-       }
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-c-convert_to_sti" class="method-detail ">
         
         <div class="method-heading">
@@ -240,7 +203,7 @@
 
           
           <div class="method-source-code" id="convert_to_sti-source">
-            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 42</span>
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 34</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_to_sti</span> <span class="ruby-identifier">n</span>=<span class="ruby-value">-1</span>
   <span class="ruby-identifier">set</span> = <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Reference&quot;</span>)[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-identifier">n</span>].<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">type</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typesym</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&quot;Reference&quot;</span>
@@ -310,7 +273,7 @@ href="PageRef.html">PageRef</a> activities</p>
 
           
           <div class="method-source-code" id="time_lookup-source">
-            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 50</span>
+            <pre><span class="ruby-comment"># File app/services/reference_services.rb, line 42</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">time_lookup</span> <span class="ruby-identifier">ix</span>=<span class="ruby-value">1</span>
   <span class="ruby-identifier">urls</span> = [
       <span class="ruby-string">&#39;http://www.bento.com/rf_ok.html&#39;</span>,
@@ -666,7 +629,7 @@ href="PageRef.html">PageRef</a> activities</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

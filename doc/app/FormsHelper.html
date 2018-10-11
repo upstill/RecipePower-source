@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -63,6 +64,10 @@
 
   <ul class="link-list" role="directory">
     
+    <li ><a href="#method-i-simple_submit_form_for">#simple_submit_form_for</a>
+    
+    <li ><a href="#method-i-submit_form_for">#submit_form_for</a>
+    
     <li ><a href="#method-i-triggered_form">#triggered_form</a>
     
   </ul>
@@ -97,6 +102,75 @@
        <header>
          <h3>Public Instance Methods</h3>
        </header>
+
+    
+      <div id="method-i-simple_submit_form_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">simple_submit_form_for</span><span
+            class="method-args">(resource, options=nil, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Override of simple_form_for which asserts options to make RP.submit happy</p>
+          
+          
+
+          
+          <div class="method-source-code" id="simple_submit_form_for-source">
+            <pre><span class="ruby-comment"># File app/helpers/forms_helper.rb, line 14</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">simple_submit_form_for</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">options</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">merge_submit_options</span> <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:html</span>][<span class="ruby-value">:data</span>] = (<span class="ruby-identifier">options</span>[<span class="ruby-value">:html</span>][<span class="ruby-value">:data</span>] <span class="ruby-operator">||</span> {}).<span class="ruby-identifier">merge</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:data</span>)
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:html</span>][<span class="ruby-value">:remote</span>] = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:remote</span>
+  <span class="ruby-identifier">simple_form_for</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">merge_submit_options</span>(<span class="ruby-identifier">options</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span> <span class="ruby-identifier">f</span> <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-submit_form_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">submit_form_for</span><span
+            class="method-args">(resource, options=nil, &block)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Override of form_for which adds options to make RP.submit happy</p>
+          
+          
+
+          
+          <div class="method-source-code" id="submit_form_for-source">
+            <pre><span class="ruby-comment"># File app/helpers/forms_helper.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">submit_form_for</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">options</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">form_for</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">merge_submit_options</span>(<span class="ruby-identifier">options</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">block</span>.<span class="ruby-identifier">call</span> <span class="ruby-identifier">f</span> <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
 
     
       <div id="method-i-triggered_form" class="method-detail ">
@@ -141,7 +215,7 @@ by RP.submit</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

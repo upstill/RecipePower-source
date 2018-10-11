@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -84,6 +85,8 @@
     
     <li ><a href="#method-i-card_homelink">#card_homelink</a>
     
+    <li ><a href="#method-i-card_label">#card_label</a>
+    
     <li ><a href="#method-i-card_ncolumns">#card_ncolumns</a>
     
     <li ><a href="#method-i-collectible_from_card-3F">#collectible_from_card?</a>
@@ -93,6 +96,8 @@
     <li ><a href="#method-i-is_viewer-3F">#is_viewer?</a>
     
     <li ><a href="#method-i-member_since">#member_since</a>
+    
+    <li ><a href="#method-i-ribbon">#ribbon</a>
     
     <li ><a href="#method-i-sharable_from_card-3F">#sharable_from_card?</a>
     
@@ -155,7 +160,7 @@
 
           
           <div class="method-source-code" id="about-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 176</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 187</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">about</span>
   <span class="ruby-identifier">handle_none</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">markdown</span>(<span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span>)
@@ -190,7 +195,7 @@
 
           
           <div class="method-source-code" id="card_aspect-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 67</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 75</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
   <span class="ruby-identifier">label</span> = <span class="ruby-identifier">contents</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">which</span>
@@ -262,7 +267,7 @@
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">latest</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">owned_lists</span>(<span class="ruby-identifier">current_user_or_guest</span>).<span class="ruby-identifier">order</span>(<span class="ruby-identifier">updated_at</span><span class="ruby-operator">:</span> <span class="ruby-value">:desc</span>).<span class="ruby-identifier">first</span>
         <span class="ruby-identifier">contents</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">latest</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">list_path</span>(<span class="ruby-identifier">latest</span>)
       <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">contents</span> = <span class="ruby-node">&quot;To create your first list, click #{link_to_submit &quot;here&quot;, new_list_path, :mode =&gt; :modal}.&quot;</span>.<span class="ruby-identifier">html_safe</span>
+        <span class="ruby-identifier">contents</span> = <span class="ruby-node">&quot;To create your first list, click #{link_to_dialog &quot;here&quot;, new_list_path}.&quot;</span>.<span class="ruby-identifier">html_safe</span>
       <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   [ <span class="ruby-identifier">label</span>, <span class="ruby-identifier">contents</span> ]
@@ -296,7 +301,7 @@
 
           
           <div class="method-source-code" id="card_aspects-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 51</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 59</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">which_column</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-ivar">@aspects</span> <span class="ruby-operator">||=</span> [
       [
@@ -350,7 +355,7 @@ image (if they&#39;re the viewer)</p>
             <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar</span> <span class="ruby-identifier">options</span>={}
   (<span class="ruby-identifier">is_viewer?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">imgdata</span>(<span class="ruby-keyword">false</span>).<span class="ruby-identifier">present?</span>) <span class="ruby-operator">?</span>
-      <span class="ruby-keyword">super</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">collectible_upload_button</span>(<span class="ruby-ivar">@decorator</span>, <span class="ruby-string">&#39;lg&#39;</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Get a Picture&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;upload-button&#39;</span>) <span class="ruby-operator">:</span>
+      <span class="ruby-keyword">super</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">collectible_editpic_button</span>(<span class="ruby-ivar">@decorator</span>, <span class="ruby-string">&#39;lg&#39;</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Get a Picture&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;upload-button&#39;</span>) <span class="ruby-operator">:</span>
       <span class="ruby-keyword">super</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -382,14 +387,14 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="card_avatar_accompaniment-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 18</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar_accompaniment</span>
   <span class="ruby-identifier">contents</span> =
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">latestrr</span> = <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">collection_pointers</span>([<span class="ruby-constant">Recipe</span>, <span class="ruby-constant">Site</span>, <span class="ruby-constant">FeedEntry</span>], <span class="ruby-identifier">current_user_or_guest</span>).<span class="ruby-identifier">order</span>(<span class="ruby-identifier">created_at</span><span class="ruby-operator">:</span> <span class="ruby-value">:desc</span>).<span class="ruby-identifier">first</span>
         <span class="ruby-identifier">latest</span> = <span class="ruby-identifier">latestrr</span>.<span class="ruby-identifier">entity</span>
         <span class="ruby-identifier">collectible_show_thumbnail</span> <span class="ruby-identifier">latest</span>.<span class="ruby-identifier">decorate</span>
       <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">current_user</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">user</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">current_user</span>
-        <span class="ruby-node">&quot;No recipes yet—so install the #{link_to_submit &#39;Cookmark Button&#39;, &#39;/cookmark.json&#39;, :mode =&gt; :modal} and go get some!&quot;</span>.<span class="ruby-identifier">html_safe</span>
+        <span class="ruby-node">&quot;No recipes yet—so install the #{link_to_dialog &#39;Cookmark Button&#39;, &#39;/cookmark.json&#39;} and go get some!&quot;</span>.<span class="ruby-identifier">html_safe</span>
       <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">card_aspect_enclosure</span> <span class="ruby-value">:latest_recipe</span>, <span class="ruby-identifier">contents</span>, <span class="ruby-string">&#39;Latest Cookmark&#39;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -422,9 +427,9 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="card_header_content-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 41</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 49</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_header_content</span>
-  <span class="ruby-identifier">mail_link</span> = <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&#39;Send email&#39;</span>, <span class="ruby-identifier">mailto_user_path</span>(<span class="ruby-identifier">user</span>, <span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-value">:modal</span>), <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">is_viewer?</span>
+  <span class="ruby-identifier">mail_link</span> = <span class="ruby-identifier">link_to_dialog</span>(<span class="ruby-string">&#39;Send email&#39;</span>, <span class="ruby-identifier">mailto_user_path</span>(<span class="ruby-identifier">user</span>), <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">is_viewer?</span>
   <span class="ruby-identifier">uhandle</span> = <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>, <span class="ruby-node">&quot;(aka #{username})&quot;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;user-handle&#39;</span>
   (<span class="ruby-node">&quot;#{fullname.downcase}&amp;nbsp;#{uhandle}&amp;nbsp;#{mail_link}&quot;</span>).<span class="ruby-identifier">html_safe</span>
 <span class="ruby-keyword">end</span></pre>
@@ -457,9 +462,41 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="card_homelink-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 29</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 37</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_homelink</span> <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">user_homelink</span> <span class="ruby-ivar">@decorator</span>, <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">homelink</span> <span class="ruby-ivar">@decorator</span>, <span class="ruby-identifier">options</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-card_label" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">card_label</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Users.html">Users</a> don&#39;t have a tab on their card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="card_label-source">
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 23</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_label</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -490,7 +527,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="card_ncolumns-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 47</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 55</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_ncolumns</span>
   <span class="ruby-value">3</span>
 <span class="ruby-keyword">end</span></pre>
@@ -523,7 +560,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="collectible_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 164</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 175</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_from_card?</span>
   <span class="ruby-operator">!</span><span class="ruby-identifier">is_viewer?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -556,7 +593,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="editable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 160</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 171</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">editable_from_card?</span>
   <span class="ruby-identifier">is_viewer?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -589,7 +626,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="is_viewer-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 37</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 45</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">is_viewer?</span>
   <span class="ruby-ivar">@viewer</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-ivar">@viewer</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -622,9 +659,41 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="member_since-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 33</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 41</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">member_since</span>
   <span class="ruby-identifier">user</span>.<span class="ruby-identifier">created_at</span>.<span class="ruby-identifier">strftime</span>(<span class="ruby-string">&#39;%B %e, %Y&#39;</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ribbon" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ribbon</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href="Users.html">Users</a> don&#39;t have a ribbon on their card</p>
+          
+          
+
+          
+          <div class="method-source-code" id="ribbon-source">
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ribbon</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -655,7 +724,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="sharable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 168</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 179</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sharable_from_card?</span>
   <span class="ruby-keyword">false</span>
 <span class="ruby-keyword">end</span></pre>
@@ -688,13 +757,16 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="show_or_edit-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 144</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 152</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show_or_edit</span> <span class="ruby-identifier">which</span>, <span class="ruby-identifier">val</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">is_viewer?</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">present?</span>
-      (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&#39;Edit&#39;</span>, <span class="ruby-identifier">edit_user_path</span>(<span class="ruby-identifier">section</span><span class="ruby-operator">:</span> <span class="ruby-identifier">which</span>), <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>, <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:modal</span>)).<span class="ruby-identifier">html_safe</span>
+      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-comment"># + link_to_dialog(&#39;Edit&#39;, edit_user_path(section: which), button_size: &#39;xs&#39;)</span>
     <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">card_aspect_editor</span> <span class="ruby-identifier">which</span>
+      <span class="ruby-string">&#39;We have no description on file for you. &#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+          <span class="ruby-identifier">link_to_dialog</span>(<span class="ruby-string">&#39;Click Here&#39;</span>, <span class="ruby-identifier">edit_user_path</span>, <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>) <span class="ruby-operator">+</span>
+      <span class="ruby-string">&#39; to let us know who you are!&#39;</span>
+      <span class="ruby-comment"># card_aspect_editor which</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">val</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">present?</span>
@@ -729,7 +801,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="tags-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 182</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 193</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tags</span>
   <span class="ruby-identifier">user</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -762,7 +834,7 @@ image (if they&#39;re the viewer)</p>
 
           
           <div class="method-source-code" id="votable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 172</span>
+            <pre><span class="ruby-comment"># File app/presenters/user_presenter.rb, line 183</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">votable_from_card?</span>
   <span class="ruby-operator">!</span><span class="ruby-identifier">is_viewer?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -784,7 +856,7 @@ image (if they&#39;re the viewer)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

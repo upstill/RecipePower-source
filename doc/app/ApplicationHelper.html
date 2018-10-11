@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -102,19 +103,15 @@
     
     <li ><a href="#method-i-entity_approval_replacement">#entity_approval_replacement</a>
     
-    <li ><a href="#method-i-enumerate_strs">#enumerate_strs</a>
-    
     <li ><a href="#method-i-feed_list_element_class">#feed_list_element_class</a>
     
     <li ><a href="#method-i-form_actions">#form_actions</a>
     
+    <li ><a href="#method-i-format_table_tree">#format_table_tree</a>
+    
     <li ><a href="#method-i-globstring">#globstring</a>
     
-    <li ><a href="#method-i-invitation_acceptance_label">#invitation_acceptance_label</a>
-    
     <li ><a href="#method-i-invitation_diversion_link">#invitation_diversion_link</a>
-    
-    <li ><a href="#method-i-issue_notifications">#issue_notifications</a>
     
     <li ><a href="#method-i-jquery_include_tag">#jquery_include_tag</a>
     
@@ -135,6 +132,8 @@
     <li ><a href="#method-i-recipe_list_element_golink_class">#recipe_list_element_golink_class</a>
     
     <li ><a href="#method-i-recipe_popup">#recipe_popup</a>
+    
+    <li ><a href="#method-i-report_items">#report_items</a>
     
     <li ><a href="#method-i-resource">#resource</a>
     
@@ -201,7 +200,7 @@
 
           
           <div class="method-source-code" id="bookmarklet-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 149</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bookmarklet</span>
   <span class="ruby-identifier">imgtag</span> = <span class="ruby-identifier">image_tag</span>(<span class="ruby-string">&#39;InstallCookmarkButton.png&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;bookmarklet&#39;</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;display: inline-block&#39;</span>, <span class="ruby-identifier">alt</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Cookmark&#39;</span>)
   <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:a</span>, <span class="ruby-identifier">imgtag</span>, <span class="ruby-identifier">href</span><span class="ruby-operator">:</span> <span class="ruby-identifier">bookmarklet_script</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Cookmark&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;bookmarklet&#39;</span>
@@ -235,7 +234,7 @@
 
           
           <div class="method-source-code" id="bookmarklet_script-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 145</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 133</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bookmarklet_script</span>
   <span class="ruby-node">&quot;javascript:(function%20()%20{var%20s%20=%20document.createElement(%27script%27);s.setAttribute(%27language%27,%27javascript%27);s.setAttribute(%27id%27,%20%27recipePower-injector%27);s.setAttribute(%27src%27,%27#{rp_url}/recipes/capture.js?recipe[url]=%27+encodeURIComponent(window.location.href)+%27&amp;recipe[title]=%27+encodeURIComponent(document.title)+%27&amp;recipe[rcpref][comment]=%27+encodeURIComponent(%27%27+(window.getSelection?window.getSelection():document.getSelection?document.getSelection():document.selection.createRange().text))+%27&amp;v=6&amp;jump=yes%27);document.body.appendChild(s);}())&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -269,7 +268,7 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="bootstrap_css_include_tag-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 246</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 220</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bootstrap_css_include_tag</span> <span class="ruby-identifier">use_cdn</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">use_cdn</span>
     <span class="ruby-comment"># The version may include a maintenance release number</span>
@@ -311,7 +310,7 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="bootstrap_js_include_tag-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 259</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 233</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">bootstrap_js_include_tag</span> <span class="ruby-identifier">use_cdn</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-identifier">local_bs</span> = <span class="ruby-identifier">javascript_include_tag</span> <span class="ruby-string">&#39;bootstrap.js&#39;</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">use_cdn</span>
@@ -358,7 +357,7 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="check_popup-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 195</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 169</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">check_popup</span> <span class="ruby-identifier">name</span>
   <span class="ruby-identifier">session</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:popup</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">session</span>[<span class="ruby-value">:popup</span>] <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">session</span>[<span class="ruby-value">:popup</span>] <span class="ruby-operator">=~</span> <span class="ruby-node">/^#{name}\b/</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -437,14 +436,15 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="data_to_add_fields-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 80</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 79</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">data_to_add_fields</span> <span class="ruby-identifier">f</span>, <span class="ruby-identifier">association</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">initializers</span>
-  <span class="ruby-identifier">new_object</span> = <span class="ruby-identifier">f</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">association</span>).<span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span> <span class="ruby-operator">*</span><span class="ruby-identifier">initializers</span>
-  <span class="ruby-identifier">id</span> = <span class="ruby-identifier">new_object</span>.<span class="ruby-identifier">object_id</span>
-  <span class="ruby-identifier">fields</span> = <span class="ruby-identifier">f</span>.<span class="ruby-identifier">simple_fields_for</span>(<span class="ruby-identifier">association</span>, <span class="ruby-identifier">new_object</span>, <span class="ruby-identifier">child_index</span><span class="ruby-operator">:</span> <span class="ruby-identifier">id</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">builder</span><span class="ruby-operator">|</span>
+  <span class="ruby-identifier">new_object</span> = <span class="ruby-identifier">f</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">send</span>(<span class="ruby-identifier">association</span>).<span class="ruby-identifier">klass</span>.<span class="ruby-identifier">base_class</span>.<span class="ruby-identifier">new</span> <span class="ruby-operator">*</span><span class="ruby-identifier">initializers</span>
+  <span class="ruby-identifier">new_object</span>.<span class="ruby-identifier">id</span> = <span class="ruby-identifier">new_object</span>.<span class="ruby-identifier">object_id</span>
+  <span class="ruby-identifier">fields</span> = <span class="ruby-identifier">f</span>.<span class="ruby-identifier">simple_fields_for</span>(<span class="ruby-identifier">association</span>, <span class="ruby-identifier">new_object</span>, <span class="ruby-identifier">child_index</span><span class="ruby-operator">:</span> <span class="ruby-identifier">new_object</span>.<span class="ruby-identifier">id</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">builder</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">render</span> <span class="ruby-identifier">association</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">singularize</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;_fields&#39;</span>, <span class="ruby-identifier">f</span><span class="ruby-operator">:</span> <span class="ruby-identifier">builder</span>
   <span class="ruby-keyword">end</span>
-  { <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">id</span>, <span class="ruby-identifier">fields</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fields</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&quot;\n&quot;</span>, <span class="ruby-string">&#39;&#39;</span>) }
+  <span class="ruby-comment"># The initializing values are all declared in the data for purposes of client-side substitution</span>
+  (<span class="ruby-identifier">initializers</span>[<span class="ruby-value">0</span>] <span class="ruby-operator">||</span> {}).<span class="ruby-identifier">merge</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">new_object</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">fields</span><span class="ruby-operator">:</span> <span class="ruby-identifier">fields</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&quot;\n&quot;</span>, <span class="ruby-string">&#39;&#39;</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -475,7 +475,7 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="debug_dump-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 185</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 159</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">debug_dump</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-node">&quot;&lt;div id=\&quot;debug\&quot;&gt;#{debug(params)}&lt;/div&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>
 <span class="ruby-keyword">end</span></pre>
@@ -627,7 +627,7 @@ bootstrap-sass</p>
         
         <div class="method-heading">
           <span class="method-name">entity_approval</span><span
-            class="method-args">(entity)</span>
+            class="method-args">(decorator)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -642,8 +642,9 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="entity_approval-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 277</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_approval</span> <span class="ruby-identifier">entity</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 251</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_approval</span> <span class="ruby-identifier">decorator</span>
+  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
   <span class="ruby-identifier">labels</span> =
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">entity</span>
     <span class="ruby-keyword">when</span> <span class="ruby-constant">Site</span>
@@ -655,21 +656,21 @@ bootstrap-sass</p>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">str</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">approved</span>
           <span class="ruby-keyword">when</span> <span class="ruby-keyword">true</span>
-            <span class="ruby-identifier">labels</span>[<span class="ruby-value">1</span>]
+            <span class="ruby-identifier">labels</span>[<span class="ruby-value">1</span>] <span class="ruby-operator">+</span> <span class="ruby-string">&#39; &#39;</span>
           <span class="ruby-keyword">when</span> <span class="ruby-keyword">false</span>
-            <span class="ruby-identifier">labels</span>[<span class="ruby-value">3</span>]
+            <span class="ruby-identifier">labels</span>[<span class="ruby-value">3</span>] <span class="ruby-operator">+</span> <span class="ruby-string">&#39; &#39;</span>
           <span class="ruby-keyword">else</span>
             <span class="ruby-string">&#39;&#39;</span>
         <span class="ruby-keyword">end</span>
   <span class="ruby-comment"># NB: entities can have nil approval status, in which case both buttons should show</span>
   <span class="ruby-identifier">str</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-identifier">labels</span>[<span class="ruby-value">0</span>],
-                        <span class="ruby-identifier">polymorphic_path</span>( [<span class="ruby-value">:approve</span>, <span class="ruby-identifier">entity</span>], <span class="ruby-identifier">approve</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Y&#39;</span>),
+                        <span class="ruby-identifier">polymorphic_path</span>( [<span class="ruby-value">:approve</span>, <span class="ruby-identifier">decorator</span>], <span class="ruby-identifier">approve</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Y&#39;</span>),
                         <span class="ruby-identifier">button_style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;success&#39;</span>,
                         <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>,
                         <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;POST&#39;</span>
   ) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">approved</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">true</span>
   <span class="ruby-identifier">str</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-identifier">labels</span>[<span class="ruby-value">2</span>],
-                        <span class="ruby-identifier">polymorphic_path</span>( [<span class="ruby-value">:approve</span>, <span class="ruby-identifier">entity</span>], <span class="ruby-identifier">approve</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;N&#39;</span>),
+                        <span class="ruby-identifier">polymorphic_path</span>( [<span class="ruby-value">:approve</span>, <span class="ruby-identifier">decorator</span>], <span class="ruby-identifier">approve</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;N&#39;</span>),
                         <span class="ruby-identifier">button_style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;danger&#39;</span>,
                         <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;xs&#39;</span>,
                         <span class="ruby-identifier">method</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;POST&#39;</span>
@@ -690,7 +691,7 @@ bootstrap-sass</p>
         
         <div class="method-heading">
           <span class="method-name">entity_approval_replacement</span><span
-            class="method-args">(entity)</span>
+            class="method-args">(decorator)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -705,50 +706,9 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="entity_approval_replacement-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 311</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_approval_replacement</span> <span class="ruby-identifier">entity</span>
-  [ <span class="ruby-node">&quot;span##{dom_id entity}&quot;</span>, <span class="ruby-identifier">entity_approval</span>(<span class="ruby-identifier">entity</span>) ]
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-enumerate_strs" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">enumerate_strs</span><span
-            class="method-args">(strs)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="enumerate_strs-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 133</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">enumerate_strs</span> <span class="ruby-identifier">strs</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">strs</span>.<span class="ruby-identifier">count</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">0</span>
-      <span class="ruby-string">&#39;&#39;</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
-      <span class="ruby-identifier">strs</span>[<span class="ruby-value">0</span>]
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">last</span> = <span class="ruby-identifier">strs</span>.<span class="ruby-identifier">pop</span>
-      <span class="ruby-identifier">strs</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39; and &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">last</span>
-  <span class="ruby-keyword">end</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 286</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">entity_approval_replacement</span> <span class="ruby-identifier">decorator</span>
+  [ <span class="ruby-node">&quot;span##{dom_id decorator.object}&quot;</span>, <span class="ruby-identifier">entity_approval</span>(<span class="ruby-identifier">decorator</span>) ]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -812,7 +772,7 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="form_actions-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 219</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 193</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">form_actions</span> <span class="ruby-identifier">f</span>, <span class="ruby-identifier">options</span> = {}
   <span class="ruby-identifier">cancel_path</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:cancel_path</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">default_next_path</span>
   <span class="ruby-identifier">submit_label</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:submit_label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Save&#39;</span>
@@ -822,6 +782,49 @@ bootstrap-sass</p>
                   <span class="ruby-identifier">dialog_cancel_button</span>
               ).<span class="ruby-identifier">html_safe</span>,
               <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;form-group actions&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-format_table_tree" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">format_table_tree</span><span
+            class="method-args">(strtree, indent=''.html_safe)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="format_table_tree-source">
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 317</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">format_table_tree</span> <span class="ruby-identifier">strtree</span>, <span class="ruby-identifier">indent</span>=<span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">strtree</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">indent</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">strtree</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">strtree</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
+    <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">strtree</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span>
+                <span class="ruby-keyword">case</span> <span class="ruby-identifier">item</span>
+                  <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>
+                    (<span class="ruby-identifier">indent</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">item</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">item</span>.<span class="ruby-identifier">present?</span>
+                  <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+                    <span class="ruby-identifier">format_table_tree</span> <span class="ruby-identifier">item</span>, <span class="ruby-string">&#39;&amp;nbsp;&amp;nbsp;&amp;nbsp;&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">indent</span>
+                <span class="ruby-keyword">end</span>
+              }.<span class="ruby-identifier">compact</span>, <span class="ruby-string">&#39;&lt;br&gt;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -852,46 +855,11 @@ bootstrap-sass</p>
 
           
           <div class="method-source-code" id="globstring-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 189</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 163</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">globstring</span>(<span class="ruby-identifier">hsh</span>)
   <span class="ruby-identifier">hsh</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">key</span>.<span class="ruby-identifier">to_s</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;: [&#39;</span><span class="ruby-operator">+</span>(<span class="ruby-identifier">hsh</span>[<span class="ruby-identifier">key</span>] <span class="ruby-operator">?</span> <span class="ruby-identifier">hsh</span>[<span class="ruby-identifier">key</span>].<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;nil&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;]&#39;</span>
   }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39; &#39;</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-invitation_acceptance_label" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">invitation_acceptance_label</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="invitation_acceptance_label-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 171</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_acceptance_label</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_invitee</span>
-    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_invitee</span>.<span class="ruby-identifier">notifications_received</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">accepted</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).<span class="ruby-identifier">empty?</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;Accept Invitation&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;Take Share&#39;</span>
-  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -923,45 +891,9 @@ getting diverted to the reference</p>
 
           
           <div class="method-source-code" id="invitation_diversion_link-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 214</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 188</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_diversion_link</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">invitee</span>
   <span class="ruby-identifier">divert_user_invitation_url</span>(<span class="ruby-identifier">invitation_token</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">raw_invitation_token</span>, <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">escape</span>(<span class="ruby-identifier">url</span>))
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-issue_notifications" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">issue_notifications</span><span
-            class="method-args">(user)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Pump pending notifications into flash notices</p>
-          
-          
-
-          
-          <div class="method-source-code" id="issue_notifications-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 178</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">issue_notifications</span> <span class="ruby-identifier">user</span>
-  <span class="ruby-identifier">notices</span> = <span class="ruby-identifier">user</span>.<span class="ruby-identifier">notifications_received</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">accepted</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">notification</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">accept</span>
-  }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>.<span class="ruby-identifier">html_safe</span>)
-  <span class="ruby-identifier">flash</span>[<span class="ruby-value">:success</span>] = <span class="ruby-identifier">notices</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">notices</span>.<span class="ruby-identifier">blank?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -993,7 +925,7 @@ if unavailable</p>
 
           
           <div class="method-source-code" id="jquery_include_tag-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 231</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 205</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">jquery_include_tag</span> <span class="ruby-identifier">use_cdn</span>=<span class="ruby-keyword">true</span>, <span class="ruby-identifier">use_jq2</span>=<span class="ruby-keyword">false</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">use_jq2</span>
     <span class="ruby-identifier">localfile</span> = <span class="ruby-string">&#39;jquery2&#39;</span>
@@ -1039,9 +971,8 @@ if unavailable</p>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">link_to_add_fields</span>(<span class="ruby-identifier">name</span>, <span class="ruby-identifier">f</span>, <span class="ruby-identifier">association</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">initializers</span>)
   <span class="ruby-identifier">data</span> = <span class="ruby-identifier">data_to_add_fields</span> <span class="ruby-identifier">f</span>, <span class="ruby-identifier">association</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">initializers</span>
   <span class="ruby-identifier">link_to</span> <span class="ruby-identifier">name</span>,
-          <span class="ruby-string">&#39;#&#39;</span>, <span class="ruby-comment"># style: &#39;display:none&#39;,</span>
+          <span class="ruby-string">&#39;#&#39;</span>,
           <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;add_fields&#39;</span>,
-          <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;display: block; height: 15px; font-size: 50px; position: relative; top: -10px&#39;</span>,
           <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> <span class="ruby-identifier">data</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -1106,7 +1037,7 @@ if unavailable</p>
 
           
           <div class="method-source-code" id="page_or_modal-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 200</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 174</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">page_or_modal</span> <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
   <span class="ruby-identifier">title</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:title</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span>
   <span class="ruby-identifier">action</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:action</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>]
@@ -1188,7 +1119,7 @@ if unavailable</p>
 
           
           <div class="method-source-code" id="question_section-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 154</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 142</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">question_section</span> <span class="ruby-identifier">q</span>, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
   (
   <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:h4</span>, <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">q</span>, <span class="ruby-string">&#39;#&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;question_section&#39;</span>))<span class="ruby-operator">+</span>
@@ -1337,6 +1268,59 @@ if unavailable</p>
       </div>
 
     
+      <div id="method-i-report_items" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">report_items</span><span
+            class="method-args">(scope_or_array, label, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a labelled presentation of a collection of entities scope_or_array:
+either a scope for items, or a preloaded array label: string to form a
+header options: limit: max number of items to display fixed_label:
+don&#39;t include a count of items orig_size: size of the set from which
+the scope or array are drawn, for reporting purposes</p>
+          
+          
+
+          
+          <div class="method-source-code" id="report_items-source">
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 297</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">report_items</span> <span class="ruby-identifier">scope_or_array</span>, <span class="ruby-identifier">label</span>, <span class="ruby-identifier">options</span>={}, <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">labelled_quantity</span>((<span class="ruby-identifier">options</span>[<span class="ruby-value">:orig_size</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">count</span>), <span class="ruby-identifier">label</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^1 /</span>, <span class="ruby-string">&#39;&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">options</span>[<span class="ruby-value">:fixed_label</span>]
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">limit</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:limit</span>]
+    <span class="ruby-identifier">scope_or_array</span> = (<span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">scope_or_array</span>[<span class="ruby-value">0</span><span class="ruby-operator">..</span><span class="ruby-identifier">limit</span>] <span class="ruby-operator">:</span> <span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">limit</span>(<span class="ruby-identifier">limit</span>))
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">summs</span> = <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+            <span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">collect</span> <span class="ruby-operator">&amp;</span><span class="ruby-identifier">block</span>
+          <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>
+            <span class="ruby-identifier">scope_or_array</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span> <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">item</span> }
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">scope_or_array</span>
+          <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">summs</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+    [<span class="ruby-identifier">label</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">summs</span>]
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-node">&quot;#{label}: &quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">first</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-resource" class="method-detail ">
         
         <div class="method-heading">
@@ -1423,7 +1407,7 @@ href="TemplateDecorator.html">TemplateDecorator</a></p>
 
           
           <div class="method-source-code" id="template_element-source">
-            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 162</span>
+            <pre><span class="ruby-comment"># File app/helpers/application_helper.rb, line 150</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">template_element</span> <span class="ruby-identifier">id</span>, <span class="ruby-identifier">partial</span>
   <span class="ruby-identifier">template</span> = <span class="ruby-identifier">render</span>(<span class="ruby-identifier">partial</span>, <span class="ruby-identifier">entity</span><span class="ruby-operator">:</span> <span class="ruby-constant">TemplateDecorator</span>.<span class="ruby-identifier">new</span> )
   <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
@@ -1555,7 +1539,7 @@ href="TemplateDecorator.html">TemplateDecorator</a></p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -72,11 +73,11 @@
     
     <li class="calls-super" ><a href="#method-i-5B-5D">#[]</a>
     
-    <li ><a href="#method-i-incr">#incr</a>
-    
-    <li ><a href="#method-i-incr_by_scope">#incr_by_scope</a>
+    <li ><a href="#method-i-include">#include</a>
     
     <li ><a href="#method-i-itemstubs">#itemstubs</a>
+    
+    <li ><a href="#method-i-merge_counts">#merge_counts</a>
     
     <li ><a href="#method-i-partition">#partition</a>
     
@@ -95,7 +96,23 @@
     
 <p><a href="Object.html">Object</a> to put a uniform interface on a set of
 results, whether they exist as a scope (if there is no search) or an array
-of Rcprefs (with search)</p>
+of Rcprefs (with search). Format of the hash: – keys are class/id pairs,
+for accumulating references – values are either: an integers (for weighting
+the results by appearances) or a sort key Parameters: – key_or_keys can be:</p>
+
+<pre>** an ActiveRecord::Relation from which ids and (possibly) sort keys can be extracted
+** a string, for use directly as a key
+** an ActiveRecord::Base model
+** an array of any of the above</pre>
+
+<p>– pluck_key_or_increment can be:</p>
+
+<pre>** an integer, in which case values will be accumulated additively for sorting
+** a specifier (either symbol or array), suitable for passing to ActiveRecord::Relation#pluck, for getting the sort value
+** any other type of value, which is asserted directly as the sort key</pre>
+
+<p>– accumulate is a flag for disambiguating an incr that can be added from
+one that is just asserted</p>
 
   </section>
 
@@ -142,7 +159,7 @@ of Rcprefs (with search)</p>
 
           
           <div class="method-source-code" id="5B-5D-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 65</span>
 <span class="ruby-keyword">def</span> <span class="ruby-operator">[]</span>(<span class="ruby-identifier">ix</span>)
   <span class="ruby-keyword">super</span>(<span class="ruby-identifier">ix</span>) <span class="ruby-operator">||</span> <span class="ruby-value">0</span>
 <span class="ruby-keyword">end</span></pre>
@@ -156,11 +173,11 @@ of Rcprefs (with search)</p>
       </div>
 
     
-      <div id="method-i-incr" class="method-detail ">
+      <div id="method-i-include" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">incr</span><span
-            class="method-args">(key, incr=1)</span>
+          <span class="method-name">include</span><span
+            class="method-args">(key_or_keys, pluck_key_or_increment=1, accumulate=true)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -174,53 +191,48 @@ of Rcprefs (with search)</p>
           
 
           
-          <div class="method-source-code" id="incr-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 8</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">incr</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">incr</span>=<span class="ruby-value">1</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Relation</span>
-    <span class="ruby-comment"># Late-breaking conversion of scope into items</span>
-    <span class="ruby-identifier">modelname</span> = <span class="ruby-identifier">key</span>.<span class="ruby-identifier">model</span>.<span class="ruby-identifier">to_s</span>
-    <span class="ruby-identifier">key</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>[<span class="ruby-identifier">modelname</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;/&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>] <span class="ruby-operator">+=</span> <span class="ruby-identifier">incr</span> }
-  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">key</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Array</span>
-    <span class="ruby-identifier">key</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">incr</span> <span class="ruby-identifier">k</span>, <span class="ruby-identifier">incr</span> }
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key</span>] <span class="ruby-operator">+=</span> <span class="ruby-identifier">incr</span>
+          <div class="method-source-code" id="include-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 23</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">include</span> <span class="ruby-identifier">key_or_keys</span>, <span class="ruby-identifier">pluck_key_or_increment</span>=<span class="ruby-value">1</span>, <span class="ruby-identifier">accumulate</span>=<span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">key_or_keys</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Relation</span>
+      <span class="ruby-comment"># Late-breaking conversion of scope into items</span>
+      <span class="ruby-identifier">modelname</span> = <span class="ruby-identifier">key_or_keys</span>.<span class="ruby-identifier">model</span>.<span class="ruby-identifier">to_s</span>
+      <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-node">&quot;Counted #{modelname}s&quot;</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">pluck_key_or_increment</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>)
+          <span class="ruby-comment"># We are accumulating hits, weighted by pluck_key_or_increment</span>
+          <span class="ruby-identifier">key_or_keys</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>).<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">id</span><span class="ruby-operator">|</span>
+            <span class="ruby-identifier">key</span> = <span class="ruby-identifier">modelname</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;/&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>
+            <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key</span>] <span class="ruby-operator">+=</span> <span class="ruby-identifier">pluck_key_or_increment</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-comment"># We are accumulating hits, using as values what we will later sort by</span>
+          <span class="ruby-identifier">to_pluck</span> = [ <span class="ruby-value">:id</span>, <span class="ruby-identifier">pluck_key_or_increment</span>].<span class="ruby-identifier">compact</span>
+          <span class="ruby-identifier">key_or_keys</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-operator">*</span><span class="ruby-identifier">to_pluck</span>).<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">idval</span><span class="ruby-operator">|</span> <span class="ruby-comment"># #pluck provides an array of results per record</span>
+            <span class="ruby-identifier">id</span>, <span class="ruby-identifier">sortval</span> = <span class="ruby-identifier">idval</span>
+            <span class="ruby-keyword">self</span>[<span class="ruby-identifier">modelname</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;/&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>] = <span class="ruby-identifier">sortval</span> <span class="ruby-operator">||</span> <span class="ruby-value">1</span>
+          <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+      <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&quot;Counted ids&quot;</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-identifier">key_or_keys</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">include</span> <span class="ruby-identifier">k</span>, <span class="ruby-identifier">pluck_key_or_increment</span> }
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">String</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">pluck_key_or_increment</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">accumulate</span>
+        <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key_or_keys</span>] <span class="ruby-operator">+=</span> <span class="ruby-identifier">pluck_key_or_increment</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key_or_keys</span>] = <span class="ruby-identifier">pluck_key_or_increment</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-constant">ActiveRecord</span><span class="ruby-operator">::</span><span class="ruby-constant">Base</span>
+      <span class="ruby-identifier">key</span> = <span class="ruby-node">&quot;#{key_or_keys.model_name.name}/#{key_or_keys.id}&quot;</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">pluck_key_or_increment</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">accumulate</span>
+        <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key_or_keys</span>] <span class="ruby-operator">+=</span> <span class="ruby-identifier">pluck_key_or_increment</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">self</span>[<span class="ruby-identifier">key_or_keys</span>] = <span class="ruby-identifier">pluck_key_or_increment</span>
+      <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-incr_by_scope" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">incr_by_scope</span><span
-            class="method-args">(scope_or_scopes, incr=1)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Bump the count of all hits across a scope using the id attribute</p>
-          
-          
-
-          
-          <div class="method-source-code" id="incr_by_scope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 21</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">incr_by_scope</span> <span class="ruby-identifier">scope_or_scopes</span>, <span class="ruby-identifier">incr</span>=<span class="ruby-value">1</span>
-  (<span class="ruby-identifier">scope_or_scopes</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">scope_or_scopes</span> <span class="ruby-operator">:</span> [<span class="ruby-identifier">scope_or_scopes</span>]).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">scope</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">incr</span> <span class="ruby-identifier">scope</span>, <span class="ruby-identifier">incr</span>
-  }
+  <span class="ruby-keyword">self</span> <span class="ruby-comment"># ...for chainability</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -245,16 +257,63 @@ of Rcprefs (with search)</p>
 
         <div class="method-description">
           
-          
+          <p>Define an array of itemstubs: strings denoting entity type/value pairs</p>
           
           
 
           
           <div class="method-source-code" id="itemstubs-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 31</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 70</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">itemstubs</span> <span class="ruby-identifier">sorted</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-comment"># Sort the count keys in descending order of hits</span>
   <span class="ruby-ivar">@itemstubs</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">sorted</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">sort</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">k1</span>, <span class="ruby-identifier">k2</span><span class="ruby-operator">|</span> <span class="ruby-keyword">self</span>[<span class="ruby-identifier">k2</span>] <span class="ruby-operator">&lt;=&gt;</span> <span class="ruby-keyword">self</span>[<span class="ruby-identifier">k1</span>] } <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">keys</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-merge_counts" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">merge_counts</span><span
+            class="method-args">(extant_counts)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="merge_counts-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 87</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">merge_counts</span> <span class="ruby-identifier">extant_counts</span>
+  <span class="ruby-comment"># Two cases:</span>
+  <span class="ruby-comment">#  -- there&#39;s an existing set of counts =&gt; merge counts in an exclusive fashion</span>
+  <span class="ruby-comment">#  -- no counts exist yet =&gt; return unchanged</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">extant_counts</span>
+    <span class="ruby-identifier">newcounts</span> = <span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">extant_counts</span>.<span class="ruby-identifier">has_key?</span> <span class="ruby-identifier">key</span>
+        <span class="ruby-identifier">value</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">extant_counts</span>[<span class="ruby-identifier">key</span>] <span class="ruby-keyword">unless</span> <span class="ruby-identifier">value</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Time</span>)
+        [<span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>]
+      <span class="ruby-keyword">end</span>
+    }.<span class="ruby-identifier">compact</span>
+    <span class="ruby-constant">Counts</span>[<span class="ruby-identifier">newcounts</span>]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">self</span>
+  <span class="ruby-keyword">end</span>
+
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -285,7 +344,7 @@ of Rcprefs (with search)</p>
 
           
           <div class="method-source-code" id="partition-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 75</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">partition</span> <span class="ruby-identifier">bounds</span>
   <span class="ruby-identifier">partition</span> = <span class="ruby-constant">Partition</span>.<span class="ruby-identifier">new</span> [<span class="ruby-value">0</span>]
   <span class="ruby-comment"># Counts has a complete, non-redundant set of model/id records for disparate entities, associated with the number of hits on @querytags</span>
@@ -315,7 +374,7 @@ of Rcprefs (with search)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

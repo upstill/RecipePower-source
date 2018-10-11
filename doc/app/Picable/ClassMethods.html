@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "../";
+  var index_rel_prefix = "../";
 </script>
 
 <script src="../js/jquery.js"></script>
@@ -63,7 +64,7 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-i-picable">#picable</a>
+    <li class="calls-super" ><a href="#method-i-picable">#picable</a>
     
   </ul>
 </div>
@@ -78,6 +79,8 @@
 
   <section class="description">
     
+<p>include Linkable</p>
+
   </section>
 
   
@@ -103,7 +106,7 @@
         
         <div class="method-heading">
           <span class="method-name">picable</span><span
-            class="method-args">(attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png')</span>
+            class="method-args">(picable_attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png')</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -115,23 +118,74 @@
           
           
           
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
 
           
           <div class="method-source-code" id="picable-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 8</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">picable</span> <span class="ruby-identifier">attribute</span>, <span class="ruby-identifier">reference_name</span>=<span class="ruby-value">:picture</span>, <span class="ruby-identifier">fallback_img_file</span>=<span class="ruby-string">&#39;NoPictureOnFile.png&#39;</span>
-  <span class="ruby-identifier">linkable</span> <span class="ruby-identifier">attribute</span>, <span class="ruby-identifier">reference_name</span>, <span class="ruby-value">:as</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;ImageReference&#39;</span> <span class="ruby-comment"># &#39;Reference&#39; #</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">picable</span> <span class="ruby-identifier">picable_attribute</span>, <span class="ruby-identifier">reference_name</span>=<span class="ruby-value">:picture</span>, <span class="ruby-identifier">fallback_img_file</span>=<span class="ruby-string">&#39;NoPictureOnFile.png&#39;</span>
+  <span class="ruby-comment"># linkable picable_attribute, reference_name, :as =&gt; &#39;ImageReference&#39; # &#39;Reference&#39; #</span>
+  <span class="ruby-identifier">reference_name</span> = <span class="ruby-identifier">reference_name</span>.<span class="ruby-identifier">to_sym</span>
+  <span class="ruby-identifier">picable_attribute</span> = <span class="ruby-identifier">picable_attribute</span>.<span class="ruby-identifier">to_sym</span>
+  <span class="ruby-identifier">ref_type</span> = <span class="ruby-string">&#39;ImageReference&#39;</span>
+  <span class="ruby-identifier">attr_accessible</span> <span class="ruby-identifier">picable_attribute</span>, <span class="ruby-identifier">reference_name</span>
+  <span class="ruby-identifier">belongs_to</span> <span class="ruby-identifier">reference_name</span>, <span class="ruby-identifier">class_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ref_type</span>
+
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">instance_eval</span> <span class="ruby-keyword">do</span>
+
+    <span class="ruby-comment"># Define singleton getter and setter methods for the URL by using a Reference object.</span>
+    <span class="ruby-comment"># Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it</span>
+    <span class="ruby-comment"># remains bound to that entity until the entity is destroyed.</span>
+    <span class="ruby-comment"># In particular, this gives a special meaning to url assignment: the URL is 1) checked that it</span>
+    <span class="ruby-comment">#  is unique within the class (actually, type of Reference) and then 2) non-destructively assigned</span>
+    <span class="ruby-comment">#  to the object by creating a new Reference bound to the object.</span>
+    <span class="ruby-comment"># IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.</span>
+    <span class="ruby-identifier">define_method</span> <span class="ruby-node">&quot;#{picable_attribute}=&quot;</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">pu</span><span class="ruby-operator">|</span>
+      <span class="ruby-comment"># Since we can&#39;t modify references once created, we can only assert a new</span>
+      <span class="ruby-comment"># URL by resort to a new reference</span>
+      <span class="ruby-comment"># Get the existing reference</span>
+      <span class="ruby-comment">#          if options[:as]</span>
+      <span class="ruby-comment"># The reference is to another entity type: we just index by URL and assign the reference association</span>
+      <span class="ruby-identifier">ref</span> = <span class="ruby-identifier">pu</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">nil</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">ref_type</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find_or_initialize</span>(<span class="ruby-identifier">pu</span>).<span class="ruby-identifier">first</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-value">:&quot;#{reference_name}=&quot;</span>).<span class="ruby-identifier">call</span> <span class="ruby-identifier">ref</span>
+      <span class="ruby-comment"># elsif pu.blank?</span>
+      <span class="ruby-comment">#   self.errors.add(picable_attribute, &#39;can\&#39;t be blank&#39;)</span>
+      <span class="ruby-comment"># else</span>
+      <span class="ruby-comment">#   # Create a new reference (or references, if there&#39;s a redirect involved) as necessary</span>
+      <span class="ruby-comment">#   refs = ref_type.constantize.find_or_initialize(pu)</span>
+      <span class="ruby-comment">#   # Give me the new references</span>
+      <span class="ruby-comment">#   self.method(:&quot;#{reference_name}=&quot;).call refs.first</span>
+      <span class="ruby-comment">#   # self.method(:&quot;#{reference_name_pl}=&quot;).call refs</span>
+      <span class="ruby-comment"># end</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">has_attribute?</span> <span class="ruby-identifier">picable_attribute</span>
+        <span class="ruby-comment"># Set the old url attribute--if it still exists</span>
+        <span class="ruby-keyword">super</span> <span class="ruby-identifier">pu</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">pu</span>
+    <span class="ruby-keyword">end</span>
+
+    <span class="ruby-identifier">define_method</span>(<span class="ruby-identifier">picable_attribute</span>) <span class="ruby-keyword">do</span>
+      <span class="ruby-comment"># This will cause an exception for entities without a corresponding reference</span>
+      ((<span class="ruby-identifier">reference</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-identifier">reference_name</span>).<span class="ruby-identifier">call</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">reference</span>.<span class="ruby-identifier">digested_reference</span>) <span class="ruby-operator">||</span>
+          (<span class="ruby-keyword">super</span>() <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">has_attribute?</span>(<span class="ruby-identifier">picable_attribute</span>))
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class_eval</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">define_singleton_method</span> <span class="ruby-value">:image_reference_name</span> <span class="ruby-keyword">do</span>
       <span class="ruby-identifier">reference_name</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">define_singleton_method</span> <span class="ruby-value">:picable_attribute</span> <span class="ruby-keyword">do</span>
-      <span class="ruby-identifier">attribute</span>
+      <span class="ruby-identifier">picable_attribute</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">define_method</span> <span class="ruby-value">:fallback_imgdata</span> <span class="ruby-keyword">do</span>
       <span class="ruby-identifier">fallback_img_file</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">alias_method</span> <span class="ruby-value">:imglink</span>, <span class="ruby-identifier">attribute</span>
+    <span class="ruby-identifier">alias_method</span> <span class="ruby-value">:imglink</span>, <span class="ruby-identifier">picable_attribute</span>
     <span class="ruby-comment"># ImageReference.register_client self, reference_name</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -153,7 +207,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

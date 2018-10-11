@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -67,7 +68,11 @@
     
     <li ><a href="#method-i-handle_invitation">#handle_invitation</a>
     
-    <li ><a href="#method-i-handle_invitation_and_login">#handle_invitation_and_login</a>
+    <li ><a href="#method-i-invitation_acceptance_label">#invitation_acceptance_label</a>
+    
+    <li ><a href="#method-i-notifs_replacement">#notifs_replacement</a>
+    
+    <li ><a href="#method-i-notifs_section">#notifs_section</a>
     
   </ul>
 </div>
@@ -116,17 +121,99 @@
 
         <div class="method-description">
           
-          <p>To go with any page: present pending notifications (and invitations) in a
-modal atop</p>
+          <p>To go with any page: provide the SignIn/SignUp/AcceptInvitation floater</p>
           
           
 
           
           <div class="method-source-code" id="do_notifs-source">
-            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 4</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">do_notifs</span>
-  <span class="ruby-identifier">handle_invitation_and_login</span>
-<span class="ruby-keyword">end</span></pre>
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 13</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">do_notifs</span>
+    <span class="ruby-identifier">sections</span> = [] <span class="ruby-comment"># Accumulates the sections to be shown</span>
+    <span class="ruby-identifier">invitee</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_invitee</span>
+    <span class="ruby-identifier">notif</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@target</span> = <span class="ruby-identifier">current_user</span>
+      <span class="ruby-comment"># If there&#39;s a pending invitation</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">invitee</span>
+        <span class="ruby-comment"># If it&#39;s for the current user</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">id</span>
+          <span class="ruby-comment"># Invitation is redundant</span>
+          <span class="ruby-identifier">flash</span>[<span class="ruby-value">:now</span>] = <span class="ruby-string">&quot;No invitation required: you&#39;re already logged in!&quot;</span>
+          <span class="ruby-comment"># Clear the invitation_token</span>
+        <span class="ruby-keyword">else</span> <span class="ruby-comment"># Invitation is for some other user</span>
+          <span class="ruby-comment"># Post &quot;please logout first&quot; alert</span>
+          <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:logout_first</span>,
+                                     <span class="ruby-identifier">is_vis</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+          )
+<span class="ruby-comment">          sections &lt;&lt; OpenStruct.new(
+              is_vis: true,
+              partial: &#39;sessions/logout_panel&#39;,
+              partial_locals: {message: &#39;That invitation is for someone else.&lt;br&gt;Just sign out if you\&#39;d like to use it&#39;.html_safe}
+          )
+</span>        <span class="ruby-keyword">end</span>
+        <span class="ruby-keyword">return</span> <span class="ruby-identifier">render</span>(<span class="ruby-string">&#39;notifs/panel&#39;</span>, <span class="ruby-identifier">sections</span><span class="ruby-operator">:</span> <span class="ruby-identifier">sections</span>, <span class="ruby-identifier">as_alert</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">wide</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>)
+      <span class="ruby-keyword">end</span>
+
+      <span class="ruby-comment"># If there&#39;s a pending notification</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">notif</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">notif</span>.<span class="ruby-identifier">target</span>.<span class="ruby-identifier">id</span>)
+        <span class="ruby-comment"># If the notification doesn&#39;t match the current user</span>
+        <span class="ruby-comment"># Notification is for some other user</span>
+        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:logout</span>,
+                                   <span class="ruby-identifier">is_vis</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+                                   <span class="ruby-identifier">exclusive</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
+        )
+<span class="ruby-comment">        sections &lt;&lt; OpenStruct.new(
+            is_vis: true,
+            exclusive: true,
+            partial: &#39;sessions/logout&#39;,
+            partial_locals: {message: &#39;That notification is for someone else. Just sign out if you\&#39;d like to see it&#39;}
+        )
+</span>      <span class="ruby-keyword">end</span> <span class="ruby-comment"># User is logged in, pending items disposed of</span>
+
+    <span class="ruby-keyword">else</span> <span class="ruby-comment"># if no current user, but there&#39;s a pending invitation</span>
+      <span class="ruby-identifier">invitee_error</span> =
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">invitee</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+        <span class="ruby-comment"># Sort out a pending invitation</span>
+        <span class="ruby-comment"># Bad invitation token =&gt; nullify the invitation and incorporate into panel</span>
+        <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># Clear invitation token</span>
+        <span class="ruby-identifier">invitee</span> = <span class="ruby-keyword">nil</span>  <span class="ruby-comment"># Forget about the invitee</span>
+        <span class="ruby-identifier">flash</span>.<span class="ruby-identifier">now</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-string">&#39;Sorry, that invitation has expired. But do sign up!&#39;</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">invitee</span>
+        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>( <span class="ruby-value">:accept</span>, <span class="ruby-comment"># Collect credentials</span>
+            <span class="ruby-identifier">is_main</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+            <span class="ruby-identifier">exclusive</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
+            <span class="ruby-identifier">partial_locals</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">resource</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>, <span class="ruby-identifier">resource_name</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;user&#39;</span>, <span class="ruby-identifier">invitee_error</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee_error</span>}.<span class="ruby-identifier">compact</span>
+        )
+<span class="ruby-comment">        sections &lt;&lt; OpenStruct.new(# Collect credentials
+            signature: &#39;accept&#39;,
+            is_vis: true,
+            is_main: true,
+            title: invitation_acceptance_label,
+            exclusive: true,
+            partial: &#39;devise/invitations/form&#39;, # &#39;notifs/accept_invitation&#39;,
+            partial_locals: {resource: invitee, resource_name: &#39;user&#39;, invitee_error: invitee_error}.compact
+        )
+</span>        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:signin</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sign In Otherwise&#39;</span>)
+<span class="ruby-comment">        sections &lt;&lt; OpenStruct.new(# Sign In
+            signature: &#39;signin&#39;,
+            title: &#39;Sign In Otherwise&#39;,
+            partial: &#39;notifs/signin&#39;
+        )
+</span>      <span class="ruby-keyword">else</span> <span class="ruby-comment"># No current user, no pending invitation (or invitation cancelled)</span>
+        <span class="ruby-comment"># The simplest case: no invitation token, no current user</span>
+        <span class="ruby-comment"># Simply present login options</span>
+        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:signup</span>, <span class="ruby-identifier">is_main</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">is_vis</span><span class="ruby-operator">:</span> (<span class="ruby-operator">!</span><span class="ruby-identifier">invitee_error</span>.<span class="ruby-identifier">nil?</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:notif</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;signup&#39;</span>)
+        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:newpw</span>, <span class="ruby-identifier">header_link</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>)
+        <span class="ruby-identifier">sections</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">notifs_section</span>(<span class="ruby-value">:signin</span>)
+        <span class="ruby-comment"># Ensure that the visible section comes first, to show any flash</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">visible</span> = <span class="ruby-identifier">sections</span>.<span class="ruby-identifier">find</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:is_vis</span>)
+          <span class="ruby-identifier">sections</span>.<span class="ruby-identifier">delete_if</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:is_vis</span>).<span class="ruby-identifier">unshift</span> <span class="ruby-identifier">visible</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">render</span>(<span class="ruby-string">&#39;notifs/panel&#39;</span>, <span class="ruby-identifier">sections</span><span class="ruby-operator">:</span> <span class="ruby-identifier">sections</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">sections</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -158,7 +245,7 @@ provide an advisory alert</p>
 
           
           <div class="method-source-code" id="handle_invitation-source">
-            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 27</span>
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 150</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">handle_invitation</span> <span class="ruby-identifier">partial</span>, <span class="ruby-identifier">advise</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">invitee</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_invitee</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
     <span class="ruby-comment"># The pending invitation is valid</span>
@@ -216,10 +303,10 @@ provide an advisory alert</p>
       </div>
 
     
-      <div id="method-i-handle_invitation_and_login" class="method-detail ">
+      <div id="method-i-invitation_acceptance_label" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">handle_invitation_and_login</span><span
+          <span class="method-name">invitation_acceptance_label</span><span
             class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -229,28 +316,117 @@ provide an advisory alert</p>
 
         <div class="method-description">
           
-          <p>Any pending invitation gets handled here, and also getting login
-credentials w/o an invitation</p>
+          
           
           
 
           
-          <div class="method-source-code" id="handle_invitation_and_login-source">
-            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 9</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">handle_invitation_and_login</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
-    <span class="ruby-comment"># User logged in: check for notifications</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">notif</span> = <span class="ruby-identifier">notifiable_notification</span>
-      <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;notifications/present&#39;</span>, <span class="ruby-identifier">presenter</span><span class="ruby-operator">:</span> <span class="ruby-identifier">present</span>(<span class="ruby-identifier">notif</span>, <span class="ruby-identifier">current_user</span>)
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span>
-    <span class="ruby-comment"># Sort out a pending invitation, whether anyone is logged in or not</span>
-    <span class="ruby-identifier">handle_invitation</span> <span class="ruby-string">&#39;notifs/panel&#39;</span>, <span class="ruby-operator">!</span><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">notification_token</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-comment"># The simplest case: no invitation token, no current user</span>
-    <span class="ruby-comment"># Simply present login options</span>
-    <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;notifs/panel&#39;</span>
-  <span class="ruby-keyword">end</span>
+          <div class="method-source-code" id="invitation_acceptance_label-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">invitation_acceptance_label</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;Take Share&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;Accept Invite&#39;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-notifs_replacement" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">notifs_replacement</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="notifs_replacement-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 8</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">notifs_replacement</span>
+  [ <span class="ruby-string">&#39;div.notifs-holder&#39;</span>, <span class="ruby-identifier">do_notifs</span> ]
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-notifs_section" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">notifs_section</span><span
+            class="method-args">(what, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="notifs_section-source">
+            <pre><span class="ruby-comment"># File app/helpers/notifs_helper.rb, line 108</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">notifs_section</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">default_options</span> = {
+      <span class="ruby-identifier">is_vis</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">params</span>[<span class="ruby-value">:notif</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>),
+      <span class="ruby-identifier">is_main</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>,
+      <span class="ruby-identifier">header_link</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
+  }.<span class="ruby-identifier">merge</span> <span class="ruby-keyword">case</span> <span class="ruby-identifier">what</span>
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:accept</span>
+              {
+                <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitation_acceptance_label</span>,
+                <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;devise/invitations/form&#39;</span>, <span class="ruby-comment"># &#39;notifs/accept_invitation&#39;,</span>
+              }
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:signin</span>
+              {
+                  <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sign In&#39;</span>,
+                  <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;notifs/signin&#39;</span>
+              }
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:signup</span>
+              {
+                  <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Sign Up&#39;</span>,
+                  <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;registrations/options&#39;</span>
+              }
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:newpw</span>
+              {
+                  <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Forgot Password&#39;</span>,
+                  <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;devise/passwords/form_new&#39;</span>
+              }
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:logout</span>
+              {
+                  <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;sessions/logout&#39;</span>,
+                  <span class="ruby-identifier">partial_locals</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">message</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;That notification is for someone else. Just sign out if you\d like to see it&#39;</span>}
+              }
+            <span class="ruby-keyword">when</span> <span class="ruby-value">:logout_first</span>
+              {
+                  <span class="ruby-identifier">partial</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;sessions/logout_panel&#39;</span>,
+                  <span class="ruby-identifier">partial_locals</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">message</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;That invitation is for someone else.&lt;br&gt;Just sign out if you\d like to use it&#39;</span>.<span class="ruby-identifier">html_safe</span>}
+              }
+          <span class="ruby-keyword">end</span>
+  <span class="ruby-constant">OpenStruct</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">default_options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">signature</span><span class="ruby-operator">:</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>) <span class="ruby-comment"># Signature is the only option that&#39;s enforced</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -270,7 +446,7 @@ credentials w/o an invitation</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

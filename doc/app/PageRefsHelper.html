@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -63,13 +64,9 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-i-page_ref_homelink">#page_ref_homelink</a>
+    <li ><a href="#method-i-page_ref_identifier">#page_ref_identifier</a>
     
-    <li ><a href="#method-i-page_ref_showlink">#page_ref_showlink</a>
-    
-    <li ><a href="#method-i-present_definition">#present_definition</a>
-    
-    <li ><a href="#method-i-summarize_page_ref">#summarize_page_ref</a>
+    <li ><a href="#method-i-present_page_ref">#present_page_ref</a>
     
   </ul>
 </div>
@@ -105,11 +102,11 @@
        </header>
 
     
-      <div id="method-i-page_ref_homelink" class="method-detail ">
+      <div id="method-i-page_ref_identifier" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">page_ref_homelink</span><span
-            class="method-args">(pr)</span>
+          <span class="method-name">page_ref_identifier</span><span
+            class="method-args">(pr, label=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -123,10 +120,12 @@
           
 
           
-          <div class="method-source-code" id="page_ref_homelink-source">
-            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 3</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_ref_homelink</span> <span class="ruby-identifier">pr</span>
-  <span class="ruby-identifier">link_to</span> (<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">title</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span>), <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span>
+          <div class="method-source-code" id="page_ref_identifier-source">
+            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 19</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_ref_identifier</span> <span class="ruby-identifier">pr</span>, <span class="ruby-identifier">label</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;Page&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">label</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-node">&quot;#{label} (##{pr.id}): &quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+      <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">decorate</span>, <span class="ruby-identifier">nuke_button</span><span class="ruby-operator">:</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipe?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">site?</span>))
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -138,44 +137,11 @@
       </div>
 
     
-      <div id="method-i-page_ref_showlink" class="method-detail ">
+      <div id="method-i-present_page_ref" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">page_ref_showlink</span><span
-            class="method-args">(pr, ttl=nil)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="page_ref_showlink-source">
-            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 7</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">page_ref_showlink</span> <span class="ruby-identifier">pr</span>, <span class="ruby-identifier">ttl</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">link_to_submit</span> (<span class="ruby-identifier">ttl</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">title</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">url</span>)), <span class="ruby-identifier">page_ref_path</span>(<span class="ruby-identifier">pr</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-present_definition" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">present_definition</span><span
-            class="method-args">(def_page_ref)</span>
+          <span class="method-name">present_page_ref</span><span
+            class="method-args">(page_ref, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -189,63 +155,21 @@
           
 
           
-          <div class="method-source-code" id="present_definition-source">
-            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 12</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_definition</span> <span class="ruby-identifier">def_page_ref</span>
-  <span class="ruby-identifier">ref_link</span> = (<span class="ruby-identifier">ref_name</span> = <span class="ruby-identifier">def_page_ref</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">name</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span>
-      <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">ref_name</span>, <span class="ruby-identifier">def_page_ref</span>.<span class="ruby-identifier">url</span>, <span class="ruby-value">:target</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;_blank&#39;</span>) <span class="ruby-operator">:</span>
+          <div class="method-source-code" id="present_page_ref-source">
+            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 4</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_page_ref</span> <span class="ruby-identifier">page_ref</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">ref_link</span> = (<span class="ruby-identifier">ref_name</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span>
+      <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">ref_name</span>, <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">url</span>, <span class="ruby-value">:target</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;_blank&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;page&#39;</span>) <span class="ruby-operator">:</span>
       <span class="ruby-string">&quot;&quot;</span>.<span class="ruby-identifier">html_safe</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">site</span> = <span class="ruby-identifier">def_page_ref</span>.<span class="ruby-identifier">site</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">site</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">site</span>
     <span class="ruby-identifier">ref_link</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39; on &#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">ref_link</span>.<span class="ruby-identifier">blank?</span>
-    <span class="ruby-identifier">ref_link</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">site</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">site</span>.<span class="ruby-identifier">home</span>, <span class="ruby-value">:target</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;_blank&#39;</span>)
+    <span class="ruby-identifier">ref_link</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">link_to</span>(<span class="ruby-identifier">site</span>.<span class="ruby-identifier">name</span>, <span class="ruby-identifier">site</span>.<span class="ruby-identifier">home</span>, <span class="ruby-value">:target</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;_blank&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;site&#39;</span>)
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">ref_link</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-summarize_page_ref" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">summarize_page_ref</span><span
-            class="method-args">(pr, options={})</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="summarize_page_ref-source">
-            <pre><span class="ruby-comment"># File app/helpers/page_refs_helper.rb, line 23</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_page_ref</span> <span class="ruby-identifier">pr</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">separator</span> = <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:separator</span>]
-  <span class="ruby-identifier">header</span>, <span class="ruby-identifier">inward_separator</span> = <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">summary_separator</span>(<span class="ruby-identifier">separator</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:header</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>]
-    <span class="ruby-identifier">header</span> = <span class="ruby-identifier">safe_join</span>([
-                           <span class="ruby-node">&quot;#{options[:label] || &#39;Page&#39;} (##{page_ref_showlink(pr, pr.id.to_s)})&quot;</span>.<span class="ruby-identifier">html_safe</span>,
-                           <span class="ruby-identifier">page_ref_homelink</span>(<span class="ruby-identifier">pr</span>)
-                       ], <span class="ruby-string">&#39;: &#39;</span>.<span class="ruby-identifier">html_safe</span>,
-    )
-    <span class="ruby-identifier">inward_separator</span> = <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">separator</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>].<span class="ruby-identifier">present?</span>
+    <span class="ruby-node">&quot;#{options[:label]}: &quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">ref_link</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">ref_link</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">referent_summaries</span> = (<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Referrable</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">referents</span> <span class="ruby-operator">:</span> []).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">referent</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">summarize_referent</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;#{referent.class} ##{referent.id}&quot;</span>, <span class="ruby-identifier">separator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">separator</span>
-  }
-  <span class="ruby-identifier">summarize_set</span> <span class="ruby-string">&#39;&#39;</span>, [<span class="ruby-identifier">header</span>] <span class="ruby-operator">+</span> <span class="ruby-identifier">referent_summaries</span>, <span class="ruby-identifier">separator</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -265,7 +189,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

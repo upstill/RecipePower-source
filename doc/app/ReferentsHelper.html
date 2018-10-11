@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -63,17 +64,19 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-i-list_children">#list_children</a>
+    <li ><a href="#method-i-ref_affiliates_summary">#ref_affiliates_summary</a>
     
-    <li ><a href="#method-i-referent_homelink">#referent_homelink</a>
+    <li ><a href="#method-i-ref_children_summary">#ref_children_summary</a>
     
-    <li ><a href="#method-i-summarize_ref_children">#summarize_ref_children</a>
+    <li ><a href="#method-i-ref_expressions_summary">#ref_expressions_summary</a>
     
-    <li ><a href="#method-i-summarize_ref_expressions">#summarize_ref_expressions</a>
+    <li ><a href="#method-i-ref_parents_summary">#ref_parents_summary</a>
+    
+    <li ><a href="#method-i-referent_identifier">#referent_identifier</a>
+    
+    <li ><a href="#method-i-referent_summary">#referent_summary</a>
     
     <li ><a href="#method-i-summarize_ref_name">#summarize_ref_name</a>
-    
-    <li ><a href="#method-i-summarize_ref_parents">#summarize_ref_parents</a>
     
     <li ><a href="#method-i-summarize_referent">#summarize_referent</a>
     
@@ -111,47 +114,10 @@
        </header>
 
     
-      <div id="method-i-list_children" class="method-detail ">
+      <div id="method-i-ref_affiliates_summary" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">list_children</span><span
-            class="method-args">(referent, do_tag=true)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="list_children-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 53</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">list_children</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">do_tag</span>=<span class="ruby-keyword">true</span>
-  (<span class="ruby-string">&quot;Children: &quot;</span><span class="ruby-operator">+</span>
-      (<span class="ruby-identifier">referent</span>.<span class="ruby-identifier">child_tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span>
-        (<span class="ruby-identifier">do_tag</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">tag_homelink</span>(<span class="ruby-identifier">tag</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>)<span class="ruby-operator">+</span>
-            <span class="ruby-node">&quot;(id #{tag.id.to_s})&quot;</span>
-      }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-string">&quot;none&quot;</span>)).<span class="ruby-identifier">html_safe</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-referent_homelink" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">referent_homelink</span><span
+          <span class="method-name">ref_affiliates_summary</span><span
             class="method-args">(ref, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -166,10 +132,25 @@
           
 
           
-          <div class="method-source-code" id="referent_homelink-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 3</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">referent_homelink</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>), <span class="ruby-identifier">options</span>
+          <div class="method-source-code" id="ref_affiliates_summary-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 67</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ref_affiliates_summary</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">affiliate_summs</span> =
+      <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">affiliates</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">affil</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">affil</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-constant">Referent</span>
+            <span class="ruby-identifier">referent_identifier</span> <span class="ruby-identifier">affil</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-constant">PageRef</span>
+            <span class="ruby-identifier">present_page_ref</span> <span class="ruby-identifier">affil</span>, <span class="ruby-identifier">options</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;About&#39;</span>) <span class="ruby-comment"># affil.model_name.human.sub(/ ref$/,&#39;&#39;))</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">safe_join</span> [<span class="ruby-identifier">affil</span>.<span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">human</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">first</span>.<span class="ruby-identifier">html_safe</span>, <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">affil</span>)], <span class="ruby-string">&#39;: &#39;</span>
+        <span class="ruby-keyword">end</span>
+      }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">flatten</span>(<span class="ruby-value">1</span>)
+
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">affiliate_summs</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">label</span> = (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Associated with &#39;</span>).<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-identifier">affiliate_summs</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> [ <span class="ruby-identifier">label</span>, <span class="ruby-identifier">affiliate_summs</span> ] <span class="ruby-operator">:</span> (<span class="ruby-identifier">label</span><span class="ruby-operator">+</span><span class="ruby-identifier">affiliate_summs</span>.<span class="ruby-identifier">first</span>)
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -181,10 +162,10 @@
       </div>
 
     
-      <div id="method-i-summarize_ref_children" class="method-detail ">
+      <div id="method-i-ref_children_summary" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">summarize_ref_children</span><span
+          <span class="method-name">ref_children_summary</span><span
             class="method-args">(ref, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -199,12 +180,14 @@
           
 
           
-          <div class="method-source-code" id="summarize_ref_children-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 47</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_ref_children</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">summarize_set</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Category includes&#39;</span>),
-                <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-identifier">referent_homelink</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>) },
-                <span class="ruby-identifier">options</span>[<span class="ruby-value">:separator</span>]
+          <div class="method-source-code" id="ref_children_summary-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 59</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ref_children_summary</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">child_summs</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:canonical_expression</span>).<span class="ruby-identifier">limit</span>(<span class="ruby-value">8</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">child</span> }
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">child_summs</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">label</span> = (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>].<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Category includes &#39;</span>).<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-identifier">child_summs</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> [<span class="ruby-identifier">label</span>, <span class="ruby-identifier">child_summs</span>] <span class="ruby-operator">:</span> (<span class="ruby-identifier">label</span><span class="ruby-operator">+</span><span class="ruby-identifier">child_summs</span>.<span class="ruby-identifier">first</span>)
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -216,10 +199,10 @@
       </div>
 
     
-      <div id="method-i-summarize_ref_expressions" class="method-detail ">
+      <div id="method-i-ref_expressions_summary" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">summarize_ref_expressions</span><span
+          <span class="method-name">ref_expressions_summary</span><span
             class="method-args">(referent, options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
@@ -234,14 +217,136 @@
           
 
           
-          <div class="method-source-code" id="summarize_ref_expressions-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 33</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_ref_expressions</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">summarize_set</span> <span class="ruby-identifier">labelled_quantity</span>(<span class="ruby-identifier">referent</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">count</span>, <span class="ruby-string">&#39;Expression&#39;</span>),
-                <span class="ruby-identifier">referent</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
-                  <span class="ruby-identifier">tag_homelink</span>(<span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">nuke_button</span><span class="ruby-operator">:</span> <span class="ruby-identifier">referent</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>)
-                },
-                <span class="ruby-identifier">options</span>[<span class="ruby-value">:separator</span>]
+          <div class="method-source-code" id="ref_expressions_summary-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 40</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ref_expressions_summary</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">ct</span> = <span class="ruby-identifier">referent</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">count</span>
+  <span class="ruby-identifier">summs</span> = <span class="ruby-identifier">referent</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">limit</span>(<span class="ruby-value">8</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span>, <span class="ruby-identifier">nuke_button</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ct</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:except</span>]
+  }.<span class="ruby-identifier">compact</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">header</span> = <span class="ruby-string">&#39;Synonym&#39;</span>.<span class="ruby-identifier">html_safe</span>
+    (<span class="ruby-identifier">ct</span> = <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">count</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> [<span class="ruby-identifier">labelled_quantity</span>(<span class="ruby-identifier">ct</span>, <span class="ruby-identifier">header</span>), <span class="ruby-identifier">summs</span>] <span class="ruby-operator">:</span> (<span class="ruby-identifier">header</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;: &#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">first</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-ref_parents_summary" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">ref_parents_summary</span><span
+            class="method-args">(ref, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="ref_parents_summary-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 51</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">ref_parents_summary</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">set</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:canonical_expression</span>).<span class="ruby-identifier">limit</span>(<span class="ruby-value">8</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">parent</span><span class="ruby-operator">|</span> <span class="ruby-identifier">homelink</span> <span class="ruby-identifier">parent</span> }
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">label</span> = (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>].<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> (<span class="ruby-string">&#39;Belongs to the categor&#39;</span><span class="ruby-operator">+</span>(<span class="ruby-identifier">set</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;ies&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;y &#39;</span>))).<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-identifier">set</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> [ <span class="ruby-identifier">label</span>, <span class="ruby-identifier">set</span> ] <span class="ruby-operator">:</span> (<span class="ruby-identifier">label</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">set</span>.<span class="ruby-identifier">first</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-referent_identifier" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">referent_identifier</span><span
+            class="method-args">(ref, label=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="referent_identifier-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 16</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">referent_identifier</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">label</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">safe_join</span> [ (<span class="ruby-identifier">label</span>.<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">model_name</span>.<span class="ruby-identifier">human</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">first</span>),
+              <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">ref</span>) ], <span class="ruby-string">&#39;: &#39;</span>.<span class="ruby-identifier">html_safe</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-referent_summary" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">referent_summary</span><span
+            class="method-args">(ref, options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="referent_summary-source">
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 21</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">referent_summary</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">ttltag</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:except</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">expression</span>
+  <span class="ruby-identifier">header</span> =
+      <span class="ruby-identifier">options</span>[<span class="ruby-value">:disambiguate</span>] <span class="ruby-operator">?</span>
+        <span class="ruby-string">&#39;Knowledge about &#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">ttltag</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">ttltag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&lt;unnamed&gt;&#39;</span>)) <span class="ruby-operator">:</span>
+        <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+
+  <span class="ruby-identifier">header</span> = <span class="ruby-identifier">referent_identifier</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:header</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>]
+  <span class="ruby-identifier">sub_summs</span> = [
+      <span class="ruby-identifier">ref_expressions_summary</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">except</span><span class="ruby-operator">:</span> <span class="ruby-identifier">ttltag</span>),
+      <span class="ruby-identifier">ref_parents_summary</span>(<span class="ruby-identifier">ref</span>),
+      <span class="ruby-identifier">ref_children_summary</span>(<span class="ruby-identifier">ref</span>),
+      <span class="ruby-identifier">ref_affiliates_summary</span>(<span class="ruby-identifier">ref</span>)
+  ].<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">flatten</span>(<span class="ruby-value">1</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">sub_summs</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">header</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> [ <span class="ruby-identifier">header</span>, <span class="ruby-identifier">sub_summs</span> ] <span class="ruby-operator">:</span> <span class="ruby-identifier">sub_summs</span>
+  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -272,45 +377,14 @@
 
           
           <div class="method-source-code" id="summarize_ref_name-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 7</span>
-      <span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_ref_name</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">long</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-identifier">extra</span> = <span class="ruby-identifier">long</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;going by the name of &#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-node">&quot;&lt;i&gt;#{referent.typename}&lt;/i&gt; #{extra}&lt;strong&gt;&#39;#{referent.name}&#39;&lt;/strong&gt; &quot;</span>.<span class="ruby-identifier">html_safe</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-summarize_ref_parents" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">summarize_ref_parents</span><span
-            class="method-args">(ref, options={})</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="summarize_ref_parents-source">
-            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 41</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_ref_parents</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">summarize_set</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Categorized under&#39;</span>),
-                <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">parent</span><span class="ruby-operator">|</span> <span class="ruby-identifier">referent_homelink</span> <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>) },
-                <span class="ruby-identifier">options</span>[<span class="ruby-value">:separator</span>]
+            <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 3</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_ref_name</span> <span class="ruby-identifier">referent</span>, <span class="ruby-identifier">long</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-identifier">extra</span> = <span class="ruby-identifier">long</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39; going by the name of &#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39; &#39;</span>
+  <span class="ruby-identifier">referent</span>.<span class="ruby-identifier">typename</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+      <span class="ruby-identifier">extra</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+      <span class="ruby-string">&quot; &#39;&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+      <span class="ruby-identifier">homelink</span>(<span class="ruby-identifier">referent</span>) <span class="ruby-operator">+</span>
+      <span class="ruby-string">&quot;&#39; &quot;</span>.<span class="ruby-identifier">html_safe</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -343,24 +417,7 @@
           <div class="method-source-code" id="summarize_referent-source">
             <pre><span class="ruby-comment"># File app/helpers/referents_helper.rb, line 12</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_referent</span> <span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">separator</span> = <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:separator</span>]
-  <span class="ruby-identifier">header</span>, <span class="ruby-identifier">inward_separator</span> = <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">summary_separator</span>(<span class="ruby-identifier">separator</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:header</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>]
-    <span class="ruby-identifier">header</span> = <span class="ruby-identifier">safe_join</span>([
-                           (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;Meaning&#39;</span>),
-                           <span class="ruby-identifier">referent_homelink</span>(<span class="ruby-identifier">ref</span>)
-                       ], <span class="ruby-string">&#39;: &#39;</span>.<span class="ruby-identifier">html_safe</span>,
-    )
-    <span class="ruby-identifier">inward_separator</span> = <span class="ruby-identifier">summary_separator</span> <span class="ruby-identifier">separator</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">summarize_set</span> <span class="ruby-string">&#39;&#39;</span>,
-                [
-                    <span class="ruby-identifier">header</span>,
-                    <span class="ruby-identifier">summarize_ref_expressions</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">separator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">inward_separator</span>),
-                    <span class="ruby-identifier">summarize_ref_parents</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">separator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">inward_separator</span>),
-                    <span class="ruby-identifier">summarize_ref_children</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">separator</span><span class="ruby-operator">:</span> <span class="ruby-identifier">inward_separator</span>)
-                ],
-                <span class="ruby-identifier">separator</span>
+  <span class="ruby-identifier">format_table_tree</span> <span class="ruby-identifier">referent_summary</span>(<span class="ruby-identifier">ref</span>, <span class="ruby-identifier">options</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -380,7 +437,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

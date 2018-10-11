@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -76,6 +77,10 @@
   
   
   
+    <li><a class="include" href="Backgroundable.html">Backgroundable</a>
+  
+  
+  
     <li><a class="include" href="Pagerefable.html">Pagerefable</a>
   
   
@@ -92,6 +97,8 @@
     <li ><a href="#method-c-strscopes">::strscopes</a>
     
     <li class="calls-super" ><a href="#method-i-absorb">#absorb</a>
+    
+    <li class="calls-super" ><a href="#method-i-adopt_gleaning">#adopt_gleaning</a>
     
     <li ><a href="#method-i-picurl-3D">#picurl=</a>
     
@@ -148,18 +155,18 @@
 
         <div class="method-description">
           
-          <p>Return scopes for searching the title and description</p>
+          <p>Return scopes for searching the title and description The block, if given,
+is for the caller to assert its own scope, joining it with this scope</p>
           
           
 
           
           <div class="method-source-code" id="strscopes-source">
-            <pre><span class="ruby-comment"># File app/models/recipe.rb, line 39</span>
+            <pre><span class="ruby-comment"># File app/models/recipe.rb, line 40</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
   <span class="ruby-identifier">scope</span> = <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">unscoped</span>
   [
-      <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;recipes&quot;.&quot;title&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>),
-      <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;recipes&quot;.&quot;description&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>)
+      <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">where</span>(<span class="ruby-string">&#39;&quot;recipes&quot;.&quot;title&quot; ILIKE ? or &quot;recipes&quot;.&quot;description&quot; ILIKE ?&#39;</span>, <span class="ruby-identifier">matcher</span>, <span class="ruby-identifier">matcher</span>)
   ] <span class="ruby-operator">+</span> <span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">strscopes</span>(<span class="ruby-identifier">matcher</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">inward</span>=<span class="ruby-keyword">nil</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">joinspec</span> = <span class="ruby-identifier">inward</span> <span class="ruby-operator">?</span> {<span class="ruby-value">:page_ref</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">inward</span>} <span class="ruby-operator">:</span> <span class="ruby-value">:page_ref</span>
     <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">joinspec</span>) <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">joins</span>(<span class="ruby-identifier">joinspec</span>)
@@ -215,10 +222,51 @@
     <span class="ruby-identifier">fe</span>.<span class="ruby-identifier">recipe</span> = <span class="ruby-keyword">self</span>
     <span class="ruby-identifier">fe</span>.<span class="ruby-identifier">save</span>
   }
-  <span class="ruby-keyword">super</span> <span class="ruby-identifier">other</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span> <span class="ruby-keyword">super</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-identifier">other</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-keyword">super</span>)
   <span class="ruby-identifier">other</span>.<span class="ruby-identifier">reload</span>
   <span class="ruby-identifier">other</span>.<span class="ruby-identifier">destroy</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">destroy</span>
   <span class="ruby-identifier">save</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-adopt_gleaning" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">adopt_gleaning</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>This is called when the page_ref finishes updating</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="adopt_gleaning-source">
+            <pre><span class="ruby-comment"># File app/models/recipe.rb, line 95</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">adopt_gleaning</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">title</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">picurl</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">picurl</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">picurl</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">description</span> = <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">description</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">description</span>.<span class="ruby-identifier">present?</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-keyword">super</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -377,7 +425,7 @@ return nil if inconclusive (maybe an authorization error, whatever)</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

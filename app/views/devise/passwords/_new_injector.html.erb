@@ -2,9 +2,7 @@
     <p>Not a member? <u><%= link_to_submit "Sign up!", new_registration_path(resource), mode: "injector" %></u></p>
     <%= simple_form_for resource, :as => resource_name, :url => password_path(resource_name, response_service.redirect_params ), html: { class: "password-reset json", 'data-type' => :json } do |f| %>
         <div class="get_password">
-          <%# flash_all false %>
-          <%# form_errors_helper f %>
-          <%= flash_notifications_div("notifications-panel") %>
+          <%= flash_notifications_div %>
           <div class="signin_credentials">
             <%# f.label :login, "Username or Email (your choice)".html_safe %>
             <%# f.text_field :login, class: "signin_element" %>

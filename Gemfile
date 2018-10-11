@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 ruby '2.2.2'
 # gem 'bundler', '~> 1.4'
 gem 'rails', '4.2.6'
+gem 'rdoc'
 
 ###### Rails Extensions
 # Protect attributes from mass-assignment in ActiveRecord models.

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -141,7 +142,7 @@
 
           
           <div class="method-source-code" id="after_accept_path_for-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 271</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 251</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">after_accept_path_for</span> <span class="ruby-identifier">resource</span>
   <span class="ruby-identifier">defer_welcome_dialogs</span>
   <span class="ruby-identifier">after_sign_in_path_for</span> <span class="ruby-identifier">resource</span>
@@ -202,134 +203,115 @@
 
         <div class="method-description">
           
-          <p>POST /resource/invitation</p>
+          <p>POST /resource/invitation Respond to dialog for issuing a share/invitation</p>
           
           
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 50</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 51</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">current_user</span>
     <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-string">&#39;NULL CURRENT_USER in invitation/create without raising authenticity error&#39;</span>
     <span class="ruby-identifier">raise</span> <span class="ruby-constant">ActionController</span><span class="ruby-operator">::</span><span class="ruby-constant">InvalidAuthenticityToken</span>
   <span class="ruby-keyword">end</span>
-
-  <span class="ruby-identifier">alerts</span> = [] <span class="ruby-comment"># This will be an array of messages to report back to the user</span>
-  <span class="ruby-identifier">popups</span> = []
+  <span class="ruby-identifier">resource_params</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>]
 
   <span class="ruby-comment"># If dialog has no invitee_tokens, get them from email field</span>
-  <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>][<span class="ruby-value">:invitee_tokens</span>] <span class="ruby-operator">||=</span>
-      <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>][<span class="ruby-value">:email</span>].<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">email</span><span class="ruby-operator">|</span> <span class="ruby-node">%Q{&#39;#{email.downcase.strip}&#39;}</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>)
+  <span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:invitee_tokens</span>] <span class="ruby-operator">||=</span> <span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:email</span>].<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;,&#39;</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">email</span><span class="ruby-operator">|</span> <span class="ruby-node">%Q{&#39;#{email.downcase.strip}&#39;}</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>)
   <span class="ruby-comment"># Check email addresses in the tokenlist for validity</span>
-  <span class="ruby-ivar">@staged</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>] <span class="ruby-comment"># invite_resource</span>
-  <span class="ruby-ivar">@shared</span> = <span class="ruby-ivar">@staged</span>.<span class="ruby-identifier">shared</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">resource_params</span> <span class="ruby-comment"># invite_resource</span>
+  <span class="ruby-ivar">@shared</span> = <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared</span>
 
-  <span class="ruby-comment"># It is an error to provide a bogus email address</span>
+  <span class="ruby-comment"># It is an error to provide no email address or a bogus one</span>
   <span class="ruby-identifier">err_address</span> =
-      <span class="ruby-ivar">@staged</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">detect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">token</span><span class="ruby-operator">|</span>
         <span class="ruby-identifier">token</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">String</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">token</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i</span>)
       }
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">err_address</span> <span class="ruby-operator">||</span> <span class="ruby-ivar">@staged</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># if there&#39;s an invalid email, go back to the user</span>
-    <span class="ruby-ivar">@staged</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> (<span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> <span class="ruby-value">:invitee_tokens</span> <span class="ruby-operator">:</span> <span class="ruby-value">:email</span>),
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">err_address</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># if there&#39;s an invalid email, go back to the user</span>
+    <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> (<span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> <span class="ruby-value">:invitee_tokens</span> <span class="ruby-operator">:</span> <span class="ruby-value">:email</span>),
                        <span class="ruby-identifier">err_address</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">?</span>
                            <span class="ruby-string">&#39;Can\t send an invitation without an email to send it to!&#39;</span> <span class="ruby-operator">:</span>
                            <span class="ruby-node">&quot;&#39;#{err_address}&#39; doesn&#39;t look like an email address.&quot;</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-ivar">@staged</span>
     <span class="ruby-identifier">smartrender</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> <span class="ruby-value">:share</span> <span class="ruby-operator">:</span> <span class="ruby-value">:new</span>)
     <span class="ruby-keyword">return</span>
   <span class="ruby-keyword">end</span>
 
-  <span class="ruby-comment"># Now that the invitee tokens are &quot;valid&quot;, send mail to each</span>
-  <span class="ruby-identifier">breakdown</span> = <span class="ruby-constant">UserServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@staged</span>).<span class="ruby-identifier">analyze_invitees</span>(<span class="ruby-identifier">current_user</span>)
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">new</span>()
-  <span class="ruby-comment"># Do invitations and/or shares, as appropriate</span>
-  <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:invited</span>] = []
-  <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:failures</span>] = []
-  <span class="ruby-comment"># breakdown[:to_invite] is the list of complete outsiders who need invitations as well as shares</span>
-  <span class="ruby-comment"># breakdown[:pending] are invitees who haven&#39;t yet accepted</span>
-  (<span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:to_invite</span>]<span class="ruby-operator">+</span><span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:pending</span>]).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">invitee</span><span class="ruby-operator">|</span>
-    <span class="ruby-comment"># Fresh invitations to a genuine external user</span>
-    <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>]
-      <span class="ruby-identifier">pr</span>[<span class="ruby-value">:email</span>] = (<span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">kind_of?</span>(<span class="ruby-constant">User</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">email</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>).<span class="ruby-identifier">downcase</span>
-      <span class="ruby-identifier">pr</span>[<span class="ruby-value">:skip_invitation</span>] = <span class="ruby-keyword">true</span> <span class="ruby-comment"># Hold off on invitation so we can re-direct to share, as nec.</span>
-      <span class="ruby-ivar">@resource</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">invite!</span>(<span class="ruby-identifier">pr</span>, <span class="ruby-identifier">current_inviter</span>)
-      <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">invitation_sent_at</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">utc</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-ivar">@shared</span>
-        <span class="ruby-ivar">@notification</span> = <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">post_notification</span>(<span class="ruby-value">:share</span>, <span class="ruby-identifier">current_inviter</span>, <span class="ruby-identifier">what</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@shared</span>)
-        <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">save</span>(<span class="ruby-identifier">validate</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>) <span class="ruby-comment"># ...because the invitee doesn&#39;t have a handle yet</span>
-        <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">issue_instructions</span>(<span class="ruby-value">:sharing_invitation_instructions</span>,
-                                     <span class="ruby-identifier">notification_token</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@notification</span>.<span class="ruby-identifier">notification_token</span>,
-                                     <span class="ruby-identifier">subject</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">invitation_issuer</span><span class="ruby-operator">+</span><span class="ruby-string">&#39; has something tasty for you&#39;</span>)
-      <span class="ruby-keyword">else</span>
-        <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">save</span>(<span class="ruby-identifier">validate</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>) <span class="ruby-comment"># ...because the invitee doesn&#39;t have a handle yet</span>
-        <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">issue_instructions</span>(<span class="ruby-value">:invitation_instructions</span>)
+  <span class="ruby-comment"># Now that the invitee tokens are syntactically &quot;valid&quot;, post appropriate events for each</span>
+  <span class="ruby-identifier">breakdown</span> = { <span class="ruby-comment"># UserServices.new(resource).analyze_invitees(current_user)</span>
+      <span class="ruby-identifier">extant_friends</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Current friends (member&#39;s share notice sent)</span>
+      <span class="ruby-identifier">new_friends</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Newly-added friends (member&#39;s share notice sent)</span>
+      <span class="ruby-identifier">reinvited</span><span class="ruby-operator">:</span>  [], <span class="ruby-comment"># Invited but not yet confirmed</span>
+      <span class="ruby-identifier">to_invite</span><span class="ruby-operator">:</span>  []
+  }
+  <span class="ruby-comment"># Define a singleton method on the hash for reporting out the results</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-identifier">which</span>, <span class="ruby-identifier">selector</span> = <span class="ruby-keyword">nil</span>)
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">items</span> = <span class="ruby-keyword">self</span>[<span class="ruby-identifier">which</span>]).<span class="ruby-identifier">present?</span>
+      <span class="ruby-identifier">count</span> = <span class="ruby-identifier">items</span>.<span class="ruby-identifier">size</span>
+      <span class="ruby-identifier">items</span> = <span class="ruby-identifier">liststrs</span>(<span class="ruby-identifier">items</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-identifier">selector</span>)) <span class="ruby-keyword">if</span> <span class="ruby-identifier">selector</span>
+      <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">items</span>, <span class="ruby-identifier">count</span>)
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitee_tokens</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">invitee</span><span class="ruby-operator">|</span>
+    <span class="ruby-comment"># Convert tokens to users</span>
+    <span class="ruby-identifier">category</span> =
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span> = <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Fixnum</span>) <span class="ruby-operator">?</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">invitee</span>) <span class="ruby-operator">:</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">downcase</span>)
+      <span class="ruby-comment"># Existing user, whether signed up or not, friend or not</span>
+      <span class="ruby-identifier">u</span>.<span class="ruby-identifier">invitation_message</span> = <span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:invitation_message</span>]
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">id</span> <span class="ruby-comment"># Existing friend: redundant</span>
+        <span class="ruby-constant">SharedEvent</span>.<span class="ruby-identifier">post</span>(<span class="ruby-identifier">current_user</span>, <span class="ruby-ivar">@shared</span>, <span class="ruby-identifier">u</span>) <span class="ruby-keyword">if</span> <span class="ruby-ivar">@shared</span>
+        <span class="ruby-value">:extant_friends</span>
+      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">last_sign_in_at</span> <span class="ruby-comment"># The user needs no invitation (already signed in)</span>
+        <span class="ruby-constant">SharedEvent</span>.<span class="ruby-identifier">post</span>(<span class="ruby-identifier">current_user</span>, <span class="ruby-ivar">@shared</span>, <span class="ruby-identifier">u</span>) <span class="ruby-keyword">if</span> <span class="ruby-ivar">@shared</span>
+        <span class="ruby-value">:new_friends</span>
+      <span class="ruby-keyword">else</span> <span class="ruby-comment"># User exists but hasn&#39;t signed in -&gt; invitation is pending</span>
+        <span class="ruby-identifier">u</span>.<span class="ruby-identifier">invite!</span>(<span class="ruby-identifier">current_inviter</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">skip_invitation</span> = <span class="ruby-keyword">true</span> }
+        <span class="ruby-constant">InvitationSentEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">u</span>, <span class="ruby-ivar">@shared</span>, <span class="ruby-identifier">u</span>.<span class="ruby-identifier">raw_invitation_token</span>
+        <span class="ruby-value">:reinvited</span>
       <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:invited</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-ivar">@resource</span>
-      <span class="ruby-comment">#        rescue Exception =&gt; e</span>
-      <span class="ruby-comment">#          breakdown[:failures].push({ email: invitee.email, error: e.to_s })</span>
-      <span class="ruby-comment">#          self.resource = nil</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-comment"># This is a new invitation/share to a new user</span>
+      <span class="ruby-identifier">u</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">invite!</span>(<span class="ruby-identifier">resource_params</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">invitee</span>.<span class="ruby-identifier">downcase</span>), <span class="ruby-identifier">current_user</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">u</span><span class="ruby-operator">|</span> <span class="ruby-identifier">u</span>.<span class="ruby-identifier">skip_invitation</span> = <span class="ruby-keyword">true</span> }
+      <span class="ruby-constant">InvitationSentEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">u</span>, <span class="ruby-ivar">@shared</span>, <span class="ruby-identifier">u</span>.<span class="ruby-identifier">raw_invitation_token</span>
+      <span class="ruby-value">:to_invite</span>
     <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">breakdown</span>[<span class="ruby-identifier">category</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">u</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">what_to_send</span> = <span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;a sharing notice&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;an invitation&#39;</span>
-  <span class="ruby-identifier">popups</span> <span class="ruby-operator">&lt;&lt;</span>
-      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:invited</span>, <span class="ruby-value">:email</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
-        <span class="ruby-identifier">subj_verb</span> = (<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>) <span class="ruby-operator">?</span>
-            (<span class="ruby-identifier">what_to_send</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^[^\s]*\s*/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">capitalize</span><span class="ruby-operator">+</span><span class="ruby-string">&#39;s are winging their way&#39;</span>) <span class="ruby-operator">:</span>
-            (<span class="ruby-identifier">what_to_send</span>.<span class="ruby-identifier">capitalize</span><span class="ruby-operator">+</span><span class="ruby-string">&#39; is winging its way&#39;</span>)
-        <span class="ruby-node">%Q{Yay! #{subj_verb} to #{names}}</span>
-      }
-  <span class="ruby-identifier">alerts</span> <span class="ruby-operator">&lt;&lt;</span>
-      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:failures</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">items</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
-        <span class="ruby-identifier">what_to_send</span> = <span class="ruby-identifier">what_to_send</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^[^\s]*\s*/</span>, <span class="ruby-string">&#39;&#39;</span>)<span class="ruby-operator">+</span><span class="ruby-string">&#39;s&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
-        <span class="ruby-node">&quot;Couldn&#39;t send #{what_to_send} to:&quot;</span><span class="ruby-operator">+</span>
-            <span class="ruby-string">&#39;&lt;ul&gt;&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">items</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">item</span><span class="ruby-operator">|</span> <span class="ruby-node">&quot;&lt;li&gt;#{item[:email]}: #{item[:error]}&lt;/li&gt;&quot;</span> }.<span class="ruby-identifier">join</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;&lt;/ul&gt;&#39;</span>
-      }
 
-  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@shared</span>
-    <span class="ruby-comment"># All categories of user get notified of the share</span>
-    (<span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:new_friends</span>]<span class="ruby-operator">+</span><span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:redundancies</span>]).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">sharee</span><span class="ruby-operator">|</span>
-      <span class="ruby-comment"># Mail generic share notice ()sans invitation) with action button to collect recipe</span>
-      <span class="ruby-comment"># Cook Me Later: add to collection</span>
-      <span class="ruby-identifier">sharee</span>.<span class="ruby-identifier">invitation_message</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-value">:invitation_message</span>]
-      <span class="ruby-identifier">sharee</span>.<span class="ruby-identifier">save</span>
-      <span class="ruby-identifier">sharee</span>.<span class="ruby-identifier">notify</span>(<span class="ruby-value">:share</span>, <span class="ruby-identifier">current_user</span>, <span class="ruby-identifier">what</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@shared</span>)
-      <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:invited</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">sharee</span>
-    <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">popups</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:redundancies</span>, <span class="ruby-value">:salutation</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span> <span class="ruby-node">%Q{#{names} #{count &gt; 1 ? &#39;have&#39; : &#39;has&#39; } been notified on your behalf.}</span> }
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">alerts</span> <span class="ruby-operator">&lt;&lt;</span> [
-        <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:redundancies</span>, <span class="ruby-value">:handle</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
-          <span class="ruby-node">&quot;You&#39;re already friends with #{names}.&quot;</span> },
-        <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:pending</span>, <span class="ruby-value">:email</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
-          <span class="ruby-identifier">verb</span> = <span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;have&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;has&#39;</span>
-          <span class="ruby-node">%Q{#{names} #{verb} already been invited but #{verb}n&#39;t accepted.}</span>
-        },
-        <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:new_friends</span>, <span class="ruby-value">:handle</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
-          <span class="ruby-node">%Q{#{names} #{count &gt; 1 ? &#39;are&#39; : &#39;is&#39;} already on RecipePower, so we&#39;ve added them to your friends.}</span>
-        }
-    ]
+  <span class="ruby-comment"># Recruit new friends (invitees who aren&#39;t currently friends)</span>
+  <span class="ruby-identifier">new_friend_ids</span> = <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:new_friends</span>].<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>) <span class="ruby-operator">-</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followee_ids</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_friend_ids</span>.<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followee_ids</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followee_ids</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">new_friends_ids</span>
+    <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">save</span>
   <span class="ruby-keyword">end</span>
+
+  <span class="ruby-identifier">what_to_send</span> = <span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;a sharing notice&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;an invitation&#39;</span>
+  <span class="ruby-comment"># Messages to report back to the user</span>
+  <span class="ruby-identifier">popup</span> =
+      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:to_invite</span>, <span class="ruby-value">:email</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">users</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
+          <span class="ruby-identifier">subj_verb</span> = <span class="ruby-identifier">what_to_send</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^[^\s]*\s*/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">capitalize</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39;s are winging their way&#39;</span>
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">subj_verb</span> = <span class="ruby-identifier">what_to_send</span>.<span class="ruby-identifier">capitalize</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; is winging its way&#39;</span>
+        <span class="ruby-keyword">end</span>
+        <span class="ruby-node">%Q{Yay! #{subj_verb} to #{users}}</span>
+      }
+  <span class="ruby-identifier">alerts</span> = <span class="ruby-ivar">@shared</span> <span class="ruby-operator">?</span> [] <span class="ruby-operator">:</span> [ <span class="ruby-comment"># Invitations only</span>
+      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:extant_friends</span>, <span class="ruby-value">:handle</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
+        <span class="ruby-node">&quot;You&#39;re already friends with #{names}.&quot;</span> },
+      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:reinvited</span>, <span class="ruby-value">:email</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">verb</span> = <span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;have&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;has&#39;</span>
+        <span class="ruby-node">%Q{#{names} #{verb} already been invited but #{verb}n&#39;t accepted.}</span>
+      },
+      <span class="ruby-identifier">breakdown</span>.<span class="ruby-identifier">report</span>(<span class="ruby-value">:new_friends</span>, <span class="ruby-value">:handle</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">names</span>, <span class="ruby-identifier">count</span><span class="ruby-operator">|</span>
+        <span class="ruby-node">%Q{#{names} #{count &gt; 1 ? &#39;are&#39; : &#39;is&#39;} already on RecipePower, so we&#39;ve added them to your friends.}</span>
+      } ].<span class="ruby-identifier">compact</span>
+
   <span class="ruby-identifier">respond_to</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
       <span class="ruby-identifier">response</span> = {<span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>}
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:new_friends</span>].<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
-        <span class="ruby-identifier">response</span>[<span class="ruby-value">:entity</span>] = <span class="ruby-identifier">breakdown</span>[<span class="ruby-value">:new_friends</span>].<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">nf</span><span class="ruby-operator">|</span>
-          <span class="ruby-keyword">unless</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followee_ids</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">nf</span>.<span class="ruby-identifier">id</span>
-            <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">followees</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">nf</span>
-            <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">save</span>
-          <span class="ruby-keyword">end</span>
-        }
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">alerts</span> = <span class="ruby-identifier">alerts</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>
-      <span class="ruby-identifier">popups</span> = <span class="ruby-identifier">popups</span>.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">alerts</span>.<span class="ruby-identifier">empty?</span>
-        <span class="ruby-comment"># If there&#39;s a single popup, report it in a popup, otherwise use an alert</span>
-        <span class="ruby-identifier">response</span>[<span class="ruby-identifier">popups</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">==</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-value">:popup</span> <span class="ruby-operator">:</span> <span class="ruby-value">:alert</span>] = <span class="ruby-identifier">popups</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">popups</span>.<span class="ruby-identifier">empty?</span>
-      <span class="ruby-keyword">else</span>
-        <span class="ruby-comment"># Alerts get reported as alerts</span>
-        <span class="ruby-identifier">response</span>[<span class="ruby-value">:alert</span>] = (<span class="ruby-identifier">popups</span><span class="ruby-operator">+</span><span class="ruby-identifier">alerts</span>).<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">msgs</span> = ((<span class="ruby-identifier">alerts</span> <span class="ruby-operator">||</span> []) <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">popup</span>.<span class="ruby-identifier">if_present</span>).<span class="ruby-identifier">compact</span>).<span class="ruby-identifier">present?</span>
+        <span class="ruby-identifier">response</span>[<span class="ruby-identifier">alerts</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span>  <span class="ruby-value">:alert</span> <span class="ruby-operator">:</span> <span class="ruby-value">:popup</span>] = <span class="ruby-identifier">msgs</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&lt;br&gt;&#39;</span>).<span class="ruby-identifier">html_safe</span>
       <span class="ruby-keyword">end</span>
       <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> <span class="ruby-identifier">response</span>
     }
@@ -337,25 +319,28 @@
   <span class="ruby-keyword">return</span>
   <span class="ruby-comment"># Now we&#39;re done processing invitations, notifications and shares. Report back.</span>
   <span class="ruby-comment">##################</span>
-  <span class="ruby-identifier">email</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>][<span class="ruby-value">:email</span>].<span class="ruby-identifier">downcase</span>
+  <span class="ruby-identifier">email</span> = <span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:email</span>].<span class="ruby-identifier">downcase</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">email</span><span class="ruby-operator">:</span> <span class="ruby-identifier">email</span>).<span class="ruby-identifier">first</span>
     <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:email</span>] <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;We already have a user with that email address&#39;</span>
   <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>][<span class="ruby-value">:invitation_message</span>] =
-        <span class="ruby-identifier">splitstr</span>(<span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>][<span class="ruby-value">:invitation_message</span>], <span class="ruby-value">100</span>)
+    <span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:invitation_message</span>] =
+        <span class="ruby-identifier">splitstr</span>(<span class="ruby-identifier">resource_params</span>[<span class="ruby-value">:invitation_message</span>], <span class="ruby-value">100</span>)
     <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>]
       <span class="ruby-identifier">pr</span>[<span class="ruby-value">:skip_invitation</span>] = <span class="ruby-keyword">true</span>
-      <span class="ruby-ivar">@resource</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">invite!</span>(<span class="ruby-identifier">pr</span>, <span class="ruby-identifier">current_inviter</span>)
-      <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">invitation_sent_at</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">utc</span>
-      <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">save</span>(<span class="ruby-identifier">validate</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>) <span class="ruby-comment"># ...because the invitee doesn&#39;t have a handle yet</span>
-      <span class="ruby-ivar">@resource</span>.<span class="ruby-identifier">issue_instructions</span>(<span class="ruby-value">:share_instructions</span>)
+      <span class="ruby-identifier">resource</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">invite!</span>(<span class="ruby-identifier">pr</span>, <span class="ruby-identifier">current_inviter</span>)
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitation_sent_at</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">utc</span>
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">save</span>(<span class="ruby-identifier">validate</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>) <span class="ruby-comment"># ...because the invitee doesn&#39;t have a handle yet</span>
+      <span class="ruby-constant">InvitationSentEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">current_inviter</span>, <span class="ruby-identifier">resource</span>, <span class="ruby-ivar">@shared</span>
+      <span class="ruby-comment"># Formerly resource.issue_instructions(:share_instructions) (IS THIS NECESSARY?)</span>
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">update_attribute</span> <span class="ruby-value">:invitation_sent_at</span>, <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>.<span class="ruby-identifier">utc</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitation_sent_at</span>
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">generate_invitation_token!</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">raw_invitation_token</span>
+      <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">send_devise_notification</span> <span class="ruby-value">:share_instructions</span>, <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">raw_invitation_token</span>
     <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-keyword">nil</span>
+      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span>  = <span class="ruby-keyword">nil</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span> <span class="ruby-comment"># Success!</span>
-    <span class="ruby-identifier">set_flash_message</span> <span class="ruby-value">:notice</span>, <span class="ruby-value">:send_instructions_html</span>, <span class="ruby-value">:email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span>.<span class="ruby-identifier">email</span>
+    <span class="ruby-identifier">set_flash_message</span> <span class="ruby-value">:notice</span>, <span class="ruby-value">:send_instructions_html</span>, <span class="ruby-value">:email</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">email</span>
     <span class="ruby-identifier">notice</span> = <span class="ruby-node">&quot;Yay! An invitation is winging its way to #{resource.email}&quot;</span>
     <span class="ruby-identifier">respond_with</span> <span class="ruby-identifier">resource</span>, <span class="ruby-value">:location</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">after_invite_path_for</span>(<span class="ruby-identifier">resource</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
       <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">alert</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notice</span>} }
@@ -424,15 +409,11 @@
 
           
           <div class="method-source-code" id="divert-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 260</span>
-  <span class="ruby-keyword">def</span> <span class="ruby-identifier">divert</span>
-<span class="ruby-comment">    RpEvent.post 
-      resource_class.find(params[:recipient]), 
-        :invitation_diverted, 
-      nil, 
-      resource_class.find(params[:sender])
-</span>    <span class="ruby-identifier">redirect_to</span> <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">unescape</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>])
-  <span class="ruby-keyword">end</span></pre>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 246</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">divert</span>
+  <span class="ruby-constant">InvitationDivertedEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:recipient</span>]), <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:sender</span>])
+  <span class="ruby-identifier">redirect_to</span> <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">unescape</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>])
+<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -456,20 +437,15 @@
 
         <div class="method-description">
           
-          <p>GET /resource/invitation/accept?invitation_token=abcdef</p>
+          <p>GET /resource/invitation/accept?invitation_token=abcdef Accept an
+invitation</p>
           
           
 
           
           <div class="method-source-code" id="edit-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 29</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 35</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
-  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">notification_token</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:notification_token</span>]) <span class="ruby-operator">&amp;&amp;</span>
-      <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span> <span class="ruby-operator">&amp;&amp;</span>
-      <span class="ruby-identifier">params</span>[<span class="ruby-value">:autosave</span>] <span class="ruby-comment"># If any</span>
-    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>.<span class="ruby-identifier">autosave</span> = <span class="ruby-keyword">true</span>
-    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>.<span class="ruby-identifier">save</span>
-  <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
       <span class="ruby-keyword">unless</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">dialog?</span>
@@ -505,20 +481,25 @@
 
         <div class="method-description">
           
-          <p>GET /resource/invitation/new</p>
+          <p>GET /resource/invitation/new Create a new invitation–with or without a
+shared entity–and throw up a dialog to get email, message, etc.</p>
           
           
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 14</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 15</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">invitation_message</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Here\s a little something I found on RecipePower. Have a look and tell me what you think.&#39;</span>)
-  <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared_type</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:shared_type</span>]
-  <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared_id</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:shared_id</span>]
-  <span class="ruby-ivar">@shared</span> = <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitation_issuer</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">polite_name</span>
-  <span class="ruby-comment"># dialog_boilerplate(@shared ? :share : :new)</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">classname</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:shared_class</span>]).<span class="ruby-identifier">present?</span>
+    <span class="ruby-identifier">entity_name</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:shared_name</span>].<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">classname</span>.<span class="ruby-identifier">underscore</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-string">&#39;_&#39;</span>,<span class="ruby-string">&#39; &#39;</span>)
+    <span class="ruby-ivar">@shared</span> = <span class="ruby-identifier">classname</span>.<span class="ruby-identifier">constantize</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:shared_id</span>].<span class="ruby-identifier">to_i</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">invitation_message</span><span class="ruby-operator">:</span> <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">comment_for</span>(<span class="ruby-ivar">@shared</span>) <span class="ruby-operator">||</span> <span class="ruby-node">&quot;Here&#39;s an interesting #{entity_name} I found on RecipePower. Have a look and tell me what you think.&quot;</span>
+    <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared_name</span> = <span class="ruby-identifier">entity_name</span>
+    <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">shared</span> = <span class="ruby-ivar">@shared</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invitation_issuer</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">polite_name</span>
   <span class="ruby-keyword">if</span> <span class="ruby-ivar">@shared</span>
     <span class="ruby-identifier">smartrender</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:share</span>
   <span class="ruby-keyword">else</span>
@@ -559,7 +540,7 @@
 
           
           <div class="method-source-code" id="require_no_authentication-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 281</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 261</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">require_no_authentication</span>
   <span class="ruby-keyword">super</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:action</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;edit&#39;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -592,7 +573,7 @@
 
           
           <div class="method-source-code" id="resource_from_invitation_token-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 276</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 256</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">resource_from_invitation_token</span>
   <span class="ruby-identifier">session</span>[<span class="ruby-value">:invitation_token</span>] = <span class="ruby-identifier">params</span>[<span class="ruby-value">:invitation_token</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:invitation_token</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -625,21 +606,22 @@
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 238</span>
+            <pre><span class="ruby-comment"># File app/controllers/invitations_controller.rb, line 223</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
-  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">accept_invitation!</span>(<span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>])
+  <span class="ruby-identifier">resource_params</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">resource_name</span>]
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">accept_invitation!</span> <span class="ruby-identifier">resource_params</span>
   <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">password</span> = <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">email</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">password</span>.<span class="ruby-identifier">blank?</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">empty?</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">password</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">email</span>
       <span class="ruby-identifier">flash</span>[<span class="ruby-value">:alert</span>] = <span class="ruby-string">&#39;You didn\t provide a password, so we\ve set it to be the same as your email address. You might want to consider changing that in your Profile&#39;</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">invitation_event</span> = <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">subject_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invited_by_id</span>, <span class="ruby-identifier">indirect_object_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">indirect_object_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>).<span class="ruby-identifier">first</span>
-    <span class="ruby-constant">RpEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">resource</span>, <span class="ruby-value">:invitation_accepted</span>, <span class="ruby-identifier">invitation_event</span>, <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invited_by</span>
     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span> = <span class="ruby-identifier">resource</span>
-    <span class="ruby-constant">RpMailer</span>.<span class="ruby-identifier">welcome_email</span>(<span class="ruby-identifier">resource</span>).<span class="ruby-identifier">deliver</span>
-    <span class="ruby-constant">RpMailer</span>.<span class="ruby-identifier">invitation_accepted_email</span>(<span class="ruby-identifier">resource</span>).<span class="ruby-identifier">deliver</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invited_by</span>
+    <span class="ruby-identifier">evt</span> = <span class="ruby-constant">InvitationAcceptedEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">resource</span>, <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">invited_by</span>, <span class="ruby-constant">InvitationSentEvent</span>.<span class="ruby-identifier">find_by_invitee</span>(<span class="ruby-identifier">resource</span>)
+    <span class="ruby-identifier">evt</span>.<span class="ruby-identifier">notify</span> <span class="ruby-value">:users</span>, <span class="ruby-identifier">key</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;invitation_accepted_event.feedback&#39;</span>, <span class="ruby-identifier">send_later</span><span class="ruby-operator">:</span> <span class="ruby-constant">ResponseServices</span>.<span class="ruby-identifier">has_worker?</span> <span class="ruby-comment"># !Rails.env.development?</span>
+
     <span class="ruby-identifier">set_flash_message</span> <span class="ruby-value">:notice</span>, <span class="ruby-value">:updated</span>
     <span class="ruby-identifier">sign_in</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">resource</span>)
+    <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># Clear the invitation</span>
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_accept_path_for</span>(<span class="ruby-identifier">resource</span>), <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-value">303</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-comment"># respond_with_navigational(resource){ dialog_boilerplate :edit }</span>
@@ -664,7 +646,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

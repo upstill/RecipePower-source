@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -58,7 +59,7 @@
   <h3>Parent</h3>
 
   
-  <p class="link"><a href="ApplicationController.html">ApplicationController</a>
+  <p class="link"><a href="CollectibleController.html">CollectibleController</a>
   
 </div>
 
@@ -141,7 +142,7 @@
 
           
           <div class="method-source-code" id="add_child-source">
-            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 191</span>
+            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 197</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">add_child</span>
     <span class="ruby-ivar">@tabindex</span> = <span class="ruby-identifier">session</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">||</span> <span class="ruby-value">0</span>
     <span class="ruby-identifier">handlerclass</span> = <span class="ruby-identifier">@@HandlersByIndex</span>[<span class="ruby-ivar">@tabindex</span>]
@@ -180,7 +181,7 @@ POST
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 59</span>
+            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-comment"># Obsolete: coming from the old tag-organizing page</span>
       <span class="ruby-ivar">@tabindex</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-operator">||</span> <span class="ruby-value">0</span>
@@ -193,12 +194,12 @@ POST
       <span class="ruby-identifier">tagid</span> = <span class="ruby-identifier">params</span>[<span class="ruby-identifier">param_key</span>][<span class="ruby-value">:tag_id</span>]
       <span class="ruby-comment"># params[param_key].delete :typenum</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">go</span> = <span class="ruby-value">0</span>
+
   <span class="ruby-identifier">keyback</span> = <span class="ruby-value">0</span>
   
   <span class="ruby-comment"># This code will pertain when we get some kind of hierarchy back</span>
   <span class="ruby-keyword">case</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:mode</span>]
-  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;before&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;before&#39;</span>
       <span class="ruby-ivar">@referent</span> = <span class="ruby-identifier">handlerclass</span>.<span class="ruby-identifier">create</span> <span class="ruby-identifier">tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagid</span>
       <span class="ruby-comment"># @referent.express tagid, form: :canonical # Ensure it has a tag</span>
       <span class="ruby-comment"># Make a child of this node&#39;s parent, if any</span>
@@ -209,7 +210,7 @@ POST
           <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">save</span>
       <span class="ruby-keyword">end</span>
       <span class="ruby-identifier">keyback</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">id</span>
-  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;after&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;after&#39;</span>
       <span class="ruby-comment"># Make a child of this node</span>
       <span class="ruby-ivar">@referent</span> = <span class="ruby-identifier">handlerclass</span>.<span class="ruby-identifier">create</span> <span class="ruby-identifier">tag</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagid</span>
       <span class="ruby-comment"># @referent.express tagid, form: :canonical</span>
@@ -217,15 +218,15 @@ POST
       <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">add_child</span> <span class="ruby-ivar">@referent</span>
       <span class="ruby-identifier">parent</span>.<span class="ruby-identifier">save</span>
       <span class="ruby-identifier">keyback</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">id</span>
-  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;child&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;child&#39;</span>
       <span class="ruby-comment"># debugger</span>
-  <span class="ruby-keyword">when</span> <span class="ruby-string">&quot;over&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;over&#39;</span>
       <span class="ruby-comment"># &quot;over&quot; indicates to add the tag to the referent&#39;s expressions</span>
       <span class="ruby-ivar">@referent</span> = <span class="ruby-identifier">handlerclass</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:target</span>].<span class="ruby-identifier">to_i</span>
       <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">tagid</span>
   <span class="ruby-keyword">end</span>
 
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:mode</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&quot;over&quot;</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:mode</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;over&#39;</span>
     <span class="ruby-comment"># &quot;over&quot; indicates to add the tag to the referent&#39;s expressions</span>
     <span class="ruby-ivar">@referent</span> = <span class="ruby-identifier">handlerclass</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:target</span>].<span class="ruby-identifier">to_i</span>
     <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">express</span> <span class="ruby-identifier">tagid</span>
@@ -244,14 +245,14 @@ POST
         <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]
           <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> [{<span class="ruby-value">:title</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">longname</span>, <span class="ruby-value">:isLazy</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>, <span class="ruby-value">:key</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">keyback</span>, <span class="ruby-value">:isFolder</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>}], <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-value">:created</span>
         <span class="ruby-keyword">else</span>
-          <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Successfully created &quot;</span><span class="ruby-operator">+</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">longname</span>}, <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-value">:created</span>
+          <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Successfully created &#39;</span><span class="ruby-operator">+</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">longname</span>}, <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-value">:created</span>
         <span class="ruby-keyword">end</span>
       }
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-ivar">@typeselections</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>
     <span class="ruby-ivar">@typeselections</span>.<span class="ruby-identifier">shift</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">name_error</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-string">&quot;user.username&quot;</span>]
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">name_error</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-string">&#39;user.username&#39;</span>]
       <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:tag_token</span>, <span class="ruby-identifier">name_error</span>[<span class="ruby-value">0</span>]
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">smartrender</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:new</span>
@@ -286,7 +287,7 @@ POST
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 178</span>
+            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 184</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
   <span class="ruby-ivar">@tabindex</span> = <span class="ruby-identifier">session</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tabindex</span>] <span class="ruby-operator">||</span> <span class="ruby-value">0</span>
   <span class="ruby-identifier">handlerclass</span> = <span class="ruby-identifier">@@HandlersByIndex</span>[<span class="ruby-ivar">@tabindex</span>]
@@ -329,12 +330,9 @@ POST
           <div class="method-source-code" id="edit-source">
             <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit</span>
-    <span class="ruby-ivar">@referent</span> = <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) <span class="ruby-comment"># .becomes(Referent)</span>
-    <span class="ruby-comment"># @expressions = @referent.expressions</span>
-    <span class="ruby-ivar">@referent_type</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">typenum</span>
-    <span class="ruby-ivar">@typeselections</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>
-    <span class="ruby-ivar">@typeselections</span>.<span class="ruby-identifier">shift</span>
-    <span class="ruby-identifier">smartrender</span>
+  <span class="ruby-identifier">update_and_decorate</span>
+  <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">object</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">base_class</span>)
+  <span class="ruby-identifier">smartrender</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -365,7 +363,7 @@ POST
 
           
           <div class="method-source-code" id="fix_expression_tokens-source">
-            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 136</span>
+            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 133</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fix_expression_tokens</span> <span class="ruby-identifier">tokens</span>, <span class="ruby-identifier">tagtype</span>
     <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">tokens</span>
     <span class="ruby-identifier">tokens</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">key</span><span class="ruby-operator">|</span>
@@ -442,7 +440,7 @@ POST
 
   <span class="ruby-identifier">handlerclass</span> = <span class="ruby-node">&quot;#{params[:type]}Referent&quot;</span>.<span class="ruby-identifier">constantize</span> <span class="ruby-comment"># @@HandlersByIndex[@tabindex]</span>
   <span class="ruby-ivar">@referent</span> = <span class="ruby-identifier">handlerclass</span>.<span class="ruby-identifier">new</span>
-  <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">express</span> (<span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]
+  <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">express</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]
   <span class="ruby-ivar">@typeselections</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>
   <span class="ruby-ivar">@typeselections</span>.<span class="ruby-identifier">shift</span>
 
@@ -451,7 +449,7 @@ POST
       <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:tagid</span>]
         <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> [ { <span class="ruby-value">:title=</span><span class="ruby-operator">&gt;</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">longname</span>, <span class="ruby-value">:isLazy=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">true</span>, <span class="ruby-value">:key=</span><span class="ruby-operator">&gt;</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">id</span>, <span class="ruby-value">:isFolder=</span><span class="ruby-operator">&gt;</span><span class="ruby-keyword">false</span> } ]
       <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">dlog</span><span class="ruby-operator">:</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&quot;html&quot;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span> } }
+        <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">dlog</span><span class="ruby-operator">:</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render_to_string</span> <span class="ruby-identifier">layout</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span> } }
       <span class="ruby-keyword">end</span>
     }
   <span class="ruby-keyword">end</span>
@@ -487,7 +485,7 @@ POST
           <div class="method-source-code" id="show-source">
             <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 19</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show</span>
-  <span class="ruby-ivar">@referent</span> = <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>])
+  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-comment"># @referent = Referent.find(params[:id])</span>
   <span class="ruby-identifier">smartrender</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -519,34 +517,43 @@ POST
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 146</span>
+            <pre><span class="ruby-comment"># File app/controllers/referents_controller.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
   <span class="ruby-comment"># @tabindex = session[:tabindex] || params[:tabindex] || 0</span>
   <span class="ruby-comment"># handlerclass = @@HandlersByIndex[@tabindex]</span>
-  <span class="ruby-ivar">@referent</span> = <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) <span class="ruby-comment"># .becomes(Referent)</span>
-  <span class="ruby-identifier">param_key</span> = <span class="ruby-constant">ActiveModel</span><span class="ruby-operator">::</span><span class="ruby-constant">Naming</span>.<span class="ruby-identifier">param_key</span>(<span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">class</span>)
+  <span class="ruby-ivar">@referent</span> = <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]).<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>)
+  <span class="ruby-comment"># update_and_decorate</span>
+  <span class="ruby-identifier">attribute_params</span> = <span class="ruby-identifier">params</span>[<span class="ruby-constant">ActiveModel</span><span class="ruby-operator">::</span><span class="ruby-constant">Naming</span>.<span class="ruby-identifier">param_key</span>(<span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">class</span>)]
   <span class="ruby-comment"># Any free tags specified as tag tokens will need a type associated with them.</span>
   <span class="ruby-comment"># This is prepended to the string</span>
-  <span class="ruby-identifier">fix_expression_tokens</span> <span class="ruby-identifier">params</span>[<span class="ruby-identifier">param_key</span>][<span class="ruby-value">:expressions_attributes</span>], <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">typenum</span>
-  <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
-    <span class="ruby-comment"># params[param_key].delete(:typenum)</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">update_attributes</span>(<span class="ruby-identifier">params</span>[<span class="ruby-identifier">param_key</span>])
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">redirect_to</span> <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>), <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Referent was successfully updated.&#39;</span> }
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> {
-        <span class="ruby-identifier">selector</span> = <span class="ruby-node">&quot;#Referent#{@referent.id}&quot;</span>
-        <span class="ruby-identifier">element</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>)
-        <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> {
-          <span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>,
-          <span class="ruby-identifier">popup</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Referent now updated to serve you better&quot;</span>
-        }
+  <span class="ruby-identifier">fix_expression_tokens</span> <span class="ruby-identifier">attribute_params</span>[<span class="ruby-value">:expressions_attributes</span>], <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">typenum</span>
+  <span class="ruby-identifier">expressions_attributes</span> =
+      <span class="ruby-identifier">attribute_params</span>[<span class="ruby-value">:expressions_attributes</span>].<span class="ruby-identifier">values</span>.<span class="ruby-identifier">find_all</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expression_attributes</span><span class="ruby-operator">|</span>
+        <span class="ruby-identifier">expression_attributes</span>[<span class="ruby-string">&#39;_destroy&#39;</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;false&#39;</span>
+      }.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expression_attributes</span><span class="ruby-operator">|</span>
+        <span class="ruby-comment"># Because the token can be either a tag id or a string, make sure to use only the string</span>
+        <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">expression_attributes</span>[<span class="ruby-string">&#39;tag_token&#39;</span>]
+        <span class="ruby-identifier">tagid</span> = <span class="ruby-identifier">tagname</span>.<span class="ruby-identifier">to_i</span>
+        <span class="ruby-identifier">tagname</span> = ((<span class="ruby-identifier">t</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">find_by</span> <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagid</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">t</span>.<span class="ruby-identifier">name</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagid</span> <span class="ruby-operator">!=</span> <span class="ruby-value">0</span>
+        ([<span class="ruby-identifier">tagname</span>] <span class="ruby-operator">+</span> <span class="ruby-identifier">expression_attributes</span>.<span class="ruby-identifier">slice</span>(<span class="ruby-string">&#39;referent_id&#39;</span>, <span class="ruby-string">&#39;localename&#39;</span>, <span class="ruby-string">&#39;formname&#39;</span>).<span class="ruby-identifier">values</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;/&#39;</span>)
       }
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">becomes</span>(<span class="ruby-constant">Referent</span>)
-      <span class="ruby-ivar">@typeselections</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>
-      <span class="ruby-ivar">@typeselections</span>.<span class="ruby-identifier">shift</span>
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">html</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;edit&quot;</span> }
-      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>, <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-value">:unprocessable_entity</span> }
-    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">expressions_attributes</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">expressions_attributes</span>.<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">count</span>
+    <span class="ruby-comment"># Error! Expressions must be unique</span>
+    <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:expressions</span>, <span class="ruby-string">&#39;must be unique&#39;</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># ...and on to the referments.</span>
+  <span class="ruby-ivar">@decorator</span> = <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">decorate</span>
+  <span class="ruby-comment"># The referment params require special processing</span>
+  <span class="ruby-identifier">rfmt_params</span> = <span class="ruby-identifier">attribute_params</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:referments_attributes</span>
+  <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">update_attributes</span> <span class="ruby-identifier">attribute_params</span>
+  <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">save</span> <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">ReferentServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-ivar">@referent</span>).<span class="ruby-identifier">parse_referment_params</span>(<span class="ruby-identifier">rfmt_params</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">any?</span>
+    <span class="ruby-ivar">@referent</span>.<span class="ruby-identifier">reload</span>
+    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:popup</span>] = <span class="ruby-node">&quot;&#39;#{@referent.name}&#39; now updated to serve you better&quot;</span>
+    <span class="ruby-ivar">@update_items</span> = [ <span class="ruby-value">:card</span> ]
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">resource_errors_to_flash</span> <span class="ruby-ivar">@referent</span>, <span class="ruby-identifier">preface</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;Couldn&#39;t save the #{@referent.typename}&quot;</span>
+    <span class="ruby-identifier">render</span> <span class="ruby-identifier">action</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;edit&#39;</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -567,7 +574,7 @@ POST
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -128,7 +129,7 @@
 
           
           <div class="method-source-code" id="hover_menu-source">
-            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 68</span>
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 36</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">hover_menu</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">with_format</span>(<span class="ruby-string">&#39;html&#39;</span>) { <span class="ruby-identifier">render</span> <span class="ruby-string">&#39;shared/hover_menu&#39;</span>,
                                       <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">label</span>,
@@ -164,7 +165,7 @@
 
           
           <div class="method-source-code" id="list_lists_with_status-source">
-            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 76</span>
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">list_lists_with_status</span> <span class="ruby-identifier">lists_with_status</span>
   <span class="ruby-identifier">safe_join</span> <span class="ruby-identifier">lists_with_status</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">list_or_list_with_status</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">list_or_list_with_status</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Array</span>
@@ -173,7 +174,7 @@
       <span class="ruby-identifier">list</span>, <span class="ruby-identifier">status</span> = <span class="ruby-identifier">list_or_list_with_status</span>, <span class="ruby-keyword">nil</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-identifier">name</span> = <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-identifier">list</span>.<span class="ruby-identifier">name_tag</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">truncate</span>(<span class="ruby-value">50</span>).<span class="ruby-identifier">downcase</span>, <span class="ruby-identifier">linkpath</span>(<span class="ruby-identifier">list</span>), <span class="ruby-value">:mode</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:partial</span>, <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;taglink&#39;</span> )
-    <span class="ruby-identifier">name</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; (#{user_homelink list.owner})&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">tagging_user_id</span>
+    <span class="ruby-identifier">name</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot; (#{homelink list.owner})&quot;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">owner_id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">list</span>.<span class="ruby-identifier">tagging_user_id</span>
     <span class="ruby-identifier">name</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;--#{status}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">env</span>.<span class="ruby-identifier">development?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">status</span>
     <span class="ruby-identifier">name</span>
   }.<span class="ruby-identifier">compact</span>, <span class="ruby-string">&#39;&amp;nbsp;&lt;span class=&quot;tagsep&quot;&gt;|&lt;/span&gt; &#39;</span>.<span class="ruby-identifier">html_safe</span>
@@ -201,44 +202,13 @@
 
         <div class="method-description">
           
-          <p># Offer to let the user save the item in their collection and any list they
-own, plus a new list # NB Obsolete: now supplanted by list-manager dialog
-def collectible_list_menu decorator, user, styling, options={}</p>
-
-<pre class="ruby"><span class="ruby-keyword">if</span> <span class="ruby-identifier">user</span>
-  <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>
-  <span class="ruby-identifier">hover_menu</span> <span class="ruby-identifier">sprite_glyph</span>(:<span class="ruby-string">&quot;list-add&quot;</span>), <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">decorator</span>)) <span class="ruby-keyword">do</span>
-    <span class="ruby-identifier">already_collected</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">collectible_collected?</span> <span class="ruby-identifier">current_user_or_guest_id</span>
-    <span class="ruby-identifier">cl</span> = <span class="ruby-identifier">collection_link</span> <span class="ruby-identifier">decorator</span>,
-                         <span class="ruby-identifier">checkbox_menu_item_label</span>(<span class="ruby-string">&quot;Collection&quot;</span>, <span class="ruby-identifier">already_collected</span>),
-                         <span class="ruby-identifier">styling</span>,
-                         :<span class="ruby-identifier">in_collection</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">already_collected</span>,
-                         :<span class="ruby-keyword">class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&quot;checkbox-menu-item collection&quot;</span>
-    [ <span class="ruby-identifier">content_tag</span>(:<span class="ruby-identifier">li</span>, <span class="ruby-identifier">cl</span>),
-      <span class="ruby-identifier">user</span>.<span class="ruby-identifier">owned_lists</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">l</span><span class="ruby-operator">|</span> <span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">li</span>, (<span class="ruby-identifier">list_menu_item</span> <span class="ruby-identifier">l</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">dom_id</span>(<span class="ruby-identifier">l</span>))) },
-      <span class="ruby-string">&quot;&lt;hr class=&#39;menu&#39;&gt;&quot;</span>.<span class="ruby-identifier">html_safe</span>,
-      <span class="ruby-identifier">content_tag</span>(:<span class="ruby-identifier">li</span>,
-                  <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&quot;Start a List...&quot;</span>,
-                                 <span class="ruby-identifier">new_list_path</span>(<span class="ruby-identifier">entity_type</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>, <span class="ruby-identifier">entity_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">id</span>),
-                                 <span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> :<span class="ruby-identifier">modal</span>,
-                                 <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;transient&quot;</span>))
-    ].<span class="ruby-identifier">flatten</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">else</span>
-  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-string">&quot;&quot;</span>,
-                 <span class="ruby-identifier">new_user_registration_path</span>(<span class="ruby-identifier">flash</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">alert</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;You can collect things and make lists once you&#39;re logged in&quot;</span>},
-                                            <span class="ruby-identifier">header</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;Join RecipePower&quot;</span>),
-                 <span class="ruby-identifier">styling</span>.<span class="ruby-identifier">merge</span>( <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;glyphicon glyphicon-pushpin&quot;</span> )
-<span class="ruby-keyword">end</span>
-</pre>
-
-<p>end</p>
+          
           
           
 
           
           <div class="method-source-code" id="list_menu_item-source">
-            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 52</span>
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">list_menu_item</span> <span class="ruby-identifier">l</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>
   <span class="ruby-identifier">already_collected</span> = <span class="ruby-constant">ListServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">l</span>).<span class="ruby-identifier">include?</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">current_user_or_guest_id</span>
   <span class="ruby-identifier">link_to_submit</span> <span class="ruby-identifier">checkbox_menu_item_label</span>(<span class="ruby-identifier">l</span>.<span class="ruby-identifier">name</span>.<span class="ruby-identifier">truncate</span>(<span class="ruby-value">20</span>), <span class="ruby-identifier">already_collected</span>),
@@ -279,7 +249,7 @@ def collectible_list_menu decorator, user, styling, options={}</p>
 
           
           <div class="method-source-code" id="list_menu_item_replacement-source">
-            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 64</span>
+            <pre><span class="ruby-comment"># File app/helpers/lists_helper.rb, line 32</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">list_menu_item_replacement</span> <span class="ruby-identifier">list</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>
   [ <span class="ruby-node">&quot;ul.#{dom_id entity} a.checkbox-menu-item.#{dom_id list}&quot;</span>, <span class="ruby-identifier">list_menu_item</span>(<span class="ruby-identifier">list</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">styling</span>) ]
 <span class="ruby-keyword">end</span></pre>
@@ -375,7 +345,7 @@ def collectible_list_menu decorator, user, styling, options={}</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

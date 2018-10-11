@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -87,6 +88,8 @@
     <li ><a href="#method-c-locales">::locales</a>
     
     <li ><a href="#method-c-localesym">::localesym</a>
+    
+    <li ><a href="#method-c-qa">::qa</a>
     
     <li ><a href="#method-c-scrub_args">::scrub_args</a>
     
@@ -171,11 +174,11 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="find_or_create-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 155</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-identifier">refid</span>, <span class="ruby-identifier">tagid</span>, <span class="ruby-identifier">args</span> = {}
-    <span class="ruby-comment"># Collect the relevant arguments into the whereargs hash</span>
-    <span class="ruby-identifier">whereargs</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">scrub_args</span> <span class="ruby-identifier">args</span>
-    <span class="ruby-identifier">whereargs</span>[<span class="ruby-value">:referent_id</span>] = <span class="ruby-identifier">refid</span>
-    <span class="ruby-identifier">whereargs</span>[<span class="ruby-value">:tag_id</span>] = <span class="ruby-identifier">tagid</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">whereargs</span>).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">whereargs</span>)
+  <span class="ruby-comment"># Collect the relevant arguments into the whereargs hash</span>
+  <span class="ruby-identifier">whereargs</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">scrub_args</span> <span class="ruby-identifier">args</span>
+  <span class="ruby-identifier">whereargs</span>[<span class="ruby-value">:referent_id</span>] = <span class="ruby-identifier">refid</span>
+  <span class="ruby-identifier">whereargs</span>[<span class="ruby-value">:tag_id</span>] = <span class="ruby-identifier">tagid</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">whereargs</span>).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">create</span>(<span class="ruby-identifier">whereargs</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -208,7 +211,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="formname-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 101</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">formname</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">name</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">name</span> <span class="ruby-identifier">tt</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -241,7 +244,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="formnum-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 91</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">formnum</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">num</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">num</span> <span class="ruby-identifier">tt</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -274,7 +277,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="forms-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 124</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">forms</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">list</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">list</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -307,7 +310,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="formsym-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 96</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">formsym</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">sym</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">sym</span> <span class="ruby-identifier">tt</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -340,7 +343,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="localename-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 52</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">localename</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">name</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">name</span> <span class="ruby-identifier">tt</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -373,7 +376,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="localenum-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">localenum</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">num</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">num</span> <span class="ruby-identifier">tt</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -406,7 +409,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="locales-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 72</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locales</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">list</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">list</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -439,7 +442,60 @@ specified, we&#39;ll match any expression on the referent and id.</p>
           <div class="method-source-code" id="localesym-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">localesym</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span> <span class="ruby-identifier">tt</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span> <span class="ruby-identifier">tt</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-qa" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">qa</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="qa-source">
+            <pre><span class="ruby-comment"># File app/models/expression.rb, line 192</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">qa</span>
+  <span class="ruby-identifier">bad_exprs</span> = []
+  <span class="ruby-constant">Expression</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:tag</span>).<span class="ruby-identifier">all</span>.<span class="ruby-identifier">find_in_batches</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">group</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">group</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">nil</span>
+        <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Nil tag for Expression ##{expr.id} to tag ##{expr.tag_id}&quot;</span>
+        <span class="ruby-identifier">bad_exprs</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">expr</span>
+      <span class="ruby-keyword">end</span>
+    }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">bad_exprs</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">expr</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">ref</span> = <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">referent</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">tag_id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">expr</span>.<span class="ruby-identifier">tag_id</span>)
+      <span class="ruby-comment"># Referent has this same bogus tag =&gt; replace it with another, if possible</span>
+      <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-keyword">nil</span>
+      (<span class="ruby-identifier">ref</span>.<span class="ruby-identifier">expressions</span>.<span class="ruby-identifier">to_a</span> <span class="ruby-operator">-</span> [<span class="ruby-identifier">expr</span>]).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">altexpr</span><span class="ruby-operator">|</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">altexpr</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">altexpr</span>.<span class="ruby-identifier">tag_id</span>
+          <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">altexpr</span>.<span class="ruby-identifier">tag_id</span>
+          <span class="ruby-keyword">break</span>
+        <span class="ruby-keyword">end</span>
+      }
+    <span class="ruby-keyword">end</span>
+  }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -464,7 +520,7 @@ specified, we&#39;ll match any expression on the referent and id.</p>
 
         <div class="method-description">
           
-          <p>Clean up a hash of arguments for a search by  1) removing any with nil
+          <p>Clean up a hash of arguments for a search by 1) removing any with nil
 values 2) making any type specifiers conform to the type in the database 3)
 ignoring those which aren&#39;t <a href="Expression.html">Expression</a>
 attributes</p>
@@ -475,21 +531,21 @@ attributes</p>
           <div class="method-source-code" id="scrub_args-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 134</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">scrub_args</span>(<span class="ruby-identifier">args</span>)
-    <span class="ruby-identifier">newargs</span> = {}
-    <span class="ruby-identifier">args</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span> 
-        <span class="ruby-identifier">k</span> = <span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>
-        <span class="ruby-identifier">val</span> = <span class="ruby-identifier">args</span>[<span class="ruby-identifier">k</span>]
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">@@Attribs</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>)
-            <span class="ruby-keyword">case</span> <span class="ruby-identifier">k</span>
-            <span class="ruby-keyword">when</span> <span class="ruby-value">:form</span>
-                <span class="ruby-identifier">val</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">formnum</span> <span class="ruby-identifier">val</span>
-            <span class="ruby-keyword">when</span> <span class="ruby-value">:locale</span>
-                <span class="ruby-identifier">val</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">localesym</span>(<span class="ruby-identifier">val</span>).<span class="ruby-identifier">to_s</span>
-            <span class="ruby-keyword">end</span>
-            <span class="ruby-identifier">newargs</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">val</span>
-        <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">newargs</span> = {}
+  <span class="ruby-identifier">args</span>.<span class="ruby-identifier">keys</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">k</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">k</span> = <span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-identifier">val</span> = <span class="ruby-identifier">args</span>[<span class="ruby-identifier">k</span>]
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">@@Attribs</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">k</span>.<span class="ruby-identifier">to_sym</span>)
+      <span class="ruby-keyword">case</span> <span class="ruby-identifier">k</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:form</span>
+          <span class="ruby-identifier">val</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">formnum</span> <span class="ruby-identifier">val</span>
+        <span class="ruby-keyword">when</span> <span class="ruby-value">:locale</span>
+          <span class="ruby-identifier">val</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">localesym</span>(<span class="ruby-identifier">val</span>).<span class="ruby-identifier">to_s</span>
+      <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">newargs</span>[<span class="ruby-identifier">k</span>] = <span class="ruby-identifier">val</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-identifier">newargs</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">newargs</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -528,11 +584,11 @@ attributes</p>
 
           
           <div class="method-source-code" id="fix_type-source">
-            <pre><span class="ruby-comment"># File app/models/expression.rb, line 25</span>
+            <pre><span class="ruby-comment"># File app/models/expression.rb, line 26</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fix_type</span>
-    <span class="ruby-identifier">tg</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>
-    <span class="ruby-identifier">ref</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent</span>
-    <span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typenum</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>)
+  <span class="ruby-identifier">tg</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>
+  <span class="ruby-identifier">ref</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">referent</span>
+  <span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">typenum</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">tg</span>.<span class="ruby-identifier">typenum</span> <span class="ruby-operator">==</span> <span class="ruby-value">0</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -565,7 +621,7 @@ attributes</p>
           <div class="method-source-code" id="formname-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 111</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">formname</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">name</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">name</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -631,7 +687,7 @@ attributes</p>
           <div class="method-source-code" id="formsym-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 106</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">formsym</span>
-    <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">sym</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span>
+  <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">sym</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -664,7 +720,7 @@ attributes</p>
           <div class="method-source-code" id="localename-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 60</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">localename</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">name</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">name</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -730,7 +786,7 @@ attributes</p>
           <div class="method-source-code" id="localesym-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 56</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">localesym</span>
-    <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span>
+  <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -763,7 +819,7 @@ attributes</p>
           <div class="method-source-code" id="set_form-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 86</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_form</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span> = <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">num</span>(<span class="ruby-identifier">tt</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">form</span> = <span class="ruby-identifier">@@Forms</span>.<span class="ruby-identifier">num</span>(<span class="ruby-identifier">tt</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -796,7 +852,7 @@ attributes</p>
           <div class="method-source-code" id="set_locale-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 68</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">set_locale</span> <span class="ruby-identifier">tt</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span> = <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span>(<span class="ruby-identifier">tt</span>)
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">locale</span> = <span class="ruby-identifier">@@Locales</span>.<span class="ruby-identifier">sym</span>(<span class="ruby-identifier">tt</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -834,7 +890,7 @@ and 2) free (untyped) tags.</p>
           <div class="method-source-code" id="tag_token-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 172</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_token</span>()
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -867,19 +923,19 @@ and 2) free (untyped) tags.</p>
           <div class="method-source-code" id="tag_token-3D-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 176</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tag_token=</span>(<span class="ruby-identifier">t</span>)
-    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">id</span> = <span class="ruby-identifier">t</span>.<span class="ruby-identifier">to_i</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
-        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">id</span>
-    <span class="ruby-keyword">else</span>
-        <span class="ruby-identifier">t</span>.<span class="ruby-identifier">sub!</span>(<span class="ruby-regexp">/^\(.*)\$/</span>, <span class="ruby-string">&#39;\1&#39;</span>) <span class="ruby-comment"># Strip out the single quotes</span>
-        <span class="ruby-identifier">params</span> = <span class="ruby-identifier">t</span>.<span class="ruby-identifier">split</span>(<span class="ruby-regexp">/::/</span>)
-        <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">to_i</span>
-        <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">last</span>
-        <span class="ruby-comment"># Try to match all within the type</span>
-        <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>( <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">matchall</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span> ).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span>
-              <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>( <span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">assert</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span> ).<span class="ruby-identifier">first</span> <span class="ruby-comment"># Try to pick up a match from the free tags</span>
-        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
-    <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span>
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">id</span> = <span class="ruby-identifier">t</span>.<span class="ruby-identifier">to_i</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">id</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">t</span>.<span class="ruby-identifier">sub!</span>(<span class="ruby-regexp">/^\(.*)\$/</span>, <span class="ruby-string">&#39;\1&#39;</span>) <span class="ruby-comment"># Strip out the single quotes</span>
+    <span class="ruby-identifier">params</span> = <span class="ruby-identifier">t</span>.<span class="ruby-identifier">split</span>(<span class="ruby-regexp">/::/</span>)
+    <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">to_i</span>
+    <span class="ruby-identifier">tagname</span> = <span class="ruby-identifier">params</span>.<span class="ruby-identifier">last</span>
+    <span class="ruby-comment"># Try to match all within the type</span>
+    <span class="ruby-identifier">tag</span> = <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">tagtype</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagtype</span>, <span class="ruby-identifier">matchall</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">first</span> <span class="ruby-operator">||</span>
+        <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">strmatch</span>(<span class="ruby-identifier">tagname</span>, <span class="ruby-identifier">assert</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">first</span> <span class="ruby-comment"># Try to pick up a match from the free tags</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span> = <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag_id</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -912,7 +968,7 @@ and 2) free (untyped) tags.</p>
           <div class="method-source-code" id="tagname-source">
             <pre><span class="ruby-comment"># File app/models/expression.rb, line 163</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagname</span>
-    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;**no tag**&quot;</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">:</span> <span class="ruby-string">&quot;**no tag**&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -932,7 +988,7 @@ and 2) free (untyped) tags.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

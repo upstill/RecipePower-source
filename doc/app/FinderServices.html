@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -76,7 +77,9 @@
     
     <li ><a href="#method-c-css_class">::css_class</a>
     
-    <li ><a href="#method-c-findings">::findings</a>
+    <li ><a href="#method-c-err_breakdown">::err_breakdown</a>
+    
+    <li ><a href="#method-c-from_extractions">::from_extractions</a>
     
     <li ><a href="#method-c-glean">::glean</a>
     
@@ -165,7 +168,7 @@ site, then global ones)</p>
 
           
           <div class="method-source-code" id="applicable_finders-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 174</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 205</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">applicable_finders</span> <span class="ruby-identifier">site</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">labels</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">site</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
     <span class="ruby-identifier">labels</span>.<span class="ruby-identifier">unshift</span> <span class="ruby-identifier">site</span>
@@ -211,7 +214,7 @@ site, then global ones)</p>
 
           
           <div class="method-source-code" id="attribute_choices-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 202</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 233</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">attribute_choices</span>
   <span class="ruby-identifier">@@AttributeChoices</span> <span class="ruby-operator">||=</span> (<span class="ruby-identifier">@@DefaultFinders</span><span class="ruby-operator">+</span><span class="ruby-identifier">@@CandidateFinders</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">f</span>[<span class="ruby-value">:attribute_name</span>] }.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
@@ -244,9 +247,9 @@ site, then global ones)</p>
 
           
           <div class="method-source-code" id="css_class-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 206</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 237</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">css_class</span> <span class="ruby-identifier">label</span>
-  <span class="ruby-identifier">label</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">gsub</span> <span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;-&#39;</span>
+  <span class="ruby-identifier">label</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">downcase</span>.<span class="ruby-identifier">gsub</span> <span class="ruby-regexp">/\s/</span>, <span class="ruby-string">&#39;-&#39;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -258,11 +261,11 @@ site, then global ones)</p>
       </div>
 
     
-      <div id="method-c-findings" class="method-detail ">
+      <div id="method-c-err_breakdown" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">findings</span><span
-            class="method-args">(extractions, url=nil)</span>
+          <span class="method-name">err_breakdown</span><span
+            class="method-args">(url, msg)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -271,25 +274,62 @@ site, then global ones)</p>
 
         <div class="method-description">
           
-          <p>Return a <a href="Results.html">Results</a> structure, either using the
-given extractions, or by examining the page</p>
+          <p>Analyze the error coming from a gleaning</p>
           
           
 
           
-          <div class="method-source-code" id="findings-source">
+          <div class="method-source-code" id="err_breakdown-source">
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 127</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">err_breakdown</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">msg</span>
+  <span class="ruby-comment"># We assume the first three-digit number is the HTTP status code</span>
+  <span class="ruby-identifier">msg</span> = <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-identifier">http_status</span> = (<span class="ruby-identifier">m</span>=<span class="ruby-identifier">msg</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/\b\d{3}\b/</span>)) <span class="ruby-operator">?</span> <span class="ruby-identifier">m</span>[<span class="ruby-value">0</span>].<span class="ruby-identifier">to_i</span> <span class="ruby-operator">:</span> (<span class="ruby-value">401</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">msg</span>.<span class="ruby-identifier">match</span>(<span class="ruby-string">&#39;redirection forbidden:&#39;</span>))
+
+  <span class="ruby-identifier">errmsg</span> = <span class="ruby-node">&quot; #{url} failed to glean (http_status #{http_status}): #{msg}&quot;</span>
+  { <span class="ruby-identifier">status</span><span class="ruby-operator">:</span> <span class="ruby-identifier">http_status</span>, <span class="ruby-identifier">msg</span><span class="ruby-operator">:</span> <span class="ruby-identifier">errmsg</span> }
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-c-from_extractions" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">from_extractions</span><span
+            class="method-args">(params, extractions=nil)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Build a finder using controller params and an optional set of extractions
+derived from the page</p>
+          
+          
+
+          
+          <div class="method-source-code" id="from_extractions-source">
             <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 14</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">findings</span> <span class="ruby-identifier">extractions</span>, <span class="ruby-identifier">url</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>
-    <span class="ruby-comment"># Translate the extractions into Finder results</span>
-    <span class="ruby-identifier">findings</span> = <span class="ruby-constant">Results</span>.<span class="ruby-identifier">new</span> <span class="ruby-operator">*</span><span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">keys</span>
-    <span class="ruby-comment"># tagstrings = tagstring.sub(/\[(.*)\]$/, &#39;\1&#39;).sub(/&quot;(.*)&quot;$/, &#39;\1&#39;).split( &#39;&quot;,&quot;&#39;).map(&amp;:strip).join &#39;,&#39;</span>
-    <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">assert_result</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span> }
-    <span class="ruby-identifier">findings</span>
-  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">url</span>
-    <span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span> <span class="ruby-identifier">url</span>
-    <span class="ruby-identifier">findings</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">present?</span>
-  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">from_extractions</span> <span class="ruby-identifier">params</span>, <span class="ruby-identifier">extractions</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-comment"># Translate the extractions into Finder results</span>
+  <span class="ruby-identifier">findings</span> = <span class="ruby-constant">Results</span>.<span class="ruby-identifier">new</span> <span class="ruby-operator">*</span>(<span class="ruby-identifier">extractions</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">keys</span> <span class="ruby-operator">:</span> [])
+  <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">assert_result</span> <span class="ruby-string">&#39;URI&#39;</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>]
+  <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">assert_result</span> <span class="ruby-string">&#39;Title&#39;</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:title</span>] <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:title</span>]
+  <span class="ruby-comment"># tagstrings = tagstring.sub(/\[(.*)\]$/, &#39;\1&#39;).sub(/&quot;(.*)&quot;$/, &#39;\1&#39;).split( &#39;&quot;,&quot;&#39;).map(&amp;:strip).join &#39;,&#39;</span>
+  <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">assert_result</span> <span class="ruby-identifier">key</span>, <span class="ruby-identifier">value</span>
+  } <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>
+  <span class="ruby-identifier">findings</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -305,7 +345,7 @@ given extractions, or by examining the page</p>
         
         <div class="method-heading">
           <span class="method-name">glean</span><span
-            class="method-args">(url, site=nil, *finders_or_labels) { |errstr| ... }</span>
+            class="method-args">(url, site=nil, *finders_or_labels)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -320,47 +360,56 @@ given extractions, or by examining the page</p>
 
           
           <div class="method-source-code" id="glean-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 28</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 27</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">glean</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">site</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">finders_or_labels</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">site</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">site</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Site</span>)
     <span class="ruby-identifier">finders_or_labels</span>.<span class="ruby-identifier">unshift</span> <span class="ruby-identifier">site</span>
     <span class="ruby-identifier">site</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">finders</span> = <span class="ruby-identifier">finders_or_labels</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Finder</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">finders_or_labels</span> <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">applicable_finders</span>(<span class="ruby-identifier">site</span>, <span class="ruby-operator">*</span><span class="ruby-identifier">finders_or_labels</span>)
-
-  <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">url</span>
-  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-    <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span>
-  <span class="ruby-keyword">end</span>
-
+  <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">pagehome</span> = <span class="ruby-node">&quot;#{uri.scheme}://#{uri.host}&quot;</span>
-
-  <span class="ruby-identifier">normu</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">url</span>
-  <span class="ruby-identifier">errstr</span> = <span class="ruby-node">&quot;Couldn&#39;t open &#39;#{url}&quot;</span>
-  <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">pagefile</span> = <span class="ruby-identifier">open</span> <span class="ruby-identifier">normu</span>
-  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-    <span class="ruby-identifier">errstr</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_s</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">redirection</span> = <span class="ruby-identifier">errstr</span>.<span class="ruby-identifier">sub</span>( <span class="ruby-regexp">/[^:]*:/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">strip</span>
-      <span class="ruby-identifier">from</span>, <span class="ruby-identifier">to</span> = <span class="ruby-operator">*</span><span class="ruby-identifier">redirection</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;-&gt;&#39;</span>)
-      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">from</span>.<span class="ruby-identifier">strip</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">normu</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">to</span>.<span class="ruby-identifier">present?</span>
-        <span class="ruby-identifier">normu</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">to</span>.<span class="ruby-identifier">strip</span>
-        <span class="ruby-keyword">begin</span>
-          <span class="ruby-identifier">pagefile</span> = <span class="ruby-identifier">open</span> <span class="ruby-identifier">normu</span>
-        <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-          <span class="ruby-identifier">errstr</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-identifier">nkdoc</span> = <span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">loop</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">normu</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">url</span>
+    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">normu</span>
+    <span class="ruby-identifier">errstr</span> = <span class="ruby-node">&quot;Couldn&#39;t open &#39;#{url}&quot;</span>
+    <span class="ruby-identifier">pagefile</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">tries</span> = <span class="ruby-value">3</span>
+    <span class="ruby-keyword">begin</span>
+      <span class="ruby-identifier">pagefile</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">open</span> <span class="ruby-identifier">redirect</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span>
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">OpenURI</span><span class="ruby-operator">::</span><span class="ruby-constant">HTTPRedirect</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">redirect</span>
+      <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">redirect</span>.<span class="ruby-identifier">uri</span> <span class="ruby-comment"># assigned from the &quot;Location&quot; response header</span>
+      <span class="ruby-keyword">retry</span> <span class="ruby-keyword">if</span> (<span class="ruby-identifier">tries</span> <span class="ruby-operator">-=</span> <span class="ruby-value">1</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
+      <span class="ruby-identifier">raise</span>
+    <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-identifier">errstr</span> = <span class="ruby-identifier">e</span>.<span class="ruby-identifier">to_s</span>
+      <span class="ruby-keyword">if</span> ((<span class="ruby-identifier">tries</span> <span class="ruby-operator">-=</span> <span class="ruby-value">1</span>) <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">redirection</span> = <span class="ruby-identifier">errstr</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/[^:]*:/</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">strip</span>)
+        <span class="ruby-identifier">from</span>, <span class="ruby-identifier">to</span> = <span class="ruby-operator">*</span><span class="ruby-identifier">redirection</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;-&gt;&#39;</span>)
+        <span class="ruby-keyword">if</span> (<span class="ruby-identifier">from</span>.<span class="ruby-identifier">strip</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">normu</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">to</span>.<span class="ruby-identifier">present?</span>
+          <span class="ruby-identifier">normu</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">to</span>.<span class="ruby-identifier">strip</span>
+          <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">normu</span>
+          <span class="ruby-keyword">retry</span>
         <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pagefile</span>
-    <span class="ruby-keyword">yield</span>(<span class="ruby-identifier">errstr</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
-    <span class="ruby-keyword">return</span>
-  <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">raise</span>(<span class="ruby-constant">Exception</span>, <span class="ruby-identifier">errstr</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pagefile</span>
 
-  <span class="ruby-comment"># We&#39;ve got a set of finders to apply and an open page to apply them to. Nokogiri time!</span>
-  <span class="ruby-identifier">nkdoc</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">HTML</span> <span class="ruby-identifier">pagefile</span>
+    <span class="ruby-comment"># We&#39;ve got a set of finders to apply and an open page to apply them to. Nokogiri time!</span>
+    <span class="ruby-identifier">nkdoc</span> = <span class="ruby-constant">Nokogiri</span><span class="ruby-operator">::</span><span class="ruby-constant">HTML</span> <span class="ruby-identifier">pagefile</span>
+
+    <span class="ruby-comment"># It&#39;s possible that the page returns a refresh with non-zero refresh time, tantamount to a redirect</span>
+    <span class="ruby-comment"># We should follow this to find the ultimate page</span>
+    <span class="ruby-keyword">if</span> (<span class="ruby-identifier">refresh_content</span> = <span class="ruby-identifier">nkdoc</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&quot;meta[http-equiv=&#39;refresh&#39;]&quot;</span>)) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">refresh_content</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>)
+      <span class="ruby-identifier">spl</span> = <span class="ruby-identifier">refresh_content</span>.<span class="ruby-identifier">attr</span>(<span class="ruby-string">&#39;content&#39;</span>).<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">split</span> <span class="ruby-string">&#39;;&#39;</span>
+      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">refresh_time</span> = <span class="ruby-identifier">spl</span>.<span class="ruby-identifier">first</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">refresh_time</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/^\s*\b0+\b\s*$/</span>) <span class="ruby-comment"># refresh_time == 0</span>
+        <span class="ruby-identifier">path</span> = <span class="ruby-identifier">spl</span>.<span class="ruby-identifier">last</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^\s*url=\s*\b/</span>, <span class="ruby-string">&#39;&#39;</span>)
+        <span class="ruby-identifier">url</span> = <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">normu</span>, <span class="ruby-identifier">path</span>).<span class="ruby-identifier">to_s</span>
+        <span class="ruby-keyword">next</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">normu</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">break</span>
+  <span class="ruby-keyword">end</span>
 
   <span class="ruby-comment"># Initialize the results</span>
   <span class="ruby-identifier">results</span> = <span class="ruby-constant">Results</span>.<span class="ruby-identifier">new</span> <span class="ruby-operator">*</span><span class="ruby-identifier">finders</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:label</span>)
@@ -376,21 +425,32 @@ given extractions, or by examining the page</p>
       <span class="ruby-identifier">children</span> = (<span class="ruby-identifier">ou</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;ul&#39;</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">ou</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&#39;li&#39;</span>) <span class="ruby-operator">:</span> [<span class="ruby-identifier">ou</span>]
       <span class="ruby-identifier">children</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span>
         <span class="ruby-comment"># If the content is enclosed in a link, emit the link too</span>
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">attribute_value</span> = <span class="ruby-identifier">attribute_name</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">attributes</span>[<span class="ruby-identifier">attribute_name</span>].<span class="ruby-identifier">to_s</span>
-          <span class="ruby-identifier">attribute_value</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">pagehome</span>, <span class="ruby-identifier">attribute_value</span>).<span class="ruby-identifier">to_s</span> <span class="ruby-keyword">if</span>(<span class="ruby-node">%w{ href src}</span>.<span class="ruby-identifier">include?</span> <span class="ruby-identifier">attribute_name</span>)
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">attribute_value</span> = <span class="ruby-identifier">attribute_name</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">attributes</span>[<span class="ruby-identifier">attribute_name</span>].<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">if_present</span>
           <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">attribute_value</span>
+        <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">attribute_name</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;content&#39;</span>
+          <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">strip</span>
         <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;a&#39;</span>
           <span class="ruby-identifier">result</span>.<span class="ruby-identifier">glean_atag</span> <span class="ruby-identifier">finder</span>[<span class="ruby-value">:linkpath</span>], <span class="ruby-identifier">child</span>, <span class="ruby-identifier">pagehome</span>
         <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">name</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;img&#39;</span>
           <span class="ruby-identifier">outstr</span> = <span class="ruby-identifier">child</span>.<span class="ruby-identifier">attributes</span>[<span class="ruby-string">&#39;src&#39;</span>].<span class="ruby-identifier">to_s</span>
-          <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">pagehome</span>, <span class="ruby-identifier">outstr</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">finder</span>[<span class="ruby-value">:pattern</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">outstr</span> <span class="ruby-operator">=~</span> <span class="ruby-node">/#{finder[:pattern]}/</span>)
+          <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">outstr</span>
           <span class="ruby-comment"># If there&#39;s an enclosed link coextensive with the content, emit the link</span>
         <span class="ruby-keyword">elsif</span> (<span class="ruby-identifier">atag</span> = <span class="ruby-identifier">child</span>.<span class="ruby-identifier">css</span>(<span class="ruby-string">&#39;a&#39;</span>).<span class="ruby-identifier">first</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">cleanupstr</span>(<span class="ruby-identifier">atag</span>.<span class="ruby-identifier">content</span>) <span class="ruby-operator">==</span> <span class="ruby-identifier">cleanupstr</span>(<span class="ruby-identifier">child</span>.<span class="ruby-identifier">content</span>))
           <span class="ruby-identifier">result</span>.<span class="ruby-identifier">glean_atag</span> <span class="ruby-identifier">finder</span>[<span class="ruby-value">:linkpath</span>], <span class="ruby-identifier">atag</span>, <span class="ruby-identifier">pagehome</span>
         <span class="ruby-keyword">else</span> <span class="ruby-comment"># Otherwise, it&#39;s just vanilla content</span>
-          <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">content</span>
+          <span class="ruby-identifier">result</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">child</span>.<span class="ruby-identifier">content</span>.<span class="ruby-identifier">strip</span>
         <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-comment"># Make sure that URLs are properly joined</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">label</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;URI&#39;</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Author Link&#39;</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;RSS Feed&#39;</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Image&#39;</span>
+        <span class="ruby-identifier">result</span>.<span class="ruby-identifier">out</span> = <span class="ruby-identifier">result</span>.<span class="ruby-identifier">out</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
+          <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">/^data:/</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">pagehome</span>, <span class="ruby-identifier">url</span>).<span class="ruby-identifier">to_s</span>
+        }.<span class="ruby-identifier">compact</span>
     <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">result</span>.<span class="ruby-identifier">found</span>
       <span class="ruby-identifier">result</span>.<span class="ruby-identifier">report</span>
@@ -429,7 +489,7 @@ processor (see capture.js.erb)</p>
 
           
           <div class="method-source-code" id="js_finders-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 192</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 223</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">js_finders</span> <span class="ruby-identifier">site</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">applicable_finders</span>(<span class="ruby-identifier">site</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">finder</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">finder</span>.<span class="ruby-identifier">attributes</span>.<span class="ruby-identifier">slice</span> <span class="ruby-string">&#39;label&#39;</span>, <span class="ruby-string">&#39;selector&#39;</span>, <span class="ruby-string">&#39;attribute_name&#39;</span>
@@ -464,7 +524,7 @@ processor (see capture.js.erb)</p>
 
           
           <div class="method-source-code" id="label_choices-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 198</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 229</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">label_choices</span>
   <span class="ruby-identifier">@@DataChoices</span> <span class="ruby-operator">||=</span> ((<span class="ruby-identifier">@@DefaultFinders</span><span class="ruby-operator">+</span><span class="ruby-identifier">@@CandidateFinders</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">f</span><span class="ruby-operator">|</span> <span class="ruby-identifier">f</span>[<span class="ruby-value">:label</span>] } <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39;Site Logo&#39;</span>).<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
@@ -539,7 +599,7 @@ character, and eliminating spaces immediately preceding commas</p>
 
           
           <div class="method-source-code" id="cleanupstr-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 109</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 138</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">cleanupstr</span> (<span class="ruby-identifier">str</span>)
   <span class="ruby-identifier">str</span>.<span class="ruby-identifier">strip</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\s+/</span>, <span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/ ,/</span>, <span class="ruby-string">&#39;,&#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">str</span>.<span class="ruby-identifier">nil?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -573,10 +633,12 @@ linkable entity</p>
 
           
           <div class="method-source-code" id="testflight-source">
-            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 114</span>
+            <pre><span class="ruby-comment"># File app/services/finder_services.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">testflight</span> <span class="ruby-identifier">entity</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">results</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">url</span>, <span class="ruby-ivar">@finder</span>)
-    <span class="ruby-ivar">@finder</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-string">&#39;url&#39;</span>, <span class="ruby-string">&#39;page can\t be open for analysis: &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">errstr</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">results</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">url</span>, <span class="ruby-ivar">@finder</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">msg</span>
+    <span class="ruby-ivar">@finder</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">err_breakdown</span>(<span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">url</span>, <span class="ruby-identifier">msg</span>)[<span class="ruby-value">:msg</span>]
     <span class="ruby-keyword">return</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">results</span>.<span class="ruby-identifier">result_for</span> <span class="ruby-ivar">@finder</span>.<span class="ruby-identifier">label</span> <span class="ruby-comment"># Found a result on the page!</span>
@@ -608,7 +670,7 @@ linkable entity</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -89,17 +90,15 @@
     
     <li ><a href="#method-c-entry_ids">::entry_ids</a>
     
-    <li ><a href="#method-c-evaluate">::evaluate</a>
-    
     <li ><a href="#method-c-feedtype_selection">::feedtype_selection</a>
-    
-    <li ><a href="#method-c-fix_counters">::fix_counters</a>
     
     <li ><a href="#method-c-preload">::preload</a>
     
     <li ><a href="#method-c-strscopes">::strscopes</a>
     
     <li ><a href="#method-c-update_now">::update_now</a>
+    
+    <li class="calls-super" ><a href="#method-i-after">#after</a>
     
     <li ><a href="#method-i-due_for_update">#due_for_update</a>
     
@@ -124,8 +123,6 @@
     <li ><a href="#method-i-refresh">#refresh</a>
     
     <li ><a href="#method-i-save">#save</a>
-    
-    <li class="calls-super" ><a href="#method-i-success">#success</a>
     
     <li ><a href="#method-i-to_s">#to_s</a>
     
@@ -182,7 +179,7 @@
 
           
           <div class="method-source-code" id="correct-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 62</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 95</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">correct</span>
   <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">feed</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">begin</span>
@@ -224,57 +221,11 @@
 
           
           <div class="method-source-code" id="entry_ids-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 88</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 121</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">entry_ids</span> <span class="ruby-identifier">feedlist</span>
   <span class="ruby-comment"># Feed.find(feedlist).each { |feed| feed.update_entries }</span>
   <span class="ruby-comment"># We could be fetching individual feeds, then sorting, but we&#39;ll just let the database handle that...</span>
   <span class="ruby-constant">FeedEntry</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">feed_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">feedlist</span>).<span class="ruby-identifier">order</span>(<span class="ruby-string">&#39;published_at DESC&#39;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>)
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-c-evaluate" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">evaluate</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="evaluate-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 137</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">evaluate</span>
-  <span class="ruby-identifier">prevurl</span> = <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-identifier">feedcount</span> = <span class="ruby-value">0</span>
-  <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;/Users/upstill/dev/rss_rejects3.txt&#39;</span>, <span class="ruby-string">&#39;w&#39;</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">outfile</span><span class="ruby-operator">|</span>
-    <span class="ruby-constant">File</span>.<span class="ruby-identifier">open</span>(<span class="ruby-string">&#39;/Users/upstill/dev/rss_rejects2.txt&#39;</span>).<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">line</span><span class="ruby-operator">|</span>
-      <span class="ruby-identifier">fields</span> = <span class="ruby-identifier">line</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39; &#39;</span>)
-      <span class="ruby-identifier">feedurl</span> = <span class="ruby-identifier">fields</span>[<span class="ruby-value">0</span>]
-      <span class="ruby-identifier">pageurl</span> = <span class="ruby-identifier">fields</span>[<span class="ruby-value">2</span>].<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\)$/</span>, <span class="ruby-string">&#39;&#39;</span>)
-      <span class="ruby-keyword">if</span>(<span class="ruby-identifier">pageurl</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">prevurl</span>)
-        <span class="ruby-identifier">feedcount</span> = (<span class="ruby-identifier">site</span> = <span class="ruby-constant">Site</span>.<span class="ruby-identifier">find_or_create_for</span> <span class="ruby-identifier">pageurl</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">site</span>.<span class="ruby-identifier">feeds</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">:</span> <span class="ruby-value">0</span>
-        <span class="ruby-identifier">prevurl</span> = <span class="ruby-identifier">pageurl</span>
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">outfile</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">line</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">feedcount</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
-    <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -305,42 +256,9 @@
 
           
           <div class="method-source-code" id="feedtype_selection-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 166</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 187</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">feedtype_selection</span>
   <span class="ruby-identifier">@@feedtypes</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-c-fix_counters" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">fix_counters</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="fix_counters-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 37</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fix_counters</span>
-  <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">find_each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">feed</span><span class="ruby-operator">|</span> <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">reset_counters</span>(<span class="ruby-identifier">feed</span>.<span class="ruby-identifier">id</span>, <span class="ruby-value">:feed_entries</span>) }
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -371,10 +289,15 @@
 
           
           <div class="method-source-code" id="preload-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 118</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 151</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">preload</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">f</span> = <span class="ruby-constant">Feedjira</span><span class="ruby-operator">::</span><span class="ruby-constant">Feed</span>.<span class="ruby-identifier">fetch_and_parse</span> <span class="ruby-identifier">url</span>, <span class="ruby-value">:on_failure</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> { <span class="ruby-identifier">raise</span> <span class="ruby-string">&#39;Feedjira error: Can\t open feed&#39;</span> }
+    <span class="ruby-identifier">f</span> = <span class="ruby-constant">Feedjira</span><span class="ruby-operator">::</span><span class="ruby-constant">Feed</span>.<span class="ruby-identifier">fetch_and_parse</span> <span class="ruby-identifier">url</span>,
+                                       <span class="ruby-value">:on_failure</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-constant">Proc</span>.<span class="ruby-identifier">new</span> {
+                                         <span class="ruby-identifier">raise</span> <span class="ruby-string">&#39;Feedjira error: Can\t open feed&#39;</span>
+                                       },
+                                       <span class="ruby-value">:max_redirects</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">5</span>,
+                                       <span class="ruby-value">:timeout</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">4</span>
     <span class="ruby-identifier">f</span> = <span class="ruby-keyword">nil</span> <span class="ruby-keyword">if</span> [<span class="ruby-constant">Fixnum</span>, <span class="ruby-constant">Hash</span>].<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">f</span>.<span class="ruby-identifier">class</span>) <span class="ruby-comment"># || !@fetched.is_a?(Feedjira::Feed)</span>
   <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
     <span class="ruby-identifier">f</span> = <span class="ruby-keyword">nil</span>
@@ -410,7 +333,7 @@
 
           
           <div class="method-source-code" id="strscopes-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 75</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 108</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">strscopes</span> <span class="ruby-identifier">matcher</span>
   <span class="ruby-identifier">onscope</span> = <span class="ruby-identifier">block_given?</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">yield</span>() <span class="ruby-operator">:</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">unscoped</span>
   [
@@ -451,7 +374,7 @@
 
           
           <div class="method-source-code" id="update_now-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 110</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 143</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">update_now</span>
   <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">where</span>(<span class="ruby-value">:approved</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">feed</span><span class="ruby-operator">|</span> <span class="ruby-identifier">feed</span>.<span class="ruby-identifier">perform</span> }
 <span class="ruby-keyword">end</span></pre>
@@ -473,6 +396,48 @@
        </header>
 
     
+      <div id="method-i-after" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">after</span><span
+            class="method-args">(job)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Backgroundable.html#method-i-after">Backgroundable#after</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="after-source">
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 246</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">after</span>(<span class="ruby-identifier">job</span>)
+  <span class="ruby-comment"># When the feed is updated successfully, re-queue it for one week hence</span>
+  <span class="ruby-keyword">super</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Successfully updated feed ##{id}&quot;</span>
+  <span class="ruby-identifier">bkg_launch</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">run_at</span><span class="ruby-operator">:</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span>.<span class="ruby-identifier">day</span>)  <span class="ruby-comment"># Launch the next update for one day hence</span>
+  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Queued up feed ##{id}&quot;</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-due_for_update" class="method-detail ">
         
         <div class="method-heading">
@@ -492,7 +457,7 @@
 
           
           <div class="method-source-code" id="due_for_update-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 201</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 223</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">due_for_update</span>
   <span class="ruby-identifier">updated_at</span> <span class="ruby-operator">&lt;</span> <span class="ruby-value">7</span>.<span class="ruby-identifier">days</span>.<span class="ruby-identifier">ago</span>
 <span class="ruby-keyword">end</span></pre>
@@ -525,7 +490,7 @@
 
           
           <div class="method-source-code" id="entries-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 102</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 135</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">entries</span>
   <span class="ruby-ivar">@entrycache</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">begin</span>
     <span class="ruby-comment"># update_entries</span>
@@ -561,7 +526,7 @@
 
           
           <div class="method-source-code" id="entry_ids-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 95</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 128</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">entry_ids</span>
   <span class="ruby-ivar">@idcache</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">begin</span>
     <span class="ruby-comment"># update_entries</span>
@@ -597,7 +562,7 @@
 
           
           <div class="method-source-code" id="feedtypename-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 170</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 191</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">feedtypename</span>
   <span class="ruby-identifier">@@feedtypenames</span>[<span class="ruby-identifier">feedtype</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -631,7 +596,7 @@ thereto</p>
 
           
           <div class="method-source-code" id="fetch-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 129</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 167</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fetch</span>
   <span class="ruby-keyword">return</span> <span class="ruby-ivar">@fetched</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@fetched</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-ivar">@fetched</span> = <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">preload</span>(<span class="ruby-identifier">url</span>)
@@ -671,7 +636,7 @@ we “follow” the url once, when a new feed is created or the url changes.</p>
 
           
           <div class="method-source-code" id="follow_url-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 45</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 78</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">follow_url</span> 
   <span class="ruby-comment"># First, check out the feed</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">fetch</span>
@@ -717,7 +682,7 @@ we “follow” the url once, when a new feed is created or the url changes.</p>
 
           
           <div class="method-source-code" id="hard_save-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 178</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 199</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">hard_save</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">updated_at</span> = <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
   <span class="ruby-identifier">orig_save</span>
@@ -751,9 +716,9 @@ we “follow” the url once, when a new feed is created or the url changes.</p>
 
           
           <div class="method-source-code" id="launch_update-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 218</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 242</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">launch_update</span> <span class="ruby-identifier">hard</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-identifier">hard</span>, <span class="ruby-identifier">priority</span><span class="ruby-operator">:</span> <span class="ruby-value">10</span>, <span class="ruby-identifier">run_at</span><span class="ruby-operator">:</span> <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
+  <span class="ruby-identifier">bkg_launch</span> <span class="ruby-identifier">hard</span>, <span class="ruby-identifier">priority</span><span class="ruby-operator">:</span> <span class="ruby-value">10</span>, <span class="ruby-identifier">run_at</span><span class="ruby-operator">:</span> <span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -813,17 +778,19 @@ updated Thus, saving will not alter the timestamps by default</p>
 
           
           <div class="method-source-code" id="perform-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 205</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 227</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">perform</span> 
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;[#{Time.now}] Updating feed #{id}; approved=#{approved ? &#39;Y&#39; : &#39;N&#39;}&quot;</span>
-  <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">false</span>
-  <span class="ruby-identifier">bkg_execute</span> <span class="ruby-keyword">do</span> <span class="ruby-constant">FeedEntry</span>.<span class="ruby-identifier">update_from_feed</span>(<span class="ruby-keyword">self</span>) <span class="ruby-operator">||</span> <span class="ruby-keyword">true</span> <span class="ruby-keyword">end</span>
-  <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">true</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">good?</span> <span class="ruby-comment"># Record the last_updated_at time</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-comment"># Update the timestamps only if successful</span>
+    <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">false</span>
+    <span class="ruby-constant">FeedEntry</span>.<span class="ruby-identifier">update_from_feed</span> <span class="ruby-keyword">self</span>
+    <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">true</span>
     <span class="ruby-identifier">touch</span>
     <span class="ruby-identifier">reload</span>
+  <span class="ruby-keyword">ensure</span>
+    <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">true</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">good?</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -854,7 +821,7 @@ updated Thus, saving will not alter the timestamps by default</p>
 
           
           <div class="method-source-code" id="refresh-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 194</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 216</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">refresh</span>
   <span class="ruby-constant">FeedEntry</span>.<span class="ruby-identifier">update_from_feed</span> <span class="ruby-keyword">self</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">reload</span> <span class="ruby-comment"># To ensure associations are updated</span>
@@ -889,14 +856,15 @@ updated Thus, saving will not alter the timestamps by default</p>
 
           
           <div class="method-source-code" id="save-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 183</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 204</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">save</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">updated_at</span>.<span class="ruby-identifier">nil?</span> <span class="ruby-comment"># Don&#39;t violate the non-null constraint on timestamps</span>
     <span class="ruby-identifier">orig_save</span> <span class="ruby-identifier">options</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">false</span>
-    <span class="ruby-identifier">orig_save</span> <span class="ruby-identifier">options</span>
+    <span class="ruby-identifier">result</span> = <span class="ruby-identifier">orig_save</span> <span class="ruby-identifier">options</span>
     <span class="ruby-constant">Feed</span>.<span class="ruby-identifier">record_timestamps</span> = <span class="ruby-keyword">true</span>
+    <span class="ruby-identifier">result</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -907,48 +875,6 @@ updated Thus, saving will not alter the timestamps by default</p>
         <div class="aliases">
           Also aliased as: <a href="Feed.html#method-i-orig_save">orig_save</a>
         </div>
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-success" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">success</span><span
-            class="method-args">(job)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-            <div class="method-calls-super">
-              Calls superclass method
-              <a href="Backgroundable.html#method-i-success">Backgroundable#success</a>
-            </div>
-          
-
-          
-          <div class="method-source-code" id="success-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 222</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">success</span>(<span class="ruby-identifier">job</span>)
-  <span class="ruby-comment"># When the feed is updated successfully, re-queue it for one week hence</span>
-  <span class="ruby-keyword">super</span>
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Successfully updated feed ##{id}&quot;</span>
-  <span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">run_at</span><span class="ruby-operator">:</span> (<span class="ruby-constant">Time</span>.<span class="ruby-identifier">now</span> <span class="ruby-operator">+</span> <span class="ruby-value">1</span>.<span class="ruby-identifier">day</span>)  <span class="ruby-comment"># Launch the next update for one day hence</span>
-  <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Queued up feed ##{id}&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
         
 
         
@@ -974,7 +900,7 @@ updated Thus, saving will not alter the timestamps by default</p>
 
           
           <div class="method-source-code" id="to_s-source">
-            <pre><span class="ruby-comment"># File app/models/feed.rb, line 114</span>
+            <pre><span class="ruby-comment"># File app/models/feed.rb, line 147</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">to_s</span>
   <span class="ruby-node">&quot;#{(title.present? &amp;&amp; title) || (&#39;Feed #&#39;+id.to_s)} (#{url})&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -996,7 +922,7 @@ updated Thus, saving will not alter the timestamps by default</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

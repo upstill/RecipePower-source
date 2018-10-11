@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -74,9 +75,17 @@
     
     <li class="calls-super" ><a href="#method-c-find_or_initialize">::find_or_initialize</a>
     
+    <li ><a href="#method-i-after">#after</a>
+    
+    <li class="calls-super" ><a href="#method-i-bkg_land">#bkg_land</a>
+    
+    <li class="calls-super" ><a href="#method-i-bkg_launch">#bkg_launch</a>
+    
+    <li ><a href="#method-i-definitive-3F">#definitive?</a>
+    
     <li ><a href="#method-i-imgdata">#imgdata</a>
     
-    <li ><a href="#method-i-launch">#launch</a>
+    <li ><a href="#method-i-imgurl">#imgurl</a>
     
     <li ><a href="#method-i-perform">#perform</a>
     
@@ -137,7 +146,7 @@
 
           
           <div class="method-source-code" id="fake_url-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 249</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 274</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fake_url</span>
   <span class="ruby-identifier">randstr</span> = (<span class="ruby-value">0</span><span class="ruby-operator">...</span><span class="ruby-value">8</span>).<span class="ruby-identifier">map</span> { (<span class="ruby-value">65</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">rand</span>(<span class="ruby-value">26</span>)).<span class="ruby-identifier">chr</span> }.<span class="ruby-identifier">join</span>
   <span class="ruby-constant">Time</span>.<span class="ruby-identifier">new</span>.<span class="ruby-identifier">to_s</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">randstr</span>
@@ -181,7 +190,7 @@ when the URL is assigned</p>
 
           
           <div class="method-source-code" id="find_or_initialize-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 185</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 190</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">params</span>={}
   [
       <span class="ruby-keyword">case</span> <span class="ruby-identifier">url</span>
@@ -200,7 +209,7 @@ when the URL is assigned</p>
         <span class="ruby-keyword">else</span>
           <span class="ruby-identifier">candidates</span> = <span class="ruby-keyword">super</span> <span class="ruby-comment"># Find by the url</span>
           <span class="ruby-comment"># Queue the refs up to get data for the url as necessary and appropriate</span>
-          <span class="ruby-identifier">candidates</span>.<span class="ruby-identifier">map</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:launch</span>
+          <span class="ruby-identifier">candidates</span>.<span class="ruby-identifier">map</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:bkg_launch</span>
           <span class="ruby-comment"># Check all the candidates for a data: URL, and return the canonical one or the first one, if none is canonical</span>
           <span class="ruby-identifier">candidates</span>.<span class="ruby-identifier">find</span> <span class="ruby-operator">&amp;</span><span class="ruby-value">:canonical</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">candidates</span>.<span class="ruby-identifier">first</span>
       <span class="ruby-keyword">end</span>
@@ -224,6 +233,156 @@ when the URL is assigned</p>
        </header>
 
     
+      <div id="method-i-after" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">after</span><span
+            class="method-args">(dj)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="after-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 299</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">after</span> <span class="ruby-identifier">dj</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">status</span> = (<span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>) <span class="ruby-operator">||</span> (<span class="ruby-identifier">errcode</span> <span class="ruby-operator">==</span> <span class="ruby-value">200</span>) <span class="ruby-operator">?</span> <span class="ruby-value">:good</span> <span class="ruby-operator">:</span> <span class="ruby-value">:bad</span>
+  <span class="ruby-identifier">save</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_land" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_land</span><span
+            class="method-args">(force=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Backgroundable.html#method-i-bkg_land">Backgroundable#bkg_land</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="bkg_land-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 295</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_land</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-operator">!</span><span class="ruby-identifier">definitive?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-bkg_launch" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">bkg_launch</span><span
+            class="method-args">(force=false)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ensure the thumbdata is up to date, optionally forcing an update even if
+previously processed</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="Backgroundable.html#method-i-bkg_launch">Backgroundable#bkg_launch</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="bkg_launch-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 291</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">bkg_launch</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
+  <span class="ruby-operator">!</span><span class="ruby-identifier">definitive?</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-definitive-3F" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">definitive?</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Is the reference un-gleanable? No further attention need be paid</p>
+          
+          
+
+          
+          <div class="method-source-code" id="definitive-3F-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 280</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">definitive?</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>
+    (<span class="ruby-identifier">good!</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">save</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">good?</span>
+    <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span>
+    (<span class="ruby-identifier">bad!</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">save</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">bad?</span>
+    <span class="ruby-keyword">true</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-imgdata" class="method-detail ">
         
         <div class="method-heading">
@@ -244,10 +403,10 @@ possibly a url or even (if the data fetch fails) nil</p>
 
           
           <div class="method-source-code" id="imgdata-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 211</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 240</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">imgdata</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
   <span class="ruby-comment"># Provide good thumbdata if possible</span>
-  <span class="ruby-identifier">bkg_sync</span> <span class="ruby-identifier">force</span>
+  <span class="ruby-identifier">bkg_land</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">force</span> <span class="ruby-comment"># Doesn&#39;t return until the job is done</span>
   <span class="ruby-identifier">thumbdata</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">thumbdata</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -260,11 +419,11 @@ possibly a url or even (if the data fetch fails) nil</p>
       </div>
 
     
-      <div id="method-i-launch" class="method-detail ">
+      <div id="method-i-imgurl" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">launch</span><span
-            class="method-args">(force=false)</span>
+          <span class="method-name">imgurl</span><span
+            class="method-args">()</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -273,22 +432,34 @@ possibly a url or even (if the data fetch fails) nil</p>
 
         <div class="method-description">
           
-          <p>Ensure the thumbdata is up to date, optionally forcing an update even if
-previously processed</p>
+          <p>Provide a url that&#39;s valid anywhere. It may come direct from the IR or,
+if there&#39;s only thumbdata, it gets stored on AWS and returned as a link
+to there</p>
           
           
 
           
-          <div class="method-source-code" id="launch-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 255</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">launch</span> <span class="ruby-identifier">force</span>=<span class="ruby-keyword">false</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>
-    (<span class="ruby-identifier">good!</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">save</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">good?</span>
-  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span>
-    (<span class="ruby-identifier">bad!</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">save</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">bad?</span>
+          <div class="method-source-code" id="imgurl-source">
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 217</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">imgurl</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">match</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>
+    <span class="ruby-comment"># The more complicated case: we have an IR with image data, but no URL.</span>
+    <span class="ruby-comment"># So we lookup the corresponding URL on AWS. If it exists, we return that;</span>
+    <span class="ruby-comment"># Otherwise, we CREATE it on AWS first, then return it.</span>
+    <span class="ruby-comment">#</span>
+    <span class="ruby-comment"># Does the resource exist? If so, we just return the link</span>
+    <span class="ruby-identifier">path</span> = <span class="ruby-node">&quot;uploads/reference/#{id}.png&quot;</span>
+    <span class="ruby-identifier">obj</span> = <span class="ruby-constant">S3_BUCKET</span>.<span class="ruby-identifier">objects</span>[<span class="ruby-identifier">path</span>]
+    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">exists?</span>
+      <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;Creating AWS file &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">path</span>
+      <span class="ruby-comment"># The nut of the problem: take the image in the thumbdata, upload it to aws, and return the link</span>
+      <span class="ruby-identifier">b64</span> = <span class="ruby-identifier">thumbdata</span>.<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39;data:image/png;base64,&#39;</span>, <span class="ruby-string">&#39;&#39;</span>
+      <span class="ruby-identifier">img</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span>.<span class="ruby-identifier">read_inline</span>(<span class="ruby-identifier">b64</span>).<span class="ruby-identifier">first</span>
+      <span class="ruby-constant">S3_BUCKET</span>.<span class="ruby-identifier">objects</span>[<span class="ruby-identifier">path</span>].<span class="ruby-identifier">write</span> <span class="ruby-identifier">img</span>.<span class="ruby-identifier">to_blob</span>, {<span class="ruby-value">:acl=</span><span class="ruby-operator">&gt;</span><span class="ruby-value">:public_read</span>}
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">obj</span>.<span class="ruby-identifier">public_url</span>.<span class="ruby-identifier">to_s</span>
   <span class="ruby-keyword">else</span>
-    <span class="ruby-comment"># force ? bkg_requeue : bkg_enqueue</span>
-          <span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-identifier">force</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -322,33 +493,29 @@ href="Reference.html#method-i-fetch">Reference#fetch</a></p>
 
           
           <div class="method-source-code" id="perform-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 218</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 247</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">perform</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">info</span> <span class="ruby-node">&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt; Acquiring Thumbnail data on url &#39;#{url}&#39; &gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&quot;</span>
-  <span class="ruby-identifier">bkg_execute</span> <span class="ruby-keyword">do</span>
-    <span class="ruby-comment"># A url which is a date string denotes an ImageReference which came in as data, and is therefore good</span>
-    (<span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>) <span class="ruby-operator">||</span>
-    <span class="ruby-keyword">begin</span>
-      <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">0</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> <span class="ruby-operator">==</span> <span class="ruby-value">-2</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_body</span> = <span class="ruby-identifier">fetch</span> <span class="ruby-comment"># Attempt to get data at the other end of the URL</span>
-        <span class="ruby-keyword">begin</span>
-          <span class="ruby-identifier">img</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span><span class="ruby-operator">::</span><span class="ruby-identifier">from_blob</span>(<span class="ruby-identifier">response_body</span>).<span class="ruby-identifier">first</span>
-          <span class="ruby-keyword">if</span> <span class="ruby-identifier">img</span>.<span class="ruby-identifier">columns</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">200</span>
-            <span class="ruby-identifier">scalefactor</span> = <span class="ruby-value">200.0</span><span class="ruby-operator">/</span><span class="ruby-identifier">img</span>.<span class="ruby-identifier">columns</span>
-            <span class="ruby-identifier">thumb</span> = <span class="ruby-identifier">img</span>.<span class="ruby-identifier">scale</span>(<span class="ruby-identifier">scalefactor</span>)
-          <span class="ruby-keyword">else</span>
-            <span class="ruby-identifier">thumb</span> = <span class="ruby-identifier">img</span>
-          <span class="ruby-keyword">end</span>
-          <span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">format</span> = <span class="ruby-string">&#39;PNG&#39;</span>
-          <span class="ruby-identifier">quality</span> = <span class="ruby-value">80</span>
-          <span class="ruby-keyword">self</span>.<span class="ruby-identifier">thumbdata</span> = <span class="ruby-string">&#39;data:image/png;base64,&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">encode64</span>(<span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">to_blob</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">quality</span> = <span class="ruby-identifier">quality</span> })
-        <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-          <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Failed to parse image data for ImageReference #{id}: #{url} (#{e})&quot;</span>
-          <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">-2</span> <span class="ruby-comment"># Bad data</span>
+  <span class="ruby-comment"># A url which is a date string denotes an ImageReference which came in as data, and is therefore good</span>
+  (<span class="ruby-identifier">url</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\d\d\d\d-/</span>) <span class="ruby-operator">||</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">0</span> <span class="ruby-keyword">if</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> <span class="ruby-operator">==</span> <span class="ruby-value">-2</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_body</span> = <span class="ruby-identifier">fetch</span> <span class="ruby-comment"># Attempt to get data at the other end of the URL</span>
+      <span class="ruby-keyword">begin</span>
+        <span class="ruby-identifier">img</span> = <span class="ruby-constant">Magick</span><span class="ruby-operator">::</span><span class="ruby-constant">Image</span><span class="ruby-operator">::</span><span class="ruby-identifier">from_blob</span>(<span class="ruby-identifier">response_body</span>).<span class="ruby-identifier">first</span>
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">img</span>.<span class="ruby-identifier">columns</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">200</span>
+          <span class="ruby-identifier">scalefactor</span> = <span class="ruby-value">200.0</span><span class="ruby-operator">/</span><span class="ruby-identifier">img</span>.<span class="ruby-identifier">columns</span>
+          <span class="ruby-identifier">thumb</span> = <span class="ruby-identifier">img</span>.<span class="ruby-identifier">scale</span>(<span class="ruby-identifier">scalefactor</span>)
+        <span class="ruby-keyword">else</span>
+          <span class="ruby-identifier">thumb</span> = <span class="ruby-identifier">img</span>
         <span class="ruby-keyword">end</span>
+        <span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">format</span> = <span class="ruby-string">&#39;PNG&#39;</span>
+        <span class="ruby-identifier">quality</span> = <span class="ruby-value">80</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">thumbdata</span> = <span class="ruby-string">&#39;data:image/png;base64,&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-constant">Base64</span>.<span class="ruby-identifier">encode64</span>(<span class="ruby-identifier">thumb</span>.<span class="ruby-identifier">to_blob</span> { <span class="ruby-keyword">self</span>.<span class="ruby-identifier">quality</span> = <span class="ruby-identifier">quality</span> })
+      <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+        <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;Failed to parse image data for ImageReference #{id}: #{url} (#{e})&quot;</span>
+        <span class="ruby-keyword">self</span>.<span class="ruby-identifier">errcode</span> = <span class="ruby-value">-2</span> <span class="ruby-comment"># Bad data</span>
       <span class="ruby-keyword">end</span>
-      <span class="ruby-identifier">save</span> <span class="ruby-comment"># Save the errcode code, if nothing else</span>
-      <span class="ruby-identifier">errcode</span> <span class="ruby-operator">==</span> <span class="ruby-value">200</span> <span class="ruby-comment"># Let bkg_execute know how we did</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
@@ -381,7 +548,7 @@ href="Reference.html#method-i-fetch">Reference#fetch</a></p>
 
           
           <div class="method-source-code" id="thumbdata-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 266</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 304</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">thumbdata</span>
   <span class="ruby-keyword">self</span>[<span class="ruby-value">:thumbdata</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -414,7 +581,7 @@ href="Reference.html#method-i-fetch">Reference#fetch</a></p>
 
           
           <div class="method-source-code" id="thumbdata-3D-source">
-            <pre><span class="ruby-comment"># File app/models/reference.rb, line 270</span>
+            <pre><span class="ruby-comment"># File app/models/reference.rb, line 308</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">thumbdata=</span>(<span class="ruby-identifier">val</span>)
   <span class="ruby-identifier">write_attribute</span> <span class="ruby-value">:thumbdata</span>, <span class="ruby-identifier">val</span>
 <span class="ruby-keyword">end</span></pre>
@@ -436,7 +603,7 @@ href="Reference.html#method-i-fetch">Reference#fetch</a></p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

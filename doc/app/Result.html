@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -211,7 +212,7 @@
 
           
           <div class="method-source-code" id="found-source">
-            <pre><span class="ruby-comment"># File lib/result.rb, line 29</span>
+            <pre><span class="ruby-comment"># File lib/result.rb, line 30</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">found</span>
   <span class="ruby-identifier">out</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">length</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>
 <span class="ruby-keyword">end</span></pre>
@@ -244,11 +245,11 @@
 
           
           <div class="method-source-code" id="glean_atag-source">
-            <pre><span class="ruby-comment"># File lib/result.rb, line 42</span>
+            <pre><span class="ruby-comment"># File lib/result.rb, line 43</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">glean_atag</span> <span class="ruby-identifier">matchstr</span>, <span class="ruby-identifier">atag</span>, <span class="ruby-identifier">site_home</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">href</span> = <span class="ruby-identifier">atag</span>.<span class="ruby-identifier">attribute</span>(<span class="ruby-string">&#39;href&#39;</span>)
     <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">href</span>.<span class="ruby-identifier">value</span>
-    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">site_home</span>, <span class="ruby-identifier">uri</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\//</span> <span class="ruby-comment"># Prepend domain/site to path as nec.</span>
+    <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">site_home</span>, <span class="ruby-identifier">uri</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span> <span class="ruby-operator">=~</span> <span class="ruby-regexp">/^\//</span> <span class="ruby-comment"># Prepend domain/site to path as nec.</span>
     <span class="ruby-identifier">outstr</span> = <span class="ruby-identifier">atag</span>.<span class="ruby-identifier">content</span>
     <span class="ruby-identifier">push</span> <span class="ruby-identifier">outstr</span>, <span class="ruby-identifier">uri</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span> <span class="ruby-operator">=~</span> <span class="ruby-node">/#{matchstr}/</span> <span class="ruby-comment"># Apply subsite constraint</span>
   <span class="ruby-keyword">end</span>
@@ -282,7 +283,7 @@
 
           
           <div class="method-source-code" id="is_for-source">
-            <pre><span class="ruby-comment"># File lib/result.rb, line 38</span>
+            <pre><span class="ruby-comment"># File lib/result.rb, line 39</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">is_for</span>(<span class="ruby-identifier">label</span>)
   <span class="ruby-ivar">@finderdata</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">==</span> <span class="ruby-identifier">label</span>
 <span class="ruby-keyword">end</span></pre>
@@ -319,12 +320,13 @@
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">push</span> (<span class="ruby-identifier">str_in</span>, <span class="ruby-identifier">uri</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">str_in</span>.<span class="ruby-identifier">nil?</span>
     <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">str_out</span> = <span class="ruby-identifier">str_in</span>.
+      <span class="ruby-comment"># Somehow, str_in can be a URI, so need to ensure it&#39;s a string</span>
+      <span class="ruby-identifier">str_out</span> = <span class="ruby-identifier">str_in</span>.<span class="ruby-identifier">to_s</span>.
           <span class="ruby-comment"># encode(&#39;ASCII-8BIT&#39;, &#39;binary&#39;, :invalid =&gt; :replace, :undef =&gt; :replace).</span>
           <span class="ruby-identifier">encode</span>(<span class="ruby-string">&#39;UTF-8&#39;</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/ ,/</span>, <span class="ruby-string">&#39;,&#39;</span>)
     <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
       <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;STRING ENCODING ERROR on #{str_in}&quot;</span>
-      <span class="ruby-identifier">str_out</span> = <span class="ruby-identifier">str_in</span>.<span class="ruby-identifier">encode</span>(<span class="ruby-string">&#39;ASCII-8BIT&#39;</span>, <span class="ruby-string">&#39;binary&#39;</span>, <span class="ruby-value">:invalid</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:replace</span>, <span class="ruby-value">:undef</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:replace</span>)
+      <span class="ruby-identifier">str_out</span> = <span class="ruby-identifier">str_in</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">encode</span>(<span class="ruby-string">&#39;ASCII-8BIT&#39;</span>, <span class="ruby-string">&#39;binary&#39;</span>, <span class="ruby-value">:invalid</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:replace</span>, <span class="ruby-value">:undef</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:replace</span>)
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">str_out</span>.<span class="ruby-identifier">blank?</span>
@@ -362,7 +364,7 @@
 
           
           <div class="method-source-code" id="report-source">
-            <pre><span class="ruby-comment"># File lib/result.rb, line 33</span>
+            <pre><span class="ruby-comment"># File lib/result.rb, line 34</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">report</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;...results due to #{@finderdata}:&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;\t&quot;</span><span class="ruby-operator">+</span><span class="ruby-identifier">out</span>.<span class="ruby-identifier">join</span>(<span class="ruby-string">&quot;\n\t&quot;</span>)
@@ -385,7 +387,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

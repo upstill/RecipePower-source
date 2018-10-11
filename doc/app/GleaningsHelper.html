@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -73,8 +74,6 @@
     
     <li ><a href="#method-i-gleaning_field_replacement">#gleaning_field_replacement</a>
     
-    <li ><a href="#method-i-gleaning_trigger">#gleaning_trigger</a>
-    
   </ul>
 </div>
 
@@ -113,7 +112,7 @@
         
         <div class="method-heading">
           <span class="method-name">gleaning_field</span><span
-            class="method-args">(decorator, label)</span>
+            class="method-args">(decorator, what, gleaning=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -130,12 +129,13 @@ replacement request to come in</p>
           
           <div class="method-source-code" id="gleaning_field-source">
             <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 4</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">label</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">good?</span>
-    <span class="ruby-identifier">gleaning_field_declaration</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">label</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">label</span>,
-                             <span class="ruby-identifier">image_tag</span>(<span class="ruby-string">&#39;ajax-loader.gif&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;beachball&#39;</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;height: 15px;&#39;</span>)
+<span class="ruby-keyword">def</span>  <span class="ruby-identifier">gleaning_field</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">gleaning</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">gleaning</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">glean</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">good?</span>
+    <span class="ruby-identifier">gleaning_field_declaration</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">gleaning</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">glean_path</span> = <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:glean</span>, <span class="ruby-identifier">decorator</span>], <span class="ruby-identifier">what</span><span class="ruby-operator">:</span> <span class="ruby-identifier">what</span>) <span class="ruby-keyword">rescue</span> <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">glean_trigger</span> = <span class="ruby-identifier">link_to_submit</span> <span class="ruby-string">&#39;Scrape&#39;</span>, <span class="ruby-identifier">glean_path</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;trigger hide&#39;</span>
+    <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">glean_trigger</span><span class="ruby-operator">+</span><span class="ruby-identifier">image_tag</span>(<span class="ruby-string">&#39;ajax-loader.gif&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;beachball&#39;</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;height: 15px;&#39;</span>)
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -152,7 +152,7 @@ replacement request to come in</p>
         
         <div class="method-heading">
           <span class="method-name">gleaning_field_class</span><span
-            class="method-args">(label)</span>
+            class="method-args">(what)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -167,9 +167,9 @@ replacement request to come in</p>
 
           
           <div class="method-source-code" id="gleaning_field_class-source">
-            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 79</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_class</span> <span class="ruby-identifier">label</span>
-  <span class="ruby-node">&quot;gleaning-field-#{FinderServices.css_class label}&quot;</span>
+            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 83</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_class</span> <span class="ruby-identifier">what</span>
+  <span class="ruby-node">&quot;gleaning-field-#{FinderServices.css_class what}&quot;</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -185,7 +185,7 @@ replacement request to come in</p>
         
         <div class="method-heading">
           <span class="method-name">gleaning_field_declaration</span><span
-            class="method-args">(decorator, label)</span>
+            class="method-args">(decorator, what, gleaning=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -200,21 +200,26 @@ replacement request to come in</p>
 
           
           <div class="method-source-code" id="gleaning_field_declaration-source">
-            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 20</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_declaration</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">label</span>
-  <span class="ruby-identifier">entity_name</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">underscore</span>
-  <span class="ruby-identifier">attribute_name</span> = <span class="ruby-node">&quot;#{entity_name}[gleaning_attributes][#{label}]&quot;</span>
+            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_declaration</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">gleaning</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">gleaning</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span>
+  <span class="ruby-identifier">attr_descriptor</span> = <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">singularize</span>
+  <span class="ruby-identifier">label</span> = {<span class="ruby-identifier">titles</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Title&#39;</span>, <span class="ruby-identifier">descriptions</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Description&#39;</span>, <span class="ruby-identifier">images</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Image&#39;</span>, <span class="ruby-identifier">feeds</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;RSS Feed&#39;</span>}[<span class="ruby-identifier">what</span>]
+  <span class="ruby-identifier">attribute_name</span> = <span class="ruby-node">&quot;#{decorator.param_key}[gleaning_attributes][#{label}]&quot;</span>
   <span class="ruby-identifier">target</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">field</span> =
       <span class="ruby-keyword">case</span> <span class="ruby-identifier">label</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Title&#39;</span>, <span class="ruby-string">&#39;Description&#39;</span>
           <span class="ruby-identifier">options</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">options_for</span> <span class="ruby-identifier">label</span>
-          <span class="ruby-identifier">target</span> = <span class="ruby-node">&quot;#{decorator.object.class.to_s.underscore}[#{decorator.attribute_for label}]&quot;</span>
-          <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Title&#39;</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:page_ref</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span>
+          <span class="ruby-identifier">target</span> = <span class="ruby-node">&quot;#{decorator.param_key}[#{decorator.attribute_for attr_descriptor}]&quot;</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">label</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;Title&#39;</span> <span class="ruby-operator">&amp;&amp;</span>
+              <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:page_ref</span>) <span class="ruby-operator">&amp;&amp;</span>
+              <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span>
+              <span class="ruby-operator">!</span><span class="ruby-identifier">options</span>.<span class="ruby-identifier">include?</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>)
             <span class="ruby-identifier">options</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">title</span>
           <span class="ruby-keyword">end</span>
           <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>.<span class="ruby-identifier">empty?</span>
-            <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>, <span class="ruby-node">&quot;No #{label.pluralize} Gleaned&quot;</span>
+            <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>, <span class="ruby-node">&quot;(no #{label.pluralize.downcase} gleaned)&quot;</span>
           <span class="ruby-keyword">else</span>
             <span class="ruby-identifier">select_tag</span> <span class="ruby-identifier">attribute_name</span>,
                        <span class="ruby-identifier">options_for_select</span>(<span class="ruby-identifier">options</span>),
@@ -248,12 +253,16 @@ replacement request to come in</p>
             <span class="ruby-identifier">label_tag</span>(<span class="ruby-string">&#39;Gleaned Feeds&#39;</span>) <span class="ruby-operator">+</span> <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">html_safe</span>
           <span class="ruby-keyword">end</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Image&#39;</span>
+          <span class="ruby-keyword">if</span> <span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">images</span>.<span class="ruby-identifier">present?</span>
+            <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-string">&#39;Click on an image to grab it.&#39;</span>, <span class="ruby-value">:class</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;prompt&#39;</span>)
+            <span class="ruby-identifier">pic_picker_select_list</span>(<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">images</span> <span class="ruby-operator">||</span> [])
+          <span class="ruby-keyword">end</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Tags&#39;</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Site Name&#39;</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Author&#39;</span>
         <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;Author Link&#39;</span>
       <span class="ruby-keyword">end</span>
-  <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">field</span>, <span class="ruby-identifier">target</span>
+  <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">field</span>, <span class="ruby-identifier">target</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -269,7 +278,7 @@ replacement request to come in</p>
         
         <div class="method-heading">
           <span class="method-name">gleaning_field_enclosure</span><span
-            class="method-args">(label, content, target=nil)</span>
+            class="method-args">(what, content, target=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -284,13 +293,17 @@ replacement request to come in</p>
 
           
           <div class="method-source-code" id="gleaning_field_enclosure-source">
-            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 83</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">label</span>, <span class="ruby-identifier">content</span>, <span class="ruby-identifier">target</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
-              <span class="ruby-identifier">content</span>,
-              <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;display: inline-block; width: 100%&#39;</span>,
-              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;gleaning-field-enclosure &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">gleaning_field_class</span>(<span class="ruby-identifier">label</span>),
-              <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">target</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target</span> }.<span class="ruby-identifier">compact</span>
+            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 87</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_enclosure</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">content</span>, <span class="ruby-identifier">target</span>=<span class="ruby-keyword">nil</span>
+  <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">case</span> <span class="ruby-identifier">what</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:images</span>
+      <span class="ruby-string">&#39;pic-pickees&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-string">&#39;gleaning-field-enclosure label-right&#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">gleaning_field_class</span>(<span class="ruby-identifier">what</span>)
+  <span class="ruby-keyword">end</span> <span class="ruby-operator">+</span> <span class="ruby-string">&#39; &#39;</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">gleaning_field_class</span>(<span class="ruby-identifier">what</span>)
+  <span class="ruby-identifier">options</span> = { <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-identifier">klass</span> }
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:data</span>] = { <span class="ruby-identifier">target</span><span class="ruby-operator">:</span> <span class="ruby-identifier">target</span> } <span class="ruby-keyword">if</span> <span class="ruby-identifier">target</span>
+  <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">content</span>, <span class="ruby-identifier">options</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -306,7 +319,7 @@ replacement request to come in</p>
         
         <div class="method-heading">
           <span class="method-name">gleaning_field_replacement</span><span
-            class="method-args">(decorator, label)</span>
+            class="method-args">(decorator, what, gleaning=nil)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -321,44 +334,9 @@ replacement request to come in</p>
 
           
           <div class="method-source-code" id="gleaning_field_replacement-source">
-            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 75</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_replacement</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">label</span>
-  [ <span class="ruby-string">&#39;.&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">gleaning_field_class</span>(<span class="ruby-identifier">label</span>), <span class="ruby-identifier">gleaning_field_declaration</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">label</span>) ]
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-gleaning_trigger" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">gleaning_trigger</span><span
-            class="method-args">(decorator)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Define a trigger link to fetch the gleaning field(s), iff needed</p>
-          
-          
-
-          
-          <div class="method-source-code" id="gleaning_trigger-source">
-            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 14</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_trigger</span> <span class="ruby-identifier">decorator</span>
-  <span class="ruby-identifier">link_to_submit</span> <span class="ruby-string">&#39;Scrape&#39;</span>,
-                 <span class="ruby-identifier">gleaning_path</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span>),
-                 <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;trigger hide&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-operator">!</span><span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">good?</span>
+            <pre><span class="ruby-comment"># File app/helpers/gleanings_helper.rb, line 79</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">gleaning_field_replacement</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">gleaning</span>=<span class="ruby-keyword">nil</span>
+  [<span class="ruby-string">&#39;.&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">gleaning_field_class</span>(<span class="ruby-identifier">what</span>), <span class="ruby-identifier">gleaning_field_declaration</span>(<span class="ruby-identifier">decorator</span>, <span class="ruby-identifier">what</span>, <span class="ruby-identifier">gleaning</span>)]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -378,7 +356,7 @@ replacement request to come in</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

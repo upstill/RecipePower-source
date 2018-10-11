@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -55,18 +56,7 @@
   <div id="class-metadata">
     
     
-    <div id="includes-section" class="nav-section">
-  <h3>Included Modules</h3>
-
-  <ul class="link-list">
-  
-  
-    <li><a class="include" href="Linkable.html">Linkable</a>
-  
-  
-  </ul>
-</div>
-
+    
     <div id="extends-section" class="nav-section">
   <h3>Extended With Modules</h3>
 
@@ -94,6 +84,8 @@
     <li class="calls-super" ><a href="#method-i-absorb">#absorb</a>
     
     <li ><a href="#method-i-imgdata">#imgdata</a>
+    
+    <li ><a href="#method-i-imgurl">#imgurl</a>
     
     <li ><a href="#method-i-picable_attribute">#picable_attribute</a>
     
@@ -156,7 +148,7 @@
 
           
           <div class="method-source-code" id="included-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 26</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 73</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">included</span>(<span class="ruby-identifier">base</span>)
   <span class="ruby-identifier">base</span>.<span class="ruby-identifier">extend</span> <span class="ruby-constant">ClassMethods</span>
 <span class="ruby-keyword">end</span></pre>
@@ -196,13 +188,13 @@
           
             <div class="method-calls-super">
               Calls superclass method
-              <a href="Linkable.html#method-i-absorb">Linkable#absorb</a>
+              
             </div>
           
 
           
           <div class="method-source-code" id="absorb-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 64</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 116</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">absorb</span> <span class="ruby-identifier">other</span>
   <span class="ruby-comment"># Act only if there&#39;s not already an image in the absorber</span>
   <span class="ruby-keyword">unless</span> <span class="ruby-identifier">picref</span>
@@ -248,11 +240,44 @@ The image may have an associated thumbnail, but it doesn&#39;t count unless
 
           
           <div class="method-source-code" id="imgdata-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 57</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 104</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">imgdata</span> <span class="ruby-identifier">fallback_to_url</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">picref</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">href</span> = <span class="ruby-identifier">picref</span>.<span class="ruby-identifier">imgdata</span> <span class="ruby-operator">||</span> (<span class="ruby-identifier">fallback_to_url</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">picref</span>.<span class="ruby-identifier">url</span>)).<span class="ruby-identifier">present?</span>
     <span class="ruby-identifier">href</span>
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-imgurl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">imgurl</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Ignore the thumbnail and return a url</p>
+          
+          
+
+          
+          <div class="method-source-code" id="imgurl-source">
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 111</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">imgurl</span>
+  <span class="ruby-identifier">picref</span>.<span class="ruby-identifier">imgurl</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">picref</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -283,7 +308,7 @@ The image may have an associated thumbnail, but it doesn&#39;t count unless
 
           
           <div class="method-source-code" id="picable_attribute-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 32</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 79</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">picable_attribute</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">picable_attribute</span>
 <span class="ruby-keyword">end</span></pre>
@@ -316,7 +341,7 @@ The image may have an associated thumbnail, but it doesn&#39;t count unless
 
           
           <div class="method-source-code" id="picref-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 83</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">picref</span>
   <span class="ruby-ivar">@picref</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">method</span>(<span class="ruby-keyword">self</span>.<span class="ruby-identifier">class</span>.<span class="ruby-identifier">image_reference_name</span>).<span class="ruby-identifier">call</span>
 <span class="ruby-keyword">end</span></pre>
@@ -352,7 +377,7 @@ useful.</p>
 
           
           <div class="method-source-code" id="picuri-source">
-            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 44</span>
+            <pre><span class="ruby-comment"># File app/models/concerns/picable.rb, line 91</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">picuri</span>
   <span class="ruby-identifier">picref</span>.<span class="ruby-identifier">url</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">picref</span>
 <span class="ruby-keyword">end</span></pre>
@@ -374,7 +399,7 @@ useful.</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

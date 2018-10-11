@@ -1,6 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <%= stylesheet_link_tag 'common/flash', :media => 'all' %>
   <style>
       img.logo {
           display: inline-block;
@@ -26,30 +30,9 @@
           margin: 10px;
           font-size: 18px;
       }
-      div.flash_notifications div.alert-success {
-          background-color: #dff0d8;
-          border-color: #d0e9c6;
-          color: #3c763d;
-      }
-      div.flash_notifications div.alert-info {
-          background-color: #d9edf7;
-          border-color: #bcdff1;
-          color: #31708f;
-      }
-      div.flash_notifications div.alert-warning {
-          background-color: #fcf8e3;
-          border-color: #faf2cc;
-          color: #8a6d3b;
-      }
-      div.flash_notifications div.alert-danger {
-          background-color: #f2dede;
-          border-color: #ebcccc;
-          color: #a94442;
-      }
-      div.flash_notifications div.alert-error {
-          background-color: #f2dede;
-          border-color: #ebcccc;
-          color: #a94442;
+
+      div.flash_notifications div.alert button.close {
+          display: none;
       }
 
       a.entity_link {

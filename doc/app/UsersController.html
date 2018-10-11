@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -103,6 +104,8 @@
     <li ><a href="#method-i-sendmail">#sendmail</a>
     
     <li ><a href="#method-i-show">#show</a>
+    
+    <li ><a href="#method-i-unsubscribe">#unsubscribe</a>
     
     <li ><a href="#method-i-update">#update</a>
     
@@ -201,7 +204,7 @@
   <span class="ruby-identifier">label</span> = (<span class="ruby-identifier">params</span>[<span class="ruby-value">:result_type</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;recipe&#39;</span>).<span class="ruby-identifier">pluralize</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">current_user_or_guest_id</span>
     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-node">&quot;My #{label}&quot;</span>
-    <span class="ruby-ivar">@empty_msg</span> = <span class="ruby-string">&#39;Nothing here yet. Click the Suggest button above to get some ideas.&#39;</span>.<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-ivar">@empty_msg</span> = <span class="ruby-node">&quot;Nothing here yet. Why not install the #{view_context.link_to_submit &#39;Cookmark Button&#39;, &#39;/cookmark.json&#39;, :mode =&gt; :modal} and go get some?&quot;</span>.<span class="ruby-identifier">html_safe</span>
     <span class="ruby-ivar">@active_menu</span> = <span class="ruby-value">:collections</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">title</span> = <span class="ruby-node">&quot;#{response_service.user.handle}&#39;s #{label}&quot;</span>
@@ -749,7 +752,7 @@ user&#39;s set of friends</p>
 
           
           <div class="method-source-code" id="sendmail-source">
-            <pre><span class="ruby-comment"># File app/controllers/users_controller.rb, line 197</span>
+            <pre><span class="ruby-comment"># File app/controllers/users_controller.rb, line 213</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sendmail</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">update_and_decorate</span>
     <span class="ruby-keyword">case</span> <span class="ruby-identifier">request</span>.<span class="ruby-identifier">method</span>
@@ -816,6 +819,50 @@ user&#39;s set of friends</p>
       </div>
 
     
+      <div id="method-i-unsubscribe" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">unsubscribe</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Turn off newsletter subscription</p>
+          
+          
+
+          
+          <div class="method-source-code" id="unsubscribe-source">
+            <pre><span class="ruby-comment"># File app/controllers/users_controller.rb, line 181</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">unsubscribe</span>
+  <span class="ruby-identifier">user_id</span> = <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">message_verifier</span>(<span class="ruby-value">:unsubscribe</span>).<span class="ruby-identifier">verify</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]
+  <span class="ruby-ivar">@user</span> = <span class="ruby-constant">User</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">user_id</span>
+  <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">subscribed</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>] <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-value">:subscribed</span>] <span class="ruby-operator">==</span> <span class="ruby-string">&#39;true&#39;</span>)
+  <span class="ruby-identifier">update_and_decorate</span> <span class="ruby-ivar">@user</span>
+  <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">save</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-ivar">@user</span>.<span class="ruby-identifier">subscribed</span>
+    <span class="ruby-identifier">respond_to</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">format</span><span class="ruby-operator">|</span>
+      <span class="ruby-identifier">format</span>.<span class="ruby-identifier">json</span> { <span class="ruby-identifier">render</span> <span class="ruby-identifier">json</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">done</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>, <span class="ruby-identifier">popup</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Unsubscribe Reversed. Thanks for Reading!&#39;</span> } }
+    <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">smartrender</span> <span class="ruby-comment"># render :controller =&gt; :pages, :action =&gt; :home</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-update" class="method-detail ">
         
         <div class="method-heading">
@@ -835,7 +882,7 @@ user&#39;s set of friends</p>
 
           
           <div class="method-source-code" id="update-source">
-            <pre><span class="ruby-comment"># File app/controllers/users_controller.rb, line 180</span>
+            <pre><span class="ruby-comment"># File app/controllers/users_controller.rb, line 196</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">update</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">update_and_decorate</span>
     <span class="ruby-keyword">if</span> <span class="ruby-ivar">@updated</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:form</span>]
@@ -870,7 +917,7 @@ user&#39;s set of friends</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

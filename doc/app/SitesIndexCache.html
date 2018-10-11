@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -68,7 +69,15 @@
   <ul class="link-list">
   
   
-    <li><a class="include" href="EntitiesCache.html">EntitiesCache</a>
+    <li><a class="include" href="ModelSearch.html">ModelSearch</a>
+  
+  
+  
+    <li><a class="include" href="CollectibleSearch.html">CollectibleSearch</a>
+  
+  
+  
+    <li><a class="include" href="TaggableSearch.html">TaggableSearch</a>
   
   
   </ul>
@@ -87,7 +96,9 @@
     
     <li ><a href="#method-i-itemscope">#itemscope</a>
     
-    <li class="calls-super" ><a href="#method-i-ordereditemscope">#ordereditemscope</a>
+    <li class="calls-super" ><a href="#method-i-orderingscope">#orderingscope</a>
+    
+    <li ><a href="#method-i-supported_org_options">#supported_org_options</a>
     
   </ul>
 </div>
@@ -147,7 +158,7 @@
 
           
           <div class="method-source-code" id="params_needed-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1107</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1462</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">params_needed</span>
   <span class="ruby-keyword">super</span> <span class="ruby-operator">+</span> [<span class="ruby-value">:approved</span>]
 <span class="ruby-keyword">end</span></pre>
@@ -193,12 +204,12 @@
 
           
           <div class="method-source-code" id="approved-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1116</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1475</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">approved</span>
   <span class="ruby-keyword">if</span> <span class="ruby-keyword">defined?</span>(<span class="ruby-ivar">@approved</span>)
     <span class="ruby-keyword">case</span> <span class="ruby-ivar">@approved</span>
       <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;invisible&#39;</span>
-        [ <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span> ]
+        [<span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span>]
       <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;true&#39;</span>
         <span class="ruby-keyword">true</span>
       <span class="ruby-keyword">when</span> <span class="ruby-string">&#39;false&#39;</span>
@@ -239,9 +250,12 @@
 
           
           <div class="method-source-code" id="itemscope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1133</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1492</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">itemscope</span>
-  <span class="ruby-ivar">@itemscope</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">Site</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">approved</span><span class="ruby-operator">:</span> <span class="ruby-identifier">approved</span>)
+  <span class="ruby-ivar">@itemscope</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">Site</span>.
+      <span class="ruby-identifier">including_user_pointer</span>(<span class="ruby-ivar">@viewerid</span>).
+      <span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>, <span class="ruby-value">:thumbnail</span>, <span class="ruby-value">:approved_feeds</span>, <span class="ruby-value">:recipes</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:page_ref</span>], <span class="ruby-value">:referent</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-value">:canonical_expression</span>]).
+      <span class="ruby-identifier">where</span>(<span class="ruby-identifier">approved</span><span class="ruby-operator">:</span> <span class="ruby-identifier">approved</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -253,11 +267,11 @@
       </div>
 
     
-      <div id="method-i-ordereditemscope" class="method-detail ">
+      <div id="method-i-orderingscope" class="method-detail ">
         
         <div class="method-heading">
-          <span class="method-name">ordereditemscope</span><span
-            class="method-args">()</span>
+          <span class="method-name">orderingscope</span><span
+            class="method-args">(iscope=itemscope)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -271,23 +285,58 @@
           
             <div class="method-calls-super">
               Calls superclass method
-              <a href="EntitiesCache.html#method-i-ordereditemscope">EntitiesCache#ordereditemscope</a>
+              <a href="CollectibleSearch.html#method-i-orderingscope">CollectibleSearch#orderingscope</a>
             </div>
           
 
           
-          <div class="method-source-code" id="ordereditemscope-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1137</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">ordereditemscope</span>
+          <div class="method-source-code" id="orderingscope-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1499</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">orderingscope</span> <span class="ruby-identifier">iscope</span>=<span class="ruby-identifier">itemscope</span>
   <span class="ruby-comment"># Use the org parameter and the ASC/DESC attribute to assert an ordering</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">org</span>
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">org</span> <span class="ruby-comment"># Blithely assuming a singular itemscope</span>
     <span class="ruby-keyword">when</span> <span class="ruby-value">:referent_id</span>
     <span class="ruby-keyword">when</span> <span class="ruby-value">:recipe_count</span>
     <span class="ruby-keyword">when</span> <span class="ruby-value">:feed_count</span>
     <span class="ruby-keyword">when</span> <span class="ruby-value">:definition_count</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">uniqueitemscope</span>.<span class="ruby-identifier">order</span>(<span class="ruby-string">%q{&quot;sites&quot;.&quot;referent_id&quot; DESC}</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:approved</span>
+      [ <span class="ruby-identifier">iscope</span>, (<span class="ruby-identifier">admin_view</span> <span class="ruby-operator">?</span> <span class="ruby-string">&#39;&quot;sites&quot;.&quot;approved&quot;&#39;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&quot;sites&quot;.&quot;id&quot;&#39;</span>) ]
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:newest</span>
+      [ <span class="ruby-identifier">iscope</span>, <span class="ruby-string">&#39;&quot;sites&quot;.&quot;created_at&quot;&#39;</span> ]
   <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-supported_org_options" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">supported_org_options</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="supported_org_options-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 1466</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">supported_org_options</span>
+  [ <span class="ruby-value">:newest</span>, <span class="ruby-value">:viewed</span>, (<span class="ruby-value">:approved</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">admin_view</span>) ]
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -307,7 +356,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

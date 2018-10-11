@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -96,6 +97,8 @@
     
     <li ><a href="#method-i-host_url">#host_url</a>
     
+    <li ><a href="#method-i-indexing_url">#indexing_url</a>
+    
     <li ><a href="#method-i-ingreds">#ingreds</a>
     
     <li ><a href="#method-i-labelled_quantity">#labelled_quantity</a>
@@ -119,6 +122,8 @@
     <li ><a href="#method-i-rp_url">#rp_url</a>
     
     <li ><a href="#method-i-safe_parse">#safe_parse</a>
+    
+    <li ><a href="#method-i-safe_uri_join">#safe_uri_join</a>
     
     <li ><a href="#method-i-sanitize_url">#sanitize_url</a>
     
@@ -229,7 +234,7 @@ be specified to modify the query</p>
 
           
           <div class="method-source-code" id="analyze_request-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 250</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 263</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">analyze_request</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">imposed_query</span>={}
   <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">url</span>)
   <span class="ruby-identifier">qparams</span> = (<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span>.<span class="ruby-identifier">blank?</span> <span class="ruby-operator">?</span> { } <span class="ruby-operator">:</span> <span class="ruby-constant">CGI</span><span class="ruby-operator">::</span><span class="ruby-identifier">parse</span>(<span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span>))
@@ -267,7 +272,7 @@ format may also be asserted</p>
 
           
           <div class="method-source-code" id="assert_query-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 211</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 224</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">assert_query</span> <span class="ruby-identifier">url</span>, <span class="ruby-identifier">format</span>=<span class="ruby-keyword">nil</span>, <span class="ruby-identifier">newparams</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">format</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Hash</span>
     <span class="ruby-identifier">newparams</span>, <span class="ruby-identifier">format</span> = <span class="ruby-identifier">format</span>, <span class="ruby-keyword">nil</span>
@@ -323,7 +328,7 @@ I.E., IT IS LIKELY TO PRODUCE A DIFFERENT QUERY STRING</p>
 
           
           <div class="method-source-code" id="build_query-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 202</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 215</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">build_query</span>(<span class="ruby-identifier">params</span>)
   <span class="ruby-identifier">params</span>.<span class="ruby-identifier">map</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">name</span>,<span class="ruby-identifier">values</span><span class="ruby-operator">|</span>
     <span class="ruby-identifier">values</span>.<span class="ruby-identifier">map</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">value</span><span class="ruby-operator">|</span>
@@ -364,7 +369,7 @@ jibit.com/a</p>
 
           
           <div class="method-source-code" id="cleanpath-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 138</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 151</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">cleanpath</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">uri</span> = <span class="ruby-identifier">safe_parse</span>(<span class="ruby-identifier">sanitize_url</span> <span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>.<span class="ruby-identifier">present?</span>
     <span class="ruby-identifier">path</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\/$/</span>,<span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^\//</span>, <span class="ruby-string">&#39;&#39;</span>) <span class="ruby-comment"># Remove trailing slash from normalized form</span>
@@ -569,7 +574,7 @@ class or its ancestors</p>
 
           
           <div class="method-source-code" id="fix_fragment-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 73</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 86</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">fix_fragment</span> <span class="ruby-identifier">url</span>
   <span class="ruby-identifier">spl</span> = <span class="ruby-identifier">url</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;#&#39;</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">spl</span>.<span class="ruby-identifier">size</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>
@@ -608,10 +613,10 @@ class or its ancestors</p>
 
           
           <div class="method-source-code" id="header_result-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 30</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 31</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">header_result</span>(<span class="ruby-identifier">link</span>, <span class="ruby-identifier">resource</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">begin</span>
-    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">resource</span> <span class="ruby-operator">?</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>(<span class="ruby-identifier">link</span>, <span class="ruby-identifier">resource</span>) <span class="ruby-operator">:</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">link</span>)
+    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">resource</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">safe_uri_join</span>(<span class="ruby-identifier">link</span>, <span class="ruby-identifier">resource</span>) <span class="ruby-operator">:</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">link</span>)
     <span class="ruby-comment"># Reject it right off the bat if the url isn&#39;t valid</span>
     <span class="ruby-keyword">return</span> <span class="ruby-value">400</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">host</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">port</span>
 
@@ -694,12 +699,53 @@ class or its ancestors</p>
 
           
           <div class="method-source-code" id="host_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 124</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">host_url</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">uri</span> = <span class="ruby-identifier">safe_parse</span>(<span class="ruby-identifier">sanitize_url</span> <span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>.<span class="ruby-identifier">blank?</span>
     <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span> = <span class="ruby-string">&#39;&#39;</span>
     <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">query</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">fragment</span> = <span class="ruby-keyword">nil</span>
     <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">normalize</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\/$/</span>,<span class="ruby-string">&#39;&#39;</span>) <span class="ruby-comment"># Remove trailing slash from normalized form</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-indexing_url" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">indexing_url</span><span
+            class="method-args">(url)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>This is the version of a url used in indexing PageRefs: no target, no lone
+slash for a path</p>
+          
+          
+
+          
+          <div class="method-source-code" id="indexing_url-source">
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 74</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">indexing_url</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-identifier">url</span>.<span class="ruby-identifier">sub!</span> <span class="ruby-node">/\#[^#]*$/</span>, <span class="ruby-string">&#39;&#39;</span> <span class="ruby-comment"># Elide the fragment for purposes of finding</span>
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">url</span>
+    <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span> = <span class="ruby-string">&#39;&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;/&#39;</span>
+    <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
+  <span class="ruby-keyword">rescue</span>
+    <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -884,7 +930,7 @@ class or its ancestors</p>
 
           
           <div class="method-source-code" id="normalize_and_test_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 176</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 189</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize_and_test_url</span>(<span class="ruby-identifier">url</span>, <span class="ruby-identifier">href</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">normalized</span> = <span class="ruby-identifier">normalize_url</span>(<span class="ruby-identifier">url</span>)
   <span class="ruby-identifier">test_url</span> <span class="ruby-identifier">normalized</span>, <span class="ruby-identifier">href</span>
@@ -918,7 +964,7 @@ class or its ancestors</p>
 
           
           <div class="method-source-code" id="normalize_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 104</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 117</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize_url</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">uri</span> = <span class="ruby-identifier">normalized_uri</span>(<span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span>.<span class="ruby-identifier">present?</span>
     <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>
@@ -957,7 +1003,7 @@ href="http://ganga.com">ganga.com</a>&#39;, true -&gt;
 
           
           <div class="method-source-code" id="normalize_urls-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 114</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 127</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">normalize_urls</span> <span class="ruby-identifier">url_or_urls</span>, <span class="ruby-identifier">strip_protocol</span>=<span class="ruby-keyword">false</span>
   (<span class="ruby-identifier">url_or_urls</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Array</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">url_or_urls</span> <span class="ruby-operator">:</span> [<span class="ruby-identifier">url_or_urls</span>]).<span class="ruby-identifier">map</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
     <span class="ruby-keyword">if</span> (<span class="ruby-identifier">norm</span> = <span class="ruby-identifier">normalize_url</span>(<span class="ruby-identifier">url</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">strip_protocol</span>
@@ -995,7 +1041,7 @@ href="http://ganga.com">ganga.com</a>&#39;, true -&gt;
 
           
           <div class="method-source-code" id="normalized_uri-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 97</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 110</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">normalized_uri</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">present?</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">sp</span> = <span class="ruby-identifier">sanitize_url</span> <span class="ruby-identifier">url</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">uri</span> = <span class="ruby-identifier">safe_parse</span>(<span class="ruby-identifier">sp</span>))
     <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">normalize!</span>
@@ -1065,7 +1111,7 @@ keys; should be supplying a subhash for nested keys</p>
 
           
           <div class="method-source-code" id="query_to_hash-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 238</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 251</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">query_to_hash</span> <span class="ruby-identifier">qstr</span>
   <span class="ruby-identifier">result</span> = {}
   <span class="ruby-identifier">qstr</span>.<span class="ruby-identifier">split</span>(<span class="ruby-string">&#39;&amp;&#39;</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">assign</span><span class="ruby-operator">|</span>
@@ -1143,7 +1189,7 @@ keys; should be supplying a subhash for nested keys</p>
 
           
           <div class="method-source-code" id="safe_parse-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 50</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 51</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">safe_parse</span>(<span class="ruby-identifier">url</span>)
   <span class="ruby-keyword">begin</span>
     <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">url</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">URI</span>.<span class="ruby-identifier">parse</span>(<span class="ruby-identifier">url</span>)
@@ -1175,6 +1221,41 @@ keys; should be supplying a subhash for nested keys</p>
       </div>
 
     
+      <div id="method-i-safe_uri_join" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">safe_uri_join</span><span
+            class="method-args">(base, path)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Wrapper on URI.join which escapes the path if need be</p>
+          
+          
+
+          
+          <div class="method-source-code" id="safe_uri_join-source">
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 272</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">safe_uri_join</span> <span class="ruby-identifier">base</span>, <span class="ruby-identifier">path</span>
+  <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span> <span class="ruby-identifier">base</span>, <span class="ruby-identifier">path</span>
+<span class="ruby-keyword">rescue</span>
+  <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span> <span class="ruby-identifier">base</span>, <span class="ruby-constant">URI</span>.<span class="ruby-identifier">escape</span>(<span class="ruby-identifier">path</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-sanitize_url" class="method-detail ">
         
         <div class="method-heading">
@@ -1194,9 +1275,9 @@ keys; should be supplying a subhash for nested keys</p>
 
           
           <div class="method-source-code" id="sanitize_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 84</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 97</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sanitize_url</span> <span class="ruby-identifier">url</span>
-  <span class="ruby-constant">URI</span>.<span class="ruby-identifier">encode</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\%23/</span>, <span class="ruby-string">&#39;#&#39;</span> ).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\%25/</span>, <span class="ruby-string">&#39;%&#39;</span> )
+  <span class="ruby-constant">URI</span>.<span class="ruby-identifier">encode</span>(<span class="ruby-identifier">url</span>).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\%23/</span>, <span class="ruby-string">&#39;#&#39;</span> ).<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/\%25/</span>, <span class="ruby-string">&#39;%&#39;</span> ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>
 
 <span class="ruby-comment">  url.strip.
       gsub(/\{/, &#39;%7B&#39;).
@@ -1358,16 +1439,16 @@ STRS ARE EMPTY</p>
 
         <div class="method-description">
           
-          <p>string -&gt; Array of strings Turn a url into a set of strings, each
-beginning with the host domain, with one string for every subpath of the
-original url. The purpose is to enable searching sites by subpath Examples:
-(see also test/uri_utils_test.rb)</p>
+          <p>string -&gt; <a href="Array.html">Array</a> of strings Turn a url into a
+set of strings, each beginning with the host domain, with one string for
+every subpath of the original url. The purpose is to enable searching sites
+by subpath Examples: (see also test/uri_utils_test.rb)</p>
           
           
 
           
           <div class="method-source-code" id="subpaths-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 151</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 164</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">subpaths</span> <span class="ruby-identifier">url</span>
   <span class="ruby-keyword">return</span> [] <span class="ruby-keyword">if</span> <span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">path</span> = <span class="ruby-identifier">cleanpath</span>(<span class="ruby-identifier">url</span>)
@@ -1412,7 +1493,7 @@ valid as specified</p>
 
           
           <div class="method-source-code" id="test_link-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 186</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 199</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">test_link</span>(<span class="ruby-identifier">link</span>, <span class="ruby-identifier">resource</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-comment"># If the result method can&#39;t make sense of the link, then give up</span>
   <span class="ruby-keyword">return</span> <span class="ruby-keyword">false</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">result_code</span> = <span class="ruby-identifier">header_result</span>(<span class="ruby-identifier">link</span>, <span class="ruby-identifier">resource</span>)
@@ -1456,7 +1537,7 @@ secondary href.</p>
 
           
           <div class="method-source-code" id="test_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 163</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 176</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">test_url</span> <span class="ruby-identifier">normalized</span>, <span class="ruby-identifier">href</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">insecure</span> = <span class="ruby-identifier">normalized</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/^https:/</span>, <span class="ruby-string">&#39;http:&#39;</span>
   <span class="ruby-identifier">secure</span> = <span class="ruby-identifier">insecure</span>.<span class="ruby-identifier">sub</span> <span class="ruby-regexp">/^http:/</span>, <span class="ruby-string">&#39;https:&#39;</span>
@@ -1521,7 +1602,7 @@ secondary href.</p>
         
         <div class="method-heading">
           <span class="method-name">valid_url</span><span
-            class="method-args">(path, url)</span>
+            class="method-args">(path, url, strong=true)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -1530,22 +1611,23 @@ secondary href.</p>
 
         <div class="method-description">
           
-          <p>Try to make sense out of a given path in the context of another url. Return
-either a valid URL or nil</p>
+          <p>Try to make sense out of a given path in the context of another url. If
+strong is true, ping the server to test the path Return either a valid URL
+or nil</p>
           
           
 
           
           <div class="method-source-code" id="valid_url-source">
-            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 14</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">valid_url</span> <span class="ruby-identifier">path</span>, <span class="ruby-identifier">url</span>
+            <pre><span class="ruby-comment"># File lib/uri_utils.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">valid_url</span> <span class="ruby-identifier">path</span>, <span class="ruby-identifier">url</span>, <span class="ruby-identifier">strong</span>=<span class="ruby-keyword">true</span>
   <span class="ruby-identifier">path</span> <span class="ruby-operator">||=</span> <span class="ruby-string">&quot;&quot;</span>  <span class="ruby-comment"># Could happen</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">validate_link</span>(<span class="ruby-identifier">path</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">good</span> = <span class="ruby-identifier">test_link</span>(<span class="ruby-identifier">path</span>) <span class="ruby-comment"># either the original URL or a replacement are good</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">validate_link</span>(<span class="ruby-identifier">path</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">good</span> = <span class="ruby-identifier">strong</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">test_link</span>(<span class="ruby-identifier">path</span>) <span class="ruby-operator">:</span> <span class="ruby-identifier">path</span>) <span class="ruby-comment"># either the original URL or a replacement are good</span>
     <span class="ruby-keyword">return</span> (<span class="ruby-identifier">good</span>.<span class="ruby-identifier">class</span> <span class="ruby-operator">==</span> <span class="ruby-constant">String</span>) <span class="ruby-operator">?</span> <span class="ruby-identifier">good</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">path</span>
   <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">url</span>
     <span class="ruby-comment"># The path may be relative. In fact, it may have backup characters</span>
     <span class="ruby-keyword">begin</span>
-      <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>.<span class="ruby-identifier">join</span>( <span class="ruby-identifier">url</span>, <span class="ruby-identifier">path</span> ).<span class="ruby-identifier">to_s</span>
+      <span class="ruby-identifier">uri</span> = <span class="ruby-identifier">safe_uri_join</span>( <span class="ruby-identifier">url</span>, <span class="ruby-identifier">path</span> ).<span class="ruby-identifier">to_s</span>
       <span class="ruby-identifier">uri</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">validate_link</span>(<span class="ruby-identifier">uri</span>)
     <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
       <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span>
@@ -1606,7 +1688,7 @@ either a valid URL or nil</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -103,7 +104,7 @@
         
         <div class="method-heading">
           <span class="method-name">token_input_query</span><span
-            class="method-args">(opt_param={})</span>
+            class="method-args">(options={})</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -119,58 +120,59 @@
           
           <div class="method-source-code" id="token_input_query-source">
             <pre><span class="ruby-comment"># File app/helpers/query_helper.rb, line 4</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">token_input_query</span> <span class="ruby-identifier">opt_param</span>={}
-  <span class="ruby-identifier">options</span> = <span class="ruby-identifier">opt_param</span>.<span class="ruby-identifier">dup</span>
-  <span class="ruby-identifier">data</span> = <span class="ruby-identifier">options</span>.<span class="ruby-identifier">slice</span> <span class="ruby-value">:hint</span>, <span class="ruby-value">:placeholder</span>, <span class="ruby-value">:&#39;no-results-text&#39;</span>, <span class="ruby-value">:&quot;min-chars&quot;</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">token_input_query</span> <span class="ruby-identifier">options</span>={}
+<span class="ruby-comment">    data = options.slice :hint, :placeholder, :&#39;no-results-text&#39;, :&#39;min-chars&#39;
 
-  <span class="ruby-comment"># Assert defaults for data fields</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:hint</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;Narrow down the list&#39;</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:placeholder</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;Seek and ye shall find...&#39;</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:&#39;min-chars&#39;</span>] <span class="ruby-operator">||=</span> <span class="ruby-value">2</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:&#39;no-results-text&#39;</span>] <span class="ruby-operator">||=</span> <span class="ruby-string">&#39;No matching tag found; hit Enter to search with text&#39;</span>
-  <span class="ruby-comment"># JS for how to invoke the search on tag completion:</span>
-  <span class="ruby-comment"># querify (tagger.js) for standard tag handling;</span>
-  <span class="ruby-comment"># submit (tagger.js) for results enclosures (which maintain and accumulate query data)</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:&#39;on-add&#39;</span>] = <span class="ruby-identifier">options</span>[<span class="ruby-value">:handler</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;submit&#39;</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:&#39;on-delete&#39;</span>] = <span class="ruby-identifier">options</span>[<span class="ruby-value">:handler</span>] <span class="ruby-operator">||</span> <span class="ruby-string">&#39;submit&#39;</span>
+    # Assert defaults for data fields
+    data[:hint] ||= &#39;Narrow down the list&#39;
+    data[:placeholder] ||= &#39;Seek and ye shall find...&#39;
+    data[:&#39;min-chars&#39;] ||= 2
+    data[:&#39;no-results-text&#39;] ||= &#39;No matching tag found; hit Enter to search with text&#39;
+    # JS for how to invoke the search on tag completion:
+    # querify (tagger.js) for standard tag handling;
+    # submit (tagger.js) for results enclosures (which maintain and accumulate query data)
+    data[:&#39;on-add&#39;] = options[:handler] || &#39;submit&#39;
+    data[:&#39;on-delete&#39;] = options[:handler] || &#39;submit&#39;
 
-  <span class="ruby-comment"># Set up the tokeninput data</span>
-  <span class="ruby-identifier">querytags</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:querytags</span>] <span class="ruby-operator">||</span> []
-  <span class="ruby-identifier">tagtype</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:tagtype</span>]
+    # Set up the tokeninput data
+    querytags = options[:querytags] || []
+    tagtype = options[:tagtype]
 
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:query</span>] = <span class="ruby-node">&quot;tagtype=#{tagtype}&quot;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagtype</span>
-  <span class="ruby-identifier">data</span>[<span class="ruby-value">:pre</span>] = <span class="ruby-identifier">querytags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> {<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">id</span>, <span class="ruby-identifier">name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span>} }.<span class="ruby-identifier">to_json</span>
-  <span class="ruby-identifier">options</span>[<span class="ruby-value">:onload</span>] = <span class="ruby-string">&#39;RP.tagger.onload(event);&#39;</span>
-  <span class="ruby-identifier">options</span>[<span class="ruby-value">:class</span>] = <span class="ruby-node">&quot;token-input-field-pending #{options[:class]}&quot;</span> <span class="ruby-comment"># The token-input-field-pending class triggers tokenInput</span>
+    data[:query] = &quot;tagtype=#{tagtype}&quot; if tagtype
+    data[:pre] = querytags.collect { |tag| {id: tag.id, name: tag.name} }.to_json
+    options[:onload] = &#39;RP.tagger.onload(event);&#39;
+    options[:class] = &quot;token-input-field-pending #{options[:class]}&quot; # The token-input-field-pending class triggers tokenInput
 
-  <span class="ruby-identifier">options</span>[<span class="ruby-value">:rows</span>] <span class="ruby-operator">||=</span> <span class="ruby-value">1</span>
-  <span class="ruby-identifier">options</span>[<span class="ruby-value">:autofocus</span>] = <span class="ruby-keyword">true</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:autofocus</span>] <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span>
-  <span class="ruby-identifier">qt</span> = <span class="ruby-identifier">text_field_tag</span> <span class="ruby-string">&#39;querytags&#39;</span>,
-                      <span class="ruby-identifier">querytags</span>.<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:id</span>).<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;,&#39;</span>),
-                      <span class="ruby-identifier">options</span>.<span class="ruby-identifier">except</span>(<span class="ruby-value">:handler</span>, <span class="ruby-value">:querytags</span>, <span class="ruby-value">:tagtype</span>, <span class="ruby-value">:type_selector</span>).<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">data</span><span class="ruby-operator">:</span> <span class="ruby-identifier">data</span>)
-  <span class="ruby-identifier">qt</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
-                    <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;glyphicon glyphicon-#{options[:glyphicon]}&quot;</span>),
-                    <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;search-glyph&#39;</span>
-  ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:glyphicon</span>]
+    options[:rows] ||= 1
+    options[:autofocus] = true unless options[:autofocus] == false
+    qt = text_field_tag &#39;querytags&#39;,
+                        querytags.map(&amp;:id).join(&#39;,&#39;),
+                        options.except(:handler, :querytags, :tagtype, :type_selector).merge(data: data)
+</span>    <span class="ruby-identifier">qt</span> = <span class="ruby-identifier">token_input_tag</span> <span class="ruby-string">&#39;querytags&#39;</span>, (<span class="ruby-identifier">options</span>[<span class="ruby-value">:querytags</span>] <span class="ruby-operator">||</span> []), <span class="ruby-identifier">options</span>.<span class="ruby-identifier">except</span>(<span class="ruby-value">:type_selector</span>, <span class="ruby-value">:glyphicon</span>, <span class="ruby-value">:batch_select</span>, <span class="ruby-value">:batch</span>, <span class="ruby-value">:querytags</span>)
+    <span class="ruby-identifier">qt</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>,
+                      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:span</span>, <span class="ruby-string">&#39;&#39;</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;glyphicon glyphicon-#{options[:glyphicon]}&quot;</span>),
+                      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;search-glyph&#39;</span>
+    ) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:glyphicon</span>]
 
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:type_selector</span>]
-    <span class="ruby-identifier">type_select</span> = <span class="ruby-string">&#39;Show tags of type&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
-        <span class="ruby-identifier">select_tag</span>(<span class="ruby-value">:tagtype</span>,
-                   <span class="ruby-identifier">options_from_collection_for_select</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>(<span class="ruby-keyword">true</span>, <span class="ruby-keyword">true</span>), <span class="ruby-value">:last</span>, <span class="ruby-value">:first</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:tagtype</span>]) <span class="ruby-operator">||</span> <span class="ruby-value">0</span>,
-                   <span class="ruby-value">:include_blank</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>,
-                   <span class="ruby-value">:onchange</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RP.tagger.select_type(event);&#39;</span>)  <span class="ruby-comment"># RP.submit.onselect( event );&#39;) +</span>
-    <span class="ruby-identifier">batch_select</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:batch_select</span>] <span class="ruby-operator">?</span> (<span class="ruby-string">&#39;  ...from batch #&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
-        <span class="ruby-identifier">select_tag</span>(<span class="ruby-value">:batch</span>, <span class="ruby-identifier">options_for_select</span>((<span class="ruby-value">1</span><span class="ruby-operator">..</span>(<span class="ruby-identifier">options</span>[<span class="ruby-value">:batch_select</span>].<span class="ruby-identifier">to_i</span>)).<span class="ruby-identifier">to_a</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:batch</span>]),
-                   <span class="ruby-value">:include_blank</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>,
-                   <span class="ruby-value">:onchange</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RP.tagger.select_batch( event );&#39;</span>)) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:type_selector</span>]
+      <span class="ruby-identifier">type_select</span> = <span class="ruby-string">&#39;Show&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+          <span class="ruby-identifier">select_tag</span>(<span class="ruby-value">:tagtype</span>,
+                     <span class="ruby-identifier">options_from_collection_for_select</span>(<span class="ruby-constant">Tag</span>.<span class="ruby-identifier">type_selections</span>(<span class="ruby-keyword">true</span>, <span class="ruby-keyword">true</span>), <span class="ruby-value">:last</span>, <span class="ruby-value">:first</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:tagtype</span>]) <span class="ruby-operator">||</span> <span class="ruby-value">0</span>,
+                     <span class="ruby-value">:include_blank</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>,
+                     <span class="ruby-value">:onchange</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RP.tagger.select_type(event);&#39;</span>) <span class="ruby-operator">+</span>
+          <span class="ruby-string">&#39;&amp;nbsp;Names&#39;</span>.<span class="ruby-identifier">html_safe</span>
+      <span class="ruby-identifier">batch_select</span> = <span class="ruby-identifier">options</span>[<span class="ruby-value">:batch_select</span>] <span class="ruby-operator">?</span> (<span class="ruby-string">&#39;  ...from batch #&amp;nbsp;&#39;</span>.<span class="ruby-identifier">html_safe</span> <span class="ruby-operator">+</span>
+          <span class="ruby-identifier">select_tag</span>(<span class="ruby-value">:batch</span>, <span class="ruby-identifier">options_for_select</span>((<span class="ruby-value">1</span><span class="ruby-operator">..</span>(<span class="ruby-identifier">options</span>[<span class="ruby-value">:batch_select</span>].<span class="ruby-identifier">to_i</span>)).<span class="ruby-identifier">to_a</span>, <span class="ruby-identifier">options</span>[<span class="ruby-value">:batch</span>]),
+                     <span class="ruby-value">:include_blank</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">true</span>,
+                     <span class="ruby-value">:onchange</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-string">&#39;RP.tagger.select_batch( event );&#39;</span>)) <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
 
-    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">type_select</span><span class="ruby-operator">+</span><span class="ruby-identifier">batch_select</span>,
-            <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;display:inline-block; vertical-align:bottom; margin:5px 10px&#39;</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
-  <span class="ruby-keyword">end</span> <span class="ruby-operator">+</span>
-      <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">qt</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;token-input-elmt&#39;</span>)
-<span class="ruby-keyword">end</span></pre>
+      <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">type_select</span><span class="ruby-operator">+</span><span class="ruby-identifier">batch_select</span>,
+                  <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;display:inline-block; vertical-align:bottom; margin:5px 10px&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>
+    <span class="ruby-keyword">end</span> <span class="ruby-operator">+</span>
+        <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">qt</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;token-input-elmt&#39;</span>)
+  <span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -189,7 +191,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

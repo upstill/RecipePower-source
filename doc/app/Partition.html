@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -58,7 +59,7 @@
   <h3>Parent</h3>
 
   
-  <p class="link">Array
+  <p class="link"><a href="Array.html">Array</a>
   
 </div>
 
@@ -73,6 +74,8 @@
     <li class="calls-super" ><a href="#method-c-new">::new</a>
     
     <li ><a href="#method-i-clip">#clip</a>
+    
+    <li ><a href="#method-i-done-21">#done!</a>
     
     <li ><a href="#method-i-done-3F">#done?</a>
     
@@ -178,7 +181,7 @@ denoting the boundaries of groups for streaming.</p>
         
         <div class="method-heading">
           <span class="method-name">new</span><span
-            class="method-args">(range, mws=5)</span>
+            class="method-args">(range, mws=max_window_size)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -198,8 +201,8 @@ denoting the boundaries of groups for streaming.</p>
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 55</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">range</span>, <span class="ruby-identifier">mws</span>=<span class="ruby-value">5</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 112</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">initialize</span> <span class="ruby-identifier">range</span>, <span class="ruby-identifier">mws</span>=<span class="ruby-identifier">max_window_size</span>
   <span class="ruby-keyword">super</span> <span class="ruby-identifier">range</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">max_window_size</span> = <span class="ruby-identifier">mws</span>
 <span class="ruby-keyword">end</span></pre>
@@ -240,13 +243,50 @@ denoting the boundaries of groups for streaming.</p>
 
           
           <div class="method-source-code" id="clip-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 75</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 132</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">clip</span> <span class="ruby-identifier">v</span>, <span class="ruby-identifier">range</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">range</span> <span class="ruby-operator">||=</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">0</span>]<span class="ruby-operator">..</span><span class="ruby-keyword">self</span>[<span class="ruby-value">-1</span>]
     <span class="ruby-keyword">return</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">min</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">v</span> <span class="ruby-operator">&lt;</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">min</span>
     <span class="ruby-keyword">return</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">max</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">v</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">max</span>
     <span class="ruby-identifier">v</span>
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-done-21" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">done!</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="done-21-source">
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 164</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">done!</span>
+  <span class="ruby-keyword">while</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">-1</span>] <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">cur_position</span>
+    <span class="ruby-keyword">self</span>.<span class="ruby-identifier">pop</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">self</span>.<span class="ruby-identifier">push</span> <span class="ruby-identifier">cur_position</span>
+  <span class="ruby-identifier">window</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">window</span>.<span class="ruby-identifier">min</span><span class="ruby-operator">..</span><span class="ruby-identifier">cur_position</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -277,8 +317,8 @@ denoting the boundaries of groups for streaming.</p>
 
           
           <div class="method-source-code" id="done-3F-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 107</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">done?</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 172</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">done?</span> <span class="ruby-comment"># public</span>
   <span class="ruby-identifier">cur_position</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-identifier">window</span>.<span class="ruby-identifier">max</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -311,7 +351,7 @@ optionally incrementing the current position</p>
 
           
           <div class="method-source-code" id="next_index-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 113</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 178</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">next_index</span> <span class="ruby-identifier">hold</span>=<span class="ruby-keyword">false</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">cur_position</span> <span class="ruby-operator">&lt;</span> <span class="ruby-identifier">window</span>.<span class="ruby-identifier">max</span>
     <span class="ruby-identifier">this_position</span> = <span class="ruby-identifier">cur_position</span>
@@ -349,7 +389,7 @@ we&#39;ve passed the window</p>
 
           
           <div class="method-source-code" id="next_range-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 69</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 126</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">next_range</span>
   <span class="ruby-identifier">range</span> = <span class="ruby-identifier">valid_range</span> <span class="ruby-identifier">cur_position</span><span class="ruby-operator">..</span>(<span class="ruby-identifier">cur_position</span><span class="ruby-operator">+</span><span class="ruby-identifier">max_window_size</span>)
   <span class="ruby-identifier">range</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">max</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">range</span>.<span class="ruby-identifier">min</span>
@@ -384,9 +424,9 @@ the range</p>
 
           
           <div class="method-source-code" id="partition_of-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 131</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 196</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">partition_of</span> <span class="ruby-identifier">ix</span>
-  (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_index</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">lower_bound</span><span class="ruby-operator">|</span> <span class="ruby-identifier">lower_bound</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">ix</span> } <span class="ruby-operator">-</span> <span class="ruby-value">1</span> ) <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">ix</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">0</span>]) <span class="ruby-keyword">or</span> (<span class="ruby-identifier">ix</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">-1</span>])
+  (<span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_index</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">lower_bound</span><span class="ruby-operator">|</span> <span class="ruby-identifier">lower_bound</span> <span class="ruby-operator">&gt;</span> <span class="ruby-identifier">ix</span> } <span class="ruby-operator">-</span> <span class="ruby-value">1</span>) <span class="ruby-keyword">unless</span> (<span class="ruby-identifier">ix</span> <span class="ruby-operator">&lt;</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">0</span>]) <span class="ruby-keyword">or</span> (<span class="ruby-identifier">ix</span> <span class="ruby-operator">&gt;=</span> <span class="ruby-keyword">self</span>[<span class="ruby-value">-1</span>])
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -418,7 +458,7 @@ partition</p>
 
           
           <div class="method-source-code" id="partition_range-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 122</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 187</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">partition_range</span> <span class="ruby-identifier">ix</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">px</span> = <span class="ruby-identifier">partition_of</span>(<span class="ruby-identifier">ix</span>)
     <span class="ruby-keyword">self</span>[<span class="ruby-identifier">px</span>]<span class="ruby-operator">..</span><span class="ruby-keyword">self</span>[<span class="ruby-identifier">px</span><span class="ruby-operator">+</span><span class="ruby-value">1</span>]
@@ -455,12 +495,12 @@ partition</p>
 
           
           <div class="method-source-code" id="valid_range-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 88</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 145</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">valid_range</span> <span class="ruby-identifier">r</span>
   <span class="ruby-keyword">if</span> (<span class="ruby-identifier">lb</span> = <span class="ruby-identifier">clip</span> <span class="ruby-identifier">r</span>.<span class="ruby-identifier">min</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-comment"># Returns nil if the range is invalid</span>
       (<span class="ruby-identifier">pr</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">partition_range</span> <span class="ruby-identifier">lb</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-comment"># Returns nil if lb is out of range</span>
       (<span class="ruby-identifier">ub</span> = <span class="ruby-identifier">clip</span> <span class="ruby-identifier">r</span>.<span class="ruby-identifier">max</span>, <span class="ruby-identifier">lb</span><span class="ruby-operator">..</span><span class="ruby-identifier">clip</span>(<span class="ruby-identifier">lb</span><span class="ruby-operator">+</span><span class="ruby-identifier">max_window_size</span>, <span class="ruby-identifier">pr</span>))
-    <span class="ruby-identifier">lb</span><span class="ruby-operator">..</span><span class="ruby-identifier">ub</span>
+    <span class="ruby-identifier">lb</span><span class="ruby-operator">..</span><span class="ruby-identifier">ub</span> <span class="ruby-comment"># if ub &gt; lb</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -493,7 +533,7 @@ partition</p>
 
           
           <div class="method-source-code" id="window-3D-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 97</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 154</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">window=</span> <span class="ruby-identifier">r</span>
   <span class="ruby-keyword">self</span>.<span class="ruby-identifier">cur_position</span> = <span class="ruby-identifier">clip</span>(<span class="ruby-identifier">cur_position</span>, <span class="ruby-ivar">@window</span>) <span class="ruby-keyword">if</span> <span class="ruby-ivar">@window</span> = <span class="ruby-identifier">valid_range</span>(<span class="ruby-identifier">r</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -526,7 +566,7 @@ partition</p>
 
           
           <div class="method-source-code" id="windowsize-source">
-            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 60</span>
+            <pre><span class="ruby-comment"># File app/models/results_cache.rb, line 117</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">windowsize</span>
   <span class="ruby-identifier">window</span>.<span class="ruby-identifier">max</span><span class="ruby-operator">-</span><span class="ruby-identifier">window</span>.<span class="ruby-identifier">min</span>
 <span class="ruby-keyword">end</span></pre>
@@ -548,7 +588,7 @@ partition</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -135,7 +136,7 @@
         
         <div class="method-heading">
           <span class="method-name">find_or_create</span><span
-            class="method-args">(params, extractions = nil, klass = Recipe)</span>
+            class="method-args">(params_or_page_ref, extractions = nil, klass=Recipe)</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -144,67 +145,71 @@
 
         <div class="method-description">
           
-          <p>Either fetch an existing recipe record or make a new one, based on the
-params. If the params have an :id, we find on that, otherwise we look for a
-record matching the :url. If there are no params, just return a new recipe
-If a new recipe record needs to be created, we also do QA on the provided
-URL and dig around for a title, description, etc. Either way, we also make
-sure that the recipe is associated with the given user</p>
+          <p>Either fetch an existing object or make a new one, of the given klass,
+based on the params. If the params have an :id, we find on that, otherwise
+we look for a record matching the :url. If there are no params, just return
+a new recipe If a new recipe record needs to be created, we also do QA on
+the provided URL and dig around for a title, description, etc. Either way,
+we also make sure that the recipe is associated with the given user</p>
           
           
 
           
           <div class="method-source-code" id="find_or_create-source">
             <pre><span class="ruby-comment"># File app/services/collectible_services.rb, line 22</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-identifier">params</span>, <span class="ruby-identifier">extractions</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-constant">Recipe</span>
+<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">find_or_create</span> <span class="ruby-identifier">params_or_page_ref</span>, <span class="ruby-identifier">extractions</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">klass</span>=<span class="ruby-constant">Recipe</span>
+  <span class="ruby-identifier">extractions</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">extractions</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Class</span>)
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params_or_page_ref</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Hash</span>)
+    <span class="ruby-identifier">params</span>, <span class="ruby-identifier">page_ref</span> = <span class="ruby-identifier">params_or_page_ref</span>, <span class="ruby-keyword">nil</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">params</span>, <span class="ruby-identifier">page_ref</span> = { <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">params_or_page_ref</span>.<span class="ruby-identifier">url</span> }, <span class="ruby-identifier">params_or_page_ref</span>
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># Recipe (or whatever) exists and we&#39;re just touching it for the user</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">extractions</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Class</span>
     <span class="ruby-identifier">extractions</span>, <span class="ruby-identifier">klass</span> = <span class="ruby-keyword">nil</span>, <span class="ruby-identifier">extractions</span>
   <span class="ruby-keyword">end</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]
-    <span class="ruby-comment"># Recipe (or whatever) exists and we&#39;re just touching it for the user</span>
-    <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>]
-  <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">entity</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>]) 
-    <span class="ruby-comment"># Get findings, either from the extractions, or by looking at the page</span>
-    <span class="ruby-keyword">unless</span> <span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">findings</span>(<span class="ruby-identifier">extractions</span>, <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>])
-      <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">params</span>
-      <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:url</span>] = <span class="ruby-string">&#39;Doesn\t appear to be a working URL: we can\t open it for analysis&#39;</span>
-      <span class="ruby-keyword">return</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>]
+  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>)  <span class="ruby-comment"># Pre-existing =&gt; ignore extractions</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Get findings from the extractions (parameters derived directly from the page)</span>
+  <span class="ruby-keyword">unless</span> <span class="ruby-identifier">findings</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">from_extractions</span>(<span class="ruby-identifier">params</span>, <span class="ruby-identifier">extractions</span>)
+    <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">params</span>
+    <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>[<span class="ruby-value">:url</span>] = <span class="ruby-string">&#39;Doesn\t appear to be a working URL&#39;</span>
+    <span class="ruby-keyword">return</span> <span class="ruby-identifier">entity</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># Construct a valid URL from the given url and the extracted URI or href</span>
+  <span class="ruby-identifier">url</span> = <span class="ruby-identifier">valid_url</span>(<span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;URI&#39;</span>), <span class="ruby-identifier">url</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">valid_url</span>(<span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;href&#39;</span>), <span class="ruby-identifier">url</span>)
+  <span class="ruby-comment"># url = findings.result_for(&#39;URI&#39;) || findings.result_for(&#39;href&#39;) || url</span>
+  <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">url</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">blank?</span>
+    <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
+  <span class="ruby-keyword">elsif</span> (<span class="ruby-identifier">id</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>].<span class="ruby-identifier">to_i</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">id</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-comment"># id of 0 means create a new entity</span>
+    <span class="ruby-keyword">begin</span>
+      <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">id</span>
+    <span class="ruby-keyword">rescue</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+      <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
+      <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:id</span>, <span class="ruby-node">&quot;There is no #{klass.to_s.downcase} number #{params[:id]}&quot;</span>
     <span class="ruby-keyword">end</span>
-    <span class="ruby-comment"># Extractions are parameters derived directly from the page</span>
-    <span class="ruby-identifier">url</span> = <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;URI&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">findings</span>.<span class="ruby-identifier">result_for</span>(<span class="ruby-string">&#39;href&#39;</span>) <span class="ruby-operator">||</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:url</span>]
-    <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span> <span class="ruby-identifier">url</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">blank?</span>
-      <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
-    <span class="ruby-keyword">elsif</span> (<span class="ruby-identifier">id</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:id</span>].<span class="ruby-identifier">to_i</span>) <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">id</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span>) <span class="ruby-comment"># id of 0 means create a new recipe</span>
-      <span class="ruby-keyword">begin</span>
-        <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find</span> <span class="ruby-identifier">id</span>
-      <span class="ruby-keyword">rescue</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-        <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
-        <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:id</span>, <span class="ruby-node">&quot;There is no #{klass.to_s.downcase} number #{params[:id]}&quot;</span>
-      <span class="ruby-keyword">end</span>
-    <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">entity</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>) <span class="ruby-comment"># Try again to find based on the extracted url</span>
-      <span class="ruby-comment"># No id: create based on url</span>
-      <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:rcpref</span>
-      <span class="ruby-comment"># Assigning title and picurl must wait until the url (and hence the reference) is set</span>
-      <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">match</span> <span class="ruby-node">%r{^#{rp_url}}</span> <span class="ruby-comment"># Check we&#39;re not trying to link to a RecipePower page</span>
-        <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:base</span>, <span class="ruby-string">&#39;Sorry, can\t cookmark pages from RecipePower. (Does that even make sense?)&#39;</span>
-      <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Linkable</span>
+  <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>(<span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">find_by_url</span> <span class="ruby-identifier">url</span>) <span class="ruby-comment"># Try again to find based on the extracted url</span>
+    <span class="ruby-comment"># No id: create based on url</span>
+    <span class="ruby-identifier">params</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:rcpref</span>
+    <span class="ruby-comment"># Assigning title and picurl must wait until the url (and hence the page_ref) is set</span>
+    <span class="ruby-identifier">entity</span> = <span class="ruby-identifier">klass</span>.<span class="ruby-identifier">new</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">match</span> <span class="ruby-node">%r{^#{rp_url}}</span> <span class="ruby-comment"># Check we&#39;re not trying to link to a RecipePower page</span>
+      <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:base</span>, <span class="ruby-string">&#39;Sorry, can\t cookmark pages from RecipePower. (Does that even make sense?)&#39;</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">page_ref</span>
+        <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">page_ref</span> <span class="ruby-operator">||=</span> <span class="ruby-identifier">page_ref</span>
+      <span class="ruby-keyword">else</span>
         <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">url</span> = <span class="ruby-identifier">url</span>
-        <span class="ruby-comment"># If this url is to the home of a site, return a Site object instead</span>
-        <span class="ruby-comment"># Ignore leading and trailing slashes in comparing paths</span>
-        <span class="ruby-identifier">site</span> = <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">site</span> <span class="ruby-operator">||</span> <span class="ruby-constant">Site</span>.<span class="ruby-identifier">find_or_create_for</span>(<span class="ruby-identifier">url</span>)
-        <span class="ruby-identifier">site_uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">site</span>.<span class="ruby-identifier">home</span>)
-        <span class="ruby-identifier">mypath</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^\//</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\/$/</span>,<span class="ruby-string">&#39;&#39;</span>)
-        <span class="ruby-identifier">sitepath</span> = <span class="ruby-identifier">site_uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/^\//</span>, <span class="ruby-string">&#39;&#39;</span>).<span class="ruby-identifier">sub</span>(<span class="ruby-regexp">/\/$/</span>,<span class="ruby-string">&#39;&#39;</span>)
-        <span class="ruby-keyword">if</span> <span class="ruby-identifier">site</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">host</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">site_uri</span>.<span class="ruby-identifier">host</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">mypath</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">sitepath</span>
-          <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">site</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-identifier">findings</span>
-          <span class="ruby-keyword">return</span> <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">site</span>
-        <span class="ruby-keyword">else</span>
-          <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-identifier">findings</span> <span class="ruby-comment"># Now set the title, description, etc.</span>
-        <span class="ruby-keyword">end</span>
       <span class="ruby-keyword">end</span>
+      <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">decorate</span>.<span class="ruby-identifier">findings</span> = <span class="ruby-identifier">findings</span> <span class="ruby-comment"># Now set the title, description, etc.</span>
     <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">entity</span>.<span class="ruby-identifier">save</span> <span class="ruby-comment"># after_save callback is invoked for new record, queueing background processing</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">entity</span>
 <span class="ruby-keyword">end</span></pre>
@@ -300,7 +305,7 @@ sure that the recipe is associated with the given user</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

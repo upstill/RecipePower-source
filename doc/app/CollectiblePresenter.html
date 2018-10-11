@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -114,10 +115,6 @@
     <li ><a href="#method-i-h">#h</a>
     
     <li ><a href="#method-i-pic_class">#pic_class</a>
-    
-    <li ><a href="#method-i-present_field">#present_field</a>
-    
-    <li ><a href="#method-i-present_field_label">#present_field_label</a>
     
     <li ><a href="#method-i-sharable_from_card-3F">#sharable_from_card?</a>
     
@@ -256,7 +253,7 @@
 
           
           <div class="method-source-code" id="card_aspect-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 76</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 72</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
   <span class="ruby-identifier">label</span> = <span class="ruby-keyword">nil</span>
   <span class="ruby-identifier">whichsym</span> = <span class="ruby-identifier">which</span>.<span class="ruby-identifier">to_sym</span>
@@ -305,7 +302,29 @@
 
         <div class="method-description">
           
-          
+          <p>def present_field_label what</p>
+
+<pre class="ruby"><span class="ruby-identifier">label</span> = <span class="ruby-identifier">what</span>.<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39;_tags&#39;</span>, <span class="ruby-string">&#39;&#39;</span>
+<span class="ruby-keyword">case</span> <span class="ruby-identifier">field_count</span>(<span class="ruby-identifier">what</span>)
+  <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span>
+    <span class="ruby-node">&quot;%%#{what}_label_plural%%&quot;</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;%%#{what}_label_singular%%&quot;</span>
+  <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
+    <span class="ruby-identifier">label</span>.<span class="ruby-identifier">singularize</span>
+  <span class="ruby-keyword">else</span>
+    <span class="ruby-identifier">label</span>.<span class="ruby-identifier">pluralize</span>
+<span class="ruby-keyword">end</span>
+</pre>
+
+<p>end</p>
+
+<p>def present_field_wrapped what=nil</p>
+
+<pre class="ruby"><span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">span</span>,
+              <span class="ruby-identifier">present_field</span>(<span class="ruby-identifier">what</span>),
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;hide-if-empty&#39;</span>
+</pre>
+
+<p>end</p>
           
           
             <div class="method-calls-super">
@@ -316,7 +335,7 @@
 
           
           <div class="method-source-code" id="card_aspects-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 72</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 68</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">which_column</span>=<span class="ruby-keyword">nil</span>
   (<span class="ruby-keyword">super</span> <span class="ruby-operator">+</span> [ <span class="ruby-value">:description</span>, <span class="ruby-value">:title</span>, <span class="ruby-value">:site</span>, (<span class="ruby-value">:found_by</span> <span class="ruby-keyword">if</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">first_collector</span>) ]).<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">uniq</span>
 <span class="ruby-keyword">end</span></pre>
@@ -349,28 +368,29 @@
 
           
           <div class="method-source-code" id="card_avatar-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 102</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 98</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-comment"># The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)</span>
-  <span class="ruby-keyword">if</span> (<span class="ruby-identifier">img</span> = <span class="ruby-identifier">image_from_decorator</span>(<span class="ruby-identifier">decorator</span>)) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:onlinks</span>]
-    <span class="ruby-comment"># Include invisible links to open the entity on click and edit the picture on double-click</span>
-    <span class="ruby-identifier">img</span> <span class="ruby-operator">&lt;&lt;</span>
-        <span class="ruby-identifier">link_to</span>(<span class="ruby-string">&#39;&#39;</span>,
-                <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">external_link</span>,
-                {
-                    <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">report</span><span class="ruby-operator">:</span> <span class="ruby-identifier">touchpath</span>(<span class="ruby-identifier">decorator</span>)}.<span class="ruby-identifier">compact</span>,
-                    <span class="ruby-identifier">target</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;_blank&#39;</span>,
-                    <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Open Original&#39;</span>,
-                    <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;clicker&#39;</span>
-                }.<span class="ruby-identifier">compact</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:external_link</span>)
-    <span class="ruby-identifier">img</span> <span class="ruby-operator">&lt;&lt;</span>
-        <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&#39;&#39;</span>,
-                       <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:editpic</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>]),
-                       <span class="ruby-identifier">mode</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;modal&#39;</span>,
-                       <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;dblclicker&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">permitted_to?</span>(<span class="ruby-value">:update</span>, <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>)
-    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">img</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;onlinks&#39;</span>
-  <span class="ruby-keyword">else</span>
-    <span class="ruby-identifier">img</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">img</span> = <span class="ruby-identifier">image_from_decorator</span>(<span class="ruby-identifier">decorator</span>)
+    <span class="ruby-identifier">divclass</span> = <span class="ruby-string">&#39;pic_box&#39;</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:onlinks</span>]
+      <span class="ruby-identifier">divclass</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-string">&#39; onlinks&#39;</span>
+      <span class="ruby-comment"># Include invisible links to open the entity on click and edit the picture on double-click</span>
+      <span class="ruby-identifier">img</span> <span class="ruby-operator">&lt;&lt;</span>
+          <span class="ruby-identifier">link_to</span>(<span class="ruby-string">&#39;&#39;</span>,
+                  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">external_link</span>,
+                  {
+                      <span class="ruby-identifier">data</span><span class="ruby-operator">:</span> {<span class="ruby-identifier">report</span><span class="ruby-operator">:</span> <span class="ruby-identifier">touchpath</span>(<span class="ruby-identifier">decorator</span>)}.<span class="ruby-identifier">compact</span>,
+                      <span class="ruby-identifier">target</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;_blank&#39;</span>,
+                      <span class="ruby-identifier">title</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;Open Original&#39;</span>,
+                      <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;clicker&#39;</span>
+                  }.<span class="ruby-identifier">compact</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:external_link</span>)
+      <span class="ruby-identifier">img</span> <span class="ruby-operator">&lt;&lt;</span>
+          <span class="ruby-identifier">link_to_dialog</span>(<span class="ruby-string">&#39;&#39;</span>,
+                         <span class="ruby-identifier">polymorphic_path</span>([<span class="ruby-value">:editpic</span>, <span class="ruby-identifier">decorator</span>]),
+                         <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;dblclicker&#39;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">user_can?</span>(<span class="ruby-value">:update</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Picable</span>)
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>, <span class="ruby-identifier">img</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;onlinks pic-box&#39;</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -402,7 +422,7 @@
 
           
           <div class="method-source-code" id="card_avatar_accompaniment-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 131</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 128</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar_accompaniment</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">collector</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">first_collector</span>
     <span class="ruby-identifier">card_aspect_enclosure</span> <span class="ruby-value">:found_by</span>,
@@ -440,15 +460,16 @@ that of is first collector, if any</p>
 
           
           <div class="method-source-code" id="card_avatar_column-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 140</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 137</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar_column</span>
-  <span class="ruby-identifier">content</span> = <span class="ruby-identifier">card_avatar</span>(<span class="ruby-identifier">onlinks</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>)
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">acc</span> = <span class="ruby-identifier">card_avatar_accompaniment</span>
-    <span class="ruby-identifier">content</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-identifier">acc</span>
-  <span class="ruby-keyword">end</span>
+  <span class="ruby-comment"># content_tag(:div, card_avatar(onlinks: true), class: &#39;stamp avatar card-column&#39;) +</span>
+  <span class="ruby-comment"># content_tag(:div, card_avatar_accompaniment || &#39;&#39;.html_safe, class: &#39;stamp found-by&#39;)</span>
   <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:div</span>,
-              <span class="ruby-identifier">content</span>,
-              { <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;stamp avatar card-column&#39;</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> (<span class="ruby-string">&#39;display:none;&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">content</span>.<span class="ruby-identifier">empty?</span>) } <span class="ruby-comment">#.compact</span>
+              (<span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, <span class="ruby-identifier">card_avatar</span>(<span class="ruby-identifier">onlinks</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">tag</span>(<span class="ruby-value">:br</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;clear: both&#39;</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;avatar&#39;</span>) <span class="ruby-operator">+</span>
+                  <span class="ruby-identifier">content_tag</span>(<span class="ruby-value">:div</span>, (<span class="ruby-identifier">card_avatar_accompaniment</span> <span class="ruby-operator">||</span> <span class="ruby-string">&#39;&#39;</span>.<span class="ruby-identifier">html_safe</span>)<span class="ruby-operator">+</span><span class="ruby-identifier">tag</span>(<span class="ruby-value">:br</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;clear: both&#39;</span>), <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;found-by&#39;</span>) <span class="ruby-operator">+</span>
+                  <span class="ruby-identifier">tag</span>(<span class="ruby-value">:br</span>, <span class="ruby-identifier">style</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;clear: both&#39;</span>)),
+              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;stamp card-column flexor avatar-column&#39;</span>
+
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -479,7 +500,7 @@ that of is first collector, if any</p>
 
           
           <div class="method-source-code" id="card_show_avatar-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 127</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 124</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_show_avatar</span>
   (<span class="ruby-identifier">href</span> = <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">imgdata</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">href</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">image_path</span>(<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">fallback_imgdata</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -512,7 +533,7 @@ that of is first collector, if any</p>
 
           
           <div class="method-source-code" id="collect_button-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 183</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 181</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">collect_button</span>
   <span class="ruby-identifier">collectible_collect_button</span> <span class="ruby-identifier">decorator</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">collectible_from_card?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -545,9 +566,9 @@ that of is first collector, if any</p>
 
           
           <div class="method-source-code" id="collectible_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 179</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 177</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">collectible_from_card?</span>
-  <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span> <span class="ruby-constant">Collectible</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -648,7 +669,7 @@ that of is first collector, if any</p>
 
           
           <div class="method-source-code" id="edit_button-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 155</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 153</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">edit_button</span>
   <span class="ruby-identifier">collectible_edit_button</span> <span class="ruby-identifier">decorator</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">editable_from_card?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -682,7 +703,7 @@ default</p>
 
           
           <div class="method-source-code" id="editable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 151</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 149</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">editable_from_card?</span>
   <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
@@ -715,7 +736,7 @@ default</p>
 
           
           <div class="method-source-code" id="field_count-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 56</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 44</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">field_count</span> <span class="ruby-identifier">what</span>
   <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">respond_to?</span>(<span class="ruby-value">:arity</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">arity</span>(<span class="ruby-identifier">what</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -742,20 +763,13 @@ default</p>
 
         <div class="method-description">
           
-          <p>def present_field_wrapped what=nil</p>
-
-<pre class="ruby"><span class="ruby-identifier">h</span>.<span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">span</span>,
-              <span class="ruby-identifier">present_field</span>(<span class="ruby-identifier">what</span>),
-              <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;hide-if-empty&#39;</span>
-</pre>
-
-<p>end</p>
+          
           
           
 
           
           <div class="method-source-code" id="field_value-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 45</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 37</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">field_value</span> <span class="ruby-identifier">what</span>=<span class="ruby-keyword">nil</span>
   <span class="ruby-keyword">return</span> <span class="ruby-identifier">form_authenticity_token</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">what</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">what</span> <span class="ruby-operator">==</span> <span class="ruby-string">&#39;authToken&#39;</span>)
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span> = <span class="ruby-ivar">@decorator</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-ivar">@decorator</span>.<span class="ruby-identifier">extract</span>(<span class="ruby-identifier">what</span>)
@@ -838,80 +852,6 @@ default</p>
       </div>
 
     
-      <div id="method-i-present_field" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">present_field</span><span
-            class="method-args">(what=nil)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="present_field-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 52</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_field</span> <span class="ruby-identifier">what</span>=<span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">field_value</span>(<span class="ruby-identifier">what</span>) <span class="ruby-operator">||</span> <span class="ruby-node">%Q{%%#{(what || &#39;&#39;).to_s}%%}</span>.<span class="ruby-identifier">html_safe</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-present_field_label" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">present_field_label</span><span
-            class="method-args">(what)</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="present_field_label-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 60</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">present_field_label</span> <span class="ruby-identifier">what</span>
-  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">what</span>.<span class="ruby-identifier">sub</span> <span class="ruby-string">&#39;_tags&#39;</span>, <span class="ruby-string">&#39;&#39;</span>
-  <span class="ruby-keyword">case</span> <span class="ruby-identifier">field_count</span>(<span class="ruby-identifier">what</span>)
-    <span class="ruby-keyword">when</span> <span class="ruby-keyword">nil</span>, <span class="ruby-keyword">false</span>
-      <span class="ruby-node">&quot;%%#{what}_label_plural%%&quot;</span><span class="ruby-operator">+</span><span class="ruby-node">&quot;%%#{what}_label_singular%%&quot;</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">1</span>
-      <span class="ruby-identifier">label</span>.<span class="ruby-identifier">singularize</span>
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-identifier">label</span>.<span class="ruby-identifier">pluralize</span>
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-i-sharable_from_card-3F" class="method-detail ">
         
         <div class="method-heading">
@@ -931,7 +871,7 @@ default</p>
 
           
           <div class="method-source-code" id="sharable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 163</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 161</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sharable_from_card?</span>
   <span class="ruby-keyword">true</span>
 <span class="ruby-keyword">end</span></pre>
@@ -964,7 +904,7 @@ default</p>
 
           
           <div class="method-source-code" id="share_button-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 167</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 165</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">share_button</span>
   <span class="ruby-identifier">collectible_share_button</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-string">&#39;lg&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">sharable_from_card?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1032,7 +972,7 @@ default</p>
 
           
           <div class="method-source-code" id="tools_menu-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 159</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 157</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tools_menu</span>
   <span class="ruby-identifier">collectible_tools_menu</span> <span class="ruby-identifier">decorator</span>, <span class="ruby-string">&#39;lg&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">editable_from_card?</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">admin_view?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1065,9 +1005,9 @@ default</p>
 
           
           <div class="method-source-code" id="votable_from_card-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 171</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 169</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">votable_from_card?</span>
-  <span class="ruby-keyword">true</span>
+  <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">Voteable</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -1098,7 +1038,7 @@ default</p>
 
           
           <div class="method-source-code" id="vote_buttons-source">
-            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 175</span>
+            <pre><span class="ruby-comment"># File app/presenters/collectible_presenter.rb, line 173</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">vote_buttons</span>
   <span class="ruby-identifier">collectible_vote_buttons</span> <span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">object</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;stamp votes&#39;</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">votable_from_card?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1120,7 +1060,7 @@ default</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

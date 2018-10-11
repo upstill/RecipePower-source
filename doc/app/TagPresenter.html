@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -97,9 +98,19 @@
     
     <li ><a href="#method-i-card_ncolumns">#card_ncolumns</a>
     
+    <li ><a href="#method-i-description">#description</a>
+    
     <li ><a href="#method-i-is_viewer-3F">#is_viewer?</a>
     
+    <li ><a href="#method-i-name">#name</a>
+    
     <li ><a href="#method-i-show_or_edit">#show_or_edit</a>
+    
+    <li ><a href="#method-i-summarize_aspect">#summarize_aspect</a>
+    
+    <li ><a href="#method-i-table_summaries">#table_summaries</a>
+    
+    <li ><a href="#method-i-taggees_table_summary">#taggees_table_summary</a>
     
     <li ><a href="#method-i-tags">#tags</a>
     
@@ -160,7 +171,7 @@
 
           
           <div class="method-source-code" id="about-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 137</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 214</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">about</span>
   <span class="ruby-identifier">handle_none</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span> <span class="ruby-keyword">do</span>
     <span class="ruby-identifier">markdown</span>(<span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span>)
@@ -195,80 +206,47 @@
 
           
           <div class="method-source-code" id="card_aspect-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 40</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
-  <span class="ruby-identifier">label</span> = <span class="ruby-identifier">content</span> = <span class="ruby-keyword">nil</span>
-  <span class="ruby-identifier">itemstrs</span> =
-  (<span class="ruby-keyword">case</span> <span class="ruby-identifier">which</span>
-     <span class="ruby-keyword">when</span> <span class="ruby-value">:description</span>
-       <span class="ruby-keyword">return</span> [<span class="ruby-string">&#39;&#39;</span>, <span class="ruby-node">&quot;#{decorator.typename.match(/^[aeiou]/i) ? &#39;An&#39; : &#39;A&#39;} #{decorator.typename} tag&quot;</span>]
-     <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_synonyms</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;synonyms&#39;</span>
-      <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">synonyms</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">tag</span> }
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:meaning</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;described as&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_meaning</span>
-      <span class="ruby-keyword">if</span> (<span class="ruby-identifier">meaning</span> = <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">primary_meaning</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">meaning</span>.<span class="ruby-identifier">description</span>.<span class="ruby-identifier">present?</span>
-        <span class="ruby-identifier">content</span> = <span class="ruby-identifier">meaning</span>.<span class="ruby-identifier">description</span>
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-keyword">nil</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_owners</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;private to&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_owners</span>
-      <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">owners</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">owner</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">user_homelink</span> <span class="ruby-identifier">owner</span> } <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">isGlobal</span>
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_similars</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;similar tags&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_similars</span>
-      <span class="ruby-comment"># TODO: The elimination should be done in the query</span>
-      <span class="ruby-constant">Tag</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">normalized_name</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">normalized_name</span>).
-          <span class="ruby-identifier">to_a</span>.
-          <span class="ruby-identifier">delete_if</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other</span><span class="ruby-operator">|</span>
-            <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">id</span>
-          }.
-          <span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">other</span><span class="ruby-operator">|</span>
-            <span class="ruby-comment"># h.summarize_tag_similar other, (args[:absorb_btn] &amp;&amp; tagserv.can_absorb(other))</span>
-            <span class="ruby-identifier">tagidstr</span> = <span class="ruby-identifier">other</span>.<span class="ruby-identifier">id</span>.<span class="ruby-identifier">to_s</span>
-            <span class="ruby-identifier">link</span> = <span class="ruby-identifier">h</span>.<span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">other</span>
-            <span class="ruby-identifier">link</span> = <span class="ruby-identifier">link</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">link_to_submit</span>( <span class="ruby-string">&quot;Absorb&quot;</span>,
-                                    <span class="ruby-node">&quot;tags/#{other.id.to_s}/absorb?victim=#{tagidstr}&quot;</span>,
-                                    <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;absorb_button&quot;</span>,
-                                    <span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;absorb_button_#{tagidstr}&quot;</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">can_absorb</span>(<span class="ruby-identifier">other</span>)
-            <span class="ruby-identifier">content_tag</span> <span class="ruby-value">:span</span>,
-                        <span class="ruby-identifier">link</span>,
-                        <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;absorb_&#39;</span><span class="ruby-operator">+</span><span class="ruby-identifier">tagidstr</span>
-          }
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_referents</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;meanings&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_referents</span>
-      <span class="ruby-identifier">tagserv</span>.
-      <span class="ruby-identifier">referents</span>.
-      <span class="ruby-identifier">to_a</span>.
-      <span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
-        <span class="ruby-comment"># summarize_referent ref, &quot;Other Meaning(s)&quot;</span>
-        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">referent_homelink</span> <span class="ruby-identifier">ref</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ref</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">primary_meaning</span>
-      }
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_parents</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;under categories&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_parents</span>
-      <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">parents</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">parent</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">parent</span> }
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_children</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;includes&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_children</span>
-      <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">child</span> }
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_references</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;references&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_references</span>
-      <span class="ruby-identifier">h</span>.<span class="ruby-identifier">present_tag_definitions</span>(<span class="ruby-identifier">tagserv</span>)
-    <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_relations</span>
-      <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;See Also&#39;</span>
-      <span class="ruby-comment"># content = h.summarize_tag_relations</span>
-      <span class="ruby-constant">Referent</span>.<span class="ruby-identifier">related</span>(<span class="ruby-identifier">tagserv</span>, <span class="ruby-keyword">false</span>, <span class="ruby-keyword">true</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rel</span><span class="ruby-operator">|</span>
-        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">present_tag_definitions</span>(<span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">rel</span>) <span class="ruby-keyword">if</span>(<span class="ruby-identifier">rel</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">id</span>)
-      }.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">flatten</span>
-  <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> []).<span class="ruby-identifier">compact</span>
-  <span class="ruby-identifier">content</span> = <span class="ruby-identifier">safe_join</span>(<span class="ruby-identifier">itemstrs</span>, <span class="ruby-string">&#39;, &#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">itemstrs</span>.<span class="ruby-identifier">empty?</span>
-  [<span class="ruby-identifier">label</span>, <span class="ruby-identifier">content</span>]
-<span class="ruby-keyword">end</span></pre>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 148</span>
+  <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspect</span> <span class="ruby-identifier">which</span>
+    <span class="ruby-identifier">label</span> = <span class="ruby-identifier">label_singular</span> = <span class="ruby-identifier">content</span> = <span class="ruby-keyword">nil</span>
+    <span class="ruby-identifier">itemstrs</span> =
+        (<span class="ruby-keyword">case</span> <span class="ruby-identifier">which</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-value">:description</span>
+             <span class="ruby-keyword">return</span> [<span class="ruby-string">&#39;&#39;</span>, (<span class="ruby-identifier">decorator</span>.<span class="ruby-identifier">tagtype</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">0</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;... for tagging by #{decorator.typename}&quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span>)]
+             <span class="ruby-comment"># return [&#39;&#39;, self.meaning || &quot;... for tagging by #{decorator.typename}&quot;]</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_synonyms</span>
+             <span class="ruby-identifier">label_singular</span> = <span class="ruby-string">&#39;synonym&#39;</span>
+             <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-value">:synonyms</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:summarize_tag_similar</span>, <span class="ruby-identifier">absorb_btn</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_owners</span>
+             <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;private to&#39;</span>
+             <span class="ruby-comment"># content = h.summarize_tag_owners</span>
+             <span class="ruby-identifier">summarize_aspect</span>(<span class="ruby-value">:owners</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:homelink</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">isGlobal</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_similars</span>
+             <span class="ruby-identifier">label_singular</span> = <span class="ruby-string">&#39;similar tag&#39;</span>
+             <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-value">:lexical_similars</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:summarize_tag_similar</span>, <span class="ruby-identifier">absorb_btn</span><span class="ruby-operator">:</span> <span class="ruby-keyword">true</span>
+           <span class="ruby-comment"># Only when a tag&#39;s referent can be usefully described...</span>
+<span class="ruby-comment">           when :tag_referents
+             label_singular = &#39;meaning&#39;
+             summarize_aspect :referents, :for =&gt; :raw, :helper =&gt; :homelink
+           # content = h.summarize_tag_referents
+</span>           <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_parents</span>
+             <span class="ruby-identifier">label_singular</span> = <span class="ruby-string">&#39;under category&#39;</span>
+             <span class="ruby-comment"># tagserv.parents.collect { |parent| h.homelink parent }</span>
+             <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-value">:parents</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:homelink</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-value">:tag_children</span>
+             <span class="ruby-identifier">label</span> = <span class="ruby-string">&#39;includes&#39;</span>
+             <span class="ruby-comment"># tagserv.children.collect { |child| h.homelink child }</span>
+             <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-value">:children</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:homelink</span>
+           <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+             <span class="ruby-comment"># An array from the PageRefServices select list: first is the label, second is the kind</span>
+             <span class="ruby-identifier">label_singular</span> = <span class="ruby-identifier">which</span>.<span class="ruby-identifier">first</span>.<span class="ruby-identifier">gsub</span>(<span class="ruby-regexp">/_/</span>,<span class="ruby-string">&#39; &#39;</span>).<span class="ruby-identifier">capitalize</span>
+             <span class="ruby-comment"># The remaining &quot;aspects&quot; are entries from TagServices.type_selections</span>
+             <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-identifier">which</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:raw</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:present_page_ref</span>
+         <span class="ruby-keyword">end</span> <span class="ruby-operator">||</span> []).<span class="ruby-identifier">compact</span>
+    <span class="ruby-identifier">content</span> = <span class="ruby-identifier">safe_join</span>(<span class="ruby-identifier">itemstrs</span>, <span class="ruby-string">&#39;, &#39;</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">itemstrs</span>.<span class="ruby-identifier">empty?</span>
+    <span class="ruby-identifier">label</span> = (<span class="ruby-identifier">itemstrs</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">label_singular</span>.<span class="ruby-identifier">pluralize</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">label_singular</span>) <span class="ruby-keyword">if</span> <span class="ruby-identifier">label_singular</span>
+    [<span class="ruby-identifier">label</span>, <span class="ruby-identifier">content</span>]
+  <span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -283,7 +261,7 @@
         
         <div class="method-heading">
           <span class="method-name">card_aspects</span><span
-            class="method-args">(which_column=nil)</span>
+            class="method-args">(which_column=nil) { |*card_aspect| ... }</span>
           
           <span class="method-click-advice">click to toggle source</span>
           
@@ -292,25 +270,31 @@
 
         <div class="method-description">
           
-          
+          <p>Report the aspects for a card on the tag If a block is given, call it for
+each aspect</p>
           
           
 
           
           <div class="method-source-code" id="card_aspects-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 26</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 129</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_aspects</span> <span class="ruby-identifier">which_column</span>=<span class="ruby-keyword">nil</span>
-  [
+  <span class="ruby-identifier">aspects</span> = [
+      <span class="ruby-value">:description</span>,
       <span class="ruby-value">:tag_synonyms</span>,
-      <span class="ruby-value">:meaning</span>,
       <span class="ruby-value">:tag_owners</span>,
       <span class="ruby-value">:tag_similars</span>,
       <span class="ruby-value">:tag_referents</span>,
       <span class="ruby-value">:tag_parents</span>,
       <span class="ruby-value">:tag_children</span>,
-      <span class="ruby-value">:tag_references</span>,
-      <span class="ruby-value">:tag_relations</span>,
-  ]
+      <span class="ruby-comment"># :tag_references,</span>
+  ] <span class="ruby-operator">+</span> [<span class="ruby-operator">*</span><span class="ruby-constant">PageRef</span>.<span class="ruby-identifier">kinds</span>.<span class="ruby-identifier">except</span>(<span class="ruby-value">:link</span>, <span class="ruby-value">:recipe</span>)] <span class="ruby-comment"># PageRefServices.type_selections[2..-1]</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+    <span class="ruby-identifier">aspects</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">aspect</span><span class="ruby-operator">|</span>
+      <span class="ruby-keyword">yield</span> <span class="ruby-operator">*</span><span class="ruby-identifier">presenter</span>.<span class="ruby-identifier">card_aspect</span>(<span class="ruby-identifier">aspect</span>)
+    }
+  <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">aspects</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -341,7 +325,7 @@
 
           
           <div class="method-source-code" id="card_avatar-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 119</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 196</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar</span> <span class="ruby-identifier">options</span>={}
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">image_ref</span> = <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">images</span>.<span class="ruby-identifier">first</span>
     <span class="ruby-identifier">image_with_error_recovery</span> <span class="ruby-identifier">image_ref</span>.<span class="ruby-identifier">imgdata</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">image_ref</span>.<span class="ruby-identifier">url</span>
@@ -376,7 +360,7 @@
 
           
           <div class="method-source-code" id="card_avatar-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 115</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 192</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_avatar?</span>
   <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">images</span>.<span class="ruby-identifier">present?</span>
 <span class="ruby-keyword">end</span></pre>
@@ -409,7 +393,7 @@
 
           
           <div class="method-source-code" id="card_header_content-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 18</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 119</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_header_content</span>
   <span class="ruby-identifier">name</span>
 <span class="ruby-keyword">end</span></pre>
@@ -442,9 +426,9 @@
 
           
           <div class="method-source-code" id="card_homelink-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 10</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 111</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_homelink</span> <span class="ruby-identifier">options</span>={}
-  <span class="ruby-identifier">tag_homelink</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">options</span>
+  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">homelink</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">options</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -475,9 +459,44 @@
 
           
           <div class="method-source-code" id="card_ncolumns-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 22</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 123</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">card_ncolumns</span>
   <span class="ruby-value">1</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-description" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">description</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Provide a text meaning of a tag by getting a description from one of its
+referent(s), if any–preferentially the primary meaning</p>
+          
+          
+
+          
+          <div class="method-source-code" id="description-source">
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">description</span>
+  (<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">meaning</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">meaning</span>.<span class="ruby-identifier">description</span>.<span class="ruby-identifier">if_present</span>) <span class="ruby-operator">||</span>
+  <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">referents</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:description</span>).<span class="ruby-identifier">find</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:&#39;present?&#39;</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -508,9 +527,43 @@
 
           
           <div class="method-source-code" id="is_viewer-3F-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 14</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 115</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">is_viewer?</span>
   <span class="ruby-ivar">@viewer</span> <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-ivar">@viewer</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">==</span> <span class="ruby-identifier">user</span>.<span class="ruby-identifier">id</span>)
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-name" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">name</span><span
+            class="method-args">(withtype = false, do_link = true)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="name-source">
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">name</span> <span class="ruby-identifier">withtype</span> = <span class="ruby-keyword">false</span>, <span class="ruby-identifier">do_link</span> = <span class="ruby-keyword">true</span>
+  ((<span class="ruby-identifier">withtype</span> <span class="ruby-operator">?</span> <span class="ruby-node">&quot;&lt;i&gt;#{decorator.typename}&lt;/i&gt; &quot;</span> <span class="ruby-operator">:</span> <span class="ruby-string">&#39;&#39;</span> )<span class="ruby-operator">+</span>
+      <span class="ruby-node">&quot;&#39;&lt;strong&gt;#{do_link ? h.homelink(tag) : tag.name}&lt;/strong&gt;&#39;&quot;</span>).<span class="ruby-identifier">html_safe</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -541,17 +594,181 @@
 
           
           <div class="method-source-code" id="show_or_edit-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 125</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 202</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show_or_edit</span> <span class="ruby-identifier">which</span>, <span class="ruby-identifier">val</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">is_viewer?</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">present?</span>
-      (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&quot;Edit&quot;</span>, <span class="ruby-identifier">edit_user_path</span>(<span class="ruby-identifier">section</span><span class="ruby-operator">:</span> <span class="ruby-identifier">which</span>), <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;xs&quot;</span>)).<span class="ruby-identifier">html_safe</span>
+      (<span class="ruby-identifier">user</span>.<span class="ruby-identifier">about</span> <span class="ruby-operator">+</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">link_to_submit</span>(<span class="ruby-string">&quot;Edit&quot;</span>, <span class="ruby-identifier">edit_user_path</span>(<span class="ruby-identifier">section</span><span class="ruby-operator">:</span> <span class="ruby-identifier">which</span>), <span class="ruby-identifier">button_size</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;xs&quot;</span>)).<span class="ruby-identifier">html_safe</span>
     <span class="ruby-keyword">else</span>
       <span class="ruby-identifier">card_aspect_editor</span> <span class="ruby-identifier">which</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">val</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">val</span>.<span class="ruby-identifier">present?</span>
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-summarize_aspect" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">summarize_aspect</span><span
+            class="method-args">(what, options={}) { || ... }</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p><a href=":helper">options</a> prescribes the name of a helper to name and
+possibly link to an instance of the aspect <a
+href=":absorb_btn">options</a> enables the provision of a button for
+absorbing the other into this tag <a href=":merge_into_btn">options</a>
+converse of :absorb_btn</p>
+          
+          
+
+          
+          <div class="method-source-code" id="summarize_aspect-source">
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 48</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">summarize_aspect</span> <span class="ruby-identifier">what</span>, <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">helper</span> = (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:helper</span>) <span class="ruby-operator">||</span> <span class="ruby-value">:homelink</span>
+  <span class="ruby-identifier">format</span> = (<span class="ruby-identifier">options</span>.<span class="ruby-identifier">delete</span> <span class="ruby-value">:for</span>) <span class="ruby-operator">||</span> <span class="ruby-value">:card</span>
+  <span class="ruby-identifier">scope</span> =
+      <span class="ruby-keyword">if</span> <span class="ruby-identifier">block_given?</span>
+        <span class="ruby-keyword">yield</span>
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-keyword">case</span> <span class="ruby-identifier">what</span>
+          <span class="ruby-comment"># Get unique parents, children and synonyms</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-value">:parents</span>
+            <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">parents</span> <span class="ruby-keyword">true</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-value">:children</span>
+            <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">children</span> <span class="ruby-keyword">true</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-value">:synonyms</span>
+            <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">synonyms</span> <span class="ruby-keyword">true</span>
+          <span class="ruby-keyword">when</span> <span class="ruby-constant">Array</span>
+            <span class="ruby-comment"># An array from the PageRefServices select list: first is the label, second is the kind</span>
+            <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">page_refs_of_kind</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">last</span>
+          <span class="ruby-keyword">else</span>
+            <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">public_send</span> <span class="ruby-identifier">what</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-keyword">return</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">empty?</span>
+  <span class="ruby-identifier">options</span>[<span class="ruby-value">:count</span>] = <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">count</span>
+  <span class="ruby-identifier">scope</span> = <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">limit</span>(<span class="ruby-identifier">options</span>[<span class="ruby-value">:limit</span>]) <span class="ruby-keyword">if</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:limit</span>] <span class="ruby-operator">&amp;&amp;</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:limit</span>] <span class="ruby-operator">&lt;</span> <span class="ruby-identifier">options</span>[<span class="ruby-value">:count</span>])
+  <span class="ruby-identifier">strs</span> = <span class="ruby-identifier">scope</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">entity</span><span class="ruby-operator">|</span>
+    <span class="ruby-keyword">case</span> <span class="ruby-identifier">helper</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">:summarize_tag_similar</span>
+        <span class="ruby-identifier">btn_options</span> = {<span class="ruby-value">:absorb_btn</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:absorb_btn</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">can_absorb</span>(<span class="ruby-identifier">entity</span>)),
+                       <span class="ruby-value">:merge_into_btn</span> =<span class="ruby-operator">&gt;</span> (<span class="ruby-identifier">options</span>[<span class="ruby-value">:merge_into_btn</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">entity</span>).<span class="ruby-identifier">can_absorb</span>(<span class="ruby-identifier">tag</span>)) }
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">summarize_tag_similar</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">btn_options</span>
+      <span class="ruby-keyword">when</span> <span class="ruby-value">:summarize_referent</span>
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">summarize_referent</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">except</span><span class="ruby-operator">:</span> <span class="ruby-identifier">tag</span>, <span class="ruby-identifier">disambiguate</span><span class="ruby-operator">:</span> (<span class="ruby-identifier">scope</span>.<span class="ruby-identifier">count</span> <span class="ruby-operator">&gt;</span> <span class="ruby-value">1</span>)
+      <span class="ruby-keyword">else</span>
+        <span class="ruby-identifier">h</span>.<span class="ruby-identifier">public_send</span> <span class="ruby-identifier">helper</span>, <span class="ruby-identifier">entity</span>
+    <span class="ruby-keyword">end</span>
+  }
+  <span class="ruby-keyword">case</span> <span class="ruby-identifier">format</span>.<span class="ruby-identifier">to_sym</span>
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:card</span>
+      <span class="ruby-identifier">h</span>.<span class="ruby-identifier">format_card_summary</span> <span class="ruby-identifier">strs</span>, { <span class="ruby-identifier">label</span><span class="ruby-operator">:</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span> }.<span class="ruby-identifier">merge</span>(<span class="ruby-identifier">options</span>)
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:table</span>
+      <span class="ruby-identifier">h</span>.<span class="ruby-identifier">format_table_tree</span> <span class="ruby-identifier">report_items</span>(<span class="ruby-identifier">strs</span>,
+                                       (<span class="ruby-identifier">options</span>[<span class="ruby-value">:label</span>] <span class="ruby-operator">||</span> <span class="ruby-identifier">what</span>.<span class="ruby-identifier">to_s</span>.<span class="ruby-identifier">singularize</span>.<span class="ruby-identifier">capitalize</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">helper</span> <span class="ruby-operator">==</span> <span class="ruby-value">:summarize_referent</span>))
+    <span class="ruby-keyword">when</span> <span class="ruby-value">:raw</span>
+      <span class="ruby-identifier">strs</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-table_summaries" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">table_summaries</span><span
+            class="method-args">(admin_view_on)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+
+          
+          <div class="method-source-code" id="table_summaries-source">
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 20</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">table_summaries</span> <span class="ruby-identifier">admin_view_on</span>
+  <span class="ruby-comment"># set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]</span>
+  <span class="ruby-identifier">set</span> = []
+  <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;...summarizing owners:&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">set</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">summarize_aspect</span>(<span class="ruby-value">:owners</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:table</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:homelink</span>, <span class="ruby-value">:limit</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">5</span>)
+  <span class="ruby-keyword">end</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">tagserv</span>.<span class="ruby-identifier">isGlobal</span>
+  <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;...summarizing referents:&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">set</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">summarize_aspect</span>(<span class="ruby-value">:referents</span>, <span class="ruby-value">:for</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:table</span>, <span class="ruby-value">:helper</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:summarize_referent</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-taggees_table_summary" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">taggees_table_summary</span><span
+            class="method-args">(options={})</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>The taggees of a tag are only summarized in its table listing; when shown
+on a card, the taggees should appear in an associated list</p>
+          
+          
+
+          
+          <div class="method-source-code" id="taggees_table_summary-source">
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 98</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">taggees_table_summary</span> <span class="ruby-identifier">options</span>={}
+  <span class="ruby-identifier">summs</span> =
+      <span class="ruby-constant">NestedBenchmark</span>.<span class="ruby-identifier">measure</span> <span class="ruby-string">&#39;...getting taggee_samples:&#39;</span> <span class="ruby-keyword">do</span>
+        <span class="ruby-comment"># Provide a collection of (direct) taggees</span>
+          <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">group</span>(<span class="ruby-value">:entity_type</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:entity_type</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">entity_type</span><span class="ruby-operator">|</span>
+            <span class="ruby-identifier">h</span>.<span class="ruby-identifier">report_items</span>(<span class="ruby-identifier">tag</span>.<span class="ruby-identifier">taggings</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:entity</span>).<span class="ruby-identifier">where</span>(<span class="ruby-value">:entity_type</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">entity_type</span>),
+                           <span class="ruby-identifier">entity_type</span>.<span class="ruby-identifier">capitalize</span>,
+                           <span class="ruby-identifier">limit</span><span class="ruby-operator">:</span> <span class="ruby-value">5</span>) { <span class="ruby-operator">|</span><span class="ruby-identifier">tagging</span><span class="ruby-operator">|</span> <span class="ruby-identifier">h</span>.<span class="ruby-identifier">homelink</span> <span class="ruby-identifier">tagging</span>.<span class="ruby-identifier">entity</span>, <span class="ruby-identifier">truncate</span><span class="ruby-operator">:</span> <span class="ruby-value">100</span> }
+          }
+      <span class="ruby-keyword">end</span>
+  <span class="ruby-identifier">h</span>.<span class="ruby-identifier">format_table_tree</span> <span class="ruby-identifier">summs</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">flatten</span>(<span class="ruby-value">1</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -582,7 +799,7 @@
 
           
           <div class="method-source-code" id="tags-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 143</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 220</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tags</span>
   <span class="ruby-identifier">user</span>.<span class="ruby-identifier">tags</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-identifier">tag</span>.<span class="ruby-identifier">name</span> }.<span class="ruby-identifier">join</span>(<span class="ruby-string">&#39;, &#39;</span>)
 <span class="ruby-keyword">end</span></pre>
@@ -615,7 +832,7 @@
 
           
           <div class="method-source-code" id="tagserv-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 6</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 5</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tagserv</span>
   <span class="ruby-ivar">@tagserv</span> <span class="ruby-operator">||=</span> <span class="ruby-constant">TagServices</span>.<span class="ruby-identifier">new</span> <span class="ruby-identifier">tag</span>
 <span class="ruby-keyword">end</span></pre>
@@ -648,7 +865,7 @@
 
           
           <div class="method-source-code" id="tools_menu-source">
-            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 147</span>
+            <pre><span class="ruby-comment"># File app/presenters/tag_presenter.rb, line 224</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">tools_menu</span>
 
 <span class="ruby-keyword">end</span></pre>
@@ -670,7 +887,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

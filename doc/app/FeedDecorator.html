@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -70,7 +71,11 @@
 
   <ul class="link-list" role="directory">
     
+    <li class="calls-super" ><a href="#method-i-eligible_tagtypes">#eligible_tagtypes</a>
+    
     <li ><a href="#method-i-imgdata">#imgdata</a>
+    
+    <li ><a href="#method-i-pageurl">#pageurl</a>
     
     <li ><a href="#method-i-typename">#typename</a>
     
@@ -108,6 +113,44 @@
        </header>
 
     
+      <div id="method-i-eligible_tagtypes" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">eligible_tagtypes</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              <a href="CollectibleDecorator.html#method-i-eligible_tagtypes">CollectibleDecorator#eligible_tagtypes</a>
+            </div>
+          
+
+          
+          <div class="method-source-code" id="eligible_tagtypes-source">
+            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 24</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">eligible_tagtypes</span>
+  ([ <span class="ruby-value">:Ingredient</span>, <span class="ruby-value">:Genre</span>, <span class="ruby-value">:Occasion</span>, <span class="ruby-value">:Dish</span>, <span class="ruby-value">:Process</span>, <span class="ruby-value">:Tool</span>, <span class="ruby-value">:Course</span>, <span class="ruby-value">:Diet</span> ] <span class="ruby-operator">+</span> <span class="ruby-keyword">super</span>).<span class="ruby-identifier">uniq</span> <span class="ruby-comment"># , :Dish, :Process, :Tool, :Course, :Diet</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-imgdata" class="method-detail ">
         
         <div class="method-heading">
@@ -127,9 +170,50 @@
 
           
           <div class="method-source-code" id="imgdata-source">
-            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 16</span>
+            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 20</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">imgdata</span>
   (<span class="ruby-identifier">img</span> = <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">imgdata</span>).<span class="ruby-identifier">present?</span> <span class="ruby-operator">?</span> <span class="ruby-identifier">img</span> <span class="ruby-operator">:</span> <span class="ruby-ivar">@object</span>.<span class="ruby-identifier">site</span>.<span class="ruby-identifier">imgdata</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-pageurl" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">pageurl</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Define presentation-specific methods here. Helpers are accessed through
+`helpers` (aka `h`). You can override attributes, for example:</p>
+
+<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">created_at</span>
+  <span class="ruby-identifier">helpers</span>.<span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">span</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;time&#39;</span> <span class="ruby-keyword">do</span>
+    <span class="ruby-identifier">object</span>.<span class="ruby-identifier">created_at</span>.<span class="ruby-identifier">strftime</span>(<span class="ruby-string">&quot;%a %m/%d/%y&quot;</span>)
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span>
+</pre>
+          
+          
+
+          
+          <div class="method-source-code" id="pageurl-source">
+            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 12</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">pageurl</span>
+  (<span class="ruby-identifier">home</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">home</span>.<span class="ruby-identifier">present?</span>) <span class="ruby-operator">||</span> (<span class="ruby-identifier">site</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">site</span>.<span class="ruby-identifier">home</span>)
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -154,21 +238,13 @@
 
         <div class="method-description">
           
-          <p>Define presentation-specific methods here. Helpers are accessed through
-`helpers` (aka `h`). You can override attributes, for example:</p>
-
-<pre class="ruby"><span class="ruby-keyword">def</span> <span class="ruby-identifier">created_at</span>
-  <span class="ruby-identifier">helpers</span>.<span class="ruby-identifier">content_tag</span> :<span class="ruby-identifier">span</span>, <span class="ruby-identifier">class</span><span class="ruby-operator">:</span> <span class="ruby-string">&#39;time&#39;</span> <span class="ruby-keyword">do</span>
-    <span class="ruby-identifier">object</span>.<span class="ruby-identifier">created_at</span>.<span class="ruby-identifier">strftime</span>(<span class="ruby-string">&quot;%a %m/%d/%y&quot;</span>)
-  <span class="ruby-keyword">end</span>
-<span class="ruby-keyword">end</span>
-</pre>
+          
           
           
 
           
           <div class="method-source-code" id="typename-source">
-            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 12</span>
+            <pre><span class="ruby-comment"># File app/decorators/feed_decorator.rb, line 16</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">typename</span>
   (<span class="ruby-identifier">name</span> = <span class="ruby-identifier">object</span>.<span class="ruby-identifier">feedtypename</span>) <span class="ruby-operator">==</span> <span class="ruby-value">:Misc</span> <span class="ruby-operator">?</span> <span class="ruby-keyword">nil</span> <span class="ruby-operator">:</span> <span class="ruby-identifier">name</span>.<span class="ruby-identifier">downcase</span>
 <span class="ruby-keyword">end</span></pre>
@@ -190,7 +266,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

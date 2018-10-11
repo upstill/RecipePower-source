@@ -1,6 +1,6 @@
 <div class='collect_form'>
   <%= image_tag 'rp-logo-xs-web.png', class: 'logo' %>
-  <%= flash_notifications_div 'flash_notifications', false %>
+  <%= flash_notifications_div %>
   <br><span class="prompt">Paste link here and click 'Add to Collection':</span>
   <%= form_for @page_ref, label: 'Add to Collection', url: page_refs_path(:mode => :modal) do |f| %>
     <%= f.text_area :url, type: 'url', class: 'url_field', lines: 3 %>

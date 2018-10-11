@@ -1,5 +1,5 @@
 <%= modal_dialog 'new_invitation new-style salmon', "Invite a Friend", data: { focus: "input#user_email" } do %>
-    <%= flash_notifications_div 'flash_notifications', false %>
+    <%= flash_notifications_div %>
 	<%= simple_form_for resource, :as => resource_name, :url => invitation_path(resource_name, :mode => response_service.mode), :html => {:method => :post} do |f| %>
 		  <%# devise_error_messages! %>
 		  <%= form_errors_helper f %>

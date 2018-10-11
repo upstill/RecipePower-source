@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -62,13 +63,26 @@
   
 </div>
 
-    
+    <div id="includes-section" class="nav-section">
+  <h3>Included Modules</h3>
+
+  <ul class="link-list">
+  
+  
+    <li><span class="include">Rails</span>
+  
+  
+  </ul>
+</div>
+
     
     <!-- Method Quickref -->
 <div id="method-list-section" class="nav-section">
   <h3>Methods</h3>
 
   <ul class="link-list" role="directory">
+    
+    <li class="calls-super" ><a href="#method-i-after_sign_out_path_for">#after_sign_out_path_for</a>
     
     <li ><a href="#method-i-create">#create</a>
     
@@ -77,6 +91,10 @@
     <li ><a href="#method-i-failure">#failure</a>
     
     <li ><a href="#method-i-new">#new</a>
+    
+    <li class="calls-super" ><a href="#method-i-require_no_authentication">#require_no_authentication</a>
+    
+    <li ><a href="#method-i-restore_tokens">#restore_tokens</a>
     
     <li ><a href="#method-i-sign_in_and_redirect">#sign_in_and_redirect</a>
     
@@ -114,6 +132,45 @@
        </header>
 
     
+      <div id="method-i-after_sign_out_path_for" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">after_sign_out_path_for</span><span
+            class="method-args">(resource)</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Normally we go back to the home page, but if a notification is waiting, we
+go to its target (if any)</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="after_sign_out_path_for-source">
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 95</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">after_sign_out_path_for</span>(<span class="ruby-identifier">resource</span>)
+  ((<span class="ruby-identifier">notification</span> = <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">pending_notification</span>) <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">notification</span>.<span class="ruby-identifier">present</span>.<span class="ruby-identifier">referral_path</span>.<span class="ruby-identifier">if_present</span>) <span class="ruby-operator">||</span> <span class="ruby-keyword">super</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
       <div id="method-i-create" class="method-detail ">
         
         <div class="method-heading">
@@ -133,15 +190,20 @@
 
           
           <div class="method-source-code" id="create-source">
-            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 25</span>
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 48</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">create</span>
   <span class="ruby-keyword">begin</span>
     <span class="ruby-identifier">resource</span> = <span class="ruby-identifier">warden</span>.<span class="ruby-identifier">authenticate!</span>(<span class="ruby-value">:scope</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">resource_name</span>, <span class="ruby-value">:recall</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-node">&quot;#{controller_path}#new&quot;</span> ) <span class="ruby-comment"># :failure)</span>
     <span class="ruby-identifier">result</span> = <span class="ruby-identifier">sign_in_and_redirect</span>(<span class="ruby-identifier">resource_name</span>, <span class="ruby-identifier">resource</span>)
     <span class="ruby-keyword">return</span> <span class="ruby-identifier">result</span>
   <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
-    <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&#39;Oops! Can\t find those credentials in our records.&#39;</span>
-    <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>
+    <span class="ruby-comment"># It&#39;s an error to get a login twice, but if there&#39;s already a user, we can just proceed as normal</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-keyword">nil</span>
+    <span class="ruby-keyword">else</span>
+      <span class="ruby-identifier">flash</span>[<span class="ruby-value">:error</span>] = <span class="ruby-string">&#39;Oops! Can\t find those credentials in our records.&#39;</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">current_user</span>
+      <span class="ruby-identifier">render</span> <span class="ruby-value">:errors</span>, <span class="ruby-identifier">locals</span><span class="ruby-operator">:</span> { <span class="ruby-identifier">with_popup</span><span class="ruby-operator">:</span> <span class="ruby-keyword">false</span> } <span class="ruby-comment"># Report error as flash</span>
+    <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
@@ -173,7 +235,7 @@
 
           
           <div class="method-source-code" id="destroy-source">
-            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 36</span>
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 64</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">destroy</span>
   <span class="ruby-identifier">handle</span> = <span class="ruby-identifier">current_user</span>.<span class="ruby-identifier">handle</span>
   <span class="ruby-identifier">redirect_path</span> = <span class="ruby-identifier">after_sign_out_path_for</span>(<span class="ruby-identifier">resource_name</span>)
@@ -227,9 +289,9 @@
 
           
           <div class="method-source-code" id="failure-source">
-            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 83</span>
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 121</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">failure</span>
-  <span class="ruby-keyword">return</span> <span class="ruby-identifier">render</span> <span class="ruby-operator">:</span><span class="ruby-identifier">json</span> =<span class="ruby-operator">&gt;</span> {<span class="ruby-value">:success</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:errors</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-string">&quot;Login failed.&quot;</span>]}
+  <span class="ruby-keyword">return</span> <span class="ruby-identifier">render</span> <span class="ruby-operator">:</span><span class="ruby-identifier">json</span> =<span class="ruby-operator">&gt;</span> {<span class="ruby-value">:success</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-keyword">false</span>, <span class="ruby-value">:errors</span> =<span class="ruby-operator">&gt;</span> [<span class="ruby-string">&#39;Login failed.&#39;</span>]}
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -260,13 +322,27 @@
 
           
           <div class="method-source-code" id="new-source">
-            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 5</span>
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 14</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">new</span>
   <span class="ruby-keyword">if</span> <span class="ruby-identifier">current_user</span>
     <span class="ruby-comment"># flash[:notice] = &quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
     <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">current_user</span>), <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-node">&quot;All signed in. Welcome back, #{current_user.handle}!&quot;</span>
   <span class="ruby-keyword">elsif</span> <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">format</span> <span class="ruby-operator">==</span> <span class="ruby-value">:html</span> <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-operator">!</span><span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">injector?</span>
-    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">home_path</span> <span class="ruby-comment"># Page display not an option</span>
+    <span class="ruby-keyword">if</span> <span class="ruby-identifier">blocked_request</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:blocked</span>]
+      <span class="ruby-comment"># This code is nasty, because recognize_path dies horribly on notifications</span>
+      <span class="ruby-keyword">begin</span>
+        <span class="ruby-identifier">controller</span> = <span class="ruby-constant">Rails</span>.<span class="ruby-identifier">application</span>.<span class="ruby-identifier">routes</span>.<span class="ruby-identifier">recognize_path</span> <span class="ruby-identifier">blocked_request</span>
+      <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">e</span>
+        <span class="ruby-identifier">uri</span> = <span class="ruby-constant">URI</span>(<span class="ruby-identifier">blocked_request</span>)
+        <span class="ruby-keyword">if</span> <span class="ruby-identifier">match</span> = <span class="ruby-identifier">uri</span>.<span class="ruby-identifier">path</span>.<span class="ruby-identifier">match</span>(<span class="ruby-regexp">%r{^/users/(\d*)/notifications/(\d*)/(\w*)$}</span>)
+          <span class="ruby-identifier">controller</span> = <span class="ruby-constant">Users</span><span class="ruby-operator">::</span><span class="ruby-constant">NotificationsWithDeviseController</span>
+        <span class="ruby-keyword">end</span>
+      <span class="ruby-keyword">end</span>
+    <span class="ruby-keyword">end</span>
+    <span class="ruby-identifier">redir</span> = <span class="ruby-identifier">controller</span>.<span class="ruby-identifier">show_page</span>(<span class="ruby-identifier">blocked_request</span>) <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">entity</span>, <span class="ruby-identifier">args</span>={}<span class="ruby-operator">|</span>
+      <span class="ruby-identifier">polymorphic_path</span> <span class="ruby-identifier">entity</span>, <span class="ruby-identifier">args</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">entity</span>
+    <span class="ruby-keyword">end</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">controller</span>.<span class="ruby-identifier">respond_to</span>(<span class="ruby-value">:show_page</span>)
+    <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">redir</span>.<span class="ruby-identifier">if_present</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">home_path</span>
   <span class="ruby-keyword">else</span>
     <span class="ruby-keyword">self</span>.<span class="ruby-identifier">resource</span> = <span class="ruby-identifier">resource_class</span>.<span class="ruby-identifier">new</span> <span class="ruby-comment"># build_resource(nil, :unsafe =&gt; true)</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">u</span> = <span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-value">:id</span>] <span class="ruby-operator">&amp;&amp;</span> <span class="ruby-constant">User</span>.<span class="ruby-identifier">find_by_id</span>(<span class="ruby-identifier">params</span>[<span class="ruby-value">:user</span>][<span class="ruby-value">:id</span>])
@@ -279,6 +355,79 @@
     <span class="ruby-identifier">resource</span>.<span class="ruby-identifier">remember_me</span> = <span class="ruby-value">1</span>
     <span class="ruby-identifier">smartrender</span> <span class="ruby-value">:action</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-value">:new</span>
   <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-require_no_authentication" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">require_no_authentication</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Somehow <a
+href="SessionsController.html#method-i-require_no_authentication">#require_no_authentication</a>
+redirects to after_sign_in_path_for when the user is already logged in</p>
+          
+          
+            <div class="method-calls-super">
+              Calls superclass method
+              
+            </div>
+          
+
+          
+          <div class="method-source-code" id="require_no_authentication-source">
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 9</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">require_no_authentication</span>
+  <span class="ruby-keyword">super</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">current_user</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+      <div id="method-i-restore_tokens" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">restore_tokens</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>When a user signs out, maintain pending invitation and notification tokens</p>
+          
+          
+
+          
+          <div class="method-source-code" id="restore_tokens-source">
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 90</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">restore_tokens</span>
+  <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">restore_tokens</span>
 <span class="ruby-keyword">end</span></pre>
           </div>
           
@@ -309,7 +458,7 @@
 
           
           <div class="method-source-code" id="sign_in_and_redirect-source">
-            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 61</span>
+            <pre><span class="ruby-comment"># File app/controllers/sessions_controller.rb, line 99</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">sign_in_and_redirect</span>(<span class="ruby-identifier">resource_or_scope</span>, <span class="ruby-identifier">resource</span>=<span class="ruby-keyword">nil</span>)
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;sign_in_and_redirect: Signing in #{(resource||resource_or_scope).handle}; redirecting with...&quot;</span>
   <span class="ruby-identifier">scope</span> = <span class="ruby-constant">Devise</span><span class="ruby-operator">::</span><span class="ruby-constant">Mapping</span>.<span class="ruby-identifier">find_scope!</span>(<span class="ruby-identifier">resource_or_scope</span>)
@@ -325,9 +474,9 @@
     <span class="ruby-identifier">session</span>.<span class="ruby-identifier">delete</span>(<span class="ruby-value">:omniauth</span>)
   <span class="ruby-keyword">else</span>
     <span class="ruby-identifier">notice</span> = <span class="ruby-node">&quot;Welcome back, #{resource.handle}! You are logged in to RecipePower.&quot;</span>
-    <span class="ruby-identifier">session</span>[<span class="ruby-value">:foo</span>] = <span class="ruby-string">&quot;bar&quot;</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">logger</span>.<span class="ruby-identifier">debug</span> <span class="ruby-node">&quot;sign_in_and_redirect: Signed in #{resource.handle}; redirecting with...&quot;</span>
+  <span class="ruby-constant">LoginEvent</span>.<span class="ruby-identifier">post</span> <span class="ruby-identifier">resource</span> <span class="ruby-comment"># Register the login</span>
   <span class="ruby-identifier">response_service</span>.<span class="ruby-identifier">invitation_token</span> = <span class="ruby-keyword">nil</span> <span class="ruby-comment"># Clear the pending invitation</span>
   <span class="ruby-identifier">redirect_to</span> <span class="ruby-identifier">after_sign_in_path_for</span>(<span class="ruby-identifier">resource_or_scope</span>), <span class="ruby-identifier">notice</span><span class="ruby-operator">:</span> <span class="ruby-identifier">notice</span>
 <span class="ruby-keyword">end</span></pre>
@@ -349,7 +498,7 @@
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 

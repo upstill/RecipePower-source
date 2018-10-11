@@ -8,6 +8,7 @@
 
 <script type="text/javascript">
   var rdoc_rel_prefix = "./";
+  var index_rel_prefix = "./";
 </script>
 
 <script src="./js/jquery.js"></script>
@@ -70,21 +71,13 @@
 
   <ul class="link-list" role="directory">
     
-    <li ><a href="#method-c-convert_references">::convert_references</a>
-    
     <li ><a href="#method-c-fix_redundant">::fix_redundant</a>
     
     <li ><a href="#method-c-new">::new</a>
     
-    <li ><a href="#method-c-probe_uris">::probe_uris</a>
-    
     <li ><a href="#method-c-time_lookup">::time_lookup</a>
     
-    <li ><a href="#method-i-convert_references">#convert_references</a>
-    
     <li ><a href="#method-i-correct_url_or_destroy">#correct_url_or_destroy</a>
-    
-    <li ><a href="#method-i-probe_uri">#probe_uri</a>
     
     <li ><a href="#method-i-scrape">#scrape</a>
     
@@ -145,77 +138,6 @@
        </header>
 
     
-      <div id="method-c-convert_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">convert_references</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="convert_references-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 11</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">convert_references</span>
-  <span class="ruby-comment"># Ensure all recipes have a PageRef</span>
-  <span class="ruby-identifier">reports</span> = [ <span class="ruby-string">&#39;***** RecipeServices.convert_references ********&#39;</span>]
-  <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">all</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:affiliate_id</span>)).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">rec</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span> <span class="ruby-operator">||</span> <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">url</span>.<span class="ruby-identifier">blank?</span>
-      <span class="ruby-keyword">if</span> <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>
-        <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">page_ref</span>.<span class="ruby-identifier">destroy</span>
-        <span class="ruby-identifier">rec</span>.<span class="ruby-identifier">reload</span>
-      <span class="ruby-keyword">end</span>
-      <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">rec</span>).<span class="ruby-identifier">convert_references</span>
-    <span class="ruby-keyword">end</span>
-  }
-
-  <span class="ruby-identifier">procids</span> =
-      (<span class="ruby-constant">PageRef</span><span class="ruby-operator">::</span><span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">virgin</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
-          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">processing</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
-          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">bad</span>.<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>) <span class="ruby-operator">+</span>
-          <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">http_status</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">pluck</span>(<span class="ruby-value">:id</span>)
-      ).<span class="ruby-identifier">uniq</span>.<span class="ruby-identifier">sort</span>
-
-  <span class="ruby-comment"># Ensure all RecipePageRefs have valid status and http_status</span>
-  <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">procids</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span> <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pr</span>).<span class="ruby-identifier">ensure_status</span> }
-
-  <span class="ruby-comment"># Clean up the PageRefs with nil URLs</span>
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:recipes</span>).<span class="ruby-identifier">where</span>(<span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-keyword">nil</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span>
-         <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
-           <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>).<span class="ruby-identifier">correct_url_or_destroy</span>
-         }
-       }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">sort</span>
-
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-constant">RecipePageRef</span>.<span class="ruby-identifier">bad</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:recipes</span>).<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">pr</span><span class="ruby-operator">|</span>
-    <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">present?</span>
-      <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">recipes</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span>
-        <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>).<span class="ruby-identifier">correct_url_or_destroy</span>
-      }
-    <span class="ruby-keyword">else</span>
-      <span class="ruby-node">&quot;RecipePageRef #{pr.id} (#{pr.url}) has no recipes&quot;</span>
-    <span class="ruby-keyword">end</span>
-  }.<span class="ruby-identifier">flatten</span>.<span class="ruby-identifier">compact</span>.<span class="ruby-identifier">sort</span>
-  <span class="ruby-identifier">reports</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-c-fix_redundant" class="method-detail ">
         
         <div class="method-heading">
@@ -236,7 +158,7 @@ as another) and merge them into the one that already owns the URL.</p>
 
           
           <div class="method-source-code" id="fix_redundant-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 172</span>
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 101</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">fix_redundant</span>
   <span class="ruby-identifier">redundant</span> = []
   <span class="ruby-identifier">current_ids</span> = <span class="ruby-constant">Set</span>.<span class="ruby-identifier">new</span> <span class="ruby-constant">Reference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">type</span><span class="ruby-operator">:</span> <span class="ruby-string">&quot;RecipeReference&quot;</span>).<span class="ruby-identifier">map</span>(<span class="ruby-operator">&amp;</span><span class="ruby-value">:affiliate_id</span>)
@@ -294,48 +216,6 @@ as another) and merge them into the one that already owns the URL.</p>
       </div>
 
     
-      <div id="method-c-probe_uris" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">probe_uris</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Take another look at the recipes&#39; links which haven&#39;t been
-validated</p>
-          
-          
-
-          
-          <div class="method-source-code" id="probe_uris-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 65</span>
-<span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">probe_uris</span>
-  <span class="ruby-identifier">reports</span> = []
-  <span class="ruby-identifier">unreachables</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>, <span class="ruby-value">:gleaning</span>).<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span> <span class="ruby-identifier">recipe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reachable?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span> }.<span class="ruby-identifier">compact</span>
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;**** Rechecking #{unreachables.count} recipes...&quot;</span>
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">+=</span> <span class="ruby-identifier">unreachables</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">unreachable</span><span class="ruby-operator">|</span>
-    <span class="ruby-comment"># Take another crack at the unreachable recipes</span>
-    <span class="ruby-constant">RecipeServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">unreachable</span>).<span class="ruby-identifier">probe_uri</span>
-  }.<span class="ruby-identifier">compact</span>
-  <span class="ruby-identifier">unreachables</span> = <span class="ruby-constant">Recipe</span>.<span class="ruby-identifier">includes</span>(<span class="ruby-value">:page_ref</span>, <span class="ruby-value">:gleaning</span>).<span class="ruby-identifier">all</span>.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">recipe</span><span class="ruby-operator">|</span> <span class="ruby-identifier">recipe</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reachable?</span> <span class="ruby-operator">==</span> <span class="ruby-keyword">false</span> }.<span class="ruby-identifier">compact</span>
-  <span class="ruby-identifier">reports</span> <span class="ruby-operator">&lt;&lt;</span> <span class="ruby-node">&quot;**** #{unreachables.count} recipes unreachable after checking&quot;</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-c-time_lookup" class="method-detail ">
         
         <div class="method-heading">
@@ -355,7 +235,7 @@ validated</p>
 
           
           <div class="method-source-code" id="time_lookup-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 205</span>
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 138</span>
 <span class="ruby-keyword">def</span> <span class="ruby-keyword">self</span>.<span class="ruby-identifier">time_lookup</span> <span class="ruby-identifier">ix</span>=<span class="ruby-value">0</span>, <span class="ruby-identifier">note</span>=<span class="ruby-string">&#39;&#39;</span>
   <span class="ruby-identifier">ix</span>, <span class="ruby-identifier">note</span> = <span class="ruby-value">0</span>, <span class="ruby-identifier">ix</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">ix</span>.<span class="ruby-identifier">is_a?</span>(<span class="ruby-constant">String</span>)
   <span class="ruby-identifier">recipe_urls</span> = [
@@ -674,13 +554,6 @@ validated</p>
         <span class="ruby-identifier">recipe_urls</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">url</span><span class="ruby-operator">|</span>
           <span class="ruby-identifier">ref</span> = <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">find_or_initialize</span> <span class="ruby-identifier">url</span><span class="ruby-operator">:</span> <span class="ruby-identifier">url</span>
         }
-      <span class="ruby-keyword">when</span> <span class="ruby-value">2</span>
-        <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Recipe via Reference&quot;</span>
-        <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;references_index_by_url_and_type&quot;</span>
-        <span class="ruby-identifier">index_table</span> = <span class="ruby-value">:references</span>
-        <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">lookup</span>(<span class="ruby-identifier">recipe_urls</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">ref</span><span class="ruby-operator">|</span>
-          <span class="ruby-identifier">recipe</span> = <span class="ruby-identifier">ref</span>.<span class="ruby-identifier">recipe</span>
-        }
       <span class="ruby-keyword">when</span> <span class="ruby-value">3</span>
         <span class="ruby-identifier">label</span> = <span class="ruby-string">&quot;Recipe via ID-no ref&quot;</span>
         <span class="ruby-identifier">index_name</span> = <span class="ruby-string">&quot;recipes_index_by_id&quot;</span>
@@ -762,46 +635,6 @@ validated</p>
        </header>
 
     
-      <div id="method-i-convert_references" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">convert_references</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          
-          
-          
-
-          
-          <div class="method-source-code" id="convert_references-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 53</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">convert_references</span>
-  <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Converting references for recipe #{recipe.id}:&quot;</span>
-  <span class="ruby-constant">RecipeReference</span>.<span class="ruby-identifier">where</span>(<span class="ruby-identifier">affiliate_id</span><span class="ruby-operator">:</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">id</span>).<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">reference</span><span class="ruby-operator">|</span>
-    <span class="ruby-identifier">reference</span>.<span class="ruby-identifier">bkg_enqueue</span> <span class="ruby-comment"># recipe.page_ref = PageRefServices.convert_reference reference, recipe.page_ref</span>
-    <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Enqueued RecipePageReference ##{reference.id} (#{reference.url})&quot;</span>
-    <span class="ruby-identifier">reference</span>.<span class="ruby-identifier">bkg_asynch</span>
-    <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;...returned&quot;</span>
-  }
-  <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">reload</span>
-<span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
       <div id="method-i-correct_url_or_destroy" class="method-detail ">
         
         <div class="method-heading">
@@ -824,7 +657,7 @@ processing</p>
 
           
           <div class="method-source-code" id="correct_url_or_destroy-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 87</span>
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 16</span>
   <span class="ruby-keyword">def</span> <span class="ruby-identifier">correct_url_or_destroy</span>
     <span class="ruby-identifier">pr</span> = <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>
 <span class="ruby-comment">    if !pr || pr.url.blank?
@@ -834,7 +667,7 @@ processing</p>
     else
       pr.perform unless pr.good? # Take another chance on a response
     end
-</span>    <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bkg_go</span>(<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>) <span class="ruby-comment"># Take another chance on a response</span>
+</span>    <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bkg_land</span>(<span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>) <span class="ruby-comment"># Take another chance on a response</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
       <span class="ruby-comment"># Try correcting the url via regexp</span>
       <span class="ruby-identifier">prs</span> = <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">pr</span>)
@@ -883,7 +716,7 @@ processing</p>
           <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span> <span class="ruby-operator">!=</span> <span class="ruby-identifier">pr</span>
             <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span> = <span class="ruby-identifier">new_page_ref</span>
             <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">save</span>
-            <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">glean!</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span>.<span class="ruby-identifier">bad?</span>
+            <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">bkg_land</span> <span class="ruby-keyword">if</span> <span class="ruby-identifier">new_page_ref</span>.<span class="ruby-identifier">bad?</span>
           <span class="ruby-keyword">end</span>
           <span class="ruby-keyword">return</span> <span class="ruby-node">&quot;Replaced PageRef ##{pr.id} &#39;#{old_url}&#39; with #{new_page_ref.id} &#39;#{new_page_ref.url}&#39;(#{new_page_ref.status}) http_status #{new_page_ref.http_status}&quot;</span>
         <span class="ruby-keyword">end</span>
@@ -891,7 +724,7 @@ processing</p>
     <span class="ruby-keyword">end</span>
     <span class="ruby-keyword">return</span> <span class="ruby-keyword">nil</span> <span class="ruby-keyword">unless</span> <span class="ruby-identifier">pr</span>.<span class="ruby-identifier">bad?</span>
     <span class="ruby-comment"># Still bad, after all that</span>
-    <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">glean!</span>(<span class="ruby-keyword">true</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-comment"># Presumably the gleaning matches the old url</span>
+    <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">bkg_land</span>(<span class="ruby-keyword">true</span>) <span class="ruby-keyword">unless</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span> <span class="ruby-comment"># Presumably the gleaning matches the old url</span>
     <span class="ruby-keyword">if</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">good?</span>
       <span class="ruby-node">&quot;Wouldn&#39;t destroy Recipe ##{recipe.id} (#{pr.url}): can be reached via gleaning&quot;</span>
     <span class="ruby-keyword">elsif</span> <span class="ruby-operator">!</span>[<span class="ruby-value">400</span>, <span class="ruby-value">404</span>, <span class="ruby-value">410</span>].<span class="ruby-identifier">include?</span> <span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">gleaning</span>.<span class="ruby-identifier">http_status</span>
@@ -906,39 +739,6 @@ processing</p>
       <span class="ruby-node">&quot;Destroyed recipe ##{recipe.id} (#{pr.url}): couldn&#39;t reach via gleaning (404 Not Found)&quot;</span>
     <span class="ruby-keyword">end</span>
   <span class="ruby-keyword">end</span></pre>
-          </div>
-          
-        </div>
-
-        
-
-        
-      </div>
-
-    
-      <div id="method-i-probe_uri" class="method-detail ">
-        
-        <div class="method-heading">
-          <span class="method-name">probe_uri</span><span
-            class="method-args">()</span>
-          
-          <span class="method-click-advice">click to toggle source</span>
-          
-        </div>
-        
-
-        <div class="method-description">
-          
-          <p>Take another crack at the recipe&#39;s URI</p>
-          
-          
-
-          
-          <div class="method-source-code" id="probe_uri-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 78</span>
-<span class="ruby-keyword">def</span> <span class="ruby-identifier">probe_uri</span>
-  <span class="ruby-constant">PageRefServices</span>.<span class="ruby-identifier">new</span>(<span class="ruby-identifier">recipe</span>.<span class="ruby-identifier">page_ref</span>).<span class="ruby-identifier">ensure_status</span> <span class="ruby-keyword">true</span>
-<span class="ruby-keyword">end</span></pre>
           </div>
           
         </div>
@@ -968,7 +768,7 @@ processing</p>
 
           
           <div class="method-source-code" id="scrape-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 186</span>
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 115</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">scrape</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;Recipe # #{@recipe.id}: #{@recipe.title}&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tsite: #{@recipe.site.name} (#{@recipe.site.home})&quot;</span>
@@ -976,10 +776,14 @@ processing</p>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tdescription: #{@recipe.description}&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\tpicurl: #{@recipe.picurl}&quot;</span>
   <span class="ruby-identifier">puts</span> <span class="ruby-string">&quot;\tExtractions:&quot;</span>
-  <span class="ruby-keyword">if</span> <span class="ruby-identifier">results</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span>(<span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">url</span>, <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">site</span>)
+  <span class="ruby-keyword">begin</span>
+    <span class="ruby-identifier">results</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">glean</span> <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">url</span>, <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">site</span>
     <span class="ruby-identifier">results</span>.<span class="ruby-identifier">labels</span>.<span class="ruby-identifier">each</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">label</span><span class="ruby-operator">|</span> <span class="ruby-identifier">puts</span> <span class="ruby-node">&quot;\t\t#{label}: #{results.result_for(label)}&quot;</span> }
-  <span class="ruby-keyword">else</span>
+  <span class="ruby-keyword">rescue</span> <span class="ruby-constant">Exception</span> =<span class="ruby-operator">&gt;</span> <span class="ruby-identifier">msg</span>
     <span class="ruby-identifier">puts</span> <span class="ruby-string">&#39;!!! Couldn\t open the page for analysis!&#39;</span>
+    <span class="ruby-identifier">errmsg</span> = <span class="ruby-constant">FinderServices</span>.<span class="ruby-identifier">err_breakdown</span>(<span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">url</span>, <span class="ruby-identifier">msg</span>)[<span class="ruby-value">:msg</span>]
+    <span class="ruby-ivar">@recipe</span>.<span class="ruby-identifier">errors</span>.<span class="ruby-identifier">add</span> <span class="ruby-value">:url</span>, <span class="ruby-identifier">errmsg</span>
+    <span class="ruby-identifier">puts</span> <span class="ruby-identifier">errmsg</span>
   <span class="ruby-keyword">end</span>
   <span class="ruby-identifier">results</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1012,7 +816,7 @@ processing</p>
 
           
           <div class="method-source-code" id="show_tags-source">
-            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 201</span>
+            <pre><span class="ruby-comment"># File app/services/recipe_services.rb, line 134</span>
 <span class="ruby-keyword">def</span> <span class="ruby-identifier">show_tags</span>(<span class="ruby-identifier">file</span>=<span class="ruby-constant">STDOUT</span>)
   <span class="ruby-identifier">file</span>.<span class="ruby-identifier">puts</span> <span class="ruby-identifier">tags</span>.<span class="ruby-identifier">sort</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">t1</span>, <span class="ruby-identifier">t2</span><span class="ruby-operator">|</span> <span class="ruby-identifier">t1</span>.<span class="ruby-identifier">id</span> <span class="ruby-operator">&lt;=&gt;</span> <span class="ruby-identifier">t2</span>.<span class="ruby-identifier">id</span> }.<span class="ruby-identifier">collect</span> { <span class="ruby-operator">|</span><span class="ruby-identifier">tag</span><span class="ruby-operator">|</span> <span class="ruby-node">&quot;#{tag.id.to_s}: #{tag.name}&quot;</span> }.<span class="ruby-identifier">join</span> <span class="ruby-string">&quot;\n&quot;</span>
 <span class="ruby-keyword">end</span></pre>
@@ -1034,7 +838,7 @@ processing</p>
 
 <footer id="validator-badges" role="contentinfo">
   <p><a href="http://validator.w3.org/check/referer">Validate</a>
-  <p>Generated by <a href="http://docs.seattlerb.org/rdoc/">RDoc</a> 4.2.0.
+  <p>Generated by <a href="https://rdoc.github.io/rdoc">RDoc</a> 5.0.0.
   <p>Based on <a href="http://deveiate.org/projects/Darkfish-RDoc/">Darkfish</a> by <a href="http://deveiate.org">Michael Granger</a>.
 </footer>
 
