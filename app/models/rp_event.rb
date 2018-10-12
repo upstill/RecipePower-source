@@ -247,7 +247,7 @@ class SharedEvent < RpEvent
                      # : :show_path,
                      email_allowed: true,
                      # notifiable_path: ->(event, key) {
-                     #   polymorphic_path([:associated, shared], format: :json, method: :get)
+                     #   polymorphic_path([:associated, shared.decorate.as_base_class], format: :json, method: :get)
                      # },
                      # Set true to :tracked option to generate automatic tracked notifications.
                      # It adds required callbacks to generate notifications for creation and update of the notifiable model.
@@ -258,7 +258,8 @@ class SharedEvent < RpEvent
   end
 
   def notifiable_path event, key
-    polymorphic_path([:associated, shared]) rescue polymorphic_path(shared)
+    shared_as_base_class = shared.decorate.as_base_class
+    polymorphic_path([:associated, shared_as_base_class]) rescue polymorphic_path(shared_as_base_class)
   end
 
   # Act on a Shared event by adding the entity to the collection of the user shared with

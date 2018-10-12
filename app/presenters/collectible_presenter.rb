@@ -113,7 +113,7 @@ class CollectiblePresenter < BasePresenter
                     }.compact) if decorator.respond_to?(:external_link)
         img <<
             link_to_dialog('',
-                           polymorphic_path([:editpic, decorator]),
+                           polymorphic_path([:editpic, decorator.as_base_class]),
                            class: 'dblclicker') if decorator.user_can?(:update) && decorator.object.is_a?(Picable)
       end
       content_tag :div, img, class: 'onlinks pic-box'

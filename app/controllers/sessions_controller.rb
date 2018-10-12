@@ -28,7 +28,7 @@ class SessionsController < Devise::SessionsController
         end
       end
       redir = controller.show_page(blocked_request) do |entity, args={}|
-        polymorphic_path entity, args if entity
+        polymorphic_path view_context.polymorphable(entity), args if entity
       end if controller.respond_to(:show_page)
       redirect_to redir.if_present || home_path
     else

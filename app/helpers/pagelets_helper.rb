@@ -54,7 +54,7 @@ module PageletsHelper
     request =
         destroyed ?
             collection_user_path(current_user) :
-            polymorphic_path(decorator, :nocache => true)
+            polymorphic_path(decorator.as_base_class, :nocache => true)
     {
         request: request,
         target: pagelet_body_selector(entity)

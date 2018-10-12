@@ -15,7 +15,7 @@
     <p class="share_recipe_title">
       <a href="<%= item_link %>" , target="_blank"><%= decorator.title %></a>
       &nbsp;&nbsp;<a class="share_recipe_internal"
-                     href="<%= polymorphic_url [:touch, polymorphable(decorator)],
+                     href="<%= polymorphic_url [:touch, decorator.as_base_class],
                                                :user_id => @touch_id,
                                                :collect => true %>",
                      target="_blank">

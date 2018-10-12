@@ -61,6 +61,12 @@ class ModelDecorator < Draper::Decorator
     object.class.base_class.to_s
   end
 
+  # Reduce the object to its base class for the use of polymorphic_path
+  def as_base_class
+    bc = object.class.base_class
+    (bc == object.class) ? object : object.becomes(bc)
+  end
+
   # Recipe => 'recipe'
   # FeedEntry => 'feed_entry'
   def singular_name

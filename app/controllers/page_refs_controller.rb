@@ -39,11 +39,12 @@ class PageRefsController < CollectibleController
   #       N: redraw the dialog with a flash error
   def create
     if current_user
-      @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
+      @entity = @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
       if !@page_ref.errors.any?
         @page_ref.bkg_land
         update_and_decorate @page_ref
         @entity = RefereeServices.new(@page_ref).assert_kind params[:page_ref][:kind], true
+        @entity.bkg_land
       end
       respond_to do |format|
         format.json {
@@ -58,8 +59,8 @@ class PageRefsController < CollectibleController
           # This is from the "dialog" in the 'collect' layout. Response depends on errors:
           #   * No errors: present an equally simple page with dialog offering a link to the entity on RecipePower
           #   * Errors: re-render the dialog with an error flash and the provided parameters
-          if @page_ref.errors.any?
-            resource_errors_to_flash @page_ref
+          if @entity.errors.any?
+            resource_errors_to_flash @entity
             render 'pages/collect', layout: 'collect'
           else
             render layout: 'collect'

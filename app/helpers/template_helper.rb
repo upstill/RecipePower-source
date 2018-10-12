@@ -10,7 +10,7 @@ module TemplateHelper
       options[:template] = { id: template_id, subs: entity.data(options.delete(:attribs)) }
     end
     button_options = styling.slice(:button_size).merge options
-    link_to_submit label, polymorphic_path([:tag, decorator], styling: styling), button_options
+    link_to_submit label, polymorphic_path([:tag, decorator.as_base_class], styling: styling), button_options
   end
 
 end

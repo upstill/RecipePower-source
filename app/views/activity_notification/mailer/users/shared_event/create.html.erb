@@ -193,7 +193,7 @@
   </div>
   <div style="display: inline-block; margin: 10px;float: left;">
     <%= link_to "Save to My Collection",
-                polymorphic_url(shared, notification_token: @notification.id),
+                polymorphic_url(@decorator.as_base_class, notification_token: @notification.id),
                 # move_notification_url_for(@notification, open: true),
                 # notifications_accept_url(notification_token: @notification.notification_token, autosave: true),
                 class: "get_button btn-lg btn-success" %>

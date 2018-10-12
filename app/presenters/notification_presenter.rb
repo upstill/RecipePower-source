@@ -11,9 +11,9 @@ class NotificationPresenter
   def referral_path
     case evt = notification.target
       when InvitationSentEvent
-        polymorphic_path( [:show, evt.shared]) if evt.shared
+        polymorphic_path( [:show, evt.shared.decorate.as_base_class]) if evt.shared
       when SharedEvent
-        polymorphic_path [:show, evt.shared]
+        polymorphic_path [:show, evt.shared.decorate.as_base_class]
     end
   end
 

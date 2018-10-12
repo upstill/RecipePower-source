@@ -1,4 +1,4 @@
-class RefermentDecorator < Draper::Decorator
+class RefermentDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

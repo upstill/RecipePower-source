@@ -1,4 +1,4 @@
-class RpEventDecorator < Draper::Decorator
+class RpEventDecorator < ModelDecorator
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

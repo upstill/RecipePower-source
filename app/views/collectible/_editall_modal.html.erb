@@ -121,7 +121,7 @@
                    />
           </div>
           <%= link_to_dialog 'Extract Images',
-                             polymorphic_path([:editpic, @decorator]),
+                             polymorphic_path([:editpic, @decorator.as_base_class]),
                              class: 'btn btn-info url-extract-button float-right-button',
                              data: { :'wait-msg' => 'Give us a sec to crack that page...' }
           %>
@@ -152,7 +152,7 @@
 
     <%# render 'form_lists' %>
     <form accept-charset="UTF-8"
-          action="<%= polymorphic_path [:lists, decorator ] %>"
+          action="<%= polymorphic_path [:lists, @decorator.as_base_class ] %>"
           class="form-inline lists_collectible"
           data-remote="true"
           data-type="json"

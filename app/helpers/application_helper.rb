@@ -269,13 +269,13 @@ module ApplicationHelper
           end
     # NB: entities can have nil approval status, in which case both buttons should show
     str << link_to_submit(labels[0],
-                          polymorphic_path( [:approve, decorator], approve: 'Y'),
+                          polymorphic_path( [:approve, decorator.as_base_class], approve: 'Y'),
                           button_style: 'success',
                           button_size: 'xs',
                           method: 'POST'
     ) unless entity.approved == true
     str << link_to_submit(labels[2],
-                          polymorphic_path( [:approve, decorator], approve: 'N'),
+                          polymorphic_path( [:approve, decorator.as_base_class], approve: 'N'),
                           button_style: 'danger',
                           button_size: 'xs',
                           method: 'POST'

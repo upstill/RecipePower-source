@@ -49,7 +49,7 @@ module CollectibleHelper
         size, styling = nil, size
       end
       button = button_to_submit styling.delete(:label),
-                                polymorphic_path([:edit, decorator], styling: styling),
+                                polymorphic_path([:edit, decorator.as_base_class], styling: styling),
                                 'glyph-edit-red',
                                 size,
                                 styling.merge(mode: :modal, title: 'Edit Me')
@@ -64,7 +64,7 @@ module CollectibleHelper
         size, styling = nil, size
       end
       button = button_to_submit options.delete(:label),
-                                polymorphic_path([:lists, decorator], :mode => :modal),
+                                polymorphic_path([:lists, decorator.as_base_class], :mode => :modal),
                                 'glyph-list-add',
                                 size,
                                 :title => 'Manage treasuries on which this appears'
@@ -152,7 +152,7 @@ module CollectibleHelper
         size, options = nil, size
       end
       button = button_to_submit styling.delete(:label),
-                                polymorphic_path( [:editpic, decorator], styling: styling),
+                                polymorphic_path( [:editpic, decorator.as_base_class], styling: styling),
                                 'glyph-upload',
                                 size,
                                 styling.merge(mode: :modal, title: 'Get Picture')
@@ -242,7 +242,7 @@ module CollectibleHelper
     options = query_options.slice! :in_collection, :comment, :private
     query_options[:styling] = styling
     link_to_submit label,
-                   polymorphic_path([:collect, decorator], query_options),
+                   polymorphic_path([:collect, decorator.as_base_class], query_options),
                    {title: 'Add to My Collection'}.
                        merge(options).
                        merge(method: 'PATCH',
