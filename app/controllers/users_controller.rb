@@ -183,13 +183,12 @@ class UsersController < CollectibleController
     @user = User.find user_id
     @user.subscribed = params[:user] && (params[:user][:subscribed] == 'true')
     update_and_decorate @user
-    @user.save
     if @user.subscribed
       respond_to do |format|
         format.json { render json: { done: true, popup: 'Unsubscribe Reversed. Thanks for Reading!' } }
       end
     else
-      smartrender # render :controller => :pages, :action => :home
+      smartrender
     end
   end
 

@@ -372,6 +372,7 @@ class ApplicationController < ActionController::Base
     # Transfer the contents of the flash to the trigger
     options = {mode: :modal}
     flash.each { |type, message| options["flash[#{type}]"] = message } if defined?(flash)
+    page = page.if_present || (current_user ? collection_user_path(current_user) : '/home')
     redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
   end
 
