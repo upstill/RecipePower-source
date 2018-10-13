@@ -1,25 +1,3 @@
-<!--
-<div class="header_content">
-  <div class="message_banner">
-    <strong><%#= @sender.polite_name %></strong> sez:
-    <%#= link_to "RecipePower", root_url, class: "brand", style: "font-size:18px;" %> has a
-    <%#= @recipient.shared.model_name.human.downcase %> for you.
-  </div>
-  <%# unless @recipient.invitation_message.blank? %>
-      <div class="message_content">
-        <blockquote><%#= @recipient.invitation_message %></blockquote>
-      </div>
-  <%# end %>
-</div>
-<div class="message_box">
-  <%#= render "rp_devise_mailer/collectible_share",
-             accept_invitation_link: notifications_accept_url(notification_token: @notification.notification_token)
-  %>
-</div>
-<br>
--->
 <%= render 'message_box' %>
-<%# render 'message_box_old' %>
 
-<%# link_to 'Edit', edit_edition_path(@edition) %> |
-<%# link_to 'Back', editions_path %>
+<%= link_to 'Edit', edit_edition_path(@edition) %> |

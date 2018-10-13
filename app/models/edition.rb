@@ -44,6 +44,9 @@ class Edition < ActiveRecord::Base
     time = Time.now + 5.seconds
     User.where(subscribed: true).where("last_edition < #{number}").each { |u|
       u.bkg_launch true, run_at: time
+      if Rails.env.development?
+        u.bkg_land
+      end
       time = time + 20.minutes
     }
   end

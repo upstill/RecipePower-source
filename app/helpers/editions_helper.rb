@@ -10,11 +10,12 @@ module EditionsHelper
       # Recipes, sites and feed entries redirect to the original item.
       # Other entities are internal to RecipePower, so go there.
       touch_params[:redirect_external] = true if [Recipe, Site, FeedEntry].include? item.class
+      decorator = item.decorate
       render 'editions/message_item',
              headline: headline,
-             decorator: item.decorate,
+             decorator: decorator,
              before_text: before_text,
-             item_link: polymorphic_url([:touch, polymorphable(item)], touch_params),
+             item_link: polymorphic_url([:touch, decorator.as_base_class], touch_params),
              after_text: after_text
     end
   end
