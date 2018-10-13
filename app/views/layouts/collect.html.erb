@@ -13,15 +13,51 @@
 
       div.collect_form {
           font-family: Oswald, "Helvetica Neue", Helvetica, Arial, sans-serif;
-          font-size: 1.2em;
           background-color: #4B815B;
           color: #ECE6CD;
           width: 6in;
-          max-width: 380px;
+          max-width: 100%;
           margin-left: auto;
           margin-right: auto;
           margin-top: 30px;
-          padding: 10px;
+          padding: 0px;
+      }
+      div.inset {
+          width: 94%;
+          padding: 3%;
+          padding-bottom: 20px;
+      }
+      @media only screen and (max-width: 325px) {
+          span.prompt {
+              font-size: 0.85em;
+          }
+          label {
+              font-size: 0.85em;
+          }
+      }
+      @media only screen and (min-width: 326px) and (max-width: 400px) {
+          span.prompt {
+              font-size: 0.95em;
+          }
+          label {
+              font-size: 0.95em;
+          }
+      }
+      @media only screen and (min-width: 401px) and (max-width: 800px) {
+          span.prompt {
+              font-size: 1.1em;
+          }
+          label {
+              font-size: 1.1em;
+          }
+      }
+      @media only screen and (min-width: 801px) {
+          span.prompt {
+              font-size: 1.2em;
+          }
+          label {
+              font-size: 1.2em;
+          }
       }
 
       div.flash_notifications {
@@ -41,27 +77,37 @@
       }
 
       textarea.url_field {
-          width: 95%;
-          margin: 10px;
+          width: 92%;
+          margin-left: 4%;
+          margin-right: 4%;
+          margin-top: 10px;
+          margin-bottom: 10px;
           font-size: 0.8em;
       }
 
       span.prompt {
-          font-size: 0.9em;
           margin: 10px;
+          margin-right: 0;
       }
 
       label.kind {
       }
 
       select#page_ref_kind {
-
+        background-color: rgb(248, 248, 248);
+          border-width: 1px;
+          border-style: solid;
+          border-color: rgb(166, 166, 166);
       }
 
       input.submit_button {
           float: right;
-          display: inline-block;
-          margin: 2px;
+          padding: 4px;
+          background-color: #28a745;
+          border-color: #7ea888;
+          color: inherit;
+          border-radius: .3rem;
+          font-size: 0.8em;
       }
   </style>
   <%= csrf_meta_tag %>

@@ -188,7 +188,7 @@ class UsersController < CollectibleController
         format.json { render json: { done: true, popup: 'Unsubscribe Reversed. Thanks for Reading!' } }
       end
     else
-      smartrender
+      smartrender modal_page: '/popup'
     end
   end
 

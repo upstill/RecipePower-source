@@ -224,7 +224,7 @@ class ApplicationController < ActionController::Base
           format.html do
             if response_service.mode == :modal
               # Run the request as a dialog within the home or collection page
-              redirect_to_modal url
+              redirect_to_modal url, renderopts[:modal_page]
             else
               render response_service.action, renderopts
             end

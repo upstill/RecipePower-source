@@ -78,7 +78,7 @@ class PagesController < ApplicationController
       if dialog = pending_modal_trigger
         # There's a modal pending
         respond_to do |format|
-          format.html { redirect_to view_context.page_with_trigger(home_path, dialog) }
+          format.html { render layout: 'signin' } # redirect_to view_context.page_with_trigger(home_path, dialog) }
           format.json { redirect_to dialog }
         end
       elsif page_request = request_matching(:format => :html)
