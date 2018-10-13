@@ -13,7 +13,10 @@
                                     id: 'rcpPic_step2' %>
     </div>
     <p class="drag-text">First, drag the button from above to your browser's Bookmarks bar.</p>
-    <p style="font-size: 80%; line-height: 1.1em">(If the bookmarks bar isn't visible, you can find it under "View" in the top menus)</p>
+    <p style="font-size: 80%; line-height: 1.1em">If the bookmarks bar isn't visible, you can find it under "View" in the top menus.</p>
+    <p style="font-size: 80%; line-height: 1.1em"><strong>NB:</strong>If your browser <strong>doesn't</strong> have a bookmarks bar,
+      go to <%= link_to 'recipepower.com/collect', collect_path %>
+      and bookmark that. You'll have to copy recipe links by hand, but that's not hard.)</p>
     <hr>
     <div class="instructions_step pic-box" style="width: 150px; float: right">
       <%= image_with_error_recovery image_path('InstallCookmark2.png'),
