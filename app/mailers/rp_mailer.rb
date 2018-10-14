@@ -32,7 +32,7 @@ class RpMailer < ActionMailer::Base
     @markdown = Redcarpet::Markdown.new Redcarpet::Render::HTML
     @unsubscribe = Rails.application.message_verifier(:unsubscribe).generate @recipient.id
     @touch_id = Rails.application.message_verifier(:touch).generate @recipient.id
-    mail :to => recipient.email, :from => '"RecipePower" <recipepowerfeedback@gmail.com>', :subject => "Cooking Smarts" # edition.banner
+    mail :to => recipient.email, :from => '"RecipePower" <support@recipepower.com>', :subject => 'Cooking Smarts' # edition.banner
   end
 
 end
