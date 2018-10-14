@@ -26,7 +26,7 @@ body.editions {
     }
   }
   p {
-    font-size: 12px;
+    font-size: 0.9em;
     margin: 10px 40px;
     line-height: 1.2em;
   }
@@ -116,11 +116,11 @@ body.editions {
           color: inherit;
         }
         a {
-          font-size: 0.9em;
+          font-size: 1.2em;
           color: #5aab7a;
           text-decoration: none;
           &.share_recipe_internal {
-            font-size: 0.5em;
+            font-size: 0.7em;
           }
         }
       }
@@ -134,7 +134,7 @@ body.editions {
         // max-height: 2.8em;
         text-decoration: none;
         color: #909090;
-        font-size: 0.8em;
+        font-size: 0.9em;
         margin: 12px;
       }
     }
