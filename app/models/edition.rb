@@ -30,7 +30,7 @@ class Edition < ActiveRecord::Base
     if ed.published && ed.published_at
       # Launch if virgin/relaunch if published_at has changed
       if ed.virgin? || (ed.dj && (ed.dj.run_at != ed.published_at))
-        ed.bkg_launch run_at: ed.published_at
+        ed.bkg_launch true, run_at: ed.published_at
         if Rails.env.development?
           ed.bkg_land
         end
