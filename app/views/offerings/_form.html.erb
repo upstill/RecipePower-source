@@ -1,0 +1,12 @@
+<%= simple_form_for(@offering) do |f| %>
+  <%= form_errors_helper f %>
+
+  <div class="form-inputs">
+    <%= f.input :product_id %>
+    <%= f.input :page_ref_id %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

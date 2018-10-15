@@ -109,3 +109,9 @@ en:
             email:
               blank: needed for signup
               invalid: needs to be a working email address
+  forms:
+    feeds:
+      new:
+        labels:
+          submit: "Add Feed"
+          url: "URL of an RSS feed:"

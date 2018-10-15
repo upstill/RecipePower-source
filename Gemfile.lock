@@ -85,6 +85,7 @@ GEM
     aws-sdk-v1 (1.67.0)
       json (~> 1.4)
       nokogiri (~> 1)
+    barkick (0.1.0)
     bcrypt (3.1.11)
     benchmark-ips (2.7.2)
     binding_of_caller (0.8.0)
@@ -472,6 +473,7 @@ DEPENDENCIES
   autoprefixer-rails
   awesome_nested_set
   aws-sdk (~> 1)
+  barkick
   binding_of_caller
   bootstrap-sass (~> 3.3.4)
   bourbon

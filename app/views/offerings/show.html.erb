@@ -1,0 +1,14 @@
+<p id="notice"><%= notice %></p>
+
+<p>
+  <strong>Product:</strong>
+  <%= @offering.product_id %>
+</p>
+
+<p>
+  <strong>Page ref:</strong>
+  <%= @offering.page_ref_id %>
+</p>
+
+<%= link_to 'Edit', edit_offering_path(@offering) %> |
+<%= link_to 'Back', offerings_path %>

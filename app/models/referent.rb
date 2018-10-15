@@ -44,6 +44,7 @@ class Referent < ActiveRecord::Base
       PageRef
       Reference
       Recipe
+      Product
       Referent
       SourceReferent
       InterestReferent
@@ -75,6 +76,9 @@ class Referent < ActiveRecord::Base
 
   has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef', inverse_of: :referents
   accepts_nested_attributes_for :page_refs
+
+  # Each Product may have numerous Offerings
+  has_many :offerings, :through => :products
   # has_many :referents, :through => :referments, :source => :referee, :source_type => 'Referent'
 
 =begin

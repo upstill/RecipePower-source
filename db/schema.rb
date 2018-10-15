@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20180731005408) do
+ActiveRecord::Schema.define(version: 20181015212404) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -277,6 +277,13 @@ ActiveRecord::Schema.define(version: 20180731005408) do
   add_index "notifications", ["notifier_type", "notifier_id"], name: "index_notifications_on_notifier_type_and_notifier_id", using: :btree
   add_index "notifications", ["target_type", "target_id"], name: "index_notifications_on_target_type_and_target_id", using: :btree
 
+  create_table "offerings", force: :cascade do |t|
+    t.integer  "product_id"
+    t.integer  "page_ref_id"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+  end
+
   create_table "page_refs", force: :cascade do |t|
     t.text     "url"
     t.string   "domain"
@@ -314,9 +321,12 @@ ActiveRecord::Schema.define(version: 20180731005408) do
   end
 
   create_table "products", force: :cascade do |t|
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
+    t.datetime "created_at",             null: false
+    t.datetime "updated_at",             null: false
     t.integer  "picture_id"
+    t.string   "barcode"
+    t.integer  "bctype",     default: 0
+    t.string   "title"
   end
 
   create_table "ratings", force: :cascade do |t|

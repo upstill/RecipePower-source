@@ -1,0 +1,29 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Listing Offerings</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Product</th>
+      <th>Page ref</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @offerings.each do |offering| %>
+      <tr>
+        <td><%= offering.product_id %></td>
+        <td><%= offering.page_ref_id %></td>
+        <td><%= link_to 'Show', offering %></td>
+        <td><%= link_to 'Edit', edit_offering_path(offering) %></td>
+        <td><%= link_to 'Destroy', offering, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Offering', new_offering_path %>

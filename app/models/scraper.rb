@@ -227,6 +227,29 @@ class Scraper < ActiveRecord::Base
 
 end
 
+class Www_oaktownspiceshop_com_Scraper < Scraper
+  def self.handler url_or_uri
+    case url_or_uri
+    when /\/blogs\/recipes\//
+      :oss_recipe
+    when /\/products\//
+      :oss_product
+    end
+  end
+
+  def oss_product
+
+  end
+
+  def oss_recipe
+    product_links = page.search 'div.clearfix.section a[href*="/products/"]'
+    product_links.each do |link|
+      tagname = link.innerText
+      productname = link.title
+    end
+  end
+end
+
 # Scraper for SeriousEats
 class Www_seriouseats_com_Scraper < Scraper
   def self.handler url_or_uri
