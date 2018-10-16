@@ -1,6 +1,5 @@
 module Collectible
   extend ActiveSupport::Concern
-  include Taggable
   include Voteable
   include Picable
 

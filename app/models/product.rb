@@ -1,11 +1,13 @@
 
 class Product < ActiveRecord::Base
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
+  include Referrable
 
   include Pagerefable
-  pagerefable :page_ref
+  pagerefable :url
 
-  has_many :offerings
+  has_many :offerings, dependent: :destroy
 
   picable :picurl, :picture
 

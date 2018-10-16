@@ -2,6 +2,7 @@
 require './lib/uri_utils.rb'
 
 class Site < ActiveRecord::Base
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Referrable
   include Backgroundable

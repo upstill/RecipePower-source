@@ -1,4 +1,5 @@
 class FeedEntry < ActiveRecord::Base
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
   picable :picurl, :picture
 

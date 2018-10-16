@@ -139,8 +139,6 @@ ActiveRecord::Schema.define(version: 20181015212404) do
     t.integer  "number"
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
-    t.integer  "status",           default: 0
-    t.integer  "dj_id",            default: 0
   end
 
   create_table "event_notices", force: :cascade do |t|
@@ -321,12 +319,13 @@ ActiveRecord::Schema.define(version: 20181015212404) do
   end
 
   create_table "products", force: :cascade do |t|
-    t.datetime "created_at",             null: false
-    t.datetime "updated_at",             null: false
+    t.datetime "created_at",              null: false
+    t.datetime "updated_at",              null: false
     t.integer  "picture_id"
     t.string   "barcode"
-    t.integer  "bctype",     default: 0
+    t.integer  "bctype",      default: 0
     t.string   "title"
+    t.integer  "page_ref_id"
   end
 
   create_table "ratings", force: :cascade do |t|

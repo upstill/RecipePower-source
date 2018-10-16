@@ -3,10 +3,10 @@ class Offering < ActiveRecord::Base
 
   # Link to the offering page
   include Pagerefable
-  pagerefable :page_ref
+  pagerefable :url
 
   # The product on offer
-  has_one :product
+  belongs_to :product
 
   attr_accessible :product, :page_ref
 

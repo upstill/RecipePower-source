@@ -7,17 +7,6 @@ module Taggable
     # When the record is saved, save its affiliated tagging info
     before_save do
       if @tagging_user_id
-=begin
-        if @tagging_tag_tokens # May not actually be editing tags
-          # Map the elements of the token string to tags, whether existing or new
-          set_tag_ids TokenInput.parse_tokens(@tagging_tag_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
-                        token.is_a?(Fixnum) ? token : Tag.strmatch(token,
-                                                                   userid: @tagging_user_id,
-                                                                   tagtype_x: :List,
-                                                                   assert: true)[0].id # Match or assert the string
-                      }
-        end
-=end
         if @tagging_list_tokens
           # Map the elements of the token string to tags, whether existing or new
           ListServices.associate(

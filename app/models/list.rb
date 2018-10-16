@@ -60,6 +60,7 @@ class List < ActiveRecord::Base
   include Commentable
   commentable :notes
   include Typeable
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
   picable :picurl, :picture, "List_Icon.png"
   after_save :propagate_privacy

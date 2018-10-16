@@ -6,6 +6,7 @@ require 'nokogiri'
 require 'htmlentities'
 
 class Recipe < ActiveRecord::Base
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Referrable # Is associated with a Referent
   include Backgroundable

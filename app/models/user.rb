@@ -18,6 +18,7 @@ class User < ActiveRecord::Base
   @@Guest_user_id = 4
   @@Super_user_id = 5
 
+  include Taggable # Can be tagged using the Tagging model
   include Collectible
   # Keep an avatar URL denoted by the :image attribute and kept as :thumbnail
   picable :image, :thumbnail, 'default-avatar-128.png'
