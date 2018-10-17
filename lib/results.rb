@@ -1,6 +1,6 @@
 require 'result.rb'
 
-class Results < Hash
+class Results < HashWithIndifferentAccess
 
   def initialize *labels
     labels.each { |label| self[label] = [] }

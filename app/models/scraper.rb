@@ -30,7 +30,6 @@ class Registrar < Object
 
   # Ensure that a recipe has been filed, and launch it for scraping if new
   def register_recipe recipe_link, extractions
-    scrape recipe_link
     recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
     Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
     extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
@@ -100,9 +99,9 @@ class Registrar < Object
     else
       ref, tag = tag_or_referent, tag_or_referent.primary_expression
     end
-    title = (options[:title] && options[:title].to_s) || tag.name
     product_pageref = PageRefServices.assert :product, page_link.to_s
     product_pageref.save
+    title = (options[:title] && options[:title].to_s) || product_pageref.title.if_present || tag.name
     unless product = ref.products.where(page_ref_id: product_pageref.id).first
       product = Product.find_or_create_by(page_ref: product_pageref, title: title)
       ref.products << product
@@ -148,7 +147,7 @@ class Scraper < ActiveRecord::Base
   backgroundable
 
   attr_accessible :url, :what, :subclass, :run_at, :waittime, :errcode, :recur
-  attr_accessor :immediate
+  attr_accessor :immediate, :page
 
   attr_accessor :mechanize
   # @@LaunchedScrapers = {}
@@ -174,6 +173,7 @@ class Scraper < ActiveRecord::Base
     uri = normalized_uri CGI.unescape(url)
     subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
 
+    # Each subclass has a #handler method to map from the uri to the method used to parse that url
     what ||= subclass.constantize.handler uri
 
     scraper = self.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what, subclass: subclass)
@@ -190,7 +190,11 @@ class Scraper < ActiveRecord::Base
   def perform 
     self.errcode = 0
     Rails.logger.info "!!!Scraper Started Performing #{what} on #{url} with status #{status}"
-    self.becomes(subclass.constantize).send what.to_sym # Invoke the scraper
+    # Make the connection and get the page
+    handler = self.becomes subclass.constantize
+    handler.open
+    # Run the scraper method for this page
+    handler.send what.to_sym # Invoke the scraper
     Rails.logger.info "!!!Scraper Finished Performing #{what} on #{url} with status #{status}"
   end
 
@@ -203,15 +207,24 @@ class Scraper < ActiveRecord::Base
   # because, by default, that's all that's left after saving the record
   # Here, we record an errcode as well as adding the error to :base errors
   def error job, exception
-    symptom =
-        case self.errcode = exception.respond_to?(:response_code) ? exception.response_code.to_i : -1
-          when 503
-            'Host isn\'t talking at the moment'
-          when 404
-            'URL doesn\'t point to anything!'
-        end
+    self.errmsg = "#{exception.class.to_s} ERROR: #{exception.to_s}"
+    if exception.respond_to?(:response_code)
+      elaboration =
+      case errcode = exception.response_code.to_i
+      when 503
+        ' Host isn\'t talking at the moment'
+      when 404
+        ' URL doesn\'t point to anything!'
+      end
+      self.errmsg << "(HTTP Response Code #{errcode}#{elaboration})"
+    else
+      self.errcode = -1
+    end
+    cutoff = exception.backtrace.find_index { |lev| lev.match('scraper.rb') && lev.match('perform') } || -1
+    self.errmsg << "\n\t" + exception.backtrace[0..cutoff].join("\n\t")
     # Adding an error here ensures that the object will be recorded as :bad
-    errors.add :base, "Error ##{errcode}(#{symptom}): #{exception}"
+    Rails.logger.info "!!!Scraper ##{id} Failed on #{url} with status #{status}:\n#{errmsg}"
+    errors.add :base, "Error ##{errcode} (#{errmsg})"
   end
 
   def handler
@@ -231,15 +244,13 @@ class Scraper < ActiveRecord::Base
     }
   end
 
-  # Get the page data via Mechanize
-  def page
-    return @page if @page
-
+  # Open the page for reading via Mechanize
+  def open
     Rails.logger.info "!!!Scraper Getting page #{url}"
     mechanize = Mechanize.new
     mechanize.user_agent_alias = 'Mac Safari'
     mechanize
-    @page = mechanize.get url
+    self.page = mechanize.get url
   end
 
   def uri
@@ -264,7 +275,10 @@ end
 
 class Oaktownspiceshop_com_Scraper < Scraper
   def self.handler url_or_uri
-    case url_or_uri.to_s
+    uri = url_or_uri.is_a?(String) ? URI(url_or_uri) : url_or_uri
+    case uri.path
+    when /\/blogs\/recipes$/
+      :oss_recipes
     when /\/blogs\/recipes\//
       :oss_recipe
     when /\/products\//
@@ -274,6 +288,18 @@ class Oaktownspiceshop_com_Scraper < Scraper
 
   def oss_product
 
+  end
+
+  def oss_recipes
+    page.search( 'div.article h2 a').each do |link|
+      # For each recipe listed on the page
+      url = link.attribute('href')
+      registrar.register_recipe url, Title: link.text
+      scrape url
+    end
+    if next_link = page.search('span.next a').first
+      scrape next_link
+    end
   end
 
   def oss_recipe
@@ -437,6 +463,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       end
     }
     registrar.register_recipe recipe_link, extractions.compact
+    scrape recipe_link
   end
 
   # Scrape the definition of a tag, and the link to the tag's page
@@ -773,6 +800,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       }.join ', '
 
       r = registrar.register_recipe url, extractions.compact
+      scrape url
       # Apply the findings, in case the recipe already existed
       r.decorate.findings = FinderServices.from_extractions extractions
     end
@@ -923,6 +951,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       end
       extractions['Title'] = member_link.content.strip
       registrar.add_to_list registrar.register_recipe(rlink, extractions), list
+      scrape rlink
     }
     # accordions 'List' => list_name
   end
