@@ -43,6 +43,7 @@ class Registrar < Object
     extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
     Rails.logger.info ''
     recipe.decorate.findings = FinderServices.from_extractions extractions
+    recipe.bkg_launch # Glean attributes of the recipe, as necessary
     recipe
   end
 
