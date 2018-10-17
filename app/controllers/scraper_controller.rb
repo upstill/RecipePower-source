@@ -13,11 +13,17 @@ class ScraperController < ApplicationController
         smartrender :action => :new
       else
         @scraper.save
-        render json: { done: true, alert: 'Scraping successful' }
+        msg =
+        if @scraper.good?
+          'Scraping successful'
+        else
+          "Scrape failed (errcode #{@scraper.errcode}:\n#{@scraper.errmsg}"
+        end
+        render json: { done: true, alert: msg }
       end
     else
       @scraper.bkg_launch true
-      render json: { done: true, alert: msg }
+      render json: { done: true, alert: 'Scraper Launched' }
     end
   end
 

@@ -29,12 +29,20 @@ class Registrar < Object
   end
 
   # Ensure that a recipe has been filed, and launch it for scraping if new
-  def register_recipe recipe_link, extractions
+  def register_recipe link_or_page, extractions={}
+    recipe_link =
+    if link_or_page.is_a?(Mechanize::Page)
+      found = link_or_page.search 'title'
+      extractions.merge!('Title': found.first.text) if found
+      link_or_page.uri.to_s
+    else
+      link_or_page
+    end
     recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
     Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
     extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
     Rails.logger.info ''
-    recipe.decorate.findings = FinderServices.from_extractions(extractions) if extractions
+    recipe.decorate.findings = FinderServices.from_extractions extractions
     recipe
   end
 
@@ -311,11 +319,14 @@ class Oaktownspiceshop_com_Scraper < Scraper
     # -- the Tag gets applied to the Recipe
     # -- the referent gets an associated Product (linked to the Product page)
     # -- the Product gets an Offering, also linked to the page
+    recipe = registrar.register_recipe page
     product_links = page.search 'div.clearfix.section a[href*="/products/"]'
-    product_links.each do |link|
+    ts = TaggingServices.new recipe
+    product_links.collect do |link|
       # Ensure there's a tag with an associated Referent
       tag = registrar.register_tag link.text, :Ingredient
       registrar.register_product tag, link.attribute('href'), title: link.attribute('title'), as_offering: true
+      ts.tag_with tag, User.super_id
     end
   end
 end
