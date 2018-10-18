@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181017164456) do
+ActiveRecord::Schema.define(version: 20181018182457) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -459,7 +459,7 @@ ActiveRecord::Schema.define(version: 20181017164456) do
   create_table "scrapers", force: :cascade do |t|
     t.string   "url"
     t.string   "what"
-    t.string   "subclass",   default: "Scraper"
+    t.string   "type",       default: "Scraper"
     t.boolean  "recur",      default: true
     t.datetime "run_at"
     t.integer  "waittime",   default: 1

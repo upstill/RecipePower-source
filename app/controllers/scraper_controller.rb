@@ -7,7 +7,9 @@ class ScraperController < ApplicationController
 
   def create
     @scraper = Scraper.assert params[:scraper][:url], (params[:scraper][:recur] == 'true')
-    if params[:scraper][:immediate] == 'true'
+    if resource_errors_to_flash @scraper
+      smartrender :action => :new
+    elsif params[:scraper][:immediate] == 'true'
       @scraper.bkg_land true
       if resource_errors_to_flash @scraper
         smartrender :action => :new
@@ -22,8 +24,7 @@ class ScraperController < ApplicationController
         render json: { done: true, alert: msg }
       end
     else
-      @scraper.bkg_launch true
-      render json: { done: true, alert: 'Scraper Launched' }
+      render json: { done: true, alert: "Scraper Launched to run at #{@scraper.run_at}" }
     end
   end
 

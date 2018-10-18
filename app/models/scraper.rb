@@ -155,17 +155,14 @@ class Scraper < ActiveRecord::Base
   include Backgroundable
   backgroundable
 
-  attr_accessible :url, :what, :subclass, :run_at, :waittime, :errcode, :recur
+  attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate, :page
 
   attr_accessor :mechanize
   # @@LaunchedScrapers = {}
 
-  after_create { |sc|
-    sc.bkg_launch sc.recur # Launch iff necessary
-  }
-
   def self.clear_all
+    Scraper.where.not(dj_id: nil).each { |sc| sc.dj.destroy }
     Scraper.delete_all
     # @@LaunchedScrapers = {}
   end
@@ -174,20 +171,24 @@ class Scraper < ActiveRecord::Base
   # what: if given, it forces the class of scraper
   #       if not given, the scraper class is inferred from the url host
   # recur: persistent flag indicating whether, in the course of scraping, new scrapers should be spawned as found
-  def self.assert url, what=nil, recur=true
+  def self.assert url, what = nil, recur = true
     unless what.is_a?(String) || what.is_a?(Symbol)
       what, recur = nil, what
     end
 
     uri = normalized_uri CGI.unescape(url)
-    subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_')
+    subclass = (uri.host.capitalize.split('.') << 'Scraper').join('_').constantize rescue nil
+    if subclass
+      # Each subclass has a #handler method to map from the uri to the method used to parse that url
+      what ||= subclass.handler uri
 
-    # Each subclass has a #handler method to map from the uri to the method used to parse that url
-    what ||= subclass.constantize.handler uri
-
-    scraper = self.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what, subclass: subclass)
-    Rails.logger.info "!!!#{scraper.persisted? ? 'Scraper Already' : 'New Scraper'} Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
-    scraper.bkg_launch
+      scraper = subclass.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what)
+      Rails.logger.info "!!!#{scraper.persisted? ? 'Scraper Already' : 'New Scraper'} Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
+      scraper.bkg_launch
+    else
+      scraper = Scraper.new()
+      scraper.errors.add :type, "#{subclass} not defined for host #{uri.host}"
+    end
     scraper
   end
 
@@ -195,15 +196,23 @@ class Scraper < ActiveRecord::Base
     page.search('title').present?
   end
 
+  # We launch a scraper AFTER the last extant scraper on the same site
+  def bkg_launch force=false, djopts={}
+    uri = URI url
+
+    latest = Scraper.where('url LIKE ?', "%#{uri.host}%").maximum(:run_at)
+    djopts[:run_at] ||= (latest || Time.now) + 10.seconds
+    super force, djopts
+  end
+
   # perform with error catching
   def perform 
-    self.errcode = 0
+    self.errcode = 0 ; self.errmsg = nil
     Rails.logger.info "!!!Scraper Started Performing #{what} on #{url} with status #{status}"
     # Make the connection and get the page
-    handler = self.becomes subclass.constantize
-    handler.open
+    open
     # Run the scraper method for this page
-    handler.send what.to_sym # Invoke the scraper
+    send what.to_sym # Invoke the scraper
     Rails.logger.info "!!!Scraper Finished Performing #{what} on #{url} with status #{status}"
   end
 
@@ -236,8 +245,17 @@ class Scraper < ActiveRecord::Base
     errors.add :base, "Error ##{errcode} (#{errmsg})"
   end
 
+  # Any Scraper subclass decides how to handle a given url
   def handler
-    subclass.constantize.handler url
+    self.handler url
+  end
+
+  def enqueue job
+    x=2
+    scraper = job.payload_object
+    scraper.update_attribute :run_at, job.run_at
+    scraper.save
+    scraper.reload
   end
 
   protected
@@ -292,6 +310,19 @@ class Oaktownspiceshop_com_Scraper < Scraper
       :oss_recipe
     when /\/products\//
       :oss_product
+    when /^$/
+      # Empty path: get product collections
+    end
+  end
+
+  def oss_product_collections
+    page.search('ul#menu li.sub-menu ').each do |submenu|
+      sn = submenu.search('a.slicknav_item').first
+      if sn && (sn.text.match 'Spices')
+        sn.search('ul li a').each do |link|
+          scrape link.attribute('href')
+        end
+      end
     end
   end
 
