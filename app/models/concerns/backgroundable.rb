@@ -167,11 +167,10 @@ module Backgroundable
       refresh, djopts = false, refresh
     end
     if dj # Job is already queued
-      if refresh # Acting as if the job is being queued afresh
-        djopts[:run_at] ||= Time.now
-        if djopts.present? && dj.locked_by.blank? # If necessary and possible, modify parameters
+      if refresh # Forces changes to the pending job
+        if dj.locked_by.blank? # If necessary and possible, modify parameters
           dj.with_lock do
-            dj.update_attributes djopts
+            dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now) # Need to undo the failed_at lock, if any
             dj.save if dj.changed?
           end
         end

@@ -161,8 +161,9 @@ class Scraper < ActiveRecord::Base
   attr_accessor :mechanize
   # @@LaunchedScrapers = {}
 
+  # Start over with ALL scrapers deleted. BETTER BE SURE YOU WANT TO DO THIS!!
   def self.clear_all
-    Scraper.where.not(dj_id: nil).each { |sc| sc.dj.destroy }
+    Scraper.where.not(dj_id: nil).each { |sc| sc.dj.destroy if sc.dj }
     Scraper.delete_all
     # @@LaunchedScrapers = {}
   end
@@ -196,13 +197,24 @@ class Scraper < ActiveRecord::Base
     page.search('title').present?
   end
 
+# ------------- Following is job-queueing (Backgroundable) functionality ------------------
+
   # We launch a scraper AFTER the last extant scraper on the same site
   def bkg_launch force=false, djopts={}
-    uri = URI url
-
-    latest = Scraper.where('url LIKE ?', "%#{uri.host}%").maximum(:run_at)
-    djopts[:run_at] ||= (latest || Time.now) + 10.seconds
+    djopts[:run_at] ||= reschedule_at(Time.now, 0)
     super force, djopts
+  end
+
+  # Delayed::Job calls this method to reset the runtime in event of job failure
+  # We schedule the job AFTER all other jobs of this class, with lag exponentially
+  # increasing based on the number of attempts
+  def reschedule_at current_time, attempts
+    t = [
+        Scraper.where(type: self.class.to_s).maximum(:run_at),
+        Scraper.where(type: self.class.to_s).maximum(:updated_at),
+        current_time ].compact.max + (10**attempts).seconds
+    update_attribute :run_at, t
+    self.run_at = t
   end
 
   # perform with error catching
@@ -211,19 +223,20 @@ class Scraper < ActiveRecord::Base
     Rails.logger.info "!!!Scraper Started Performing #{what} on #{url} with status #{status}"
     # Make the connection and get the page
     open
-    # Run the scraper method for this page
-    send what.to_sym # Invoke the scraper
+    send what.to_sym # Invoke the scraper method
     Rails.logger.info "!!!Scraper Finished Performing #{what} on #{url} with status #{status}"
   end
 
-  def registrar
-    @registrar = Registrar.new page.uri
+  # When the job fails for the last time, and is about to be purged, we reset dj_id
+  def failure job
+    self.dj = nil
+    update_attribute :dj_id, nil
   end
 
   # Handle performance errors
   # This is the place for Backgroundables to record any persistent error state beyond :good or :bad status,
   # because, by default, that's all that's left after saving the record
-  # Here, we record an errcode as well as adding the error to :base errors
+  # Here, we record an errcode as well as adding the error to :base errors and the errmsg
   def error job, exception
     self.errmsg = "#{exception.class.to_s} ERROR: #{exception.to_s}"
     if exception.respond_to?(:response_code)
@@ -245,17 +258,46 @@ class Scraper < ActiveRecord::Base
     errors.add :base, "Error ##{errcode} (#{errmsg})"
   end
 
+  # When a job is queued up, we keep a pointer to it, and also remember the run_at time.
+  # Having a private copy of run_at is what enables us to reschedule a job after ALL jobs
+  # of this class. See #reschedule_at
+  def enqueue job
+    self.run_at = job.run_at
+    update_attribute :run_at, job.run_at
+  end
+
+  # Summarize the current state of bad scrapers.
+  # -- id: picks out a specific scraper to report on
+  # -- nlines: limits the stack trace to that number of levels
+  def self.badsumm id=nil, nlines=nil
+    if id && id < 100
+      id, nlines = nil, id
+    end
+    linelimit = nlines ? nlines-1 : -1
+    if id
+      Scraper.find(id).errmsg.split("\n")[0..linelimit]
+    else
+      Scraper.where(type: self.to_s, status: [0,4]).order(:run_at).pluck(:errmsg, :id, :url, :status, :dj_id, :run_at).collect do |arr|
+        runtime = (dj = Delayed::Job.find_by(id: arr[-2])) ? "due in #{dj.run_at - Time.now} seconds" : nil
+        runtime << "(scraper claims #{arr[-1] - Time.now} seconds)" if runtime
+        arr[-1] = runtime
+        # Split the message on lines, slice it for the number of lines, then rejoin it
+        msg = arr[0].present? ? arr[0].split("\n\t")[0..linelimit].collect { |line| line.truncate(150) }.join("\n\t") : ''
+        "\n" + arr[1..-1].compact.join(', ') + "\n\t" + msg
+      end
+    end
+  end
+
+# ------------- End of Backgroundable functionality ------------------
+
+  # The Registrar handles registering various findings (e.g. recipes, taggings, products) in the database
+  def registrar
+    @registrar = Registrar.new page.uri
+  end
+
   # Any Scraper subclass decides how to handle a given url
   def handler
     self.handler url
-  end
-
-  def enqueue job
-    x=2
-    scraper = job.payload_object
-    scraper.update_attribute :run_at, job.run_at
-    scraper.save
-    scraper.reload
   end
 
   protected
