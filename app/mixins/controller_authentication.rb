@@ -21,7 +21,7 @@ module ControllerAuthentication
   end
   
   def current_user_or_guest
-      current_user || User.guest
+    current_user || User.guest
   end
   
   def current_user_or_guest_id

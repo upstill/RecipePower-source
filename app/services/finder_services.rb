@@ -23,20 +23,14 @@ class FinderServices
     findings
   end
 
-  # Return the raw mapping from finders to arrays of hits
-  def self.glean url, site=nil, *finders_or_labels
-    unless site.nil? || site.is_a?(Site)
-      finders_or_labels.unshift site
-      site = nil
-    end
-    finders = finders_or_labels.first.is_a?(Finder) ? finders_or_labels : self.applicable_finders(site, *finders_or_labels)
-    uri = URI url
-    pagehome = "#{uri.scheme}://#{uri.host}"
+  # Follow redirects to get a Nokogiri view on a page
+  def self.open_noko url
+
     nkdoc = nil
     loop do
       normu = normalize_url url
       uri = URI normu
-      errstr = "Couldn't open '#{url}"
+      errstr = "Couldn't make sense of '#{url}' as a URI'"
       pagefile = nil
       tries = 3
       begin
@@ -73,6 +67,20 @@ class FinderServices
       end
       break
     end
+    nkdoc
+  end
+
+  # Return the raw mapping from finders to arrays of hits
+  def self.glean url, site=nil, *finders_or_labels
+    unless site.nil? || site.is_a?(Site)
+      finders_or_labels.unshift site
+      site = nil
+    end
+    finders = finders_or_labels.first.is_a?(Finder) ? finders_or_labels : self.applicable_finders(site, *finders_or_labels)
+
+    uri = URI url
+    pagehome = "#{uri.scheme}://#{uri.host}"
+    nkdoc = self.open_noko url
 
     # Initialize the results
     results = Results.new *finders.map(&:label)

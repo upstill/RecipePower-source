@@ -285,12 +285,14 @@ class PageRef < ActiveRecord::Base
         (self.find_by(url: url) || self.find_by(self.arel_table[:aliases].overlap [url]))
   end
 
-  # String => PageRef
+  # String, PageRef => PageRef; nil => nil
   # Return a (possibly newly-created) PageRef on the given URL
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
-  def self.fetch url
-    self.find_by_url(url) || self.build_by_url(url)
+  def self.fetch url_or_page_ref
+    # Enabling "fetch" of existing page_ref
+    return url_or_page_ref if url_or_page_ref.is_a?(PageRef)
+    (self.find_by_url(url_or_page_ref) || self.build_by_url(url_or_page_ref)) if url_or_page_ref.present?
   end
 
   # Make a new PageRef (poss. of some subclass), carefully avoiding any extant URL

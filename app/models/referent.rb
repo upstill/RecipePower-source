@@ -348,7 +348,7 @@ class Referent < ActiveRecord::Base
 
       # Find or create an expression of this referent on this tag. If locale
       # or form aren't specified, match any expression
-      args[:form] ||= Expression.formnum :generic
+      args[:form] ||= ::Expression.formnum :generic
       scrubbed_args = Expression.scrub_args(args).merge tag: tag, referent: self.becomes(Referent)
       unless expressions.exists?(scrubbed_args)
         tag.save if tag.changed?

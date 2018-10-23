@@ -186,6 +186,8 @@ class TagServices
   def self.define tag_or_tagname, options={}
     return nil unless tag_or_tagname
     page_link = options[:page_link]
+    page_ref = options[:page_ref]
+    tag_ref = options[:tag_ref]
     image_link = options[:image_link]
     location = nil
     return nil unless tag =
@@ -198,16 +200,23 @@ class TagServices
                 tag_or_tagname
               end
           if tag
-            tag_ref = Referent.express tag
+            # We optionally take an existing referent to apply
+            if tag_ref
+              tag_ref.express tag
+            else
+              # No such referent? Make one!
+              tag_ref = Referent.express tag
+            end
             location =
-                if page_link
+                # We accept either a uri or a complete page_ref
+                if page_link || page_ref
                   # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
-                  page_ref = PageRef.fetch page_link
+                  page_ref ||= PageRef.fetch page_link
                   page_ref.kind = (options[:page_kind] || :about ) unless page_ref.persisted?
                   page_ref.assert_referent tag_ref if page_ref.errors.empty?
                   page_ref.link_text = options[:link_text].strip if options[:link_text].present? # Force the link text to something else
                   page_ref.save! if page_ref.changed?
-                  page_link
+                  page_ref.url
                 else
                   '(no page_ref)'
                 end

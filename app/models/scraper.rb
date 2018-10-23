@@ -1,148 +1,3 @@
-# The Registrar class registers scraping findings with the database
-class Registrar < Object
-
-  attr_accessor :url
-
-  # Initialize the Registrar for a particular url
-  def initialize url
-    @url = url.to_s
-  end
-
-  # Ensure that a given link (or Nokogiri spec or Mechanize node) has a valid url
-  def absolutize link_or_path, attr=:href
-    path =
-        case link_or_path
-          when String
-            link_or_path
-          when Mechanize::Page::Link
-            link_or_path.href
-          when Nokogiri::XML::Element
-            link_or_path.attribute(attr.to_s).to_s
-          when Nokogiri::XML::Attr
-            link_or_path.to_s
-          when respond_to?(attr.to_sym)
-            link_or_path.send attr.to_sym
-          when nil
-            return nil
-        end
-    path.present? ? URI.decode(safe_uri_join(url, path).to_s) : url
-  end
-
-  # Ensure that a recipe has been filed, and launch it for scraping if new
-  def register_recipe link_or_page, extractions={}
-    recipe_link =
-    if link_or_page.is_a?(Mechanize::Page)
-      found = link_or_page.search 'title'
-      extractions.merge!('Title': found.first.text) if found
-      link_or_page.uri.to_s
-    else
-      link_or_page
-    end
-    recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
-    Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
-    extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
-    Rails.logger.info ''
-    recipe.decorate.findings = FinderServices.from_extractions extractions
-    recipe.bkg_launch # Glean attributes of the recipe, as necessary
-    recipe
-  end
-
-  # Commit the link in association with a tag
-=begin
-  def self.register_link_for_tag tagname, link, ts_options
-    link = absolutize link
-    if Rails.development?
-      puts "#{link} gets linked to tag #{tagname}"
-      ts_options.each { |name, val| puts "    #{name} => #{val}" }
-    else
-      TagServices.define tagname, ts_options.merge(page_link: link)
-    end
-  end
-
-=end
-  # Associate a name with a tag, or add a page_link to an existing tag
-  # name_or_tag: a string or a Tag instance;
-  #     tagtype required to give the tag type if a string
-  #     tagtype omitted if already a tag
-  # page_link (optional): a page to associate with the tag
-  # options: other info useful to TagServices.define
-  #   :page_kind: how the PageRef will be classified
-  #   :image_link: for an image to be associated with the reference
-  #   :link_text: passed to the page_ref for labeling its URL in links
-  #   :description: description of the associated referent
-  #   :parent_tag: tag to be a parent of the asserted tag
-  #   :child_tag: tag to be a child of the asserted tag
-  #   :suggests: tag to be suggested by the asserted tag
-  #   :suggested_by: tag that will suggest the asserted tag
-  def register_tag name_or_tag, tagtype=nil, page_link=nil, options={}
-    if name_or_tag.is_a?(Tag)
-      page_link, options = tagtype, page_link
-    else
-      options[:tagtype] = tagtype
-    end
-    if page_link.is_a?(Hash)
-      options, page_link = page_link, nil
-    end
-    options[:page_link] = absolutize page_link
-    options[:image_link] = absolutize options[:image_link]
-    parent_tag = options.delete :parent_tag
-    child_tag = options.delete :child_tag
-    suggested_tag = options.delete :suggests
-    suggested_by = options.delete :suggested_by
-    tag = TagServices.define name_or_tag, options.compact
-    TagServices.new(parent_tag).make_parent_of tag if parent_tag
-    TagServices.new(tag).make_parent_of child_tag if child_tag
-    TagServices.new(tag).suggests suggested_tag if suggested_tag
-    TagServices.new(suggested_by).suggests tag if suggested_by
-    tag
-  end
-
-  # Register a product
-  # tag_or_referent: the key whose referent will be associated with the product
-  # page_link: URL for the product page
-  # options:
-  #    :title may be different from the name of the tag
-  def register_product tag_or_referent, page_link, options={}
-    if tag_or_referent.is_a?(Tag)
-      tag, ref = tag_or_referent, Referent.express(tag_or_referent)
-    else
-      ref, tag = tag_or_referent, tag_or_referent.primary_expression
-    end
-    product_pageref = PageRefServices.assert :product, page_link.to_s
-    product_pageref.save
-    title = (options[:title] && options[:title].to_s) || product_pageref.title.if_present || tag.name
-    unless product = ref.products.where(page_ref_id: product_pageref.id).first
-      product = Product.find_or_create_by(page_ref: product_pageref, title: title)
-      ref.products << product
-      ref.save
-    end
-    # This product may also represent an offering
-    if options[:as_offering]
-      unless offering = product.offerings.where(page_ref_id: product_pageref.id).first
-        offering = Offering.find_or_create_by(page_ref: product_pageref)
-        product.offerings << offering
-        product.save
-      end
-    end
-    product
-  end
-
-  # Assert a list into the database with the given name. Options:
-  # :owner is the User who owns it
-  # :picurl is the list's picture
-  # :description is the list's description
-  def register_list name, options={}
-    list = List.assert name, options[:owner] || User.superuser
-    list.picurl = absolutize options[:picurl] if options[:picurl]
-    list.description = options[:description].strip if options[:description].present?
-    list.save
-    list
-  end
-
-  def add_to_list item, list, options={}
-    ListServices.new(list).include item, (options[:user] || User.superuser)
-  end
-end
 
 # The scraper class exists to scrape pages: one per scraper. The scraper either:
 # 1) generates more scrapers based on the contents of the page, or
@@ -158,7 +13,6 @@ class Scraper < ActiveRecord::Base
   attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate, :page
 
-  attr_accessor :mechanize
   # @@LaunchedScrapers = {}
 
   # Start over with ALL scrapers deleted. BETTER BE SURE YOU WANT TO DO THIS!!
@@ -292,7 +146,7 @@ class Scraper < ActiveRecord::Base
 
   # The Registrar handles registering various findings (e.g. recipes, taggings, products) in the database
   def registrar
-    @registrar = Registrar.new page.uri
+    @registrar = Registrar.new self.url
   end
 
   # Any Scraper subclass decides how to handle a given url
@@ -315,11 +169,22 @@ class Scraper < ActiveRecord::Base
 
   # Open the page for reading via Mechanize
   def open
-    Rails.logger.info "!!!Scraper Getting page #{url}"
-    mechanize = Mechanize.new
-    mechanize.user_agent_alias = 'Mac Safari'
-    mechanize
-    self.page = mechanize.get url
+    pr = PageRef.fetch url
+    Rails.logger.info "!!!Scraper for #{url} Getting page_ref for #{pr.url}"
+    pr.bkg_land
+    if pr.good?
+      Rails.logger.info "!!!Scraper Getting page #{url}"
+      begin
+        mechanize = Mechanize.new
+        mechanize.user_agent_alias = 'Mac Safari'
+        mechanize
+        self.page = mechanize.get url
+      rescue Exception => e
+        self.page = FinderServices.open_noko pr.url
+      end
+    else
+      nil
+    end
   end
 
   def uri
@@ -344,34 +209,45 @@ end
 
 class Oaktownspiceshop_com_Scraper < Scraper
   def self.handler url_or_uri
-    uri = url_or_uri.is_a?(String) ? URI(url_or_uri) : url_or_uri
+    uri = url_or_uri.is_a?(URI) ? url_or_uri : URI(url_or_uri.to_s)
     case uri.path
     when /\/blogs\/recipes$/
       :oss_recipes
     when /\/blogs\/recipes\//
       :oss_recipe
     when /\/products\//
-      :oss_product
-    when /^$/
+      :oss_offering
+    when /\/collections\/(blends|salts|herbs|chiles|peppercorns|single-origin|spices)/
+      :oss_collection
+    when /^\/?$/
+      :oss_home
       # Empty path: get product collections
     end
   end
 
-  def oss_product_collections
-    page.search('ul#menu li.sub-menu ').each do |submenu|
+  # From the home page, scrape the product collection pages and the first recipes page
+  def oss_home
+    page.search('ul#menu li.sub-menu').each do |submenu|
       sn = submenu.search('a.slicknav_item').first
       if sn && (sn.text.match 'Spices')
-        sn.search('ul li a').each do |link|
-          scrape link.attribute('href')
+        # Launch a scraper for each product collection: blends|salts|herbs|chiles|peppercorns|single-origin|spices
+        submenu.search('ul li a').each do |link|
+          url = link.attribute('href').to_s
+          scrape url if Oaktownspiceshop_com_Scraper.handler(url)
         end
       end
     end
+    scrape 'blogs/recipes'
   end
 
-  def oss_product
-
+  # Launch a scraper for each product in a collection
+  def oss_collection
+    page.search('div[itemtype="http://schema.org/Product"] a[itemprop="url"]').each do |product_link|
+      scrape product_link.attribute('href')
+    end
   end
 
+  # Launch a scraper for each recipe in a recipes page as well as the next link
   def oss_recipes
     page.search( 'div.article h2 a').each do |link|
       # For each recipe listed on the page
@@ -384,6 +260,7 @@ class Oaktownspiceshop_com_Scraper < Scraper
     end
   end
 
+  # Scrape a single recipe page
   def oss_recipe
     # Get the links that are embedded in the ingredient list
     # Each of these is to a Product: href => link, title =>
@@ -398,10 +275,25 @@ class Oaktownspiceshop_com_Scraper < Scraper
     ts = TaggingServices.new recipe
     product_links.collect do |link|
       # Ensure there's a tag with an associated Referent
-      tag = registrar.register_tag link.text, :Ingredient
-      registrar.register_product tag, link.attribute('href'), title: link.attribute('title'), as_offering: true
-      ts.tag_with tag, User.super_id
+      product = registrar.register_product link.text, link.attribute('href'), title: link.attribute('title'), as_offering: true
+      if tag = Tag.strmatch(link.text, tagtype: Tag.typenum(:Ingredient), matchall: true).first
+        ts.tag_with tag, User.super_id
+      end
+      scrape product.url
     end
+  end
+
+  # Process an offering page. It may have been invoked in the course of scraping another page,
+  # but in case not (i.e., it's being scraped directly), we need to first ensure that its
+  # page_ref has been created and gleaned.
+  def oss_offering
+    # If there is an extant product under this URL, use its title for the tag
+    title = page.search('h1.product_name').first.text
+    product = registrar.register_product nil, self.url, title: title, :as_offering => true
+    product_pageref = product.page_ref
+    product_pageref.bkg_land
+    product.picurl ||= product_pageref.gleaning.result_for 'Image'
+    product.save
   end
 end
 
