@@ -17,8 +17,8 @@
 </table>
 <% if @edition.opening.present? %>
     <p class="message-content">
-      <% if defined?(@recipient) && @recipient.first_name %>
-          Dear <%= @recipient.first_name.capitalize %>,
+      <% if defined?(@recipient) && @recipient.salutation(true).present? %>
+          Dear <%= @recipient.salutation.capitalize %>,
       <% else %>
           Hello,
       <% end %>

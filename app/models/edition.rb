@@ -31,9 +31,6 @@ class Edition < ActiveRecord::Base
       # Launch if virgin/relaunch if published_at has changed
       if ed.virgin? || (ed.dj && (ed.dj.run_at != ed.published_at))
         ed.bkg_launch true, run_at: ed.published_at
-        if Rails.env.development?
-          ed.bkg_land
-        end
       end
     end
   end
@@ -44,10 +41,7 @@ class Edition < ActiveRecord::Base
     time = Time.now + 5.seconds
     User.where(subscribed: true).where("last_edition < #{number}").each { |u|
       u.bkg_launch true, run_at: time
-      if Rails.env.development?
-        u.bkg_land
-      end
-      time = time + 20.minutes
+      time = time + 10.minutes
     }
   end
 

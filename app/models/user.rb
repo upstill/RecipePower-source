@@ -461,10 +461,10 @@ private
         email.sub(/@.*/, '')
   end
 
-  def salutation
+  def salutation polite=false
     (first_name unless first_name.blank?) ||
     (fullname.split(/\b/).first unless fullname.blank?) ||
-    username
+    (username unless polite)
   end
 
   def printable_notifier_name
