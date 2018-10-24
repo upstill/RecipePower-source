@@ -41,7 +41,7 @@ class Edition < ActiveRecord::Base
     time = Time.now + 5.seconds
     User.where(subscribed: true).where("last_edition < #{number}").each { |u|
       u.bkg_launch true, run_at: time
-      time = time + 10.minutes
+      time = time + 4.minutes # 360/day per MailGun terms
     }
   end
 
