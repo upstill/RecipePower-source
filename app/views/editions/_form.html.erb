@@ -26,10 +26,10 @@
 
     <div class="form-actions">
       <% if @edition.published %>
-          <%= f.button :'forms.labels', "Save" %>
+          <%= f.button :submit, "Save" %>
       <% else %>
-          <%= f.button :'forms.labels', "Publish" %>
-          <%= f.button :'forms.labels', "Save As Draft" %>
+          <%= f.button :submit, "Publish" %>
+          <%= f.button :submit, "Save As Draft" %>
       <% end %>
     </div>
 <% end %>

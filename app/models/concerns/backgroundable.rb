@@ -175,7 +175,7 @@ module Backgroundable
           end
         end
       end
-      puts ">>>>>>>>>>> bkg_launch redundant on #{self} (dj #{self.dj})"
+      puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       save if !id # Just in case (so DJ gets a retrievable record)
       self.dj = Delayed::Job.enqueue self, djopts
