@@ -314,19 +314,19 @@ module ModelSearch
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
   def count_tag tag, counts, iscope
-    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+    tagname = tag.normalized_name.if_present || Tag.normalizeName(tag.name)
     iscope, sort_key, pluck_key = orderingscope iscope
     pluck_key ||= sort_key
     model = iscope.model
     if model.respond_to? :strscopes
       NestedBenchmark.measure 'Fuzzy searches on entity e.g., title and description' do
-        strscopes = model.strscopes "%#{tagname}%" do |joinspec=nil|
+        strscopes = model.strscopes "%#{tag.name}%" do |joinspec=nil|
           joinspec ? iscope.joins(joinspec) : iscope
         end
         counts.include strscopes, pluck_key
       end
       NestedBenchmark.measure 'Exact searches on entity e.g., title and description' do
-        strscopes = model.strscopes tagname do |joinspec=nil|
+        strscopes = model.strscopes tag.name do |joinspec=nil|
           joinspec ? iscope.joins(joinspec) : iscope
         end
         counts.include strscopes, pluck_key
