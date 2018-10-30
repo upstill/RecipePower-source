@@ -6,7 +6,7 @@
 # url: the url of the page to be examined
 # site: the site being examined, expressed as the name of a method of the scraper model
 # what: the contents that are being sought (a section of the method that scrapes this kind of page)
-class Scraper < ActiveRecord::Base
+class Scraper < ApplicationRecord
   include Backgroundable
   backgroundable
 

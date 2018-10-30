@@ -1,4 +1,4 @@
-class TagSelection < ActiveRecord::Base
+class TagSelection < ApplicationRecord
   belongs_to :tagset
   belongs_to :user
   belongs_to :tag

@@ -1,6 +1,6 @@
 require './lib/results.rb'
 
-class Gleaning < ActiveRecord::Base
+class Gleaning < ApplicationRecord
   include Backgroundable
 
   backgroundable :status

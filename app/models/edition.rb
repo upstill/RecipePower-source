@@ -1,4 +1,4 @@
-class Edition < ActiveRecord::Base
+class Edition < ApplicationRecord
   include Backgroundable
 
   backgroundable :status

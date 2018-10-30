@@ -1,4 +1,4 @@
-class DeferredRequest < ActiveRecord::Base
+class DeferredRequest < ApplicationRecord
   serialize :requests
   attr_accessible :requests, :session_id
   self.primary_key = 'session_id'

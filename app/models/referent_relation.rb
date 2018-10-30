@@ -18,7 +18,7 @@ class ReferentRelationValidator < ActiveModel::Validator
     end
 end
 
-class ReferentRelation < ActiveRecord::Base
+class ReferentRelation < ApplicationRecord
     belongs_to :parent, :class_name => "Referent"
     belongs_to :child, :class_name => "Referent"
     

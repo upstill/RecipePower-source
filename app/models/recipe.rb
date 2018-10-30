@@ -5,7 +5,7 @@ require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
 
-class Recipe < ActiveRecord::Base
+class Recipe < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Referrable # Is associated with a Referent

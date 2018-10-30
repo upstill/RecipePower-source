@@ -3,7 +3,7 @@ require 'net/http'
 # Besides storing the result of the query (which, after all, could be re-instantiated at any time)
 # the class deals with multiple URLs leading to the same page. That is, since Mercury extracts a
 # canonical URL, many URLs could lead to that single referent.
-class PageRef < ActiveRecord::Base
+class PageRef < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
   # Referrable page refs are referred to by, e.g., a glossary entry for a given concept

@@ -4,7 +4,7 @@ def const_for object, qualifier=nil
   # First try investigating defined constants directly
   object.class.ancestors.detect { |anc|
     next if anc.to_s.match /^#</
-    return nil if anc == ActiveRecord::Base # Stop checking at ActiveRecord base class
+    return nil if anc == ApplicationRecord # Stop checking at ApplicationRecord base class
     next if anc.to_s.match /::/
     classname = "#{anc}#{qualifier}"
     if Object.const_defined? classname

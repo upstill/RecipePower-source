@@ -13,7 +13,7 @@ class ReferentValidator < ActiveModel::Validator
   end
 end
 
-class Referent < ActiveRecord::Base
+class Referent < ApplicationRecord
   include Collectible
   picable :picurl, :picture
 

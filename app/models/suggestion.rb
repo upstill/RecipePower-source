@@ -1,4 +1,4 @@
-class Suggestion < ActiveRecord::Base
+class Suggestion < ApplicationRecord
 
   attr_accessible :base, :viewer, :session, :filter, :results_cache, :results, :pending, :ready
 

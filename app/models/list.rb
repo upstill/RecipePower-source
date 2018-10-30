@@ -56,7 +56,7 @@ class ListSerializer
 
 end
 
-class List < ActiveRecord::Base
+class List < ApplicationRecord
   include Commentable
   commentable :notes
   include Typeable

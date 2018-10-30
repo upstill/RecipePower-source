@@ -1,4 +1,4 @@
-class RpEvent < ActiveRecord::Base
+class RpEvent < ApplicationRecord
   include Backgroundable
   backgroundable
 
@@ -175,8 +175,8 @@ class InvitationSentEvent < RpEvent
   alias_attribute :shared, :indirect_object
   attr_accessible :inviter, :invitee, :shared
 
-  def self.post inviter, invitee, shared, raw_invitation_token
-    super inviter, invitee, shared, raw_invitation_token: raw_invitation_token
+  def self.post inviter, invitee, shared=nil, raw_invitation_token=nil
+    super inviter, invitee, shared, {raw_invitation_token: raw_invitation_token}.compact
   end
 
   acts_as_notifiable :users,
@@ -195,11 +195,11 @@ class InvitationSentEvent < RpEvent
 
 end
 
-# <User> responded to invitation <InvitationSentEvent>
+# <User> responded to invitation <InvitationSentEvent> from <User>
 class InvitationResponseEvent < RpEvent
   alias_attribute :invitee, :subject
-  alias_attribute :inviter, :direct_object
-  alias_attribute :invitation_event, :indirect_object
+  alias_attribute :inviter, :indirect_object
+  alias_attribute :invitation_event, :direct_object
   attr_accessible :inviter, :invitee, :invitation_event
 
 end

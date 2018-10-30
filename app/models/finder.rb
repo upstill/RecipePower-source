@@ -1,4 +1,4 @@
-class Finder < ActiveRecord::Base
+class Finder < ApplicationRecord
   attr_accessible :label, :selector, :attribute_name, :site, :site_id
   belongs_to :site
 

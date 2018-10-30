@@ -1,5 +1,5 @@
 # encoding: UTF-8
-class Tag < ActiveRecord::Base
+class Tag < ApplicationRecord
   # require 'iconv'
   include Typeable
   typeable(:tagtype,

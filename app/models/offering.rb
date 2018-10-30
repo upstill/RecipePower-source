@@ -1,5 +1,5 @@
 # An Offering is a commercial instance of a Product
-class Offering < ActiveRecord::Base
+class Offering < ApplicationRecord
 
   # Link to the offering page
   include Pagerefable

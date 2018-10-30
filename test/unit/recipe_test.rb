@@ -57,23 +57,17 @@ class RecipeTest < ActiveSupport::TestCase
   test "blank url rejected" do
     url = ''
     recipe = Recipe.new url: url, title: 'some damn thing'
+    assert_nil recipe.page_ref
+    assert recipe.errors[:url].present?
     recipe.bkg_land
-    assert recipe.page_ref.errors[:url].present?
-    assert_equal url, recipe.url
-    assert recipe.page_ref.bad?
-    assert_nil recipe.id
-    assert_nil recipe.page_ref.id
-    refute recipe.save
-    assert_nil recipe.id
-    assert_nil recipe.page_ref.id
-    x=2
+    assert_nil recipe.page_ref
   end
 
   test "mal-formed url rejected" do
     url = "nonsense url"
     recipe = Recipe.new url: url
+    assert recipe.errors[:url].present?
     recipe.bkg_land
-    assert recipe.page_ref.errors[:url].present?
     assert_equal url, recipe.url
     assert recipe.page_ref.bad?
     refute recipe.save

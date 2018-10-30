@@ -1,4 +1,4 @@
-class Scale < ActiveRecord::Base
+class Scale < ApplicationRecord
 	has_many :ratings
 	has_many :recipes, :through=>:ratings
 	attr_accessible :id, :minlabel, :maxlabel, :name #, :minval, :maxval

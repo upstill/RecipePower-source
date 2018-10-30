@@ -3,7 +3,7 @@ require 'time_check'
 # Rcpref is the join table between users and entities, denoting that a user has either collected
 # the entity (:in_collection = true) or simply viewed it (:in_collection = false).
 # Rcprefs also allow the user to leave a comment, and to declare it private from others.
-class Rcpref < ActiveRecord::Base
+class Rcpref < ApplicationRecord
   include Voteable
 
   belongs_to :entity, :polymorphic => true

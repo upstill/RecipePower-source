@@ -301,7 +301,7 @@ module ApplicationHelper
     end
     summs = if block_given?
               scope_or_array.collect &block
-            elsif scope_or_array.first.is_a? ActiveRecord::Base
+            elsif scope_or_array.first.is_a? ApplicationRecord
               scope_or_array.collect { |item| homelink item }
             else
               scope_or_array

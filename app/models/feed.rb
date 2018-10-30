@@ -1,6 +1,6 @@
 require 'feedjira'
 
-class Feed < ActiveRecord::Base
+class Feed < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Backgroundable

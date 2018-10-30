@@ -1,4 +1,4 @@
-class Referment < ActiveRecord::Base
+class Referment < ApplicationRecord
 
   attr_accessible :referent, :referent_id, :referee, :referee_type, :referee_id
 

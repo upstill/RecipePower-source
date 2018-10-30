@@ -12,7 +12,7 @@ require 'result_type.rb'
 # -- key_or_keys can be:
 #    ** an ActiveRecord::Relation from which ids and (possibly) sort keys can be extracted
 #    ** a string, for use directly as a key
-#    ** an ActiveRecord::Base model
+#    ** an ApplicationRecord model
 #    ** an array of any of the above
 # -- pluck_key_or_increment can be:
 #    ** an integer, in which case values will be accumulated additively for sorting
@@ -51,7 +51,7 @@ class Counts < Hash
         else
           self[key_or_keys] = pluck_key_or_increment
         end
-      when ActiveRecord::Base
+      when ApplicationRecord
         key = "#{key_or_keys.model_name.name}/#{key_or_keys.id}"
         if pluck_key_or_increment.is_a?(Fixnum) && accumulate
           self[key_or_keys] += pluck_key_or_increment
@@ -563,7 +563,7 @@ class NullResults
 
 end
 
-class ResultsCache < ActiveRecord::Base
+class ResultsCache < ApplicationRecord
   include ActiveRecord::Sanitization
   include DefaultSearch # Defaults for *Cache methods
   include ExtractParams

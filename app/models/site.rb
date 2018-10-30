@@ -1,7 +1,7 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
 
-class Site < ActiveRecord::Base
+class Site < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Referrable

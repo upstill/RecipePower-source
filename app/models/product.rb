@@ -1,5 +1,5 @@
 
-class Product < ActiveRecord::Base
+class Product < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
   include Referrable

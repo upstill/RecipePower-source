@@ -1,7 +1,7 @@
 require 'type_map.rb'
 require 'rp_event.rb'
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   # The users are backgroundable to mail the latest newsletter
   include Backgroundable
   backgroundable :status

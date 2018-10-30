@@ -57,9 +57,12 @@ module Pagerefable
         # be different from the one provided
         define_method "#{url_attribute}=" do |url|
           unless page_ref && page_ref.answers_to?(url)
-            pr = PageRef.fetch url
-            # pr.glean unless self.errors.any? # Update the gleaning data, if any
-            self.page_ref = pr
+            if pr = PageRef.fetch(url)
+              # pr.glean unless self.errors.any? # Update the gleaning data, if any
+              self.page_ref = pr
+            else
+              self.errors.add :url, 'can\'t be used'
+            end
           end
           url
         end

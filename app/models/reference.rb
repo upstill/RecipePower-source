@@ -4,7 +4,7 @@ require 'mechanize'
 require 'fileutils'
 require 'array_utils'
 
-class Reference < ActiveRecord::Base
+class Reference < ApplicationRecord
 
   include Referrable # Can be linked to a Referent
 

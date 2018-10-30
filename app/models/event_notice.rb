@@ -1,2 +1,2 @@
-class EventNotice < ActiveRecord::Base
+class EventNotice < ApplicationRecord
 end
