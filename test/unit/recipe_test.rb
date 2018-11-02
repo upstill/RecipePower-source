@@ -66,9 +66,9 @@ class RecipeTest < ActiveSupport::TestCase
   test "mal-formed url rejected" do
     url = "nonsense url"
     recipe = Recipe.new url: url
-    assert recipe.errors[:url].present?
-    recipe.bkg_land
+    refute recipe.errors[:url].present? # Bogus URL is at least assignable
     assert_equal url, recipe.url
+    recipe.bkg_land
     assert recipe.page_ref.bad?
     refute recipe.save
     assert_nil recipe.id

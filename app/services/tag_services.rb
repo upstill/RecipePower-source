@@ -108,6 +108,7 @@ class TagServices
   end
 
 # Ensure that the child tag has a referent that is a child of our referent
+# Return: the child tag
   def make_parent_of child_tag, move=true
     # NB: If the child needs to change type, and if there is a name clash with an existing type,
     # Tag.assert WILL RETURN A TAG DIFFERENT THAN THAT PROVIDED. Thus,

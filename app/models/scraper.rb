@@ -151,7 +151,7 @@ class Scraper < ApplicationRecord
 
   # Any Scraper subclass decides how to handle a given url
   def handler
-    self.handler url
+    self.class.handler url
   end
 
   protected

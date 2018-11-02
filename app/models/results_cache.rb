@@ -607,42 +607,43 @@ class ResultsCache < ApplicationRecord
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, result_types, params={}
+    # Derive the subclass of ResultsCache that will handle generating items
+    caching_class = self
+    if (self == ResultsCache) && params['controller'].present? && params['action'].present?
+      classname = params['controller'].camelize + params['action'].capitalize + 'Cache'
+      unless caching_class = (classname.constantize rescue nil)
+        logger.debug 'No ResultsCache handler ' + classname
+        return []
+      end
+    end
     result_types.collect { |result_type|
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
+      # Give the class a chance to defer to a subclass based on the result type
+      cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
 
-      # Derive the subclass of ResultsCache that will handle generating items
-      classname = params['controller'].camelize + params['action'].capitalize + 'Cache'
-      if cc = (classname.constantize rescue nil)
-        # Give the class a chance to defer to a subclass based on the result type
-        cc = cc.subclass_for(result_type) if cc.respond_to? :subclass_for
+      relevant_params = cc.extract_params result_type, params
 
-        relevant_params = cc.extract_params result_type, params
+      rc = cc.find_or_initialize_by(session_id: session_id,
+                                    type: cc.to_s,
+                                    result_typestr: (relevant_params[:result_type] || ''))
+      # For purposes of busting the cache, we assume that sort direction is irrelevant
+      # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
 
-        rc = cc.find_or_initialize_by(session_id: session_id,
-                                      type: cc.to_s,
-                                      result_typestr: (relevant_params[:result_type] || ''))
-        # For purposes of busting the cache, we assume that sort direction is irrelevant
-        # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
+      if rc.params != relevant_params # TODO: Take :nocache into consideration
+        # Bust the cache if the prior params don't match the new ones
+        diffs = (rc.params.keys + relevant_params.keys).uniq.collect {|key|
+          "#{key}: #{rc.params[key] || nil}=>#{relevant_params[key] || nil}" if rc.params[key] != relevant_params[key]
+        }.compact.join('; ') if rc.params.present?
+        diffs = diffs ? "; busted cache on #{diffs}" : '. (new)'
 
-        if rc.params != relevant_params # TODO: Take :nocache into consideration
-          # Bust the cache if the prior params don't match the new ones
-          diffs = (rc.params.keys + relevant_params.keys).uniq.collect { |key|
-            "#{key}: #{rc.params[key] || nil}=>#{relevant_params[key] || nil}" if rc.params[key] != relevant_params[key]
-          }.compact.join('; ') if rc.params.present?
-          diffs = diffs ? "; busted cache on #{diffs}" : '. (new)'
-
-          rc.cache = rc.partition = rc.items = nil
-        end
-
-        # Assign the params anyway for side-effects in setting instance variables correctly
-        rc.send :'params=', relevant_params
-
-        logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
-        rc
-      else # No cacheclass
-        logger.debug 'No ResultsCache handler ' + classname
-        nil
+        rc.cache = rc.partition = rc.items = nil
       end
+
+      # Assign the params anyway for side-effects in setting instance variables correctly
+      rc.send :'params=', relevant_params
+
+      logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
+      rc
     }.compact
   end
 

@@ -8,6 +8,7 @@ class RefereeServices
   # Ensure a Pagerefable referee matches the kind of its page ref
   # Return the original object (if the kind matches) or a new, matching object
   def assert_kind kind, promote=false
+    return @referee if !kind
     page_ref =
     case @referee
       when PageRef
@@ -19,6 +20,7 @@ class RefereeServices
         @referee.errors.add :referment, "won't translate to #{kind}"
         return @referee
     end
+    return nil if !page_ref
     case kind
       when 'recipe'
         # We want a recipe, but the current referee is not a recipe

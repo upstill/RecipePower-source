@@ -101,10 +101,11 @@ class Referent < ApplicationRecord
   validates_with ReferentValidator
 
   after_save do |ref|
-    # If the canonical expression has been removed from the tag set, nullify it
+    # If the canonical expression has been removed from the tag set, pick a new one
     unless ref.canonical_expression && ref.tags.where(id: ref.canonical_expression.id).exists?
-      ref.canonical_expression = nil
-      ref.update_attribute :tag_id, nil if ref.tag_id
+      newcon = ref.tags.first
+      ref.canonical_expression = newcon
+      ref.update_attribute :tag_id, (newcon.id if newcon) if ref.tag_id
     end
   end
   after_save :ensure_tagtypes

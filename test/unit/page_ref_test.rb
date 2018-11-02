@@ -45,21 +45,21 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "try substitute absorbs" do
-    mpgood = PageRef.fetch 'http://www.saveur.com/article/Recipes/Classic-Indian-Samosa'
+    mpgood = PageRef.fetch 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
     mpgood.bkg_land
     assert mpgood.good?
 
-    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
+    url = 'https://oaktownspiceshop.com/blogs/recipe/roasted-radicchio-and-squash-salad-with-burrata'
     mpbad = PageRef.new url: url
     mpbad.bkg_land
     assert mpbad.bad?
     badid = mpbad.id
 
-    new_mp = PageRefServices.new(mpbad).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
+    new_mp = PageRefServices.new(mpbad).try_substitute 'oaktownspiceshop.com/blogs/recipe', 'oaktownspiceshop.com/blogs/recipes'
     assert_equal mpgood, new_mp
     assert new_mp.aliases.include?(url)
     assert_nil PageRef.find_by(id: badid)
-    assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+    assert_equal 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata', new_mp.url
   end
 
   test "initializes simple page" do

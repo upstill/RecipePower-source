@@ -381,7 +381,7 @@ class ReferentTest < ActiveSupport::TestCase
     ref = Referent.first
     rfs = ReferentServices.new ref
     assert_empty ref.referments
-    rfs.parse_referment_params [ { id: 1 } ]
+    rfs.parse_referment_params '0' => { id: 1 }
     refute ref.errors.any?
     assert_equal referments(:empty), ref.referments.first
     assert_equal referments(:empty), ref.referments.last
@@ -390,7 +390,7 @@ class ReferentTest < ActiveSupport::TestCase
   test "Referment params for specified referee get parsed properly" do
     ref = Referent.first
     rfs = ReferentServices.new ref
-    rfs.parse_referment_params [ { referee_type: 'Recipe', referee_id: 3 } ]
+    rfs.parse_referment_params '0' => { referee_type: 'Recipe', referee_id: 3 }
     refute ref.errors.any?
     assert_equal recipes(:rcp), ref.referments.first.referee
     assert_equal recipes(:rcp), ref.referments.last.referee
@@ -399,7 +399,7 @@ class ReferentTest < ActiveSupport::TestCase
   test "Referment params for specified referee with changed kind get parsed properly" do
     ref = Referent.first
     rfs = ReferentServices.new ref
-    rfs.parse_referment_params [ { referee_type: 'Recipe', referee_id: 3, kind: 'article' } ]
+    rfs.parse_referment_params '0' => { referee_type: 'Recipe', referee_id: 3, kind: 'article' }
     refute ref.errors.any?
   end
 
@@ -419,7 +419,7 @@ class ReferentTest < ActiveSupport::TestCase
   test 'PageRef Referee translates to Recipe' do
     pr_before = page_refs :goodpr
     assert_equal 'article', pr_before.kind
-    pr_after = RefereeServices.new(pr_before).assert_kind 'recipe'
+    pr_after = RefereeServices.new(pr_before).assert_kind 'recipe', promote: true
     assert_equal Recipe, pr_after.class
     refute pr_after.errors.any?
   end

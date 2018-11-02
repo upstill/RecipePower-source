@@ -108,7 +108,9 @@ class ReferentServices
         else
           # The referment's referee is accessible => build a new referment for the referent
           # Ensure the type of referee matches the 'kind' parameter (for Referrable referees only)
-          referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind] if referee.is_a?(Referrable)
+          if referee.is_a?(Referrable) && rfmt_params[:kind]
+            referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind]
+          end
           # The Referment doesn't exist but the referee does => create a new Referment
           if @referent.referments.exists?(referee: referee)
             # Don't want to add a redundant referment

@@ -283,6 +283,7 @@ public
   def home=(url)
     revised = ohome_eq(url)
     page_ref.site = self
+    page_ref.kind = :site
     revised
   end
 
