@@ -11,7 +11,7 @@ class Product < ApplicationRecord
 
   picable :picurl, :picture
 
-  attr_accessible :barcode, :bctype, :title, :page_ref, :offerings, :picurl
+  # attr_accessible :barcode, :bctype, :title, :page_ref, :offerings, :picurl
 
   # barcode and bctype specify barcodes according to https://github.com/ankane/barkick
   enum bctype: [ :upc_a, :upc_e, :ean8 ]

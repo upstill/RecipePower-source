@@ -13,7 +13,7 @@ class RatingsController < ApplicationController
   # GET /ratings/1
   # GET /ratings/1.xml
   def show
-    @rating = Rating.find(params[:id])
+    @rating = Rating.find params[:id]
 
     respond_to do |format|
       format.html # show.html.erb
@@ -34,13 +34,13 @@ class RatingsController < ApplicationController
 
   # GET /ratings/1/edit
   def edit
-    @rating = Rating.find(params[:id])
+    @rating = Rating.find params[:id]
   end
 
   # POST /ratings
   # POST /ratings.xml
   def create
-    @rating = Rating.new(params[:rating])
+    @rating = Rating.new rating_params
 
     respond_to do |format|
       if @rating.save
@@ -56,10 +56,10 @@ class RatingsController < ApplicationController
   # PUT /ratings/1
   # PUT /ratings/1.xml
   def update
-    @rating = Rating.find(params[:id])
+    @rating = Rating.find params[:id]
 
     respond_to do |format|
-      if @rating.update_attributes(params[:rating])
+      if @rating.update_attributes rating_params
         format.html { redirect_to(@rating, :notice => 'Rating was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -72,12 +72,18 @@ class RatingsController < ApplicationController
   # DELETE /ratings/1
   # DELETE /ratings/1.xml
   def destroy
-    @rating = Rating.find(params[:id])
+    @rating = Rating.find params[:id]
     @rating.destroy
 
     respond_to do |format|
       format.html { redirect_to(ratings_url) }
       format.xml  { head :ok }
     end
+  end
+
+  private
+
+  def rating_params
+    params.require(:rating).permit!
   end
 end

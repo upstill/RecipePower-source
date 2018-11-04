@@ -34,7 +34,7 @@ class Rcpref < ApplicationRecord
 
   }
   # before_save :ensure_unique
-  attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
+  # attr_accessible :comment, :entity_type, :entity_id, :user_id, :in_collection, :updated_at, :created_at, :private
 
   # Establish belongs_to relations for all the known Collectible classes, mainly for use in joins
   # TODO: Smell! We're enumerating a relation for every collectible type. This really should be

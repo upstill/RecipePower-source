@@ -62,7 +62,7 @@ module Backgroundable
   module ClassMethods
 
     def backgroundable status_attribute=:status
-      attr_accessible status_attribute
+      # attr_accessible status_attribute
       # Since enums are defined at the Module level, we need to detect when an enum has been
       # defined in multiple classes. detect_enum_conflict! throws an error, so we assume
       # that the enum has been priorly defined.

@@ -33,14 +33,15 @@ module Taggable
 
     attr_reader :tagging_user_id
     attr_accessor :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
-    attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
+=begin
+    # attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
                     :editable_tag_tokens, :editable_misc_tag_tokens,
                     :editable_author_tag_tokens, :editable_dish_tag_tokens,
                     :editable_genre_tag_tokens, :editable_ingredient_tag_tokens,
                     :editable_tool_tag_tokens, :editable_process_tag_tokens,
                     :editable_occasion_tag_tokens, :editable_source_tag_tokens,
                     :editable_course_tag_tokens, :editable_diet_tag_tokens
-
+=end
                     Tag.taggable self
   end
 
@@ -116,7 +117,7 @@ module Taggable
 
   def incoming_attributes keys
     token_attributes = keys.select { |key| key[/^(visible_|editable_|locked_)?((not?_)?[^_]*_)*(tags|tag_tokens)$/] }.reverse.map &:to_sym
-    self.class_eval { attr_accessible *token_attributes }
+    # self.class_eval { attr_accessible *token_attributes }
   end
 
   # Here we corral methods of the form {visible,editable,locked}[_type]_{tags,tag_tokens}[=]

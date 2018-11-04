@@ -13,7 +13,7 @@ class RpEvent < ApplicationRecord
 
   belongs_to :user
 
-  attr_accessible :on_mobile, :serve_count, :subject_type, :subject_id, :direct_object_type, :indirect_object_type, :direct_object_id, :indirect_object_id, :data
+  # attr_accessible :on_mobile, :serve_count, :subject_type, :subject_id, :direct_object_type, :indirect_object_type, :direct_object_id, :indirect_object_id, :data
 
   # Return a hash of aggregate_user_table for the user
   def self.user_stats user, interval
@@ -112,7 +112,7 @@ end
 # <User> logged in
 class SignupEvent < RpEvent
   alias_attribute :who, :subject
-  attr_accessible :who
+  # attr_accessible :who
 
   acts_as_notifiable :users,
                      targets: ->(evt, key) { [evt.who] },
@@ -132,7 +132,7 @@ end
 # <User> logged in
 class LoginEvent < RpEvent
   alias_attribute :who, :subject
-  attr_accessible :who
+  # attr_accessible :who
 
 =begin
   acts_as_notifiable :users,
@@ -173,7 +173,7 @@ class InvitationSentEvent < RpEvent
   alias_attribute :inviter, :subject
   alias_attribute :invitee, :direct_object
   alias_attribute :shared, :indirect_object
-  attr_accessible :inviter, :invitee, :shared
+  # attr_accessible :inviter, :invitee, :shared
 
   def self.post inviter, invitee, shared=nil, raw_invitation_token=nil
     super inviter, invitee, shared, {raw_invitation_token: raw_invitation_token}.compact
@@ -200,7 +200,7 @@ class InvitationResponseEvent < RpEvent
   alias_attribute :invitee, :subject
   alias_attribute :inviter, :indirect_object
   alias_attribute :invitation_event, :direct_object
-  attr_accessible :inviter, :invitee, :invitation_event
+  # attr_accessible :inviter, :invitee, :invitation_event
 
 end
 
@@ -239,7 +239,7 @@ class SharedEvent < RpEvent
   alias_attribute :shared, :direct_object
   alias_attribute :sharee, :indirect_object
   alias_attribute :topic, :direct_object
-  attr_accessible :sharer, :shared, :sharee, :topic
+  # attr_accessible :sharer, :shared, :sharee, :topic
 
   acts_as_notifiable :users,
                      targets: ->(evt, key) { [evt.sharee] },

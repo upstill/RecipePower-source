@@ -144,7 +144,6 @@ class ReferentsController < CollectibleController
     # @tabindex = session[:tabindex] || params[:tabindex] || 0
     # handlerclass = @@HandlersByIndex[@tabindex]
     @referent = Referent.find(params[:id]).becomes(Referent)
-    # update_and_decorate
     attribute_params = params[ActiveModel::Naming.param_key(@referent.class)]
     # Any free tags specified as tag tokens will need a type associated with them.
     # This is prepended to the string
@@ -201,4 +200,10 @@ class ReferentsController < CollectibleController
       child = handlerclass.find params[:childid].to_i
       parent.add_child child
   end
+
+    private
+
+    def referent_params
+      params.require(:referent).permit()
+    end
 end

@@ -8,7 +8,7 @@ class Feed < ApplicationRecord
   backgroundable :status
 
   picable :picurl, :picture
-  attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date, :home
+  # attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date, :home
   
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site

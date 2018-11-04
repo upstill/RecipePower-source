@@ -12,7 +12,7 @@ module Pagerefable
 
       # The url attribute is accessible, but access is through an instance method that
       # defers to a Pageref
-      attr_accessible url_attribute, :page_ref
+      # attr_accessible url_attribute, :page_ref
 
       # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
       belongs_to :page_ref, validate: true, autosave: true

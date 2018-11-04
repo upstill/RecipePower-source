@@ -12,7 +12,7 @@ class Reference < ApplicationRecord
 
   backgroundable :status
 
-  attr_accessible :type, :url, :filename, :link_text
+  # attr_accessible :type, :url, :filename, :link_text
 
   validates_uniqueness_of :url, :scope => :type
 

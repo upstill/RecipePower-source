@@ -1,0 +1,4 @@
+one:
+  user_id: 1
+  question_id: 2
+  answer: 'some random answer'

@@ -3,7 +3,7 @@
 class Vote < ApplicationRecord
   self.primary_keys = ["user_id", "entity_type", "entity_id"]
 
-  attr_accessible :voter, :user_id, :entity, :entity_type, :entity_id
+  # attr_accessible :voter, :user_id, :entity, :entity_type, :entity_id
 
   belongs_to :voter, :class_name => "User", foreign_key: 'user_id'
   belongs_to :entity, :polymorphic => true

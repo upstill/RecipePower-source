@@ -38,9 +38,7 @@ module Collectible
     }
 
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
-    # attr_accessor :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
-    # attr_accessible :collectible_userid, :collectible_comment, :collectible_private # Virtual attributes for editing
-    attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
+    # attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
     attr_accessor :page_ref_kind
   end
 

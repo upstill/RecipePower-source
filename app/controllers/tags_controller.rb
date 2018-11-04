@@ -126,7 +126,7 @@ class TagsController < ApplicationController
 
   # GET /tags/1/edit
   def edit
-    @tag = Tag.find(params[:id])
+    @tag = Tag.find params[:id]
     smartrender
   end
 
@@ -235,7 +235,7 @@ class TagsController < ApplicationController
   # PUT /tags/1
   # PUT /tags/1.xml
   def update
-    @tag = Tag.find(params[:id])
+    @tag = Tag.find params[:id]
     @decorator = @tag.decorate
     @touched = [ @tag ]
     params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
@@ -270,7 +270,7 @@ class TagsController < ApplicationController
       end
     else
       # Keeping it the same type, possibly with a change of spelling, so we have to watch out for a name clash
-      if !(success = @tag.update_attributes(params[:tag])) && @tag.errors[:key] # ...signalling a name clash, possibly
+      if !(success = @tag.update_attributes tag_params) && @tag.errors[:key] # ...signalling a name clash, possibly
         if other = @tag.clashing_tag
           @touched << other
           @decorator = (@tag = other.absorb @tag).decorate
@@ -297,6 +297,12 @@ class TagsController < ApplicationController
       BannedTag.create(normalized_name: nn) unless BannedTag.where(normalized_name: nn).exists?
     end
     super
+  end
+
+  private
+
+  def tag_params
+    params.require(:tag).permit!
   end
 
 end

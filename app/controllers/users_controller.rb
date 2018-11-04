@@ -69,7 +69,7 @@ class UsersController < CollectibleController
   # DELETE /users/1
   # DELETE /users/1.xml
   def destroy
-    response_service.user = User.find(params[:id])
+    response_service.user = User.find params[:id]
     response_service.user.destroy
     respond_to do |format|
       format.html { redirect_to(users_url) }
@@ -129,7 +129,7 @@ class UsersController < CollectibleController
   # Remove a user from the friends of the current user
   def remove
     begin
-      followee = User.find(params[:id])
+      followee = User.find params[:id]
     rescue Exception => e
       flash[:error] = 'Couldn\'t find followee '+params[:id].to_s
     end
@@ -230,6 +230,12 @@ class UsersController < CollectibleController
         smartrender
       end
     end
+  end
+
+  private
+
+  def user_params
+    params.require(:user).permit!
   end
 
 end

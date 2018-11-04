@@ -10,7 +10,7 @@ class Scraper < ApplicationRecord
   include Backgroundable
   backgroundable
 
-  attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
+  # attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate, :page
 
   # @@LaunchedScrapers = {}

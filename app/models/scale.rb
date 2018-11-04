@@ -1,7 +1,7 @@
 class Scale < ApplicationRecord
 	has_many :ratings
 	has_many :recipes, :through=>:ratings
-	attr_accessible :id, :minlabel, :maxlabel, :name #, :minval, :maxval
+	# attr_accessible :id, :minlabel, :maxlabel, :name #, :minval, :maxval
 
     def value_as_text(val)
         s = ["super ", "very ", "fairly ", "", "fairly ", "very ", "super "][val+3]

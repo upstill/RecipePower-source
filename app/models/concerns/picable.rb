@@ -11,7 +11,7 @@ module Picable
       reference_name = reference_name.to_sym
       picable_attribute = picable_attribute.to_sym
       ref_type = 'ImageReference'
-      attr_accessible picable_attribute, reference_name
+      # attr_accessible picable_attribute, reference_name
       belongs_to reference_name, class_name: ref_type
 
       self.instance_eval do

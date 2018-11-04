@@ -8,7 +8,7 @@ class Offering < ApplicationRecord
   # The product on offer
   belongs_to :product
 
-  attr_accessible :product, :page_ref
+  # attr_accessible :product, :page_ref
 
   # An offering gets its title from the product
   delegate :title, :to => :product

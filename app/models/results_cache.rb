@@ -581,7 +581,7 @@ class ResultsCache < ApplicationRecord
   # Standard parameters
   attr_reader :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
 
-  attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
+  # attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
   attr_accessor :typeset, :itemscope
   serialize :params
   serialize :cache

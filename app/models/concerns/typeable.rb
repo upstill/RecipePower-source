@@ -6,7 +6,7 @@ module Typeable
   module ClassMethods
     
     def typeable(attribute, list)
-      attr_accessible attribute, :typenum, :typename, :typesym
+      # attr_accessible attribute, :typenum, :typename, :typesym
       @tag_types = TypeMap.new(list, 'unclassified')
       @attrib_name = attribute
     end

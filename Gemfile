@@ -6,8 +6,8 @@ gem 'rails', '4.2.6'
 gem 'rdoc'
 
 ###### Rails Extensions
-# Protect attributes from mass-assignment in ActiveRecord models.
-gem 'protected_attributes' # https://github.com/rails/protected_attributes
+# Protect attributes from mass-assignment in ActiveRecord models. (No longer supported in Rails 5)
+# gem 'protected_attributes' # https://github.com/rails/protected_attributes
 # Counter caches
 gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
 # Composite Primary Keys (NB: VERSION NUMBER DEPENDS VERY CLOSELY ON RAILS VERSION)

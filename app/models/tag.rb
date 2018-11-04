@@ -27,7 +27,7 @@ class Tag < ApplicationRecord
            Dual: ['Dual', 21]
   )
 
-  attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
+  # attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
 
   has_many :taggings, :dependent => :destroy
   has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id', :dependent => :restrict_with_error

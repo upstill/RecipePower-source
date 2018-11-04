@@ -28,7 +28,7 @@ class SuggestionsController < ApplicationController
 
   # POST /suggestions
   def create
-    @suggestion = Suggestion.new(suggestion_params)
+    @suggestion = Suggestion.new suggestion_params
 
     if @suggestion.save
       redirect_to @suggestion, notice: 'Suggestion was successfully created.'
@@ -39,7 +39,7 @@ class SuggestionsController < ApplicationController
 
   # PATCH/PUT /suggestions/1
   def update
-    if @suggestion.update(suggestion_params)
+    if @suggestion.update suggestion_params
       redirect_to @suggestion, notice: 'Suggestion was successfully updated.'
     else
       render action: 'edit'
@@ -55,11 +55,11 @@ class SuggestionsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_suggestion
-      @suggestion = Suggestion.find(params[:id])
+      @suggestion = Suggestion.find params[:id]
     end
 
     # Only allow a trusted parameter "white list" through.
     def suggestion_params
-      params.require(:suggestion).permit(:base_type, :base_id, :viewer_id, :session, :filter, :results_cache_id, :results)
+      params.require(:suggestion).permit :base_type, :base_id, :viewer_id, :session, :filter, :results_cache_id, :results
     end
 end

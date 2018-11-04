@@ -1,6 +1,6 @@
 class Suggestion < ApplicationRecord
 
-  attr_accessible :base, :viewer, :session, :filter, :results_cache, :results, :pending, :ready
+  # attr_accessible :base, :viewer, :session, :filter, :results_cache, :results, :pending, :ready
 
   belongs_to :base, :polymorphic => true
   belongs_to :viewer, :class_name => 'User'

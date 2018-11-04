@@ -13,7 +13,7 @@ class ScalesController < ApplicationController
   # GET /scales/1
   # GET /scales/1.xml
   def show
-    @scale = Scale.find(params[:id])
+    @scale = Scale.find params[:id]
 
     respond_to do |format|
       format.html # show.html.erb
@@ -34,7 +34,7 @@ class ScalesController < ApplicationController
 
   # GET /scales/1/edit
   def edit
-    @scale = Scale.find(params[:id])
+    @scale = Scale.find params[:id]
   end
 
   # POST /scales
@@ -56,10 +56,10 @@ class ScalesController < ApplicationController
   # PUT /scales/1
   # PUT /scales/1.xml
   def update
-    @scale = Scale.find(params[:id])
+    @scale = Scale.find params[:id]
 
     respond_to do |format|
-      if @scale.update_attributes(params[:scale])
+      if @scale.update_attributes scale_params
         format.html { redirect_to(@scale, :notice => 'Scale was successfully updated.') }
         format.xml  { head :ok }
       else
@@ -72,12 +72,18 @@ class ScalesController < ApplicationController
   # DELETE /scales/1
   # DELETE /scales/1.xml
   def destroy
-    @scale = Scale.find(params[:id])
+    @scale = Scale.find params[:id]
     @scale.destroy
 
     respond_to do |format|
       format.html { redirect_to(scales_url) }
       format.xml  { head :ok }
     end
+  end
+
+  private
+
+  def scale_params
+    params.require(:scale).permit!
   end
 end

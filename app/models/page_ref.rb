@@ -28,9 +28,9 @@ class PageRef < ApplicationRecord
   @@mercury_attributes = [ :url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
-  attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
-                  :error_message, :http_status, :errcode,
-                  :recipes, :sites # Entities that uniquely refer to this pageref
+  # attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
+                  # :error_message, :http_status, :errcode,
+                  # :recipes, :sites # Entities that uniquely refer to this pageref
 
   unless method_defined? :"kind="
     enum kind: [ :link, :recipe, :site, :referrable, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event]

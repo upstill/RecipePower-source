@@ -11,7 +11,7 @@ class FeedbackController < ApplicationController
   end
 
   def create
-    @feedback = Feedback.create(params[:feedback])
+    @feedback = Feedback.create feedback_params
     if @feedback.valid?
       RpMailer.feedback(@feedback).deliver
       render json: { done: true, notice: "Thank you again!" }
@@ -24,5 +24,16 @@ class FeedbackController < ApplicationController
       # without worrying about the javascript.
       smartrender :action => 'new', :status => :unprocessable_entity
     end
+  end
+
+  private
+
+  def feedback_params
+    params.require(:feedback).permit(:user_id,
+                                     :subject,
+                                     :email,
+                                     :comment,
+                                     :page,
+                                     :docontact)
   end
 end

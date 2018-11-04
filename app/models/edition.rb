@@ -4,13 +4,16 @@ class Edition < ApplicationRecord
   backgroundable :status
   require 'referent.rb'
 
-  attr_accessible :opening, :signoff,
+=begin
+  # attr_accessible :opening, :signoff,
                   :recipe_id, :recipe_before, :recipe_after,
                   :site_id, :site_before, :site_after,
                   :condiment_id, :condiment_type, :condiment_before, :condiment_after,
                   :list_id, :list_before, :list_after,
                   :guest_id, :guest_type, :guest_before, :guest_after,
                   :published, :published_at, :number
+=end
+
   belongs_to :recipe
   belongs_to :site
   belongs_to :list

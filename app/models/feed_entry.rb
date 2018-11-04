@@ -3,7 +3,7 @@ class FeedEntry < ApplicationRecord
   include Collectible
   picable :picurl, :picture
 
-  attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
+  # attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
 
   belongs_to :recipe
   belongs_to :feed, :counter_cache => true

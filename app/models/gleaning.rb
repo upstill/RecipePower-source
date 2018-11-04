@@ -12,7 +12,7 @@ class Gleaning < ApplicationRecord
   has_one :page_ref
   has_one :site, :through => :page_ref
 
-  attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
+  # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
   serialize :results
 

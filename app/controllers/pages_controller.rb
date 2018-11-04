@@ -96,4 +96,10 @@ class PagesController < ApplicationController
     end
   end
 
+  private
+
+  def page_params
+    params.require(:page).permit!
+  end
+
 end

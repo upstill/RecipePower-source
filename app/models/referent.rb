@@ -85,14 +85,14 @@ class Referent < ApplicationRecord
     def self.referrable klass
       has_many klass.to_s.pluralize.underscore, :through => :referments, :source => :referee, :source_type => klass
     end
-=end
 
-  attr_accessible :tag, :type, :description, :isCountable, :dependent,
+  # attr_accessible :tag, :type, :description, :isCountable, :dependent,
                   :canonical_expression, :expressions_attributes, :add_expression, :tag_id,
                   :page_refs_attributes,
                   :parents, :children, :relateds,
                   :parent_tag_tokens, :child_tag_tokens, :related_tag_tokens,
                   :typeindex
+=end
 
   attr_accessor :dependent
 
@@ -612,7 +612,7 @@ else
   class SourceReferent < Referent
     has_one :site, foreign_key: 'referent_id'
 
-    attr_accessible :site
+    # attr_accessible :site
 
     def associate
       self.site

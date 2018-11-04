@@ -42,7 +42,7 @@ class VotesController < ApplicationController
 
   # PATCH/PUT /votes/1
   def update
-    if @vote.update(vote_params)
+    if @vote.update vote_params
       redirect_to @vote, notice: 'Vote was successfully updated.'
     else
       render action: 'edit'
@@ -69,6 +69,6 @@ class VotesController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def vote_params
-      params.require(:vote).permit(:user_id, :entity_type, :entity_id, :up)
+      params.require(:vote).permit :user_id, :entity_type, :entity_id, :up
     end
 end

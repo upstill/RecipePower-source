@@ -104,16 +104,14 @@ class ApplicationController < ActionController::Base
     end
     # Finish whatever background task is associated with the entity
     entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
-    attribute_params = nil
+    attribute_params =
     if entity
       # If the entity is provided, ignore parameters
-      modelname = entity.class.to_s.underscore
-      attribute_params = params[modelname.to_sym] if options[:update_attributes]
+      strong_parameters if options[:update_attributes]
     else # If entity not provided, find/build it and update attributes
-      modelname = response_service.controller_model_name # params[:controller].sub(/_controller$/, '').singularize
-      objclass = response_service.controller_model_class
+      objclass = params[:controller].singularize.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
-      attribute_params = params[modelname.to_sym]
+      strong_parameters
     end
     entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
     if entity.errors.empty? && # No probs. so far
@@ -125,7 +123,7 @@ class ApplicationController < ActionController::Base
       end
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
-    instance_variable_set :"@#{modelname}", entity
+    instance_variable_set :"@#{entity.model_name.singular}", entity
     # We build a decorator if necessary and possible
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
       @decorator = (entity.decorate if entity.respond_to? :decorate)
@@ -137,6 +135,20 @@ class ApplicationController < ActionController::Base
     end
     @presenter = present(entity) rescue nil # Produce a presenter if possible
     entity.errors.empty? # ...and report back status
+  end
+
+  # Get the model parameters as filtered by strong parameters for the current controller
+  # This is a skin on #<model>_params as defined by each controller to constrain mass assignment
+  #
+  # If #<model>_params is NOT defined in the controller, we simply return the parameters for the model
+  def strong_parameters
+    modelname = params[:controller].singularize
+    method_name = "#{modelname}_params"
+    if self.respond_to? method_name, true # Allow for private params method
+      self.send method_name
+    else
+      params[modelname] # Good luck with that!
+    end
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home

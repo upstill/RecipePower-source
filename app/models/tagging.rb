@@ -1,6 +1,6 @@
 
 class Tagging < ApplicationRecord
-  attr_accessible :user_id, :tag_id, :entity, :entity_id, :entity_type # :is_definition,
+  # attr_accessible :user_id, :tag_id, :entity, :entity_id, :entity_type # :is_definition,
   
   belongs_to :tag
   belongs_to :tagger, :foreign_key => :user_id, :class_name => "User" # :user

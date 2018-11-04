@@ -1,6 +1,6 @@
 =begin
 class Notification
-  attr_accessible :info, :source_id, :target_id,
+  # attr_accessible :info, :source_id, :target_id,
                   :notification_type,
                   :accepted, :shared, :autosave
   serialize :info
@@ -46,7 +46,7 @@ end
 
   class ActivityNotification::Notification
     alias_attribute :notification_token, :id
-    attr_accessible :notification_token
+    # attr_accessible :notification_token
     before_create :generate_token
 
     def self.find_by_notification_token token

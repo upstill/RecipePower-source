@@ -21,11 +21,9 @@ class AnswersController < ApplicationController
 
   # POST /answers
   def create
-    ts = Answer.find_or_create_by params[:answer].slice(:user_id, :question_id)
-    ts.update_attributes params[:answer]
-    ts.save
-    update_and_decorate ts
-    if update_and_decorate
+    valid_params = answer_params
+    ts = Answer.create_with(valid_params.slice :answer).find_or_create_by valid_params.slice(:user_id, :question_id)
+    if !ts.errors.any?
       flash[:popup] = 'Answer duly noted.'
     else
       render :new
@@ -49,13 +47,14 @@ class AnswersController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_answer
-      @answer = Answer.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def answer_params
-      params.require(:answer).permit(:answer, :user_id, :question_id)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_answer
+    @answer = Answer.find params[:id]
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def answer_params
+    params.require(:answer).permit :answer, :user_id, :question_id
+  end
 end

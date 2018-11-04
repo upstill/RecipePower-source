@@ -1,6 +1,6 @@
 class DeferredRequest < ApplicationRecord
   serialize :requests
-  attr_accessible :requests, :session_id
+  # attr_accessible :requests, :session_id
   self.primary_key = 'session_id'
 
   # Save the current request pending (presumably) a login, such that deferred_request and deferred_trigger

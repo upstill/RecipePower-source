@@ -1,6 +1,6 @@
 class Authentication < ApplicationRecord
   belongs_to :user
-  attr_accessible :user_id, :provider, :uid
+  # attr_accessible :user_id, :provider, :uid
   
   def provider_name
     case provider

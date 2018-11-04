@@ -10,7 +10,7 @@ class ReferencesController < ApplicationController
   # GET /references/1
   # GET /references/1.json
   def show
-    @reference = Reference.find(params[:id])
+    @reference = Reference.find params[:id]
     smartrender
   end
 
@@ -23,14 +23,14 @@ class ReferencesController < ApplicationController
 
   # GET /references/1/edit
   def edit
-    @reference = Reference.find(params[:id])
+    @reference = Reference.find params[:id]
     smartrender
   end
 
   # POST /references
   # POST /references.json
   def create
-    @reference = Reference.new(params[:reference])
+    @reference = Reference.new reference_params
 
     respond_to do |format|
       if @reference.save
@@ -46,10 +46,10 @@ class ReferencesController < ApplicationController
   # PUT /references/1
   # PUT /references/1.json
   def update
-    @reference = Reference.find(params[:id])
+    @reference = Reference.find params[:id]
 
     respond_to do |format|
-      if @reference.update_attributes(params[:reference])
+      if @reference.update_attributes reference_params
         format.html { redirect_to @reference, notice: 'Reference was successfully updated.' }
         format.json { head :no_content }
       else
@@ -62,13 +62,19 @@ class ReferencesController < ApplicationController
   # DELETE /references/1
   # DELETE /references/1.json
   def destroy
-    @reference = Reference.find(params[:id])
+    @reference = Reference.find params[:id]
     @reference.destroy
 
     respond_to do |format|
       format.html { redirect_to references_url }
       format.json { head :no_content }
     end
+  end
+
+  private
+
+  def reference_params
+    params.require(:reference).permit!
   end
 
 end

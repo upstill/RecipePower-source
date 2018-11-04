@@ -308,8 +308,6 @@ GEM
     premailer-rails (1.10.2)
       actionmailer (>= 3, < 6)
       premailer (~> 1.7, >= 1.7.9)
-    protected_attributes (1.1.4)
-      activemodel (>= 4.0.1, < 5.0)
     public_suffix (3.0.2)
     rack (1.6.9)
     rack-mini-profiler (1.0.0)
@@ -523,7 +521,6 @@ DEPENDENCIES
   poltergeist
   postgres_ext
   premailer-rails
-  protected_attributes
   rack-mini-profiler
   rails (= 4.2.6)
   rails-observers

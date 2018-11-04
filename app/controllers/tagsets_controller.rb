@@ -23,10 +23,9 @@ class TagsetsController < ApplicationController
 
   # POST /tagsets
   def create
-    @tagset = Tagset.create
-    @tagset.uid = current_user.id
-    @tagset.update_attributes tagset_params
-    if update_and_decorate @tagset
+    params[:tagset][:uid] = current_user.id
+    @tagset = Tagset.create tagset_params
+    if @tagset.errors.blank?
       redirect_to @tagset, notice: 'Tagset was successfully created.'
     else
       render :new
@@ -35,7 +34,7 @@ class TagsetsController < ApplicationController
 
   # PATCH/PUT /tagsets/1
   def update
-    if update_and_decorate # @tagset.update(tagset_params)
+    if update_and_decorate
       redirect_to @tagset, notice: 'Tagset was successfully updated.'
     else
       render :edit
@@ -51,11 +50,11 @@ class TagsetsController < ApplicationController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_tagset
-      @tagset = Tagset.find(params[:id])
+      @tagset = Tagset.find params[:id]
     end
 
     # Only allow a trusted parameter "white list" through.
     def tagset_params
-      params[:tagset]
+      params.require(:tagset).permit!
     end
 end
