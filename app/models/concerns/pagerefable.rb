@@ -8,6 +8,10 @@ module Pagerefable
 
   module ClassMethods
 
+    def mass_assignable_attributes keys=[]
+      [ self.url_attribute ].compact + (defined?(super) ? super : [])
+    end
+
     def pagerefable(url_attribute, options = {})
 
       # The url attribute is accessible, but access is through an instance method that

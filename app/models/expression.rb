@@ -17,7 +17,6 @@ end
 require 'type_map.rb'
 
 class Expression < ApplicationRecord
-  # attr_accessible :tag, :tag_id, :referent, :referent_id, :locale, :form, :tagname, :tag_token, :localename, :formname
   belongs_to :tag
   belongs_to :referent
 

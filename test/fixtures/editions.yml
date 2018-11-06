@@ -13,6 +13,7 @@ one:
   list_before: MyText
   list_after: MyText
   guest_id: 1
+  guest_type: Referent
   guest_before: MyText
   guest_after: MyText
   list_id: 1

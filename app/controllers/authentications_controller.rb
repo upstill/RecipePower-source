@@ -127,19 +127,13 @@ class AuthenticationsController < ApplicationController
   end
 
   def destroy
-    @authentication = Authentication.find(params[:id])
+    @authentication = Authentication.find params[:id]
     @authentication.destroy
     flash[:notice] = "Okay, no more #{@authentication.provider_name} authentication for you!"
     respond_to do |format|
-      format.html {
-        redirect_to authentications_url, :status => 303
-      }
-      format.json {
-        redirect_to authentications_url(mode: response_service.mode), :status => 303
-      }
-      format.js {
-        render action: 'destroy', locals: {provider: @authentication.provider}
-      }
+      format.html { redirect_to authentications_url, :status => 303 }
+      format.json { redirect_to authentications_url(mode: response_service.mode), :status => 303 }
+      format.js { render action: 'destroy', locals: {provider: @authentication.provider} }
     end
   end
 end

@@ -117,9 +117,9 @@ class ApplicationController < ActionController::Base
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
       current_user.touch(entity) if options[:touch]
-      if attribute_params
+      if attribute_params.present?
         entity.incoming_attributes attribute_params.keys if entity.is_a? Taggable
-        entity.update_attributes attribute_params # There are parameters to update
+        entity.update_attributes attribute_params# There are parameters to update
       end
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
@@ -143,6 +143,7 @@ class ApplicationController < ActionController::Base
   # If #<model>_params is NOT defined in the controller, we simply return the parameters for the model
   def strong_parameters
     modelname = params[:controller].singularize
+    return {} unless params[modelname].present?
     method_name = "#{modelname}_params"
     if self.respond_to? method_name, true # Allow for private params method
       self.send method_name

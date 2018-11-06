@@ -3,7 +3,16 @@ module Collectible
   include Voteable
   include Picable
 
+  module ClassMethods
+
+    def mass_assignable_attributes keys=[]
+      [ :collectible_user_id, :collectible_comment, :collectible_private ] +
+          (defined?(super) ? super : [])
+    end
+  end
+
   included do
+
     before_save do
       @cached_ref.save if cached_ref_valid? # It must have been set
     end
@@ -40,6 +49,10 @@ module Collectible
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
     attr_accessor :page_ref_kind
+  end
+
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
   # Prepare for editing the model by setting the collectible attributes

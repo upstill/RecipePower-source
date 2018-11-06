@@ -25,7 +25,7 @@ class EditionsController < ApplicationController
 
   # POST /editions
   def create
-    @edition = Edition.new(edition_params)
+    @edition = Edition.new edition_params
 
     if @edition.save
       redirect_to @edition, notice: 'Edition was successfully created.'
@@ -36,8 +36,8 @@ class EditionsController < ApplicationController
 
   # PATCH/PUT /editions/1
   def update
-    @edition.published = true if params[:commit].match 'Publish'
-    if @edition.update_attributes(edition_params)
+    params[:edition][:published] = true if params[:commit].match 'Publish'
+    if @edition.update_attributes edition_params
       redirect_to @edition, notice: 'Edition was successfully updated.'
     else
       render :edit
@@ -51,18 +51,19 @@ class EditionsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_edition
-      @edition = Edition.find(params[:id])
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def edition_params
-      params.require(:edition).permit(:opening, :signoff, :published_at,
-                                      :recipe_id, :recipe_before, :recipe_after,
-                                      :condiment_id, :condiment_type, :condiment_before, :condiment_after,
-                                      :site_id, :site_before, :site_after,
-                                      :guest_id, :guest_type, :guest_before, :guest_after,
-                                      :list_id, :list_before, :list_after)
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_edition
+    @edition = Edition.find params[:id]
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def edition_params
+    params.require(:edition).permit(:opening, :signoff, :published, :published_at,
+                                    :recipe_id, :recipe_before, :recipe_after,
+                                    :condiment_id, :condiment_type, :condiment_before, :condiment_after,
+                                    :site_id, :site_before, :site_after,
+                                    :guest_id, :guest_type, :guest_before, :guest_after,
+                                    :list_id, :list_before, :list_after)
+  end
 end

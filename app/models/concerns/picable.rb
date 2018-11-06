@@ -5,6 +5,9 @@ module Picable
   # include Linkable
 
   module ClassMethods
+    def mass_assignable_attributes keys=[]
+      [ self.picable_attribute, self.image_reference_name ] + (defined?(super) ? super(keys) : [] )
+    end
 
     def picable picable_attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png'
       # linkable picable_attribute, reference_name, :as => 'ImageReference' # 'Reference' #

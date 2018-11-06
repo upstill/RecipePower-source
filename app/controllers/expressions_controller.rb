@@ -8,6 +8,7 @@ Fields:
     -- locale: the language in which this expression is valid
 =end
 class ExpressionsController < ApplicationController
+  before_action :set_expression, only: [:show, :edit, :update, :destroy]
   # GET /expressions
   # GET /expressions.json
   def index
@@ -22,7 +23,6 @@ class ExpressionsController < ApplicationController
   # GET /expressions/1
   # GET /expressions/1.json
   def show
-    @expression = Expression.find params[:id]
     smartrender
   end
 
@@ -35,7 +35,6 @@ class ExpressionsController < ApplicationController
 
   # GET /expressions/1/edit
   def edit
-    @expression = Expression.find params[:id]
     smartrender
   end
 
@@ -43,7 +42,6 @@ class ExpressionsController < ApplicationController
   # POST /expressions.json
   def create
     @expression = Expression.new expression_params
-
     respond_to do |format|
       if @expression.save
         format.html { redirect_to @expression, notice: 'Expression was successfully created.' }
@@ -58,8 +56,6 @@ class ExpressionsController < ApplicationController
   # PUT /expressions/1
   # PUT /expressions/1.json
   def update
-    @expression = Expression.find params[:id]
-
     respond_to do |format|
       if @expression.update_attributes expression_params
         format.html { redirect_to @expression, notice: 'Expression was successfully updated.' }
@@ -74,9 +70,7 @@ class ExpressionsController < ApplicationController
   # DELETE /expressions/1
   # DELETE /expressions/1.json
   def destroy
-    @expression = Expression.find params[:id]
     @expression.destroy
-
     respond_to do |format|
       format.html { redirect_to expressions_url }
       format.json { head :ok }
@@ -85,7 +79,12 @@ class ExpressionsController < ApplicationController
 
   private
 
+  # Use callbacks to share common setup or constraints between actions.
+  def set_expression
+    @expression = Expression.find params[:id]
+  end
+
   def expression_params
-    params.require(:edition).permit!
+    params.require(:expression).permit :tag_id, :referent_id, :locale, :form
   end
 end

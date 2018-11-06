@@ -3,7 +3,24 @@ require 'token_input.rb'
 module Taggable
   extend ActiveSupport::Concern
 
+  module ClassMethods
+
+    # Provide the list of parameters that taggables may accept
+    def mass_assignable_attributes keys=[]
+      [   :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens,
+          :editable_tag_tokens, :editable_misc_tag_tokens,
+          :editable_author_tag_tokens, :editable_dish_tag_tokens,
+          :editable_genre_tag_tokens, :editable_ingredient_tag_tokens,
+          :editable_tool_tag_tokens, :editable_process_tag_tokens,
+          :editable_occasion_tag_tokens, :editable_source_tag_tokens,
+          :editable_course_tag_tokens, :editable_diet_tag_tokens ] +
+          (defined?(super) ? super : [])
+    end
+
+  end
+
   included do
+
     # When the record is saved, save its affiliated tagging info
     before_save do
       if @tagging_user_id
@@ -43,6 +60,10 @@ module Taggable
                     :editable_course_tag_tokens, :editable_diet_tag_tokens
 =end
                     Tag.taggable self
+  end
+
+  def self.included(base)
+    base.extend(ClassMethods)
   end
 
   def tagging_user_id= id

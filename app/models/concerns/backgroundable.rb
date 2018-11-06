@@ -61,6 +61,10 @@ module Backgroundable
 
   module ClassMethods
 
+    def mass_assignable_attributes keys=[]
+      [ ] + (defined?(super) ? super : [])
+    end
+
     def backgroundable status_attribute=:status
       # attr_accessible status_attribute
       # Since enums are defined at the Module level, we need to detect when an enum has been

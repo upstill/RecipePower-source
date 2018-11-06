@@ -33,7 +33,7 @@ class FeedbacksControllerTest < ActionDispatch::IntegrationTest
   end
 
   test "should update feedback" do
-    patch :update, id: @feedback, feedback: { base_id: @feedback.base_id, base_type: @feedback.base_type, filter: @feedback.filter, results_cache_id: @feedback.results_cache_id, results: @feedback.results, session: @feedback.session, viewer: @feedback.viewer }
+    patch :update, id: @feedback, feedback: @feedback.attributes.slice('base_id', 'base_type', 'filter', 'results_cache_id', 'results', 'session', 'viewer')
     assert_redirected_to feedback_path(assigns(:feedback))
   end
 
