@@ -28,6 +28,7 @@ class RefermentsController < ApplicationController
 private
 
   def referment_params
-    params.require(:referment).permit(:kind, :url, :title)
+    # TODO: Testing!
+    params.require(:referment).permit :kind, :url, :title 
   end
 end

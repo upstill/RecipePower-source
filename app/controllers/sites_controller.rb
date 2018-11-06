@@ -71,6 +71,7 @@ class SitesController < CollectibleController
   private
 
   def site_params
+    # TODO: Testing!
     params.require(:site).permit!
   end
 end

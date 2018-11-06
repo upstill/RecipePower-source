@@ -84,6 +84,7 @@ class RatingsController < ApplicationController
   private
 
   def rating_params
+    # TODO: Testing!
     params.require(:rating).permit!
   end
 end

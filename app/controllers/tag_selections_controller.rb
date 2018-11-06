@@ -17,6 +17,7 @@ class TagSelectionsController < ApplicationController
   private
 
   def tag_selection_params
+    # TODO: Testing!
     params.require(:tag_selection).permit!
   end
 end

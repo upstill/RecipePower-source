@@ -1,22 +1,38 @@
 # encoding: UTF-8
 require 'test_helper'
-require 'warden_test_helper'
+# require 'warden_test_helper'
 
-class ListsControllerTest < ActionController::TestCase
-  fixtures :lists, :users
+class ListsControllerTest < ActionDispatch::IntegrationTest
+  include Warden::Test::Helpers
+  Warden.test_mode!
+  fixtures :lists, :users, :tags
 
   setup do
-    # tagee = users(:thing3)
-    # login_as(tagee, scope: :user)
-    @list = lists :dessert
+    tagee = users(:thing3)
+    login_as(tagee, scope: :user)
+    # @list = FactoryBot.create(:list)
+    @list_params = {
+        # collectible_user_id: 3,
+        collectible_comment: 'this would be a comment',
+        name: "Some other kind of list",
+        # name_tag_id: 15,
+        description: 'compiling something',
+        notes: 'notes would go here',
+        availability: 2,
+        # included_tag_tokens: "11",
+        pullin: 1,
+        # tagging_user_id: 3,
+        editable_dish_tag_tokens: "4",
+        editable_ingredient_tag_tokens: "3",
+        tagging_list_tokens: "1"
+        }
   end
 
   test "should create list" do
     count_before = List.count
     # post '/lists', list: @list.attributes
-    post '/lists',
-         format: 'json',
-         list: @list.attributes.slice( 'tag_id', 'referent_id', 'locale', 'form' )
+    post create_list_path, format: 'json', list: @list_params
+
     count_after = List.count
     assert_equal count_before+1, count_after
     list = List.last

@@ -302,6 +302,7 @@ class TagsController < ApplicationController
   private
 
   def tag_params
+    # TODO: Testing!
     params.require(:tag).permit!
   end
 

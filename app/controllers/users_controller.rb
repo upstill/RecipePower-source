@@ -235,6 +235,7 @@ class UsersController < CollectibleController
   private
 
   def user_params
+    # TODO: Testing!
     params.require(:user).permit!
   end
 

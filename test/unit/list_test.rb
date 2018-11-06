@@ -7,9 +7,9 @@ class ListTest < ActiveSupport::TestCase
   # to set up fixture information.
   def setup
     @owner = users(:thing3)
-    @lst_name = "Test List"
-    @description = "A list strictly for testing purposes"
-    @lst = List.assert @lst_name, @owner, description: @description
+    @lst_name = "Test List" # From tags.yml
+    @description = "A list strictly for testing purposes"  # From lists.yml
+    @lst = List.assert @lst_name, @owner # , description: @description
     # Get a recipe under a tag
     @lst.store (@included = FactoryBot.create(:recipe))
   end

@@ -55,6 +55,7 @@ class TagsetsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def tagset_params
+      # TODO: Testing!
       params.require(:tagset).permit!
     end
 end

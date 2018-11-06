@@ -60,6 +60,7 @@ class SuggestionsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def suggestion_params
+      # TODO: Testing!
       params.require(:suggestion).permit :base_type, :base_id, :viewer_id, :session, :filter, :results_cache_id, :results
     end
 end

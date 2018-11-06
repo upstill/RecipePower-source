@@ -204,6 +204,7 @@ class ReferentsController < CollectibleController
     private
 
     def referent_params
-      params.require(:referent).permit()
+    # TODO: Testing!
+      params.require(:referent).permit!
     end
 end

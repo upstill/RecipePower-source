@@ -39,10 +39,10 @@ class PageRefsController < CollectibleController
   #       N: redraw the dialog with a flash error
   def create
     if current_user
-      @entity = @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
+      @entity = @page_ref = PageRefServices.assert page_ref_params.slice('kind', 'url') # params[:page_ref][:kind], params[:page_ref][:url]
       if !@page_ref.errors.any?
         @page_ref.bkg_land
-        update_and_decorate @page_ref
+        update_and_decorate @page_ref # Applies other parameters
         @entity = RefereeServices.new(@page_ref).assert_kind params[:page_ref][:kind], true
         @entity.bkg_land
       end
@@ -76,7 +76,7 @@ class PageRefsController < CollectibleController
   # PATCH/PUT /page_refs/1
   # Handled in CollectibleController
   def update
-    if page_ref.update(page_ref_params)
+    if page_ref.update page_ref_params
       redirect_to page_ref, notice: 'Mercury page was successfully updated.'
     else
       render :edit
@@ -109,6 +109,7 @@ class PageRefsController < CollectibleController
 
     # Only allow a trusted parameter "white list" through.
     def page_ref_params
+    # TODO: Testing!
       params.require(:page_ref).permit(:url, :title, :content, :date_published, :lead_image_url, :domain)
     end
 end

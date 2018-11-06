@@ -74,6 +74,7 @@ class ReferencesController < ApplicationController
   private
 
   def reference_params
+    # TODO: Testing!
     params.require(:reference).permit!
   end
 

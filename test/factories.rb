@@ -49,6 +49,22 @@ FactoryBot.define do
     # title "#{description}"
   end
 
+  factory :list, class: List do
+    collectible_user_id 3
+    collectible_comment 'this would be a comment'
+    name_tag_id 15
+    description 'compiling something'
+    notes 'notes would go here'
+    availability 2
+    included_tag_tokens "11"
+    pullin 1
+    tagging_user_id 3
+    editable_dish_tag_tokens "4"
+    editable_ingredient_tag_tokens "3"
+    tagging_list_tokens "1"
+
+  end
+
   factory :page_ref, class: PageRef do
     url "http://www.foodandwine.com/chefs/adam-erace"
   end

@@ -22,6 +22,7 @@ module Taggable
   included do
 
     # When the record is saved, save its affiliated tagging info
+=begin
     before_save do
       if @tagging_user_id
         if @tagging_list_tokens
@@ -37,6 +38,7 @@ module Taggable
         end
       end
     end
+=end
 
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { uniq }, :through => :taggings
@@ -49,7 +51,6 @@ module Taggable
     }
 
     attr_reader :tagging_user_id
-    attr_accessor :tagging_tag_tokens, :tagging_list_tokens # Only gets written externally; internally accessed with instance variable
 =begin
     # attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
                     :editable_tag_tokens, :editable_misc_tag_tokens,
@@ -64,6 +65,14 @@ module Taggable
 
   def self.included(base)
     base.extend(ClassMethods)
+  end
+
+  def tagging_list_tokens= list
+    x=2
+  end
+
+  def tagging_list_tokens
+    x=3
   end
 
   def tagging_user_id= id
@@ -136,10 +145,12 @@ module Taggable
     super if defined? super
   end
 
+=begin
   def incoming_attributes keys
     token_attributes = keys.select { |key| key[/^(visible_|editable_|locked_)?((not?_)?[^_]*_)*(tags|tag_tokens)$/] }.reverse.map &:to_sym
     # self.class_eval { attr_accessible *token_attributes }
   end
+=end
 
   # Here we corral methods of the form {visible,editable,locked}[_type]_{tags,tag_tokens}[=]
   # visible means the user can see
@@ -205,8 +216,6 @@ module Taggable
     logger.debug filter_options
     filtered_tags filter_options
   end
-
-  protected
 
   # Fetch the tags associated with the entity, with various optional constraints (including userid via @tagging_user_id)
   # Options:

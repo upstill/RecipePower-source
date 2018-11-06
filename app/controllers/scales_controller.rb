@@ -84,6 +84,7 @@ class ScalesController < ApplicationController
   private
 
   def scale_params
+    # TODO: Testing!
     params.require(:scale).permit!
   end
 end

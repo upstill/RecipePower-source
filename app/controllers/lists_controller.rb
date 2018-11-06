@@ -27,7 +27,7 @@ class ListsController < CollectibleController
 
   def create
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
-    response_service.title = "New List"
+    response_service.title = 'New List'
     puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     l = List.assert( params[:list][:name], current_user)
     update_and_decorate l, touch: true, update_attributes: !l.persisted?
@@ -59,8 +59,7 @@ class ListsController < CollectibleController
   end
 
   def update
-    @list.save if update_and_decorate
-    if @list.errors.empty?
+    if update_and_decorate
       flash[:popup] = "'#{@list.name}' all saved now"
       respond_to do |format|
         format.html { redirect_to list_url(@list), :status => :see_other }
@@ -116,7 +115,14 @@ class ListsController < CollectibleController
   private
 
   def list_params
-    params.require(:list).permit!
+    # TODO: Testing!
+    permitted_attributes = List.mass_assignable_attributes + [
+        :owner, :ordering, :title,
+        :name, :name_tag_id, :name_tag,
+        :tags, :included_tag_tokens, :pullin, :notes, :description,
+        :availability, :owner_id
+    ]
+    params.require(:list).permit *permitted_attributes
   end
 
 end
