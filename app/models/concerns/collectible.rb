@@ -6,7 +6,7 @@ module Collectible
   module ClassMethods
 
     def mass_assignable_attributes keys=[]
-      [ :collectible_user_id, :collectible_comment, :collectible_private ] +
+      [ :collectible_comment, :collectible_private ] +
           (defined?(super) ? super : [])
     end
   end

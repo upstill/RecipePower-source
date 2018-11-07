@@ -67,8 +67,15 @@ module Taggable
     base.extend(ClassMethods)
   end
 
-  def tagging_list_tokens= list
-    x=2
+  def tagging_list_tokens= tokenlist_str
+    ListServices.associate(
+        self,
+        TokenInput.parse_tokens(tokenlist_str) { |token| # parse_tokens analyzes each token in the list as either integer or string
+          token.is_a?(Fixnum) ?
+              Tag.find(token) :
+              Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
+        },
+        @tagging_user_id)
   end
 
   def tagging_list_tokens

@@ -12,16 +12,16 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     login_as(tagee, scope: :user)
     # @list = FactoryBot.create(:list)
     @list_params = {
-        # collectible_user_id: 3,
+        # collectible_user_id: 3, # Not assignable, but taken from current_user
         collectible_comment: 'this would be a comment',
         name: "Some other kind of list",
-        # name_tag_id: 15,
+        # name_tag_id: 15, # Implicit from name assignment
         description: 'compiling something',
         notes: 'notes would go here',
         availability: 2,
-        # included_tag_tokens: "11",
+        included_tag_tokens: "11",
         pullin: 1,
-        # tagging_user_id: 3,
+        # tagging_user_id: 3, # Not assignable, but taken from current_user
         editable_dish_tag_tokens: "4",
         editable_ingredient_tag_tokens: "3",
         tagging_list_tokens: "1"

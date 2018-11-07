@@ -117,10 +117,10 @@ class ListsController < CollectibleController
   def list_params
     # TODO: Testing!
     permitted_attributes = List.mass_assignable_attributes + [
-        :owner, :ordering, :title,
-        :name, :name_tag_id, :name_tag,
+        :ordering, :title, :owner_id, # :owner, # Specified by id
+        :name, # :name_tag_id, :name_tag, # Specified by name
         :tags, :included_tag_tokens, :pullin, :notes, :description,
-        :availability, :owner_id
+        :availability
     ]
     params.require(:list).permit *permitted_attributes
   end
