@@ -1,6 +1,6 @@
 # A picable class has an associated image
 module Picable
-  require 'reference.rb'
+  require 'image_reference.rb'
   extend ActiveSupport::Concern
   # include Linkable
 
@@ -10,21 +10,18 @@ module Picable
     end
 
     def picable picable_attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png'
-      # linkable picable_attribute, reference_name, :as => 'ImageReference' # 'Reference' #
       reference_name = reference_name.to_sym
       picable_attribute = picable_attribute.to_sym
-      ref_type = 'ImageReference'
-      # attr_accessible picable_attribute, reference_name
-      belongs_to reference_name, class_name: ref_type
+      belongs_to reference_name, class_name: 'ImageReference'
 
       self.instance_eval do
 
-        # Define singleton getter and setter methods for the URL by using a Reference object.
+        # Define singleton getter and setter methods for the URL by using an ImageReference object.
         # Once a URL is in use for an entity of a particular type (Recipe, site, image, etc.), it
         # remains bound to that entity until the entity is destroyed.
         # In particular, this gives a special meaning to url assignment: the URL is 1) checked that it
-        #  is unique within the class (actually, type of Reference) and then 2) non-destructively assigned
-        #  to the object by creating a new Reference bound to the object.
+        #  is unique within the class (actually, type of ImageReference) and then 2) non-destructively assigned
+        #  to the object by creating a new ImageReference bound to the object.
         # IT IS AN ERROR TO ASSIGN A URL WHICH IS IN USE BY ANOTHER ENTITY OF THE SAME CLASS.
         define_method "#{picable_attribute}=" do |pu|
           # Since we can't modify references once created, we can only assert a new
@@ -32,17 +29,8 @@ module Picable
           # Get the existing reference
           #          if options[:as]
           # The reference is to another entity type: we just index by URL and assign the reference association
-          ref = pu.blank? ? nil : ref_type.constantize.find_or_initialize(pu).first
+          ref = pu.blank? ? nil : ImageReference.find_or_initialize(pu)
           self.method(:"#{reference_name}=").call ref
-          # elsif pu.blank?
-          #   self.errors.add(picable_attribute, 'can\'t be blank')
-          # else
-          #   # Create a new reference (or references, if there's a redirect involved) as necessary
-          #   refs = ref_type.constantize.find_or_initialize(pu)
-          #   # Give me the new references
-          #   self.method(:"#{reference_name}=").call refs.first
-          #   # self.method(:"#{reference_name_pl}=").call refs
-          # end
           if self.has_attribute? picable_attribute
             # Set the old url attribute--if it still exists
             super pu
@@ -68,7 +56,6 @@ module Picable
           fallback_img_file
         end
         alias_method :imglink, picable_attribute
-        # ImageReference.register_client self, reference_name
       end
     end
   end

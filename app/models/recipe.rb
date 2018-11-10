@@ -71,7 +71,7 @@ class Recipe < ApplicationRecord
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
     pu = site_service.resolve(pu) if site_service
-    self.picture = ImageReference.find_or_initialize(pu).first
+    self.picture = ImageReference.find_or_initialize pu
   end
 
   def site_service

@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe ReferencesController do
+describe ImageReferencesController do
 
   describe "GET 'index'" do
     it "should be successful" do

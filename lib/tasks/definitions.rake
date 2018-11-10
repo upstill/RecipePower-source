@@ -1,23 +1,5 @@
 namespace :definitions do
   desc "TODO"
-  task convert_references: :environment do
-      reports = [ '***** task definitions:convert_references ********']
-      # Convert any references that have come in since the initial conversion
-      # ...thus ensuring that we have NO DefinitionReferences hanging around
-      Referment.where(referee_type: "Reference").each { |rm|
-        if rm.referee.class == DefinitionReference
-          reports << RefermentServices.new(rm).convert_reference
-          if (referee = rm.referee).class == DefinitionReference
-            referee.bkg_launch
-            referee.bkg_land # Wait for the worker to return
-          end
-        end
-      }
-      reports += PageRefServices.join_urls 'Definition'
-      reports += DefinitionPageRef.all.collect { |pr| PageRefServices.new(pr).ensure_status }.flatten.compact.sort
-      reports += DefinitionPageRef.where(site_id: nil).collect { |pr| PageRefServices.new(pr).ensure_site }.flatten.compact.sort
-      puts reports.flatten.compact.sort
-  end
 
   task reports: :environment do
     # Every PageRef needs to have a parsable URL

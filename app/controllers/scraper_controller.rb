@@ -42,7 +42,7 @@ class ScraperController < ApplicationController
       List.delete_all
       Rcpref.delete_all
       Recipe.delete_all
-      Reference.delete_all
+      ImageReference.delete_all
       Referent.delete_all
       Referment.delete_all
       ReferentRelation.delete_all

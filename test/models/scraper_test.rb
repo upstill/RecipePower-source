@@ -10,7 +10,7 @@ class ScraperTest < ActiveSupport::TestCase
     List.delete_all
     Rcpref.delete_all
     Recipe.delete_all
-    Reference.delete_all
+    ImageReference.delete_all
     Referent.delete_all
     Referment.delete_all
     ReferentRelation.delete_all
@@ -370,7 +370,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert ir = ImageReference.find_by(url: 'http://ichef.bbci.co.uk/food/ic/food_16x9_608/foods/c/candied_peel_16x9.jpg')
 
     # Check that the referent got the image
-    assert_equal ir, ing_ref.image_refs.first
+    assert_equal ir, ing_ref.image_references.first
 
     # Rerun the scraper to ensure that no tags, etc. get created redundantly
     scraper2 = Scraper.assert 'http://www.bbc.co.uk/food/candied_peel', false
@@ -389,12 +389,12 @@ class ScraperTest < ActiveSupport::TestCase
     assert ir = ImageReference.find_by(url: 'http://ichef.bbci.co.uk/food/ic/food_16x9_608/foods/c/candied_peel_16x9.jpg')
 
     # Check that the referent got the image
-    assert_equal ir, ing_ref.image_refs.first
+    assert_equal ir, ing_ref.image_references.first
 
     # Confirm that destroying the image removes the picture from the referent
     ir.destroy
     ing_ref.reload
-    assert_nil ing_ref.image_refs.first
+    assert_nil ing_ref.image_references.first
 
     ing_ref.destroy
     assert_equal 0, Tag.first.expressions.count
@@ -742,7 +742,7 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 12, stags.count
     assert_equal 'January', stags.first.name
 
-    assert_equal 12, Reference.where(type: 'ImageReference').count
+    assert_equal 12, ImageReference.count
 
     assert_equal 13, Scraper.count
     assert_equal 'http://www.bbc.co.uk/food/seasons/december', Scraper.last.url
@@ -760,8 +760,8 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 12, ImageReference.count
     assert_equal 12, OccasionReferent.count
     occr = OccasionReferent.first
-    assert_equal ImageReference.first, occr.image_refs.first
-    assert occr.image_refs.find_by(url: 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/seasons/january_16x9.jpg')
+    assert_equal ImageReference.first, occr.image_references.first
+    assert occr.image_references.find_by(url: 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/seasons/january_16x9.jpg')
   end
 
   test 'bbc_cuisine_home_page' do
@@ -867,8 +867,8 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal 20, GenreReferent.count
 
     occr = GenreReferent.first
-    assert_equal ImageReference.first, occr.image_refs.first
-    assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/cuisines/african_16x9.jpg', occr.image_refs.first.url
+    assert_equal ImageReference.first, occr.image_references.first
+    assert_equal 'http://ichef.bbci.co.uk/food/ic/food_16x9_235/cuisines/african_16x9.jpg', occr.image_references.first.url
 
     assert_equal 21, Scraper.count
     assert_equal 20, Scraper.where(what: 'bbc_cuisine_home_page').count

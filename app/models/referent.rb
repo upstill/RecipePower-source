@@ -42,7 +42,7 @@ class Referent < ApplicationRecord
   # What can we get to through the referments? Each class that includes the Referrable module should be in this list
   @@referment_associations = %w{
       PageRef
-      Reference
+      ImageReference
       Recipe
       Product
       Referent
@@ -72,7 +72,6 @@ class Referent < ApplicationRecord
     has_many assoc.underscore.pluralize.to_sym, :through => :referments, :source => :referee, :source_type => assoc
   }
   has_many :relateds, :through => :referments, :source => :referee, :source_type => 'Referent'
-  has_many :image_refs, -> { where type: 'ImageReference' }, :through => :referments, :source => :referee, :source_type => 'Reference'
 
   has_many :page_refs, :through => :referments, :source => :referee, :source_type => 'PageRef', inverse_of: :referents
   accepts_nested_attributes_for :page_refs

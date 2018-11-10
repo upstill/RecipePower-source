@@ -8,20 +8,20 @@ class RefermentTest < ActiveSupport::TestCase
     test "Referent takes Reference" do
       rft = Referent.express tags(:jal)
       assert (rft.class==IngredientReferent), "Couldn't get referent"
-      rfc = Reference.create
-      assert (rfc.class==Reference), "Couldn't get reference"
-      rft.references << rfc
-      assert_equal 1, rft.references.count, "Reference not associated with Referent"
+      rfc = ImageReference.create
+      assert (rfc.class==ImageReference), "Couldn't get reference"
+      rft.image_references << rfc
+      assert_equal 1, rft.image_references.count, "Reference not associated with Referent"
       assert_equal 1, rfc.referents.count, "Referent not associated with Reference"
     end
   
     test "Reference takes Referent" do
       rft = Referent.express tags(:jal)
       assert (rft.class==IngredientReferent), "Couldn't get referent"
-      rfc = Reference.create
-      assert (rfc.class==Reference), "Couldn't get reference"
+      rfc = ImageReference.create
+      assert (rfc.class==ImageReference), "Couldn't get reference"
       rfc.referents << rft
-      assert_equal 1, rft.references.count, "Reference not associated with Referent"
+      assert_equal 1, rft.image_references.count, "Reference not associated with Referent"
       assert_equal 1, rfc.referents.count, "Referent not associated with Reference"
     end
     

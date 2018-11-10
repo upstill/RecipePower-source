@@ -32,10 +32,10 @@ module TagsTable
   end
 end
 
-module ReferencesTable
+module ImageReferencesTable
   @item_mode = :table
   def table_headers
-    ['Reference Type', 'URL/Referees', '', '', '']
+    [ 'URL/Referees', '', '', '']
   end
 end
 
@@ -651,8 +651,8 @@ class ListsAssociatedPresenter < ListsShowPresenter
 end
 
 # Present the entries associated with a list
-class ReferencesIndexPresenter < FilteredPresenter
-  include ReferencesTable
+class ImageReferencesIndexPresenter < FilteredPresenter
+  include ImageReferencesTable
 
   def result_type
     'references'

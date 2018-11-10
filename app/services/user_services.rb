@@ -1,4 +1,4 @@
-require 'reference.rb'
+require 'image_reference.rb'
 class UserServices
   
   attr_accessor :user

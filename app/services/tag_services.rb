@@ -165,12 +165,12 @@ class TagServices
 # -----------------------------------------------
   # Look up all the images attached to all the referents of the tag
   def images
-    tag.referents.collect { |referent| referent.image_refs.to_a }.flatten
+    tag.referents.collect { |referent| referent.image_references.to_a }.flatten
   end
 
   def has_image image_ref
     tag.referents.each { |referent|
-      referent.image_refs << image_ref unless referent.image_refs.include?(image_ref)
+      referent.image_references << image_ref unless referent.image_references.include?(image_ref)
     }
   end
 
@@ -252,7 +252,7 @@ class TagServices
         end
       }
     end
-    has_image ReferenceServices.assert_image_for_referent(image_link, tag) if image_link
+    has_image ImageReferenceServices.assert_image_for_referent(image_link, tag) if image_link
     tag
   end
 

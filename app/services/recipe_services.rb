@@ -1,4 +1,4 @@
-require 'reference.rb'
+require 'image_reference.rb'
 
 class RecipeServices
   attr_accessor :recipe 
@@ -96,22 +96,7 @@ class RecipeServices
       "Destroyed recipe ##{recipe.id} (#{pr.url}): couldn't reach via gleaning (404 Not Found)"
     end
   end
-
-  # Find all recipes that are redundant (ie., they have the same canonical url as another) and merge them into the one that already owns the URL.
-  def self.fix_redundant
-    redundant = []
-    current_ids = Set.new Reference.where(type: "RecipeReference").map(&:affiliate_id)
-    all_ids = Set.new Recipe.all.map(&:id)
-    (all_ids - current_ids).each { |id|
-      rcp = Recipe.find id
-      old_rcp = Recipe.find_by_url rcp.url
-      puts "Recipe ##{rcp.id} (url #{rcp.url})..."
-      puts "  ...clashes with recipe ##{old_rcp.id} (url #{old_rcp.url})"
-      old_rcp.absorb rcp
-      self.new(old_rcp).test_conversion
-    }
-  end
-
+  
   def scrape
     puts "Recipe # #{@recipe.id}: #{@recipe.title}"
     puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
@@ -445,13 +430,6 @@ class RecipeServices
           index_table = :page_refs
           recipe_urls.each { |url|
             ref = PageRef::RecipePageRef.fetch url
-          }
-        when 1
-          label = "Reference via Recipe"
-          index_name = "references_index_by_url_and_type"
-          index_table = :references
-          recipe_urls.each { |url|
-            ref = RecipeReference.find_or_initialize url: url
           }
         when 3
           label = "Recipe via ID-no ref"

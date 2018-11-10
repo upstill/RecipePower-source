@@ -15,61 +15,6 @@ namespace :recipes do
       reports << "**** #{unreachables.count} recipes unreachable after checking"
   end
 
-  # OBSOLETE when there are no more RecipeReferences
-  task convert_references: :environment do
-    # Ensure all recipes have a PageRef
-    reports = ['***** rake recipes:convert_references ********']
-    Recipe.includes(:page_ref).where(id: RecipeReference.all.pluck(:affiliate_id)).collect { |rec|
-      if !rec.page_ref || rec.page_ref.url.blank?
-        if rec.page_ref
-          rec.page_ref.destroy
-          rec.reload
-        end
-        # RecipeServices.new(rec).convert_references
-        puts "Converting references for recipe #{rec.id}:"
-        RecipeReference.where(affiliate_id: rec.id).each { |reference|
-          reference.bkg_launch # rec.page_ref = PageRefServices.convert_reference reference, rec.page_ref
-          puts "Enqueued RecipePageReference ##{reference.id} (#{reference.url})"
-          reference.bkg_land
-          puts "...returned"
-        }
-        rec.reload
-      end
-    }
-
-    procids =
-        (PageRef::RecipePageRef.virgin.pluck(:id) +
-            RecipePageRef.processing.pluck(:id) +
-            RecipePageRef.bad.pluck(:id) +
-            RecipePageRef.where(http_status: nil).pluck(:id)
-        ).uniq.sort
-
-    # Ensure all RecipePageRefs have valid status and http_status
-    RecipePageRef.where(id: procids).each { |pr| PageRefServices.new(pr).ensure_status }
-
-    # Clean up the PageRefs with nil URLs
-    reports += RecipePageRef.includes(:recipes).where(url: nil).collect { |pr|
-      pr.recipes.collect { |recipe|
-        RecipeServices.new(recipe).correct_url_or_destroy
-      }
-    }.flatten.compact.sort
-
-    reports += RecipePageRef.bad.includes(:recipes).collect { |pr|
-      if pr.recipes.present?
-        pr.recipes.collect { |recipe|
-          RecipeServices.new(recipe).correct_url_or_destroy
-        }
-      else
-        "RecipePageRef #{pr.id} (#{pr.url}) has no recipes"
-      end
-    }.flatten.compact.sort
-    reports += PageRefServices.join_urls Recipe
-    # Finally, ensure that all RecipePageRef objects have either :good or :bad status and also valid http_status
-    reports += RecipePageRef.all.collect { |pr| PageRefServices.new(pr).ensure_status }.flatten.compact.sort
-    RecipePageRef.where(site_id: nil).collect { |pr| PageRefServices.new(pr).ensure_site }.flatten.compact.sort
-    puts reports
-  end
-
   task :reports => :environment do
     # Every recipe needs to have a site and a url (page_ref)
     # reports << Recipe.includes(:referent).to_a.collect { |recipe| "Recipe ##{recipe.id} has no referent (ERROR)" unless recipe.referent }.compact

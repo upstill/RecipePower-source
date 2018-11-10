@@ -184,9 +184,9 @@ RP::Application.routes.draw do
   end
   match 'sites', :controller => 'sites', :action => 'index', :via => [:get, :post]
 
-  post '/reference' => 'references#create', :as => 'create_reference'
-  resources :references, :except => [:index, :create]
-  match 'references', :controller => 'references', :action => 'index', :via => [:get, :post]
+  # post '/image_reference' => 'image_references#create', :as => 'create_image_reference'
+  resources :image_references #, :except => [:index, :create]
+  # match 'image_references', :controller => 'image_references', :action => 'index', :via => [:get, :post]
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
   # get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"

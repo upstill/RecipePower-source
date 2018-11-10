@@ -14,7 +14,7 @@ class ReferentDecorator < CollectibleDecorator
   # A referent gets its picture from either 1) a directly-associated ImageReference, or an image
   # from one of its PageRefs
   def imgdata
-    if ir = @object.picture || @object.image_refs.first
+    if ir = @object.picture || @object.image_references.first
       ir.imgdata
     elsif piced_pr = @object.page_refs.where.not(picture_id: nil).first ||
         PageRef.tagged_by(@object.tag_ids).where.not(picture_id: nil).first

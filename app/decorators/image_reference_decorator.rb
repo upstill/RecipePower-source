@@ -1,4 +1,4 @@
-class ReferenceDecorator < ModelDecorator
+class ImageReferenceDecorator < ModelDecorator
   delegate_all
 
   def name

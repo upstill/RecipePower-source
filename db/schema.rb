@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181024175020) do
+ActiveRecord::Schema.define(version: 20181108235801) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -140,7 +140,7 @@ ActiveRecord::Schema.define(version: 20181024175020) do
     t.datetime "created_at",                                      null: false
     t.datetime "updated_at",                                      null: false
     t.integer  "status",           default: 0
-    t.integer  "dj_id"
+    t.integer  "dj_id",            default: 0
   end
 
   create_table "event_notices", force: :cascade do |t|
@@ -228,6 +228,22 @@ ActiveRecord::Schema.define(version: 20181024175020) do
     t.integer  "http_status"
     t.text     "err_msg"
   end
+
+  create_table "image_references", force: :cascade do |t|
+    t.datetime "created_at",                 null: false
+    t.datetime "updated_at",                 null: false
+    t.text     "url"
+    t.text     "thumbdata"
+    t.integer  "errcode"
+    t.boolean  "canonical",  default: false
+    t.string   "host"
+    t.integer  "status",     default: 0
+    t.string   "filename"
+    t.string   "link_text"
+    t.integer  "dj_id"
+  end
+
+  add_index "image_references", ["id"], name: "references_index_by_id", unique: true, using: :btree
 
   create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
     t.text     "response"
@@ -378,24 +394,6 @@ ActiveRecord::Schema.define(version: 20181024175020) do
 
   add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
   add_index "recipes", ["title"], name: "recipes_index_by_title", using: :btree
-
-  create_table "references", force: :cascade do |t|
-    t.datetime "created_at",                                  null: false
-    t.datetime "updated_at",                                  null: false
-    t.text     "url"
-    t.string   "type",       limit: 25, default: "Reference"
-    t.text     "thumbdata"
-    t.integer  "errcode"
-    t.boolean  "canonical",             default: false
-    t.string   "host"
-    t.integer  "status",                default: 0
-    t.string   "filename"
-    t.string   "link_text"
-    t.integer  "dj_id"
-  end
-
-  add_index "references", ["id"], name: "references_index_by_id", unique: true, using: :btree
-  add_index "references", ["url", "type"], name: "references_index_by_url_and_type", unique: true, using: :btree
 
   create_table "referent_relations", force: :cascade do |t|
     t.integer  "parent_id"

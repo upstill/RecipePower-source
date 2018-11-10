@@ -1,0 +1,13 @@
+<% item ||= @image_reference %>
+<tr>
+	<td>
+		<%= link_to item.url, item.url %>
+		<%= image_reference_expressions item %>
+	</td><td>
+		<%= link_to_dialog 'Show', image_reference_path(item) %>
+	</td>
+	<% if permitted_to? :edit, item %>
+		<td><%= link_to_dialog 'Edit', edit_image_reference_path(item) %></td>
+		<td><%= link_to_submit 'Destroy', item, method: :delete, confirm: 'Are you sure?' %></td>
+	<% end %>
+</tr>

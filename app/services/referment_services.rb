@@ -16,7 +16,7 @@ class RefermentServices
 
   def self.make_polymorphic
     Referment.all.each do |rfm|
-      flat_reference = rfm.referent # class Reference
+      flat_reference = rfm.referent
     end
   end
   

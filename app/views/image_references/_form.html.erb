@@ -1,0 +1,9 @@
+<%= simple_form_for(@image_reference) do |f| %>
+  <%= modal_body do %>
+    <%= form_errors_helper f %>
+    <%= f.input :url %>
+  <% end %>
+  <%= modal_footer do %>
+    <%= form_actions f, cancel_path: image_references_path %>
+  <% end %>
+<% end %>

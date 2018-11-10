@@ -2,7 +2,7 @@
 require 'test_helper'
 class ReferentTest < ActiveSupport::TestCase
   fixtures :referents
-  fixtures :references
+  fixtures :image_references
   fixtures :referments
   fixtures :tags
   fixtures :recipes
@@ -438,9 +438,8 @@ class ReferentTest < ActiveSupport::TestCase
     assert after.errors.any?
   end
 
-  test 'Reference Referee rejects translation to PageRef' do
-    ref = Reference.first
-    assert_equal ImageReference, ref.class
+  test 'ImageReference Referee rejects translation to PageRef' do
+    ref = ImageReference.first
     after = RefereeServices.new(ref).assert_kind 'article'
     assert_equal ref, after
     assert after.errors.any?

@@ -1,5 +1,5 @@
 # require 'yaml'
-# require 'reference.rb'
+# require 'image_reference.rb'
 require 'site.rb'
 require './lib/results.rb'
 

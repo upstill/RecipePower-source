@@ -1530,7 +1530,7 @@ class SitesAssociatedCache < SitesShowCache
 
 end
 
-class ReferencesIndexCache < ResultsCache
+class ImageReferencesIndexCache < ResultsCache
   include ModelSearch
 
   def max_window_size
@@ -1546,19 +1546,19 @@ class ReferencesIndexCache < ResultsCache
   end
 
   def typeclass
-    'ImageReference' # Reference.type_to_class(type).to_s
+    'ImageReference'
   end
 
   def itemscope
-    @itemscope ||= (typeclass == Reference) ? Reference.unscoped : Reference.where(type: typeclass)
+    @itemscope ||= ImageReference.unscoped
   end
 
 end
 
-class ReferenceCache < ResultsCache
+class ImageReferenceCache < ResultsCache
 
   def reference
-    @reference ||= Reference.find @entity_id
+    @reference ||= ImageReference.find @entity_id
   end
 
 end
