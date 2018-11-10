@@ -12,8 +12,9 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     login_as(tagee, scope: :user)
     # @list = FactoryBot.create(:list)
     @list_params = {
-        # collectible_user_id: 3, # Not assignable, but taken from current_user
+        collectible_user_id: 3, # Not assignable, but taken from current_user
         collectible_comment: 'this would be a comment',
+        owner_id: users(:thing3).id,
         name: "Some other kind of list",
         # name_tag_id: 15, # Implicit from name assignment
         description: 'compiling something',
@@ -21,7 +22,7 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
         availability: 2,
         included_tag_tokens: "11",
         pullin: 1,
-        # tagging_user_id: 3, # Not assignable, but taken from current_user
+        tagging_user_id: 3,
         editable_dish_tag_tokens: "4",
         editable_ingredient_tag_tokens: "3",
         tagging_list_tokens: "1"
@@ -36,19 +37,32 @@ class ListsControllerTest < ActionDispatch::IntegrationTest
     count_after = List.count
     assert_equal count_before+1, count_after
     list = List.last
-    assert_not_equal list, @list
-    assert_equal list.attributes.slice('tag_id', 'referent_id', 'locale', 'form'),
-                 @list.attributes.slice('tag_id', 'referent_id', 'locale', 'form')
+    assert_equal list.owner, users(:thing3)
+    assert_equal @list_params[:name], list.name
+    assert_equal tags(:jal3), list.included_tags.first
+    assert_equal @list_params[:collectible_comment], list.rcprefs.first.comment
+    assert_equal 1, list.included_tags.count
+    assert list.pullin
+    %w{ availability description notes  }.each { |attrib|
+      assert_equal @list_params[attrib.to_sym],
+                   list.attributes[attrib]
+    }
   end
 
   test "should update list" do
-    # A commit (submit button title) that includes 'Publish' is the signal to flip Published on
-    patch list_path(@list), list: { 'locale' => 2 }
-    assert_redirected_to list_path(assigns(:list))
-    @list.reload
-    assert_equal @list.localesym, :it
-    assert_equal @list.localename, 'Italian'
-    assert_equal @list.locale, '2'
+    list = lists(:for_testing)
+    patch list_path(list), format: 'json', list: @list_params
+    list.reload
+    assert_equal list.owner, users(:thing3)
+    assert_equal @list_params[:name], list.name
+    assert_equal tags(:jal3), list.included_tags.first
+    assert_equal @list_params[:collectible_comment], list.rcprefs.first.comment
+    assert_equal 1, list.included_tags.count
+    assert list.pullin
+    %w{ availability description notes  }.each { |attrib|
+      assert_equal @list_params[attrib.to_sym],
+                   list.attributes[attrib]
+    }
   end
 
   test "should collect querytags" do

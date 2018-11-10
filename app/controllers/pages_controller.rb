@@ -96,11 +96,4 @@ class PagesController < ApplicationController
     end
   end
 
-  private
-
-  def page_params
-    # TODO: Testing!
-    params.require(:page).permit!
-  end
-
 end

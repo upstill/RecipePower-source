@@ -22,7 +22,6 @@ class OfferingsController < ApplicationController
   # POST /offerings
   def create
     @offering = Offering.new offering_params 
-
     if @offering.save
       redirect_to @offering, notice: 'Offering was successfully created.'
     else
@@ -53,7 +52,6 @@ class OfferingsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def offering_params
-      # TODO: Testing!
-      params.require(:offering).permit(:product_id, :page_ref_id)
+      params.require(:offering).permit :product_id, :page_ref_id
     end
 end

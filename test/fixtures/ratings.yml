@@ -1,0 +1,4 @@
+test:
+  recipe_id: 4
+  scale_id: 2
+  scale_val: 3

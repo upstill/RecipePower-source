@@ -2,7 +2,6 @@ class ListsController < CollectibleController
   before_filter :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card, :contents ]
 
   def index
-    # seeker_result Reference, 'div.reference_list' # , clear_tags: true
     @active_menu = :other_lists
     response_service.title =
     case @access = params[:access]
@@ -115,7 +114,6 @@ class ListsController < CollectibleController
   private
 
   def list_params
-    # TODO: Testing!
     permitted_attributes = List.mass_assignable_attributes + [
         :ordering, :title, :owner_id, # :owner, # Specified by id
         :name, # :name_tag_id, :name_tag, # Specified by name

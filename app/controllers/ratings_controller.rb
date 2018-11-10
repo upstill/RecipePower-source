@@ -1,4 +1,6 @@
 class RatingsController < ApplicationController
+  before_action :set_rating, only: [:show, :edit, :update, :destroy]
+
   # GET /ratings
   # GET /ratings.xml
   def index
@@ -13,8 +15,6 @@ class RatingsController < ApplicationController
   # GET /ratings/1
   # GET /ratings/1.xml
   def show
-    @rating = Rating.find params[:id]
-
     respond_to do |format|
       format.html # show.html.erb
       format.xml  { render :xml => @rating }
@@ -25,7 +25,6 @@ class RatingsController < ApplicationController
   # GET /ratings/new.xml
   def new
     @rating = Rating.new
-
     respond_to do |format|
       format.html # new.html.erb
       format.xml  { render :xml => @rating }
@@ -34,13 +33,12 @@ class RatingsController < ApplicationController
 
   # GET /ratings/1/edit
   def edit
-    @rating = Rating.find params[:id]
   end
 
   # POST /ratings
   # POST /ratings.xml
   def create
-    @rating = Rating.new rating_params
+    @rating = Rating.new rating_params.merge(user_id: current_user.id)
 
     respond_to do |format|
       if @rating.save
@@ -56,8 +54,6 @@ class RatingsController < ApplicationController
   # PUT /ratings/1
   # PUT /ratings/1.xml
   def update
-    @rating = Rating.find params[:id]
-
     respond_to do |format|
       if @rating.update_attributes rating_params
         format.html { redirect_to(@rating, :notice => 'Rating was successfully updated.') }
@@ -72,7 +68,6 @@ class RatingsController < ApplicationController
   # DELETE /ratings/1
   # DELETE /ratings/1.xml
   def destroy
-    @rating = Rating.find params[:id]
     @rating.destroy
 
     respond_to do |format|
@@ -83,8 +78,11 @@ class RatingsController < ApplicationController
 
   private
 
+  def set_rating
+    @rating = Rating.find params[:id]
+  end
+
   def rating_params
-    # TODO: Testing!
-    params.require(:rating).permit!
+    params.require(:rating).permit :recipe_id, :scale_id, :scale_val
   end
 end

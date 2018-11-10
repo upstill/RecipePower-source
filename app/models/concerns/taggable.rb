@@ -78,9 +78,12 @@ module Taggable
         @tagging_user_id)
   end
 
+=begin
+  # NB: gleaning the appropriate list tokens is the responsibility of UserDecorator#list_tags
   def tagging_list_tokens
     x=3
   end
+=end
 
   def tagging_user_id= id
     @tagging_user_id =

@@ -18,7 +18,7 @@ class PageRefsController < CollectibleController
 
   # GET /page_refs/new
   def new
-    @page_ref = PageRef.new kind: 'recipe'
+    @page_ref = PageRef.new kind: 'recipe', url: 'http://www.example.com'
     smartrender
   end
 
@@ -39,7 +39,7 @@ class PageRefsController < CollectibleController
   #       N: redraw the dialog with a flash error
   def create
     if current_user
-      @entity = @page_ref = PageRefServices.assert page_ref_params.slice('kind', 'url') # params[:page_ref][:kind], params[:page_ref][:url]
+      @entity = @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
       if !@page_ref.errors.any?
         @page_ref.bkg_land
         update_and_decorate @page_ref # Applies other parameters
@@ -104,12 +104,14 @@ class PageRefsController < CollectibleController
   private
     # Use callbacks to share common setup or constraints between actions.
     def set_page_ref
-      page_ref = PageRef.find(params[:id])
+      page_ref = PageRef.find params[:id]
     end
 
     # Only allow a trusted parameter "white list" through.
     def page_ref_params
-    # TODO: Testing!
-      params.require(:page_ref).permit(:url, :title, :content, :date_published, :lead_image_url, :domain)
+      # :url and :domain cannot be mass-assigned b/c they have to be processed externally.
+      # Specifically, a page_ref can be asserted for a novel url, but an existing page_ref is
+      # DEFINED to be associated with a specific url. Hence it cannot be changed
+      params.require(:page_ref).permit(:kind, :title, :content, :date_published, :lead_image_url)
     end
 end

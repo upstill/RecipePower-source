@@ -1,0 +1,5 @@
+test:
+  id: 1
+  minlabel: simple
+  maxlabel: Fussy
+  name: Complexity
