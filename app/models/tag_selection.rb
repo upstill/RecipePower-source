@@ -1,3 +1,5 @@
+# This model is for persisting part of the user's profile: the Q&A where the
+# answers are in the form of a tag
 class TagSelection < ApplicationRecord
   belongs_to :tagset
   belongs_to :user

@@ -6,7 +6,7 @@ module Collectible
   module ClassMethods
 
     def mass_assignable_attributes keys=[]
-      [ :collectible_user_id, :collectible_comment, :collectible_private ] +
+      [ :collectible_comment, :collectible_private ] +
           (defined?(super) ? super : [])
     end
   end
@@ -49,6 +49,7 @@ module Collectible
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
     attr_accessor :page_ref_kind
+    attr_reader :collectible_user_id
   end
 
   def self.included(base)
@@ -61,14 +62,6 @@ module Collectible
     # cached_ref  # Bust the cache but update the collectible attributes to reflect the ref assoc'd with this id
     # Work back up the hierarchy
     super if defined? super
-  end
-
-  def collectible_user_id
-    @collectible_user_id
-  end
-
-  def collectible_user_id= id
-    @collectible_user_id=id.to_i
   end
 
   def collectible_private
@@ -159,7 +152,7 @@ module Collectible
       # A user is specified, but the currently-cached ref doesn't match
       @cached_ref =
           if force
-            toucher_pointers.find_or_initialize_by(user_id: @collectible_user_id)
+            toucher_pointers.find_or_initialize_by user_id: @collectible_user_id
           else
             # Look first to the cached rcprefs
             (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == @collectible_user_id }) ||

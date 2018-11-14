@@ -1,5 +1,5 @@
 class SuggestionsController < ApplicationController
-  before_action :set_suggestion, only: [:show, :edit, :update, :destroy]
+  before_action :set_suggestion, only: [:show, :edit, :update, :destroy, :results]
 
   # GET /suggestions
   def index
@@ -12,7 +12,6 @@ class SuggestionsController < ApplicationController
 
   # GET /suggestions/1/results
   def results
-    @suggestion = Suggestion.find params[:id]
     @suggestion.time_check params[:sugtime]
     smartrender
   end
@@ -29,7 +28,6 @@ class SuggestionsController < ApplicationController
   # POST /suggestions
   def create
     @suggestion = Suggestion.new suggestion_params
-
     if @suggestion.save
       redirect_to @suggestion, notice: 'Suggestion was successfully created.'
     else
@@ -60,7 +58,6 @@ class SuggestionsController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def suggestion_params
-      # TODO: Testing!
-      params.require(:suggestion).permit :base_type, :base_id, :viewer_id, :session, :filter, :results_cache_id, :results
+      params.require(:suggestion).permit :base_type, :base_id, :viewer_id, :filter # , :session, :results_cache_id, :results
     end
 end

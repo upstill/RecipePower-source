@@ -9,7 +9,7 @@ class ListServices
   end
 
   # Get the lists on which the entity appears, as visible to the user
-  def self.associated_lists_with_status entity_or_decorator, user_or_user_id=nil
+  def self.associated_lists_with_status entity_or_decorator, user_or_user_id
     def self.accept_if list, status
       [list, status] if list
     end
@@ -48,8 +48,8 @@ class ListServices
         }).compact
   end
 
-  # Compile the set of lists, leaving the status intact but optionally uniquifying the lists
-  def self.associated_lists entity_or_decorator, user_or_user_id=nil
+  # Compile the set of lists associated with an object, leaving the status intact but optionally uniquifying the lists
+  def self.associated_lists entity_or_decorator, user_or_user_id
     lws = self.associated_lists_with_status(entity_or_decorator, user_or_user_id)
     # Execute the optional block on each, returning the lists only
     if block_given?

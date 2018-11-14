@@ -8,8 +8,8 @@ class TagSelectionsController < ApplicationController
 
   def create
     # Avoid creating another selection for a given user and tagset
-    ts = TagSelection.find_or_create_by tag_selection_params.slice(:user_id, :tagset_id)
-    update_and_decorate ts
+    tsp = tag_selection_params
+    @tag_selection = TagSelection.create_with(tsp.except :user_id, :tagset_id).find_or_create_by tsp.slice(:user_id, :tagset_id)
     flash[:popup] = 'Selection duly noted.'
     render :create, layout: false
   end
@@ -17,7 +17,6 @@ class TagSelectionsController < ApplicationController
   private
 
   def tag_selection_params
-    # TODO: Testing!
-    params.require(:tag_selection).permit!
+    params.require(:tag_selection).permit :user_id, :tagset_id, :tag_token
   end
 end

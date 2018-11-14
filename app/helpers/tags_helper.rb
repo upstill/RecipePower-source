@@ -1,41 +1,9 @@
 module TagsHelper
 
-    # Return HTML for each tag of the given type
-    def taglist(taglist)
-        taglist.map { |tag| grabtag tag }.join('').html_safe
-    end
-    
-    def grabtag(tag)
-        # orphantagid() is a helper method in application_controller.rb (so tags_controller can use it)
-        ("<div class=\"orphantag\" id=\"#{orphantagid(tag.id)}\">#{tag.name}</div>").html_safe
-    end
-    
-    # Build a set of tabs for use by jQuery UI, with the current tab given as a parameter
-    def tags_tabset(tabindex)
-   	    tabstrs = ""
-   	    ix = 0
-   	    type = 0 # Index 0 yields type nil
-   	    while type
-   	        label = Tag.typename(type).to_s.pluralize
-   	        tabstrs += <<BLOCK_END
-       		    <li class="tag_tab"><a href="tags/list?tabindex=#{ix.to_s}" title="#{label}">#{label}</a></li> 
-BLOCK_END
-   	        type = Tag.index_to_type(ix+=1) # we get nil when we've run off the end of the table
-        end
-        s = <<BLOCK_END
-<div id="tags_tabset" value=#{tabindex.to_s} > 
-  <ul>
-    #{tabstrs}
-  </ul> 
-</div>
-BLOCK_END
-         s.html_safe
-       end
-
-   # Helper to define a selection menu for tag type
-  def type_selections val=nil
+  # Helper to define a selection menu for tag type
+  def type_selections val = nil
     rmv = [Tag.typenum(:Course), Tag.typenum(:List), Tag.typenum(:Epitaph)]
-    selections = Tag.type_selections(val.kind_of? Tag).keep_if { |sel| !rmv.include? sel.last }
+    selections = Tag.type_selections(val.kind_of? Tag).keep_if {|sel| !rmv.include? sel.last}
     selections.insert 3, ['Course', 18]
     selections.first[0] = 'No Type'
     if val.kind_of? Tag
@@ -49,12 +17,12 @@ BLOCK_END
 
   # Provide a Bootstrap selection menu of a set of tags
   def tag_select alltags, curtags
-    menu_options = { class: "question-selector" }
-    menu_options[:style] = "display: none;" if (alltags-curtags).empty?
-    options = alltags.collect { |tag|
-      content_tag :option, tag.name, { value: tag.id, style: ("display: none;" if curtags.include?(tag)) }.compact
+    menu_options = {class: "question-selector"}
+    menu_options[:style] = "display: none;" if (alltags - curtags).empty?
+    options = alltags.collect {|tag|
+      content_tag :option, tag.name, {value: tag.id, style: ("display: none;" if curtags.include?(tag))}.compact
     }.unshift(
-      content_tag :option, "Pick #{curtags.empty? ? 'a' : 'Another'} Question", value: 0
+        content_tag :option, "Pick #{curtags.empty? ? 'a' : 'Another'} Question", value: 0
     ).join.html_safe
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
@@ -63,7 +31,7 @@ BLOCK_END
   # options:
   #   absorb_btn: a button to absorb the other tag into this one
   #   merge_into_btn: a button to absorb this tag into the other one
-  def summarize_tag_similar this, other, options={}
+  def summarize_tag_similar this, other, options = {}
     contents = [
         homelink(other),
         "(#{other.typename})"
@@ -85,19 +53,19 @@ BLOCK_END
     content_tag :span, safe_join(contents, ' '), class: "absorb_#{other.id}"
   end
 
-  def tag_filter_header locals={}
+  def tag_filter_header locals = {}
     locals[:type_selector] ||= false
     render "tags/tag_filter_header", locals # ttl: label, type_selector: type_selector
   end
 
   def tag_list tags
-    strjoin( tags.collect { |tag|
+    strjoin(tags.collect {|tag|
       link_to_dialog tag.name, tag_path(tag)
     }).html_safe
   end
 
-  def list_tags_for_collectible taglist, collectible_decorator=nil
-    tags_str = safe_join taglist.collect { |tag|
+  def list_tags_for_collectible taglist, collectible_decorator = nil
+    tags_str = safe_join taglist.collect {|tag|
       link_to_submit tag.name, linkpath(tag), :mode => :partial, :class => 'taglink'
     }, '&nbsp;<span class="tagsep">|</span> '.html_safe
 =begin

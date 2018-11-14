@@ -244,6 +244,7 @@ ActiveRecord::Schema.define(version: 20181108235801) do
   end
 
   add_index "image_references", ["id"], name: "references_index_by_id", unique: true, using: :btree
+  add_index "image_references", ["url"], name: "image_references_index_by_url", unique: true, using: :btree
 
   create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
     t.text     "response"

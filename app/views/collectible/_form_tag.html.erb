@@ -23,7 +23,6 @@
         <% end %>
         <%= tagging_fields decorator %>
         <div class="control-group">
-          <input id="<%= decorator.element_id :collectible_user_id %>" name="<%= decorator.field_name :collectible_user_id %>" type="hidden" value="<%= decorator.collectible_user_id %>">
           <label class="string optional">Comment</label>
           <textarea class="full-width" id="<%= decorator.element_id :collectible_comment %>" name="<%= decorator.field_name :collectible_comment %>" placeholder="Anything you'd like to say about this <%= decorator.human_name false, false %>" rows="3"><%= decorator.collectible_comment %></textarea>
         </div>

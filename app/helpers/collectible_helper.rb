@@ -118,7 +118,7 @@ module CollectibleHelper
     attribs = %w( collectible_comment collectible_private collectible_user_id
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
-                    tagging_tag_data tagging_user_id )
+                    tagging_tag_data )
     template_link decorator,
                   'tag-collectible',
                   sprite_glyph(:tag, size),

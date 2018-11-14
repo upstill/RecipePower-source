@@ -12,9 +12,7 @@ class TagsetsController < ApplicationController
 
   # GET /tagsets/new
   def new
-    # @tagset = Tagset.new
     update_and_decorate Tagset.new
-    # @tagset.tagging_user_id = current_user.id
   end
 
   # GET /tagsets/1/edit
@@ -23,9 +21,9 @@ class TagsetsController < ApplicationController
 
   # POST /tagsets
   def create
-    params[:tagset][:uid] = current_user.id
     @tagset = Tagset.create tagset_params
-    if @tagset.errors.blank?
+    @tagset.uid = current_user.id # The current user is permanently associated with the tagset as uid
+    if @tagset.save
       redirect_to @tagset, notice: 'Tagset was successfully created.'
     else
       render :new
@@ -48,14 +46,14 @@ class TagsetsController < ApplicationController
   end
 
   private
-    # Use callbacks to share common setup or constraints between actions.
-    def set_tagset
-      @tagset = Tagset.find params[:id]
-    end
 
-    # Only allow a trusted parameter "white list" through.
-    def tagset_params
-      # TODO: Testing!
-      params.require(:tagset).permit!
-    end
+  # Use callbacks to share common setup or constraints between actions.
+  def set_tagset
+    @tagset = Tagset.find params[:id]
+  end
+
+  # Only allow a trusted parameter "white list" through.
+  def tagset_params
+    params.require(:tagset).permit :title, :tagtype
+  end
 end

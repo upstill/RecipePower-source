@@ -4,7 +4,6 @@
       <div class='label-enclosure'>
         <%= f.label :comment, 'Comment' -%>
       </div>
-      <input id="<%= @decorator.element_id :collectible_user_id %>" name="<%= @decorator.field_name :collectible_user_id %>" type="hidden" value="<%= @decorator.collectible_user_id %>">
       <%= f.text_area :collectible_comment,
                       :class => 'comment',
                       :id => @decorator.element_id(:collectible_comment),

@@ -42,7 +42,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def field_count what
-    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
   end
 
 =begin
@@ -81,7 +81,7 @@ class CollectiblePresenter < BasePresenter
             label = field_label_counted decorator.send("#{whichstr}_tags_label"), tags.count
             entity_links tags, joinstr: ' | '
           when :List # Lists it appears under
-            lists_with_status = ListServices.associated_lists_with_status decorator
+            lists_with_status = ListServices.associated_lists_with_status decorator, current_user_or_guest_id
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
           when :site

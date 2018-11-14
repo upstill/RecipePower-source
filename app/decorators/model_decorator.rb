@@ -18,7 +18,7 @@ class ModelDecorator < Draper::Decorator
     # We memoize the map for each type
     @@AttrMaps ||= {}
     # By default, all accessible attributes map to themselves
-    @@AttrMaps[self.object_class.to_s] ||= self.object_class.accessible_attributes.inject(HashWithIndifferentAccess.new) { |memo, attrname|
+    @@AttrMaps[self.object_class.to_s] ||= self.object_class.mass_assignable_attributes.inject(HashWithIndifferentAccess.new) { |memo, attrname|
       memo[attrname] = attrname
       memo
     }

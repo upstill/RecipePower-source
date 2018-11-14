@@ -131,7 +131,7 @@ module CardPresentation
   end
 
   def field_count what
-    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what)
+    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
   end
 
 =begin

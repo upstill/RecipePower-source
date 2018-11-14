@@ -7,7 +7,7 @@ module Taggable
 
     # Provide the list of parameters that taggables may accept
     def mass_assignable_attributes keys=[]
-      [   :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens,
+      [   :tagging_tag_tokens, :tagging_list_tokens,
           :editable_tag_tokens, :editable_misc_tag_tokens,
           :editable_author_tag_tokens, :editable_dish_tag_tokens,
           :editable_genre_tag_tokens, :editable_ingredient_tag_tokens,
@@ -50,6 +50,7 @@ module Taggable
       joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag_id: ids }.compact )
     }
 
+    # TODO: This shouldn't be public: should be using current_user outside the object context
     attr_reader :tagging_user_id
 =begin
     # attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
@@ -84,16 +85,6 @@ module Taggable
     x=3
   end
 =end
-
-  def tagging_user_id= id
-    @tagging_user_id =
-        case id
-          when String
-            id.to_i
-          when Fixnum
-            id
-        end
-  end
 
   # Define an editable field of taggings by the current user on the entity
   def uid= user_id

@@ -209,7 +209,6 @@ RP::Application.routes.draw do
       get 'associated'
     end
     collection do
-      get 'editor'
       get 'list'
       get 'typify'
       get 'match'

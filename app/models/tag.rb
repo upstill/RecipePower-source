@@ -27,8 +27,6 @@ class Tag < ApplicationRecord
            Dual: ['Dual', 21]
   )
 
-  # attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
-
   has_many :taggings, :dependent => :destroy
   has_many :dependent_lists, :class_name => 'List', foreign_key: 'name_tag_id', :dependent => :restrict_with_error
   has_many :dependent_referents, :class_name => 'Referent', foreign_key: 'tag_id', :dependent => :nullify
@@ -532,22 +530,6 @@ class Tag < ApplicationRecord
     list = list + Tag.strmatch(singular, matchall: true, tagtype: self.tagtype) if singular != self.name
     list = list + Tag.strmatch(plural, matchall: true, tagtype: self.tagtype) if plural != self.name
     list
-  end
-
-  # Respond to a directive to move tags from one category to another
-  def self.convertTypesByIndex(tagids, fromindex, toindex, globalize = false)
-    # Iterate through the tags, keeping those we successfully change.
-    # XXX We're assuming that these tags have no semantic information,
-    # i.e., they're orphans.
-    fromType = self.index_to_type(fromindex)
-    toType = self.index_to_type(toindex)
-    tagids.keep_if do |id|
-      if tag = self.find(id)
-        tag.tagtype = toType; # XXX Should check for existing tag, folding them together if nec.
-        tag.isGlobal = true if globalize
-        tag.save
-      end
-    end
   end
 
   # Return a list of tags that are expressions of this tag's referent(s)

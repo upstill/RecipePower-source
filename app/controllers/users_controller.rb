@@ -235,8 +235,11 @@ class UsersController < CollectibleController
   private
 
   def user_params
-    # TODO: Testing!
-    params.require(:user).permit!
+    params.
+        require(:user).
+        permit(:image, :username, :first_name, :last_name, :fullname, :about, :email, :private, :role_id,
+               {answers_attributes: %w{ answer _destroy question_id id }},
+               {tag_selections_attributes: %w{ tag_token _destroy tagset_id id }})
   end
 
 end

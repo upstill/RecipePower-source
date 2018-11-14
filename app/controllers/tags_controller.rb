@@ -1,4 +1,5 @@
 class TagsController < ApplicationController
+  before_action :set_tag, only: [:show, :edit, :associate, :update, :destroy]
   filter_access_to :all
 
   # GET /tags
@@ -21,18 +22,18 @@ class TagsController < ApplicationController
     #  1) we actually are creating a new tag;
     #  2) we get called from the index page with a tag filter
     if params[:commit] =~ /Filter/
-      redirect_to controller: "tags", action: "index", tag: params[:tag]
+      redirect_to controller: 'tags', action: 'index', tag: tag_params
     else
-      @tag = Tag.new(params[:tag])
+      @tag = Tag.new tag_params
       respond_to do |format|
         if @tag.save
-          format.html { redirect_to controller: "tags",
-                                    action: "index",
-                                    tag: params[:tag],
+          format.html { redirect_to controller: 'tags',
+                                    action: 'index',
+                                    tag: tag_params,
                                     notice: 'Tag was successfully created.' }
           format.xml { render :xml => @tag, :status => :created, :location => @tag }
         else
-          format.html { render :action => "new" }
+          format.html { render :action => 'new' }
           format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
         end
       end
@@ -54,9 +55,7 @@ class TagsController < ApplicationController
   #    :except - comma-delimited id(s) of tag to avoid
   #    :all - match all tags w/o regard to privacy
   #    :user_id - match only tags visible to the user (ignored by :all)
-  #    :tabindex - index of tabs in the tags editor; convertible to tag type
-  #             NB: tabindex may be omitted for other contexts; all types will be searched
-  #    :unbound_only - if true, we're addressing a list of unbound tags, so 
+  #    :unbound_only - if true, we're addressing a list of unbound tags, so
   #                     eliminate all tags that already have a referent
   #    :q, :term - string to match within a tag
   #    :user_id - id of user who is viewing the list
@@ -66,7 +65,7 @@ class TagsController < ApplicationController
     matchstr = params[:q] || params[:term] || ""
     matchopts = {
         userid: (User.super_id if params[:all]) || params[:user_id] || (current_user && current_user.id) || User.guest_id,
-        assert: (params[:makeormatch] == "true"),
+        assert: (params[:makeormatch] == 'true'),
         partition: true,
         fold: !params[:verbose]
     }
@@ -112,7 +111,7 @@ class TagsController < ApplicationController
                                    results
                                end
       }
-      format.html { render partial: 'tags/taglist' }
+      format.html { render partial: 'tags/taglist' } # XXX Doesn't exist
       format.xml { render :xml => @taglist }
     end
   end
@@ -126,7 +125,6 @@ class TagsController < ApplicationController
 
   # GET /tags/1/edit
   def edit
-    @tag = Tag.find params[:id]
     smartrender
   end
 
@@ -135,31 +133,17 @@ class TagsController < ApplicationController
   def show
     # return if need_login true, true
     begin
-      update_and_decorate
+      update_and_decorate @tag
     rescue
       render text: "There is no tag #{params[:id]}. Where did you get that idea?"
     end
-    if @tag
-      session[:tabindex] = @tabindex
-      smartrender
-    end
+    smartrender if @tag
   end
 
   def associated
     update_and_decorate
     response_service.title = @tag.name
     smartrender
-  end
-
-  # GET /tags/editor?tabindex=index
-  # Return HTML for the editor for classifying tags
-  def editor
-    # return if need_login true, true
-    @tabindex = params[:tabindex] ? params[:tabindex].to_i : (session[:tabindex] || 0)
-    # The list of orphan tags gets all tags of this type which aren't linked to a table
-    @taglist = Tag.strmatch('', userid: current_user.id, tagtype: Tag.index_to_type(@tabindex))
-    session[:tabindex] = @tabindex
-    render partial: 'editor'
   end
 
   # POST /id/associate
@@ -170,7 +154,7 @@ class TagsController < ApplicationController
   #  -- 'merge_into' means to vanish this tag into the other (inverse of absorb)
   def associate
     begin
-      update_and_decorate
+      update_and_decorate @tag
       if !(other = Tag.find_by(id: params[:other]) ||
           (Tag.assert(params[:other], tagtype: @tag.tagtype) if @tag.tagtype > 0))
         flash[:error] = 'Couldn\'t find tag to associate with'
@@ -206,12 +190,7 @@ class TagsController < ApplicationController
   def typify
     # Return array of ids of tags successfully converted
     # We can take an array of tagids or a single tagid together with a new type spec
-    if params['tagids']
-      puts "Typify"+params['tagids'].inspect
-      idsChanged = Tag.convertTypesByIndex(params['tagids'].map { |p| p.delete('orphantag_').to_i }, params['fromtabindex'].to_i, params['totabindex'].to_i, true)
-      # Go back to the client with a list of ids that were changed
-      puts 'Success on '+idsChanged.inspect
-    elsif params['tagid'] && params['typenum']
+    if params['tagid'] && params['typenum']
       # Change the type of a single tag
       # We ask and allow for the possibility that the tag will be absorbed into another
       # tag of the target type
@@ -235,32 +214,32 @@ class TagsController < ApplicationController
   # PUT /tags/1
   # PUT /tags/1.xml
   def update
-    @tag = Tag.find params[:id]
     @decorator = @tag.decorate
     @touched = [ @tag ]
-    params[:tag][:tagtype] = params[:tag][:tagtype].to_i unless params[:tag][:tagtype].nil?
+    tp = tag_params
+    tp[:tagtype] = tp[:tagtype].to_i unless tp[:tagtype].nil?
     # Special handling: if the tag has a Meaning, and the spec is for a change of category,
     # we need the user to decide whether to actually
     # change it to the new category, or duplicate it (make a synonym) in the new category
     # '<new tagname> is already defined as a <source category>. Do you mean it should <i>really</i>
     # be a <target category>, or be defined as BOTH <source category> AND <target category>?'
-    if (@tag.tagtype > 0) && (@tag.tagtype != params[:tag][:tagtype])
-      # Moving the tag between semantic types
+    if (@tag.tagtype > 0) && (@tag.tagtype != tp[:tagtype])
+      # Moving the tag between semantic types requires special handling
       ts = TagServices.new @tag
       case params[:button_name]
         when 'Duplicate', 'Okay' # 'Okay' is the acknowledgement that we have to copy; 'Duplicate' is a choice
           # Make a duplicate tag of the target type
           ts.retype
-          @tag = Tag.assert @tag, params[:tag][:tagtype]
+          @tag = Tag.assert @tag, tp[:tagtype]
         when /Only/ # No duplication; change type with no duplication
           # It's okay to just retype the tag during update_attributes
           @tag = ts.retype false
-          @newtag = Tag.assert @tag, params[:tag][:tagtype]
+          @newtag = Tag.assert @tag, tp[:tagtype]
           @tag = @newtag.absorb(@tag, true) if @newtag != @tag
         else
           # :button_name param is only set in the alert => reached here from editor, responding with the alert
           @oldtype = @tag.typename
-          @tag.tagtype = params[:tag][:tagtype]
+          @tag.tagtype = tp[:tagtype]
           @alert_choices = ts.retypeable? ? [ 'Both', "#{@tag.typename} Only"] : %w{ Okay }
           respond_to do |format|
             format.html { render :action => 'edit' }
@@ -270,7 +249,7 @@ class TagsController < ApplicationController
       end
     else
       # Keeping it the same type, possibly with a change of spelling, so we have to watch out for a name clash
-      if !(success = @tag.update_attributes tag_params) && @tag.errors[:key] # ...signalling a name clash, possibly
+      if !(success = @tag.update_attributes tp) && @tag.errors[:key] # ...signalling a name clash, possibly
         if other = @tag.clashing_tag
           @touched << other
           @decorator = (@tag = other.absorb @tag).decorate
@@ -283,7 +262,7 @@ class TagsController < ApplicationController
           format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
         else
           flash[:popup] ||= 'Tag successfully updated'
-          format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{params[:tag][:tagtype].to_s} to #{@tag.typename}.") }
+          format.html { redirect_to(@tag, :notice => "Tag was successfully updated for type #{tp[:tagtype].to_s} to #{@tag.typename}.") }
           format.json { render }
           format.xml  { head :ok }
         end
@@ -292,18 +271,19 @@ class TagsController < ApplicationController
   end
 
   def destroy
-    if params[:ban]
-      nn = Tag.where(id: params[:id]).pluck(:normalized_name).first
-      BannedTag.create(normalized_name: nn) unless BannedTag.where(normalized_name: nn).exists?
-    end
+    BannedTag.find_or_create(normalized_name: @tag.normalized_name) if params[:ban]
     super
   end
 
   private
 
+  def set_tag
+    @tag = Tag.find params[:id]
+  end
+
   def tag_params
-    # TODO: Testing!
-    params.require(:tag).permit!
+    # attr_accessible :name, :id, :tagtype, :isGlobal, :links, :referents, :users, :owners, :primary_meaning # , :recipes
+    params.require(:tag).permit :name, :tagtype, :isGlobal
   end
 
 end

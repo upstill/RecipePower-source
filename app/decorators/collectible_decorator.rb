@@ -132,17 +132,20 @@ class CollectibleDecorator < ModelDecorator
   #       object.created_at.strftime("%a %m/%d/%y")
   #     end
   #   end
-  def arity fieldname
+
+  # How many elements are in the named field? (for labeling purposes)
+  def arity fieldname, viewerid
     case fieldname.downcase
-      when /_tags$/
-        tagtype = fieldname.sub /_tags$/, ''
-        tagtype = ['Culinary Term', 'Untyped'] if tagtype=='Other'
-        visible_tags(:tagtype => tagtype).count
-      when 'list', 'lists'
-        ListServices.associated_lists(object).count # ListServices.find_by_listee(object).count
+    when /_tags$/
+      tagtype = fieldname.sub /_tags$/, ''
+      tagtype = ['Culinary Term', 'Untyped'] if tagtype == 'Other'
+      visible_tags(viewerid, :tagtype => tagtype).count
+    when 'list', 'lists'
+      ListServices.associated_lists(object, viewerid).count # ListServices.find_by_listee(object).count
     end
   end
 
+  # TODO This should be in a Presenter and access current_user instead of using collectible_user_id
   def extract fieldname
     case fieldname.downcase
       when /_tags$/
@@ -153,8 +156,8 @@ class CollectibleDecorator < ModelDecorator
                 }
       when /^tags$/
         h.list_tags_for_collectible visible_tags( :tagtype_x => [ :Question, :List ]), self
-      when /^lists$/
-        h.list_lists_with_status ListServices.associated_lists_with_status(self)
+    when /^lists$/
+        h.list_lists_with_status ListServices.associated_lists_with_status(self, self.collectible_user_id)
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
@@ -178,18 +181,6 @@ class CollectibleDecorator < ModelDecorator
         end
       when 'site'
         h.link_to object.sourcename, object.sourcehome, class: 'tablink'
-=begin
-      when 'list', 'lists'
-        strjoin ListServices.find_by_listee(object).collect { |list|
-                  llink = h.link_to_submit list.name, list, class: 'rcp_list_element_tag'
-                  if list.owner_id == object.tagging_user_id
-                    llink
-                  else
-                    ulink = h.link_to list.owner.handle, list.owner, class: 'rcp_list_element_tag'
-                    "#{llink} (#{ulink})".html_safe
-                  end
-                }
-=end
       when 'collections'
         strjoin CollectibleServices.new(object).collectors.collect { |user|
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id

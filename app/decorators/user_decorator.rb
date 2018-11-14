@@ -20,6 +20,7 @@ class UserDecorator < CollectibleDecorator
   end
 
   # Check permissions for current user to access controller method
+  # TODO: move this into a Presenter and use current_user_or_guest_id instead of collectible_user_id
   def user_can? what
     (what.to_sym == :edit) && (object.collectible_user_id == object.id) ? true : super
   end
@@ -115,33 +116,30 @@ class UserDecorator < CollectibleDecorator
   def list_tags decorator=nil, options={}
     decorator, options = nil, decorator if decorator.is_a? Hash
     # define method to add to the results array
-    def assert_tag tag, user=nil, status=nil
-      user, status = nil, user if !user.is_a?(User)
-      return if !tag || @results[tag.id]
-      result = {
-          tag: tag,
-          id: tag.id,
-          name: tag.name,
-          sortval: case status
-                     when :owned
-                       1
-                     when :collected
-                       2
-                     when :friends
-                       3
-                     when :public
-                       4
-                     else
-                       5
-                   end
-      }
-      result[:status] = status if status
-      result.merge!(
-          owner_id: user.id,
-          owner_name: user.handle
-      ) if user
-      @results[tag.id] = result
-      @tag_ids_used << tag.id
+    def assert_tag tag, user, status=nil
+      if tag
+        @results[tag.id] ||= {
+            tag: tag,
+            id: tag.id,
+            name: tag.name,
+            owner_id: user.id,
+            owner_name: user.handle,
+            status: status,
+            sortval: case status
+                       when :owned
+                         1
+                       when :collected
+                         2
+                       when :friends
+                         3
+                       when :public
+                         4
+                       else
+                         5
+                     end
+        }.compact
+        @tag_ids_used << tag.id
+      end
     end
 
     @results = [] # Initialize the @results

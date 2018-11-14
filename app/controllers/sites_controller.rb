@@ -1,5 +1,6 @@
 
 class SitesController < CollectibleController
+  before_action :set_site, only: [:show, :edit, :update, :destroy]
 
   # GET /sites
   # GET /sites.json
@@ -17,7 +18,7 @@ class SitesController < CollectibleController
   # POST /sites
   # POST /sites.json
   def create
-    update_and_decorate 
+    @site = Site.create site_params
     respond_to do |format|
       if !@site.errors.any?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
@@ -32,10 +33,11 @@ class SitesController < CollectibleController
   # PUT /sites/1
   # PUT /sites/1.json
   def update
+    # TODO: see if mass-assigning gleaning_attributes works in Rails 5
+    gleanings = params[:site].delete :gleaning_attributes
     if update_and_decorate
-      # @site.include_url(params[:site][:home], true) if params[:site][:home].present?
       unless @site.errors.any?
-        @site.gleaning_attributes = params[:site][:gleaning_attributes]
+        @site.gleaning_attributes = gleanings
         respond_to do |format|
           format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
           format.json {
@@ -54,24 +56,17 @@ class SitesController < CollectibleController
     smartrender :action => :edit
   end
 
-  # DELETE /sites/1
-  # DELETE /sites/1.json
-=begin
-  def destroy
-    # return if need_login true, true
-    @site = Site.find params[:id]
-    @site.destroy
-    respond_to do |format|
-      format.html { redirect_to sites_url }
-      format.json { head :ok }
-    end
-  end
-=end
-
   private
 
+  def set_site
+    @site = Site.find params[:id]
+  end
+
   def site_params
-    # TODO: Testing!
-    params.require(:site).permit!
+    permitted_attributes = Site.mass_assignable_attributes + [
+      :name, :description, :home, :root, :ttlcut, :logo,
+      :finders_attributes => %w{ label selector attribute_name _destroy id }
+    ]
+    params.require(:site).permit *permitted_attributes
   end
 end

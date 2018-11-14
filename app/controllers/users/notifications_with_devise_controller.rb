@@ -31,9 +31,12 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
 
   # GET /:target_type/:target_id/notifications
   def index
+    ok_keys = [ :for, :target_type, :format, :user_id, :devise_type ]
+    okparams = params.extract! *ok_keys  # Remove our parameters from the scrutiny of #permit
     set_index_options
+    @index_options.merge! okparams # .permit(*ok_keys)
     load_index if params.has_key?(:reload) ? params[:reload].to_s.to_boolean : true
-    smartrender unless (params[:for] || '') == 'counter'
+    smartrender unless okparams[:for] == 'counter'
     # By default, goes to index.json.rb to replace the counter in the menu bar.
   end
 
