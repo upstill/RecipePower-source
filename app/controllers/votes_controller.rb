@@ -55,7 +55,7 @@ class VotesController < ApplicationController
     # Ensure the vote exists.
     def set_vote
       @vote = Vote.find_or_initialize_by(
-          entity_type: params[:entity_type].singularize.camelize,
+          entity_type: params[:entity].camelize,
           entity_id: params[:id],
           user_id: current_user.id
       )

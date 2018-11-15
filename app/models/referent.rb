@@ -15,6 +15,7 @@ end
 
 class Referent < ApplicationRecord
   include Collectible
+  include Taggable # Only so referents can appear on lists
   picable :picurl, :picture
 
   # Referents don't have a strict tree structure, just categories defined by an isa relationship.

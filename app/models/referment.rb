@@ -11,12 +11,14 @@ class Referment < ApplicationRecord
 
   def title
     case referee
-      when Referent
-        referee.name
-      when nil
-        @title
-      else
-        referee.title
+    when Referent
+      referee.name
+    when ImageReference
+      'Image'
+    when nil
+      @title
+    else
+      referee.title
     end
   end
 

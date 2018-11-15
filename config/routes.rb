@@ -97,7 +97,7 @@ RP::Application.routes.draw do
     get "integers" => 'integers#index'
   end
 
-  post '/votes/:entity/:id' => 'votes#create', :entity => /recipe|feed|feed_entry|list|product|site|user/
+  post '/votes/:entity/:id' => 'votes#create', :entity => /recipe|feed|feed_entry|list|product|site|user|referent/
 
   get "redirect/go", :as => "goto"
   put "redirect/go"

@@ -252,8 +252,9 @@ module CollectibleHelper
   # Declare the voting buttons for a collectible
   def collectible_vote_buttons entity, options={}
     if entity.is_a? Collectible
-      uplink = vote_link(entity, true)
-      downlink = vote_link(entity, false)
+      entity = entity.becomes(entity.class.base_class) if entity.class.base_class != entity.class
+      uplink = vote_link entity, true
+      downlink = vote_link entity, false
       button_options = { method: 'post', remote: true, class: 'vote-button'}
       vote_state = Vote.current entity
       up_button = button_to_submit '', uplink, 'glyph-vote-up', "xl", button_options.merge(title: 'Vote Up')
@@ -274,6 +275,7 @@ module CollectibleHelper
   end
 
   def vote_buttons_replacement entity
+    entity = entity.becomes(entity.class.base_class) if entity.class.base_class != entity.class
     [ "div.vote-buttons#"+dom_id(entity), collectible_vote_buttons(entity, class: 'stamp votes') ]
   end
 
