@@ -223,7 +223,7 @@ class ImageReference < ApplicationRecord
     !definitive? && super
   end
 
-  def after dj
+  def after
     self.status = (url =~ /^\d\d\d\d-/) || (errcode == 200) ? :good : :bad
     save
   end
