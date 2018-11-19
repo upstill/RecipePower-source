@@ -161,22 +161,27 @@ module Taggable
     namestr = namesym.to_s
     is_assignment = namestr.sub!(/=$/, '')
     substrs = namestr.split '_'
-    return super unless
-    case substrs.pop
-      when 'tags'
-        substrs.present?
-      when 'tokens'
-        (tokens = substrs.pop) == 'tag' && substrs.present?
-    end
+    return super unless case substrs.pop
+                        when 'tags'
+                          substrs.present?
+                        when 'tokens'
+                          (tokens = substrs.pop) == 'tag' && substrs.present?
+                        end
     begin
       filter_options = {}
+      # The tags of the entity are categorized as follows:
+      # 'editable' tags are exactly those which the viewer (current user) applied
+      # 'visible' are all tags the user can see (those of the user and all their friends)
+      # 'locked' are visible tags that the user CANNOT edit, i.e. visible - editable
       case (substrs.shift if %w{ visible editable locked }.include? substrs.first)
-        when 'visible'
-          filter_options[:user_id] = [User.super_id, @tagging_user_id].compact
-        when 'editable'
-          filter_options[:user_id] = @tagging_user_id if @tagging_user_id
-        when 'locked'
-          filter_options[:user_id] = User.super_id
+      when 'visible'
+        filter_options[:user_id] = (@tagging_user_id ? UserRelation.followee_ids_of(@tagging_user_id) : []) +
+            [User.super_id, @tagging_user_id].compact
+      when 'editable'
+        filter_options[:user_id] = @tagging_user_id if @tagging_user_id
+      when 'locked'
+        followee_ids = (@tagging_user_id ? UserRelation.followee_ids_of(@tagging_user_id) : []) << User.super_id
+        filter_options[:user_id] = followee_ids.reject { |id| id == @tagging_user_id }
       end
       tagtype, tagtype_x = [], [:Question, :List]
       while type = substrs.shift do
@@ -188,7 +193,7 @@ module Taggable
       end
       if tagtype.present?
         filter_options[:tagtype] = tagtype.uniq
-      else  # NB: we only apply exclusions if there is no positive
+      else # NB: we only apply exclusions if there is no positive
         filter_options[:tagtype_x] = tagtype_x.uniq
       end
     rescue Exception => e
@@ -198,7 +203,7 @@ module Taggable
       nids =
           if tokens
             # Map the elements of the token string to tags, whether existing or new
-            TokenInput.parse_tokens(args.first) { |token| # parse_tokens analyzes each token in the list as either integer or string
+            TokenInput.parse_tokens(args.first) {|token| # parse_tokens analyzes each token in the list as either integer or string
               token.is_a?(Fixnum) ? token : Tag.strmatch(token, filter_options.merge(assert: true))[0].id # Match or assert the string
             }
           else
@@ -209,10 +214,10 @@ module Taggable
       oids = self.method_missing((namestr.sub /tag_tokens$/, 'tags').to_sym).pluck :id
 
       # Add new tags as necessary
-      (nids - oids).each { |tagid| assert_tagging tagid, @tagging_user_id }
+      (nids - oids).each {|tagid| assert_tagging tagid, @tagging_user_id}
 
       # Remove tags as nec.
-      (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
+      (oids - nids).each {|tagid| refute_tagging tagid, @tagging_user_id}
     end
     logger.debug filter_options
     filtered_tags filter_options
