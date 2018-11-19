@@ -1,4 +1,5 @@
 @touched ||= [@tag]
+flashes = flash_notify
 replacements =
 @touched.inject([]) { |memo, tag|
   memo +
@@ -8,4 +9,4 @@ replacements =
     done: true, # i.e., editing is finished, close the dialog, if any
     replacements: replacements,
     followup: pagelet_followup(@decorator, @decorator.destroyed?)
-}.merge(flash_notify).to_json
+}.merge(flashes).to_json

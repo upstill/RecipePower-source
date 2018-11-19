@@ -5,14 +5,14 @@ class RegistrationsController < Devise::RegistrationsController
     respond_to :html, :json
     
     def edit
-      response_service.user = (params[:id] && User.find(params[:id])) || current_user
+      response_service.user = set_user || current_user
       smartrender 
     end
     
     def create
       # We can be coming from users#identify on the 'existing user' form
       if params[:commit] == "Go"
-          if response_service.user = User.find_by_email(params[:user][:email])
+          if response_service.user = User.find_by_email(user_params[:email])
               if omniauth = session[:omniauth]
                 response_service.user.apply_omniauth(omniauth)
                 response_service.user.authentications.build(omniauth.slice('provider','uid'))
@@ -20,10 +20,10 @@ class RegistrationsController < Devise::RegistrationsController
               end
               sign_in_and_redirect(:user, response_service.user)
           else # No such user found
-              redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{params[:user][:email]}'."
+              redirect_to users_identify_url, :notice => "Sorry, we don't have any records of an '#{user_params[:email]}'."
           end
       else
-          build_resource params[:user]
+          build_resource user_params
           resource.extend_fields
           if resource.save
             if resource.active_for_authentication?
@@ -94,6 +94,14 @@ class RegistrationsController < Devise::RegistrationsController
     def sign_up(resource_name, resource)
       super
       (resource.class.to_s+"Services").constantize.new(resource).sign_up
+    end
+
+    def set_user
+      @user = User.find_by id: params[:id]
+    end
+
+    def user_params
+      params.require(:user).permit :email, :password, :password_confirmation
     end
 
     def build_resource(*args)

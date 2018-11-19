@@ -43,7 +43,7 @@ class ListsController < CollectibleController
   end
 
   def contents
-    update_and_decorate
+    update_and_decorate touch: true
     response_service.title = "About #{@list.name}"
     @empty_msg = 'This list is empty now, but you can add any item by editing that item'
     @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
@@ -51,10 +51,7 @@ class ListsController < CollectibleController
   end
 
   def show
-    update_and_decorate
-    response_service.title = "About #{@list.name}"
-    @active_menu = (@list.owner == current_user) ? :my_lists : :other_lists
-    smartrender
+    contents
   end
 
   def update

@@ -10,6 +10,10 @@ class Feed < ApplicationRecord
   picable :picurl, :picture
   # attr_accessible :title, :description, :site_id, :feedtype, :approved, :url, :last_post_date, :home
   
+  def self.mass_assignable_attributes
+    super + [ :title, :description, :approved, :url, :home ]
+  end
+  
   # Setup a feed properly: do a reality check on the url, populate the information
   # fields (title, description...), and ensure it has an associated site
   before_validation { |feed|
@@ -244,7 +248,7 @@ class Feed < ApplicationRecord
     bkg_launch hard, priority: 10, run_at: Time.now
   end
 
-  def after(job)
+  def after
     # When the feed is updated successfully, re-queue it for one week hence
     super
     logger.debug "Successfully updated feed ##{id}"

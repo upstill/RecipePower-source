@@ -1097,6 +1097,10 @@ class UserOwnedListsCache < ResultsCache
   include ModelSearch
   include CollectibleSearch
 
+  def orderingscope iscope = itemscope
+    key == :newest ? [ iscope, 'created_at' ] : super
+  end
+
   def itemscope
     unless @itemscope
       @itemscope = user.decorate.owned_lists viewer

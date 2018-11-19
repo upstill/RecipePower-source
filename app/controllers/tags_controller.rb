@@ -271,7 +271,8 @@ class TagsController < ApplicationController
   end
 
   def destroy
-    BannedTag.find_or_create(normalized_name: @tag.normalized_name) if params[:ban]
+    BannedTag.find_or_create_by(normalized_name: @tag.normalized_name) if params[:ban]
+    flash[:popup] = "'#{@tag.name}' duly #{params[:ban] ? 'banned' : 'deleted'}"
     super
   end
 

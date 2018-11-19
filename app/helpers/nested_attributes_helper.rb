@@ -1,6 +1,6 @@
 module NestedAttributesHelper
   def na_menu f, id, tag_selections
-    field_data = data_to_add_fields f, :tag_selections
+    field_data = data_to_add_fields f, :tag_selections, user_id: f.object.id
     tsids = tag_selections.map(&:tagset_id)
     optionset = Tagset.all.collect { |ts|
       content_tag :option,

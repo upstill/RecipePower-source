@@ -48,6 +48,10 @@ class Recipe < ApplicationRecord
     }
   end
 
+  def self.mass_assignable_attributes
+    super + [ :title, :description, {:gleaning_attributes => %w{ Title Description }}]
+  end
+
   # These HTTP response codes lead us to conclude that the URL is not valid
   @@BadResponseCodes = [400, 404, 410]
 

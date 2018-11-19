@@ -239,7 +239,7 @@ class UsersController < CollectibleController
         require(:user).
         permit(:image, :username, :first_name, :last_name, :fullname, :about, :email, :private, :role_id,
                {answers_attributes: %w{ answer _destroy question_id id }},
-               {tag_selections_attributes: %w{ tag_token _destroy tagset_id id }})
+               {tag_selections_attributes: %w{ user_id tag_token _destroy tagset_id id }})
   end
 
 end

@@ -59,7 +59,7 @@ class ApplicationController < ActionController::Base
       if @decorator.errors.any? # resource_errors_to_flash(@decorator.object)
         render :errors, locals: { entity: @decorator.object }
       else
-        flash[:popup] = "#{@decorator.human_name} is no more."
+        flash[:popup] ||= "#{@decorator.human_name} is no more."
         render :update
       end
     else
@@ -140,13 +140,19 @@ class ApplicationController < ActionController::Base
   # If #<model>_params is NOT defined in the controller, we simply return the parameters for the model
   def strong_parameters
     modelname = params[:controller].singularize
-    return {} unless params[modelname].present?
     method_name = "#{modelname}_params"
-    if self.respond_to? method_name, true # Allow for private params method
-      self.send method_name
-    else
-      params[modelname] # Good luck with that!
-    end
+    # Check for the presence of the model's params
+    return {} unless params[modelname].present?
+
+    # Get the params from the controller's #<modelname>_params method, if any
+    return self.send(method_name) if self.respond_to? method_name, true # Allow for private params method
+
+    # Try to call <ModelClass>.mass_assignable_attributes
+    mc = modelname.camelize.constantize
+    return params.require(modelname).permit(mc.mass_assignable_attributes) if mc.respond_to? :mass_assignable_attributes
+
+    # Finally just return the params if nothing else
+    params.require(modelname).permit # Good luck with that!
   end
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
