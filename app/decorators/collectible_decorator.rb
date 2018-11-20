@@ -133,18 +133,6 @@ class CollectibleDecorator < ModelDecorator
   #     end
   #   end
 
-  # How many elements are in the named field? (for labeling purposes)
-  def arity fieldname, viewerid
-    case fieldname.downcase
-    when /_tags$/
-      tagtype = fieldname.sub /_tags$/, ''
-      tagtype = ['Culinary Term', 'Untyped'] if tagtype == 'Other'
-      visible_tags(viewerid, :tagtype => tagtype).count
-    when 'list', 'lists'
-      ListServices.associated_lists(object, viewerid).count # ListServices.find_by_listee(object).count
-    end
-  end
-
   # TODO This should be in a Presenter and access current_user instead of using collectible_user_id
   def extract fieldname
     case fieldname.downcase

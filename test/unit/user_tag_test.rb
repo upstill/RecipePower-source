@@ -16,7 +16,7 @@ class UserTagTest < ActiveSupport::TestCase
       @tagee.uid = @thing1.id
       assert_equal [], @tagee.visible_tags, "@tagee should start out with no tags by @thing1"
       @tagee.tag_with @jal
-      assert_equal @tagee.visible_tags.map(&:id)[0], @jal.id, "@tagee should have tag for @jal due to @thing1"
+      assert_equal @tagee.visible_tags.pluck(:id)[0], @jal.id, "@tagee should have tag for @jal due to @thing1"
     end
 
     test "user takes and removes different tag ids for different users" do
@@ -31,13 +31,16 @@ class UserTagTest < ActiveSupport::TestCase
       @tagee.tag_with @chilibean, thing2id
       
       assert_equal 2, Tagging.count - tagging_count, "There should now be exactly two taggings"
-      assert_equal [jalid], @tagee.visible_tags(thing1id).map(&:id), "@tagee should be tagged for :jal"
-      assert_equal [chilibeanid], @tagee.visible_tags(thing2id).map(&:id), "@tagee should have tag for :chilibean"
+      @tagee.uid = thing1id
+      assert_equal [jalid], @tagee.visible_tags.pluck(:id), "@tagee should be tagged for :jal"
+      @tagee.uid = thing2id
+      assert_equal [chilibeanid], @tagee.visible_tags.pluck(:id), "@tagee should have tag for :chilibean"
       
       @tagee.uid = thing1id
       @tagee.shed_tag @jal
-      assert_equal [], @tagee.visible_tags(thing1id), "@tagee should no longer have tag by @thing1"
-      assert_equal [chilibeanid], @tagee.visible_tags(thing2id).map(&:id), "@tagee should still have tag for @thing2"
+      assert_equal [], @tagee.visible_tags, "@tagee should no longer have tag by @thing1"
+      @tagee.uid = thing2id
+      assert_equal [chilibeanid], @tagee.visible_tags.pluck(:id), "@tagee should still have tag for @thing2"
     end
         
     test "user takes and removes different tags for different users" do
@@ -50,9 +53,11 @@ class UserTagTest < ActiveSupport::TestCase
       
       @tagee.uid = thing2id
       @tagee.tag_with @chilibean
-      
-      assert_equal @tagee.visible_tags(thing1id), [@jal], "@tagee should have tag for :chilibean"
-      assert_equal @tagee.visible_tags(thing2id), [@chilibean], "@tagee should have tag for :chilibean"
+
+      @tagee.uid = thing1id
+      assert_equal @tagee.visible_tags, [@jal], "@tagee should have tag for :chilibean"
+      @tagee.uid = thing2id
+      assert_equal @tagee.visible_tags, [@chilibean], "@tagee should have tag for :chilibean"
       assert_equal 2, Tagging.count-tagging_count, "There should now be exactly two taggings"
     end
     

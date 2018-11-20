@@ -92,24 +92,8 @@ module Taggable
     super if defined? super
   end
 
-  # Allow the given user to see tags applied by themselves and super
-  def visible_tags user_id = nil, options={}
-    if user_id.is_a?(Hash)
-      user_id, options = nil, user_id
-    end
-    taggers = [User.super_id, (user_id || @tagging_user_id)].compact
-    filtered_tags options.merge(user_id: taggers) # Allowing for an array of uids
-  end
-
   def tagging_tags_of_type type_or_types
     filtered_tags tagtype: type_or_types
-  end
-
-  # Return the editable tags for the current user, i.e. not lists
-  def tagging_tags options={}
-    filtered_tags options.merge(
-                      :tagtype_x => [options[:tagtype_x], :List].flatten.compact
-                  )
   end
 
   # We can't get here if we're not Pagerefable
@@ -122,13 +106,6 @@ module Taggable
     end
     super if defined?(super)
   end
-
-=begin
-  # Provide the tags of appropriate types for the user identified by @tagging_user_id
-  def tagging_tag_data options={}
-    tagging_tags(options).map(&:attributes).to_json
-  end
-=end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag_or_id, uid=nil
@@ -145,13 +122,6 @@ module Taggable
     other.taggings.map { |tagging| tag_with tagging.tag, tagging.user_id }
     super if defined? super
   end
-
-=begin
-  def incoming_attributes keys
-    token_attributes = keys.select { |key| key[/^(visible_|editable_|locked_)?((not?_)?[^_]*_)*(tags|tag_tokens)$/] }.reverse.map &:to_sym
-    # self.class_eval { attr_accessible *token_attributes }
-  end
-=end
 
   # Here we corral methods of the form {visible,editable,locked}[_type]_{tags,tag_tokens}[=]
   # visible means the user can see
@@ -240,7 +210,7 @@ module Taggable
   # Set the tag ids associated with the given user
   def set_tag_ids nids
     # Ensure that the user's tags are all and only those in nids
-    oids = tagging_tags.pluck :id
+    oids = editable_tags.pluck :id
 
     # Add new tags as necessary
     (nids - oids).each { |tagid| assert_tagging tagid, @tagging_user_id }

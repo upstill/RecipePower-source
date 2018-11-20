@@ -41,30 +41,6 @@ class CollectiblePresenter < BasePresenter
     end
   end
 
-  def field_count what
-    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
-  end
-
-=begin
-  def present_field_label what
-    label = what.sub '_tags', ''
-    case field_count(what)
-      when nil, false
-        "%%#{what}_label_plural%%"+"%%#{what}_label_singular%%"
-      when 1
-        label.singularize
-      else
-        label.pluralize
-    end
-  end
-
-  def present_field_wrapped what=nil
-    h.content_tag :span,
-                  present_field(what),
-                  class: 'hide-if-empty'
-  end
-=end
-
   def card_aspects which_column=nil
     (super + [ :description, :title, :site, (:found_by if @decorator.first_collector) ]).compact.uniq
   end

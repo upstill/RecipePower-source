@@ -103,8 +103,8 @@ class User < ApplicationRecord
   # of that class, and hence the defining of the access methods.
   def method_missing(meth, *args, &block)
     meth = meth.to_s
-    collectible_class = active_record_class_from_association_method_name meth
     begin
+      collectible_class = active_record_class_from_association_method_name meth
       if collectible_class.method_defined?(:user_pointers) && User.method_defined?(meth)
         self.method(meth).call *args, &block
       else

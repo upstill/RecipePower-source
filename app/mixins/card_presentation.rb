@@ -130,8 +130,17 @@ module CardPresentation
     str.html_safe
   end
 
-  def field_count what
-    @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
+  # How many elements are in the named field? (for labeling purposes)
+  def field_count fieldname
+    # @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
+    case fieldname.downcase
+    when /_tags$/
+      tagtype = fieldname.sub /_tags$/, ''
+      tagtype = ['Culinary Term', 'Untyped'] if tagtype == 'Other'
+      visible_tags(:tagtype => tagtype).count
+    when 'list', 'lists'
+      ListServices.associated_lists(object, current_user_or_guest_id).count # ListServices.find_by_listee(object).count
+    end
   end
 
 =begin
