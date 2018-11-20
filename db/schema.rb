@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181108235801) do
+ActiveRecord::Schema.define(version: 20181120033954) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -563,7 +563,7 @@ ActiveRecord::Schema.define(version: 20181108235801) do
     t.datetime "updated_at"
     t.integer  "tagtype"
     t.string   "normalized_name", limit: 255
-    t.boolean  "isGlobal"
+    t.boolean  "is_global"
     t.integer  "referent_id"
   end
 

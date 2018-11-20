@@ -8,7 +8,7 @@
   <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
       <%= item.id.to_s %>
       <br>
-      <% if @tagserv.isGlobal %>
+      <% if @tagserv.is_global %>
           <span style="color: green">Public</span>
       <% else %>
           <span style="color: red">Private</span>

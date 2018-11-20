@@ -108,10 +108,13 @@ class PageRefsController < CollectibleController
     end
 
     # Only allow a trusted parameter "white list" through.
+    # NB: Provided by PageRef#mass_assignable_attributes
+=begin
     def page_ref_params
       # :url and :domain cannot be mass-assigned b/c they have to be processed externally.
       # Specifically, a page_ref can be asserted for a novel url, but an existing page_ref is
       # DEFINED to be associated with a specific url. Hence it cannot be changed
-      params.require(:page_ref).permit(:kind, :title, :content, :date_published, :lead_image_url)
+      params.require(:page_ref).permit(:kind, :title, :lead_image_url)
     end
+=end
 end

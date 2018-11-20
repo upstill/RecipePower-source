@@ -202,12 +202,12 @@ class Referent < ApplicationRecord
     mytype = self.typenum
     self.tags.each do |tag|
       # Ensure that all associated tags have the right type, are global, and have a meaning
-      unless tag.tagtype == mytype && tag.isGlobal
+      unless tag.tagtype == mytype && tag.is_global
         if tag.tagtype != mytype && (tag.tagtype > 0) # ERROR!! Can't convert tag from another type
           errors.add(:tags, "#{tag.name} is a '#{tag.typename}', not '#{Tag.typename(mytype)}'")
         else
           tag.tagtype = mytype
-          tag.isGlobal = true
+          tag.is_global = true
           tag.save
         end
       end

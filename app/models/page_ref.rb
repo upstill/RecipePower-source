@@ -12,6 +12,10 @@ class PageRef < ApplicationRecord
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
+  def self.mass_assignable_attributes
+    super + %i[ kind title lead_image_url ]
+  end
+
   validates_each :url do |pr, attr, value| # "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL"
     unless pr.good? || validate_link(pr.url, %w{ http https }) # Is it a valid URL?
       message = pr.errors.generate_message(:url, :invalid).html_safe

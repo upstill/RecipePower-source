@@ -2,7 +2,7 @@ class TagServices
 
   attr_accessor :tag
   
-  delegate :id, :typename, :name, :normalized_name, :isGlobal, :taggings,
+  delegate :id, :typename, :name, :normalized_name, :is_global, :taggings,
            :meaning, :primary_meaning, :elide_meaning,
            :absorb, :can_absorb,
            :users, :user_ids, :owners, :owner_ids, :to => :tag

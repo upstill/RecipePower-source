@@ -22,7 +22,7 @@ class TagPresenter < BasePresenter
     set = []
     NestedBenchmark.measure '...summarizing owners:' do
       set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5)
-    end unless tagserv.isGlobal
+    end unless tagserv.is_global
     NestedBenchmark.measure '...summarizing referents:' do
       set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
     end
@@ -158,7 +158,7 @@ class TagPresenter < BasePresenter
            when :tag_owners
              label = 'private to'
              # content = h.summarize_tag_owners
-             summarize_aspect(:owners, :for => :raw, :helper => :homelink) unless tagserv.isGlobal
+             summarize_aspect(:owners, :for => :raw, :helper => :homelink) unless tagserv.is_global
            when :tag_similars
              label_singular = 'similar tag'
              summarize_aspect :lexical_similars, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true

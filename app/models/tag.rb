@@ -231,15 +231,15 @@ class Tag < ApplicationRecord
         # The important thing here is that we're making all requisite changes (to Taggings, Referents and Expressions)
         # directly in the database, to ensure consistency
         # Take on all owners of the absorbee unless one of them is global
-        tag_owners.delete_all if self.isGlobal ||= other.isGlobal
+        tag_owners.delete_all if self.is_global ||= other.is_global
         if delete
           # Redirect taggings, referents and expressions hither
-          TagOwnerServices.change_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+          TagOwnerServices.change_tag other.id, id unless is_global # self.owner_ids = (other.owner_ids + owner_ids).uniq
           TaggingServices.change_tag other.id, id
           ReferentServices.change_tag other.id, id # Change the canonical expression of any referent which uses us
           ExpressionServices.change_tag other.id, id
         else
-          TagOwnerServices.copy_tag other.id, id unless isGlobal # self.owner_ids = (other.owner_ids + owner_ids).uniq
+          TagOwnerServices.copy_tag other.id, id unless is_global # self.owner_ids = (other.owner_ids + owner_ids).uniq
           # Make this tag synonymous with the other => Ensure it has a matching set of referents and expressions
           # (taggings are unnecessary b/c the original is surviving)
           ExpressionServices.copy_tag other.id, id
@@ -369,9 +369,9 @@ class Tag < ApplicationRecord
 
   # Expose this tag to the given user; if user is nil or super, make the tag global
   def admit_user(uid = nil)
-    unless isGlobal
+    unless is_global
       if (uid.nil? || (uid == User.super_id))
-        self.isGlobal = true
+        self.is_global = true
       elsif !owners.exists?(uid) && (user = User.find_by id: uid) # Reality check on the user id
         self.owners << user
       end
@@ -464,16 +464,16 @@ class Tag < ApplicationRecord
     elsif uid && (uid != User.super_id)
       # Restrict the found set to any asserted user
       # user_tag_ids = TagOwner.where(user_id: uid).map(&:tag_id)
-      # tags.keep_if { |tag| tag.isGlobal || user_tag_ids.include?(tag.id) }
+      # tags.keep_if { |tag| tag.is_global || user_tag_ids.include?(tag.id) }
       user_tag_id_list = TagOwner.where(user_id: uid).map(&:tag_id)
       unless user_tag_id_list.empty?
         user_tag_id_list = user_tag_id_list.collect { |id| id.to_s }.join ', '
-        tags = tags.where %Q{"tags"."isGlobal" = 't' or "tags"."id" in (#{user_tag_id_list}) }
+        tags = tags.where %Q{"tags"."is_global" = 't' or "tags"."id" in (#{user_tag_id_list}) }
       else
-        tags = tags.where isGlobal: true
+        tags = tags.where is_global: true
       end
     else # No user specified => only global tags allowed
-      tags = tags.where(isGlobal: true) unless uid == User.super_id
+      tags = tags.where(is_global: true) unless uid == User.super_id
     end
     if do_fold
       # Fold the set of tags to reduce redundancy as follows:

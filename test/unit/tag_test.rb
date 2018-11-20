@@ -77,7 +77,7 @@ class TagTest < ActiveSupport::TestCase
     # ----- Security and Privacy ---------------
     # Tag made global when asserted by nil user
     test "nil user makes global tags" do
-        assert Tag.assert("random tag", userid: nil).isGlobal
+        assert Tag.assert("random tag", userid: nil).is_global
     end
     
     # ---------- type integrity ------------------

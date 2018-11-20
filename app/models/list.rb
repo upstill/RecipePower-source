@@ -172,7 +172,7 @@ class List < ApplicationRecord
   # The tag is visible only if one of the lists that use it is not private
   def propagate_privacy
     return unless name_tag
-    name_tag.isGlobal = List.exists? name_tag_id: name_tag_id, availability: [0,1]
+    name_tag.is_global = List.exists? name_tag_id: name_tag_id, availability: [0,1]
     name_tag.save if name_tag.changed?
   end
 end
