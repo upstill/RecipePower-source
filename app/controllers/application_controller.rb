@@ -141,17 +141,21 @@ class ApplicationController < ActionController::Base
   def strong_parameters
     modelname = params[:controller].singularize
     method_name = "#{modelname}_params"
+    # logger.debug "Getting strong parameters for controller #{params[:controller]}"
     # Check for the presence of the model's params
     return {} unless params[modelname].present?
 
     # Get the params from the controller's #<modelname>_params method, if any
+    # logger.debug "...trying #{method_name}"
     return self.send(method_name) if self.respond_to? method_name, true # Allow for private params method
 
     # Try to call <ModelClass>.mass_assignable_attributes
     mc = modelname.camelize.constantize
+    # logger.debug "...trying to get mass_assignable_attributes from #{mc.to_s}"
     return params.require(modelname).permit(mc.mass_assignable_attributes) if mc.respond_to? :mass_assignable_attributes
 
     # Finally just return the params if nothing else
+    # logger.debug "...giving up and returning params[#{modelname}]"
     params.require(modelname).permit # Good luck with that!
   end
 

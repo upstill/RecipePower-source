@@ -372,7 +372,7 @@ class Tag < ApplicationRecord
   def admit_user uid = nil
     if (tagtype != 0)  || (uid == User.super_id)
       self.is_global = true
-    elsif uid && !owner_ids.exists?(uid) && (user = User.find_by id: uid)
+    elsif uid && !owners.exists?(uid) && (user = User.find_by id: uid)
       self.owners << user
     end
   end
