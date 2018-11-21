@@ -190,13 +190,14 @@ class TagServices
     page_ref = options[:page_ref]
     tag_ref = options[:tag_ref]
     image_link = options[:image_link]
+    tagtype = options[:tagtype]
     location = nil
     return nil unless tag =
         Tag.transaction do
           tag =
-              if tt = options[:tagtype]
+              if tagtype
                 # Force the existence of a tag of the given type
-                Tag.assert(tag_or_tagname, tt) if tag_or_tagname.present?
+                Tag.assert(tag_or_tagname, tagtype) if tag_or_tagname.present?
               elsif tag_or_tagname.is_a?(Tag)
                 tag_or_tagname
               end

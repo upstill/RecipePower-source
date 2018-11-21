@@ -355,26 +355,25 @@ class Tag < ApplicationRecord
         t.absorb tag if tag.persisted? && (tag.tagtype == 0)
         tag = t
       else
-        # Clone the tag for another type, but if it's a free tag, just change types
+        # Clone the tag if it's not a free tag
         tag = tag.dup if tag.persisted? && (tag.tagtype != 0)
+        # Now we're safe to change types
         tag.tagtype = tagtype
       end
     end
     # Ensure that the tag is available to the user (or globally, depending)
     # NB: Tag.strmatch does this, but not the other ways of getting here
-    tag.admit_user opts[:userid] if opts[:userid]
+    tag.admit_user opts[:userid]
     tag.save! if tag.changed?
     tag
   end
 
-  # Expose this tag to the given user; if user is nil or super, make the tag global
-  def admit_user(uid = nil)
-    unless is_global
-      if (uid.nil? || (uid == User.super_id))
-        self.is_global = true
-      elsif !owners.exists?(uid) && (user = User.find_by id: uid) # Reality check on the user id
-        self.owners << user
-      end
+  # Expose this tag to the given user; if tag is a free tag or the user is super, make the tag global
+  def admit_user uid = nil
+    if (tagtype != 0)  || (uid == User.super_id)
+      self.is_global = true
+    elsif uid && !owner_ids.exists?(uid) && (user = User.find_by id: uid)
+      self.owners << user
     end
   end
 
@@ -438,7 +437,7 @@ class Tag < ApplicationRecord
       # The tag set will be those which totally match the input. If there are none such, we need to create one
       if tags.present?
         # Since these match, we only need to make them visible to the user, if necessary
-        tags.each { |tag| tag.admit_user uid } if uid && (uid != User.super_id)
+        tags.each { |tag| tag.admit_user uid }
       else
         # We are to create a tag on the given string (after cleanup), and make it visible to the given user
         name = Tag.tidyName name # Strip/collapse whitespace and commas
@@ -457,7 +456,6 @@ class Tag < ApplicationRecord
             else # No type specified
               Tag.find_or_create_by :name => name, tagtype: 0 # It'll be a free tag, but if you don't care enough to specify...
             end
-        # If it's private, make it visible to this user
         tag.admit_user uid
         tags = [tag]
       end

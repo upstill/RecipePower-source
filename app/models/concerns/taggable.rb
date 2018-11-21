@@ -174,7 +174,9 @@ module Taggable
           if tokens
             # Map the elements of the token string to tags, whether existing or new
             TokenInput.parse_tokens(args.first) {|token| # parse_tokens analyzes each token in the list as either integer or string
-              token.is_a?(Fixnum) ? token : Tag.strmatch(token, filter_options.merge(assert: true))[0].id # Match or assert the string
+              token.is_a?(Fixnum) ?
+                  token :
+                  Tag.strmatch(token, filter_options.merge(assert: true, userid: @tagging_user_id))[0].id # Match or assert the string
             }
           else
             args.first.map &:id
