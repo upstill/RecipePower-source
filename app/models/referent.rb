@@ -116,7 +116,7 @@ class Referent < ApplicationRecord
     ref.express ref.canonical_expression
   end
 
-  # Scopes for the referents of the given tag(s)
+  # Scopes for the meanings of the given tag(s)
   scope :by_tag_id, -> (tagid_or_ids) { joins(:tags).where(tags: {id: tagid_or_ids}) }
 
   scope :by_tag_name, -> (str, exact=false) {
@@ -355,7 +355,7 @@ class Referent < ApplicationRecord
         tag.save if tag.changed?
         expr = tag.expressions.create(scrubbed_args)
         self.expressions << expr
-        tag.reload # To ensure the tag's referents are current
+        tag.reload # To ensure the tag's meanings are current
       end
     else
       self.errors.add :tags, "won't take bogus tag as expression"
@@ -388,11 +388,11 @@ class Referent < ApplicationRecord
   # ...all the referents of this tag
   # TODO: currently unused; should be optimized and employed in searching by tags
   def self.related tag, doSynonyms = false, doParents = false, doChildren = false
-    unique_referents = tag.referents.collect { |ref|
+    unique_referents = tag.meanings.collect { |ref|
       [(ref.parents if doParents), (ref.children if doChildren)]
-    }.flatten.compact.uniq - tag.referents
+    }.flatten.compact.uniq - tag.meanings
     tag_ids = unique_referents.collect { |ref| ref.tag_id }
-    tag_ids = tag_ids + tag.referents.collect { |ref| ref.tag_id } if doSynonyms
+    tag_ids = tag_ids + tag.meanings.collect { |ref| ref.tag_id } if doSynonyms
     tag_ids.uniq.delete_if { |id| id == tag.id }.collect { |id| Tag.find id }
   end
 

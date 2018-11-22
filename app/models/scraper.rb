@@ -571,7 +571,7 @@ class Www_bbc_co_uk_Scraper < Scraper
       author_tag = registrar.register_tag author_name, :Author, url
       if item = page.search('div#overview p').first
         description = item.text.strip
-        author_tag.referents.each { |ref|
+        author_tag.meanings.each { |ref|
           unless ref.description.present?
             ref.description = description.truncate 250
             ref.save
@@ -1155,19 +1155,19 @@ class Www_bbc_co_uk_Scraper < Scraper
     headered_list_items 'div.related-resources-module h2', 'ul', 'Related chefs' do |title, li|
       # The 'Related Chefs' section
       tag = tag_item li
-      genre_tag.referents.each { |genre_ref| genre_ref.author_referents |= tag.referents }
+      genre_tag.meanings.each { |genre_ref| genre_ref.author_referents ||= tag.meanings }
     end
 
     headered_list_items 'div.related-resources-module h3' do |title, li|
       tag = tag_item li, title.singularize.to_sym
-      genre_tag.referents.each { |genre_ref|
+      genre_tag.meanings.each { |genre_ref|
         case tag.typesym
           when :Author
-            genre_ref.author_referents |= tag.referents
+            genre_ref.author_referents |= tag.meanings
           when :Ingredient
-            genre_ref.ingredient_referents |= tag.referents
+            genre_ref.ingredient_referents |= tag.meanings
           when :Dish
-            genre_ref.dish_referents |= tag.referents
+            genre_ref.dish_referents |= tag.meanings
         end
       }
     end
@@ -1246,8 +1246,8 @@ class Www_bbc_co_uk_Scraper < Scraper
       #                                  :tagtype => :Ingredient,
       #                                  :page_link => absolutize(page_link))
       ingred_tag = registrar.register_tag page_link.text.downcase, :Ingredient, page_link
-      month_tag.referents.each { |tr|
-        tr.ingredient_referents = (tr.ingredient_referents + ingred_tag.referents).uniq
+      month_tag.meanings.each { |tr|
+        tr.ingredient_referents = (tr.ingredient_referents + ingred_tag.meanings).uniq
       }
     }
   end

@@ -169,7 +169,7 @@ module LinkHelper
         action = :collection
         cssclass << ' ' + user_subclass(decorator.object) if defined?(user_subclass)
       when Referent
-        # decorator.object = decorator.object.becomes(Referent)
+        decorator.object = decorator.object.becomes(Referent)
       when Site, Tag
         action = :associated
     end

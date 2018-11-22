@@ -78,7 +78,7 @@ class TagsController < ApplicationController
     @taglist = Tag.strmatch(matchstr, matchopts)
     # When searching over more than one type, we can disambiguate by showing the type of the resulting tag
     showtype = params[:showtype] # tagtype.nil? || (tagtype.is_a?(Array) && (tagtype.size>1))
-    @taglist.delete_if { |t| !t.referents.empty? } if params[:unbound_only] == 'true'
+    @taglist.delete_if { |t| !t.meanings.empty? } if params[:unbound_only] == 'true'
     if except_ids = params[:except]
       except_ids = except_ids.split(',').map &:to_i
     end
@@ -283,7 +283,7 @@ class TagsController < ApplicationController
   end
 
   def tag_params
-    # attr_accessible :name, :id, :tagtype, :is_global, :links, :referents, :users, :owners, :primary_meaning # , :recipes
+    # attr_accessible :name, :id, :tagtype, :is_global, :links, :meanings, :users, :owners, :primary_meaning # , :recipes
     params.require(:tag).permit :name, :tagtype, :is_global
   end
 

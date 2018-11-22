@@ -35,7 +35,7 @@ class Tag < ApplicationRecord
   # expressions associate tags with the foods (roles, processes, etc.) they refer to
   # These are the 'meanings' of a tag
   has_many :expressions, :dependent => :destroy
-  has_many :referents, :through => :expressions
+  has_many :meanings, :through => :expressions, :source => 'referent'
 
   # When a tag is used as the basis for a personal collection, destroying the tag destroys the collection
   # has_many :private_subscriptions, :dependent => :destroy
@@ -67,7 +67,7 @@ class Tag < ApplicationRecord
 
   # Scope for the collected synonyms of one or more tags
   scope :synonyms, -> (tag_id_or_ids) {
-    joins(:referents).where( referents: { id: Referent.by_tag_id(tag_id_or_ids).pluck( :id) })
+    joins(:meanings).where( meanings: { id: Referent.by_tag_id(tag_id_or_ids).pluck( :id) })
   }
 
   # Scope for finding tags which clash with this one
@@ -87,20 +87,20 @@ class Tag < ApplicationRecord
 
   # Same, except accesses tags by name
   scope :synonyms_by_str, -> (str, exact=false) {
-    joins(:referents).where(referents: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
-    # joins(:referents).where( referents: { id: Referent.by_tag_ids(tagids).pluck :id })
+    joins(:meanings).where(meanings: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
+    # joins(:meanings).where( meanings: { id: Referent.by_tag_ids(tagids).pluck :id })
   }
 
   validates_presence_of :name
   before_validation :tagqa
 
   def meaning
-    self.primary_meaning ||= (referents.first.becomes(Referent) if referents.first)
+    self.primary_meaning ||= (meanings.first.becomes(Referent) if meanings.first)
   end
 
   def meaning=ref
     self.primary_meaning = ref.becomes(Referent)
-    self.referents << ref unless self.referent_ids.include?(ref.id)
+    self.meanings << ref unless self.meaning_ids.include?(ref.id)
   end
 
   # Delete this tag only if it's safe to do so
@@ -110,7 +110,7 @@ class Tag < ApplicationRecord
 
   # Pre-check to determine whether a tag can absorb another tag
   def can_absorb other
-    return true if (referent_ids == other.referent_ids)
+    return true if (meaning_ids == other.meaning_ids)
     (other.normalized_name == self.normalized_name) && ((other.tagtype==0) || (other.tagtype == self.tagtype))
   end
 
@@ -253,7 +253,7 @@ class Tag < ApplicationRecord
         elsif other != self # No need to monkey with referents if the projection devolved on us
           # Make this tag synonymous with the other by ensuring it has the other's referents
           # Ensure that we have at least one referent
-          Referent.express(self) unless primary_meaning || referents.first
+          Referent.express(self) unless primary_meaning || meanings.first
           if !valid?
             # Failure: copy errors into the original record and return it
             errors.each { |k, v| other.errors[k] = v }
@@ -307,7 +307,7 @@ class Tag < ApplicationRecord
   def typenum=(tt)
     # Need to be careful: the tag needs to agree in type with any expressions that include it
     return typenum if typematch(tt) # Don't do anything if the type isn't changing
-    return nil unless self.referents.all? { |ref| ref.drop self }
+    return nil unless self.meanings.all? { |ref| ref.drop self }
     self.tagtype = Tag.typenum(tt)
   end
 
@@ -381,7 +381,7 @@ class Tag < ApplicationRecord
   def elide_meaning ref
     if ref
       self.primary_meaning = nil if primary_meaning == ref
-      referents.delete ref
+      meanings.delete ref
       expressions.each { |expr| expressions.delete(expr) if expr.referent == ref }
     end
   end
@@ -493,7 +493,7 @@ class Tag < ApplicationRecord
         equivs[tag.normalized_name] = tag if accept
 
 =begin Semantic folding didn't really work out. Necessary?
-        tag.referent_ids.each { |rid|
+        tag.meaning_ids.each { |rid|
           # Does the referent already have a representative in the equivs?
           equivs[tag.normalized_name] = tag unless (prior = equivs[rid]) &&
               (referent = Referent.find(rid)) &&
@@ -532,7 +532,7 @@ class Tag < ApplicationRecord
 
   # Return a list of tags that are expressions of this tag's referent(s)
   def synonyms(opts = {})
-    self.referents.uniq.collect { |ref| ref.tags }.flatten.uniq
+    self.meanings.uniq.collect { |ref| ref.tags }.flatten.uniq
   end
 
 end

@@ -13,12 +13,12 @@ class TagServices
   end
 
   def referents exclude_self=false
-    exclude_self ? tag.referents.where.not(id: tag.referent_id) : tag.referents
+    exclude_self ? tag.meanings.where.not(id: tag.meaning_id) : tag.meanings
   end
 
 # -----------------------------------------------
   def sites
-    tag.typesym == :Source ? Site.where(referent_id: tag.referent_ids) : Site.where(id: tag.site_ids)
+    tag.typesym == :Source ? Site.where(referent_id: tag.meaning_ids) : Site.where(id: tag.site_ids)
   end
 # -----------------------------------------------
   def recipe_ids with_synonyms=false
@@ -62,8 +62,8 @@ class TagServices
     else
       assoc = PageRef.of_kind(kind).joins(:taggings).where("taggings.tag_id = #{id}")
     end
-    referred_page_refs = tag.referents(true).collect { |referent| referent.page_refs.of_kind kind }.flatten.uniq
-    (assoc.to_a + referred_page_refs).compact
+    referred_page_refs = tag.meanings(true).collect { |referent| referent.page_refs.of_kind kind }.flatten
+    (assoc.to_a + referred_page_refs).compact.uniq
   end
 # -----------------------------------------------
   def synonym_ids unique=false
@@ -125,9 +125,9 @@ class TagServices
             tag
           else
             child_ref = Referent.express child_tag
-            (child_tag.referent_ids & tag.referent_ids).each { |exid|
+            (child_tag.meaning_ids & tag.meaning_ids).each { |exid|
               # child_tag and tag are synonyms on some referent(s), so child needs to be removed from those refs
-              child_tag.elide_meaning child_tag.referents.find_by(id: exid)
+              child_tag.elide_meaning child_tag.meanings.find_by(id: exid)
               child_ref = nil if child_ref.id == exid # Can't use a referent of the parent as the child's referent
             }
             # Force the creation of a new meaning for the child if it was a synonym of the parent
@@ -160,16 +160,16 @@ class TagServices
   end
 
   def child_referents
-    tag.referents.collect { |referent| referent.children.to_a }.flatten.uniq
+    tag.meanings.collect { |referent| referent.children.to_a }.flatten.uniq
   end
 # -----------------------------------------------
-  # Look up all the images attached to all the referents of the tag
+  # Look up all the images attached to all the meanings of the tag
   def images
-    tag.referents.collect { |referent| referent.image_references.to_a }.flatten
+    tag.meanings.collect { |referent| referent.image_references.to_a }.flatten
   end
 
   def has_image image_ref
-    tag.referents.each { |referent|
+    tag.meanings.each { |referent|
       referent.image_references << image_ref unless referent.image_references.include?(image_ref)
     }
   end
@@ -212,7 +212,7 @@ class TagServices
             location =
                 # We accept either a uri or a complete page_ref
                 if page_link || page_ref
-                  # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.referents.empty?
+                  # Asserting the page_ref ensures a referent for the tag # Referent.express(tag) if tag.meanings.empty?
                   page_ref ||= PageRef.fetch page_link
                   page_ref.kind = (options[:page_kind] || :about ) unless page_ref.persisted?
                   page_ref.assert_referent tag_ref if page_ref.errors.empty?
@@ -246,7 +246,7 @@ class TagServices
       suggests target_tag
     end
     if options[:description].present?
-      tag.referents.each { |ref|
+      tag.meanings.each { |ref|
         unless ref.description.present?
           ref.description = options[:description]
           ref.save

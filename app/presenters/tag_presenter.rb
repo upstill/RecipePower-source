@@ -14,17 +14,17 @@ class TagPresenter < BasePresenter
   # Provide a text meaning of a tag by getting a description from one of its referent(s), if any--preferentially the primary meaning
   def description
     (tag.meaning && tag.meaning.description.if_present) ||
-    tag.referents.pluck(:description).find(&:'present?')
+    tag.meanings.pluck(:description).find(&:'present?')
   end
 
   def table_summaries admin_view_on
-    # set = [ self.recipes_summary, self.owners, self.children, self.referents, self.references, self.relations ]
+    # set = [ self.recipes_summary, self.owners, self.children, self.meanings, self.references, self.relations ]
     set = []
     NestedBenchmark.measure '...summarizing owners:' do
       set << self.summarize_aspect(:owners, :for => :table, :helper => :homelink, :limit => 5)
     end unless tagserv.is_global
-    NestedBenchmark.measure '...summarizing referents:' do
-      set << self.summarize_aspect(:referents, :for => :table, :helper => :summarize_referent)
+    NestedBenchmark.measure '...summarizing meanings:' do
+      set << self.summarize_aspect(:meanings, :for => :table, :helper => :summarize_referent)
     end
   end
 
@@ -32,7 +32,7 @@ class TagPresenter < BasePresenter
   # :owners - Users who own a private tag
   # :parents - Tags for the semantic parents of a tag
   # :children - Tags for the semantic offspring of a tag
-  # :referents - The meaning(s) attached to a tag
+  # :meanings - The meaning(s) attached to a tag
   # :page_refs -- A set of page Refs selected using an entry from TagServices.type_selections
   # :synonyms - Tags for the semantic siblings of a tag
   # :similars - Tags for the lexical of a tag (those which have the same normalized_name)
@@ -60,6 +60,8 @@ class TagPresenter < BasePresenter
               tagserv.children true
             when :synonyms
               tagserv.synonyms true
+            when :meanings
+              tag.meanings
             when Array
               # An array from the PageRefServices select list: first is the label, second is the kind
               tagserv.page_refs_of_kind what.last
@@ -78,6 +80,8 @@ class TagPresenter < BasePresenter
           h.summarize_tag_similar tag, entity, btn_options
         when :summarize_referent
           h.summarize_referent entity, except: tag, disambiguate: (scope.count > 1)
+        when :summarize_meaning
+          h.homelink entity
         else
           h.public_send helper, entity
       end
@@ -132,7 +136,7 @@ class TagPresenter < BasePresenter
         :tag_synonyms,
         :tag_owners,
         :tag_similars,
-        :tag_referents,
+        :tag_meanings,
         :tag_parents,
         :tag_children,
         # :tag_references,
@@ -163,12 +167,10 @@ class TagPresenter < BasePresenter
              label_singular = 'similar tag'
              summarize_aspect :lexical_similars, :for => :raw, :helper => :summarize_tag_similar, absorb_btn: true
            # Only when a tag's referent can be usefully described...
-=begin
-           when :tag_referents
+           when :tag_meanings
              label_singular = 'meaning'
-             summarize_aspect :referents, :for => :raw, :helper => :homelink
-           # content = h.summarize_tag_referents
-=end
+             summarize_aspect :meanings, :for => :raw, :helper => :summarize_meaning, label: 'Topic'
+           # content = h.summarize_tag_meanings
            when :tag_parents
              label_singular = 'under category'
              # tagserv.parents.collect { |parent| h.homelink parent }
