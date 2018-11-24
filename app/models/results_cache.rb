@@ -1098,7 +1098,7 @@ class UserOwnedListsCache < ResultsCache
   include CollectibleSearch
 
   def orderingscope iscope = itemscope
-    key == :newest ? [ iscope, 'created_at' ] : super
+    @org == :newest ? [ iscope, 'created_at' ] : super
   end
 
   def itemscope

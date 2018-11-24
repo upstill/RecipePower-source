@@ -122,7 +122,8 @@ class CollectibleController < ApplicationController
       when Pagerefable
         page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
       when NilClass
-        page_ref, prparams = nil, params[:page_ref] || (entity_params && entity_params[:page_ref_attributes])
+        prparams = params[:page_ref] || (entity_params.delete(:page_ref_attributes) if entity_params)
+        page_ref = PageRef.find_by(id: prparams[:id]) if prparams
       else
         return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
@@ -163,10 +164,11 @@ class CollectibleController < ApplicationController
     if current_user
       model, modelparams = proxify response_service.controller_model_class.find_by(id: params[:id])
       modelname = model.model_name.param_key
-      misc_tag_tokens = modelparams[:editable_misc_tag_tokens]
-      params[modelname] = modelparams.except :editable_misc_tag_tokens
+      params[modelname] = modelparams
+      misc_tag_tokens = params[modelname].delete :editable_tag_tokens
       # Now the parameters should reflect the target type, and we can proceed as usual
-      update_and_decorate model, update_attributes: (request.method != 'GET')
+      model.update_attributes strong_parameters(modelname) if request.method != 'GET'
+      update_and_decorate model
 
       # The editable tag tokens need to be set through the decorator, since Taggable
       # doesn't know what tag types pertain

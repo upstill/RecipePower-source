@@ -138,8 +138,7 @@ class ApplicationController < ActionController::Base
   # This is a skin on #<model>_params as defined by each controller to constrain mass assignment
   #
   # If #<model>_params is NOT defined in the controller, we simply return the parameters for the model
-  def strong_parameters
-    modelname = params[:controller].singularize
+  def strong_parameters modelname = params[:controller].singularize
     method_name = "#{modelname}_params"
     # logger.debug "Getting strong parameters for controller #{params[:controller]}"
     # Check for the presence of the model's params
