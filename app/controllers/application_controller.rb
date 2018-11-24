@@ -107,11 +107,11 @@ class ApplicationController < ActionController::Base
     attribute_params =
     if entity
       # If the entity is provided, ignore parameters
-      strong_parameters if options[:update_attributes]
+      (options[:attribute_params] || strong_parameters) if options[:update_attributes]
     else # If entity not provided, find/build it and update attributes
       objclass = params[:controller].singularize.camelize.constantize
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
-      strong_parameters
+      (options[:attribute_params] || strong_parameters)
     end
     entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
     if entity.errors.empty? && # No probs. so far

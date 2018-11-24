@@ -165,13 +165,18 @@ class CollectibleController < ApplicationController
       model, modelparams = proxify response_service.controller_model_class.find_by(id: params[:id])
       modelname = model.model_name.param_key
       params[modelname] = modelparams
-      misc_tag_tokens = params[modelname].delete :editable_tag_tokens
-      # Now the parameters should reflect the target type, and we can proceed as usual
-      model.update_attributes strong_parameters(modelname) if request.method != 'GET'
-      update_and_decorate model
 
       # The editable tag tokens need to be set through the decorator, since Taggable
-      # doesn't know what tag types pertain
+      # doesn't know what tag types pertain.
+      # So, first we pull the misc_tag_tokens from the params...
+      misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
+      # Now the parameters should reflect the target type, and we can proceed as usual
+      update_options = (request.method == 'GET') ?
+                           {} :
+                           # We have to provide update parameters, in case the model name doesn't match the controller
+                           { update_attributes: true, attribute_params: strong_parameters(modelname) }
+      update_and_decorate model, update_options
+      # ...now we apply the misc tag tokens (if any) according to the constraints of the decorator
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
       unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
         @decorator.be_collected
