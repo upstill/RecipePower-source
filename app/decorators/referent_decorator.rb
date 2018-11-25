@@ -26,8 +26,8 @@ class ReferentDecorator < CollectibleDecorator
   # and indirectly via taggings on any of the referent's tags
   def page_refs kind=nil
     kind_int = PageRef.kinds[kind]
-    @object.page_refs.where(kind: kind_int).to_a +
-    PageRef.tagged_by(@object.tag_ids).where(kind: kind_int).to_a
+    [@object.page_refs.where(kind: kind_int).to_a +
+     PageRef.tagged_by(@object.tag_ids).where(kind: kind_int).to_a].uniq
   end
 
   # Provide the set of entities of a given type that are acquired either:
