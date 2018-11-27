@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181120033954) do
+ActiveRecord::Schema.define(version: 20181127021203) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -192,7 +192,7 @@ ActiveRecord::Schema.define(version: 20181120033954) do
   create_table "feeds", force: :cascade do |t|
     t.text     "url"
     t.integer  "feedtype",                       default: 0
-    t.string   "description",        limit: 255
+    t.text     "description"
     t.integer  "site_id"
     t.boolean  "approved"
     t.datetime "created_at",                                       null: false
@@ -408,7 +408,7 @@ ActiveRecord::Schema.define(version: 20181120033954) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.boolean  "isCountable"
-    t.string   "description", limit: 255
+    t.text     "description"
     t.integer  "tag_id"
     t.integer  "picture_id"
   end
