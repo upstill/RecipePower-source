@@ -67,7 +67,7 @@ class Tag < ApplicationRecord
 
   # Scope for the collected synonyms of one or more tags
   scope :synonyms, -> (tag_id_or_ids) {
-    joins(:meanings).where( meanings: { id: Referent.by_tag_id(tag_id_or_ids).pluck( :id) })
+    joins(:meanings).where( referents: { id: Referent.by_tag_id(tag_id_or_ids).pluck(:id) } )
   }
 
   # Scope for finding tags which clash with this one
@@ -87,7 +87,7 @@ class Tag < ApplicationRecord
 
   # Same, except accesses tags by name
   scope :synonyms_by_str, -> (str, exact=false) {
-    joins(:meanings).where(meanings: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
+    joins(:meanings).where(referents: { id: Referent.by_tag_name(str, exact).pluck(:id) } )
     # joins(:meanings).where( meanings: { id: Referent.by_tag_ids(tagids).pluck :id })
   }
 
