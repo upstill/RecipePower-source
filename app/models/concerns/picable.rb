@@ -41,7 +41,7 @@ module Picable
         define_method(picable_attribute) do
           # This will cause an exception for entities without a corresponding reference
           ((reference = self.method(reference_name).call) && reference.digested_reference) ||
-              (super() if self.has_attribute?(picable_attribute))
+              (super() if self.has_attribute?(picable_attribute)) # In case there's a direct attribute for the link
         end
       end
 
@@ -73,20 +73,6 @@ module Picable
   def picref
     @picref ||= self.method(self.class.image_reference_name).call
   end
-
-  # Return the image for the entity as a url
-  # NB: This isn't necessarily a valid URL: Conventionally, if an image comes
-  # in as a data URL, the data is moved into thumbdata and the url becomes a
-  # unique string not otherwise useful.
-  def picuri
-    picref.url if picref
-  end
-
-=begin
-  def picuri_problem
-    picref && !picref.usable_url
-  end
-=end
 
   # Return the image for the entity, either as a URL or a data specifier
   # The image may have an associated thumbnail, but it doesn't count unless

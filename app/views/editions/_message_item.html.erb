@@ -7,9 +7,10 @@
   <% end %>
 
   <div class="cardini">
-    <% if decorator.picture %>
+    <%# if decorator.picture %>
+    <% if (pd = decorator.picurl || decorator.picdata) %>
         <div class="share_recipe_pic_box">
-          <%= image_tag decorator.imgurl %>
+          <%= image_tag pd %>
         </div>
     <% end %>
     <p class="share_recipe_title">

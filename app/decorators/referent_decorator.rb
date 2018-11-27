@@ -11,15 +11,23 @@ class ReferentDecorator < CollectibleDecorator
     object.class.to_s.sub /Referent/, ''
   end
 
+  # Enumerate all the pictures connected with this referent and apply the method to each until a non-nil result is found
+  def first_from_pix method
+    @object.send(method) ||
+        @object.image_references.to_a.find { |ir| ir.send(method) } ||
+        @object.page_refs.includes(:picture).where.not(picture_id: nil).map(&(method)).compact.first ||
+        PageRef.includes(:picture).tagged_by(@object.tag_ids).where.not(picture_id: nil).map(&(method)).compact.first
+  end
+
   # A referent gets its picture from either 1) a directly-associated ImageReference, or an image
   # from one of its PageRefs
-  def imgdata
-    if ir = @object.picture || @object.image_references.first
-      ir.imgdata
-    elsif piced_pr = @object.page_refs.where.not(picture_id: nil).first ||
-        PageRef.tagged_by(@object.tag_ids).where.not(picture_id: nil).first
-      piced_pr.imgdata
-    end
+  def picdata
+    first_from_pix :imgdata
+  end
+
+  # For situations in which a data URL won't do, get an image link
+  def picurl
+    first_from_pix :imgurl
   end
 
   # Provide the PageRef's associated with a referent. These come directly from Referments,

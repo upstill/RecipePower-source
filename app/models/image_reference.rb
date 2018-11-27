@@ -22,10 +22,12 @@ class ImageReference < ApplicationRecord
   has_many :lists, :foreign_key => :picture_id, :dependent => :nullify
   has_many :products, :foreign_key => :picture_id, :dependent => :nullify
   has_many :recipes, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :page_refs, :foreign_key => :picture_id, :dependent => :nullify
+  has_many :referents, :foreign_key => :picture_id, :dependent => :nullify
   has_many :sites, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :referments, :as => :referee, :dependent => :destroy
-  has_many :referents, :through => :referments
+  # has_many :referents, :through => :referments
 
   public
 

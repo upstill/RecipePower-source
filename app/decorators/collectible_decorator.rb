@@ -22,9 +22,17 @@ class CollectibleDecorator < ModelDecorator
 
   end
 
+  # Get the url from the associated ImageReference, possibly resolving a relative path with the help of a sample page
+  # TODO There's no reason why this shouldn't be named 'imgurl'
   def picurl
-    picurl = object.imglink
+    picurl = object.imgurl
     (picurl.present? && sample_page) ? valid_url(picurl, sample_page) : picurl
+  end
+
+  # Get the data from the associated ImageReference, possibly reducing its image URL to a data URL
+  # TODO There's no reason why this shouldn't be named 'imgdata'
+  def picdata
+    object.imgdata
   end
 
   def pageurl
