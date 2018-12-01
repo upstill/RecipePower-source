@@ -6,7 +6,7 @@ require 'time_check'
 class Rcpref < ApplicationRecord
   include Voteable
 
-  belongs_to :entity, :polymorphic => true
+  belongs_to :entity, polymorphic: true
   belongs_to :user
   counter_culture :user,
                   :column_name => Proc.new {|model| model.in_collection ? 'count_of_collecteds' : nil },

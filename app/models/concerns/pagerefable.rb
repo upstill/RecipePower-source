@@ -18,8 +18,14 @@ module Pagerefable
       # defers to a Pageref
       # attr_accessible url_attribute, :page_ref
 
-      # has_one :page_ref, -> { where(type: ref_type).order('canonical DESC') }, foreign_key: 'affiliate_id', class_name: ref_type, :dependent=>:destroy
-      belongs_to :page_ref, validate: true, autosave: true
+      if Rails::VERSION::STRING[0].to_i < 5
+        belongs_to :page_ref, validate: true, autosave: true
+      else
+        belongs_to :page_ref,
+                   validate: true,
+                   autosave: true,
+                   optional: true # Is not required
+      end
 
       has_one :site, :through => :page_ref
       # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to

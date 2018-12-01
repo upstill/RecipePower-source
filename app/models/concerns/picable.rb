@@ -12,7 +12,11 @@ module Picable
     def picable picable_attribute, reference_name=:picture, fallback_img_file='NoPictureOnFile.png'
       reference_name = reference_name.to_sym
       picable_attribute = picable_attribute.to_sym
-      belongs_to reference_name, class_name: 'ImageReference'
+      if Rails::VERSION::STRING[0].to_i < 5
+        belongs_to reference_name, class_name: 'ImageReference'
+      else
+        belongs_to reference_name, class_name: 'ImageReference', optional: true
+      end
 
       self.instance_eval do
 

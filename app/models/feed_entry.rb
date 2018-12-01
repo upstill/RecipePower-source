@@ -5,7 +5,11 @@ class FeedEntry < ApplicationRecord
 
   # attr_accessible :guid, :title, :published_at, :summary, :url, :feed, :recipe
 
-  belongs_to :recipe
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :recipe
+  else
+    belongs_to :recipe, :optional => true
+  end
   belongs_to :feed, :counter_cache => true
   delegate :site, :to => :feed
 

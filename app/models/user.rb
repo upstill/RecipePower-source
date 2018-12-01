@@ -50,7 +50,11 @@ class User < ApplicationRecord
   has_many :invitees, :foreign_key => :invited_by_id, :class_name => 'User'
 
   has_many :aliases, :foreign_key => :alias_id, :class_name => 'User'
-  belongs_to :aliased_to, :foreign_key => :alias_id, :class_name => 'User'
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :aliased_to, :foreign_key => :alias_id, :class_name => 'User'
+  else
+    belongs_to :aliased_to, :foreign_key => :alias_id, :class_name => 'User', optional: true
+  end
 
   scope :legit, -> { where 'sign_in_count > 0' }
 

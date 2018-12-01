@@ -27,7 +27,11 @@ class PageRef < ApplicationRecord
   backgroundable
 
   # Has an associated Gleaning record for a more frontal attack
-  belongs_to :gleaning
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :gleaning
+  else
+    belongs_to :gleaning, optional: true
+  end
 
   @@mercury_attributes = [ :url, :title, :content, :date_published, :lead_image_url, :domain, :author]
   @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]

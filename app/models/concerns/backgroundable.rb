@@ -100,9 +100,16 @@ module Backgroundable
     end
 =end
 
-    belongs_to :dj,
-               :class_name => 'Delayed::Backend::ActiveRecord::Job',
-               :dependent => :destroy
+    if Rails::VERSION::STRING[0].to_i < 5
+      belongs_to :dj,
+                 :class_name => 'Delayed::Backend::ActiveRecord::Job',
+                 :dependent => :destroy
+    else
+      belongs_to :dj,
+                 :class_name => 'Delayed::Backend::ActiveRecord::Job',
+                 :dependent => :destroy,
+                 :optional => true
+    end
 
     # These overrides provide for setting status before a backgroundable has been saved
     def virgin!

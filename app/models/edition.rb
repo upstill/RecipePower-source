@@ -16,10 +16,21 @@ class Edition < ApplicationRecord
 
   belongs_to :recipe
   belongs_to :site
-  belongs_to :list
-  belongs_to :condiment, polymorphic: true
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :list
+    belongs_to :condiment, polymorphic: true
+    belongs_to :guest, polymorphic: true
+  else
+    belongs_to :list,
+               optional: true
+    belongs_to :condiment,
+               polymorphic: true,
+               optional: true
+    belongs_to :guest,
+               polymorphic: true,
+               optional: true
+  end
   validates :condiment_type, inclusion: { in: %w(List IngredientReferent), message: "%{value} is not a valid condiment" }
-  belongs_to :guest, polymorphic: true
   validates :guest_type, inclusion: { in: %w(User Referent), message: "%{value} is not a valid guest" }
 
   before_save do |ed|

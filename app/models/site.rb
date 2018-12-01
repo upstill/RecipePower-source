@@ -33,7 +33,11 @@ class Site < ApplicationRecord
 
   # attr_accessible :sample, :root
 
-  belongs_to :referent, class_name: 'SourceReferent' # See before_destroy method, :dependent=>:destroy
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :referent, class_name: 'SourceReferent' # See before_destroy method, :dependent=>:destroy
+  else
+    belongs_to :referent, class_name: 'SourceReferent', optional: true # See before_destroy method, :dependent=>:destroy
+  end
 
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true

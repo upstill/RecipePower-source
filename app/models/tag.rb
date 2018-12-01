@@ -41,7 +41,16 @@ class Tag < ApplicationRecord
   # has_many :private_subscriptions, :dependent => :destroy
 
   # The primary meaning is the default meaning of a tag
-  belongs_to :primary_meaning, :class_name => 'Referent', :foreign_key => 'referent_id'
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :primary_meaning,
+               :class_name => 'Referent',
+               :foreign_key => 'referent_id'
+  else
+    belongs_to :primary_meaning,
+               :class_name => 'Referent',
+               :foreign_key => 'referent_id',
+               :optional => true
+  end
 
   # ownership of tags restrict visible tags
   has_many :tag_owners, :dependent => :destroy

@@ -30,7 +30,16 @@ class Referent < ApplicationRecord
   has_many :tags, :through => :expressions
   accepts_nested_attributes_for :expressions, allow_destroy: true
 
-  belongs_to :canonical_expression, :class_name => 'Tag', :foreign_key => 'tag_id'
+  if Rails::VERSION::STRING[0].to_i < 5
+    belongs_to :canonical_expression,
+               :class_name => 'Tag',
+               :foreign_key => 'tag_id'
+  else
+    belongs_to :canonical_expression,
+               :class_name => 'Tag',
+               :foreign_key => 'tag_id',
+               :optional => true
+  end
   has_many :dependent_tags, :foreign_key => 'referent_id', :class_name => 'Tag', :dependent => :nullify
 
   has_many :referments, :dependent => :destroy, :inverse_of => :referent
