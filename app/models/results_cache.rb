@@ -1420,7 +1420,7 @@ class TagsIndexCache < ResultsCache
   protected
 
   def supported_org_options
-    [ :popularity, :newest, (:meaningless if admin_view) ]
+    [ :newest, :popularity, (:meaningless if admin_view) ]
   end
 
 end
