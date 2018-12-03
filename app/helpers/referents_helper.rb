@@ -22,7 +22,7 @@ module ReferentsHelper
     ttltag = options[:except] || ref.expression
     header =
         options[:disambiguate] ?
-          'Knowledge about '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>')) :
+          'Topic: '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>')) :
           ''.html_safe
 
     header = referent_identifier(ref, options[:label]) if options[:header] || options[:label]
