@@ -153,13 +153,15 @@ class ReferentsController < CollectibleController
     end
     # ...and on to the referments.
     @decorator = @referent.decorate
+    @presenter = present @referent
     # The referment params require special processing
     rfmt_params = rp.delete :referments_attributes
     @referent.update_attributes rp
     @referent.save if !@referent.errors.any? && ReferentServices.new(@referent).parse_referment_params(rfmt_params)
-    if !@referent.errors.any?
+    if @referent.errors.empty?
       @referent.reload
       flash[:popup] = "'#{@referent.name}' now updated to serve you better"
+      @replacements = [ view_context.summarize_referent_replacement(@referent) ]
       @update_items = [:card]
     else
       resource_errors_to_flash @referent, preface: "Couldn't save the #{@referent.typename}"

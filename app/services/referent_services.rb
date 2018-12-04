@@ -112,10 +112,8 @@ class ReferentServices
             referee = RefereeServices.new(referee).assert_kind rfmt_params[:kind]
           end
           # The Referment doesn't exist but the referee does => create a new Referment
-          if @referent.referments.exists?(referee: referee)
+          unless @referent.referments.exists? referee: referee
             # Don't want to add a redundant referment
-            @referent.errors.add :reference, 'already exists'
-          else
             @referent.referments.build referee: referee
             changed = true
           end
@@ -125,9 +123,7 @@ class ReferentServices
         rfmt = assert_referment rfmt_params[:kind], rfmt_params[:url]
         if rfmt.errors.any?
           @referent.errors.add :referments, "have bad kind/url #{rfmt_params[:kind]}/#{rfmt_params[:url]}: #{rfmt.errors.full_messages}"
-        elsif @referent.referments.exists? referee: referee
-          @referent.errors.add :reference, 'already exists'
-        else
+        elsif !@referent.referments.exists? referee: referee
           @referent.referments << rfmt
           changed = true
         end

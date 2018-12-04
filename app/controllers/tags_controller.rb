@@ -270,6 +270,19 @@ class TagsController < ApplicationController
     end
   end
 
+  # Define: provide a typed tag with a meaning (i.e., a Referent)
+  def define
+    update_and_decorate
+    if @tag.tagtype == 0
+      @tag.errors.add :tagtype, 'has to exist before defining the tag'
+    elsif @tag.meanings.present?
+      @tag.errors.add :meanings, 'already exist'
+    else
+      TagServices.define @tag
+    end
+    render (@tag.errors.empty? ? :update : :errors), locals: { entity: @tag }
+  end
+
   def destroy
     BannedTag.find_or_create_by(normalized_name: @tag.normalized_name) if params[:ban]
     flash[:popup] = "'#{@tag.name}' duly #{params[:ban] ? 'banned' : 'deleted'}"

@@ -207,6 +207,7 @@ RP::Application.routes.draw do
       post 'associate'
       get 'owned'
       get 'associated'
+      post 'define'
     end
     collection do
       get 'list'

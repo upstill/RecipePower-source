@@ -42,8 +42,8 @@ module CollectibleHelper
   end
 
   ################## Standardized glyph buttons for collectibles ##########################
-  def collectible_edit_button decorator, size=nil, styling={}
-    entity = decorator.object
+  def collectible_edit_button decorator_or_entity, size=nil, styling={}
+    decorator = decorator_or_entity.is_a?(Draper::Decorator) ? decorator_or_entity : decorator_or_entity.decorate
     if decorator.user_can? :update
       if size.is_a? Hash
         size, styling = nil, size

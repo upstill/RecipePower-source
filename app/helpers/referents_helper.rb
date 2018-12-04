@@ -9,8 +9,13 @@ module ReferentsHelper
         "' ".html_safe
   end
 
+  def summarize_referent_replacement ref
+    [ "div.referent_#{ref.id}", summarize_referent(ref) ]
+  end
+
   def summarize_referent ref, options={}
-    format_table_tree referent_summary(ref, options)
+    treestr = format_table_tree referent_summary(ref, options)
+    content_tag :div, treestr, class: "referent_#{ref.id}"
   end
 
   def referent_identifier ref, label=nil
@@ -21,20 +26,20 @@ module ReferentsHelper
   def referent_summary ref, options={}
     ttltag = options[:except] || ref.expression
     header =
-        options[:disambiguate] ?
-          'Topic: '.html_safe + homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>')) :
-          ''.html_safe
-
-    header = referent_identifier(ref, options[:label]) if options[:header] || options[:label]
+    if options[:header] || options[:label]
+      referent_identifier(ref, options[:label])
+    else
+      'Topic: '.html_safe +
+          homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>')) +
+          collectible_edit_button(ref)
+    end
     sub_summs = [
         ref_expressions_summary(ref, except: ttltag),
         ref_parents_summary(ref),
         ref_children_summary(ref),
         ref_affiliates_summary(ref)
     ].compact.flatten(1)
-    if sub_summs.present?
-      header.present? ? [ header, sub_summs ] : sub_summs
-    end
+    header.present? ? [ header, sub_summs ] : sub_summs
   end
 
   def ref_expressions_summary referent, options={}

@@ -20,7 +20,8 @@
                      data: {request: '/tags/typify',
                             valueparam: 'typenum',
                             querydata: {tagid: item.id}} %><br>
-      <br>
+      <%= link_to_submit('Make Topic', define_tag_path(item), method: 'POST') if (item.tagtype != 0) && item.meanings.empty? %>
+    <br>
       <%= link_to_dialog 'Edit', edit_tag_path(item) %>
       <br>
       <%= button_to_submit 'Destroy',
