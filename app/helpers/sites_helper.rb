@@ -36,6 +36,7 @@ module SitesHelper
   def site_feeds_summary site
   end
 
+  # Summarize a site for the site's table entry
   def site_summaries site, admin_view
     napproved = site.approved_feeds.size
     nothers = site.feeds.size - napproved

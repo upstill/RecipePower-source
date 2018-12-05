@@ -378,7 +378,7 @@ class Referent < ApplicationRecord
     if tag && (tag.tagtype == typenum)
       super tag
       update_attribute(:tag_id, tag.id) if tag_id_changed? && tag.id # Save for later
-      express tag if persisted? # Ensure the tag is listed among the expressions
+      express tag if persisted? && !tag_ids.include?(tag.id) # Ensure the tag is listed among the expressions
       true
     elsif tag
       # It is an error to assign a tag to a referent of the wrong type
@@ -555,7 +555,22 @@ class Referent < ApplicationRecord
 
   # Return the name of the referent
   def name args = {}
-    (tag = self.expression args) ? tag.name : "**no tag**"
+    name_tag(args).try(:name) || '**no tag**'
+    # (tag = name_tag args) ? tag.name : "**no tag**"
+  end
+
+  # Return the tag which matches the args (if any)
+  def name_tag args={}
+    (args.present? && expression(args)) || canonical_expression || tags.first
+  end
+
+  def name_tag_token
+    name_tag.try(:id).to_s
+  end
+
+  # Assert a name for the referent. If it's not an existing tag of an existing expression, make it one
+  def name_tag_token= token
+    self.canonical_expression = Tag.find_by(id: token) || token
   end
 
   # Return the name, appended with all associated forms

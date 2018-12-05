@@ -156,7 +156,11 @@ class ReferentsController < CollectibleController
     @presenter = present @referent
     # The referment params require special processing
     rfmt_params = rp.delete :referments_attributes
+    # We hold the name_tag_token back until the expressions get processed,
+    # so the expressions' local and form pertain
+    name_tag_token = rp.delete :name_tag_token
     @referent.update_attributes rp
+    @referent.name_tag_token = name_tag_token # Saved until after expressions are set
     @referent.save if !@referent.errors.any? && ReferentServices.new(@referent).parse_referment_params(rfmt_params)
     if @referent.errors.empty?
       @referent.reload

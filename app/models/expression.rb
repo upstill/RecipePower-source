@@ -168,8 +168,8 @@ class Expression < ApplicationRecord
   # If a token string, it has a type specifier for the tag prepended.
   # Before accepting a tag name as a new tag, we do our due diligence to find the
   # proferred string among 1) tags of the specified type, and 2) free (untyped) tags.
-  def tag_token()
-    self.tag ? self.tag.id.to_s : ""
+  def tag_token
+    tag ? tag.id.to_s : '**no tag**'
   end
 
   def tag_token=(t)

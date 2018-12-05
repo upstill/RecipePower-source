@@ -1,13 +1,18 @@
 <tr class="expression_fields">
-  <td><%= f.hidden_field :tag_token %>
-  <%= f.hidden_field :referent_id %>
-  <%= f.label :tagname, expression_name(f.object), class: "expr_tag" %></td>
-<!--
+  <td>
+    <%= f.hidden_field :tag_token %>
+    <%= f.hidden_field :referent_id %>
+    <%= f.label :tagname, expression_name(f.object), class: "expr_tag" %>
+  </td>
+  <td align="center">
+    <input type="radio" name="referent[name_tag_token]" value="<%= f.object.tag_token %>" <%= 'checked' if (f.object.referent.name_tag_token == f.object.tag_token) %>>
+  </td>
+  <!--
   <td><%# f.input :localename, label: false, collection: Expression.locales.collect { |entry| entry[0] } %></td>
   <td><%# f.input :formname, label: false, collection: Expression.forms.collect { |entry| entry[0] } %></td>
 -->
-  <td><%= f.select :localename, Expression.locales.collect { |entry| entry[0] } %></td>
-  <td><%= f.select :formname, Expression.forms.collect { |entry| entry[0] } %></td>
+  <td><%= f.select :localename, Expression.locales.collect {|entry| entry[0]} %></td>
+  <td><%= f.select :formname, Expression.forms.collect {|entry| entry[0]} %></td>
   <td>
     <%= f.hidden_field :_destroy, class: 'delete-expression' %>
     <%= link_to '', '#', class: "remove_fields remove-allowed nukeable_X glyphicon glyphicon-remove", :title => 'Nuke It!' %>

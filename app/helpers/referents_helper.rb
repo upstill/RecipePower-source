@@ -14,27 +14,36 @@ module ReferentsHelper
   end
 
   def summarize_referent ref, options={}
-    treestr = format_table_tree referent_summary(ref, options)
-    content_tag :div, treestr, class: "referent_#{ref.id}"
+    content_tag :div,
+                format_table_tree(referent_summary ref, options),
+                class: "referent_#{ref.id}"
   end
 
-  def referent_identifier ref, label=nil
-    safe_join [ (label.if_present || ref.model_name.human.split(' ').first),
-                homelink(ref) ], ': '.html_safe
+  # Provide a labelled specification of a referent.
+  # The label may be provided, or is generated from the referent's class nme
+  def referent_identifier ref, label = nil
+    safe_join [
+                  (label.if_present || ref.model_name.human.split.first),
+                  homelink(ref),
+                  ': '.html_safe
+              ]
   end
 
+  # Summarize a referent for a table, with its name, and summaries of its expressions, relations and affiliates
+  # Options:
+  #   :header, if truthy, says to generate a header from the referent's identifier
+  #   :label labels the name (defaults to the referent's type name)
   def referent_summary ref, options={}
-    ttltag = options[:except] || ref.expression
     header =
     if options[:header] || options[:label]
-      referent_identifier(ref, options[:label])
+      referent_identifier ref, options[:label]
     else
       'Topic: '.html_safe +
-          homelink(ref, title: (ttltag ? ttltag.name : '<unnamed>')) +
+          homelink(ref, title: ref.name) +
           collectible_edit_button(ref)
     end
     sub_summs = [
-        ref_expressions_summary(ref, except: ttltag),
+        ref_expressions_summary(ref, except: ref.name_tag),
         ref_parents_summary(ref),
         ref_children_summary(ref),
         ref_affiliates_summary(ref)

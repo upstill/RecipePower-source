@@ -79,7 +79,7 @@ class TagPresenter < BasePresenter
                        :merge_into_btn => (options[:merge_into_btn] && TagServices.new(entity).can_absorb(tag))}
         h.summarize_tag_similar tag, entity, btn_options
       when :summarize_referent
-        h.summarize_referent entity, except: tag
+        h.summarize_referent entity
       when :summarize_meaning
         h.homelink entity
       else
