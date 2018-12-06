@@ -1,4 +1,4 @@
-class AddBarcodeAndStringToProduct < ActiveRecord::Migration
+class AddBarcodeAndStringToProduct < ActiveRecord::Migration[4.2]
   def change
     add_column :products, :barcode, :string # The barcode
     add_column :products, :bctype, :integer, default: 0 # The type (enum)

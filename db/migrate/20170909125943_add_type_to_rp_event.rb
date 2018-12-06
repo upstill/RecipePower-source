@@ -1,4 +1,4 @@
-class AddTypeToRpEvent < ActiveRecord::Migration
+class AddTypeToRpEvent < ActiveRecord::Migration[4.2]
   def up
     RpEvent.delete_all
     add_column :rp_events, :type, :string

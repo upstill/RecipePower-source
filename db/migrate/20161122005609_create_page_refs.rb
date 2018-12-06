@@ -1,4 +1,4 @@
-class CreatePageRefs < ActiveRecord::Migration
+class CreatePageRefs < ActiveRecord::Migration[4.2]
   def change
       create_table :page_refs do |t|
         # Data extracted via Mercury

@@ -1,4 +1,4 @@
-class AddSubscribedToUsers < ActiveRecord::Migration
+class AddSubscribedToUsers < ActiveRecord::Migration[4.2]
   def change
     add_column :users, :subscribed, :boolean, default: true
     add_column :users, :last_edition, :integer, default: 0

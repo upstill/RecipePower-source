@@ -1,4 +1,4 @@
-class ChangeStatusForSite < ActiveRecord::Migration
+class ChangeStatusForSite < ActiveRecord::Migration[4.2]
   def up
 	change_column :sites, :status, :integer, default: 0
 	change_column :recipes, :status, :integer, default: 0

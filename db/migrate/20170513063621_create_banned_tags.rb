@@ -1,4 +1,4 @@
-class CreateBannedTags < ActiveRecord::Migration
+class CreateBannedTags < ActiveRecord::Migration[4.2]
 
   def change
     if ActiveRecord::Base.connection.table_exists?("rcpqueries")

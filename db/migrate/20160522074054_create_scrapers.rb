@@ -1,4 +1,4 @@
-class CreateScrapers < ActiveRecord::Migration
+class CreateScrapers < ActiveRecord::Migration[4.2]
   def change
     create_table :scrapers, :force => true do |t|
       t.string :url

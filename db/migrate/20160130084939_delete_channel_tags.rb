@@ -1,4 +1,4 @@
-class DeleteChannelTags < ActiveRecord::Migration
+class DeleteChannelTags < ActiveRecord::Migration[4.2]
   def up
     ExpressionDecorator.ref_check # Remove all Expressions that no longer connect to Referents
     List.assert 'healthy', User.find(1), create: true

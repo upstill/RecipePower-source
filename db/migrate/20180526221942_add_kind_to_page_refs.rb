@@ -1,4 +1,4 @@
-class AddKindToPageRefs < ActiveRecord::Migration
+class AddKindToPageRefs < ActiveRecord::Migration[4.2]
   def up
     remove_index :page_refs, name: "page_refs_index_by_url_and_type"
     add_column :page_refs, :kind, :integer, default: 1

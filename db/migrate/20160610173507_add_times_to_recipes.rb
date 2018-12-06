@@ -1,4 +1,4 @@
-class AddTimesToRecipes < ActiveRecord::Migration
+class AddTimesToRecipes < ActiveRecord::Migration[4.2]
   def change
     add_column :recipes, :prep_time, :string
     add_column :recipes, :cook_time, :string

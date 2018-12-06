@@ -1,5 +1,5 @@
 # Migration responsible for creating a table with notifications
-class CreateActivityNotificationTables < ActiveRecord::Migration
+class CreateActivityNotificationTables < ActiveRecord::Migration[4.2]
   # Create tables
   def up
     drop_table(:notifications) if ActiveRecord::Base.connection.table_exists?("notifications")

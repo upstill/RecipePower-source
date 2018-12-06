@@ -1,4 +1,4 @@
-class AddGleaningIdToPageRef < ActiveRecord::Migration
+class AddGleaningIdToPageRef < ActiveRecord::Migration[4.2]
   def up
     add_column :page_refs, :gleaning_id, :integer
     Gleaning.where.not(entity_type: nil).each { |gleaning|

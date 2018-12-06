@@ -1,4 +1,4 @@
-class ChangeDescriptionToText < ActiveRecord::Migration
+class ChangeDescriptionToText < ActiveRecord::Migration[4.2]
   def up
 	change_column :feeds, :description, :text
 	change_column :referents, :description, :text

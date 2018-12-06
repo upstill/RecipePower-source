@@ -1,4 +1,4 @@
-class CreateGleanings < ActiveRecord::Migration
+class CreateGleanings < ActiveRecord::Migration[4.2]
   def change
     drop_table :gleanings if ActiveRecord::Base.connection.table_exists?("gleanings")
     create_table :gleanings do |t|

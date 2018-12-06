@@ -1,4 +1,4 @@
-class Reference < ApplicationRecord
+class Reference < ApplicationRecord[4.2]
 end
 class RenameReferenceToImageReference < ActiveRecord::Migration
   def up

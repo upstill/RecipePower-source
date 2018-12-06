@@ -1,4 +1,4 @@
-class AddDjIds < ActiveRecord::Migration
+class AddDjIds < ActiveRecord::Migration[4.2]
   def change
     add_column :feeds, :dj_id, :integer
     add_column :gleanings, :dj_id, :integer

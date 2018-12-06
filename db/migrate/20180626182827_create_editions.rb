@@ -1,4 +1,4 @@
-class CreateEditions < ActiveRecord::Migration
+class CreateEditions < ActiveRecord::Migration[4.2]
   def up
     unless ActiveRecord::Base.connection.table_exists?("editions")
       create_table :editions do |t|

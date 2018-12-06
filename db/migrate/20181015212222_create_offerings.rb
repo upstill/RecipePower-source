@@ -1,4 +1,4 @@
-class CreateOfferings < ActiveRecord::Migration
+class CreateOfferings < ActiveRecord::Migration[4.2]
   def up
     drop_table :offerings if ActiveRecord::Base.connection.table_exists?("offerings")
     create_table :offerings do |t|

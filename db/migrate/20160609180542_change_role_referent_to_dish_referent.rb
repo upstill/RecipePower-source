@@ -1,4 +1,4 @@
-class ChangeRoleReferentToDishReferent < ActiveRecord::Migration
+class ChangeRoleReferentToDishReferent < ActiveRecord::Migration[4.2]
   def up
 	Referent.where(type: 'RoleReferent').each { |rr|
 	  dr = rr.becomes(DishReferent)
