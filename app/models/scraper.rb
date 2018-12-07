@@ -120,6 +120,10 @@ class Scraper < ApplicationRecord
     update_attribute :run_at, job.run_at
   end
 
+  def to_s
+    "Scraper #{self.class}##{handler} on #{url}"
+  end
+
   # Summarize the current state of bad scrapers.
   # -- id: picks out a specific scraper to report on
   # -- nlines: limits the stack trace to that number of levels
@@ -203,6 +207,72 @@ class Scraper < ApplicationRecord
       found = attribute_name ? s.attributes[attribute_name.to_s] : s.text
       found.to_s
     end
+  end
+
+end
+
+class Www_theguardian_com_Scraper < Scraper
+
+  def self.handler url_or_uri
+    uri = url_or_uri.is_a?(URI) ? url_or_uri : URI(url_or_uri.to_s)
+    case uri.path
+    when /(food|lifeandstyle)\/\d\d\d\d\/\w+\/\d\d\//
+      :guard_rcppage
+    when /food\/series\/yotam-ottolenghi-recipes(\/all)?\/?$/
+      :guard_yotam
+    when /food\/series\//
+      :guard_series
+    end
+  end
+
+  def launch link
+    url = link.attribute('href').to_s
+    scrape url if self.handler(url)
+  end
+
+  # Scrape a page from the Guardian with recipes, each demarcated/titled by an h2 element.
+  # The trick is, there will be several recipes on the page, each needing its own entry
+  # Also, the image for the first recipe precedes the header.
+  def guard_rcppage
+    body = page.search('div.content__article-body').first
+    headers = body.search('h2').map(&:text)
+    find_by = { url: page, title: headers.first }
+    # Format within body:
+    # --possibly a picture, by default attached to the first recipe
+    # --a number of recipes, punctuated by <h2> headers
+    figures = body.search('figure img.gu-image').collect do |figure|
+      # Define a hash with :url and :text entries for each figure
+      { url: figure.attribute('src').to_s, text: figure.attribute('alt').to_s }
+    end
+    # Scan through the children of the body: each <h2> gives a recipe title,
+    # and a subsequent <figure> gives its picture
+    headers.each do |header|
+      header.sub!(/ \(pictured above\)/, '')
+      # Check for a saved figure
+      extractions = { }
+      figures.each do |figure|
+        if figure[:text].match header.downcase
+          extractions[:Image] = figure[:url]
+          break
+        end
+      end
+      recipe = registrar.register_recipe Hash( url: page, title: header ), extractions
+      x=2
+    end
+  end
+
+  #  /food\/series\/yotam-ottolenghi-recipes\?page=/
+  def guard_yotam
+    # Get the next link
+    scrape page.search('div.pagination__list a[rel="next"]').first
+    
+    # Links are given within 'fc-item__content' divs
+    scrape page.search('div.fc-item__container > a')
+
+  end
+
+  def guard_series
+
   end
 
 end

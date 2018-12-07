@@ -29,16 +29,25 @@ class Registrar < Object
   end
 
   # Ensure that a recipe has been filed, and launch it for scraping if new
-  def register_recipe link_or_page, extractions={}
+  def register_recipe link_or_page_or_hash, extractions={}
+    link_or_page =
+    if link_or_page_or_hash.is_a? Hash
+      title = link_or_page_or_hash[:title]
+      link_or_page_or_hash[:url]
+    else
+      link_or_page_or_hash
+    end
     recipe_link =
         if link_or_page.is_a?(Mechanize::Page)
-          found = link_or_page.search 'title'
-          extractions.merge!('Title': found.first.text) if found
+          title ||= link_or_page.search('title').try :text
+          extractions.merge!('Title': title) if title
           link_or_page.uri.to_s
         else
           link_or_page
         end
-    recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link)}, extractions, Recipe)
+    recipe = CollectibleServices.find_or_create({url: absolutize(recipe_link), title: title}.compact,
+                                                extractions,
+                                                Recipe)
     Rails.logger.info "!!!Scraper Defined Recipe at #{absolutize recipe_link}:"
     extractions.each { |key, value| Rails.logger.info "!!!Scraper Defined Recipe        #{key}: '#{value}'" }
     Rails.logger.info ''

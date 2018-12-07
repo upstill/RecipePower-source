@@ -49,6 +49,54 @@ class ScraperTest < ActiveSupport::TestCase
     sleep 5
   end
 
+  test 'yotam_ital_recipes' do
+    url = 'https://www.theguardian.com/food/2018/sep/29/yotam-ottolenghi-italian-feast-recipes-meatballs-clams-tart'
+    scraper = Scraper.assert url
+    assert_equal :guard_rcppage, scraper.handler
+    scraper.bkg_land
+    ttls = Recipe.all.pluck(:title)
+    assert_equal 3, ttls.count
+    assert ttls.include?( 'Clams with tomatoes, chilli and lemon')
+    assert ttls.include?('Pork and fennel meatballs with braised lentils')
+    assert ttls.include?('Grape and strawberry crostata')
+    rcp = Recipe.first
+    rcp.bkg_land
+    tagstrs = rcp.tags.pluck :name
+    keywords = 'Yotam Ottolenghi,Italian food and drink,Food,Life and style,Pork,Seafood,Baking,Fruit,Main course,Starter,Vegetables,Dessert'.split(',')
+    keywords.each do |keyword|
+      assert tagstrs.include?(keyword), "'#{keyword}' didn't make it into tags"
+    end
+
+    # Each recipe should have a picture
+    Recipe.all.each do |recipe|
+      assert recipe.picture, "No picture for '#{recipe.title}'"
+    end
+  end
+
+  test 'guardian_recipes' do
+    url = 'https://www.theguardian.com/lifeandstyle/2017/jul/08/roast-trout-tomato-orange-salad-recipe-potato-chorizo-gruyere-lamb-patty-fish-taco-yotam-ottolenghi'
+    scraper = Scraper.assert url
+    assert_equal :guard_rcppage, scraper.handler
+    scraper.bkg_land
+    ttls = Recipe.all.pluck(:title)
+    assert_equal 5, ttls.count
+    assert ttls.include?( 'Roast trout with tomato, orange and barberry salsa')
+    assert ttls.include?('Jacket potatoes with chorizo and gruyère')
+    assert ttls.include?('Fishcake tacos with mango and lime and cumin yoghurt')
+    assert ttls.include?('Chinese five spice- and coffee-marinated chicken skewers')
+    assert ttls.include?('Lamb and pistachio patties with sumac yoghurt')
+  end
+
+  test 'ottolenghi_page' do
+    url = 'https://www.theguardian.com/food/series/yotam-ottolenghi-recipes/all'
+    scraper = Scraper.assert url
+    assert_equal :guard_yotam, scraper.handler
+    scraper.bkg_land
+    assert 2, Scraper.where(what: 'guard_yotam').count
+    assert 20, Scraper.where(what: 'guard_rcppage').count
+    assert_equal :guard_rcppage, Scraper.last.handler
+  end
+
 =begin
   test 'bbc_handlers' do
     check_handler_url 'http://www.bbc.co.uk/food', :bbc_food_page

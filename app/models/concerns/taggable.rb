@@ -98,11 +98,18 @@ module Taggable
 
   # We can't get here if we're not Pagerefable
   def adopt_gleaning
-    if page_ref.gleaning && (tagstrings = page_ref.gleaning.results_for('Tags'))
+    if page_ref.gleaning
       ts = TaggingServices.new self
-      tagstrings.each { |tagstring|
-        tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
-      }
+      if tagstrings = page_ref.gleaning.results_for('Tags')
+        tagstrings.each { |tagstring|
+          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
+        }
+      end
+      if authorstrings = page_ref.gleaning.results_for('Author')
+        authorstrings.each { |authorstring|
+          authorstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Author' }
+        }
+      end
     end
     super if defined?(super)
   end

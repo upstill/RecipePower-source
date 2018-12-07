@@ -98,9 +98,9 @@ class Recipe < ApplicationRecord
 
   # This is called when the page_ref finishes updating
   def adopt_gleaning
-    self.title = page_ref.title if page_ref.title.present?
-    self.picurl = page_ref.picurl if page_ref.picurl.present?
-    self.description = page_ref.description if page_ref.description.present?
+    self.title = page_ref.title if page_ref.title.present? && !title.present?
+    self.picurl = page_ref.picurl if page_ref.picurl.present? && !picurl.present?
+    self.description = page_ref.description if page_ref.description.present? && !description.present?
     super if defined?(super)
   end
 

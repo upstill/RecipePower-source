@@ -31,8 +31,7 @@ class CollectibleServices
     if extractions.is_a? Class
       extractions, klass = nil, extractions
     end
-    url = params[:url]
-    if (entity = klass.find_by_url url)  # Pre-existing => ignore extractions
+    if entity = klass.find_by_url_and(params)  # Pre-existing => ignore extractions
       return entity
     end
 
@@ -44,7 +43,8 @@ class CollectibleServices
     end
 
     # Construct a valid URL from the given url and the extracted URI or href
-    url = valid_url(findings.result_for('URI'), url) || valid_url(findings.result_for('href'), url)
+    url = valid_url(findings.result_for('URI'), params[:url]) ||
+          valid_url(findings.result_for('href'), params[:url])
     # url = findings.result_for('URI') || findings.result_for('href') || url
     uri = URI url
     if uri.blank?
@@ -56,7 +56,7 @@ class CollectibleServices
         entity = klass.new
         entity.errors.add :id, "There is no #{klass.to_s.downcase} number #{params[:id]}"
       end
-    elsif !(entity = klass.find_by_url url) # Try again to find based on the extracted url
+    elsif !(entity = klass.find_by_url_and params.merge(url: url)) # Try again to find based on the extracted url
       # No id: create based on url
       params.delete :rcpref
       # Assigning title and picurl must wait until the url (and hence the page_ref) is set

@@ -53,6 +53,13 @@ module Pagerefable
           self.joins(:page_ref).find_by(PageRef.url_query url)
         end
 
+        # Include other parameters in the query for a record
+        define_singleton_method :find_by_url_and do |params|
+          url = params[:url]
+          scope = params.count > 1 ? self.where(params.except :url) : self
+          scope.joins(:page_ref).find_by(PageRef.url_query url)
+        end
+
         # Find entitites whose url matches the given path (which includes the host)
         define_singleton_method :query_on_path do |urpath|
           self.joins(:page_ref).where(PageRef.url_path_query urpath)
