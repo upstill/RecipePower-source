@@ -234,31 +234,27 @@ class Www_theguardian_com_Scraper < Scraper
   # The trick is, there will be several recipes on the page, each needing its own entry
   # Also, the image for the first recipe precedes the header.
   def guard_rcppage
-    body = page.search('div.content__article-body').first
-    headers = body.search('h2').map(&:text)
-    find_by = { url: page, title: headers.first }
+    pending_pic = page.search('div.content__main-column header.content__head figure picture img').first.attribute('src').text
+    pending_header = nil
+    body = page.search('div.content__main-column div.content__article-body').first
     # Format within body:
     # --possibly a picture, by default attached to the first recipe
-    # --a number of recipes, punctuated by <h2> headers
-    figures = body.search('figure img.gu-image').collect do |figure|
-      # Define a hash with :url and :text entries for each figure
-      { url: figure.attribute('src').to_s, text: figure.attribute('alt').to_s }
-    end
-    # Scan through the children of the body: each <h2> gives a recipe title,
-    # and a subsequent <figure> gives its picture
-    headers.each do |header|
-      header.sub!(/ \(pictured above\)/, '')
-      # Check for a saved figure
-      extractions = { }
-      figures.each do |figure|
-        if figure[:text].match header.downcase
-          extractions[:Image] = figure[:url]
-          break
+    # --a number of recipes, defined/named by <h2> headers
+    body.children.each do |body_child|
+      case body_child.name
+      when 'h2'
+        if pending_header
+          recipe = registrar.register_recipe Hash(url: page, title: pending_header), {:Image => pending_pic}.compact
+          pending_pic = pending_header = nil
+        end
+        pending_header = body_child.text.sub(/ \(pictured above\)/, '')
+      when 'figure'
+        if pic = body_child.search('img.gu-image').first # contains image
+          pending_pic = pic.attribute('src').text
         end
       end
-      recipe = registrar.register_recipe Hash( url: page, title: header ), extractions
-      x=2
     end
+    recipe = registrar.register_recipe Hash( url: page, title: pending_header ), { :Image => pending_pic }.compact if pending_header
   end
 
   #  /food\/series\/yotam-ottolenghi-recipes\?page=/
