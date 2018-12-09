@@ -105,6 +105,13 @@ class ScraperTest < ActiveSupport::TestCase
     rcp = Recipe.first
     ng = rcp.content
     assert ng.present?, "Recipe's scraper content doesn't exist"
+    begin
+      ng = Nokogiri::XML.parse ng
+    rescue Exception => e
+      ng = nil
+    end
+    assert ng, "Recipe's scraper content doesn't parse into XML"
+    assert_equal Nokogiri::XML::Document, ng.class, "Recipe's scraper content isn't valid (can't be unserialized)"
   end
 
 =begin

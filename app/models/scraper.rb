@@ -236,12 +236,11 @@ class Www_theguardian_com_Scraper < Scraper
   def guard_rcppage
     def flush_content content, pic
       if content.first
-        nodes_text = content.collect {|node| node.to_xml}.join '\n'
-        xml_doc = Nokogiri::XML "<root>#{nodes_text}</root>"
+        xml_doc_text = "<root>#{content.map(&:to_xml).join}</root>"
         recipe = registrar.register_recipe Hash(url: page, title: content.first.text.sub(/ \(pictured above\)/, '')),
                                            {
                                                :Image => pic,
-                                               :Content => xml_doc.to_xml
+                                               :Content => xml_doc_text
                                            }.compact
       end
     end
@@ -270,8 +269,10 @@ class Www_theguardian_com_Scraper < Scraper
         if pic = body_child.search('img.gu-image').first # contains image
           pending_pic = pic.attribute('src').text
         end
+      when 'text'
+        content << body_child unless body_child.text.strip.match /^(\\n)?$/
       else
-        content << body_child unless body_child.text.strip.blank?
+        content << body_child
       end
     end
     flush_content content, pending_pic

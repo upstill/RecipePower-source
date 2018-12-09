@@ -7,7 +7,10 @@ class Results < HashWithIndifferentAccess
   end
 
   def results_for label
-    (self[label] || []).map(&:out).flatten.compact.map(&:strip).map(&:if_present).compact.uniq
+    (self[label] || []).map(&:out).flatten.compact.map { |result|
+      # Allowing for non-String results
+      result.is_a?(String) ? result.strip.if_present : result
+    }.compact.uniq
   end
 
   def result_for label
