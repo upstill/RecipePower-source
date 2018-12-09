@@ -234,27 +234,47 @@ class Www_theguardian_com_Scraper < Scraper
   # The trick is, there will be several recipes on the page, each needing its own entry
   # Also, the image for the first recipe precedes the header.
   def guard_rcppage
-    pending_pic = page.search('div.content__main-column header.content__head figure picture img').first.attribute('src').text
-    pending_header = nil
-    body = page.search('div.content__main-column div.content__article-body').first
+    def flush_content content, pic
+      if content.first
+        nodes_text = content.collect {|node| node.to_xml}.join '\n'
+        xml_doc = Nokogiri::XML "<root>#{nodes_text}</root>"
+        recipe = registrar.register_recipe Hash(url: page, title: content.first.text.sub(/ \(pictured above\)/, '')),
+                                           {
+                                               :Image => pic,
+                                               :Content => xml_doc.to_xml
+                                           }.compact
+      end
+    end
+    return unless body = page.search('div.content__article-body').first
+    pending_pic = nil
     # Format within body:
     # --possibly a picture, by default attached to the first recipe
     # --a number of recipes, defined/named by <h2> headers
+    content = []
+    pending_pic = nil
+    # Cycle through each child, saving non-empty elements to the contents, except for
+    # -- <h2> elements, which demarcate the beginning of a recipe and give its title.
+    #       When such a header is encountered, the existing contents (if any) get
+    #       flushed to define a recipe
+    # -- <figure> elements, which contain an img element whose source is saved in pending_pic
     body.children.each do |body_child|
       case body_child.name
       when 'h2'
-        if pending_header
-          recipe = registrar.register_recipe Hash(url: page, title: pending_header), {:Image => pending_pic}.compact
-          pending_pic = pending_header = nil
+        if content.present?
+          flush_content content, pending_pic
+          pending_pic = nil
         end
-        pending_header = body_child.text.sub(/ \(pictured above\)/, '')
+        # Start saving this section
+        content = [body_child]
       when 'figure'
         if pic = body_child.search('img.gu-image').first # contains image
           pending_pic = pic.attribute('src').text
         end
+      else
+        content << body_child unless body_child.text.strip.blank?
       end
     end
-    recipe = registrar.register_recipe Hash( url: page, title: pending_header ), { :Image => pending_pic }.compact if pending_header
+    flush_content content, pending_pic
   end
 
   #  /food\/series\/yotam-ottolenghi-recipes\?page=/

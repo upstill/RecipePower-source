@@ -97,6 +97,16 @@ class ScraperTest < ActiveSupport::TestCase
     assert_equal :guard_rcppage, Scraper.last.handler
   end
 
+  test 'nokogiri_persistence' do
+    url = 'https://www.theguardian.com/lifeandstyle/2017/jul/08/roast-trout-tomato-orange-salad-recipe-potato-chorizo-gruyere-lamb-patty-fish-taco-yotam-ottolenghi'
+    scraper = Scraper.assert url
+    assert_equal :guard_rcppage, scraper.handler
+    scraper.bkg_land
+    rcp = Recipe.first
+    ng = rcp.content
+    assert ng.present?, "Recipe's scraper content doesn't exist"
+  end
+
 =begin
   test 'bbc_handlers' do
     check_handler_url 'http://www.bbc.co.uk/food', :bbc_food_page

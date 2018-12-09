@@ -62,6 +62,7 @@ class CollectibleDecorator < ModelDecorator
     self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
     ts = nil # TaggingService object
     if self.is_a? Recipe
+      self.content = findings.result_for('Content') if findings.result_for('Content').present?
       self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
       self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
       if findings.result_for('Total Time').present?
