@@ -52,6 +52,12 @@ module RP
 
     config.active_record.raise_in_transactional_callbacks = true
 
+    # Issue CSRF credentials for every form
+    config.action_controller.per_form_csrf_tokens = true
+
+    # Check if the HTTP Origin header should be checked against the site's origin
+    config.action_controller.forgery_protection_origin_check = true
+
     # Version of your assets, change this if you want to expire all your assets
     config.assets.enabled = true
     config.assets.version = '1.0'

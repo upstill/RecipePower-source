@@ -622,10 +622,11 @@ class ResultsCache < ApplicationRecord
       cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
 
       relevant_params = cc.extract_params result_type, params
-
-      rc = cc.find_or_initialize_by(session_id: session_id,
-                                    type: cc.to_s,
-                                    result_typestr: (relevant_params[:result_type] || ''))
+      attr_params = {session_id: session_id,
+                     type: cc.to_s,
+                     result_typestr: (relevant_params[:result_type] || '')
+      }
+      rc = cc.find_by(attr_params) || cc.new(attr_params)
       # For purposes of busting the cache, we assume that sort direction is irrelevant
       # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
 

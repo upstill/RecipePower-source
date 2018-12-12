@@ -50,7 +50,7 @@ div.slider-item {
   div.pic-box {
     display: -webkit-box;
     display: -moz-box;
-    display: box;
+    display: flex;
 
     -webkit-box-orient: vertical;
     -moz-box-orient: vertical;
@@ -77,7 +77,7 @@ div.slider-item {
 
     display: -webkit-box;
     // display: -moz-box;
-    display: box;
+    display: flex;
 
     -webkit-box-align: center;
     -moz-box-align: center;
@@ -114,7 +114,7 @@ div.slider-item {
   height: auto; // 220px;
   display: -webkit-box;
   display: -moz-box;
-  display: box;
+  display: flex;
 
   -webkit-box-orient: vertical;
   -moz-box-orient: vertical;
@@ -178,7 +178,7 @@ img.fixed-width {
 
   display: -webkit-box;
   // display: -moz-box;
-  display: box;
+  display: flex;
 
   -webkit-box-align: center;
   -moz-box-align: center;
