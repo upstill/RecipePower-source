@@ -576,7 +576,6 @@ class ResultsCache < ApplicationRecord
 
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
-  self.primary_keys = ['session_id', 'type', 'result_typestr']
 
   # Standard parameters
   attr_reader :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type

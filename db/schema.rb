@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -11,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181208200357) do
+ActiveRecord::Schema.define(version: 20181212194453) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -31,13 +30,12 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.datetime "opened_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["group_owner_id"], name: "index_activ_notifications_on_group_owner_id", using: :btree
+    t.index ["group_type", "group_id"], name: "index_activ_notifications_on_group_type_and_group_id", using: :btree
+    t.index ["notifiable_type", "notifiable_id"], name: "index_activ_notifications_on_notifiable_type_and_notifiable_id", using: :btree
+    t.index ["notifier_type", "notifier_id"], name: "index_activ_notifications_on_notifier_type_and_notifier_id", using: :btree
+    t.index ["target_type", "target_id"], name: "index_activ_notifications_on_target_type_and_target_id", using: :btree
   end
-
-  add_index "activ_notifications", ["group_owner_id"], name: "index_activ_notifications_on_group_owner_id", using: :btree
-  add_index "activ_notifications", ["group_type", "group_id"], name: "index_activ_notifications_on_group_type_and_group_id", using: :btree
-  add_index "activ_notifications", ["notifiable_type", "notifiable_id"], name: "index_activ_notifications_on_notifiable_type_and_notifiable_id", using: :btree
-  add_index "activ_notifications", ["notifier_type", "notifier_id"], name: "index_activ_notifications_on_notifier_type_and_notifier_id", using: :btree
-  add_index "activ_notifications", ["target_type", "target_id"], name: "index_activ_notifications_on_target_type_and_target_id", using: :btree
 
   create_table "activ_subscriptions", force: :cascade do |t|
     t.integer  "target_id",                               null: false
@@ -52,11 +50,10 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.text     "optional_targets"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["key"], name: "index_activ_subscriptions_on_key", using: :btree
+    t.index ["target_type", "target_id", "key"], name: "index_activ_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
+    t.index ["target_type", "target_id"], name: "index_activ_subscriptions_on_target_type_and_target_id", using: :btree
   end
-
-  add_index "activ_subscriptions", ["key"], name: "index_activ_subscriptions_on_key", using: :btree
-  add_index "activ_subscriptions", ["target_type", "target_id", "key"], name: "index_activ_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
-  add_index "activ_subscriptions", ["target_type", "target_id"], name: "index_activ_subscriptions_on_target_type_and_target_id", using: :btree
 
   create_table "answers", force: :cascade do |t|
     t.string   "answer",      default: ""
@@ -64,9 +61,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "question_id"
     t.datetime "created_at",               null: false
     t.datetime "updated_at",               null: false
+    t.index ["user_id"], name: "index_answers_on_user_id", using: :btree
   end
-
-  add_index "answers", ["user_id"], name: "index_answers_on_user_id", using: :btree
 
   create_table "authentications", force: :cascade do |t|
     t.integer  "user_id"
@@ -80,9 +76,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "normalized_name"
     t.datetime "created_at",      null: false
     t.datetime "updated_at",      null: false
+    t.index ["normalized_name"], name: "index_banned_tags_on_normalized_name", unique: true, using: :btree
   end
-
-  add_index "banned_tags", ["normalized_name"], name: "index_banned_tags_on_normalized_name", unique: true, using: :btree
 
   create_table "channels_referents", id: false, force: :cascade do |t|
     t.integer "channel_id"
@@ -94,9 +89,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.text     "requests",   default: "--- []\n"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["session_id"], name: "index_deferred_requests", unique: true, using: :btree
   end
-
-  add_index "deferred_requests", ["session_id"], name: "index_deferred_requests", unique: true, using: :btree
 
   create_table "delayed_jobs", force: :cascade do |t|
     t.integer  "priority",               default: 0
@@ -110,9 +104,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "queue",      limit: 255
     t.datetime "created_at",                         null: false
     t.datetime "updated_at",                         null: false
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
   end
-
-  add_index "delayed_jobs", ["priority", "run_at"], name: "delayed_jobs_priority", using: :btree
 
   create_table "editions", force: :cascade do |t|
     t.text     "opening"
@@ -158,9 +151,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "locale",      limit: 255
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["referent_id", "tag_id", "form", "locale"], name: "expression_unique", unique: true, using: :btree
   end
-
-  add_index "expressions", ["referent_id", "tag_id", "form", "locale"], name: "expression_unique", unique: true, using: :btree
 
   create_table "feed_entries", force: :cascade do |t|
     t.string   "title",        limit: 255
@@ -173,9 +165,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "feed_id"
     t.integer  "recipe_id"
     t.integer  "picture_id"
+    t.index ["feed_id", "guid"], name: "index_feed_entries_on_feed_id_and_guid", using: :btree
   end
-
-  add_index "feed_entries", ["feed_id", "guid"], name: "index_feed_entries_on_feed_id_and_guid", using: :btree
 
   create_table "feedbacks", force: :cascade do |t|
     t.integer  "user_id"
@@ -241,10 +232,9 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "filename"
     t.string   "link_text"
     t.integer  "dj_id"
+    t.index ["id"], name: "references_index_by_id", unique: true, using: :btree
+    t.index ["url"], name: "image_references_index_by_url", unique: true, using: :btree
   end
-
-  add_index "image_references", ["id"], name: "references_index_by_id", unique: true, using: :btree
-  add_index "image_references", ["url"], name: "image_references_index_by_url", unique: true, using: :btree
 
   create_table "letsencrypt_plugin_challenges", force: :cascade do |t|
     t.text     "response"
@@ -286,13 +276,12 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.datetime "opened_at"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["group_owner_id"], name: "index_notifications_on_group_owner_id", using: :btree
+    t.index ["group_type", "group_id"], name: "index_notifications_on_group_type_and_group_id", using: :btree
+    t.index ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable_type_and_notifiable_id", using: :btree
+    t.index ["notifier_type", "notifier_id"], name: "index_notifications_on_notifier_type_and_notifier_id", using: :btree
+    t.index ["target_type", "target_id"], name: "index_notifications_on_target_type_and_target_id", using: :btree
   end
-
-  add_index "notifications", ["group_owner_id"], name: "index_notifications_on_group_owner_id", using: :btree
-  add_index "notifications", ["group_type", "group_id"], name: "index_notifications_on_group_type_and_group_id", using: :btree
-  add_index "notifications", ["notifiable_type", "notifiable_id"], name: "index_notifications_on_notifiable_type_and_notifiable_id", using: :btree
-  add_index "notifications", ["notifier_type", "notifier_id"], name: "index_notifications_on_notifier_type_and_notifier_id", using: :btree
-  add_index "notifications", ["target_type", "target_id"], name: "index_notifications_on_target_type_and_target_id", using: :btree
 
   create_table "offerings", force: :cascade do |t|
     t.integer  "product_id"
@@ -327,9 +316,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "picture_id"
     t.text     "description"
     t.integer  "kind",                      default: 1
+    t.index ["url"], name: "page_refs_index_by_url", unique: true, using: :btree
   end
-
-  add_index "page_refs", ["url"], name: "page_refs_index_by_url", unique: true, using: :btree
 
   create_table "private_subscriptions", force: :cascade do |t|
     t.integer  "user_id"
@@ -392,10 +380,9 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "dj_id"
     t.integer  "status",                      default: 0
     t.text     "content"
+    t.index ["id"], name: "recipes_index_by_id", unique: true, using: :btree
+    t.index ["title"], name: "recipes_index_by_title", using: :btree
   end
-
-  add_index "recipes", ["id"], name: "recipes_index_by_id", unique: true, using: :btree
-  add_index "recipes", ["title"], name: "recipes_index_by_title", using: :btree
 
   create_table "referent_relations", force: :cascade do |t|
     t.integer  "parent_id"
@@ -422,18 +409,17 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.datetime "updated_at",               null: false
   end
 
-  create_table "results_caches", id: false, force: :cascade do |t|
+  create_table "results_caches", force: :cascade do |t|
     t.string   "session_id",                          null: false
     t.text     "params",         default: "--- {}\n"
     t.text     "cache"
     t.string   "type",                                null: false
     t.string   "result_typestr", default: "",         null: false
     t.text     "partition"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                          null: false
+    t.datetime "updated_at",                          null: false
+    t.index ["session_id", "type", "result_typestr"], name: "index_results_caches_on_session_id_and_type_and_result_typestr", unique: true, using: :btree
   end
-
-  add_index "results_caches", ["session_id", "type", "result_typestr"], name: "index_results_caches_on_session_id_and_type_and_result_typestr", unique: true, using: :btree
 
   create_table "rp_events", force: :cascade do |t|
     t.integer  "subject_id"
@@ -492,9 +478,8 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "root"
     t.integer  "dj_id"
     t.integer  "status",                           default: 0
+    t.index ["id"], name: "sites_index_by_id", unique: true, using: :btree
   end
-
-  add_index "sites", ["id"], name: "sites_index_by_id", unique: true, using: :btree
 
   create_table "subscriptions", force: :cascade do |t|
     t.integer  "target_id",                               null: false
@@ -509,11 +494,10 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.text     "optional_targets"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.index ["key"], name: "index_subscriptions_on_key", using: :btree
+    t.index ["target_type", "target_id", "key"], name: "index_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
+    t.index ["target_type", "target_id"], name: "index_subscriptions_on_target_type_and_target_id", using: :btree
   end
-
-  add_index "subscriptions", ["key"], name: "index_subscriptions_on_key", using: :btree
-  add_index "subscriptions", ["target_type", "target_id", "key"], name: "index_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
-  add_index "subscriptions", ["target_type", "target_id"], name: "index_subscriptions_on_target_type_and_target_id", using: :btree
 
   create_table "suggestions", force: :cascade do |t|
     t.string   "base_type"
@@ -543,11 +527,10 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "tag_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["tag_id"], name: "index_tag_selections_on_tag_id", using: :btree
+    t.index ["tagset_id"], name: "index_tag_selections_on_tagset_id", using: :btree
+    t.index ["user_id"], name: "index_tag_selections_on_user_id", using: :btree
   end
-
-  add_index "tag_selections", ["tag_id"], name: "index_tag_selections_on_tag_id", using: :btree
-  add_index "tag_selections", ["tagset_id"], name: "index_tag_selections_on_tagset_id", using: :btree
-  add_index "tag_selections", ["user_id"], name: "index_tag_selections_on_user_id", using: :btree
 
   create_table "taggings", force: :cascade do |t|
     t.integer  "user_id"
@@ -566,18 +549,16 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.string   "normalized_name", limit: 255
     t.boolean  "is_global"
     t.integer  "referent_id"
+    t.index ["id"], name: "tags_index_by_id", unique: true, using: :btree
+    t.index ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
+    t.index ["normalized_name"], name: "tag_normalized_name_index", using: :btree
   end
-
-  add_index "tags", ["id"], name: "tags_index_by_id", unique: true, using: :btree
-  add_index "tags", ["name", "tagtype"], name: "tag_name_type_unique", unique: true, using: :btree
-  add_index "tags", ["normalized_name"], name: "tag_normalized_name_index", using: :btree
 
   create_table "tags_caches", id: false, force: :cascade do |t|
     t.string "session_id"
     t.text   "tags",       default: "--- {}\n"
+    t.index ["session_id"], name: "index_tags_caches_on_session_id", using: :btree
   end
-
-  add_index "tags_caches", ["session_id"], name: "index_tags_caches_on_session_id", using: :btree
 
   create_table "tagsets", force: :cascade do |t|
     t.string   "title"
@@ -638,14 +619,13 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.integer  "last_edition",                       default: 0
     t.integer  "status",                             default: 0
     t.integer  "dj_id",                              default: 0
+    t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
+    t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
+    t.index ["invitation_token"], name: "index_users_on_invitation_token", using: :btree
+    t.index ["invited_by_id"], name: "index_users_on_invited_by_id", using: :btree
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
+    t.index ["unlock_token"], name: "index_users_on_unlock_token", unique: true, using: :btree
   end
-
-  add_index "users", ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
-  add_index "users", ["email"], name: "index_users_on_email", unique: true, using: :btree
-  add_index "users", ["invitation_token"], name: "index_users_on_invitation_token", using: :btree
-  add_index "users", ["invited_by_id"], name: "index_users_on_invited_by_id", using: :btree
-  add_index "users", ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true, using: :btree
-  add_index "users", ["unlock_token"], name: "index_users_on_unlock_token", unique: true, using: :btree
 
   create_table "visitors", force: :cascade do |t|
     t.string   "email",      limit: 255
@@ -654,16 +634,15 @@ ActiveRecord::Schema.define(version: 20181208200357) do
     t.datetime "updated_at"
   end
 
-  create_table "votes", id: false, force: :cascade do |t|
+  create_table "votes", force: :cascade do |t|
     t.integer  "user_id"
     t.string   "entity_type"
     t.integer  "entity_id"
     t.boolean  "up"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.index ["user_id", "entity_type", "entity_id"], name: "index_votes_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
   end
-
-  add_index "votes", ["user_id", "entity_type", "entity_id"], name: "index_votes_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
 
   add_foreign_key "answers", "users"
   add_foreign_key "tag_selections", "tags"
