@@ -60,10 +60,7 @@ module ItemHelper
       tail << "_#{item_mode}" if item_mode
       if item
         # Prefer the decorator b/c the item's model_name may be for a subclass of an STI model
-        item_class = (@decorator || item).model_name.to_s.pluralize
-        ctrl_class = (item_class+'Controller').constantize rescue nil
-        view = ctrl_class ? response_service.find_view(ctrl_class, '_'+tail) : "#{item_class.underscore}/_#{tail}"
-        view.sub('/_', '/')
+        response_service.find_view((@decorator || item).model_name, '_'+tail).sub('/_', '/')
       else
         tail
       end

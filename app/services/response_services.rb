@@ -151,14 +151,32 @@ class ResponseServices
   end
 
   # Return the appropriate template for the current controller and action, suitable for render :template
-  # OR, start with a controller class and filename, looking for that file in the class hierarchy
+  # OR, start with a model_name and filename, looking for that file in the corresponding controller's class hierarchy
   # NB The reason that this exists is to go through the standard search path
-  def find_view ctrl_class=nil, file=nil
-    ctrl_class ||= controller_instance.class
+  def find_view model_name=nil, file=nil
+    controller_name = model_name ? "#{model_name.name.pluralize}Controller" : controller_instance.class.to_s
+
+    # We keep a cache of controller/file combos to avoid all the rigmarole of lookup
+    @@Views ||= {}
+    if cached_view = @@Views[cache_index = controller_name+file]
+      return cached_view
+    end
+
+    # Rigmarole required!
+    ctrl_class =
+    if model_name
+      begin
+        controller_name.constantize
+      rescue
+        return "#{model_name.collection}/#{file}"
+      end
+    else
+      controller_instance.class
+    end
     file ||= action.to_s
     ctrl_class._prefixes.each { |path|
-      return "#{path}/#{file}" if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
-    }
+      return (@@Views[cache_index] = "#{path}/#{file}") if File.exists?(Rails.root.join("app", "views", path, "#{file}.html.erb"))
+    } if ctrl_class
     "#{controller_instance.class.ancestors[0].controller_path}/#{action}" # This will crash, but oh well...
   end
 

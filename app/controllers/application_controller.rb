@@ -478,6 +478,11 @@ class ApplicationController < ActionController::Base
     # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
 
+  # TODO XXX!!! This is a stub to eliminate the need for the authoreyes gem pending going to Ruby 2.3
+  def permitted_to? (privilege, object_or_sym = nil, options = {})
+    true
+  end
+
   protected
 
   include ControllerDeference

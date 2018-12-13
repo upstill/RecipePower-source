@@ -1,6 +1,6 @@
 class TagsController < ApplicationController
   before_action :set_tag, only: [:show, :edit, :associate, :update, :destroy]
-  filter_access_to :all
+  # TODO XXX restore for authoreyes gem: filter_access_to :all
 
   # GET /tags
   # GET /tags.xml
