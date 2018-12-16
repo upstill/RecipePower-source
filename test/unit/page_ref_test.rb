@@ -5,7 +5,9 @@ class PageRefTest < ActiveSupport::TestCase
   # Called before every test method runs. Can be used
   # to set up fixture information.
   def setup
-    # Do nothing
+    prgood = page_refs(:goodpr)
+    prgood.aliases = [ prgood.url.sub('http:', 'https:') ]
+    prgood.save
   end
 
   # Called after every test method runs. Can be used to tear
@@ -22,6 +24,30 @@ class PageRefTest < ActiveSupport::TestCase
     fail('Not implemented')
   end
 =end
+  test 'arel for aliases' do
+    # Find on url
+    url_node = PageRef.arel_table[:url]
+    aliases_node = PageRef.arel_table[:aliases]
+    url = page_refs(:goodpr).url
+    urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
+    url_query = url_node.in urlpair # eq(urlpair.first).or url_node.eq(urlpair.last)
+    assert_not_nil PageRef.where(url_query).first
+
+    sqlit = Arel::Nodes::SqlLiteral.new("'{#{urlpair.join ', '}}'")
+    aliases_query = Arel::Nodes::InfixOperation.new'&&', aliases_node, sqlit
+    assert PageRef.where(aliases_query).first
+    assert PageRef.where(url_query.or aliases_query).first
+
+    q = PageRef.url_query urlpair.first
+    assert PageRef.find_by(q)
+
+    q = PageRef.url_query urlpair.last
+    assert PageRef.find_by(q)
+
+    q = PageRef.url_query page_refs(:goodpr).aliases.first
+    assert PageRef.find_by(q)
+
+  end
 
   test "try substitute" do
     url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'

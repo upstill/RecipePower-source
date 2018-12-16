@@ -32,3 +32,6 @@ describe ExpressionsController do
       form = Expression.create! valid_attributes
       get :index
       assigns(:expressions).should eq([expression])
+    end
+  end
+end

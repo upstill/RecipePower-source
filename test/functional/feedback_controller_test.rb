@@ -10,18 +10,17 @@ class FeedbackControllerTest < ActionController::TestCase
   def setup
     sign_in User.first
     @controller = FeedbackController.new
-    @controller.request = @request = ActionController::TestRequest.new
-    @response   = ActionController::TestResponse.new
+    @controller.request = @request = ActionController::TestRequest.create
+    # @response   = ActionController::TestResponse.new
   end
 
   def test_should_have_minimal_feedback_form
     warden
     @request.env["devise.mapping"] = Devise.mappings[:user]
     get :new
-    assert_select "form#feedback_form", true do
-      assert_select "[action=?]", "/feedbacks"
-      assert_select "[method=?]", /post/i
+    assert_select "form#new_feedback", true do
       assert_select "textarea[name=?]", "feedback[comment]"
+      assert_select "[method=?]", 'post'
     end
   end
 

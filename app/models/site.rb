@@ -11,6 +11,10 @@ class Site < ApplicationRecord
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
 
+  def self.mass_assignable_attributes
+    super + %i[ description ]
+  end
+
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
   def dependent_page_refs
@@ -250,7 +254,8 @@ public
 
   def self.find_for link
     # Find a site, if any, based on the longest subpath of the URL
-    if (matches = applies_to_url(link)).present? # Of all sites whose root matches a subpath of the url...
+    matches = applies_to_url link
+    if matches.present? # Of all sites whose root matches a subpath of the url...
       # ...return the one with the longest root
       matches.inject(matches.first) { |result, site|
         site.root.length > result.root.length ? site : result

@@ -13,7 +13,7 @@ class PageRef < ApplicationRecord
   picable :picurl, :picture
 
   def self.mass_assignable_attributes
-    super + %i[ kind title lead_image_url ]
+    super + %i[ kind title lead_image_url description ]
   end
 
   validates_each :url do |pr, attr, value| # "'#{pr.url}' (PageRef ##{pr.id}) is not a valid URL"
@@ -266,14 +266,13 @@ class PageRef < ApplicationRecord
 
   # Use arel to generate a query (suitable for #where or #find_by) to match the url
   def self.url_query url
+    url_node = self.arel_table[:url]
+    aliases_node = self.arel_table[:aliases]
     url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
     urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
-    url_node = self.arel_table[:url]
-    url_query = url_node.eq(urlpair.first).or url_node.eq(urlpair.last)
-
-    aliases_node = self.arel_table[:aliases]
-    aliases_query = aliases_node.overlap urlpair # [url]
-
+    url_query = url_node.in urlpair # eq(urlpair.first).or url_node.eq(urlpair.last)
+    sqlit = Arel::Nodes::SqlLiteral.new("'{#{urlpair.join ', '}}'")
+    aliases_query = Arel::Nodes::InfixOperation.new'&&', aliases_node, sqlit
     url_query.or aliases_query
   end
 
@@ -286,11 +285,8 @@ class PageRef < ApplicationRecord
 
   # Lookup a PageRef. We undergo two queries, on the theory that
   #  a direct lookup is faster if the search url is likely to be found in the url attribute
-  def self.find_by_url url, single_query=true
-    url = indexing_url(url)
-    single_query ?
-        self.find_by(url_query url) :
-        (self.find_by(url: url) || self.find_by(self.arel_table[:aliases].overlap [url]))
+  def self.find_by_url url
+    self.find_by url_query(indexing_url url)
   end
 
   # String, PageRef => PageRef; nil => nil

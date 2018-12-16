@@ -47,7 +47,7 @@ module Templateer
       # templateData.subs.picdata ||= templateData.subs.picurl || "/assets/NoPictureOnFile.png"  # Default
 
       if @object
-        toget = needed || (@object.class.accessible_attributes + [:id])
+        toget = needed || (@object.class.mass_assignable_attributes + [:id])
         toget.each { |key|
           key = key.to_sym
           @data[key] = @object.send(key) if @object.respond_to? key
