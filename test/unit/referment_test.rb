@@ -11,8 +11,9 @@ class RefermentTest < ActiveSupport::TestCase
       rfc = ImageReference.create
       assert (rfc.class==ImageReference), "Couldn't get reference"
       rft.image_references << rfc
-      assert_equal 1, rft.image_references.count, "Reference not associated with Referent"
-      assert_equal 1, rfc.referents.count, "Referent not associated with Reference"
+      rfmt = rfc.referments.first
+      assert_equal rft, rfmt.referent, "Referent not associated with Reference"
+      assert_equal rfc, rfmt.referee, "Reference not associated with Referent"
     end
   
     test "Reference takes Referent" do
@@ -20,9 +21,10 @@ class RefermentTest < ActiveSupport::TestCase
       assert (rft.class==IngredientReferent), "Couldn't get referent"
       rfc = ImageReference.create
       assert (rfc.class==ImageReference), "Couldn't get reference"
-      rfc.referents << rft
-      assert_equal 1, rft.image_references.count, "Reference not associated with Referent"
-      assert_equal 1, rfc.referents.count, "Referent not associated with Reference"
+      rft.image_references << rfc
+      rfmt = rft.referments.first
+      assert_equal rft, rfmt.referent, "Referent not associated with Reference"
+      assert_equal rfc, rfmt.referee, "Reference not associated with Referent"
     end
     
     test "Adding Recipe to Referent" do

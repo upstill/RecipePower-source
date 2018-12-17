@@ -50,7 +50,7 @@ module RP
     # Enable the asset pipeline (on by default)
     # config.assets.enabled = true
 
-    config.active_record.raise_in_transactional_callbacks = true
+    # config.active_record.raise_in_transactional_callbacks = true
 
     # Issue CSRF credentials for every form
     config.action_controller.per_form_csrf_tokens = true

@@ -235,9 +235,9 @@ class Www_theguardian_com_Scraper < Scraper
   # Also, the image for the first recipe precedes the header.
   def guard_rcppage
     def flush_content content, pic
-      if content.first
+      if (hdr = content.first) && (hdr.name == 'h2')
         xml_doc_text = "<root>#{content.map(&:to_xml).join}</root>"
-        recipe = registrar.register_recipe Hash(url: page, title: content.first.text.sub(/ \(pictured above\)/, '')),
+        recipe = registrar.register_recipe Hash(url: page, title: hdr.text.sub(/ \(pictured above\)/, '')),
                                            {
                                                :Image => pic,
                                                :Content => xml_doc_text
@@ -259,8 +259,7 @@ class Www_theguardian_com_Scraper < Scraper
     body.children.each do |body_child|
       case body_child.name
       when 'h2'
-        if content.present?
-          flush_content content, pending_pic
+        if flush_content content, pending_pic
           pending_pic = nil
         end
         # Start saving this section

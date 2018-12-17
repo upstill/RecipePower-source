@@ -12,6 +12,7 @@ thing3:
     email: foo3@bar.com
 
 super:
+    id: 5
     username: super
     email: fooper@bar.com
 

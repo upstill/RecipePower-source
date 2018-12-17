@@ -17,9 +17,9 @@ class SiteMergeTest < ActiveSupport::TestCase
     assert site1.page_ref
     assert site1.referent
 
-    site2 = sites(:umami2)
+    site2 = sites(:nyt)
     site2.home = site2.sample
-    site2.name = "Umami Blog"
+    site2.name = "NYT Blog"
     site2.description = "Some words about Site2"
     site2.logo = "data:kwljerkjk"
     site2.save

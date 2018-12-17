@@ -211,7 +211,12 @@ class PageRefTest < ActiveSupport::TestCase
     uri = "http://www.foodandwine.com/chefs/adam-erace"
 
     ref = PageRef.fetch uri
-    ref.assert_referent Referent.express(jal)
+    rft = Referent.express jal
+    assert jal.meaning_ids.include?(rft.id)
+    assert_equal jal.meanings.first, rft
+    assert_equal jal.meaning, rft.becomes(Referent)
+
+    ref.assert_referent rft
     # ref = PageRefServices.assert_for_referent uri, Referent.express(jal)
 
     ref.kind = :about
@@ -221,9 +226,6 @@ class PageRefTest < ActiveSupport::TestCase
     rft = ref.referents.first # jal.primary_meaning
     assert rft, "Referent wasn't added properly"
     assert_equal rft.page_refs.about.first, ref
-    assert jal.referent_ids.include? rft.id
-    assert_equal jal.referents.first, rft
-    assert_equal jal.meaning, rft.becomes(Referent)
   end
 
   test "Assert Redundant Reference Properly" do

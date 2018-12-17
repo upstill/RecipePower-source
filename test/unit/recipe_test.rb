@@ -10,7 +10,7 @@ class RecipeTest < ActiveSupport::TestCase
     assert recipe.site
     recipe.site.decorate
     assert recipe.good?
-    assert_not_equal 'placeholder', recipe.title
+    assert_equal 'placeholder', recipe.title  # Immune to gleaning
     recipe.title = 'replacement'
     assert_equal 'replacement', recipe.title
     recipe.bkg_land true

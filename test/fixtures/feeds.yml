@@ -1,8 +1,11 @@
 feed1:
     title: feed1
+    url: http://some.feed.so
 
 feed2:
     title: feed2
+    url: http://some2.feed.so
 
 feed3:
     title: feed3
+    url: http://some3.feed.so

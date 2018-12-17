@@ -379,10 +379,11 @@ class Tag < ApplicationRecord
 
   # Expose this tag to the given user; if tag is a free tag or the user is super, make the tag global
   def admit_user uid = nil
-    if (tagtype != 0)  || (uid == User.super_id)
+    return if is_global
+    if (tagtype != 0) || uid.nil? || (uid == User.super_id)
       self.is_global = true
-    elsif uid && !owners.exists?(uid) && (user = User.find_by id: uid)
-      self.owners << user
+    elsif !owner_ids.include?(uid) && (user = User.find_by id: uid)
+      self.owners << user unless owners.include?(user)
     end
   end
 

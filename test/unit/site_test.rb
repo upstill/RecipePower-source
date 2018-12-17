@@ -92,9 +92,9 @@ class SiteTest < ActiveSupport::TestCase
     rpr.kind = 'recipe'
     rpr.save
     assert_equal site, rpr.site
-    assert_equal [dpr.id, rpr.id, site.page_ref_id].sort, site.page_ref_ids.sort
+    assert_equal [dpr.id, rpr.id, site.page_ref_id].compact.sort, site.page_ref_ids.sort
     site.save
-    assert_equal [dpr.id, rpr.id, site.page_ref_id].sort, site.page_ref_ids.sort
+    assert_equal [dpr.id, rpr.id, site.page_ref_id].compact.sort, site.page_ref_ids.sort
   end
 
   test "with_subroot_of" do

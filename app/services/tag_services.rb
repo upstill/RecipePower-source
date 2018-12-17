@@ -13,7 +13,7 @@ class TagServices
   end
 
   def referents exclude_self=false
-    exclude_self ? tag.meanings.where.not(id: tag.meaning_id) : tag.meanings
+    exclude_self ? tag.meanings.where.not(id: tag.referent_id) : tag.meanings
   end
 
 # -----------------------------------------------

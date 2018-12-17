@@ -1,15 +1,13 @@
 nyt:
     sample: http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss
+    root: dinersjournal.blogs.nytimes.com
     # site: http://dinersjournal.blogs.nytimes.com
 
-alca1:
+alca:
     sample: http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29
-
-alca2:
-    sample: http://www.alcademics.com/2012/04/the-golden-gate-75-cocktail-.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29
+    root: www.alcademics.com
 
 umami1:
     sample: http://umamimart.com/2012/05/forest-feast-asparagus-tart/
+    root: umamimart.com
 
-umami2:
-    sample: http://blog.umamimart.com/tester

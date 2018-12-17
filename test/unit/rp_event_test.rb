@@ -23,7 +23,7 @@ class EventTest < ActiveSupport::TestCase
   test "event is typeable" do
     u = users :thing1
     evt = LoginEvent.post u
-    LoginEvent.accessible_attributes.to_a.include? 'status'
+    LoginEvent.mass_assignable_attributes.to_a.include? 'status'
     assert_equal 'LoginEvent', evt.type
     assert_equal u, evt.who
     assert LoginEvent.find_by(who: u)

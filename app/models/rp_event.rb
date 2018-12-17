@@ -13,6 +13,10 @@ class RpEvent < ApplicationRecord
 
   belongs_to :user
 
+  def self.mass_assignable_attributes
+    super + [ :on_mobile, :serve_count, :subject_type, :subject_id, :direct_object_type, :indirect_object_type, :direct_object_id, :indirect_object_id, :data]
+  end
+
   # attr_accessible :on_mobile, :serve_count, :subject_type, :subject_id, :direct_object_type, :indirect_object_type, :direct_object_id, :indirect_object_id, :data
 
   # Return a hash of aggregate_user_table for the user

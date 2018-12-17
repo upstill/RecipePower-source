@@ -19,8 +19,8 @@ class TagTest < ActiveSupport::TestCase
     t2.absorb t1, false
     assert t1.reload
     assert_equal t1.tagtype, t2.tagtype
-    assert t2.referent_ids.present?
-    assert_equal t1.referent_ids, t2.referent_ids
+    assert t2.meaning_ids.present?
+    assert_equal t1.meaning_ids, t2.meaning_ids
   end
 
   test 'free tag gets absorbed when synonymized with clashing tag' do
@@ -51,15 +51,15 @@ class TagTest < ActiveSupport::TestCase
   test 'ancestor_path_to' do
     pie_tag = tags(:pie)
     pie_ref = pie_tag.meaning
-    assert_equal pie_ref, pie_tag.referents.first
+    assert_equal pie_ref, pie_tag.meanings.first
 
     cake_tag = tags(:cake)
     cake_ref = cake_tag.meaning
-    assert_equal cake_ref, cake_tag.referents.first
+    assert_equal cake_ref, cake_tag.meanings.first
 
     dessert_tag = tags(:dessert)
     dessert_ref = dessert_tag.meaning
-    assert_equal dessert_ref, dessert_tag.referents.first
+    assert_equal dessert_ref, dessert_tag.meanings.first
 
     refute ReferentServices.new(dessert_ref).ancestor_path_to(pie_ref)
 
@@ -77,7 +77,7 @@ class TagTest < ActiveSupport::TestCase
   test 'successfully adds a child' do
     pie_tag = tags(:pie)
     pie_ref = pie_tag.meaning
-    assert_equal pie_ref, pie_tag.referents.first
+    assert_equal pie_ref, pie_tag.meanings.first
     cake_tag = tags(:cake)
     cake_ref = cake_tag.meaning
     dessert_tag = tags(:dessert)
@@ -100,7 +100,7 @@ class TagTest < ActiveSupport::TestCase
   test 'adds a synonym as child' do
     dessert_tag = tags(:dessert)
     dessert_ref = dessert_tag.meaning
-    assert_equal dessert_ref, dessert_tag.referents.first
+    assert_equal dessert_ref, dessert_tag.meanings.first
 
     desserts_tag = tags(:desserts)
     desserts_ref = desserts_tag.meaning

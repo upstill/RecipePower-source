@@ -33,19 +33,19 @@ class ExpressionTest < ActiveSupport::TestCase
 
   test "Expression Fixtures created correctly" do
     dessert = tags(:dessert)
-    assert_equal 1, dessert.referents.count, "Dessert should only have one referent"
-    assert_equal dessert.primary_meaning, dessert.referents.first, "Dessert should have only its referent's primary meaning"
+    assert_equal 1, dessert.meanings.count, "Dessert should only have one referent"
+    assert_equal dessert.primary_meaning, dessert.meanings.first, "Dessert should have only its referent's primary meaning"
     assert_equal dessert, dessert.primary_meaning.canonical_expression, "Dessert should be the primary meaning of its referent"
 
     pie = tags(:pie)
-    assert_equal 1, pie.referents.count, "Pie should only have one referent"
-    assert_equal pie.primary_meaning, pie.referents.first, "Pie should have only its referent's primary meaning"
+    assert_equal 1, pie.meanings.count, "Pie should only have one referent"
+    assert_equal pie.primary_meaning, pie.meanings.first, "Pie should have only its referent's primary meaning"
     assert_equal pie, pie.primary_meaning.canonical_expression, "Pie should be the primary meaning of its referent"
 
     cake = tags(:cake)
     gateau = tags(:gateau)
-    assert_equal 1, cake.referents.count, "Cake should only have one referent"
-    assert_equal cake.primary_meaning, cake.referents.first, "Cake should have only its referent's primary meaning"
+    assert_equal 1, cake.meanings.count, "Cake should only have one referent"
+    assert_equal cake.primary_meaning, cake.meanings.first, "Cake should have only its referent's primary meaning"
     assert_equal cake, gateau.meaning.expression, "Gateau should be the primary expression of cake"
 
   end
@@ -100,7 +100,7 @@ class ExpressionTest < ActiveSupport::TestCase
   test "Build a new tag with referent" do
     dessert = Tag.new name: "Mexican", tagtype: 1
     ref = Referent.express dessert # TagServices.new(dessert).assert_referent
-    assert dessert.referents.include?(ref)
+    assert dessert.meanings.include?(ref)
     assert ref.tags.include?(dessert)
     assert_equal ref.expression, dessert
     assert_equal dessert.meaning, ref.becomes(Referent)
@@ -109,7 +109,7 @@ class ExpressionTest < ActiveSupport::TestCase
     assert_equal 1, ref.tags.size
     dessert.reload
     assert_equal 1, dessert.expressions.size
-    assert_equal 1, dessert.referents.size
+    assert_equal 1, dessert.meanings.size
   end
 
   test "Tag added to unsaved referent without saving" do
