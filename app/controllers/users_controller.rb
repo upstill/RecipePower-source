@@ -4,8 +4,8 @@ require 'filtered_presenter.rb'
 class UsersController < CollectibleController
   
   rescue_from ActiveRecord::RecordNotFound, :with => :not_found
-  before_filter :login_required, :except => [:touch, :unsubscribe, :create, :new, :show, :index, :identify, :profile, :sign_up, :collection ]
-  before_filter :authenticate_user!, :except => [:touch, :unsubscribe, :new, :show, :index, :identify, :profile, :collection]
+  before_action :login_required, :except => [:touch, :unsubscribe, :create, :new, :show, :index, :identify, :profile, :sign_up, :collection ]
+  before_action :authenticate_user!, :except => [:touch, :unsubscribe, :new, :show, :index, :identify, :profile, :collection]
 
   # Take a tokenInput query string and match the input against the given user's set of friends
   def match_friends

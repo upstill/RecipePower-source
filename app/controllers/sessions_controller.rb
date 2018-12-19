@@ -1,9 +1,9 @@
 class SessionsController < Devise::SessionsController
   include Rails.application.routes.url_helpers
 
-  before_filter :allow_iframe, only: :new
-  before_filter :require_no_authentication, only: :create
-  after_filter :restore_tokens, only: :destroy
+  before_action :allow_iframe, only: :new
+  before_action :require_no_authentication, only: :create
+  after_action :restore_tokens, only: :destroy
 
   # Somehow require_no_authentication redirects to after_sign_in_path_for when the user is already logged in
   def require_no_authentication

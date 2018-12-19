@@ -11,12 +11,12 @@ class ApplicationController < ActionController::Base
   include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
-  before_filter :check_flash
-  before_filter :report_cookie_string
-  before_filter { report_session 'Before controller' }
-  # after_filter :log_serve
-  after_filter { report_session 'After controller'  }
-  before_filter :setup_response_service
+  before_action :check_flash
+  before_action :report_cookie_string
+  before_action { report_session 'Before controller' }
+  # after_action :log_serve
+  after_action { report_session 'After controller'  }
+  before_action :setup_response_service
 
   helper :all
   helper_method :current_user_or_guest
@@ -395,7 +395,7 @@ class ApplicationController < ActionController::Base
     redirect_to view_context.page_with_trigger(page, assert_query(dialog, options))
   end
 
-  # before_filter on controller that needs login to do anything
+  # before_action on controller that needs login to do anything
   def  login_required options={}
     unless logged_in?
       summary = action_summary params[:controller], params[:action]
@@ -479,9 +479,9 @@ class ApplicationController < ActionController::Base
   end
 
   # TODO XXX!!! This is a stub to eliminate the need for the authoreyes gem pending going to Ruby 2.3
-  def permitted_to? (privilege, object_or_sym = nil, options = {})
-    true
-  end
+  # def permitted_to? (privilege, object_or_sym = nil, options = {})
+  #   true
+  # end
 
   protected
 

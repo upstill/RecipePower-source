@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
-ruby '2.2.2'
-## gem 'bundler', '~> 1.4'
+ruby '2.3.6'
+gem 'bundler', '~> 1.16'
 gem 'rails', '5.0.0'
 gem 'rdoc'
 
@@ -29,7 +29,7 @@ gem 'arel', '~> 7.0' # https://github.com/rails/arel
 ####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
 gem 'pg', '0.20' # TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
-# gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
+# gem 'postgres_ext' # No good for Rails 5 https://github.com/jagregory/postgres_ext
 ## gem 'pg_search' # For full-text search https://robots.thoughtbot.com/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
 #### Full-text search with Elasticsearch: https://github.com/elastic/elasticsearch-rails
 # See also https://18f.gsa.gov/2016/04/08/how-we-get-high-availability-with-elasticsearch-and-ruby-on-rails/
@@ -50,7 +50,7 @@ gem 'thin'
 gem 'activity_notification', '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.2' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.3' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
 gem 'jquery-ui-rails', '~> 3.0'
 gem 'coffee-rails', "~> 4.2"
@@ -60,7 +60,7 @@ gem 'sass-rails', " ~> 5.0"
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
-gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
+# gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
 gem 'masonry-rails'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'sassc', '~> 1.12' # Version 2.0 requires Ruby 2.3
@@ -73,7 +73,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-openid'
-# gem 'authoreyes'
+gem 'authoreyes'
 # gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs

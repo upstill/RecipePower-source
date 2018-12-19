@@ -2,8 +2,8 @@
 class PageRefsController < CollectibleController
   require 'page_ref.rb'
   before_action :set_page_ref, only: [:show, :edit, :update, :destroy]
-  before_filter :allow_iframe, only: :tag
-  before_filter :login_required, :except => [:create, :touch, :index, :show, :associated, :capture, :collect, :card ]
+  before_action :allow_iframe, only: :tag
+  before_action :login_required, :except => [:create, :touch, :index, :show, :associated, :capture, :collect, :card ]
 
   # GET /page_refs
   def index

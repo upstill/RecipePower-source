@@ -1,7 +1,7 @@
 require './lib/uri_utils.rb'
 
 class RegistrationsController < Devise::RegistrationsController
-    before_filter :authenticate_user!, :except => [:show, :index]
+    before_action :authenticate_user!, :except => [:show, :index]
     respond_to :html, :json
     
     def edit

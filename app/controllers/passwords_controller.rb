@@ -1,6 +1,6 @@
 class PasswordsController < Devise::PasswordsController
-  before_filter :allow_iframe, only: :new
-  # before_filter { @_area = params[:_area] || "" }
+  before_action :allow_iframe, only: :new
+  # before_action { @_area = params[:_area] || "" }
 
   def validate_token original_token
     reset_password_token = Devise.token_generator.digest(User, :reset_password_token, original_token)
