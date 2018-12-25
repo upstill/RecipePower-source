@@ -12,6 +12,8 @@ class PageRef < ApplicationRecord
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
+  has_many :aliases, :dependent => :destroy
+
   def self.mass_assignable_attributes
     super + %i[ kind title lead_image_url description ]
   end
@@ -150,6 +152,24 @@ class PageRef < ApplicationRecord
     errors.add(:url, 'is inaccessible to Mercury') if needs_mercury?
   end
 
+  # Will this page_ref be found when looking for a page_ref of the given url?
+  # (unlike #alias_for, it checks the url for a match before hitting the aliases)
+  def answers_to? qurl
+    (Alias.reduced_url(qurl) == Alias.reduced_url(url)) || alias_for(qurl)
+  end
+
+  # Find the alias associated with the given url, optionally building one
+  def alias_for url, force=false
+    aliases.to_a.find { |al| al.url == Alias.reduced_url(url) } || (force && self.aliases.build(url: url))
+  end
+
+  def elide_alias url
+    if al = alias_for(url)
+      aliases.delete al
+    end
+    url
+  end
+
   # Consult Mercury on a url and report the results in the model
   # status: :good iff Mercury could get through to the resource, :bad otherwise
   # http_status: 200 if Mercury could get through to the resource OR the HTTP code (from the header) for a direct fetch
@@ -185,24 +205,25 @@ class PageRef < ApplicationRecord
               if hr.is_a?(Fixnum)
                 if (hr == 404) && redirected_from
                   # Got a redirect via Mercury, but the target failed
-                  @data['url'] = self.aliases.delete(redirected_from)
+                  @data['url'] = elide_alias redirected_from
                   hr = 303
                 end
                 break;
               end
               hr = safe_uri_join(@data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
-              break if aliases.include?(hr) # Time to give up when the url has been tried (it already appears among the aliases)
+              break if alias_for hr # Time to give up when the url has been tried (it already appears among the aliases)
               puts "Redirecting from #{@data['url']} to #{hr}"
               begin
-                self.aliases |= [redirected_from = @data['url']] # Stash the redirection source in the aliases
+                alias_for((redirected_from = @data['url']), true) # Stash the redirection source in the aliases
+                # self.aliases |= [redirected_from = @data['url']]
                 @data = try_mercury hr
                 if (self.error_message = @data['mercury_error']).blank? # Success on redirect
                   hr = 200
                   break;
                 end
               rescue Exception => e
-                # Bad URL => Restore the last alias
-                @data['url'] = self.aliases.delete(redirected_from) if redirected_from
+                # Bad URL => Remove the last alias
+                @data['url'] = elide_alias(redirected_from) if redirected_from
                 hr = 400
               end
             end
@@ -211,7 +232,7 @@ class PageRef < ApplicationRecord
       # Does the extracted url change to a collision with an existing PageRef of the same type?
       new_url = @data['url']
       if (new_url != url) &&
-          !aliases.include?(new_url) &&
+          !alias_for(new_url) &&
           (expr = self.class.find_by_url(new_url)) &&
           (expr.id != self.id)
         self.extant_pr = expr
@@ -223,7 +244,7 @@ class PageRef < ApplicationRecord
       @data['content'] ||= ''
       @data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
       self.extraneity = @data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.aliases |= [url] if @data['url'] != url # Record the existing url in the aliases if not already there
+      self.alias_for(url, true) # if @data['url'] != url # Record the existing url in the aliases if not already there
       self.assign_attributes @data.slice(*(@@mercury_attributes.map(&:to_s)))
     rescue Exception => e
       self.error_message = "Bad URL '#{url}': #{e}"
@@ -264,18 +285,6 @@ class PageRef < ApplicationRecord
     self.arel_table
   end
 
-  # Use arel to generate a query (suitable for #where or #find_by) to match the url
-  def self.url_query url
-    url_node = self.arel_table[:url]
-    aliases_node = self.arel_table[:aliases]
-    url = url.sub /\#[^#]*$/, '' # Elide the target for purposes of finding
-    urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
-    url_query = url_node.in urlpair # eq(urlpair.first).or url_node.eq(urlpair.last)
-    sqlit = Arel::Nodes::SqlLiteral.new("'{#{urlpair.join ', '}}'")
-    aliases_query = Arel::Nodes::InfixOperation.new'&&', aliases_node, sqlit
-    url_query.or aliases_query
-  end
-
   # Use arel to generate a query (suitable for #where or #find_by) to match the url path
   def self.url_path_query urlpath
     urls = [ "http://#{urlpath}%", "https://#{urlpath}%" ]
@@ -283,10 +292,9 @@ class PageRef < ApplicationRecord
     url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
   end
 
-  # Lookup a PageRef. We undergo two queries, on the theory that
-  #  a direct lookup is faster if the search url is likely to be found in the url attribute
+  # Lookup a PageRef by resort to the Alias table
   def self.find_by_url url
-    self.find_by url_query(indexing_url url)
+    self.joins(:aliases).find_by Alias.url_query(url)
   end
 
   # String, PageRef => PageRef; nil => nil
@@ -301,22 +309,26 @@ class PageRef < ApplicationRecord
 
   # Make a new PageRef (poss. of some subclass), carefully avoiding any extant URL
   def self.build_by_url url
-    mp = self.new url: indexing_url(url)
+    mp = self.new url: url
     mp.sync
     # The sync process follows redirects, accumulating aliases along the way.
     # It may turn up a URL used by another object, in which case we return that instead
     if !mp.errors.any? || mp.extant_pr
       if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
         # Found => fold the extracted page data into the existing page
-        extant.aliases |= mp.aliases - [extant.url]
+        mp.aliases.each { |al|
+          extant.aliases << al unless extant.aliases.exists?(url: al.url)
+        }
         mp = extant
       end
     end
     # Ensure that we can always get back to this record via the indexing url
-    if (mp.url != (iu = indexing_url mp.url)) && !mp.aliases.include?(iu)
-      mp.aliases << iu
-    end
+    mp.alias_for mp.url, true
     mp
+  end
+
+  def url= url
+    super targetless_url(url)
   end
 
   # Provide a relation for entities that match a string
@@ -325,11 +337,6 @@ class PageRef < ApplicationRecord
     [
         (block_given? ? yield() : self).where(ar)
     ]
-  end
-
-  # Will this page_ref be found when looking for a page_ref of the given type and url?
-  def answers_to? qurl, kind=nil
-    (!kind || (self.kind == kind)) && (url.sub(/^https/,'http') == qurl.sub(/^https/,'http') || aliases.include?(qurl))
   end
 
   # Associate this page_ref with the given referent.

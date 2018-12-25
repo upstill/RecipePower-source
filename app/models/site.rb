@@ -200,9 +200,11 @@ public
     save
   end
 
+  # Find a site that has a root which is a substring of the given root
   def self.with_subroot_of(root)
     dirs = root.sub(/\/$/,'').split('/')
     base = dirs.shift # Get the host
+    # TODO: make this a single query and choose the result with the longest root
     found = Site.where('root LIKE ?', base + '%').inject(nil) { |result, site|
       if (site.root.length < root.length) && (!result || (site.root.length > result.root.length))
         site
@@ -233,8 +235,8 @@ public
       # All page refs will still be valid if the new root is a substring of the current one
       # ...but the shorter version may still attract others
       unless Site.with_subroot_of(root) # A site that <could> take all pagerefs as needed
-        orphans = dependent_page_refs.where.not(PageRef.url_path_query new_root).pluck :url
-        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id)  }.empty?
+        orphans = dependent_page_refs.joins(:aliases).where.not(Alias.url_path_query new_root).pluck :url
+        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id) }.empty?
           # The new root is neither a substring nor a superstring of the existing root.
           # Since we've already established that there's no Site to catch the existing entities, we fail
           errors.add(:root, "would abandon #{orphans.count} out of #{dependent_page_refs.count} existing entities")
