@@ -84,12 +84,13 @@ class Site < ApplicationRecord
           pr.save
         end
       }
-      # Steal any references from a site that has a shorter path
+      # A given domain may have several sites, even if ones where one is a substring of another.
+      # The site for a page_ref should be the one with the longest root.
+      # Therefore, at this point we may steal any references from a site that has a shorter path
       if shorter_site = Site.with_subroot_of(root)
-        shorter_site.page_refs.where(PageRef.url_path_query root).each { |pr|
+        PageRef.where(site: shorter_site).joins(:aliases).where(Alias.url_path_query root).each { |pr|
           # Reassign all PageRefs of the parent which apply here
-          pr.site = self
-          pr.save
+          pr.update_attribute :site_id, id
         }
       end
     end
@@ -202,17 +203,8 @@ public
 
   # Find a site that has a root which is a substring of the given root
   def self.with_subroot_of(root)
-    dirs = root.sub(/\/$/,'').split('/')
-    base = dirs.shift # Get the host
-    # TODO: make this a single query and choose the result with the longest root
-    found = Site.where('root LIKE ?', base + '%').inject(nil) { |result, site|
-      if (site.root.length < root.length) && (!result || (site.root.length > result.root.length))
-        site
-      else
-        result
-      end
-    }
-    found
+    paths = root.split('/')[0..-2].inject([]) { |int, p| int << (int.empty? ? p : "#{int[-1]}/#{p}") }
+    Site.where(root: paths).to_a.max_by { |s| s.root.length }
   end
 
   # do qa when reassigning root

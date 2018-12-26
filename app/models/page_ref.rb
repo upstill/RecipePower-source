@@ -285,13 +285,6 @@ class PageRef < ApplicationRecord
     self.arel_table
   end
 
-  # Use arel to generate a query (suitable for #where or #find_by) to match the url path
-  def self.url_path_query urlpath
-    urls = [ "http://#{urlpath}%", "https://#{urlpath}%" ]
-    url_node = self.arel_table[:url]
-    url_query = url_node.matches("http://#{urlpath}%").or url_node.matches("https://#{urlpath}%")
-  end
-
   # Lookup a PageRef by resort to the Alias table
   def self.find_by_url url
     self.joins(:aliases).find_by Alias.url_query(url)

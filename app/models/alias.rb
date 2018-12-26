@@ -17,12 +17,15 @@ class Alias < ApplicationRecord
     return self.arel_table[:url].eq self.reduced_url(url)
   end
 
-  # Use arel to generate a query (suitable for #where or #find_by) to match the url path
+  # Use arel to generate a query (suitable for #where or #find_by) to match a subpath of the url
+  # Input: the domain+path part of a URL, optionally including the prefatory 'http://'
+  # We supply the protocal as necessary for the benefit of #reduced_url
   # Since the path has neither protocol nor target, we only need to include the '%' wildcard at the end
   def self.url_path_query urlpath
-    self.arel_table[:url].matches urlpath.sub(/\/?$/, '%')
+    urlpath = 'http://'+urlpath unless urlpath.match(/^http/)
+    self.arel_table[:url].matches self.reduced_url(urlpath)+'%'
   end
-
+  
   # We only allow urls in their reduced form for indexing purposes
   def url= url
     super self.class.reduced_url(url)
