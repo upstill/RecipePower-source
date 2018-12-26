@@ -60,7 +60,7 @@ gem 'sass-rails', " ~> 5.0"
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
-gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
+# gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
 gem 'masonry-rails'
 gem 'jquery-fileupload-rails', '0.4.7'
 gem 'sassc', '~> 1.12' # Version 2.0 requires Ruby 2.3
