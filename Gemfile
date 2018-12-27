@@ -50,7 +50,7 @@ gem 'thin'
 gem 'activity_notification', '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.2' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
 gem 'jquery-ui-rails', '~> 3.0'
 gem 'coffee-rails', "~> 4.2"
