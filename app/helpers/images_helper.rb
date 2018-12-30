@@ -44,8 +44,13 @@ module ImagesHelper
 
     options[:alt] ||= 'Image Not Accessible'
     options[:onError] ||= 'onImageError(this);'
-    image_tag (url.if_present || fallback_img || ''), options
-    # end
+    src = url.if_present || fallback_img || ''
+    # Have to handle img-tag generation explicitly b/c #image_tag freaks out if handed a data URL
+    if src =~ /^(?:cid|data):/
+      tag 'img', options.merge(src: src)
+    else
+      image_tag src, options
+    end
   end
 
   # Define a div or other content tag for enclosing an image.
