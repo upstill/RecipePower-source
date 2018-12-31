@@ -3,8 +3,8 @@ require 'string_utils.rb'
 require 'uri_utils.rb'
 
 class InvitationsController < Devise::InvitationsController
-  # skip_before_filter :verify_authenticity_token
-  prepend_before_filter :login_required, :except => [ :edit, :update ] # No invitations unless logged in!
+  # skip_before_action :verify_authenticity_token
+  prepend_before_action :login_required, :except => [ :edit, :update ] # No invitations unless logged in!
 
   def after_invite_path_for(resource)
     default_next_path

@@ -1,7 +1,7 @@
 class RecipesController < CollectibleController
 
-  before_filter :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect ]
-  before_filter { @focus_selector = '#recipe_url' }
+  before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect ]
+  before_action { @focus_selector = '#recipe_url' }
     
   # TODO XXX restore for authoreyes gem: filter_access_to :all
   # include ApplicationHelper

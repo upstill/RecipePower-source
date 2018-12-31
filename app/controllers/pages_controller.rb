@@ -30,7 +30,7 @@ class PagesController < ApplicationController
     @auth_context = :manage
     @home_page = true
     if current_user
-      redirect_to collection_user_path(current_user, params.slice(:trigger))
+      redirect_to collection_user_path(current_user) # , params.slice(:trigger))
     else
       cache version: '1' do
         render

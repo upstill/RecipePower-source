@@ -58,6 +58,8 @@ stream_fire = (elmt) ->
 			dataType: "json"
 			contentType: "application/json",
 			url: querypath,
+			complete: (jqXHR, statusText) ->
+				RP.submit.dequeue() # Check for queued-up requests
 			error: (jqXHR, statusText, errorThrown) ->
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
 				RP.submit.handleResponse parent, responseData, statusText, errorThrown

@@ -6,7 +6,7 @@ class PageRefTest < ActiveSupport::TestCase
   # to set up fixture information.
   def setup
     prgood = page_refs(:goodpr)
-    prgood.aliases = [ prgood.url.sub('http:', 'https:') ]
+    prgood.aliases.build url: prgood.url.sub('http:', 'https:')
     prgood.save
   end
 
@@ -26,27 +26,29 @@ class PageRefTest < ActiveSupport::TestCase
 =end
   test 'arel for aliases' do
     # Find on url
-    url_node = PageRef.arel_table[:url]
-    aliases_node = PageRef.arel_table[:aliases]
-    url = page_refs(:goodpr).url
-    urlpair = [ url.sub(/^http:/, 'https:'), url.sub(/^https:/, 'http:') ]
-    url_query = url_node.in urlpair # eq(urlpair.first).or url_node.eq(urlpair.last)
-    assert_not_nil PageRef.where(url_query).first
 
-    sqlit = Arel::Nodes::SqlLiteral.new("'{#{urlpair.join ', '}}'")
-    aliases_query = Arel::Nodes::InfixOperation.new'&&', aliases_node, sqlit
-    assert PageRef.where(aliases_query).first
-    assert PageRef.where(url_query.or aliases_query).first
+    urlpair = [ 'http://www.recipepower.com/rcp2', 'https://www.recipepower.com/rcp2' ]
 
-    q = PageRef.url_query urlpair.first
-    assert PageRef.find_by(q)
+    q = Alias.url_query urlpair.first
+    assert PageRef.joins(:aliases).find_by(q)
 
-    q = PageRef.url_query urlpair.last
-    assert PageRef.find_by(q)
+    q = Alias.url_query urlpair.last
+    assert PageRef.joins(:aliases).find_by(q)
 
-    q = PageRef.url_query page_refs(:goodpr).aliases.first
-    assert PageRef.find_by(q)
+    # q = Alias.url_query page_refs(:goodpr).aliases.first.url
+    # assert PageRef.joins(:aliases).find_by(q)
 
+  end
+
+  test 'early elision of alias' do
+    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
+    url2 = 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa'
+    mp = PageRef.fetch url
+    al = mp.alias_for url2, true
+    assert_equal mp.aliases.last, al
+    mp.elide_alias url2
+    assert_not_equal mp.aliases.last, al
+    refute mp.alias_for( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
   end
 
   test "try substitute" do
@@ -55,7 +57,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal 200, mp.http_status
     new_mp = PageRefServices.new(mp).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
     assert_equal mp, new_mp
-    assert new_mp.aliases.include?(url)
+    assert new_mp.alias_for(url)
     assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
   end
 
@@ -66,7 +68,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert mp.bad?
     new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
     assert_equal mp, new_mp
-    assert new_mp.aliases.include?(url)
+    assert new_mp.alias_for(url)
     assert_equal 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/', new_mp.url
   end
 
@@ -83,7 +85,7 @@ class PageRefTest < ActiveSupport::TestCase
 
     new_mp = PageRefServices.new(mpbad).try_substitute 'oaktownspiceshop.com/blogs/recipe', 'oaktownspiceshop.com/blogs/recipes'
     assert_equal mpgood, new_mp
-    assert new_mp.aliases.include?(url)
+    assert new_mp.alias_for(url)
     assert_nil PageRef.find_by(id: badid)
     assert_equal 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata', new_mp.url
   end
@@ -93,7 +95,6 @@ class PageRefTest < ActiveSupport::TestCase
     mp = PageRef.fetch url
     assert_not_nil mp
     assert !mp.errors.any?
-    assert_equal Array, mp.aliases.class
     assert_equal ActiveSupport::HashWithIndifferentAccess, mp.extraneity.class
     assert_equal url, mp.url
   end
@@ -103,7 +104,7 @@ class PageRefTest < ActiveSupport::TestCase
     mp0.save
     mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
-    assert mp.aliases.empty?
+    assert (mp.aliases.present? && mp.aliases.first == mp.aliases.last), 'Should have only one alias'
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
   end
 
@@ -112,7 +113,7 @@ class PageRefTest < ActiveSupport::TestCase
     # URL extracted from page
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     # Original URL (minus target) is alias for "official" URL
-    assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet', mp.aliases.first
+    assert_equal 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet', mp.aliases.first.url
     # Original URL found both with and without target
     assert_equal mp.id, PageRef.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target').id
     assert_equal mp.id, PageRef.fetch('https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet').id
@@ -124,10 +125,11 @@ class PageRefTest < ActiveSupport::TestCase
     mp.sync
     mp.content = ''
     mp.save
+    assert_equal mp.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'
     mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
     mp2.kind = :recipe
     mp2.save
-    assert_equal 1, PageRef.recipe.count
+    assert_equal mp2, mp
     assert_equal '', mp.content
   end
 
@@ -196,7 +198,7 @@ class PageRefTest < ActiveSupport::TestCase
     url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
     pr = PageRef.fetch url
     assert_equal 200, pr.http_status
-    assert pr.aliases.include? "https://www.tastecooking.com"
+    assert pr.alias_for("https://www.tastecooking.com")
   end
 
   test "funky direct" do

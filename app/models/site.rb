@@ -84,12 +84,13 @@ class Site < ApplicationRecord
           pr.save
         end
       }
-      # Steal any references from a site that has a shorter path
+      # A given domain may have several sites, even if ones where one is a substring of another.
+      # The site for a page_ref should be the one with the longest root.
+      # Therefore, at this point we may steal any references from a site that has a shorter path
       if shorter_site = Site.with_subroot_of(root)
-        shorter_site.page_refs.where(PageRef.url_path_query root).each { |pr|
+        PageRef.where(site: shorter_site).joins(:aliases).where(Alias.url_path_query root).each { |pr|
           # Reassign all PageRefs of the parent which apply here
-          pr.site = self
-          pr.save
+          pr.update_attribute :site_id, id
         }
       end
     end
@@ -200,17 +201,10 @@ public
     save
   end
 
+  # Find a site that has a root which is a substring of the given root
   def self.with_subroot_of(root)
-    dirs = root.sub(/\/$/,'').split('/')
-    base = dirs.shift # Get the host
-    found = Site.where('root LIKE ?', base + '%').inject(nil) { |result, site|
-      if (site.root.length < root.length) && (!result || (site.root.length > result.root.length))
-        site
-      else
-        result
-      end
-    }
-    found
+    paths = root.split('/')[0..-2].inject([]) { |int, p| int << (int.empty? ? p : "#{int[-1]}/#{p}") }
+    Site.where(root: paths).to_a.max_by { |s| s.root.length }
   end
 
   # do qa when reassigning root
@@ -233,8 +227,8 @@ public
       # All page refs will still be valid if the new root is a substring of the current one
       # ...but the shorter version may still attract others
       unless Site.with_subroot_of(root) # A site that <could> take all pagerefs as needed
-        orphans = dependent_page_refs.where.not(PageRef.url_path_query new_root).pluck :url
-        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id)  }.empty?
+        orphans = dependent_page_refs.joins(:aliases).where.not(Alias.url_path_query new_root).pluck :url
+        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id) }.empty?
           # The new root is neither a substring nor a superstring of the existing root.
           # Since we've already established that there's no Site to catch the existing entities, we fail
           errors.add(:root, "would abandon #{orphans.count} out of #{dependent_page_refs.count} existing entities")

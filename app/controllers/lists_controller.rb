@@ -1,5 +1,5 @@
 class ListsController < CollectibleController
-  before_filter :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card, :contents ]
+  before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card, :contents ]
 
   def index
     @active_menu = :other_lists

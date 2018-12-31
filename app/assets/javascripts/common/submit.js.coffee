@@ -16,8 +16,8 @@ jQuery ->
 	$(document).on "ajax:beforeSend", 'form.ujs-submit', RP.submit.beforeSend
 	$(document).on "ajax:success", 'form.ujs-submit', RP.submit.success
 	$(document).on "ajax:error", 'form.ujs-submit', RP.submit.error
-	$(document).bind "ajaxComplete", (event) ->
-		RP.submit.dequeue() # Check for queued-up requests
+	#	$(document).bind "ajaxComplete", (event) ->
+	#		RP.submit.dequeue() # Check for queued-up requests
 	# -- handle JSON responses properly,
 	# -- short-circuit redundant forms requests
 	# -- provide for keep-alive, popup and confirmation interaction
@@ -107,6 +107,8 @@ RP.submit.submit_and_process = ( request, elmt, ajaxData ) ->
 			dataType: "json",
 			# contentType: "application/json",
 			url: request,
+			complete: (jqXHR, statusText) ->
+				RP.submit.dequeue() # Check for queued-up requests
 			error: (jqXHR, statusText, errorThrown) ->
 				# TODO Not actually posting an error for the user
 				responseData = RP.post_error(jqXHR) # Try to recover useable data from the error
@@ -213,6 +215,8 @@ RP.submit.filter_submit = (eventdata) ->
 			async: false,
 			dataType: 'json',
 			data: $(context).serializeArray(),
+			complete: (jqXHR, statusText) ->
+				RP.submit.dequeue() # Check for queued-up requests
 			error: (jqXHR, textStatus, errorThrown) ->
 				RP.notifications.done()
 				jsonout = RP.post_error jqXHR, dlog # Show the error message in the dialog

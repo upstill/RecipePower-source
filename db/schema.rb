@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181212194453) do
+ActiveRecord::Schema.define(version: 20181219232420) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -53,6 +53,14 @@ ActiveRecord::Schema.define(version: 20181212194453) do
     t.index ["key"], name: "index_activ_subscriptions_on_key", using: :btree
     t.index ["target_type", "target_id", "key"], name: "index_activ_subscriptions_on_target_type_and_target_id_and_key", unique: true, using: :btree
     t.index ["target_type", "target_id"], name: "index_activ_subscriptions_on_target_type_and_target_id", using: :btree
+  end
+
+  create_table "aliases", force: :cascade do |t|
+    t.integer  "page_ref_id"
+    t.text     "url",         null: false
+    t.datetime "created_at",  null: false
+    t.datetime "updated_at",  null: false
+    t.index ["url"], name: "aliases_index_by_url", unique: true, using: :btree
   end
 
   create_table "answers", force: :cascade do |t|
@@ -310,7 +318,6 @@ ActiveRecord::Schema.define(version: 20181212194453) do
     t.integer  "dj_id"
     t.datetime "created_at",                                    null: false
     t.datetime "updated_at",                                    null: false
-    t.text     "aliases",                   default: [],                     array: true
     t.integer  "http_status"
     t.integer  "gleaning_id"
     t.integer  "picture_id"

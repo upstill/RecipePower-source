@@ -9,7 +9,8 @@ RP::Application.configure do
 
   # Configure static asset server for tests with Cache-Control for performance
   config.public_file_server.enabled = true
-  config.static_cache_control = "public, max-age=3600"
+  # Defunct: config.static_cache_control = "public, max-age=3600"
+  config.public_file_server.headers = { 'Cache-Control' => 'public, max-age=3600' }
 
   # Log error messages when you accidentally call methods on nil
   # Removed for Rails 4: config.whiny_nils = true

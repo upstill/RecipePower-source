@@ -1,7 +1,7 @@
 require 'uri'
 
 class AuthenticationsController < ApplicationController
-  before_filter :allow_iframe, only: :new
+  before_action :allow_iframe, only: :new
 
   def index
     @authentications = current_user.authentications if current_user

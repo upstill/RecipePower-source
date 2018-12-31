@@ -50,19 +50,20 @@ module Pagerefable
         # The class gets two finder methods, for finding by exact url, and matching a root path (host+path)
         # Locate an entity by its url. This could be the canonical url or any alias
         define_singleton_method :find_by_url do |url|
-          self.joins(:page_ref).find_by(PageRef.url_query url)
+          self.joins(:page_ref => :aliases).find_by Alias.url_query(url)
+          # self.joins(:page_ref).find_by(PageRef.url_query url)
         end
 
         # Include other parameters in the query for a record
         define_singleton_method :find_by_url_and do |params|
           url = params[:url]
           scope = params.count > 1 ? self.where(params.except :url) : self
-          scope.joins(:page_ref).find_by(PageRef.url_query url)
+          scope.joins(:page_ref => :aliases).find_by(Alias.url_query url)
         end
 
-        # Find entitites whose url matches the given path (which includes the host)
+        # Find entities whose url matches the given path (which includes the host)
         define_singleton_method :query_on_path do |urpath|
-          self.joins(:page_ref).where(PageRef.url_path_query urpath)
+          self.joins(:page_ref => :aliases).where(Alias.url_path_query urpath)
         end
 
       end
