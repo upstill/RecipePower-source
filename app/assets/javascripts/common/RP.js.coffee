@@ -31,7 +31,7 @@ jQuery ->
 	$('div.navbar').on "resize", (event) ->
 		$('body')[0].style.paddingTop = ($('div.navbar')[0].offsetHeight+7).toString()+"px"
 
-	RP.loadElmt $('body') # RP.fire_triggers()
+	RP.loadElmt $('body')
 
 # Respond to the preview-recipe button by opening a popup loaded with its URL.
 #   If the popup gets blocked, return true so that the recipe is opened in a new
@@ -136,19 +136,18 @@ RP.findEnclosingByClass = (classname, elmt) ->
 
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = (context) ->
-	if context && $(context).hasClass 'trigger'
-		$(context).each (ix, elmt) ->
-			if elmt.tagName == "A"
-				$(elmt).trigger "click"
-			else if elmt.tagName == "DIV" && $(elmt).hasClass 'dialog'
-				$(elmt).removeClass "trigger"
-				RP.dialog.run elmt
 	context ||= window.document
-	# Links with class 'trigger' get fired
-	$('a.trigger', context).trigger "click"
-	# Dialogs with class 'trigger' get autorun
-	$('div.dialog.trigger', context).removeClass("trigger").each (ix, dlog) ->
-		RP.dialog.run dlog
+	$('a.trigger', context).each (ix, elmt) ->
+		# Links with class 'trigger' get fired, either by submitting or by clicking
+		if $(elmt).hasClass 'submit'
+			# Let the submit module handle submit links
+			RP.submit.fire elmt
+		else
+			$(elmt).trigger "click"
+	$('div.trigger.dialog', context).each (ix, elmt) ->
+		# Dialogs with class 'trigger' get autorun
+		$(elmt).removeClass "trigger"
+		RP.dialog.run elmt
 
 # For the FAQ page: click on a question to show the associated answer
 RP.showhide = (event) ->
