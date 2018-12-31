@@ -471,17 +471,6 @@ class RecipeServices
           recipe_urls.each { |url|
             PageRef::RecipePageRef.find_by_url url
           }
-        when 9
-          label = "RecipePageRef by url (two queries)"
-          index_name = "page_refs_index_by_url_and_type"
-          index_table = :page_refs
-          aliases_node = PageRef.arel_table[:aliases]
-          recipe_urls.each { |url|
-            url = indexing_url url
-            sqlit = Arel::Nodes::SqlLiteral.new "'{#{url}}'"
-            aliases_query = Arel::Nodes::InfixOperation.new'&&', aliases_node, sqlit
-            PageRef::RecipePageRef.find_by(url: url) || PageRef::RecipePageRef.find_by(aliases_query)
-          }
         else
           return false
       end

@@ -1,0 +1,9 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  page_ref_id: 1
+  url: htp://www.recipepower.com/alias_one
+
+two:
+  page_ref_id: 1
+  url: htp://www.recipepower.com/alias_two

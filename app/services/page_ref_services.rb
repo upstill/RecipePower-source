@@ -96,7 +96,7 @@ class PageRefServices
     # An important question is: which url (and associated status attributes) gets used in the product?
     # The default is to keep the absorber's attributes unless the other is shown to be good. The 'force'
     # parameter allows this issue to be forced.
-    aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
+    # aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
     if force || ((page_ref.http_status != 200) && (other.http_status == 200))
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
       puts "...taking #{hard_attribs} from other"
@@ -111,39 +111,11 @@ class PageRefServices
         end
       }
     end
-    page_ref.aliases = aliases - [page_ref.url]
+    # page_ref.aliases = aliases - [page_ref.url]
+    other.aliases.each { |al| page_ref.aliases << al unless page_ref.aliases.exists? url: al.url }
 
     other.destroy if other.id # May not have been saved
     page_ref.save
-  end
-
-  # Convert any relative paths in PageRef urls by resort to aliases
-  def self.join_urls what
-    (what.to_s+'PageRef').constantize.where(domain: nil).collect { |pr|
-      report = "Joining URLS for #{pr.class} ##{pr.id} '#{pr.url}'"
-      if pr.url.present?
-        uri = (URI(pr.url) rescue nil)
-        # report << PageRefServices.new(pr).join_url
-        if !(uri && uri.scheme.present? && uri.host.present?)
-          report << "Rationalizing bad url '#{pr.url}' (PageRef ##{pr.id}) using '#{pr.aliases.first}'"
-          pr.url = safe_uri_join(pr.aliases.shift, uri || pr.url)
-          report << "\n\t...to #{pr.url}"
-          pr.bkg_land true
-        elsif pr.domain.blank?
-          pr.domain = uri.host
-          pr.save
-        end
-      elsif what == 'Definition'
-        if rfm = Referment.find_by(referee_type: 'PageRef', referee_id: pr.id)
-          report << "\n...Couldn't destroy b/c attached to Referment #{rfm.id}"
-        else
-          pr.destroy
-          report << "\n...destroyed URL for #{pr.class} ##{pr.id} '#{pr.url}'"
-        end
-      else
-        report << "\n...Couldn't destroy b/c not a Definition"
-      end
-    }
   end
 
   # So a PageRef exists; ensure that it has valid status and http_status
@@ -156,8 +128,6 @@ class PageRefServices
         uri.scheme = 'http'
         page_ref.http_status = nil unless page_ref.title.present?
         page_ref.url = uri.to_s
-      elsif page_ref.aliases.present?
-        page_ref.url = page_ref.aliases.pop
       else
         break
       end
@@ -205,32 +175,30 @@ class PageRefServices
 
   # Try to make a URL good by applying a pattern (string or regexp)
   def try_substitute old_ptn, subst
-    ([page_ref.url] + page_ref.aliases).each { |old_url|
-      if old_url.match(old_ptn)
-        new_url = old_url.sub old_ptn, subst
-        puts "Trying to substitute #{new_url} for #{old_url} on PageRef ##{page_ref.id}"
-        klass = page_ref.class
-        new_page_ref = klass.fetch new_url
-        puts "...got PageRef ##{new_page_ref.id || '<nil>'} '#{new_page_ref.url}' http_status #{new_page_ref.http_status}"
-        unless new_page_ref.errors.any?
-          if new_page_ref.id # Existed prior =>
-            # Make the old page_ref represent the new URL
-            PageRefServices.new(new_page_ref).absorb page_ref
-            return new_page_ref
-          elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
-            puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-            epr = PageRefServices.new extant
-            epr.absorb page_ref
-            epr.absorb new_page_ref
-            return extant
-          else
-            absorb new_page_ref, true
-            puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-            return page_ref
-          end
+    if page_ref.url.match old_ptn
+      new_url = page_ref.url.sub old_ptn, subst
+      puts "Trying to substitute #{new_url} for #{page_ref.url} on PageRef ##{page_ref.id}"
+      klass = page_ref.class
+      new_page_ref = klass.fetch new_url
+      puts "...got PageRef ##{new_page_ref.id || '<nil>'} '#{new_page_ref.url}' http_status #{new_page_ref.http_status}"
+      unless new_page_ref.errors.any?
+        if new_page_ref.id # Existed prior =>
+          # Make the old page_ref represent the new URL
+          PageRefServices.new(new_page_ref).absorb page_ref
+          return new_page_ref
+        elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
+          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
+          epr = PageRefServices.new extant
+          epr.absorb page_ref
+          epr.absorb new_page_ref
+          return extant
+        else
+          absorb new_page_ref, true
+          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
+          return page_ref
         end
       end
-    }
+    end
     nil
   end
 end

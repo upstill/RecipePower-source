@@ -41,7 +41,7 @@ class RecipeTest < ActiveSupport::TestCase
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
     # assert recipe.page_ref.good?
-    assert recipe.page_ref.aliases.include?(url) || recipe.url == url
+    assert recipe.page_ref.alias_for(url) || recipe.url == url
   end
 
   test "url assigned with unsuccessful redirect" do
