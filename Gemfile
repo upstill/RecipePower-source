@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-ruby '2.2.2'
+ruby '2.3.6'
 ## gem 'bundler', '~> 1.4'
 gem 'rails', '5.0.0'
 gem 'rdoc'
@@ -73,7 +73,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-openid'
-# gem 'authoreyes'
+gem 'authoreyes'
 # gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs

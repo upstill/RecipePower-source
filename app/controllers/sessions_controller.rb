@@ -1,6 +1,7 @@
 class SessionsController < Devise::SessionsController
   include Rails.application.routes.url_helpers
-
+  protect_from_forgery with: :null_session
+  
   before_action :allow_iframe, only: :new
   before_action :require_no_authentication, only: :create
   after_action :restore_tokens, only: :destroy

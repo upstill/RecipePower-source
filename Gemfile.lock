@@ -82,6 +82,8 @@ GEM
       rake
     ansi (1.5.0)
     arel (7.1.4)
+    authoreyes (0.2.4)
+      rails (~> 5.0)
     autoprefixer-rails (9.4.3)
       execjs
     awesome_nested_set (3.1.4)
@@ -475,6 +477,7 @@ DEPENDENCIES
   activity_notification (= 1.4.4)!
   annotate (= 2.5.0)
   arel (~> 7.0)
+  authoreyes
   autoprefixer-rails
   awesome_nested_set
   aws-sdk (~> 1)
@@ -556,7 +559,7 @@ DEPENDENCIES
   youtube_addy
 
 RUBY VERSION
-   ruby 2.2.2p95
+   ruby 2.3.6p384
 
 BUNDLED WITH
    1.17.2

@@ -40,9 +40,11 @@ class UserDecoratorTest < Draper::TestCase
     user = users(:thing1)
     tt = UserDecorator.new user
     assert_equal user.id, tt.id
-    assert_equal user.remember_me, tt.remember_me
+    assert_nil user.remember_me
+    assert_nil tt.remember_me
     data = tt.data
     assert_equal user.id, data[:id]
-    assert_equal user.remember_me, data[:remember_me]
+    assert_nil user.remember_me
+    assert_nil data[:remember_me]
   end
 end

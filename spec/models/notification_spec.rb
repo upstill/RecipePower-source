@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'spec_helper.rb'
 
 describe Notification do
   pending "add some examples to (or delete) #{__FILE__}"
