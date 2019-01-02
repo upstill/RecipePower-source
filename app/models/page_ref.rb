@@ -42,7 +42,7 @@ class PageRef < ApplicationRecord
                   # :error_message, :http_status, :errcode,
                   # :recipes, :sites # Entities that uniquely refer to this pageref
 
-  unless method_defined? :"kind="
+  unless method_defined? :"link?"
     enum kind: [ :link, :recipe, :site, :referrable, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event]
   end
 
