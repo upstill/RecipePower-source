@@ -21,6 +21,12 @@ GIT
       actionmailer (>= 4.0, < 6)
       activesupport (>= 4.0, < 6)
 
+GIT
+  remote: http://github.com/stffn/declarative_authorization.git
+  revision: 45e91af20eba71b2828c5c84066bcce3ef032e8a
+  specs:
+    declarative_authorization (1.0.0.pre)
+
 PATH
   remote: vendor/gems/activity_notification-1.4.4
   specs:
@@ -82,8 +88,6 @@ GEM
       rake
     ansi (1.5.0)
     arel (7.1.4)
-    authoreyes (0.2.4)
-      rails (~> 5.0)
     autoprefixer-rails (9.4.2)
       execjs
     awesome_nested_set (3.1.4)
@@ -477,7 +481,6 @@ DEPENDENCIES
   activity_notification (= 1.4.4)!
   annotate (= 2.5.0)
   arel (~> 7.0)
-  authoreyes
   autoprefixer-rails
   awesome_nested_set
   aws-sdk (~> 1)
@@ -497,6 +500,7 @@ DEPENDENCIES
   counter_culture (~> 0.1.23)
   daemons
   dalli
+  declarative_authorization!
   delayed_job!
   delayed_job_active_record!
   derailed
@@ -563,4 +567,4 @@ RUBY VERSION
    ruby 2.3.6p384
 
 BUNDLED WITH
-   1.16.6
+   1.17.2

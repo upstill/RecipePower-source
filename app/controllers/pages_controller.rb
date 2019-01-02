@@ -1,5 +1,5 @@
 class PagesController < ApplicationController
-  # filter_access_to :all
+  filter_access_to :all
   respond_to :html, :json
 
   # Present dialog for collecting a cookmark in a super-simple layout

@@ -73,8 +73,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-openid'
-gem 'authoreyes'
-# gem 'declarative_authorization', '~> 0.5.7'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
+gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs
 gem "rmagick", "~> 2.16.0"

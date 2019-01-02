@@ -11,6 +11,11 @@ class ApplicationController < ActionController::Base
   include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
+  def self.filter_access_to *args
+    # We have to declare a bogus before_filter so filter_access_to can remove it without error
+    before_filter :filter_access_filter
+    super *args
+  end
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
