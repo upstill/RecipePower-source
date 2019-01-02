@@ -21,10 +21,10 @@ class CollectibleServices
   # Either way, we also make sure that the recipe is associated with the given user
   def self.find_or_create params_or_page_ref, extractions = nil, klass=Recipe
     extractions, klass = nil, extractions if extractions.is_a?(Class)
-    if params_or_page_ref.is_a?(Hash)
-      params, page_ref = params_or_page_ref, nil
-    else
+    if params_or_page_ref.is_a?(PageRef)
       params, page_ref = { url: params_or_page_ref.url }, params_or_page_ref
+    else
+      params, page_ref = params_or_page_ref, nil
     end
     # Recipe (or whatever) exists and we're just touching it for the user
     return klass.find(params[:id]) if params[:id]

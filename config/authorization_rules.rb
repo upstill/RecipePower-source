@@ -20,6 +20,7 @@ authorization do
     has_permission_on [:lists], :to => [:index, :show, :subscribe, :edit, :update]
     has_permission_on [ :notifications_with_devise ], :to => [ :index ]
     has_permission_on [:sessions], :to => [ :destroy ]
+    has_permission_on [:page_refs], :to => [ :new, :create ]
 
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do
