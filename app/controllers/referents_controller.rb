@@ -1,6 +1,6 @@
 class ReferentsController < CollectibleController
   before_action :set_referent, only: [:show, :edit, :update, :destroy]
-  # TODO XXX restore for authoreyes gem: filter_access_to :all
+  filter_access_to :all
   # Here's where we defer to different handlers for different types of referent
   @@HandlersByIndex = [Referent, GenreReferent, DishReferent,
                        ProcessReferent, IngredientReferent, UnitReferent,

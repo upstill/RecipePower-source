@@ -1,6 +1,5 @@
 authorization do
   role :guest do
-    has_permission_on [:redirect], :to => :all
     has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ, :root]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :touch]
@@ -8,19 +7,20 @@ authorization do
     has_permission_on [:lists, :feeds, :feed_entries, :sites, :users, :page_refs, :referents], :to => [:touch]
     has_permission_on [:tags], :to => [ :read, :match, :query ]
     has_permission_on [:users], :to => [ :unsubscribe, :collection ] # ...following pre-authorized links
-    has_permission_on [:sessions], :to => [ :create ]
+    has_permission_on [:sessions], :to => [ :create, :new ]
   end
 
   role :user do
     includes :guest
-    has_permission_on [:recipes, :lists, :feeds, :feed_entries, :sites, :users, :page_refs, :referents], :to => [:update, :lists, :tag, :editpic, :glean]
+    has_permission_on [:recipes, :lists, :feeds, :feed_entries, :sites, :users, :page_refs, :referents], :to => [:touch, :update, :lists, :tag, :editpic, :glean]
     has_permission_on [:users], :to => [:edit, :update, :notifications ] # BUT ONLY FOR ONESELF
     has_permission_on [:recipes], :to => [:subscribe, :update, :delete]
     has_permission_on [:tags], :to => [:read]
     has_permission_on [:feeds, :referents], :to => [:index, :show, :subscribe]
     has_permission_on [:lists], :to => [:index, :show, :subscribe, :edit, :update]
-    has_permission_on [:sessions], :to => [:destroy] # BUT ONLY FOR ONESELF
     has_permission_on [ :notifications_with_devise ], :to => [ :index ]
+    has_permission_on [:sessions], :to => [ :destroy ]
+    has_permission_on [:page_refs], :to => [ :new, :create ]
 
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :create
     #has_permission_on [:accounts, :categories, :matches, :transactions], :to => :manage do

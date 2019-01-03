@@ -75,7 +75,7 @@ module Backgroundable
       rescue
         return
       end
-      unless method_defined?(:"#{status_attribute}=") || method_defined?(:'virgin?')
+      unless method_defined? :"virgin?"
         enum status_attribute => [
                  :virgin, # Hasn't been executed or queued
                  :obs_pending, # Queued but not executed (Obsolete with dj attribute)
