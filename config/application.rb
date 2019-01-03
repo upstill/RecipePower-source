@@ -2,6 +2,12 @@ require File.expand_path('../boot', __FILE__)
 
 require 'rails/all'
 
+class ActionController::Base
+  # Declare the defunct #hide_action class method for the benefit of DeclarativeAuthorization
+  def self.hide_action *args
+  end
+end
+
 # puts (["Loading Bundler in #{__FILE__}. Backtrace:"] + caller).join("\n  >> ")
 Bundler.require(:default, Rails.env)
 # puts "Finished loading Bundler in #{__FILE__}."

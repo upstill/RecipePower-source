@@ -99,7 +99,7 @@ class User < ApplicationRecord
     has_many ('touched_'+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
   end
 
-  # The User class defines collectible-entity association methods here. The Collectible class is cocnsulted, and if it has
+  # The User class defines collectible-entity association methods here. The Collectible class is consulted, and if it has
   # a :user_pointers method (part of the Collectible module), then the methods get defined, otherwise we punt
   # NB All the requisite methods will have been defined IF the collectible's class has been defined (thank you, Collectible)
   # We're really only here to deal with the case where the User class (or a user model) has been accessed before the

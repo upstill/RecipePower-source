@@ -27,4 +27,8 @@ class Product < ApplicationRecord
     super
   end
 
+  def respond_to?(method, include_private = false)
+    super || gtin.respond_to?(method)
+  end
+
 end
