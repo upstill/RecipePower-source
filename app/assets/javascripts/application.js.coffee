@@ -17,10 +17,14 @@
 #= require JavaScript-Canvas-to-Blob/canvas-to-blob.min.js
 
 # NB: This ordering is significant for some reason
-#= require jquery_addons/fileupload/jquery.iframe-transport.js
-#= require jquery_addons/fileupload/jquery.fileupload.js
-#= require jquery_addons/fileupload/jquery.fileupload-process.js
-#= require jquery_addons/fileupload/jquery.fileupload-image.js
+#= require jquery-fileupload/jquery.iframe-transport.js
+#= require jquery-fileupload/jquery.fileupload.js
+#= require jquery-fileupload/jquery.fileupload-process.js
+#= require jquery-fileupload/jquery.fileupload-image.js
+# require jquery_addons/fileupload/jquery.iframe-transport.js
+# require jquery_addons/fileupload/jquery.fileupload.js
+# require jquery_addons/fileupload/jquery.fileupload-process.js
+# require jquery_addons/fileupload/jquery.fileupload-image.js
 
 #= require imagesloaded.pkgd.min
 #= require bootstrap-filestyle
