@@ -1,6 +1,6 @@
-class Reference < ApplicationRecord[4.2]
+class Reference < ApplicationRecord
 end
-class RenameReferenceToImageReference < ActiveRecord::Migration
+class RenameReferenceToImageReference < ActiveRecord::Migration[4.2]
   def up
     drop_table :image_references if ActiveRecord::Base.connection.table_exists?("image_references")
     remove_index(:references, name: "references_index_by_url_and_type") if index_name_exists?(:references, "references_index_by_url_and_type", false)
