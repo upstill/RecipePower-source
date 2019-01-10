@@ -48,17 +48,17 @@ class AuthenticationsController < ApplicationController
     # render text: omniauth.to_yaml
     authparams = omniauth.slice('provider', 'uid')
     # Our query parameters appear in env['omniauth.params']
-    if origin_url = env['omniauth.origin']  # Remove any enclosing quotes
+    if origin_url = request.env['omniauth.origin']  # Remove any enclosing quotes
       origin_url.sub! /^"?([^"]*)"?/, '\\1'
     end
     # Originator is where we came from, so we can go back there if login fails
-    if originator = env['omniauth.params']['originator']  # Remove any enclosing quotes
+    if originator = request.env['omniauth.params']['originator']  # Remove any enclosing quotes
       originator.sub! /^"?([^"]*)"?/, '\\1'
     end
     # Check for existing authorization
     @authentication = Authentication.find_by_provider_and_uid(omniauth['provider'], omniauth['uid'])
     (info = omniauth['info']) && (email = info['email']) && (user = User.find_by_email(email))
-    intention = env['omniauth.params']['intention'] # If intention is 'signup', don't accept existing authentications
+    intention = request.env['omniauth.params']['intention'] # If intention is 'signup', don't accept existing authentications
     if intention == "signup"
       if @authentication || user # This authentication method already in use
         flash[:notice] = "That #{omniauth.provider.capitalize} login is already in use on RecipePower.<br>Perhaps you just need to sign in?"

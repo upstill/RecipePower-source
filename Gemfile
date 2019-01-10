@@ -10,8 +10,8 @@ gem 'rdoc'
 ## gem 'protected_attributes' # https://github.com/rails/protected_attributes
 # Counter caches
 gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
-# TODO: implement categorization via Awesome Nested Set
-gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
+# Can't implement categorization via Awesome Nested Set b/c we need a digraph, not exclusive categories
+# gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 # Forms made easy for Rails!
 gem "simple_form", '~> 3.1' # https://github.com/plataformatec/simple_form
 # Decorators/View-Models for Rails Applications

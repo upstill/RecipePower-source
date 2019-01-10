@@ -90,8 +90,6 @@ GEM
     arel (7.1.4)
     autoprefixer-rails (9.4.3)
       execjs
-    awesome_nested_set (3.1.4)
-      activerecord (>= 4.0.0, < 5.3)
     aws-sdk (1.67.0)
       aws-sdk-v1 (= 1.67.0)
     aws-sdk-v1 (1.67.0)
@@ -482,7 +480,6 @@ DEPENDENCIES
   annotate (= 2.5.0)
   arel (~> 7.0)
   autoprefixer-rails
-  awesome_nested_set
   aws-sdk (~> 1)
   barkick
   binding_of_caller

@@ -49,7 +49,13 @@ class ResponseServices
     @invitation_token = params[:invitation_token] if params[:invitation_token].present?
 
     # Save the parameters we might want to pass back
-    @meaningful_params = params.except :controller, :action, :mode, :format # , :id, :nocache
+    @unsafe_params = params.to_unsafe_h # , :id, :nocache
+
+  end
+
+  # We provide access to the parameters hash
+  def params_hash
+    @unsafe_params
   end
 
   def user
@@ -69,7 +75,7 @@ class ResponseServices
   def originator
     unless @originator
       uri = URI @request.url
-      uri.query = nil if (uri.query = @meaningful_params.to_param).blank?
+      uri.query = @unsafe_params.except(:id, :controller, :action, :mode, :format).to_query.if_present
       uri.path = uri.path.sub(/\..*/,'') # Remove any format indicator
       @originator = uri.to_s
     end
@@ -158,7 +164,7 @@ class ResponseServices
 
     # We keep a cache of controller/file combos to avoid all the rigmarole of lookup
     @@Views ||= {}
-    if cached_view = @@Views[cache_index = controller_name+file]
+    if cached_view = @@Views[cache_index = "#{controller_name}#{file}"]
       return cached_view
     end
 

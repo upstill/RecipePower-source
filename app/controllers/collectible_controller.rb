@@ -91,7 +91,7 @@ class CollectibleController < ApplicationController
     gleaning =
     if @pageurl = params[:url]
       Gleaning.glean @pageurl, 'Image'
-    elsif @decorator.object.is_a?(Backgroundable) && @decorator.bkg_land
+    elsif @decorator.object.respond_to?(:gleaning) && @decorator.object.is_a?(Backgroundable) && @decorator.bkg_land
       @decorator.gleaning
     else
       Gleaning.glean @decorator, 'Image'
