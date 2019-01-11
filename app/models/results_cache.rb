@@ -482,16 +482,16 @@ module ExtractParams
   end
 
   module ClassMethods
-    def extract_params result_type=nil, params={}
+    def extract_params result_type=nil, params_hash={}
       if result_type.is_a? Hash
-        result_type, params = nil, result_type
+        result_type, params_hash = nil, result_type
       end
 
       # Since params_needed may be key/default pairs as well as a list of names
       defaulted_params = HashWithIndifferentAccess.new
       paramlist = self.params_needed.collect { |pspec|
         if pspec.is_a? Array
-          defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params use
+          defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params_hash use
           pspec.first
         else
           pspec
@@ -500,10 +500,10 @@ module ExtractParams
 
       # The entity_id comes in the :id param, but this can cause confusion with the AR id for the record.
       # Consequently, we use :entity_id internally
-      defaulted_params[:entity_id] = params[:id] if params[:id]
+      defaulted_params[:entity_id] = params_hash[:id] if params_hash[:id]
 
       # relevant_params are the parameters that will bust the cache when changed from one request to another
-      defaulted_params.merge(params).merge(:result_type => result_type || '').slice *paramlist
+      defaulted_params.merge(params_hash).merge(:result_type => result_type || '').slice *paramlist
     end
   end
 
@@ -544,8 +544,8 @@ class NullResults
     [:admin_view, [:org, :newest]]
   end
 
-  def initialize params={}
-    self.send :'params=', self.class.extract_params(params)
+  def initialize params_hash={}
+    self.send :'params=', self.class.extract_params(params_hash)
     # We blow off any querytags, but respond with an empty array
     @querytags = []
     @result_type = ResultType.new ''
@@ -605,11 +605,11 @@ class ResultsCache < ApplicationRecord
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, result_types, params={}
+  def self.retrieve_or_build session_id, result_types, params_hash={}
     # Derive the subclass of ResultsCache that will handle generating items
     caching_class = self
-    if (self == ResultsCache) && params['controller'].present? && params['action'].present?
-      classname = params['controller'].camelize + params['action'].capitalize + 'Cache'
+    if (self == ResultsCache) && params_hash['controller'].present? && params_hash['action'].present?
+      classname = params_hash['controller'].camelize + params_hash['action'].capitalize + 'Cache'
       unless caching_class = (classname.constantize rescue nil)
         logger.debug 'No ResultsCache handler ' + classname
         return []
@@ -620,14 +620,14 @@ class ResultsCache < ApplicationRecord
       # Give the class a chance to defer to a subclass based on the result type
       cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
 
-      relevant_params = cc.extract_params result_type, params
+      relevant_params = cc.extract_params result_type, params_hash
       attr_params = {session_id: session_id,
                      type: cc.to_s,
                      result_typestr: (relevant_params[:result_type] || '')
       }
       rc = cc.find_by(attr_params) || cc.new(attr_params)
       # For purposes of busting the cache, we assume that sort direction is irrelevant
-      # NB: At the point, the params in rc are in exactly the same form as the query params, i.e. strings
+      # NB: At the point, the params_hash in rc are in exactly the same form as the query params_hash, i.e. strings
 
       if rc.params != relevant_params # TODO: Take :nocache into consideration
         # Bust the cache if the prior params don't match the new ones
@@ -683,16 +683,6 @@ class ResultsCache < ApplicationRecord
     @items = nil unless (safe_partition.window == oldwindow)
     save
   end
-
-=begin
-  # Derive the class of the appropriate cache handler from the controller, action and other parameters
-  def self.type params
-    controller = (params[:controller] || '').singularize.capitalize
-    controller = controller.pluralize if params[:action] && (params[:action] == 'index')
-    name = "#{controller}Cache"
-    Object.const_defined?(name) ? name.constantize : ResultsCache
-  end
-=end
 
   # Take a window of entities from the scope or the results cache
   def items # public

@@ -12,8 +12,8 @@ class ApplicationController < ActionController::Base
   protect_from_forgery with: :exception
 
   def self.filter_access_to *args
-    # We have to declare a bogus before_filter so filter_access_to can remove it without error
-    before_filter :filter_access_filter
+    # We have to declare a bogus before_action so filter_access_to can remove it without error
+    before_action :filter_access_filter
     super *args
   end
   before_action :check_flash
@@ -207,7 +207,7 @@ class ApplicationController < ActionController::Base
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
     logger.info "SESSION Contents: >>>>>>>>"
-    if sess = env['rack.session']
+    if sess = request.env['rack.session']
                   sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
     else
       logger.info "NO env['rack.session']!!!"
@@ -237,7 +237,7 @@ class ApplicationController < ActionController::Base
       if fp = NestedBenchmark.measure('Building FilteredPresenter') do
         FilteredPresenter.build view_context,
                                 response_service,
-                                params.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
+                                response_service.params_hash.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
                                 @decorator
       end
         NestedBenchmark.measure "Rendering #{fp.class}" do
@@ -416,9 +416,9 @@ class ApplicationController < ActionController::Base
         defer_request request_options
         redirect_to(if (response_service.format == :json)
                       flash[:alert] = alert
-                      defer_invitation_path(response_service.redirect_params(params.slice(:sourcehome)).merge(notif: 'signup'))
+                      defer_invitation_path(response_service.redirect_params(response_service.params_hash.slice(:sourcehome)).merge notif: 'signup' )
                     elsif response_service.mode == :injector
-                      new_user_session_url(response_service.redirect_params params.slice(:sourcehome))
+                      new_user_session_url(response_service.redirect_params response_service.params_hash.slice(:sourcehome))
                     elsif options[:login_direct]
                       new_user_registration_url notif: 'signin', header: 'Sorry, members only', flash: {alert: alert}
                     else

@@ -167,28 +167,28 @@ class FilteredPresenter
   delegate :display_style, :to => :viewparams
 
   # Build an instance of the appropriate subclass, given the entity, controller and action
-  def self.build view_context, response_service, params, decorator=nil
+  def self.build view_context, response_service, params_hash, decorator=nil
     # If we have a FilteredPresenter subclass available
     classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
     return if classname.match(/\W/)
     if (Object.const_defined? classname) ||
         (classname = 'EntityShowPresenter' if %w{ show associated}.include?(response_service.action))
-      classname.constantize.new view_context, response_service, params, decorator
+      classname.constantize.new view_context, response_service, params_hash, decorator
     end
   end
 
-  def initialize view_context, response_service, params, decorator=nil
+  def initialize view_context, response_service, params_hash, decorator=nil
     if @decorator = decorator
       @entity = decorator.object
       @klass = @entity.class
     else
-      name = params['controller'].sub(/Controller$/, '').singularize.capitalize
+      name = params_hash['controller'].sub(/Controller$/, '').singularize.capitalize
       @klass = name.constantize rescue nil
     end
 
     params_needed.each { |pspec|
       key, val = (pspec.is_a? Array) ? pspec : [pspec]
-      val = params[key] if params[key]
+      val = params_hash[key] if params_hash[key]
       setter = "#{key}="
       if self.respond_to? setter, true
         self.method(setter).call val
@@ -196,15 +196,15 @@ class FilteredPresenter
         self.instance_variable_set "@#{key}".to_sym, val
       end
     }
-    params[:result_type] = result_type # Give subclasses a chance to weigh in on a default
+    params_hash[:result_type] = result_type # Give subclasses a chance to weigh in on a default
     @h = view_context
     @response_service = response_service
     @viewer = @response_service.user
 
-    # May have been set by subclass, may have been inherited from params
+    # May have been set by subclass, may have been inherited from params_hash
     # Set the instance variable, possibly in consultation with the class
     @item_mode =
-        params[:item_mode] || # Provisionally accept item mode imposed by param
+        params_hash[:item_mode] || # Provisionally accept item mode imposed by param
             (self.class.instance_variable_get(:'@item_mode') rescue nil) ||
             (:table if response_service.action == 'index')
     @item_mode = @item_mode.to_sym if @item_mode
@@ -212,9 +212,9 @@ class FilteredPresenter
     response_service.item_mode = item_mode
 
     @content_mode =
-        if params.has_key? :stream # The query is for items from the stream
+        if params_hash.has_key? :stream # The query is for items from the stream
           :items
-        elsif params[:mode] && params[:mode] == 'modal' # The query is for a modal dialog
+        elsif params_hash[:mode] == 'modal' # The query is for a modal dialog
           :modal
         else
           @content_mode.to_sym # Either specified, or :container by default
@@ -225,9 +225,9 @@ class FilteredPresenter
     @viewparams = ViewParams.new self
     # Initialize a stream using ResultsCache(s), if any
     if subtypes.present?
-      init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params).first)
+      init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid, subtypes, params_hash).first)
     else
-      @results_cache = NullResults.new params
+      @results_cache = NullResults.new params_hash
     end
   end
 
@@ -237,11 +237,11 @@ class FilteredPresenter
   end
 
   # The query for applying querytags is the same as this one, without :stream, :querytags or :nocache
-  def query format=nil, params={}
+  def query format=nil, params_hash={}
     if format.is_a? Hash
-      params, format = format, nil
+      params_hash, format = format, nil
     end
-    assert_query request_path, format, params.merge(stream_params_null).merge(querytags: nil)
+    assert_query request_path, format, params_hash.merge(stream_params_null).merge(querytags: nil)
   end
 
   def querytags?
@@ -274,9 +274,9 @@ class FilteredPresenter
   # Provide a tokeninput field for specifying tags, with or without the ability to free-tag
   # The options are those of the tokeninput plugin, with defaults
   def filter_field opt_param={}
-    params = opt_param.clone
-    params[:batch] = batch if results_cache.respond_to?(:batch)
-    query_opts = params.merge tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector
+    params_hash = opt_param.clone
+    params_hash[:batch] = batch if results_cache.respond_to?(:batch)
+    query_opts = params_hash.merge tagtype: tagtype, querytags: querytags, type_selector: filter_type_selector
     query_opts[:batch_select] = (1+ Tag.last.id/100) if response_service.admin_view?
     h.token_input_query query_opts.compact
   end
