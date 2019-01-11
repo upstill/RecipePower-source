@@ -41,8 +41,8 @@ module Taggable
 =end
 
     has_many :taggings, :as => :entity, :dependent => :destroy
-    has_many :tags, -> { uniq }, :through => :taggings
-    has_many :taggers, -> { uniq }, :through => :taggings, :class_name => 'User'
+    has_many :tags, -> { distinct }, :through => :taggings
+    has_many :taggers, -> { distinct }, :through => :taggings, :class_name => 'User'
 
     # Scope for objects tagged by a given tag, as visible to the given viewer
     scope :tagged_by, -> (tag_or_tags_or_id_or_ids, viewer_id_or_ids=nil) {
@@ -213,7 +213,7 @@ module Taggable
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
     tagging_constraints = opts.slice(:user_id).merge entity: self
     # tagging_constraints[:user_id] ||= @tagging_user_id if @tagging_user_id
-    tagscope.joins(:taggings).where(taggings: tagging_constraints).uniq
+    tagscope.joins(:taggings).where(taggings: tagging_constraints).distinct
   end
 
   # Set the tag ids associated with the given user
