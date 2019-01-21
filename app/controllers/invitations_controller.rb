@@ -53,12 +53,11 @@ class InvitationsController < Devise::InvitationsController
       logger.debug 'NULL CURRENT_USER in invitation/create without raising authenticity error'
       raise ActionController::InvalidAuthenticityToken
     end
-    resource_params = params[resource_name]
 
     # If dialog has no invitee_tokens, get them from email field
-    resource_params[:invitee_tokens] ||= resource_params[:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
+    params[:user][:invitee_tokens] ||= params[:user][:email].split(',').collect { |email| %Q{'#{email.downcase.strip}'} }.join(',')
     # Check email addresses in the tokenlist for validity
-    self.resource = User.new resource_params # invite_resource
+    self.resource = User.new user_params # invite_resource
     @shared = resource.shared
 
     # It is an error to provide no email address or a bogus one
@@ -95,7 +94,7 @@ class InvitationsController < Devise::InvitationsController
       category =
       if u = invitee.is_a?(Fixnum) ? User.find(invitee) : User.find_by(email: invitee.downcase)
         # Existing user, whether signed up or not, friend or not
-        u.invitation_message = resource_params[:invitation_message]
+        u.invitation_message = user_params[:invitation_message]
         if current_user.followee_ids.include? u.id # Existing friend: redundant
           SharedEvent.post(current_user, @shared, u) if @shared
           :extant_friends
@@ -109,7 +108,9 @@ class InvitationsController < Devise::InvitationsController
         end
       else
         # This is a new invitation/share to a new user
-        u = resource_class.invite!(resource_params.merge(email: invitee.downcase), current_user) { |u| u.skip_invitation = true }
+        up = user_params.clone
+        up[:email] = invitee.downcase
+        u = resource_class.invite!(up, current_user) { |u| u.skip_invitation = true }
         InvitationSentEvent.post current_user, u, @shared, u.raw_invitation_token
         :to_invite
       end
@@ -154,75 +155,11 @@ class InvitationsController < Devise::InvitationsController
         render json: response
       }
     }
-    return
-    # Now we're done processing invitations, notifications and shares. Report back.
-    ##################
-    email = resource_params[:email].downcase
-    if resource = User.where(email: email).first
-      resource.errors[:email] << 'We already have a user with that email address'
-    else
-      resource_params[:invitation_message] =
-          splitstr(resource_params[:invitation_message], 100)
-      begin
-        pr[:skip_invitation] = true
-        resource = self.resource = resource_class.invite!(pr, current_inviter)
-        resource.invitation_sent_at = Time.now.utc
-        resource.save(validate: false) # ...because the invitee doesn't have a handle yet
-        InvitationSentEvent.post current_inviter, resource, @shared
-        # Formerly resource.issue_instructions(:share_instructions) (IS THIS NECESSARY?)
-        resource.update_attribute :invitation_sent_at, Time.now.utc unless resource.invitation_sent_at
-        resource.generate_invitation_token! unless resource.raw_invitation_token
-        resource.send_devise_notification :share_instructions, resource.raw_invitation_token
-      rescue Exception => e
-        self.resource  = nil
-      end
-    end
-    if resource && resource.errors.empty? # Success!
-      set_flash_message :notice, :send_instructions_html, :email => resource.email
-      notice = "Yay! An invitation is winging its way to #{resource.email}"
-      respond_with resource, :location => after_invite_path_for(resource) do |format|
-        format.json { render json: {done: true, alert: notice} }
-      end
-    elsif !resource
-      if e.class == ActiveRecord::RecordNotUnique
-        other = User.find_by_email email
-        flash[:notice] = "What do you know? '#{other.handle}' has already been invited/signed up."
-      else
-        error = 'Sorry, can\'t create invitation for some reason.'
-        if e
-          e.to_s.split('\n').each { |line|
-            error << '\n'+line if (line =~ /DETAIL:/)
-          }
-        end
-        flash[:error] = error
-      end
-      redirect_to default_next_path
-    elsif resource.errors[:email]
-      if (other = User.where(email: resource.email).first)
-        # HA! request failed because email exists. Forget the invitation, just make us friends.
-        id = other.email
-        id = other.handle if id.blank?
-        id << " (aka #{other.handle})" if (other.handle != id)
-        if current_inviter.followee_ids.include? other.id
-          notice = "#{id} is already on RecipePower--and a friend of yours."
-        else
-          current_inviter.followees << other
-          current_inviter.save
-          notice = "But #{id} is already on RecipePower! Oh happy day!! <br>(We've gone ahead and made them your friend.)".html_safe
-        end
-        smartrender :action => :new
-      else # There's a resource error on email, but not because the user exists: go back for correction
-        render :new
-      end
-    else
-      respond_with_navigational(resource) { render :new }
-    end
   end
 
   # PUT /resource/invitation
   def update
-    resource_params = params[resource_name]
-    self.resource = resource_class.accept_invitation! resource_params
+    self.resource = resource_class.accept_invitation! user_params
     resource.password = resource.email if resource.password.blank?
     if resource.errors.empty?
       if resource.password == resource.email
@@ -260,6 +197,10 @@ class InvitationsController < Devise::InvitationsController
   # Override to allow inspection of invitation while logged in
   def require_no_authentication
     super unless params[:action] == 'edit'
+  end
+
+  def user_params
+    params.require(:user).permit(:invitee_tokens, :email, :invitation_issuer, :invitation_message, :shared_class, :shared_id, :shared_name)
   end
 
 end
