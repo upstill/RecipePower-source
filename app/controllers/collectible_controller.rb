@@ -229,7 +229,7 @@ class CollectibleController < ApplicationController
   # Since that entity will now be at the head return a new first item in the list.
   def touch
     # If all is well, make sure it's on the user's list
-    @resource = CollectibleServices.find_or_create(params.slice(:id, :url), response_service.controller_model_class)
+    @resource = CollectibleServices.find_or_create Hash(:id => params[:id], :url => params[:url]).compact, response_service.controller_model_class
     if update_and_decorate(@resource) # May be defined by a subclass before calling up the chain
       who = current_user ||
       if params[:user_id]
@@ -284,7 +284,7 @@ class CollectibleController < ApplicationController
     # and also invoke the 'new cookmark' dialog. The difference is whether
     # parameters are supplied for url, title and note (though only URI is required).
     if params[:url] &&
-        (@resource = CollectibleServices.find_or_create params.slice(:url), response_service.controller_model_class) &&
+        (@resource = CollectibleServices.find_or_create Hash(:url => params[:url]), response_service.controller_model_class) &&
         @resource.id # A fetched/successfully saved item has an id
       current_user.collect @resource if current_user # Add to the current user's collection
       report_entity( default_next_path, truncate( @resource.decorate.title, :length => 100)+' now appearing in your collection.', formats)

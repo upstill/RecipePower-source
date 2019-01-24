@@ -159,14 +159,16 @@ class InvitationsController < Devise::InvitationsController
 
   # PUT /resource/invitation
   def update
+    params[:user][:invitation_token] = response_service.invitation_token
     self.resource = resource_class.accept_invitation! user_params
     resource.password = resource.email if resource.password.blank?
+    # result = ActiveRecord::Base.connection.execute("show log_destination ;")
     if resource.errors.empty?
       if resource.password == resource.email
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
       end
       response_service.user = resource
-      evt = InvitationAcceptedEvent.post resource, resource.invited_by, InvitationSentEvent.find_by_invitee(resource)
+      evt = InvitationAcceptedEvent.post resource, InvitationSentEvent.find_by_invitee(resource), resource.invited_by
       evt.notify :users, key: 'invitation_accepted_event.feedback', send_later: ResponseServices.has_worker? # !Rails.env.development?
 
       set_flash_message :notice, :updated
@@ -174,7 +176,6 @@ class InvitationsController < Devise::InvitationsController
       response_service.invitation_token = nil # Clear the invitation
       redirect_to after_accept_path_for(resource), status: 303
     else
-      # respond_with_navigational(resource){ dialog_boilerplate :edit }
       respond_with_navigational(resource) { smartrender :action => :edit, :mode => :modal }
     end
   end
@@ -200,7 +201,9 @@ class InvitationsController < Devise::InvitationsController
   end
 
   def user_params
-    params.require(:user).permit(:invitee_tokens, :email, :invitation_issuer, :invitation_message, :shared_class, :shared_id, :shared_name)
+    params.require(:user).permit(:invitee_tokens, :email, :username, :password,
+                                 :invitation_token, :invitation_issuer, :invitation_message,
+                                 :shared_class, :shared_id, :shared_name)
   end
 
 end
