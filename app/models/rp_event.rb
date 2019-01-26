@@ -202,8 +202,8 @@ end
 # <User> responded to invitation <InvitationSentEvent> from <User>
 class InvitationResponseEvent < RpEvent
   alias_attribute :invitee, :subject
-  alias_attribute :inviter, :indirect_object
   alias_attribute :invitation_event, :direct_object
+  alias_attribute :inviter, :indirect_object
   # attr_accessible :inviter, :invitee, :invitation_event
 
 end

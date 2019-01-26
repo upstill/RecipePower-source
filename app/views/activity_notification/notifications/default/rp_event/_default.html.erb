@@ -28,7 +28,7 @@
           <br>
           <span>
             <%= notification.created_at.strftime("%b %d %H:%M") %>
-            <%= button_to_submit('Ack', open_notification_path_for(notification, format: :json), 'info', 'xs', method: :post) if notification.unopened? %>
+            <%= button_to_submit('Ack', "/users/#{current_user.id}/notifications/#{notification.id}/open.json", 'info', 'xs', method: :post) if notification.unopened? %>
           </span>
         </p>
       </div>

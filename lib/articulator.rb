@@ -125,11 +125,12 @@ class InvitationAcceptedEventArticulator < Articulator
   SUMMARY_USES = [ :subject, :verb, :direct_object ]
 
   def subject
-    @subject ||= user_reference notification.notifiable.subject
+    @subject ||= user_reference(notification.notifiable.subject).capitalize
   end
 
   def direct_object
-    @direct_object ||= user_reference notification.notifiable.direct_object, true
+    invitation = notification.notifiable.direct_object
+    @direct_object ||= user_reference invitation.subject, true
   end
 
   def verb

@@ -4,3 +4,5 @@ $(".notification_count").html("<span class=\"<%= 'unopened' if @target.has_unope
 <% else %>
   $(".notifications").html("<%= escape_javascript( render_notification(@notifications, fallback: :default) ) %>");
 <% end %>
+<% empty_nots = %q{<div class="notifications"><div class='no-pending' style='margin:10px'>No pending notifications</div></div>}.html_safe %>
+$("div.notification_list_wrapper div.notifications").html("<%= escape_javascript(empty_nots) %>");

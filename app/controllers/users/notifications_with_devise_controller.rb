@@ -58,8 +58,6 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
     @notification.open!(with_members: with_members)
     if params[:move].to_s.to_boolean
       move
-    elsif (params[:for] || '') != 'counter'
-      redirect_to :action => :index
     end
   end
 
@@ -101,7 +99,7 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
 
   # Extend the index options to include ours
   def set_index_options
-    ok_keys = [ :for, :target_type, :format, :user_id, :devise_type ]
+    ok_keys = [ :for, :target_type, :format, :user_id, :devise_type, :index_content ]
     okparams = params.extract! *ok_keys  # Remove our parameters from the scrutiny of #permit
     super
     ok_keys.each { |key| @index_options[key] = okparams[key] if okparams[key] }

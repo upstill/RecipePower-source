@@ -1,10 +1,6 @@
 <div class="notification_wrapper <%= 'open opened' if parameters[:opened] %>">
   <a class="dropdown_notification" onclick="RP.navbar.toggleNotifications(event);">
-    <p class="notification_count" id="notification_count">
-      <span class="<%= 'unopened' if @target.has_unopened_notifications?(parameters) %>">
-        <%= @target.unopened_notification_count(parameters) %>
-      </span>
-    </p>
+    <%= notification_count @target, parameters %>
   </a>
 
   <div class="notification_list_wrapper">
@@ -21,11 +17,9 @@
       </p>
     </div>
     <div class="notifications">
-      <% if content = yield(:notification_index).if_present %>
-          <%= content %>
-      <% else %>
-          <div style="margin:10px">No pending notifications</div>
-      <% end %>
+      <%= yield :notification_index %>
+      <!-- The "no pending"" line is only shown if it is the first child of notifications"-->
+      <div class='no-pending' style='margin:10px'>No pending notifications</div>
     </div>
     <div class="notification_link_wrapper">
       <p class="notification_link">

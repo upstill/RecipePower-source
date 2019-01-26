@@ -54,14 +54,14 @@ div.menu div.notification_wrapper {
     position: absolute;
     top: 4px;
     left: 10px;
-    font-size: 14px;
-    color: #ECE6CD;
+    font-size: 20px;
+    color: #c9bc87;
   }
   .notification_wrapper .notification_list_wrapper .notification_header_wrapper .notification_header_menu {
     position: absolute;
-    top: 4px;
+    top: 6px;
     right: 10px;
-    font-size: 14px;
+    font-size: 16px;
     color: #9AB3A0;
   }
 
@@ -70,6 +70,12 @@ div.menu div.notification_wrapper {
     width: 330px;
     height: calc(500px - 37px - 37px);
     overflow: scroll;
+    div.no-pending { // The "no pending notifications" notice is only shown when it is alone in the list
+      display: none;
+      &:first-child {
+        display: block;
+      }
+    }
   }
   .notification_wrapper .notification_list_wrapper .notification_link_wrapper{
     position: absolute;

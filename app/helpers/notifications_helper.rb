@@ -1,5 +1,14 @@
 module NotificationsHelper
 
+  def notification_count target, parameters={}
+  content_tag :p,
+              content_tag(:span,
+                          target.unopened_notification_count(parameters).to_s.html_safe,
+                          class: (target.has_unopened_notifications?(parameters) ? 'unopened' : '')),
+              class: 'notification_count',
+              id: 'notification_count'
+  end
+
   def notifications_locator
     'li#home-navtab div.notification_wrapper'
   end

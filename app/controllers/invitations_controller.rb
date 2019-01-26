@@ -162,7 +162,6 @@ class InvitationsController < Devise::InvitationsController
     params[:user][:invitation_token] = response_service.invitation_token
     self.resource = resource_class.accept_invitation! user_params
     resource.password = resource.email if resource.password.blank?
-    # result = ActiveRecord::Base.connection.execute("show log_destination ;")
     if resource.errors.empty?
       if resource.password == resource.email
         flash[:alert] = 'You didn\'t provide a password, so we\'ve set it to be the same as your email address. You might want to consider changing that in your Profile'
