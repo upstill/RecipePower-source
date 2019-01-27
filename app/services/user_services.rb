@@ -134,4 +134,13 @@ class UserServices
       UserServices.fix_user u.id, name if name.length > 0
     }
   end
+
+  @@FolloweeCache = {}
+
+  # Provide the list of ids for the folowees of the given id
+  def self.followee_ids_of id
+    # @@FolloweeCache[id] ||= self.where(follower_id: id).pluck :followee_id
+    @@FolloweeCache[id] ||= Rcpref.where(user_id: id, entity_type: 'User').pluck :entity_id
+  end
+
 end

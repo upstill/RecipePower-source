@@ -58,12 +58,6 @@ class User < ApplicationRecord
 
   scope :legit, -> { where 'sign_in_count > 0' }
 
-  has_many :follower_relations, :foreign_key=>'followee_id', :dependent => :destroy, :class_name => 'UserRelation'
-  has_many :followers, :through => :follower_relations, :source => :follower
-
-  has_many :followee_relations, :foreign_key => 'follower_id', :dependent => :destroy, :class_name => 'UserRelation'
-  has_many :followees, :through => :followee_relations, :source => :followee
-
   has_many :answers
   accepts_nested_attributes_for :answers, allow_destroy: true
   has_many :questions, :through => :answers
@@ -79,6 +73,7 @@ class User < ApplicationRecord
 
   has_many :votings, :class_name => 'Vote', dependent: :destroy
 
+  # collection_pointers are Rcprefs for entities in this user's collection
   has_many :collection_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :class_name => 'Rcpref'
 
   # ALL Rcprefs, including those that have only been touched
@@ -88,7 +83,7 @@ class User < ApplicationRecord
   has_many :public_pointers, -> { where(in_collection: true, private: false) }, :class_name => 'Rcpref'
 
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
-  has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => User, :autosave=>true
+  has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => 'User', :autosave=>true
   # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => 'Recipe', :autosave=>true
   # Class method to define instance methods for the collectible entities: those of collectible_class
   # This is invoked by the Collectible module when it is included in a collectible class

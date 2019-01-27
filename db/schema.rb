@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20181219232420) do
+ActiveRecord::Schema.define(version: 20190126224920) do
 
   create_table "activ_notifications", force: :cascade do |t|
     t.integer  "target_id",       null: false
@@ -569,13 +569,6 @@ ActiveRecord::Schema.define(version: 20181219232420) do
     t.integer  "tagtype"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-  end
-
-  create_table "user_relations", force: :cascade do |t|
-    t.integer  "follower_id"
-    t.integer  "followee_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "users", force: :cascade do |t|

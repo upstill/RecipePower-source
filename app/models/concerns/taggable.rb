@@ -152,12 +152,12 @@ module Taggable
       # 'locked' are visible tags that the user CANNOT edit, i.e. visible - editable
       case (substrs.shift if %w{ visible editable locked }.include? substrs.first)
       when 'visible'
-        filter_options[:user_id] = (@tagging_user_id ? UserRelation.followee_ids_of(@tagging_user_id) : []) +
+        filter_options[:user_id] = (@tagging_user_id ? UserServices.followee_ids_of(@tagging_user_id) : []) +
             [User.super_id, @tagging_user_id].compact
       when 'editable'
         filter_options[:user_id] = @tagging_user_id if @tagging_user_id
       when 'locked'
-        followee_ids = (@tagging_user_id ? UserRelation.followee_ids_of(@tagging_user_id) : []) << User.super_id
+        followee_ids = (@tagging_user_id ? UserServices.followee_ids_of(@tagging_user_id) : []) << User.super_id
         filter_options[:user_id] = followee_ids.reject { |id| id == @tagging_user_id }
       end
       tagtype, tagtype_x = [], [:Question, :List]
