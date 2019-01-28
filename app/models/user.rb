@@ -2,6 +2,16 @@ require 'type_map.rb'
 require 'rp_event.rb'
 
 class User < ApplicationRecord
+
+  # We keep the currently-logged-in user for reference by models
+  def self.current
+    Thread.current[:user]
+  end
+
+  def self.current=(user)
+    Thread.current[:user] = user
+  end
+  
   # The users are backgroundable to mail the latest newsletter
   include Backgroundable
   backgroundable :status

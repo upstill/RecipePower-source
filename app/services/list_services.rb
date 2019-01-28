@@ -21,7 +21,7 @@ class ListServices
           when Fixnum
             [User.find(user_or_user_id), user_or_user_id]
           when nil
-            [entity_or_decorator.tagging_user, entity_or_decorator.tagging_user_id]
+            [User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id]
         end
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     ts = TaggingServices.new decorator.object
