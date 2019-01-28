@@ -77,7 +77,7 @@ class UserDecorator < CollectibleDecorator
     rrq = { user_id: user.id }
     rrq[:private] = false if viewer != user
     entity_type = entity_type.to_s.constantize unless entity_type.is_a? Class
-    entity_type.joins(:user_pointers).where(rcprefs: rrq)
+    entity_type.joins(:collector_pointers).where(rcprefs: rrq)
   end
 
   def list_availability viewer

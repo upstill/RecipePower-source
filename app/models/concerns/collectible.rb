@@ -20,18 +20,20 @@ module Collectible
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
     has_many :rcprefs, :dependent => :destroy, :as => :entity
 
-    # Scope for the collection of entities that are collected by the user given by 'id'
+    # Scope for the collection of entities that are collected by the user denoted by 'id'
     scope :including_user_pointer, -> (id) { includes(:rcprefs).where rcprefs: { user_id: id } }
 
     # User_pointers refers to users who have the entity in their collection
-    has_many :user_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
-    has_many :users, :through => :user_pointers, :autosave => true, :source=>'user'
+    # NB For the case of User models, this provides the users who are following the given user
+    has_many :collector_pointers, -> { where(in_collection: true) }, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
+    # has_many :users, :through => :collector_pointers, :autosave => true, :source=>'user'
+    has_many :collectors, :through => :collector_pointers, :autosave => true, :source => 'user'
     # Scope for instances of a class collected by a user, as visible to a possibly different viewer
     scope :collected_by_user, -> (userid, viewerid=userid) {
-      joins(:user_pointers).merge(Rcpref.for_user(userid, viewerid))
+      joins(:collector_pointers).merge(Rcpref.for_user(userid, viewerid))
     }
     scope :matching_comment, -> (matchstr) {
-      joins(:user_pointers).merge Rcpref.matching_comment(matchstr)
+      joins(:collector_pointers).merge Rcpref.matching_comment(matchstr)
     }
 
     # Viewer_points refers to all users who have viewed it, whether it's collected or not
@@ -39,7 +41,7 @@ module Collectible
     has_many :touchers, :through => :toucher_pointers, :autosave => true
     scope :viewed_by_user, -> (userid, viewerid=userid) {
       joins(:toucher_pointers).merge(Rcpref.for_user(userid, viewerid, false))
-    }
+    }                                                                                                                            
 
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
     # attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
@@ -107,9 +109,9 @@ module Collectible
     (ref = ref_if_any uid) && ref.in_collection
   end
 
-  # Return the number of times a recipe's been marked
+  # Return the number of times an entity has been marked
   def num_cookmarks
-    user_pointers.count
+    collector_pointers.count
   end
 
   # One collectible is being merged into another, so add the new one to the collectors of the old one

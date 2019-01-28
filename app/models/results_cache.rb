@@ -1242,7 +1242,7 @@ class FeedsIndexCache < ResultsCache
         case result_type.subtype
           when 'collected' # Feeds actually collected by user and friends
             persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
-            Feed.joins(:user_pointers).
+            Feed.joins(:collector_pointers).
                 where("rcprefs.user_id in (#{persons_of_interest})").
                 order("rcprefs.user_id DESC").# User's own feeds first
             order("rcprefs.updated_at DESC") # Most recent first (within user)

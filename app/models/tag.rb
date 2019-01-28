@@ -151,7 +151,8 @@ class Tag < ApplicationRecord
   # This is invoked by the Taggable module when it is included in a taggable
   def self.taggable taggable_class
 
-    taggable_type = taggable_class.to_s.underscore
+    taggable_class_name = taggable_class.to_s
+    taggable_type = taggable_class_name.underscore
     ids_method_name = "#{taggable_type}_ids"
 
     define_method taggable_type.pluralize do |uid=nil|
@@ -159,7 +160,7 @@ class Tag < ApplicationRecord
     end
 
     define_method ids_method_name do |uid=nil|
-      scope = taggings.where entity_type: taggable_class
+      scope = taggings.where entity_type: taggable_class_name
       scope = scope.where(:user_id => uid) if uid
       scope.map(&:entity_id).uniq
     end

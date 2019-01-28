@@ -34,13 +34,6 @@ class User < ApplicationRecord
   # before_save :serialize_browser
 
   # Setup accessible (or protected) attributes for your model
-=begin
-  # attr_accessible :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :thumbnail_id,
-                :email, :password, :password_confirmation, :invitee_tokens, :avatar_url, # :image,
-                :invitation_token, :invitation_message, :invitation_issuer, :shared_class, :shared_name, :shared_id,
-                :remember_me, :role_id, :sign_in_count, :followee_tokens, :subscription_tokens,
-                :answers_attributes, :tag_selections_attributes, :mail_subject, :mail_body, :subscribed, :last_edition
-=end
   # attr_writer :browser
   attr_readonly :count_of_collection_pointers
   attr_accessor :invitee_tokens, :avatar_url, :mail_subject, :mail_body,
@@ -83,7 +76,8 @@ class User < ApplicationRecord
   has_many :public_pointers, -> { where(in_collection: true, private: false) }, :class_name => 'Rcpref'
 
   # We allow users to collect users, but the collectible class method can't be used on self, so we define the association directly
-  has_many :users, :through=>:collection_pointers, :source => :entity, :source_type => 'User', :autosave=>true
+  has_many :followees, :through=>:collection_pointers, :source => :entity, :source_type => 'User', :autosave=>true
+
   # has_many :recipes, :through=>:collection_pointers, :source => :entity, :source_type => 'Recipe', :autosave=>true
   # Class method to define instance methods for the collectible entities: those of collectible_class
   # This is invoked by the Collectible module when it is included in a collectible class
@@ -95,7 +89,7 @@ class User < ApplicationRecord
   end
 
   # The User class defines collectible-entity association methods here. The Collectible class is consulted, and if it has
-  # a :user_pointers method (part of the Collectible module), then the methods get defined, otherwise we punt
+  # a :collector_pointers method (part of the Collectible module), then the methods get defined, otherwise we punt
   # NB All the requisite methods will have been defined IF the collectible's class has been defined (thank you, Collectible)
   # We're really only here to deal with the case where the User class (or a user model) has been accessed before the
   # Collectible class has been defined. Thus, the method_defined? call on the collectible class is enough to ensure the loading
@@ -104,7 +98,7 @@ class User < ApplicationRecord
     meth = meth.to_s
     begin
       collectible_class = active_record_class_from_association_method_name meth
-      if collectible_class.method_defined?(:user_pointers) && User.method_defined?(meth)
+      if collectible_class.method_defined?(:collector_pointers) && User.method_defined?(meth)
         self.method(meth).call *args, &block
       else
         # puts "Failed to define method '#{meth}'"
@@ -131,10 +125,6 @@ class User < ApplicationRecord
     touch entity, true
   end
 
-  def has_in_collection? entity
-    collection_pointers.exists? user: self, entity: entity
-  end
-
   def uncollect entity
     collection_pointers.where(entity: entity).map(&:uncollect)
   end
@@ -159,7 +149,7 @@ class User < ApplicationRecord
       end
     else # A new rcpref needs to be added to the entity
       entity.toucher_pointers << ref unless entity.toucher_pointers.include?(ref)
-      entity.user_pointers << ref if collect && !entity.user_pointers.include?(ref)
+      entity.collector_pointers << ref if collect && !entity.collector_pointers.include?(ref)
       ref.save if entity.id # Save the reference if it's safe
     end
   end
@@ -174,18 +164,6 @@ class User < ApplicationRecord
     else
       where(conditions).first
     end
-  end
-
-  def add_followee friend
-    self.followees << friend unless followee_ids.include? friend.id
-    # refresh_browser friend
-    save
-  end
-
-  def delete_followee f
-    # browser.delete_selected
-    followees.delete f
-    save
   end
 
   def role
@@ -501,8 +479,8 @@ private
   def absorb other
     self.about = other.about if self.about.blank?
     other.touched_pointers.each { |ref| touch ref.entity, ref.in_collection }
-    other.followees.each { |followee| self.add_followee followee }
-    other.followers.each { |follower| follower.add_followee self }
+    other.followees.each { |followee| self.collect followee }
+    other.collectors.each { |collector| collector.collect self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes
     super
   end

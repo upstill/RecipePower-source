@@ -1,6 +1,6 @@
 module RcprefsHelper
   def show_comments decorator
-    decorator.user_pointers.collect { |rr|
+    decorator.collector_pointers.collect { |rr|
       if rr.comment.present?
         render "collectible/show_comment", rcpref: rr
       end

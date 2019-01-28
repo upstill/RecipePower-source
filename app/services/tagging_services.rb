@@ -47,7 +47,7 @@ class TaggingServices
     tag_ids = tag_ids.first if tag_ids.count == 1
     query = { tag_id: tag_ids,
               entity_id: @taggable_entity.id,
-              entity_type: @taggable_entity.class }
+              entity_type: @taggable_entity.class.name }
 
     if owners_or_ids
       owner_ids = (owners_or_ids.is_a?(Array) ? owners_or_ids : [ owners_or_ids ] ).collect { |owner_or_id|

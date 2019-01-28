@@ -179,7 +179,7 @@ class CollectibleDecorator < ModelDecorator
       when 'site'
         h.link_to object.sourcename, object.sourcehome, class: 'tablink'
       when 'collections'
-        strjoin CollectibleServices.new(object).collectors.collect { |user|
+        strjoin object.collectors.collect { |user|
           h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
         }.compact
       when 'feeds'

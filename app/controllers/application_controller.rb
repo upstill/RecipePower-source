@@ -463,17 +463,6 @@ class ApplicationController < ActionController::Base
     end || super
   end
 
-=begin
-  # This is an override of the Devise method to determine where to go after login.
-  # If there was a redirect to the login page, we go back to the source of the redirect.
-  # Otherwise, new users go to the welcome page and previously-logged-in users to the queries page.
-  def after_sign_in_path_for resource_or_scope
-    # Process any pending notifications
-    view_context.issue_notifications current_user
-    stored_location_for(resource_or_scope)
-  end
-=end
-
   # When a user signs up or accepts an invitation, they'll see these dialogs, in reverse order
   def defer_welcome_dialogs
     dialog = specs_matching(path: '/collect', format: :html) ? view_context.new_page_ref_path : '/cookmark'

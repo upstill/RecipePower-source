@@ -296,7 +296,6 @@ class TagsController < ApplicationController
   end
 
   def tag_params
-    # attr_accessible :name, :id, :tagtype, :is_global, :links, :meanings, :users, :owners, :primary_meaning # , :recipes
     params.require(:tag).permit :name, :tagtype, :is_global
   end
 

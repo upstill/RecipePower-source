@@ -13,6 +13,7 @@ class FeedTest < ActiveSupport::TestCase
       assert_equal "http://ruhlman.com", f1.site.home, "wrong site extracted"
       f2 = Feed.new url: "http://blog.ruhlman.com/feed"
       assert f2.save, "blog.ruhlman.com/feed couldn't be saved"
+      x=2
     end
     
     test "bogus feed fails" do

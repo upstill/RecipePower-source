@@ -102,7 +102,7 @@ class ListServices
     # 2) All friends-only lists owned by friends who also follow the user (thus allowing access to friends-only lists)
     return tag.dependent_lists.none if user.followee_ids.empty?
     query = "(lists.availability = 0 AND lists.owner_id in (#{user.followee_ids.join(', ')}))"
-    if (extras = user.followee_ids & user.follower_ids).present?
+    if (extras = user.followee_ids & user.collector_ids).present?
       query << " OR (lists.availability = 1 AND lists.owner_id in (#{extras.join(', ')}))"
       puts 'extras: ', extras.sort.join(', ')
     end

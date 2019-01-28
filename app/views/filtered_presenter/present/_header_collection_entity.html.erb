@@ -36,7 +36,8 @@
           </div>
             <div class="nav-top">
               <%= collectible_collect_button(decorator, 'xl', class: 'friend-color') unless decorator.object == response_service.user %>
-              <%= user_follower_count decorator %>
+              <span class="follower-count"><%= decorator.collector_pointers.count %></span>
+              &nbsp;<%= sprite_glyph :chef %>
             </div>
             <div class="nav-bottom">
               <div class="half-height"></div>

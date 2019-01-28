@@ -3,7 +3,7 @@ class UserServices
   
   attr_accessor :user
   
-  delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :add_collection, :delete_collection, :add_followee,
+  delegate :id, :username, :first_name, :last_name, :fullname, :about, :login, :private, :skip_invitation, :collect,
            :email, :password, :password_confirmation, :shared_class, :shared_name, :shared_id, :shared, :'shared=', :invitee_tokens, :image,
            :remember_me, :role_id, :sign_in_count, :invitation_message, :followee_tokens, :subscription_tokens, :invitation_issuer, :to => :user
   
@@ -71,8 +71,8 @@ class UserServices
     List.assert 'Now Cooking', user
     List.assert 'To Try', user
     List.assert 'Keepers', user
-    add_followee User.find(1)
-    add_followee User.find(3)
+    collect User.find(1)
+    collect User.find(3)
   end
 
   def self.glean_names
@@ -139,7 +139,6 @@ class UserServices
 
   # Provide the list of ids for the folowees of the given id
   def self.followee_ids_of id
-    # @@FolloweeCache[id] ||= self.where(follower_id: id).pluck :followee_id
     @@FolloweeCache[id] ||= Rcpref.where(user_id: id, entity_type: 'User').pluck :entity_id
   end
 

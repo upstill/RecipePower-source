@@ -11,7 +11,7 @@
       <br><%= decorator.about %><br>
       <%= count_report decorator.object.collection_size, 'cookmarks', '<b>Has collected</b>', '<br>' %>
       <%= count_report decorator.object.followees.count, 'other', '<b>Following</b>', '<br>' %>
-      <%= count_report decorator.object.followers.count, 'other', '<b>Followed by</b>', '<br>' %>
+      <%= count_report decorator.object.collectors.count, 'other', '<b>Followed by</b>', '<br>' %>
       <%= count_report decorator.object.collection_size(Feed), 'feed', '<b>Taking</b>', '<br>' %>
       <%= count_report decorator.owned_lists(current_user).count, 'list', '<b>Owns</b>', '<br>' %>
     </td>
