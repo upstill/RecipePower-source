@@ -49,8 +49,8 @@ class SiteMergeTest < ActiveSupport::TestCase
     site2.tag_with tag3, user2.id
 
     site2.reload
-    assert_equal 2, site1.users.size
-    assert_equal 2, site2.users.size
+    assert_equal 2, site1.collectors.size
+    assert_equal 2, site2.collectors.size
     assert_equal 1, user1.sites.size
     assert_equal 2, user2.sites.size
     assert_equal 1, user3.sites.size
@@ -72,7 +72,7 @@ class SiteMergeTest < ActiveSupport::TestCase
     site1.reload
     # After absorbing, but before destroying, site2, its collections and votings should be unchanged
     assert site1.page_ref
-    assert_equal 3, site1.users.size, "site2's users didn't transfer"
+    assert_equal 3, site1.collectors.size, "site2's users didn't transfer"
     assert_equal 3, site1.votes.size, "Vote didn't transfer from site2 to site1"
     assert_equal 1, user1.sites.size
     assert_equal 1, user2.sites.size

@@ -41,13 +41,13 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert user.feeds.empty?
 
     collected_user = users(:thing2)
-    assert user.users.empty?
-    user.users<<collected_user
-    assert_equal 1, user.users.size
-    refute user.users.empty?
+    assert user.followees.empty?
+    user.followees<<collected_user
+    assert_equal 1, user.followees.size
+    refute user.followees.empty?
     user.uncollect collected_user
     user.reload
-    assert user.users.empty?
+    assert user.followees.empty?
 
   end
 
@@ -61,7 +61,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert user.recipes.empty?
     refute user.touched_pointers.empty?
     refute user.touched_pointers.first.in_collection
-    assert rcp.users.empty?
+    assert rcp.collectors.empty?
 
     user.collect rcp
     user.reload
@@ -69,7 +69,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 1, user.collection_pointers.size
     assert_equal 1, user.touched_pointers.size
     assert_equal rcp, user.recipes.first
-    assert_equal 1, rcp.users.size
+    assert_equal 1, rcp.collectors.size
     assert_equal 1, user.recipes.size
 
     user.collect rcp  # Can only collect it once
@@ -78,7 +78,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 1, user.touched_pointers.size
     assert_equal rcp, user.recipes.first
     assert_equal 1, user.recipes.size
-    assert_equal 1, rcp.users.size
+    assert_equal 1, rcp.collectors.size
 
     # Uncollecting it still leaves it touched
     user.uncollect rcp
@@ -86,6 +86,6 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert user.recipes.empty?
     assert_equal 1, user.touched_pointers.size
     assert_equal 1, user.touched_recipes.size
-    assert rcp.users.empty?
+    assert rcp.collectors.empty?
   end
 end

@@ -82,10 +82,10 @@ class User < ApplicationRecord
   # Class method to define instance methods for the collectible entities: those of collectible_class
   # This is invoked by the Collectible module when it is included in a collectible class
   def self.collectible collectible_class
-
-    asoc_name = collectible_class.to_s.pluralize.underscore
-    has_many asoc_name.to_sym, :through=>:collection_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
-    has_many ('touched_'+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class, :autosave=>true
+    collectible_class_name = collectible_class.name
+    asoc_name = collectible_class_name.pluralize.underscore
+    has_many asoc_name.to_sym, :through=>:collection_pointers, :source => :entity, :source_type => collectible_class_name, :autosave=>true
+    has_many ('touched_'+asoc_name).to_sym, :through=>:touched_pointers, :source => :entity, :source_type => collectible_class_name, :autosave=>true
   end
 
   # The User class defines collectible-entity association methods here. The Collectible class is consulted, and if it has

@@ -25,10 +25,10 @@ class UserMergeTest < ActiveSupport::TestCase
     fr1 = create(:user, username: "Follower1")
     fr2 = create(:user, username: "Follower2")
     fr3 = create(:user, username: "Follower3")
-    user1.followers << fr1
-    user1.followers << fr2
-    user2.followers << fr2
-    user2.followers << fr3
+    user1.collectors << fr1
+    user1.collectors << fr2
+    user2.collectors << fr2
+    user2.collectors << fr3
 
     assert_equal 0, user1.votings.size, "Users should be born with no votes"
     assert_equal 0, user2.votings.size, "Users should be born with no votes"
@@ -48,11 +48,11 @@ class UserMergeTest < ActiveSupport::TestCase
 
     assert_equal 2, user1.recipes.count, "# recipes of user1 not right"
     assert_equal 2, user2.recipes.count, "# recipes of user2 not right"
-    assert_equal 1, user2.users.count, "# users collected by user2 not right"
+    assert_equal 1, user2.followers.count, "# users collected by user2 not right"
     assert_equal 2, user1.followees.count, "# followees of user1 not right"
     assert_equal 2, user2.followees.count, "# followees of user2 not right"
-    assert_equal 2, user1.followers.count, "# followers of user1 not right"
-    assert_equal 2, user2.followers.count, "# followers of user2 not right"
+    assert_equal 2, user1.collectors.count, "# followers of user1 not right"
+    assert_equal 2, user2.collectors.count, "# followers of user2 not right"
 
     user1.absorb user2
     user1.save
@@ -62,7 +62,7 @@ class UserMergeTest < ActiveSupport::TestCase
     assert_equal "Some words about User2", user1.about, "Merge didn't copy about"
     assert_equal user2.image, user1.image, "Merge didn't copy image"
     assert_equal 3, user1.recipes.count, "After merge, # recipes of user1 not right"
-    assert_equal 3, user1.followers.count, "After merge, # followers of user1 not right"
+    assert_equal 3, user1.collectors.count, "After merge, # followers of user1 not right"
     assert_equal 3, user1.followees.count, "After merge, # followees of user1 not right"
     user2.destroy
     assert_equal 1, dish1.upvotes, "dish1 should have one vote after destroying user."
