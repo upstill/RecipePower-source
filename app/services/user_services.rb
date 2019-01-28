@@ -135,11 +135,4 @@ class UserServices
     }
   end
 
-  @@FolloweeCache = {}
-
-  # Provide the list of ids for the folowees of the given id
-  def self.followee_ids_of id
-    @@FolloweeCache[id] ||= Rcpref.where(user_id: id, entity_type: 'User').pluck :entity_id
-  end
-
 end

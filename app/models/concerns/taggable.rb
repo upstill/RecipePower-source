@@ -21,25 +21,6 @@ module Taggable
 
   included do
 
-    # When the record is saved, save its affiliated tagging info
-=begin
-    before_save do
-      if @tagging_user_id
-        if @tagging_list_tokens
-          # Map the elements of the token string to tags, whether existing or new
-          ListServices.associate(
-              self,
-              TokenInput.parse_tokens(@tagging_list_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
-                token.is_a?(Fixnum) ?
-                    Tag.find(token) :
-                    Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
-              },
-              @tagging_user_id)
-        end
-      end
-    end
-=end
-
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { distinct }, :through => :taggings
     has_many :taggers, -> { distinct }, :through => :taggings, :class_name => 'User'
@@ -51,17 +32,13 @@ module Taggable
     }
 
     # TODO: This shouldn't be public: should be using current_user outside the object context
-    attr_reader :tagging_user_id
-=begin
-    # attr_accessible :tagging_user_id, :tagging_tag_tokens, :tagging_list_tokens, # For the benefit of update_attributes
-                    :editable_tag_tokens, :editable_misc_tag_tokens,
-                    :editable_author_tag_tokens, :editable_dish_tag_tokens,
-                    :editable_genre_tag_tokens, :editable_ingredient_tag_tokens,
-                    :editable_tool_tag_tokens, :editable_process_tag_tokens,
-                    :editable_occasion_tag_tokens, :editable_source_tag_tokens,
-                    :editable_course_tag_tokens, :editable_diet_tag_tokens
-=end
-                    Tag.taggable self
+    attr_accessor :tagging_user
+
+    def tagging_user_id
+      @tagging_user.id if @tagging_user
+    end
+
+    Tag.taggable self
   end
 
   def self.included(base)
@@ -74,9 +51,9 @@ module Taggable
         TokenInput.parse_tokens(tokenlist_str) { |token| # parse_tokens analyzes each token in the list as either integer or string
           token.is_a?(Fixnum) ?
               Tag.find(token) :
-              Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
+              Tag.strmatch(token, userid: tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
         },
-        @tagging_user_id)
+        tagging_user_id)
   end
 
 =begin
@@ -87,8 +64,8 @@ module Taggable
 =end
 
   # Define an editable field of taggings by the current user on the entity
-  def uid= user_id
-    @tagging_user_id = user_id.to_i
+  def uid= user_or_user_id
+    self.tagging_user = user_or_user_id.is_a?(Fixnum) ? User.find(user_or_user_id) : user_or_user_id
     super if defined? super
   end
 
@@ -116,11 +93,11 @@ module Taggable
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag_or_id, uid=nil
-    assert_tagging tag_or_id, (uid || @tagging_user_id)
+    assert_tagging tag_or_id, (uid || tagging_user_id)
   end
 
   def shed_tag tag_or_id, uid=nil
-    refute_tagging tag_or_id, (uid || @tagging_user_id)
+    refute_tagging tag_or_id, (uid || tagging_user_id)
   end
 
   # One collectible is being merged into another => transfer taggings
@@ -152,13 +129,13 @@ module Taggable
       # 'locked' are visible tags that the user CANNOT edit, i.e. visible - editable
       case (substrs.shift if %w{ visible editable locked }.include? substrs.first)
       when 'visible'
-        filter_options[:user_id] = (@tagging_user_id ? UserServices.followee_ids_of(@tagging_user_id) : []) +
-            [User.super_id, @tagging_user_id].compact
+        filter_options[:user_id] = (tagging_user ? tagging_user.followee_ids : []) +
+            [User.super_id, tagging_user_id].compact
       when 'editable'
-        filter_options[:user_id] = @tagging_user_id if @tagging_user_id
+        filter_options[:user_id] = tagging_user_id if tagging_user_id
       when 'locked'
-        followee_ids = (@tagging_user_id ? UserServices.followee_ids_of(@tagging_user_id) : []) << User.super_id
-        filter_options[:user_id] = followee_ids.reject { |id| id == @tagging_user_id }
+        followee_ids = (tagging_user ? tagging_user.followee_ids : []) << User.super_id
+        filter_options[:user_id] = followee_ids - [ tagging_user_id ]
       end
       tagtype, tagtype_x = [], [:Question, :List]
       while type = substrs.shift do
@@ -176,14 +153,14 @@ module Taggable
     rescue Exception => e
       puts "Parse of #{namesym} failed: #{e}"
     end
-    if is_assignment && @tagging_user_id
+    if is_assignment && tagging_user
       nids =
           if tokens
             # Map the elements of the token string to tags, whether existing or new
             TokenInput.parse_tokens(args.first) {|token| # parse_tokens analyzes each token in the list as either integer or string
               token.is_a?(Fixnum) ?
                   token :
-                  Tag.strmatch(token, filter_options.merge(assert: true, userid: @tagging_user_id))[0].id # Match or assert the string
+                  Tag.strmatch(token, filter_options.merge(assert: true, userid: tagging_user_id))[0].id # Match or assert the string
             }
           else
             args.first.map &:id
@@ -193,16 +170,16 @@ module Taggable
       oids = self.method_missing((namestr.sub /tag_tokens$/, 'tags').to_sym).pluck :id
 
       # Add new tags as necessary
-      (nids - oids).each {|tagid| assert_tagging tagid, @tagging_user_id}
+      (nids - oids).each {|tagid| assert_tagging tagid, tagging_user_id}
 
       # Remove tags as nec.
-      (oids - nids).each {|tagid| refute_tagging tagid, @tagging_user_id}
+      (oids - nids).each {|tagid| refute_tagging tagid, tagging_user_id}
     end
     logger.debug filter_options
     filtered_tags filter_options
   end
 
-  # Fetch the tags associated with the entity, with various optional constraints (including userid via @tagging_user_id)
+  # Fetch the tags associated with the entity, with various optional constraints (including userid via tagging_user_id)
   # Options:
   # :tagtype: one or more types to be applied
   # :tagtype_x: one or more types to be ignored
@@ -212,7 +189,6 @@ module Taggable
     tagscope = tagscope.where(tagtype: Tag.typenum(opts[:tagtype])) if opts[:tagtype]
     tagscope = tagscope.where.not(tagtype: Tag.typenum(opts[:tagtype_x])) if opts[:tagtype_x]
     tagging_constraints = opts.slice(:user_id).merge entity: self
-    # tagging_constraints[:user_id] ||= @tagging_user_id if @tagging_user_id
     tagscope.joins(:taggings).where(taggings: tagging_constraints).distinct
   end
 
@@ -222,10 +198,10 @@ module Taggable
     oids = editable_tags.pluck :id
 
     # Add new tags as necessary
-    (nids - oids).each { |tagid| assert_tagging tagid, @tagging_user_id }
+    (nids - oids).each { |tagid| assert_tagging tagid, tagging_user_id }
 
     # Remove tags as nec.
-    (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
+    (oids - nids).each { |tagid| refute_tagging tagid, tagging_user_id }
   end
 
   # Manage taggings of a given user

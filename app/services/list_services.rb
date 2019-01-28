@@ -21,7 +21,7 @@ class ListServices
           when Fixnum
             [User.find(user_or_user_id), user_or_user_id]
           when nil
-            [User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id]
+            [entity_or_decorator.tagging_user, entity_or_decorator.tagging_user_id]
         end
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     ts = TaggingServices.new decorator.object
@@ -58,27 +58,6 @@ class ListServices
       lws.map(&:first).uniq
     end
   end
-
-=begin
-  # Return the set of lists containing the entity (either directly or indrectly) that are visible to the given user
-  # NB: Supplanted by associated_lists
-  def self.find_by_listee taggable_entity
-    viewer = User.find(taggable_entity.tagging_user_id || User.super_id)
-    list_scope = self.lists_visible_to viewer, true
-    friend_ids = viewer.followee_ids + [taggable_entity.tagging_user_id, User.super_id]
-    tag_ids = taggable_entity.taggings.where(user_id: friend_ids).pluck(:tag_id)
-    list_tag_ids = Tag.where(id: tag_ids, tagtype: 16).pluck :id
-    tag_id_str = tag_ids.map(&:to_s).join ','
-
-
-    indirect = tag_ids.blank? ? [] : list_scope.where(pullin: true).joins(:taggings).where("taggings.tag_id in (#{tag_id_str})").to_a
-    # Collect all the lists whose owners included the entity in the list directly
-    direct = Tagging.where(user_id: friend_ids, entity: taggable_entity, tag_id: list_tag_ids).collect { |tagging|
-      list_scope.find_by owner_id: tagging.user_id, name_tag_id: tagging.tag_id
-    }.compact
-    (direct+indirect).uniq(&:id)
-  end
-=end
 
   # Provide a scope for the lists visible to the given user
   def self.availability_query user, with_owned=false
