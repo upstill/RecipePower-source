@@ -154,7 +154,7 @@ class CollectibleDecorator < ModelDecorator
       when /^tags$/
         h.list_tags_for_collectible visible_tags( :tagtype_x => [ :Question, :List ]), self
     when /^lists$/
-        h.list_lists_with_status ListServices.associated_lists_with_status(self, self.collectible_user_id)
+        h.list_lists_with_status ListServices.associated_lists_with_status(self)
       when /^rcp/
         attrname = fieldname.sub(/^rcp/, '').downcase
         case attrname
@@ -180,7 +180,7 @@ class CollectibleDecorator < ModelDecorator
         h.link_to object.sourcename, object.sourcehome, class: 'tablink'
       when 'collections'
         strjoin object.collectors.collect { |user|
-          h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.id == object.tagging_user_id
+          h.link_to_submit( user.handle, h.user_path(user), :mode => :modal) unless user.current?
         }.compact
       when 'feeds'
         strjoin(object.feeds.where(approved: true).collect { |feed| h.link_to_submit feed.title, h.feed_path(feed) },'','',',', '<br>').html_safe

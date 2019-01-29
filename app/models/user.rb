@@ -8,8 +8,24 @@ class User < ApplicationRecord
     Thread.current[:user]
   end
 
+  # This must be set by the controller
   def self.current=(user)
     Thread.current[:user] = user
+  end
+
+  # Get the id of the current user, if any
+  def self.current_id
+    self.current.id if self.current
+  end
+
+  # Am I the current user?
+  def current?
+    self.id && (User.current_id == self.id)
+  end
+
+  # For situations where we MUST have a user, fall back on the guest
+  def self.current_or_guest
+    self.current || self.guest
   end
   
   # The users are backgroundable to mail the latest newsletter

@@ -21,25 +21,6 @@ module Taggable
 
   included do
 
-    # When the record is saved, save its affiliated tagging info
-=begin
-    before_save do
-      if @tagging_user_id
-        if @tagging_list_tokens
-          # Map the elements of the token string to tags, whether existing or new
-          ListServices.associate(
-              self,
-              TokenInput.parse_tokens(@tagging_list_tokens) { |token| # parse_tokens analyzes each token in the list as either integer or string
-                token.is_a?(Fixnum) ?
-                    Tag.find(token) :
-                    Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
-              },
-              @tagging_user_id)
-        end
-      end
-    end
-=end
-
     has_many :taggings, :as => :entity, :dependent => :destroy
     has_many :tags, -> { distinct }, :through => :taggings
     has_many :taggers, -> { distinct }, :through => :taggings, :class_name => 'User'
@@ -50,8 +31,6 @@ module Taggable
       joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag_id: ids }.compact )
     }
 
-    # TODO: This shouldn't be public: should be using current_user outside the object context
-    attr_reader :tagging_user_id
     Tag.taggable self
   end
 
@@ -60,22 +39,15 @@ module Taggable
   end
 
   def tagging_list_tokens= tokenlist_str
-    ListServices.associate(
+    ListServices.associate( # Assign tags to the taggable entity, relative to the current user
         self,
         TokenInput.parse_tokens(tokenlist_str) { |token| # parse_tokens analyzes each token in the list as either integer or string
           token.is_a?(Fixnum) ?
               Tag.find(token) :
-              Tag.strmatch(token, userid: @tagging_user_id, tagtype: :List, assert: true)[0] # Match or assert the tag
-        },
-        @tagging_user_id)
+              Tag.strmatch(token, userid: User.current_id, tagtype: :List, assert: true)[0] # Match or assert the tag
+        }
+    )
   end
-
-=begin
-  # NB: gleaning the appropriate list tokens is the responsibility of UserDecorator#list_tags
-  def tagging_list_tokens
-    x=3
-  end
-=end
 
   # Define an editable field of taggings by the current user on the entity
   def uid= user_id
@@ -106,12 +78,12 @@ module Taggable
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag_or_id, uid=nil
-    assert_tagging tag_or_id, (uid || @tagging_user_id)
+  def tag_with tag_or_id, uid=User.current_id
+    assert_tagging tag_or_id, uid
   end
 
-  def shed_tag tag_or_id, uid=nil
-    refute_tagging tag_or_id, (uid || @tagging_user_id)
+  def shed_tag tag_or_id, uid=User.current_id
+    refute_tagging tag_or_id, uid
   end
 
   # One collectible is being merged into another => transfer taggings
@@ -144,12 +116,12 @@ module Taggable
       case (substrs.shift if %w{ visible editable locked }.include? substrs.first)
       when 'visible'
         filter_options[:user_id] = (User.current ? User.current.followee_ids : []) +
-            [User.super_id, @tagging_user_id].compact
+            [User.super_id, User.current_id].compact
       when 'editable'
-        filter_options[:user_id] = @tagging_user_id if @tagging_user_id
+        filter_options[:user_id] = User.current_id if User.current_id
       when 'locked'
         followee_ids = (User.current ? User.current.followee_ids : []) << User.super_id
-        filter_options[:user_id] = followee_ids.reject { |id| id == @tagging_user_id }
+        filter_options[:user_id] = followee_ids - [ User.current_id ]
       end
       tagtype, tagtype_x = [], [:Question, :List]
       while type = substrs.shift do
@@ -167,14 +139,14 @@ module Taggable
     rescue Exception => e
       puts "Parse of #{namesym} failed: #{e}"
     end
-    if is_assignment && @tagging_user_id
+    if is_assignment && User.current_id
       nids =
           if tokens
             # Map the elements of the token string to tags, whether existing or new
             TokenInput.parse_tokens(args.first) {|token| # parse_tokens analyzes each token in the list as either integer or string
               token.is_a?(Fixnum) ?
                   token :
-                  Tag.strmatch(token, filter_options.merge(assert: true, userid: @tagging_user_id))[0].id # Match or assert the string
+                  Tag.strmatch(token, filter_options.merge(assert: true, userid: User.current_id))[0].id # Match or assert the string
             }
           else
             args.first.map &:id
@@ -184,16 +156,16 @@ module Taggable
       oids = self.method_missing((namestr.sub /tag_tokens$/, 'tags').to_sym).pluck :id
 
       # Add new tags as necessary
-      (nids - oids).each {|tagid| assert_tagging tagid, @tagging_user_id}
+      (nids - oids).each {|tagid| assert_tagging tagid }
 
       # Remove tags as nec.
-      (oids - nids).each {|tagid| refute_tagging tagid, @tagging_user_id}
+      (oids - nids).each {|tagid| refute_tagging tagid }
     end
     logger.debug filter_options
     filtered_tags filter_options
   end
 
-  # Fetch the tags associated with the entity, with various optional constraints (including userid via @tagging_user_id)
+  # Fetch the tags associated with the entity, with various optional constraints (including userid via User.current_id)
   # Options:
   # :tagtype: one or more types to be applied
   # :tagtype_x: one or more types to be ignored
@@ -212,20 +184,20 @@ module Taggable
     oids = editable_tags.pluck :id
 
     # Add new tags as necessary
-    (nids - oids).each { |tagid| assert_tagging tagid, @tagging_user_id }
+    (nids - oids).each { |tagid| assert_tagging tagid }
 
     # Remove tags as nec.
-    (oids - nids).each { |tagid| refute_tagging tagid, @tagging_user_id }
+    (oids - nids).each { |tagid| refute_tagging tagid }
   end
 
   # Manage taggings of a given user
-  def assert_tagging tag_or_id, uid
+  def assert_tagging tag_or_id, uid=User.current_id
     Tagging.find_or_create_by user_id: uid,
                               tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),
                               entity: self
   end
 
-  def refute_tagging tag_or_id, uid=nil
+  def refute_tagging tag_or_id, uid=User.current_id
     scope = taggings.where tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id)
     scope = scope.where(user_id: uid) if uid
     scope.map &:destroy

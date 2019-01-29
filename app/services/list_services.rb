@@ -9,20 +9,11 @@ class ListServices
   end
 
   # Get the lists on which the entity appears, as visible to the user
-  def self.associated_lists_with_status entity_or_decorator, user_or_user_id
+  def self.associated_lists_with_status entity_or_decorator, user=User.current_or_guest
     def self.accept_if list, status
       [list, status] if list
     end
 
-    user, user_id =
-        case user_or_user_id
-          when User
-            [user_or_user_id, user_or_user_id.id]
-          when Fixnum
-            [User.find(user_or_user_id), user_or_user_id]
-          when nil
-            [User.find(entity_or_decorator.tagging_user_id), entity_or_decorator.tagging_user_id]
-        end
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
     ts = TaggingServices.new decorator.object
     # The lists that the given object appear on FOR THIS USER are those that
@@ -49,8 +40,8 @@ class ListServices
   end
 
   # Compile the set of lists associated with an object, leaving the status intact but optionally uniquifying the lists
-  def self.associated_lists entity_or_decorator, user_or_user_id
-    lws = self.associated_lists_with_status(entity_or_decorator, user_or_user_id)
+  def self.associated_lists entity_or_decorator, user=User.current_or_guest
+    lws = self.associated_lists_with_status(entity_or_decorator, user)
     # Execute the optional block on each, returning the lists only
     if block_given?
       lws.collect { |arr| yield(*arr); arr.first }.uniq
@@ -95,19 +86,19 @@ class ListServices
   end
 
   # List tags are handled specially, due to ownership of lists
-  def self.associate entity_or_decorator, ntags, uid
+  def self.associate entity_or_decorator, ntags, user=User.current
     decorator = entity_or_decorator.is_a?(Draper::Decorator) ? entity_or_decorator : entity_or_decorator.decorate
-    otags = ListServices.associated_lists(decorator, uid).map &:name_tag
-    (ntags - otags).each { |list_tag| decorator.assert_tagging list_tag, uid }
+    otags = ListServices.associated_lists(decorator, user).map &:name_tag
+    (ntags - otags).each { |list_tag| decorator.assert_tagging list_tag, user.id }
     (otags - ntags).each do |list_tag|
-      if owned_list = list_tag.dependent_lists.where(owner_id: uid).first
-        ListServices.new(owned_list).exclude decorator.object, uid
+      if owned_list = list_tag.dependent_lists.where(owner_id: user.id).first
+        ListServices.new(owned_list).exclude decorator.object, user.id
       else
-        decorator.refute_tagging list_tag, uid
+        decorator.refute_tagging list_tag, user.id
       end
     end
     ntags.each { |list_tag|
-      list_tag.dependent_lists.where(owner_id: uid).each { |list|
+      list_tag.dependent_lists.where(owner_id: user.id).each { |list|
         list.store decorator.object
       }
     }

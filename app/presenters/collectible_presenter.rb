@@ -57,7 +57,7 @@ class CollectiblePresenter < BasePresenter
             label = field_label_counted decorator.send("#{whichstr}_tags_label"), tags.count
             entity_links tags, joinstr: ' | '
           when :List # Lists it appears under
-            lists_with_status = ListServices.associated_lists_with_status decorator, current_user_or_guest_id
+            lists_with_status = ListServices.associated_lists_with_status decorator
             label = field_label_counted 'AS SEEN IN TREASURY', lists_with_status.count
             list_lists_with_status lists_with_status
           when :site

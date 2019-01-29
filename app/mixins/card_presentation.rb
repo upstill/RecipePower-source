@@ -139,7 +139,7 @@ module CardPresentation
       tagtype = ['Culinary Term', 'Untyped'] if tagtype == 'Other'
       visible_tags(:tagtype => tagtype).count
     when 'list', 'lists'
-      ListServices.associated_lists(object, current_user_or_guest_id).count # ListServices.find_by_listee(object).count
+      ListServices.associated_lists(object).count # ListServices.find_by_listee(object).count
     end
   end
 
