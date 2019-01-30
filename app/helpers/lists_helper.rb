@@ -18,7 +18,7 @@ module ListsHelper
   end
 
   def list_menu_item l, entity, styling
-    already_collected = ListServices.new(l).include? entity, current_user_or_guest_id
+    already_collected = ListServices.new(l).include? entity, User.current_or_guest.id
     link_to_submit checkbox_menu_item_label(l.name.truncate(20), already_collected),
                    pin_list_path(l,
                         entity_type: (entity.klass.to_s rescue entity.class.to_s),
@@ -49,7 +49,7 @@ module ListsHelper
         list, status = list_or_list_with_status, nil
       end
       name = link_to_submit(list.name_tag.name.truncate(50).downcase, linkpath(list), :mode => :partial, :class => 'taglink' )
-      name << " (#{homelink list.owner})".html_safe if list.owner_id != current_user_or_guest_id
+      name << " (#{homelink list.owner})".html_safe if list.owner_id != User.current_or_guest.id
       name << "--#{status}" if Rails.env.development? && status
       name
     }.compact, '&nbsp;<span class="tagsep">|</span> '.html_safe

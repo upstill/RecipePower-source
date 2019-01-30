@@ -1,4 +1,4 @@
-<%= present decorator, current_user_or_guest do |presenter| %>
+<%= present decorator do |presenter| %>
     <td class="avatar-column">
       <%# image_enclosure decorator, fill_mode: 'fixed-width' %>
       <%# link_to_submit decorator.handle, polymorphic_path(decorator.as_base_class) %>
@@ -6,7 +6,7 @@
     </td>
     <td class="description-column">
       <%= presenter.card_homelink class: 'title-link' %>
-      <%= collectible_collect_button(decorator, 'lg') unless decorator.object == current_user_or_guest %>
+      <%= collectible_collect_button(decorator, 'lg') unless decorator.object == User.current_or_guest %>
       <%= button_to_submit((decorator.private? ? 'Show' : 'Hide'), user_path(decorator.object, user: {private: (decorator.private? ? 0 : 1)}), method: :put) if response_service.admin_view? %>
       <br><%= decorator.about %><br>
       <%= count_report decorator.object.collection_size, 'cookmarks', '<b>Has collected</b>', '<br>' %>

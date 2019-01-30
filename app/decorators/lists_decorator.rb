@@ -10,8 +10,8 @@ class ListsDecorator < ModelDecorator
   #     end
   #   end
 
-  def collected_by? uid
-    object.owner.id == uid
+  def collected_by? user_id
+    object.owner.id == user_id
   end
 
 end

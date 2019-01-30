@@ -3,7 +3,7 @@ class BasePresenter
 
   attr_reader :viewer, :decorator
 
-  def initialize decorator_or_object, template, viewer
+  def initialize decorator_or_object, template, viewer=User.current_or_guest
     if decorator_or_object.is_a?(Draper::Decorator)
       @decorator, @object = decorator_or_object, decorator_or_object.object
     else
@@ -12,7 +12,6 @@ class BasePresenter
     end
     @template = template
     @viewer = viewer
-    # @display_services = DisplayServices.new viewer, @object
   end
 
   def ribbon ribbon_class=nil, name=@decorator.human_name
@@ -54,7 +53,8 @@ private
     markdown = Redcarpet::Markdown.new(renderer)
     markdown.render(text).html_safe
   end
-  
+
+  # Any method missing from the presenter gets deferred to the template
   def method_missing(*args, &block)
     @template.send(*args, &block)
   end

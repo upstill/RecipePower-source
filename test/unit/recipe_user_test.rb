@@ -27,7 +27,8 @@ class RecipeUserTest < ActiveSupport::TestCase
 
       @thing2.touch @rcp, true
       assert_equal 2, @rcp.num_cookmarks, "Recipe's cookmark count should advance when cookmarked for second user"
-      @rcp.uid = @thing2.id
+      User.current = @thing2
+      @rcp.reload
       assert @rcp.collectible_collected?, "Recipe should get cookmarked for current user"
     end
     

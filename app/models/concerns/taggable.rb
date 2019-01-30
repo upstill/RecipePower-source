@@ -49,12 +49,6 @@ module Taggable
     )
   end
 
-  # Define an editable field of taggings by the current user on the entity
-  def uid= user_id
-    @tagging_user_id = user_id.to_i
-    super if defined? super
-  end
-
   def tagging_tags_of_type type_or_types
     filtered_tags tagtype: type_or_types
   end
@@ -78,12 +72,12 @@ module Taggable
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
-  def tag_with tag_or_id, uid=User.current_id
-    assert_tagging tag_or_id, uid
+  def tag_with tag_or_id, user_id=User.current_id
+    assert_tagging tag_or_id, user_id
   end
 
-  def shed_tag tag_or_id, uid=User.current_id
-    refute_tagging tag_or_id, uid
+  def shed_tag tag_or_id, user_id=User.current_id
+    refute_tagging tag_or_id, user_id
   end
 
   # One collectible is being merged into another => transfer taggings
@@ -191,15 +185,17 @@ module Taggable
   end
 
   # Manage taggings of a given user
-  def assert_tagging tag_or_id, uid=User.current_id
-    Tagging.find_or_create_by user_id: uid,
+  def assert_tagging tag_or_id, user_id=User.current_id
+    return unless user_id
+    Tagging.find_or_create_by user_id: user_id,
                               tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),
                               entity: self
   end
 
-  def refute_tagging tag_or_id, uid=User.current_id
+  def refute_tagging tag_or_id, user_id=User.current_id
+    return unless user_id
     scope = taggings.where tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id)
-    scope = scope.where(user_id: uid) if uid
+    scope = scope.where(user_id: user_id) if user_id
     scope.map &:destroy
   end
 end

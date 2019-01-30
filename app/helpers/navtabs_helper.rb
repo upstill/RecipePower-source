@@ -60,14 +60,13 @@ module NavtabsHelper
   end
 
   def collections_navtab mode = :full
-    navtab :collections, 'Collections', collection_user_path(current_user_or_guest), mode do
+    navtab :collections, 'Collections', collection_user_path(User.current), mode do
       [
-          link_to_submit('My Collection', collection_user_path(current_user_or_guest)),
-          link_to_submit('Cookmarks', collection_user_path(current_user_or_guest, result_type: 'cookmarks'), class: 'submenu'),
-          link_to_submit('Treasuries', collection_user_path(current_user_or_guest, result_type: 'lists'), class: 'submenu'),
-          link_to_submit('Feeds', collection_user_path(current_user_or_guest, result_type: 'feeds'), class: 'submenu'),
-          link_to_submit('Friends', collection_user_path(current_user_or_guest, result_type: 'friends'), class: 'submenu'),
-          # link_to_submit('Recently Viewed', user_recent_path(current_user_or_guest_id)),
+          link_to_submit('My Collection', collection_user_path(User.current)),
+          link_to_submit('Cookmarks', collection_user_path(User.current, result_type: 'cookmarks'), class: 'submenu'),
+          link_to_submit('Treasuries', collection_user_path(User.current, result_type: 'lists'), class: 'submenu'),
+          link_to_submit('Feeds', collection_user_path(User.current, result_type: 'feeds'), class: 'submenu'),
+          link_to_submit('Friends', collection_user_path(User.current, result_type: 'friends'), class: 'submenu'),
           link_to_submit('The RecipePower Collection', search_path()),
           '<hr class="menu">'.html_safe,
           link_to_submit('Add to Collection...', new_page_ref_path, :mode => :modal),
@@ -79,7 +78,7 @@ module NavtabsHelper
 
   def friends_navtab mode = :full
     friends = NestedBenchmark.measure '>> query friends' do
-      current_user_or_guest.followees.limit 10
+      User.current.followees.limit 10
     end
     navtab :friends, 'Cookmates', users_path(:select => :followees), mode do
       friends.collect { |u|
@@ -95,8 +94,7 @@ module NavtabsHelper
   def my_lists_navtab mode = :full
     lids =
     NestedBenchmark.measure '>> query lists' do
-      # List.joins(:name_tag).where(owner_id: current_user_or_guest.id).pluck :id, :'tags.name'
-      arr1 = List.where(owner_id: current_user_or_guest.id).limit(16).pluck :id, :name_tag_id
+      arr1 = List.where(owner_id: User.current_id).limit(16).pluck :id, :name_tag_id
       arr2 = Tag.where( id: arr1.map(&:last)).pluck :id, :name
       # Replace the tag ids in the first array with the corresponding name from the second
       arr1.map { |elem| [elem.first, arr2.find { |elem2| elem2.first == elem.last}.last ] }
@@ -120,12 +118,12 @@ module NavtabsHelper
 =begin
   def other_lists_navtab mode = :full
     navtab :other_lists, 'More Treasuries', lists_path(access: 'collected'), mode do
-      list_set = current_user_or_guest.decorate.collection_lists.take(16)
+      list_set = User.current.decorate.collection_lists.take(16)
       if list_set.count < 16
         # Try adding the lists owned by friends
-        current_user_or_guest.followees.each { |friend|
+        User.current.followees.each { |friend|
           list_set = (list_set +
-              friend.decorate.owned_lists(current_user_or_guest).includes(:name_tag).to_a.
+              friend.decorate.owned_lists(User.current).includes(:name_tag).to_a.
                   keep_if { |l| l.name != 'Keepers' && l.name != 'To Try' && l.name != 'Now Cooking' }
           ).uniq
           break if list_set.count >= 16
@@ -146,7 +144,7 @@ module NavtabsHelper
     navtab :feeds, 'Feeds', feeds_path(access: 'collected'), mode do
       feed_set =
           NestedBenchmark.measure 'query (old)' do
-            current_user_or_guest.collection_scope(entity_type: 'Feed').
+            User.current.collection_scope(entity_type: 'Feed').
                 joins(:feeds).
                 where('rcprefs.entity_id = feeds.id and feeds.approved = true').
                 order('feeds.last_post_date DESC').
@@ -157,18 +155,18 @@ module NavtabsHelper
           end
 =begin
       data = NestedBenchmark.measure 'query (new)' do
-        fids = current_user_or_guest.collection_scope(entity_type: 'Feed').pluck :entity_id
+        fids = User.current.collection_scope(entity_type: 'Feed').pluck :entity_id
         Feed.where(id: fids, approved: true).
             order(:last_post_date => 'DESC').
             limit(16).
             pluck(:id, :title)
       end
 =end
-      # feed_set = current_user_or_guest.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
+      # feed_set = User.current.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
 =begin
       if feed_set.count < 16
         # Try adding the lists owned by friends
-        current_user_or_guest.followees.each { |friend|
+        User.current.followees.each { |friend|
           feed_set = (feed_set + friend.feeds).uniq
           break if feed_set.count >= 16
         }
@@ -196,11 +194,11 @@ module NavtabsHelper
 
 =begin
   def news_navtab mode = :full
-    navtab :news, 'News', "/users/#{current_user_or_guest_id}/news", mode
+    navtab :news, 'News', "/users/#{User.current_or_guest.id}/news", mode
   end
 
   def more_navtab mode = :full
-    navtab :more, 'More', "/users/#{current_user_or_guest_id}/biglist", mode
+    navtab :more, 'More', "/users/#{User.current_or_guest.id}/biglist", mode
   end
 =end
 

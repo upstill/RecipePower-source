@@ -22,8 +22,7 @@ class Notification
     msg = ""
     case typesym
     when :share
-      shared.collectible_user_id = target_id
-      shared.be_collected
+      target.collect shared, true
       msg = "'#{shared.decorate.title}' now appearing in your collection"
     when :make_friend
     end

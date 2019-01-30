@@ -59,7 +59,7 @@ class ResponseServices
   end
 
   def user
-    @user ||= @controller_instance.current_user_or_guest
+    @user ||= User.current_or_guest
   end
 
   # What model is the controller addressing?

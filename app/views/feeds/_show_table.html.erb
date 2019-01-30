@@ -1,5 +1,5 @@
 <% feed = decorator.object %>
-<%= present decorator, current_user_or_guest do |presenter| %>
+<%= present decorator do |presenter| %>
     <td class="avatar-column">
       <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
     </td>

@@ -155,13 +155,13 @@ class Tag < ApplicationRecord
     taggable_type = taggable_class_name.underscore
     ids_method_name = "#{taggable_type}_ids"
 
-    define_method taggable_type.pluralize do |uid=nil|
-      taggable_class.where id: self.method(ids_method_name).call(uid)
+    define_method taggable_type.pluralize do |user_id=nil|
+      taggable_class.where id: self.method(ids_method_name).call(user_id)
     end
 
-    define_method ids_method_name do |uid=nil|
+    define_method ids_method_name do |user_id=nil|
       scope = taggings.where entity_type: taggable_class_name
-      scope = scope.where(:user_id => uid) if uid
+      scope = scope.where(:user_id => user_id) if user_id
       scope.map(&:entity_id).uniq
     end
   end
@@ -174,9 +174,6 @@ class Tag < ApplicationRecord
   # of that class, and hence the defining of the access methods.
   def method_missing(meth, *args, &block)
     meth = meth.to_s
-    # methstr = meth
-    # methstr = ":#{methstr}" if meth.is_a? Symbol
-    # puts "Tag method '#{methstr}' missing"
     taggable_class = ((match = meth.match(/(.+)_ids/)) ? match[1] : meth).singularize.camelize.constantize
     proof_method = :tag_with
     # puts "Extracted taggable_class '#{taggable_class}'"
@@ -379,11 +376,11 @@ class Tag < ApplicationRecord
   end
 
   # Expose this tag to the given user; if tag is a free tag or the user is super, make the tag global
-  def admit_user uid = nil
+  def admit_user user_id = nil
     return if is_global
-    if (tagtype != 0) || uid.nil? || (uid == User.super_id)
+    if (tagtype != 0) || user_id.nil? || (user_id == User.super_id)
       self.is_global = true
-    elsif !owner_ids.include?(uid) && (user = User.find_by id: uid)
+    elsif !owner_ids.include?(user_id) && (user = User.find_by id: user_id)
       self.owners << user unless owners.include?(user)
     end
   end
@@ -411,8 +408,8 @@ class Tag < ApplicationRecord
   # given type, visible to the given user. This may not require making a new tag, but only opening
   # an existing tag to the given user
   def self.strmatch(name, opts = {})
-    uid = opts[:userid]
-    # private_scope = uid ? Tag.find(TagOwner.where(user_id: uid).map(&:tag_id)) : nil
+    user_id = opts[:userid]
+    # private_scope = user_id ? Tag.find(TagOwner.where(user_id: user_id).map(&:tag_id)) : nil
     # Convert to internal form
     type = opts[:tagtype] && Tag.typenum(opts[:tagtype]) # Restricted to types
     type_x = opts[:tagtype_x] && Tag.typenum(opts[:tagtype_x]) # Types excluded
@@ -448,7 +445,7 @@ class Tag < ApplicationRecord
       # The tag set will be those which totally match the input. If there are none such, we need to create one
       if tags.present?
         # Since these match, we only need to make them visible to the user, if necessary
-        tags.each { |tag| tag.admit_user uid }
+        tags.each { |tag| tag.admit_user user_id }
       else
         # We are to create a tag on the given string (after cleanup), and make it visible to the given user
         name = Tag.tidyName name # Strip/collapse whitespace and commas
@@ -467,14 +464,14 @@ class Tag < ApplicationRecord
             else # No type specified
               Tag.find_or_create_by :name => name, tagtype: 0 # It'll be a free tag, but if you don't care enough to specify...
             end
-        tag.admit_user uid
+        tag.admit_user user_id
         tags = [tag]
       end
-    elsif uid && (uid != User.super_id)
+    elsif user_id && (user_id != User.super_id)
       # Restrict the found set to any asserted user
-      # user_tag_ids = TagOwner.where(user_id: uid).map(&:tag_id)
+      # user_tag_ids = TagOwner.where(user_id: user_id).map(&:tag_id)
       # tags.keep_if { |tag| tag.is_global || user_tag_ids.include?(tag.id) }
-      user_tag_id_list = TagOwner.where(user_id: uid).map(&:tag_id)
+      user_tag_id_list = TagOwner.where(user_id: user_id).map(&:tag_id)
       unless user_tag_id_list.empty?
         user_tag_id_list = user_tag_id_list.collect { |id| id.to_s }.join ', '
         tags = tags.where %Q{"tags"."is_global" = 't' or "tags"."id" in (#{user_tag_id_list}) }
@@ -482,7 +479,7 @@ class Tag < ApplicationRecord
         tags = tags.where is_global: true
       end
     else # No user specified => only global tags allowed
-      tags = tags.where(is_global: true) unless uid == User.super_id
+      tags = tags.where(is_global: true) unless user_id == User.super_id
     end
     if do_fold
       # Fold the set of tags to reduce redundancy as follows:

@@ -38,7 +38,7 @@ module ItemHelper
   # container_selector and wrapper_selector are adopted from masonry_helper.rb and are currently only for masonry lists
   # TODO: generalize these for all items
   def item_container_selector entity_or_string=nil, context=nil
-    entity_or_string ||= current_user_or_guest
+    entity_or_string ||= User.current_or_guest
     masonry_id = entity_or_string.is_a?(String) ? entity_or_string : "#{dom_id entity_or_string}_contents"
     masonry_id = "div#"+masonry_id unless masonry_id.blank?  # Prepend the id selector
     "#{masonry_id} div.js-masonry"

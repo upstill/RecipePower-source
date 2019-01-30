@@ -1,6 +1,6 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <% decorator ||= viewparams.decorator %>
-<%= present decorator, current_user_or_guest do |presenter| %>
+<%= present decorator do |presenter| %>
     <div class="row collection-header">
       <div class="col-md-7 header-element collection-nav <%= viewparams.result_type %>">
         <div class="row">

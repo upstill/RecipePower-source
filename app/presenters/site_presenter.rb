@@ -2,10 +2,6 @@ class SitePresenter < CollectiblePresenter
   presents :site
   delegate :name, :fullname, :lists, :feeds, to: :site
 
-  def initialize decorator, template, viewer
-    super
-  end
-
   def card_aspects
     super + [ :feeds ] - [ :site ]
   end

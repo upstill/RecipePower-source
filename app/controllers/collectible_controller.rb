@@ -144,7 +144,7 @@ class CollectibleController < ApplicationController
         # and this user is the only one who's collected it, then we destroy it.
         page_ref.recipes.to_a.each { |recipe|
           # Remove any uncollected recipes
-          page_ref.recipes.destroy recipe unless (recipe.user_ids - [current_user_or_guest_id]).present?
+          page_ref.recipes.destroy recipe unless (recipe.user_ids - [User.current_or_guest.id]).present?
         }
       end
       page_ref.kind = prparams[:kind]

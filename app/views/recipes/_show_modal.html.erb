@@ -1,4 +1,4 @@
-<%= present decorator, current_user_or_guest do |presenter| %>
+<%= present decorator do |presenter| %>
     <% dlgopts = (defined?(wide) && wide) ? {dialog_class: "modal-xl"} : {} %>
     <%= modal_dialog "show_recipe", dlgopts do %>
         <%= render_item decorator, :card %>

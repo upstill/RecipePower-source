@@ -71,7 +71,7 @@ module RecipesHelper
   end
 
   def recipe_comments_div recipe, whose
-    user = User.find recipe.collectible_user_id
+    user = User.current_or_guest
     comments =
     case whose
     when :mine

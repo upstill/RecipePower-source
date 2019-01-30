@@ -25,7 +25,7 @@ class UserPresenter < CollectiblePresenter
 
   def card_avatar_accompaniment
     contents =
-        if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], current_user_or_guest).order(created_at: :desc).first
+        if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], viewer).order(created_at: :desc).first
           latest = latestrr.entity
           collectible_show_thumbnail latest.decorate
         elsif current_user && user == current_user
@@ -140,7 +140,7 @@ class UserPresenter < CollectiblePresenter
         label = answer.question.name if answer
       when :latest_list
         label = 'Newest Treasury'
-        if latest = user.decorate.owned_lists(current_user_or_guest).order(updated_at: :desc).first
+        if latest = user.decorate.owned_lists(viewer).order(updated_at: :desc).first
           contents = link_to_submit latest.name, list_path(latest)
         else
           contents = "To create your first list, click #{link_to_dialog "here", new_list_path}.".html_safe

@@ -44,21 +44,11 @@ module Collectible
     }                                                                                                                            
 
     User.collectible self unless self == User # Provides an association to users for each type of collectible (users collecting users are handled specially)
-    # attr_accessible :collectible_user_id, :collectible_comment, :collectible_private
     attr_accessor :page_ref_kind
-    attr_reader :collectible_user_id
   end
 
   def self.included(base)
     base.extend(ClassMethods)
-  end
-
-  # Prepare for editing the model by setting the collectible attributes
-  def uid= uid
-    @collectible_user_id = uid.to_i
-    # cached_ref  # Bust the cache but update the collectible attributes to reflect the ref assoc'd with this id
-    # Work back up the hierarchy
-    super if defined? super
   end
 
   def collectible_private
@@ -93,20 +83,20 @@ module Collectible
   alias_method :'collect', :'be_collected'
 
   # Present the time-since-touched in a text format
-  def touch_date uid=nil
-    if ref = ref_if_any(uid)
+  def touch_date user_id=User.current_id
+    if ref = ref_if_any(user_id)
       ref.updated_at
     end
   end
 
   # Get THIS USER's comment on an entity
-  def comment uid=nil
-    (ref = ref_if_any uid) ? ref.comment : ""
+  def comment user_id=User.current_id
+    (ref = ref_if_any user_id) ? ref.comment : ""
   end
 
   # Does the entity appear in the user's collection?
-  def collectible_collected? uid=nil
-    (ref = ref_if_any uid) && ref.in_collection
+  def collectible_collected? user_id=User.current_id
+    (ref = ref_if_any user_id) && ref.in_collection
   end
 
   # Return the number of times an entity has been marked
@@ -131,15 +121,14 @@ module Collectible
   protected
 
   # Check for the existence of a reference and return it, but don't create one
-  def ref_if_any uid=nil
-    uid ||= @collectible_user_id
-    (uid==@collectible_user_id) ? # If it's the current id, we capture the ref
+  def ref_if_any user_id=User.current_id
+    (user_id && user_id==User.current_id) ? # If it's the current id, we capture the ref
         cached_ref(false) :
-        toucher_pointers.where(user_id: uid).first
+        toucher_pointers.where(user_id: user_id).first
   end
 
   def cached_ref_valid?
-    @collectible_user_id && @cached_ref && (@cached_ref.user_id == @collectible_user_id)
+    User.current_id && @cached_ref && (@cached_ref.user_id == User.current_id)
   end
 
   # Return the reference for the given user and this entity, creating a new one as necessary
@@ -149,11 +138,11 @@ module Collectible
       # A user is specified, but the currently-cached ref doesn't match
       @cached_ref =
           if force
-            toucher_pointers.find_or_initialize_by user_id: @collectible_user_id
+            toucher_pointers.find_or_initialize_by user_id: User.current_id
           else
             # Look first to the cached rcprefs
-            (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == @collectible_user_id }) ||
-            toucher_pointers.find_by(user_id: @collectible_user_id)
+            (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == User.current_id }) ||
+            toucher_pointers.find_by(user_id: User.current_id)
           end
     end
     @cached_ref

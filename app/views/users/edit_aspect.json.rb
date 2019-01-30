@@ -1,4 +1,4 @@
-if presenter = present(@decorator, current_user_or_guest)
+if presenter = present(@decorator)
   repl = presenter.card_aspect_editor_replacement aspect
 end
 {

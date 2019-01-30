@@ -78,14 +78,14 @@ class UsersController < CollectibleController
   end
   
   def show
-    @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :friends
+    @active_menu = params[:id].to_s == User.current_or_guest.id ? :home : :friends
     update_and_decorate
     smartrender 
   end
 
   # Show the user's recently-viewed recipes
   def recent
-    @active_menu = params[:id].to_s == current_user_or_guest_id ? :home : :collections
+    @active_menu = params[:id].to_s == User.current_or_guest.id ? :home : :collections
     update_and_decorate 
     @empty_msg = "As you check out things in RecipePower, they will be remembered here."
     response_service.title = 'Recently Viewed'
@@ -96,7 +96,7 @@ class UsersController < CollectibleController
   def collection
     update_and_decorate 
     label = (params[:result_type] || 'recipe').pluralize
-    if response_service.user.id == current_user_or_guest_id
+    if response_service.user.id == User.current_or_guest.id
       response_service.title = "My #{label}"
       @empty_msg = "Nothing here yet. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some?".html_safe
       @active_menu = :collections

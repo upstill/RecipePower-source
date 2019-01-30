@@ -1,7 +1,7 @@
 class NotificationPresenter
   attr_reader :viewer, :notification, :template
 
-  def initialize notification, template, viewer
+  def initialize notification, template, viewer=User.current_or_guest
     @notification = notification
     @template = template
     @viewer = viewer

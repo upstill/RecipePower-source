@@ -1,5 +1,5 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
-<%= present decorator, current_user_or_guest do |presenter| %>
+<%= present decorator do |presenter| %>
     <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
          style="min-height: 200px"
          onload="RP.card.onload(event)"

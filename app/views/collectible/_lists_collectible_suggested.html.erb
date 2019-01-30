@@ -1,4 +1,4 @@
-<% user_decorator = current_user_or_guest.decorate %>
+<% user_decorator = User.current_or_guest.decorate %>
 <% all_tags = user_decorator.list_tags %>
 <% classify_listtags all_tags %>
 <% used_tags = user_decorator.list_tags(decorator) %>

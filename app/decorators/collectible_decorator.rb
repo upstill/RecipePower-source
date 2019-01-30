@@ -142,7 +142,6 @@ class CollectibleDecorator < ModelDecorator
   #     end
   #   end
 
-  # TODO This should be in a Presenter and access current_user instead of using collectible_user_id
   def extract fieldname
     case fieldname.downcase
       when /_tags$/

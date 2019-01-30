@@ -132,7 +132,6 @@ module CardPresentation
 
   # How many elements are in the named field? (for labeling purposes)
   def field_count fieldname
-    # @decorator && @decorator.respond_to?(:arity) && @decorator.arity(what, current_user_or_guest_id)
     case fieldname.downcase
     when /_tags$/
       tagtype = fieldname.sub /_tags$/, ''

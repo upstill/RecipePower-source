@@ -198,7 +198,7 @@ class PageRefTest < ActiveSupport::TestCase
     url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
     pr = PageRef.fetch url
     assert_equal 200, pr.http_status
-    assert pr.alias_for("https://www.tastecooking.com")
+    assert pr.alias_for("https://www.tastecooking.com", true)
   end
 
   test "funky direct" do

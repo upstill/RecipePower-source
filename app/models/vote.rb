@@ -19,9 +19,9 @@ class Vote < ApplicationRecord
   end
 
   # Return the current vote-state on the entity by the user: :up, :down, or nil
-  # NB: EXPECTS THE ENTITY TO HAVE A CURRENT USER ATTACHED
+  # NB: EXPECTS A CURRENT USER
   def self.current entity
-    if vote = self.find_by(entity: entity, user_id: entity.collectible_user_id)
+    if vote = self.find_by(entity: entity, user_id: User.current_id)
       vote.up ? :up : :down
     end
   end

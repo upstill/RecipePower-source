@@ -19,12 +19,12 @@ class ApplicationController < ActionController::Base
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
+  before_action { User.current = current_user }
   # after_action :log_serve
   after_action { report_session 'After controller'  }
   before_action :setup_response_service
 
   helper :all
-  helper_method :current_user_or_guest
   rescue_from Timeout::Error, :with => :timeout_error # self defined exception
   rescue_from OAuth::Unauthorized, :with => :timeout_error # self defined exception
   rescue_from AbstractController::ActionNotFound, :with => :no_action_error
@@ -118,7 +118,6 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
-    entity.uid = current_user_or_guest_id if entity.respond_to? :"uid="
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
       current_user.touch(entity) if options[:touch]
@@ -171,7 +170,7 @@ class ApplicationController < ActionController::Base
   # Get a presenter for the object from within a controller
   # TODO Should we be detecting a presenter on the subclass if such?
   def present object
-    "#{object.class.base_class.to_s}Presenter".constantize.new object, view_context, current_user_or_guest
+    "#{object.class.base_class.to_s}Presenter".constantize.new object, view_context
   end
 
   def check_flash
@@ -237,7 +236,7 @@ class ApplicationController < ActionController::Base
       if fp = NestedBenchmark.measure('Building FilteredPresenter') do
         FilteredPresenter.build view_context,
                                 response_service,
-                                response_service.params_hash.merge(viewerid: current_user_or_guest_id, admin_view: response_service.admin_view?),
+                                response_service.params_hash.merge(admin_view: response_service.admin_view?),
                                 @decorator
       end
         NestedBenchmark.measure "Rendering #{fp.class}" do
@@ -345,7 +344,7 @@ class ApplicationController < ActionController::Base
                else
                  params[:action]
              end
-    flash[:alert] = "Sorry, but as a #{current_user_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
+    flash[:alert] = "Sorry, but as a #{User.current_or_guest.role}, you're not allowed to #{action} #{params[:controller]}."
     respond_to do |format|
       format.html { redirect_to(:back) rescue redirect_to('/') }
       format.json {
@@ -372,7 +371,6 @@ class ApplicationController < ActionController::Base
   # alias_method :rescue_action_locally, :rescue_action_in_public
 
   def setup_response_service
-    # @user = current_user_or_guest
     @response_service ||= ResponseServices.new params, session, request
     @response_service.controller_instance = self
     # This is a unique identifier for a computer, stored as a cookie to persist across sessions
@@ -402,7 +400,7 @@ class ApplicationController < ActionController::Base
 
   # before_action on controller that needs login to do anything
   def  login_required options={}
-    unless logged_in?
+    unless User.current
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
       unless session.id

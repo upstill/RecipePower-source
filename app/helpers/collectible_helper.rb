@@ -115,7 +115,7 @@ module CollectibleHelper
     end
     options[:id] = dom_id(decorator)
     return '' unless current_user
-    attribs = %w( collectible_comment collectible_private collectible_user_id
+    attribs = %w( collectible_comment collectible_private
                     id title url picuri imgdata
                     element_id field_name human_name object_path tag_path
                     tagging_tag_data )
@@ -171,7 +171,7 @@ module CollectibleHelper
       else
         do_label = options.delete :label
         label = ''
-        if entity.collectible_collected?(current_user_or_guest.id) 
+        if entity.collectible_collected?(User.current_id) 
           if options[:removable]
             label = '&nbsp;Remove from Collection' if do_label
             collection_link decorator, sprite_glyph(:minus)+label.html_safe, {}, :in_collection => false

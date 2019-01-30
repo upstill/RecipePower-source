@@ -578,7 +578,7 @@ class ResultsCache < ApplicationRecord
   # As a model, it saves intermediate results to the database
 
   # Standard parameters
-  attr_reader :entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
+  attr_reader :entity_id, :viewer, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
 
   # attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
   attr_accessor :typeset, :itemscope
@@ -622,6 +622,7 @@ class ResultsCache < ApplicationRecord
 
       relevant_params = cc.extract_params result_type, params_hash
       attr_params = {session_id: session_id,
+                     viewerid: User.current_or_guest.id,
                      type: cc.to_s,
                      result_typestr: (relevant_params[:result_type] || '')
       }
@@ -638,9 +639,10 @@ class ResultsCache < ApplicationRecord
 
         rc.cache = rc.partition = rc.items = nil
       end
+      rc.viewer = User.current_or_guest
 
       # Assign the params anyway for side-effects in setting instance variables correctly
-      rc.send :'params=', relevant_params
+      rc.send :'params=', relevant_params.merge( viewer: User.current_or_guest )
 
       logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
       rc
@@ -819,12 +821,7 @@ class ResultsCache < ApplicationRecord
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:entity_id, :viewerid, :admin_view, :querytags, :org, :sort_direction, [:result_type, '']]
-  end
-
-  # Memoize the viewing user
-  def viewer
-    @viewer ||= User.find @viewerid
+    [:entity_id, :viewer, :admin_view, :querytags, :org, :sort_direction, [:result_type, '']]
   end
 
   def sort_table_name
@@ -924,10 +921,6 @@ class ResultsCache < ApplicationRecord
     @entity_id = i.to_i
   end
 
-  def viewerid= id
-    @viewerid = id.to_i
-  end
-
   def org= o
     @org = o.to_sym
   end
@@ -1011,7 +1004,7 @@ class UsersBiglistCache < UsersCollectionCache
 
   def itemscope
     @itemscope ||=
-        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', @viewerid).
+        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', viewerid).
             where.not(entity_type: %w{ Feed User List})
   end
 end
@@ -1034,7 +1027,7 @@ class UserFeedsCache < UsersCollectionCache
   def itemscope
     # If we're looking at the feeds with the latest post, ignore those
     # with no posts, which would otherwise come up first
-    scope = Feed.collected_by_user @entity_id, @viewerid
+    scope = Feed.collected_by_user @entity_id, viewerid
     org == :posted ? scope.where.not(last_post_date: nil) : scope
   end
 
@@ -1094,7 +1087,7 @@ class UserOwnedListsCache < ResultsCache
   def itemscope
     unless @itemscope
       @itemscope = user.decorate.owned_lists viewer
-      @itemscope = @itemscope.viewed_by_user(@entity_id, @viewerid) if @org == :viewed
+      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @org == :viewed
     end
     @itemscope
   end
@@ -1184,7 +1177,7 @@ class ListsShowCache < ResultsCache
 
   # The itemscope is the initial query for all possible items
   def itemscope
-    @itemscope ||= list_services.tagging_query @viewerid
+    @itemscope ||= list_services.tagging_query viewerid
   end
 
   def stream_id # public
@@ -1241,7 +1234,7 @@ class FeedsIndexCache < ResultsCache
     @itemscope ||=
         case result_type.subtype
           when 'collected' # Feeds actually collected by user and friends
-            persons_of_interest = [@viewerid, 1, 3, 5].map(&:to_s).join(',')
+            persons_of_interest = [viewerid, 1, 3, 5].map(&:to_s).join(',')
             Feed.joins(:collector_pointers).
                 where("rcprefs.user_id in (#{persons_of_interest})").
                 order("rcprefs.user_id DESC").# User's own feeds first
@@ -1333,7 +1326,7 @@ class UsersIndexCache < ResultsCache
               # Exclude the viewer and all their friends
               User.where(private: false).
                   where('count_of_collecteds > 0').
-                  where.not(id: viewer.followee_ids+[@viewerid, 4, 5]).
+                  where.not(id: viewer.followee_ids+[viewerid, 4, 5]).
                   order('count_of_collecteds DESC')
             else
               User.where(private: false).where.not(id: [4, 5])
@@ -1368,7 +1361,7 @@ class UserFriendsCache < ResultsCache
   def itemscope
     unless @itemscope
       @itemscope = user.followees.order 'CONCAT(fullname, email) ASC'
-      @itemscope = @itemscope.viewed_by_user(@entity_id, @viewerid) if @org == :viewed
+      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @org == :viewed
     end
     @itemscope
   end
@@ -1486,7 +1479,7 @@ class SitesIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||= Site.
-        including_user_pointer(@viewerid).
+        including_user_pointer(viewerid).
         includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
         where(approved: approved)
   end

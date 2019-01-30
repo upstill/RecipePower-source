@@ -104,7 +104,7 @@ class TagsController < ApplicationController
                                        results <<
                                            {
                                                id: tag.id,
-                                               name: tag.typedname(disambiguate, ([1, 3].include? current_user_or_guest_id))
+                                               name: tag.typedname(disambiguate, ([1, 3].include? User.current_or_guest.id))
                                            } unless except_ids && (except_ids.include? tag.id)
                                      }
                                    }

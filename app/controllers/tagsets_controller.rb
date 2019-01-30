@@ -22,7 +22,6 @@ class TagsetsController < ApplicationController
   # POST /tagsets
   def create
     @tagset = Tagset.create tagset_params
-    @tagset.uid = current_user.id # The current user is permanently associated with the tagset as uid
     if @tagset.save
       redirect_to @tagset, notice: 'Tagset was successfully created.'
     else

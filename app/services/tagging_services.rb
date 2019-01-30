@@ -7,8 +7,9 @@ class TaggingServices
   # Shop for taggings according to various criteria
   def filtered_taggings options={}
     scope = @taggable_entity.taggings
-    uid = options[:user_id] || (options[:user].id if options[:user])
-    scope = scope.where(user_id: uid) if uid
+    if user_id = (options[:user_id] || (options[:user] && options[:user].id))
+      scope = scope.where user_id: user_id
+    end
     scope = scope.
         joins('INNER JOIN tags ON tags.id = taggings.tag_id').
         where("tags.tagtype = #{Tag.typenum(options[:tagtype])}") if options[:tagtype]
@@ -58,7 +59,8 @@ class TaggingServices
     Tagging.where(query).any?
   end
 
-  def assert tag, owner_id
+  def assert tag, owner_id=User.current_id
+    return unless owner_id
     Tagging.find_or_create_by(
         tag_id: tag.id,
         user_id: owner_id,
@@ -66,7 +68,8 @@ class TaggingServices
         entity_type: @taggable_entity.class.to_s)
   end
 
-  def refute tag, owner_id
+  def refute tag, owner_id=User.current_id
+    return unless owner_id
     if tagging = Tagging.find_by(
         tag_id: tag.id,
         user_id: owner_id,

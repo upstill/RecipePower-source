@@ -33,10 +33,10 @@ module ApplicationHelper
     "#{preface} #{numstr} #{name} #{postscript}".strip.gsub(/\s+/, ' ').html_safe
   end
 
-  def present to_present, viewer, &block
+  def present to_present, &block
     object = to_present.is_a?(Draper::Decorator) ? to_present.object : to_present
     if const = const_for(object, 'Presenter')
-      presenter = const.new to_present, self, viewer
+      presenter = const.new to_present, self
       if block_given?
         with_output_buffer { yield presenter }
       else

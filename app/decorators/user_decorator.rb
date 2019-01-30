@@ -20,9 +20,8 @@ class UserDecorator < CollectibleDecorator
   end
 
   # Check permissions for current user to access controller method
-  # TODO: move this into a Presenter and use current_user_or_guest_id instead of collectible_user_id
   def user_can? what
-    (what.to_sym == :edit) && (object.collectible_user_id == object.id) ? true : super
+    (what.to_sym == :edit) && object.current? ? true : super
   end
 
   def finderlabels

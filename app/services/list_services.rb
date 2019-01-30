@@ -111,10 +111,10 @@ class ListServices
   def include? entity, user_or_id, with_pullins=true
     # Trivial accept if the entity is physically in among the list items
     return true if @list.stores? entity
-    uid = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
+    user_id = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
     ts = TaggingServices.new entity
     # It's included if the owner or this user has tagged it with the name tag
-    return true if ts.exists? @list.name_tag_id, (uid == @list.owner_id ? uid : [uid, @list.owner_id])
+    return true if ts.exists? @list.name_tag_id, (user_id == @list.owner_id ? user_id : [user_id, @list.owner_id])
     # If not directly tagged, it's included if it's tagged with any of the list's tags, BY ANYONE (?)
     return false unless with_pullins && @list.pullin
     ts.exists? pulled_tag_ids
@@ -125,9 +125,9 @@ class ListServices
   # 2) tagging the entity with the list's tag as the given user
   # 3) adding the entity to the owner's collection
   def include entity, user_or_id
-    uid = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
-    @list.store entity if uid==owner_id
-    TaggingServices.new(entity).assert @list.name_tag, uid # Tag with the list's name tag anyway
+    user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    @list.store entity if user_id==owner_id
+    TaggingServices.new(entity).assert @list.name_tag, user_id # Tag with the list's name tag anyway
     # owner.touch entity
   end
 
@@ -144,9 +144,9 @@ class ListServices
   end
 
   def exclude entity, user_or_id
-    uid = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
-    @list.remove entity if uid == owner_id
-    TaggingServices.new(entity).refute @list.name_tag, uid # Remove tagging (from this user's perspective)
+    user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    @list.remove entity if user_id == owner_id
+    TaggingServices.new(entity).refute @list.name_tag, user_id # Remove tagging (from this user's perspective)
   end
 
   # Remove an entity from the list based on parameters
@@ -165,7 +165,7 @@ class ListServices
     @list.pullin ? @list.taggings.where(user_id: @list.owner_id).map(&:tag_id) : []
   end
 
-  def tagging_query viewerid=nil
+  def tagging_query viewerid=User.current_or_guest.id
     Tagging.list_scope @list, viewerid
   end
 

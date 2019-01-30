@@ -2,7 +2,7 @@
 # several methods available to all controllers and views. Here's a
 # common example you might add to your application layout file.
 #
-#   <% if logged_in? %>
+#   <% if User.current %>
 #     Welcome <%= current_user.username %>.
 #     <%= link_to "Edit profile", edit_current_user_path %> or
 #     <%= link_to "Log out", logout_path %>
@@ -17,18 +17,7 @@
 #   before_action :login_required, :except => [:index, :show]
 module ControllerAuthentication
   def self.included(controller)
-      controller.send :helper_method, :current_user_or_guest_id, :logged_in?
+      # controller.send :helper_method, :logged_in?
   end
   
-  def current_user_or_guest
-    Rails.env.test? ? User.first : (current_user || User.guest)
-  end
-  
-  def current_user_or_guest_id
-    self.current_user_or_guest.id
-  end
-
-  def logged_in?
-    current_user != nil
-  end
 end
