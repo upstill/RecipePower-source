@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190126224920) do
+ActiveRecord::Schema.define(version: 20190130041832) do
 
   create_table "activ_notifications", force: :cascade do |t|
     t.integer  "target_id",       null: false
@@ -414,15 +414,16 @@ ActiveRecord::Schema.define(version: 20190126224920) do
   end
 
   create_table "results_caches", force: :cascade do |t|
-    t.string   "session_id",                          null: false
-    t.text     "params",         default: "--- {}\n"
+    t.string   "session_id",                       null: false
+    t.text     "params",      default: "--- {}\n"
     t.text     "cache"
-    t.string   "type",                                null: false
-    t.string   "result_typestr", default: "",         null: false
+    t.string   "type",                             null: false
+    t.string   "result_type", default: "",         null: false
     t.text     "partition"
-    t.datetime "created_at",                          null: false
-    t.datetime "updated_at",                          null: false
-    t.index ["session_id", "type", "result_typestr"], name: "index_results_caches_on_session_id_and_type_and_result_typestr", unique: true, using: :btree
+    t.datetime "created_at",                       null: false
+    t.datetime "updated_at",                       null: false
+    t.integer  "viewer_id",                        null: false
+    t.index ["session_id", "type", "result_type", "viewer_id"], name: "results_cache_index", unique: true, using: :btree
   end
 
   create_table "rp_events", force: :cascade do |t|

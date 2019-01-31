@@ -3,13 +3,6 @@
 module ResultTyping
   extend ActiveSupport::Concern
 
-  included do
-    def self.params_needed
-      # The access parameter filters for private and public lists
-      (super + [:result_type]).uniq
-    end
-  end
-
   def stream_id
     ((uid = defined?(super) && super) ? "#{uid}-" : '') + result_type.stream_id
   end

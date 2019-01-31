@@ -24,7 +24,6 @@ class RecipesController < CollectibleController
 
   def revise # modify current recipe to reflect a client-side change
     @recipe = Recipe.find(params[:id])
-    @recipe.current_user = User.current_or_guest.id # session[:user_id]
 	# Modification instructions are in query strings:
 	# :do => 'add', 'remove'
 	# :what => "Genre", "Technique", "Course"

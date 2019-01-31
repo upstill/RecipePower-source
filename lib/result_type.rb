@@ -30,11 +30,6 @@ class ResultType < String
     gsub /\./, '-'
   end
 
-  # A convenience method to declare params w/o creating an object
-  def self.params type
-    type.present? ? { result_type: type } : { }
-  end
-
   def params
     @params ||= self.present? ? { result_type: self } : { }
   end

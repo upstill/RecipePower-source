@@ -160,32 +160,34 @@ module CollectibleHelper
     end
   end
 
-  def collectible_collect_button decorator, size = nil, options={}
-    if current_user
-      if size.is_a? Hash
-        size, options = nil, size
-      end
-      entity = decorator.object
-      if entity.class == User
-        user_follow_button entity, size, options
+  def collectible_collect_button decorator, size = nil, options = {}
+    if size.is_a? Hash
+      size, options = nil, size
+    end
+    entity = decorator.object
+    # if entity.class == User
+    #   user_follow_button entity, size, options
+    # else
+    if User.current && (entity != User.current) # Need a user to do the collecting, but not the current user (no self-following)
+      label = '' unless options.delete :label
+      if !entity.collectible_collected?
+        collection_link decorator,
+                        sprite_glyph(:plus) + (label || '&nbsp'+((entity.class == User) ? 'Follow' : 'Add to Collection')).html_safe,
+                        {},
+                        :in_collection => true
+      elsif options[:removable]
+        label ||= (entity.class == User) ? '&nbsp;Stop Following' : '&nbsp;Remove from Collection'
+        collection_link decorator,
+                        sprite_glyph(:minus) + (label || '&nbsp'+((entity.class == User) ? 'Stop Following' : 'Remove from Collection')).html_safe,
+                        {},
+                        :in_collection => false
       else
-        do_label = options.delete :label
-        label = ''
-        if entity.collectible_collected?(User.current_id) 
-          if options[:removable]
-            label = '&nbsp;Remove from Collection' if do_label
-            collection_link decorator, sprite_glyph(:minus)+label.html_safe, {}, :in_collection => false
-          else
-            label = '&nbsp;In Collection' if do_label
-            content_tag :span,
-                        sprite_glyph(:check, size, title: 'In Collection') + label.html_safe,
-                        class: "collection-state #{dom_id decorator.object}"
-          end
-        else
-          label = '&nbsp;Add to Collection' if do_label
-          collection_link decorator, sprite_glyph(:plus)+label.html_safe, {}, :in_collection => true
-        end
+        title = (entity.class == User) ? 'Following' : 'In Collection'
+        content_tag :span,
+                    sprite_glyph(:check, size, title: title) + (label || ('&nbsp;' + title)).html_safe,
+                    class: "collection-state #{dom_id decorator.object}"
       end
+      # end
       # content_tag :div, glyph, class: "collectible-collect-icon glyph-button #{dom_id decorator}"
     end
   end

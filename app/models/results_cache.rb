@@ -459,7 +459,7 @@ module CollectionCache
   def itemscopes
     # :entity_type => %w{ Recipe Site FeedEntry }, Feed
     @itemscopes ||= [result_type.entity_params[:entity_type]].flatten.collect { |entity_type|
-      entity_type.constantize.collected_by_user @entity_id, @viewerid
+      entity_type.constantize.collected_by_user @entity_id, viewerid
     }.compact
   end
 
@@ -482,11 +482,7 @@ module ExtractParams
   end
 
   module ClassMethods
-    def extract_params result_type=nil, params_hash={}
-      if result_type.is_a? Hash
-        result_type, params_hash = nil, result_type
-      end
-
+    def extract_params params_hash={}
       # Since params_needed may be key/default pairs as well as a list of names
       defaulted_params = HashWithIndifferentAccess.new
       paramlist = self.params_needed.collect { |pspec|
@@ -503,7 +499,7 @@ module ExtractParams
       defaulted_params[:entity_id] = params_hash[:id] if params_hash[:id]
 
       # relevant_params are the parameters that will bust the cache when changed from one request to another
-      defaulted_params.merge(params_hash).merge(:result_type => result_type || '').slice *paramlist
+      defaulted_params.merge(params_hash).slice *paramlist
     end
   end
 
@@ -525,10 +521,6 @@ module ExtractParams
     }
   end
 
-  def result_type= rt
-    @result_type = ResultType.new rt # Because we want access to the result type's services, not just a string
-  end
-
 end
 
 # A DefaultSearch is a shell for handling the case where there ARE no results to manage (eg., in a #show action)
@@ -548,7 +540,6 @@ class NullResults
     self.send :'params=', self.class.extract_params(params_hash)
     # We blow off any querytags, but respond with an empty array
     @querytags = []
-    @result_type = ResultType.new ''
   end
 
   def has_query? # public
@@ -574,14 +565,17 @@ class ResultsCache < ApplicationRecord
 
   belongs_to :tags_cache, :foreign_key => :session_id
 
+  # The user is whom the results were generated for (respecting views)
+  belongs_to :viewer, :foreign_key => :viewer_id, :class_name => 'User'
+
   # The ResultsCache class responds to a query with a series of items.
   # As a model, it saves intermediate results to the database
 
   # Standard parameters
-  attr_reader :entity_id, :viewer, :viewerid, :admin_view, :querytags, :org, :sort_direction, :result_type
+  attr_reader :entity_id, :admin_view, :querytags, :org, :sort_direction
 
-  # attr_accessible :session_id, :type, :params, :cache, :partition, :result_typestr
   attr_accessor :typeset, :itemscope
+  # attr_reader :result_type
   serialize :params
   serialize :cache
   serialize :partition
@@ -593,6 +587,11 @@ class ResultsCache < ApplicationRecord
     @org_options ||= OrgOptions.new supported_org_options
   end
 
+  # We wrap the result_type string attribute in a ResultType class that provides more functionality
+  def result_type
+    @result_type ||= ResultType.new read_attribute(:result_type)
+  end
+
   # Assert an organization scheme, which must be among those declared in #supported_org_options
   def org= orgscheme
      @org = orgscheme if org_options.valid?(orgscheme)
@@ -601,6 +600,11 @@ class ResultsCache < ApplicationRecord
   # Default the organization scheme to the first available option (if any)
   def org
     @org ||= org_options.first
+  end
+
+  # Just a memo for the viewer's id
+  def viewerid
+    @viewerid ||= viewer.id
   end
 
   # Get the current results cache and return it if relevant. Otherwise,
@@ -619,41 +623,35 @@ class ResultsCache < ApplicationRecord
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
       # Give the class a chance to defer to a subclass based on the result type
       cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
-
-      relevant_params = cc.extract_params result_type, params_hash
-      attr_params = {session_id: session_id,
-                     viewerid: User.current_or_guest.id,
-                     type: cc.to_s,
-                     result_typestr: (relevant_params[:result_type] || '')
+      rc_params = cc.extract_params params_hash
+      rc_attribs = {
+          session_id: session_id,
+          viewer: User.current_or_guest,
+          result_type: params_hash[:result_type]
       }
-      rc = cc.find_by(attr_params) || cc.new(attr_params)
+      # We SEARCH on the rc_attribs. The rest of the parameters are stored in the model's params.
+      # The difference is that the cache gets busted if the params change
+      # rc = cc.find_by(rc_attribs) || cc.new(rc_attribs)
+      rc = cc.create_with(params: rc_params).find_or_initialize_by rc_attribs
+
       # For purposes of busting the cache, we assume that sort direction is irrelevant
       # NB: At the point, the params_hash in rc are in exactly the same form as the query params_hash, i.e. strings
-
-      if rc.params != relevant_params # TODO: Take :nocache into consideration
-        # Bust the cache if the prior params don't match the new ones
-        diffs = (rc.params.keys + relevant_params.keys).uniq.collect {|key|
-          "#{key}: #{rc.params[key] || nil}=>#{relevant_params[key] || nil}" if rc.params[key] != relevant_params[key]
+      if rc.id && (rc.params == rc_params) # TODO: Take :nocache into consideration
+        logger.debug "Found applicable #{cc} for #{rc.result_type.class} '#{rc.result_type}'"
+      else # Bust the cache if the prior params don't match the new ones
+        diffs = (rc.params.keys | rc_params.keys).collect {|key|
+          "#{key}: #{rc.params[key] || nil}=>#{rc_params[key] || nil}" if rc.params[key] != rc_params[key]
         }.compact.join('; ') if rc.params.present?
         diffs = diffs ? "; busted cache on #{diffs}" : '. (new)'
 
         rc.cache = rc.partition = rc.items = nil
+        logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
       end
-      rc.viewer = User.current_or_guest
-
-      # Assign the params anyway for side-effects in setting instance variables correctly
-      rc.send :'params=', relevant_params.merge( viewer: User.current_or_guest )
-
-      logger.debug "Started #{cc} for #{rc.result_type.class} #{rc.result_type}#{diffs || '.'}"
+      # Assign the params hash--whether it will change or not--to side-effectively set instance variables
+      rc.send :'params=', rc_params
       rc
     }.compact
   end
-
-=begin
-  def self.bust session_id
-    self.where(session_id: session_id).each { |rc| rc.destroy }
-  end
-=end
 
   # Return the following range, for triggering purposes, and optionally pre-advance the window
   def next_range force=false
@@ -821,7 +819,7 @@ class ResultsCache < ApplicationRecord
 
   # Declare the parameters needed for this class
   def self.params_needed
-    [:entity_id, :viewer, :admin_view, :querytags, :org, :sort_direction, [:result_type, '']]
+    [:entity_id, :admin_view, :querytags, :org, :sort_direction ]
   end
 
   def sort_table_name
