@@ -302,7 +302,7 @@ module DefaultSearch
     iscope = itemscope
     iscope = iscope.includes(:entity) if %w{ rcprefs taggings }.include? iscope.model_name.collection
     oscope, sort_key = orderingscope iscope
-    oscope = oscope.order("#{sort_key} #{@sort_direction || 'DESC'}") if sort_key
+    oscope = oscope.order sort_key if sort_key
     oscope.offset(offset).limit(limit).to_a
   end
 
@@ -341,18 +341,17 @@ end
 module CollectibleSearch
 
   # What to sort on AND what to pass to #pluck for manual sorting
-  def orderingscope iscope=itemscope
+  def orderingscope iscope = itemscope
     key =
-    case org
-      when :newest
-        # Newest in the collection
-        'rcprefs.created_at'
-      when :viewed
-        'rcprefs.updated_at'
-      else
-        return super
-    end
-    [ iscope, key ]
+        case org
+        when :viewed
+          '"rcprefs"."updated_at" DESC'
+        when :newest
+          '"rcprefs"."created_at" DESC'
+        else
+          return super
+        end
+    [iscope, key]
   end
 
   def count_tag tag, counts, iscope
@@ -822,10 +821,6 @@ class ResultsCache < ApplicationRecord
     [:entity_id, :admin_view, :querytags, :org, :sort_direction ]
   end
 
-  def sort_table_name
-    result_type.table_name
-  end
-
   # Convert from item stubs (modelname + id) to entities, in the most efficient manner possible
   def slice_cache
     if cache_slice = cache.slice(safe_partition.window.min, safe_partition.windowsize)
@@ -1249,9 +1244,9 @@ class FeedsIndexCache < ResultsCache
   def orderingscope iscope=itemscope
     case org # Blithely assuming a singular itemscope
       when :updated
-        [ iscope, '"feeds"."last_post_date"' ]
+        [ iscope, '"feeds"."last_post_date" DESC' ]
       when :approved
-        [ iscope, '"feeds"."approved"' ]
+        [ iscope, '"feeds"."approved" DESC' ]
       else
         super
     end
@@ -1358,20 +1353,20 @@ class UserFriendsCache < ResultsCache
 
   def itemscope
     unless @itemscope
-      @itemscope = user.followees.order 'CONCAT(fullname, email) ASC'
-      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @org == :viewed
+      @itemscope = user.followees
+      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @entity_id != viewerid
     end
     @itemscope
   end
 
-  def sort_table_name
-    'user_relations'
+  def orderingscope iscope=itemscope
+    org ? super : [ iscope, {:fullname => :DESC, :email => :ASC} ]
   end
 
   protected
 
   def supported_org_options
-    [ ]
+    [ :viewed, :newest ]
   end
 
 end

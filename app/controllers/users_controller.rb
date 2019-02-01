@@ -79,7 +79,7 @@ class UsersController < CollectibleController
   
   def show
     @active_menu = params[:id].to_s == User.current_or_guest.id ? :home : :friends
-    update_and_decorate
+    update_and_decorate touch: true
     smartrender 
   end
 
@@ -94,11 +94,28 @@ class UsersController < CollectibleController
 
   # Show the user's entire collection
   def collection
-    update_and_decorate 
-    label = (params[:result_type] || 'recipe').pluralize
+    update_and_decorate touch: true
+    case label = (params[:result_type].if_present || '???').split('.').first
+    when 'recipes'
+      label = 'cookmarks'
+    when 'lists'
+      label = 'treasuries'
+    end
     if response_service.user.id == User.current_or_guest.id
-      response_service.title = "My #{label}"
-      @empty_msg = "Nothing here yet. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some?".html_safe
+      case params[:result_type]
+      when 'recipes', 'cookmarks'
+        @empty_msg = "You haven't collected anything. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some?".html_safe
+      when 'feeds'
+        @empty_msg = "There are no feeds in your collection. You might want to #{view_context.link_to_submit 'check out our existing offerings here', '/feeds.json'}.".html_safe
+      when 'lists.collected'
+        @empty_msg = "No treasuries collected? You might want to #{view_context.link_to_submit 'see what\'s available here', '/lists.json'}.".html_safe
+      when 'lists', 'lists.owned'
+        @empty_msg = "Haven't compiled any treasuries? Start one #{view_context.link_to_dialog('here', new_list_path, class: 'transient')}.".html_safe
+      when 'friends'
+        @empty_msg = "See what other people are up to! #{view_context.link_to_submit 'Find potential friends here', '/users.json'}--or #{view_context.link_to_dialog('invite one of your own friends!', new_user_invitation_path)}!.".html_safe
+      else
+        @empty_msg = "No #{label} to be found..."
+      end
       @active_menu = :collections
     else
       response_service.title = "#{response_service.user.handle}'s #{label}"

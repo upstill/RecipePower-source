@@ -42,8 +42,10 @@ class FeedEntry < ApplicationRecord
   def self.add_entries(entries, feed)
     # Identify the guids of entries that already exist
     existing_guids = feed.feed_entries.where(guid: (entries.map &:id)).pluck(:guid)
+    # We keep a post_time to provide a default published_at date that correctly orders the entries by guid
+    post_time = Time.current
     return unless last_posted =
-    entries.map { |entry|
+    entries.sort(&:guid).reverse.map { |entry|
       unless existing_guids.include?(entry.id) # Create a new entry only if its guid doesn't already exist
         entry.published = Time.current if !entry.published || (entry.published > Time.current) # No post-dated post dates
         create!(
