@@ -14,7 +14,9 @@ module Collectible
   included do
 
     before_save do
-      @cached_ref.save if cached_ref_valid? # It must have been set
+      if @cached_refs
+        @cached_refs.values.compact.each { |rr| rr.save if rr.changed? }
+      end
     end
 
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
@@ -52,7 +54,7 @@ module Collectible
   end
 
   def collectible_private
-    cached_ref(false) ? @cached_ref.private : false
+    cached_ref.try(&:private) || false
   end
   alias_method :'private', :'collectible_private'
 
@@ -62,41 +64,37 @@ module Collectible
     unless newval==true || newval==false
       newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
     end
-    cached_ref(true).private = newval
+    cached_ref( true).private = newval
   end
   alias_method :'private=', :'collectible_private='
 
   def collectible_comment
-    cached_ref(false) ? @cached_ref.comment : ''
+    cached_ref.try(&:comment) || ''
   end
 
   def collectible_comment= str
-    cached_ref.comment = str
+    cached_ref(true).comment = str
   end
 
   def be_collected newval=true
-    unless newval==true || newval==false
-      newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
-    end
-    cached_ref.in_collection = newval
+    newval = (newval.to_boolean || false) unless newval==true || newval==false
+    cached_ref(true).in_collection = newval
   end
   alias_method :'collect', :'be_collected'
 
   # Present the time-since-touched in a text format
   def touch_date user_id=User.current_id
-    if ref = ref_if_any(user_id)
-      ref.updated_at
-    end
+    cached_ref(false, user_id).try &:updated_at
   end
 
   # Get THIS USER's comment on an entity
   def comment user_id=User.current_id
-    (ref = ref_if_any user_id) ? ref.comment : ""
+    cached_ref(false, user_id).try(&:comment) || ''
   end
 
   # Does the entity appear in the user's collection?
   def collectible_collected? user_id=User.current_id
-    (ref = ref_if_any user_id) && ref.in_collection
+    cached_ref(false, user_id).try(&:in_collection) || false
   end
 
   # Return the number of times an entity has been marked
@@ -120,32 +118,22 @@ module Collectible
 
   protected
 
-  # Check for the existence of a reference and return it, but don't create one
-  def ref_if_any user_id=User.current_id
-    (user_id && user_id==User.current_id) ? # If it's the current id, we capture the ref
-        cached_ref(false) :
-        toucher_pointers.where(user_id: user_id).first
-  end
-
-  def cached_ref_valid?
-    User.current_id && @cached_ref && (@cached_ref.user_id == User.current_id)
-  end
-
-  # Return the reference for the given user and this entity, creating a new one as necessary
-  # If 'force' is set, and there is no reference to the entity for the user, create one
-  def cached_ref force=true
-    unless cached_ref_valid?
-      # A user is specified, but the currently-cached ref doesn't match
-      @cached_ref =
-          if force
-            toucher_pointers.find_or_initialize_by user_id: User.current_id
-          else
-            # Look first to the cached rcprefs
-            (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == User.current_id }) ||
-            toucher_pointers.find_by(user_id: User.current_id)
-          end
+  # Maintain a cache of rcprefs by user id
+  # assert: build it if it doesn't already exist
+  # user_id: the user_id that identifies rcpref for this entity
+  def cached_ref assert=false, user_id=User.current_id
+    unless (@cached_refs ||= {})[user_id]
+      unless @cached_refs.has_key?(user_id)
+        @cached_refs[user_id] ||=
+            # Try to find the ref amongst the loaded refs, if any
+            (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == user_id }) ||
+            rcprefs.find_by(user_id: user_id)
+      end
+      # Finally, build a new one as needed
+      @cached_refs[user_id] ||= rcprefs.new user_id: user_id if assert
     end
-    @cached_ref
+    @cached_refs[user_id]
   end
+
 
 end

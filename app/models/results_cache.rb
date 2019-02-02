@@ -300,9 +300,11 @@ module DefaultSearch
   # NB This is not valid when the cache uses multiple scopes--but that should be handled by cache_and_partition
   def scope_slice offset, limit
     iscope = itemscope
-    iscope = iscope.includes(:entity) if %w{ rcprefs taggings }.include? iscope.model_name.collection
     oscope, sort_key = orderingscope iscope
     oscope = oscope.order sort_key if sort_key
+    oscope = oscope.includes(:entity) if %w{ rcprefs taggings }.include? iscope.model_name.collection
+    # oscope = oscope.includes(:rcprefs) if iscope.model.is_a?(Collectible)
+    oscope = oscope.including_user_pointer(viewerid) if iscope.model.is_a?(Collectible)
     oscope.offset(offset).limit(limit).to_a
   end
 
@@ -356,8 +358,8 @@ module CollectibleSearch
 
   def count_tag tag, counts, iscope
     tagname = tag.normalized_name || Tag.normalizeName(tag.name)
-    iscope, sk, pk = orderingscope iscope
-    counts.include iscope.matching_comment(tagname), (pk || sk)
+    iscope, sort_key, pluck_key = orderingscope iscope
+    counts.include iscope.matching_comment(tagname), (pluck_key || sort_key)
     super
   end
 end
@@ -1273,7 +1275,7 @@ class FeedsShowCache < ResultsCache
     case org
       when :newest
         # Newest entries
-        [iscope, 'published_at']
+        [iscope, '"feed_entries"."published_at" DESC', '"feed_entries"."published_at"']
       when :viewed
         [ iscope.joins(:toucher_pointers), 'rcprefs.updated_at' ]
       else

@@ -45,18 +45,21 @@ class FeedEntry < ApplicationRecord
     # We keep a post_time to provide a default published_at date that correctly orders the entries by guid
     post_time = Time.current
     return unless last_posted =
-    entries.sort(&:guid).reverse.map { |entry|
+    entries.sort_by(&:entry_id).reverse.map { |entry|
       unless existing_guids.include?(entry.id) # Create a new entry only if its guid doesn't already exist
-        entry.published = Time.current if !entry.published || (entry.published > Time.current) # No post-dated post dates
+        if !(published = entry.published) || (published > Time.current) # No post-dated post dates
+          published = post_time
+          post_time -= 1.second
+        end
         create!(
           :title        => entry.title,
           :summary      => entry.summary,
           :url          => entry.url,
-          :published_at => entry.published,
+          :published_at => published,
           :guid         => entry.id,
           :feed         => feed
         )
-        entry.published
+        published
       end
     }.compact.sort.last
     # Update the last_post_date of the feed if there's a new entry
