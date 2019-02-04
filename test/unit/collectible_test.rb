@@ -51,7 +51,7 @@ class CollectibleTest < ActiveSupport::TestCase
     assert_equal 0, recipe.num_cookmarks
     refute recipe.collectible_collected?(user.id)
     User.current = user
-    user.touch recipe, false  # Touch but don't collect
+    user.uncollect recipe  # Touch but don't collect
     refute recipe.collectible_collected?(user.id)
     recipe.reload
     assert_equal 0, recipe.num_cookmarks # Should have been remembered as viewed, but not cookmarked

@@ -13,11 +13,16 @@ module Collectible
 
   included do
 
+=begin
     before_save do
       if @cached_refs
-        @cached_refs.values.compact.each { |rr| rr.save if rr.changed? }
+        # We want to save rcprefs that need to be saved because they're not part of an association
+        # the sign of which is they're persisted and have an entity_id
+        # We save the cached refs that are newly created, under the assumption that
+        @cached_refs.values.compact.each { |ref| ref.save unless ref.persisted? && ref.entity_id }
       end
     end
+=end
 
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
     has_many :rcprefs, :dependent => :destroy, :as => :entity
@@ -53,6 +58,10 @@ module Collectible
     base.extend(ClassMethods)
   end
 
+  def update_associations ref, for_sure
+    self.rcprefs << ref if for_sure || !rcprefs.where(user_id: ref.user_id, entity: ref.entity).exists?
+  end
+
   def collectible_private
     cached_ref.try(&:private) || false
   end
@@ -76,11 +85,19 @@ module Collectible
     cached_ref(true).comment = str
   end
 
-  def be_collected newval=true
-    newval = (newval.to_boolean || false) unless newval==true || newval==false
-    cached_ref(true).in_collection = newval
+  # Create or update the touch status of this entity with the user
+  def be_touched user_id = User.current_id, collect = nil
+    unless user_id.class == Fixnum
+      user_id, collect = User.current_id, user_id
+    end
+    cr = cached_ref(true, user_id)
+    if collect.nil?
+      cr.touch if cr.persisted?
+    else
+      cr.in_collection = collect
+    end
+    cr.ensconce # Ready to be added_to/updated in associations for the entity and the user
   end
-  alias_method :'collect', :'be_collected'
 
   # Present the time-since-touched in a text format
   def touch_date user_id=User.current_id
@@ -105,7 +122,7 @@ module Collectible
   # One collectible is being merged into another, so add the new one to the collectors of the old one
   def absorb other
     other.toucher_pointers.each { |other_ref|
-      other_ref.user.touch self, other_ref.in_collection # Ensure there's a ref
+      other_ref.in_collection ? other_ref.user.collect(self) : other_ref.user.uncollect(self) # Ensure there's a ref
       if other_ref.comment.present? &&
           (myref = toucher_pointers.where(user: other_ref.user).first) &&
           myref.comment.blank?
@@ -122,6 +139,9 @@ module Collectible
   # assert: build it if it doesn't already exist
   # user_id: the user_id that identifies rcpref for this entity
   def cached_ref assert=false, user_id=User.current_id
+    if assert.class == Fixnum
+      assert, user_id = false, assert
+    end
     unless (@cached_refs ||= {})[user_id]
       unless @cached_refs.has_key?(user_id)
         @cached_refs[user_id] ||=

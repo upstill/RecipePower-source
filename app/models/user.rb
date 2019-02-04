@@ -152,13 +152,22 @@ class User < ApplicationRecord
   end
 
   def uncollect entity
-    collection_pointers.where(entity: entity).map(&:uncollect)
+    touch entity, false
   end
 
-  # Remember that the user has (recently) touched the entity, optionally adding it to the collection
-  def touch entity=nil, collect=false
+  # Remember that the user has (recently) touched the entity, optionally adding it to or removing it from the collection
+  def touch entity=nil, and_collect=nil
     return super unless entity
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
+    entity.be_touched id, and_collect
+  end
+
+  def update_associations ref, for_sure
+    self.touched_pointers << ref if for_sure || !touched_pointers.where(entity: entity).first
+  end
+=begin
+    ref.save if ref.changed? || !ref.persisted?
+    bust_associations
     ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id,
                                                                                      entity_type: entity.class.base_class.to_s,
                                                                                      entity_id: entity.id
@@ -178,7 +187,7 @@ class User < ApplicationRecord
       entity.collector_pointers << ref if collect && !entity.collector_pointers.include?(ref)
       ref.save if entity.id # Save the reference if it's safe
     end
-  end
+=end
 
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
@@ -504,7 +513,7 @@ private
   # Absorb another user into self
   def absorb other
     self.about = other.about if self.about.blank?
-    other.touched_pointers.each { |ref| touch ref.entity, ref.in_collection }
+    other.touched_pointers.each { |ref| ref.in_collection ? self.collect(ref.entity) : self.uncollect(ref.entity) }
     other.followees.each { |followee| self.collect followee }
     other.collectors.each { |collector| collector.collect self }
     other.votings.each { |voting| vote(voting.entity, voting.up) } # Transfer all the other's votes

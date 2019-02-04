@@ -74,7 +74,7 @@ class FeedsController < CollectibleController
         render :new, mode: :modal
       else
         # No problems. Collect the feed now.
-        @feed.be_collected
+        current_user.collect @feed
         @feed.save
         if resource_errors_to_flash(@feed)
           render :errors

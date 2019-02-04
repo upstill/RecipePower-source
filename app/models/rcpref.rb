@@ -56,4 +56,24 @@ class Rcpref < ApplicationRecord
     save
   end
 
+  # Ensure that the ref is properly registered with both the user's and the entity's associations
+  def ensconce for_sure=true
+    user.update_associations self, for_sure
+    entity.update_associations self, for_sure
+  end
+
+  # We add functionality to catch a newly-collected ref and peg the created_at date to now
+  def save options={}
+    if created_at && in_collection && in_collection_changed?
+      # We use the created_at time as "time of collection"
+      self.created_at = self.updated_at = Time.now
+      Rcpref.record_timestamps = false
+      result = super
+      Rcpref.record_timestamps = true
+      result
+    else
+      super
+    end
+  end
+
 end

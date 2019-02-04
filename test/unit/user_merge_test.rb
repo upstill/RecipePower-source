@@ -17,9 +17,9 @@ class UserMergeTest < ActiveSupport::TestCase
     user1.recipes << dish2
     user1.save
 
-    user2.touch dish2, true
-    user2.touch dish3, true
-    user2.touch user1, true
+    user2.collect dish2
+    user2.collect dish3
+    user2.collect user1
     user2.save
 
     fr1 = create(:user, username: "Follower1")

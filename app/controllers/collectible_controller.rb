@@ -8,14 +8,14 @@ class CollectibleController < ApplicationController
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing
       msg = @decorator.title.truncate 50
       if params.has_key? :private
-        @decorator.be_collected true
+        current_user.collect @decorator.object # ...by the current user
         @decorator.collectible_private = params[:private]
-        msg << (@decorator.private ? ' now' : ' no longer')
+        msg << (@decorator.private ? ' now' : ' not')
         msg << ' hidden from others.'
       end
       if params.has_key? :in_collection
         was_collected = @decorator.collectible_collected?
-        @decorator.be_collected params[:in_collection]
+        current_user.touch @decorator.object, params[:in_collection].to_boolean
         @newly_deleted = !(@newly_collected = @decorator.collectible_collected?) if @decorator.collectible_collected? != was_collected
         msg << (@decorator.collectible_collected? ?
             ' now appearing in your collection.' :
@@ -179,7 +179,7 @@ class CollectibleController < ApplicationController
       # ...now we apply the misc tag tokens (if any) according to the constraints of the decorator
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
       unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
-        @decorator.be_collected
+        current_user.collect @decorator.object
         @decorator.save
         flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
       end
@@ -238,7 +238,7 @@ class CollectibleController < ApplicationController
       end
       which_flash = (response_service.format == :html) ? :notice : (who ? :popup : :alert)
       if who
-        who.touch @decorator.object, params[:collect]
+        who.touch @decorator.object, params[:collect].to_boolean
         verb = @resource.is_a?(User) ? 'Now Following' : 'Collected'
         flash[which_flash] = "Snap! #{verb} '#{@decorator.title}'." if params[:collect]
       else
