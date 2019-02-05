@@ -13,16 +13,25 @@ module Collectible
 
   included do
 
-=begin
+    # We keep a cache of rcprefs that have been accessed by a user, to
+    # 1) speed up subsequent accesses
+    # 2) ensure that changes to refs are saved when the entity is saved.
+    # NB: this is because ActiveRecord doesn't keep a record of individual members of an association,
+    # and so can't :autosave them
     before_save do
       if @cached_refs
         # We want to save rcprefs that need to be saved because they're not part of an association
         # the sign of which is they're persisted and have an entity_id
         # We save the cached refs that are newly created, under the assumption that
-        @cached_refs.values.compact.each { |ref| ref.save unless ref.persisted? && ref.entity_id }
+        @cached_refs.values.compact.each { |ref| puts "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
+        @cached_refs = {}
       end
     end
-=end
+
+    def reload
+      @cached_refs = {}
+      super
+    end
 
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
     has_many :rcprefs, :dependent => :destroy, :as => :entity
@@ -58,34 +67,44 @@ module Collectible
     base.extend(ClassMethods)
   end
 
+  # When a rcpref has been updated/created, make sure our associations are current
   def update_associations ref, for_sure
     self.rcprefs << ref if for_sure || !rcprefs.where(user_id: ref.user_id, entity: ref.entity).exists?
   end
 
-  def collectible_private
-    cached_ref.try(&:private) || false
+  def private user_id=User.current_id
+    cached_ref(user_id).try(&:private) || false
   end
-  alias_method :'private', :'collectible_private'
+  alias_method :'collectible_private', :'private'
 
-  # Gatekeeper for the privacy value to interpret strings from checkbox fields
-  def collectible_private= newval
+  def set_private_for newval, user_id=User.current_id
     # Boolean may be coming in as string or integer
     unless newval==true || newval==false
       newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
     end
-    cached_ref( true).private = newval
+    cached_ref( true, user_id).private = newval
   end
-  alias_method :'private=', :'collectible_private='
+  alias_method :'collectible_private=', :'set_private_for'
 
-  def collectible_comment
-    cached_ref.try(&:comment) || ''
+  def comment user_id=User.current_id
+    cached_ref(user_id).try(&:comment) || ''
   end
+  alias_method :collectible_comment, :comment
 
-  def collectible_comment= str
-    cached_ref(true).comment = str
+  def set_comment_for str, user_id=User.current_id
+    cached_ref(true, user_id).comment = str
   end
+  alias_method :'comment=', :set_comment_for
+  alias_method :'collectible_comment=', :set_comment_for
+
+  # Does the entity appear in the user's collection?
+  def collected user_id=User.current_id
+    cached_ref(false, user_id).try(&:in_collection) || false
+  end
+  alias_method :'collectible_collected?', :collected
 
   # Create or update the touch status of this entity with the user
+  # collect: true or false sets the in_collection status; nil ignores it
   def be_touched user_id = User.current_id, collect = nil
     unless user_id.class == Fixnum
       user_id, collect = User.current_id, user_id
@@ -102,16 +121,6 @@ module Collectible
   # Present the time-since-touched in a text format
   def touch_date user_id=User.current_id
     cached_ref(false, user_id).try &:updated_at
-  end
-
-  # Get THIS USER's comment on an entity
-  def comment user_id=User.current_id
-    cached_ref(false, user_id).try(&:comment) || ''
-  end
-
-  # Does the entity appear in the user's collection?
-  def collectible_collected? user_id=User.current_id
-    cached_ref(false, user_id).try(&:in_collection) || false
   end
 
   # Return the number of times an entity has been marked
@@ -133,6 +142,13 @@ module Collectible
     super if defined? super
   end
 
+  def report_ref_cache
+    @cached_refs.values.each do |rr|
+      puts rr
+      rr.attributes.each { |key, value| puts "\t#{key}: #{value}" }
+    end
+  end
+
   protected
 
   # Maintain a cache of rcprefs by user id
@@ -147,7 +163,7 @@ module Collectible
         @cached_refs[user_id] ||=
             # Try to find the ref amongst the loaded refs, if any
             (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == user_id }) ||
-            rcprefs.find_by(user_id: user_id)
+            rcprefs.where(user_id: user_id).first
       end
       # Finally, build a new one as needed
       @cached_refs[user_id] ||= rcprefs.new user_id: user_id if assert

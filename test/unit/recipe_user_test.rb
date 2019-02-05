@@ -11,6 +11,37 @@ class RecipeUserTest < ActiveSupport::TestCase
       @thing2 = users(:thing2)
     end
 
+    test 'caches and saves rcprefs appropriately' do
+      assert_equal '', @rcp.comment
+      User.current = @rcp
+      @rcp.comment= 'I told you so'
+      assert_equal 'I told you so', @rcp.comment
+      # Recall without saving
+      @rcp.reload
+      assert_equal '', @rcp.comment
+
+      # This time saving and reloading
+      @rcp.comment= 'I told you so'
+      assert_equal 'I told you so', @rcp.comment
+      @rcp.save
+      @rcp.reload
+      assert_equal 'I told you so', @rcp.comment
+
+      # Modifying an existing rcpref
+      @rcp.comment= 'You told me so'
+      assert_equal 'You told me so', @rcp.comment
+      # Recall without saving
+      @rcp.reload
+      assert_equal 'I told you so', @rcp.comment
+
+      # This time saving and reloading
+      @rcp.comment= 'You told me so'
+      assert_equal 'You told me so', @rcp.comment
+      @rcp.save
+      @rcp.reload
+      assert_equal 'You told me so', @rcp.comment
+    end
+
     test 'maintains rcprefs during touching' do
       assert_equal 0, @rcp.num_cookmarks, "Should wake up with no cookmarks"
       assert !(@rcp.collectible_collected? @thing1.id), "Should wake up with no cookmark for user"
