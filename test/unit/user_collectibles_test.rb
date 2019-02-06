@@ -19,6 +19,8 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 1, user.recipes.size
     refute user.recipes.empty?
     user.uncollect rcp
+    # rcp.save
+    user.save
     user.reload
     assert user.recipes.empty?
 
@@ -64,6 +66,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert rcp.collectors.empty?
 
     user.collect rcp
+    user.save
     user.reload
     # ...though it will be among the collection_pointers and the recipes
     assert_equal 1, user.collection_pointers.size

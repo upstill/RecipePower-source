@@ -13,7 +13,7 @@ class RecipeUserTest < ActiveSupport::TestCase
 
     test 'caches and saves rcprefs appropriately' do
       assert_equal '', @rcp.comment
-      User.current = @rcp
+      User.current = @thing1
       @rcp.comment= 'I told you so'
       assert_equal 'I told you so', @rcp.comment
       # Because this is a new rcpref, it gets saved
@@ -26,6 +26,20 @@ class RecipeUserTest < ActiveSupport::TestCase
       @rcp.save
       @rcp.reload
       assert_equal 'You told me so', @rcp.comment
+      assert_equal 1, @rcp.toucher_pointers.count
+      assert_equal 0, @rcp.collector_pointers.count
+      assert_equal 1, @rcp.touchers.count
+      assert_equal @thing1, @rcp.touchers.first
+      assert_equal 0, @rcp.collector_pointers.count
+
+      @thing1.save
+      @thing1.reload
+      assert_equal 'You told me so', @thing1.touched_pointers.first.comment
+      assert_equal 1, @thing1.touched_pointers.count
+      assert_equal 0, @thing1.collection_pointers.count
+      assert_equal @rcp, @thing1.touched_pointers.first.entity
+      refute @thing1.recipes.first  # No collected recipes
+      assert_equal @rcp, @thing1.touched_recipes.first # ...but one touched recipe
     end
 
     test 'maintains rcprefs during touching' do

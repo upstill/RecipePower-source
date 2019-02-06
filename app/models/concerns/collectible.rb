@@ -54,7 +54,7 @@ module Collectible
 
     # Viewer_points refers to all users who have viewed it, whether it's collected or not
     has_many :toucher_pointers, :dependent => :destroy, :as => :entity, :class_name => 'Rcpref'
-    has_many :touchers, :through => :toucher_pointers, :autosave => true
+    has_many :touchers, :through => :toucher_pointers, :autosave => true, :source => 'user'
     scope :viewed_by_user, -> (userid, viewerid=userid) {
       joins(:toucher_pointers).merge(Rcpref.for_user(userid, viewerid, false))
     }                                                                                                                            
@@ -102,6 +102,16 @@ module Collectible
     cached_ref(false, user_id).try(&:in_collection) || false
   end
   alias_method :'collectible_collected?', :collected
+
+  # Ensure that the collectible is in the collection of [current user]
+  def collect user_id=User.current_id
+    be_touched user_id, true
+  end
+
+  # Remove the collectible from the collection of [current user]
+  def uncollect user_id=User.current_id
+    be_touched user_id, false
+  end
 
   # Create or update the touch status of this entity with the user
   # collect: true or false sets the in_collection status; nil ignores it

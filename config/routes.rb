@@ -109,9 +109,6 @@ RP::Application.routes.draw do
 
   get '/auth/:provider/callback' => 'authentications#create'
   post '/auth/:provider/callback' => 'authentications#create'
-  # !!! TODO: Why does this throw an error that 'auth_add' is created twice?
-  # get '/auth/:provider' => 'authentications#create', :as => 'auth_add'
-  # post '/auth/:provider' => 'authentications#create', :as => 'auth_add'
 
   devise_for :users, :skip => [:registrations], :controllers => {
                        :sessions => 'sessions',

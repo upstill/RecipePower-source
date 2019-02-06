@@ -162,32 +162,10 @@ class User < ApplicationRecord
     entity.be_touched id, and_collect
   end
 
+  # When a rcpref that involves the user is created, add it to the association(s)
   def update_associations ref
     self.touched_pointers << ref
   end
-=begin
-    ref.save if ref.changed? || !ref.persisted?
-    bust_associations
-    ref = touched_pointers.create_with(in_collection: collect).find_or_initialize_by user_id: id,
-                                                                                     entity_type: entity.class.base_class.to_s,
-                                                                                     entity_id: entity.id
-    if ref.created_at # Existed prior
-      if collect && !ref.in_collection
-        # We use the created_at time as "time of collection"
-        ref.created_at = ref.updated_at = Time.now
-        ref.in_collection = true
-        Rcpref.record_timestamps=false
-        ref.save
-        Rcpref.record_timestamps=true
-      else  # Just touch if previously saved
-        ref.touch
-      end
-    else # A new rcpref needs to be added to the entity
-      entity.toucher_pointers << ref unless entity.toucher_pointers.include?(ref)
-      entity.collector_pointers << ref if collect && !entity.collector_pointers.include?(ref)
-      ref.save if entity.id # Save the reference if it's safe
-    end
-=end
 
   # login is a virtual attribute placeholding for [username or email]
   attr_accessor :login
