@@ -162,8 +162,8 @@ class User < ApplicationRecord
     entity.be_touched id, and_collect
   end
 
-  def update_associations ref, for_sure
-    self.touched_pointers << ref if for_sure || !touched_pointers.where(entity: entity).first
+  def update_associations ref
+    self.touched_pointers << ref
   end
 =begin
     ref.save if ref.changed? || !ref.persisted?

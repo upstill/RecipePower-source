@@ -57,9 +57,9 @@ class Rcpref < ApplicationRecord
   end
 
   # Ensure that the ref is properly registered with both the user's and the entity's associations
-  def ensconce for_sure=true
-    user.update_associations self, for_sure
-    entity.update_associations self, for_sure
+  def ensconce
+    user.update_associations self
+    entity.update_associations self
   end
 
   # We add functionality to catch a newly-collected ref and peg the created_at date to now

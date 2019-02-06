@@ -68,8 +68,8 @@ module Collectible
   end
 
   # When a rcpref has been updated/created, make sure our associations are current
-  def update_associations ref, for_sure
-    self.rcprefs << ref if for_sure || !rcprefs.where(user_id: ref.user_id, entity: ref.entity).exists?
+  def update_associations ref
+    self.rcprefs << ref
   end
 
   def private user_id=User.current_id
@@ -82,7 +82,7 @@ module Collectible
     unless newval==true || newval==false
       newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
     end
-    cached_ref( true, user_id).private = newval
+    cached_ref( true, user_id) { |ref| ref.private = newval }
   end
   alias_method :'collectible_private=', :'set_private_for'
 
@@ -92,7 +92,7 @@ module Collectible
   alias_method :collectible_comment, :comment
 
   def set_comment_for str, user_id=User.current_id
-    cached_ref(true, user_id).comment = str
+    cached_ref(true, user_id) { |ref| ref.comment = str }
   end
   alias_method :'comment=', :set_comment_for
   alias_method :'collectible_comment=', :set_comment_for
@@ -109,13 +109,13 @@ module Collectible
     unless user_id.class == Fixnum
       user_id, collect = User.current_id, user_id
     end
-    cr = cached_ref(true, user_id)
-    if collect.nil?
-      cr.touch if cr.persisted?
-    else
-      cr.in_collection = collect
+    cached_ref(true, user_id) do |cr|
+      if collect.nil?
+        cr.touch if cr.persisted? # Touch will effectively happen when it's saved
+      else
+        cr.in_collection = collect
+      end
     end
-    cr.ensconce # Ready to be added_to/updated in associations for the entity and the user
   end
 
   # Present the time-since-touched in a text format
@@ -158,17 +158,25 @@ module Collectible
     if assert.class == Fixnum
       assert, user_id = false, assert
     end
-    unless (@cached_refs ||= {})[user_id]
-      unless @cached_refs.has_key?(user_id)
-        @cached_refs[user_id] ||=
+    if cr = (@cached_refs ||= {})[user_id]
+      yield(cr) if block_given?
+    else
+      unless @cached_refs.has_key?(user_id) # Nil means nil (i.e., no need to lookup the ref)
+        cr = @cached_refs[user_id] ||
             # Try to find the ref amongst the loaded refs, if any
             (rcprefs.loaded? && rcprefs.find { |rr| rr.user_id == user_id }) ||
             rcprefs.where(user_id: user_id).first
       end
       # Finally, build a new one as needed
-      @cached_refs[user_id] ||= rcprefs.new user_id: user_id if assert
+      if cr
+        yield(cr) if block_given?
+      elsif assert
+        cr = rcprefs.new user_id: user_id
+        yield(cr) if block_given?
+        cr.ensconce
+      end
     end
-    @cached_refs[user_id]
+    @cached_refs[user_id] = cr
   end
 
 

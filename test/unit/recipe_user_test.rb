@@ -16,21 +16,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       User.current = @rcp
       @rcp.comment= 'I told you so'
       assert_equal 'I told you so', @rcp.comment
-      # Recall without saving
-      @rcp.reload
-      assert_equal '', @rcp.comment
-
-      # This time saving and reloading
-      @rcp.comment= 'I told you so'
-      assert_equal 'I told you so', @rcp.comment
-      @rcp.save
-      @rcp.reload
-      assert_equal 'I told you so', @rcp.comment
-
-      # Modifying an existing rcpref
-      @rcp.comment= 'You told me so'
-      assert_equal 'You told me so', @rcp.comment
-      # Recall without saving
+      # Because this is a new rcpref, it gets saved
       @rcp.reload
       assert_equal 'I told you so', @rcp.comment
 
@@ -143,6 +129,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       assert !@rcp.collectible_collected?(@thing2.id), "User shouldn't get cookmarked when touched without collecting"
 
       @thing2.collect @rcp
+      @rcp.save
       assert_equal 2, @rcp.num_cookmarks, "Recipe's cookmark count should advance when cookmarked for second user"
       User.current = @thing2
       @rcp.reload
