@@ -19,6 +19,6 @@
 <% if @decorator.description.present? %>
     <p><%= @decorator.description %></p>
 <% end %>
-<% if comment = @notification.notifiable.sharer.comment_for(@decorator.object) %>
+<% if comment = @decorator.object.comment(@notification.notifiable.sharer.id) %>
     <p><%= comment %></p>
 <% end %>

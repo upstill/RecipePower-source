@@ -159,12 +159,6 @@ class User < ApplicationRecord
     Vote.vote entity, up, self
   end
 
-  def comment_for entity
-    if rcpref = touched_pointers.find_by(entity: entity)
-      rcpref.comment
-    end
-  end
-
   # Include the entity in the user's collection
   def collect entity
     touch entity, true
@@ -291,12 +285,9 @@ private
 
   public
 
+  # Does this user have this other user in their collection?
   def follows? (user)
-    if self.class == user.class
-      self.followees.include? user
-    else
-      self.followee_ids.include? user
-    end
+    collection_pointers.exists? entity: user
   end
 
   # Presents a hash of IDs with a switch value for whether to include that followee
@@ -550,7 +541,7 @@ private
 
   private
 
-  # Maintain a cache of rcprefs by user id
+  # Maintain a cache of modified rcprefs by user id
   # assert: build it if it doesn't already exist
   # user_id: the user_id that identifies rcpref for this entity
   def cached_tp assert=false, entity
