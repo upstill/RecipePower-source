@@ -3,6 +3,20 @@ require 'test_helper'
 class UserMergeTest < ActiveSupport::TestCase
   fixtures :users
 
+  test 'Correctly definining followers and followees' do
+    user1 = users(:thing1)
+    user2 = users(:thing2)
+    user2.collect user1
+    assert_equal 0, user1.followees.count
+    assert_equal 1, user2.followees.count
+    user1.save ; user1.reload
+    user2.save ; user2.reload
+    assert_equal 0, user1.followees.count
+    assert_equal 1, user2.followees.count
+    assert_equal 1, user1.touchers.count
+    assert_equal 0, user2.touchers.count
+  end
+
   test "Successfully creating users" do
     user1 = users(:thing1)
     user2 = users(:thing2)
@@ -16,11 +30,14 @@ class UserMergeTest < ActiveSupport::TestCase
     user1.recipes << dish1
     user1.recipes << dish2
     user1.save
+    user1.reload
 
     user2.collect dish2
     user2.collect dish3
     user2.collect user1
     user2.save
+    user2.reload
+    user1.reload
 
     fr1 = create(:user, username: "Follower1")
     fr2 = create(:user, username: "Follower2")
@@ -45,6 +62,8 @@ class UserMergeTest < ActiveSupport::TestCase
     user1.followees << fe2
     user2.followees << fe2
     user2.followees << fe3
+    user1.save ; user1.reload
+    user2.save ; user2.reload
 
     assert_equal 2, user1.recipes.count, "# recipes of user1 not right"
     assert_equal 2, user2.recipes.count, "# recipes of user2 not right"

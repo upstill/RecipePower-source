@@ -129,6 +129,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       sleep 6 # We can only touch things once in five seconds
       @thing1.touch @rcp
       @thing1.save
+      @rcp.reload
       assert_operator td1, :<, @rcp.touch_date(@thing1.id), "Touching should advance touch date"
     end
 
@@ -143,7 +144,8 @@ class RecipeUserTest < ActiveSupport::TestCase
       assert !@rcp.collectible_collected?(@thing2.id), "User shouldn't get cookmarked when touched without collecting"
 
       @thing2.collect @rcp
-      @rcp.save
+      @thing2.save
+      @rcp.reload
       assert_equal 2, @rcp.num_cookmarks, "Recipe's cookmark count should advance when cookmarked for second user"
       User.current = @thing2
       @rcp.reload

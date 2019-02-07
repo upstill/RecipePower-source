@@ -152,13 +152,6 @@ module Collectible
     super if defined? super
   end
 
-  def report_ref_cache
-    @cached_refs.values.each do |rr|
-      puts rr
-      rr.attributes.each { |key, value| puts "\t#{key}: #{value}" }
-    end
-  end
-
   protected
 
   # Maintain a cache of rcprefs by user id

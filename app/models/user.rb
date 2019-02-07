@@ -27,6 +27,25 @@ class User < ApplicationRecord
   def self.current_or_guest
     self.current || self.guest
   end
+  # We keep a cache of rcprefs that have been accessed by a user, to
+  # 1) speed up subsequent accesses
+  # 2) ensure that changes to refs are saved when the entity is saved.
+  # NB: this is because ActiveRecord doesn't keep a record of individual members of an association,
+  # and so can't :autosave them
+  before_save do
+    if @cached_tps
+      # We want to save rcprefs that need to be saved because they're not part of an association
+      # the sign of which is they're persisted and have an entity_id
+      # We save the cached refs that are newly created, under the assumption that
+      @cached_tps.values.compact.each { |ref| puts "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
+      @cached_tps = {}
+    end
+  end
+
+  def reload
+    @cached_tps = {}
+    super
+  end
   
   # The users are backgroundable to mail the latest newsletter
   include Backgroundable
@@ -159,12 +178,19 @@ class User < ApplicationRecord
   def touch entity=nil, and_collect=nil
     return super unless entity
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
-    entity.be_touched id, and_collect
+    # entity.be_touched id, and_collect
+    cached_tp(true, entity) do |cr|
+      if and_collect.nil?
+        cr.touch if cr.persisted? # Touch will effectively happen when it's saved
+      else
+        cr.in_collection = and_collect
+      end
+    end
   end
 
   # When a rcpref that involves the user is created, add it to the association(s)
   def update_associations ref
-    self.touched_pointers << ref
+    self.touched_pointers << ref unless ref.entity == self
   end
 
   # login is a virtual attribute placeholding for [username or email]
@@ -523,4 +549,33 @@ private
   end
 
   private
+
+  # Maintain a cache of rcprefs by user id
+  # assert: build it if it doesn't already exist
+  # user_id: the user_id that identifies rcpref for this entity
+  def cached_tp assert=false, entity
+    unless assert == false || assert == true
+      assert, user_id = false, assert
+    end
+    key = "#{entity.class.base_class.to_s}#{entity.id}"
+    if cr = (@cached_tps ||= {})[key]
+      yield(cr) if block_given?
+    else
+      unless @cached_tps.has_key?(key) # Nil means nil (i.e., no need to lookup the ref)
+        cr = @cached_tps[key] ||
+            # Try to find the ref amongst the loaded refs, if any
+            (touched_pointers.loaded? && touched_pointers.find { |rr| "#{rr.entity_type}#{rr.entity_id}" == key }) ||
+            touched_pointers.where(entity: entity).first
+      end
+      # Finally, build a new one as needed
+      if cr
+        yield(cr) if block_given?
+      elsif assert
+        cr = touched_pointers.new entity: entity
+        yield(cr) if block_given?
+        cr.ensconce
+      end
+    end
+    @cached_tps[key] = cr
+  end
 end

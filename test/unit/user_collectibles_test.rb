@@ -24,12 +24,17 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     user.reload
     assert user.recipes.empty?
 
+    rcp.reload
+    assert_equal 0, rcp.collector_pointers.count
+    assert_equal 1, rcp.toucher_pointers.count
+
     site = sites(:nyt)
     assert user.sites.empty?
     user.sites<<site
     assert_equal 1, user.sites.size
     refute user.sites.empty?
     user.uncollect site
+    user.save
     user.reload
     assert user.sites.empty?
 
@@ -39,6 +44,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 1, user.feeds.size
     refute user.feeds.empty?
     user.uncollect feed
+    user.save
     user.reload
     assert user.feeds.empty?
 
@@ -48,6 +54,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 1, user.followees.size
     refute user.followees.empty?
     user.uncollect collected_user
+    user.save
     user.reload
     assert user.followees.empty?
 
@@ -85,6 +92,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
 
     # Uncollecting it still leaves it touched
     user.uncollect rcp
+    user.save ; user.reload
     assert user.collection_pointers.empty?
     assert user.recipes.empty?
     assert_equal 1, user.touched_pointers.size
