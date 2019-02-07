@@ -36,15 +36,4 @@ class UserDecoratorTest < Draper::TestCase
     assert_equal user.id, tt.id
   end
 
-  test "it generates data map for object" do
-    user = users(:thing1)
-    tt = UserDecorator.new user
-    assert_equal user.id, tt.id
-    assert_nil user.remember_me
-    assert_nil tt.remember_me
-    data = tt.data
-    assert_equal user.id, data[:id]
-    assert_nil user.remember_me
-    assert_nil data[:remember_me]
-  end
 end

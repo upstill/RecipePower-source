@@ -7,7 +7,7 @@ class RemoveUserRelation < ActiveRecord::Migration[5.0]
     map = []
     ActiveRecord::Base.connection.execute(q).each do |h|
       # logger.debug "Relation of follower #{h['follower_id']} to followee #{h['followee_id']}"
-      puts "Relation of follower #{h['follower_id']} to followee #{h['followee_id']}"
+      # puts "Relation of follower #{h['follower_id']} to followee #{h['followee_id']}"
       id = h['follower_id']
       map[id] ||= []
       map[id] << h['followee_id']

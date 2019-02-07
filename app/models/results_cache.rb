@@ -344,16 +344,14 @@ module CollectibleSearch
 
   # What to sort on AND what to pass to #pluck for manual sorting
   def orderingscope iscope = itemscope
-    key =
-        case org
-        when :viewed
-          '"rcprefs"."updated_at" DESC'
-        when :newest
-          '"rcprefs"."created_at" DESC'
-        else
-          return super
-        end
-    [iscope, key]
+    case org
+    when :viewed
+      return [iscope, '"rcprefs"."updated_at" DESC', '"rcprefs"."updated_at"']
+    when :newest
+      return [iscope, '"rcprefs"."created_at" DESC', '"rcprefs"."created_at"']
+    else
+      return super
+    end
   end
 
   def count_tag tag, counts, iscope
@@ -1246,9 +1244,9 @@ class FeedsIndexCache < ResultsCache
   def orderingscope iscope=itemscope
     case org # Blithely assuming a singular itemscope
       when :updated
-        [ iscope, '"feeds"."last_post_date" DESC' ]
+        [ iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"' ]
       when :approved
-        [ iscope, '"feeds"."approved" DESC' ]
+        [ iscope, '"feeds"."approved" DESC', '"feeds"."approved"' ]
       else
         super
     end
@@ -1362,7 +1360,7 @@ class UserFriendsCache < ResultsCache
   end
 
   def orderingscope iscope=itemscope
-    org ? super : [ iscope, {:fullname => :DESC, :email => :ASC} ]
+    org ? super : [ iscope, {:fullname => :DESC, :email => :ASC}, 'fullname' ]
   end
 
   protected

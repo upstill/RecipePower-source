@@ -12,6 +12,9 @@
 
 ActiveRecord::Schema.define(version: 20190130041832) do
 
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "activ_notifications", force: :cascade do |t|
     t.integer  "target_id",       null: false
     t.string   "target_type",     null: false

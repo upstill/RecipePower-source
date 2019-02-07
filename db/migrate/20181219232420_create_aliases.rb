@@ -21,13 +21,13 @@ class CreateAliases < ActiveRecord::Migration[5.0]
       id, kind, url, aliases = datum
       if al = Alias.find_by(Alias.url_query url)
         # If there's a collision on url
-        logger.debug "Collision on #{url} with #{al.url}..."
+        # logger.debug "Collision on #{url} with #{al.url}..."
         PageRefServices.new(al.page_ref).absorb PageRef.find(id)
         false
       else
-        logger.debug "Creating Alias on url #{url}"
+        # logger.debug "Creating Alias on url #{url}"
         al = Alias.create(page_ref_id: id, url: url)
-        logger.debug "...saved as #{al.url}"
+        # logger.debug "...saved as #{al.url}"
         true
       end
     end
@@ -38,9 +38,9 @@ class CreateAliases < ActiveRecord::Migration[5.0]
       aliases.each do |url|
         unless al = Alias.find_by(Alias.url_query url)
           reduced_url = Alias.reduced_url url
-          logger.debug "Creating Alias on alias #{url} (reduced_url = '#{reduced_url}')..."
+          # logger.debug "Creating Alias on alias #{url} (reduced_url = '#{reduced_url}')..."
           al = Alias.create page_ref_id: id, url: url
-          logger.debug "...saved as #{al.url}"
+          # logger.debug "...saved as #{al.url}"
         end
       end
     end
@@ -58,7 +58,7 @@ class CreateAliases < ActiveRecord::Migration[5.0]
         end
       end
     end
-    puts violations
+    # puts violations
     remove_column :page_refs, :aliases
   end
 
