@@ -1,5 +1,6 @@
 class CollectibleController < ApplicationController
   before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card ]
+  before_action :set_current_user
   before_action :allow_iframe, only: :capture
 #  protect_from_forgery except: :capture
 

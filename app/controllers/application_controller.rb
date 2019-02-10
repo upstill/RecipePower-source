@@ -9,7 +9,7 @@ class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, prepend: true
 
   def self.filter_access_to *args
     # We have to declare a bogus before_action so filter_access_to can remove it without error
@@ -19,7 +19,6 @@ class ApplicationController < ActionController::Base
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
-  before_action { User.current = current_user }
   # after_action :log_serve
   after_action { report_session 'After controller'  }
   before_action :setup_response_service
@@ -107,6 +106,7 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
+    set_current_user # Ensure that models have access to the currently logged-in user
     # Finish whatever background task is associated with the entity
     entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params =
@@ -442,8 +442,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-#  protect_from_forgery
-
   def stored_location_for(resource_or_scope)
     # If user is logging in to complete some process, we return
     # the path to completing the capture/tagging process
@@ -470,10 +468,10 @@ class ApplicationController < ActionController::Base
     # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
 
-  # TODO XXX!!! This is a stub to eliminate the need for the authoreyes gem pending going to Ruby 2.3
-  # def permitted_to? (privilege, object_or_sym = nil, options = {})
-  #   true
-  # end
+  def set_current_user
+    User.current ||= current_user
+    logger.debug "Set current user with id #{User.current_id}"
+  end
 
   protected
 
