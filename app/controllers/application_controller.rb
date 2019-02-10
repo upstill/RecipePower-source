@@ -19,6 +19,7 @@ class ApplicationController < ActionController::Base
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
+  before_action :set_current_user
   # after_action :log_serve
   after_action { report_session 'After controller'  }
   before_action :setup_response_service
@@ -42,6 +43,13 @@ class ApplicationController < ActionController::Base
   helper_method :'permitted_to?'
 
   include ApplicationHelper
+
+  # The current user is frequently a factor in model machinations (for example, setting comments,
+  # which happens in a Collectible's associated Rcpref). The solution is to make the current user
+  # a (thread-safe) class attribute
+  def set_current_user
+    User.current = current_user
+  end
 
   def edit
     update_and_decorate
