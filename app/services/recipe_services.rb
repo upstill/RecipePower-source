@@ -86,7 +86,7 @@ class RecipeServices
       "Wouldn't destroy Recipe ##{recipe.id} (#{pr.url}): can be reached via gleaning"
     elsif ![400, 404, 410].include? recipe.gleaning.http_status
       "Wouldn't destroy Recipe ##{recipe.id} (#{pr.url}): gleaning HTTP isn't 400, 404 or 410 (is #{recipe.gleaning.http_status})"
-    elsif (recipe.user_ids - [1, 3, 5]).present?
+    elsif (recipe.collector_ids - [1, 3, 5]).present?
       "Can't destroy Recipe ##{recipe.id} (#{pr.url}) because of existing users"
     else
       if recipe.page_ref.bad? && recipe.page_ref.recipe_ids == [recipe.id]
