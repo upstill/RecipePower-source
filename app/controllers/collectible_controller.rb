@@ -15,7 +15,7 @@ class CollectibleController < ApplicationController
       end
       if params.has_key? :in_collection
         was_collected = @decorator.collectible_collected?
-        current_user.touch @decorator.object, params[:in_collection].to_boolean
+        current_user.touch @decorator.object, params[:in_collection].to_s.to_boolean
         @newly_deleted = !(@newly_collected = @decorator.collectible_collected?) if @decorator.collectible_collected? != was_collected
         msg << (@decorator.collectible_collected? ?
             ' now appearing in your collection.' :
@@ -238,7 +238,7 @@ class CollectibleController < ApplicationController
       end
       which_flash = (response_service.format == :html) ? :notice : (who ? :popup : :alert)
       if who
-        who.touch @decorator.object, params[:collect].to_boolean
+        who.touch @decorator.object, params[:collect].to_s.to_boolean
         verb = @resource.is_a?(User) ? 'Now Following' : 'Collected'
         flash[which_flash] = "Snap! #{verb} '#{@decorator.title}'." if params[:collect]
       else
