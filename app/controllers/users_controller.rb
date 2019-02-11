@@ -110,7 +110,7 @@ class UsersController < CollectibleController
       when 'lists.collected'
         @empty_msg = "No treasuries collected? You might want to #{view_context.link_to_submit 'see what\'s available here', '/lists.json'}.".html_safe
       when 'lists', 'lists.owned'
-        @empty_msg = "Haven't compiled any treasuries? Start one #{view_context.link_to_dialog('here', new_list_path, class: 'transient')}.".html_safe
+        @empty_msg = "Haven't compiled any treasuries? Start one #{view_context.link_to_dialog('here', new_list_path, class: 'transient')} or see what's on offer #{view_context.link_to_submit('here', '/lists.json')}.".html_safe
       when 'friends'
         @empty_msg = "See what other people are up to! #{view_context.link_to_submit 'Find potential friends here', '/users.json'}--or #{view_context.link_to_dialog('invite one of your own friends!', new_user_invitation_path)}!.".html_safe
       else

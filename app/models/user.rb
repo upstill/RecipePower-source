@@ -264,17 +264,15 @@ private
 
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
-    # Give him friends
-    f = [User.least_email('upstill'), User.least_email('arrone'), User.super_id]
-    f << self.invited_by_id if self.invited_by_id
-    self.followee_ids = f
+    # Give him friends: upstill, garrone, Super and whomever invited them
+    self.followee_ids = [ 1, 3, User.super_id, invited_by_id ].compact.uniq
 
     # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
     List.assert 'Keepers', self, create: true
     List.assert 'To Try', self, create: true
     List.assert 'Now Cooking', self, create: true
 
-    self.save
+    save
 
     # Make the inviter follow the newbie.
     if invited_by

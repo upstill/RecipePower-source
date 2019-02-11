@@ -407,7 +407,7 @@ class ApplicationController < ActionController::Base
 
   # before_action on controller that needs login to do anything
   def  login_required options={}
-    unless User.current
+    unless current_user # User.current has not yet been set at this point
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
       unless session.id

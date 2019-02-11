@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190130041832) do
+ActiveRecord::Schema.define(version: 20190211232340) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -365,6 +365,7 @@ ActiveRecord::Schema.define(version: 20190130041832) do
     t.integer  "edit_count",    default: 0
     t.string   "entity_type",   default: "Recipe"
     t.integer  "rating"
+    t.index ["user_id", "entity_type", "entity_id"], name: "index_rcprefs_on_user_id_and_entity_type_and_entity_id", unique: true, using: :btree
   end
 
   create_table "recipes", force: :cascade do |t|
