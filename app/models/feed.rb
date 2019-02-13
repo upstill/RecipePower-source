@@ -66,14 +66,6 @@ class Feed < ApplicationRecord
     end if feed.home_changed? && feed.home.present?
   end
 
-=begin
-  def valid_url?(uri)
-    uri = URI.parse(uri) && !uri.host.nil?
-  rescue URI::InvalidURIError
-    false
-  end
-=end
-
   has_many :feed_entries, :dependent => :destroy
 
   # When a feed is built, the url may be valid for getting to a feed, but it may also

@@ -1,5 +1,8 @@
 class AddIndexToRcprefs < ActiveRecord::Migration[5.0]
   def up
+    # Coincidentally, we ensure that all owned lists are touched by their owners,
+    # so they show up when ordered by last-viewed time
+    User.includes(:owned_lists).each { |u| u.owned_lists.each { |l| u.touch l } }
     refs = {}
     Rcpref.all.each do |ref|
       key = "#{ref.user_id} #{ref.entity_type} #{ref.entity_id}"
