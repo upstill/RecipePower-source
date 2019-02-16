@@ -27,4 +27,23 @@ class Results < HashWithIndifferentAccess
     prior.out = val_or_vals.is_a?(Array) ? val_or_vals : [val_or_vals]
   end
 
+  # We store each set of Result entities as a pair: a Finder id together with the strings it finds
+  def self.load str
+    return Results.new if str.blank?
+    hwia = YAML.load str
+    results = self.new
+    hwia.each do |key, result_vals|
+      results[key] = result_vals.map { |result_val| Result.load result_val }
+    end
+    results
+  end
+
+  def self.dump source
+    product = Results.new
+    source.each do |key, vals|
+      product[key] = vals.map { |result| Result.dump result }
+    end
+    YAML.dump product # Coders::YAMLColumn.new('HashWithIndifferentAccess').dump results # results.to_yaml
+  end
+
 end

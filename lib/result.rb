@@ -1,4 +1,5 @@
 class Result
+  include ActiveModel::Serialization
 
   attr_accessor :finderdata, :out
 
@@ -23,7 +24,7 @@ class Result
     unless str_out.blank?
       # Add to result
       str_out << '\t'+uri unless uri.blank?
-      self.out << str_out # Add to the list of results
+      self.out << str_out unless out.include?(str_out) # Add to the list of results
     end
   end
 
@@ -47,6 +48,25 @@ class Result
       outstr = atag.content
       push outstr, uri if uri =~ /#{matchstr}/ # Apply subsite constraint
     end
+  end
+
+  # Dump self into a YAML string for the Finder's id and the results array
+  def self.dump result
+    finder_id = result.finderdata[:id]
+    unless Finder.exists?(id: finder_id)
+      site = result.finderdata[:site] || Site.find_by(id: result.finderdata[:site_id])
+      finder = Finder.create result.finderdata.slice(:label, :selector, :attribute_name).merge(site: site)
+      finder_id = finder.id
+    end
+    {:finder_id => finder_id, :out => result.out}.to_yaml
+  end
+
+  # Un-serialize a string
+  def self.load str
+    hashvals = YAML.load str
+    result = self.new Finder.find(hashvals[:finder_id])
+    result.out = hashvals[:out]
+    result
   end
 
 end

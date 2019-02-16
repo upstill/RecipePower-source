@@ -14,7 +14,7 @@ class Gleaning < ApplicationRecord
 
   # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
-  serialize :results
+  serialize :results, Results
 
   # delegate :result_for, :results_for, :labels, :to => :results
 
