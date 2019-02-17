@@ -9,6 +9,7 @@
       <%= collectible_collect_button decorator, "lg" %>
       <%= feed_subscribe_button feed, :unsub_only => true %>
       <hr>
+      <%= feed_stars feed %>
       <%= feed.description %>
     </td>
     <td><%= decorator.extract 'tags' %><%# taggable_list feed %></td>

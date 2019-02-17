@@ -127,7 +127,15 @@ class ApplicationController < ActionController::Base
     end
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
-      current_user.touch(entity) if options[:touch]
+      case options[:touch]
+      when true
+        current_user.touch entity
+      when false
+        # Do not touch
+      when nil
+        # Touch iff previously persisted (i.e., don't add record)
+        current_user.touch(entity) if entity.id
+      end
       entity.update_attributes attribute_params if attribute_params.present? # There are parameters to update
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator

@@ -173,9 +173,10 @@ module NavtabsHelper
       end
 =end
       result = NestedBenchmark.measure 'collect feed links (old)' do
-        feed_set.collect { |f|
-          link_to_submit truncate(f.title, length: 30), feed_path(f), id: dom_id(f)
-        }
+        feed_set.collect { |f| [ f.entries_since(f.touch_date User.current_id).count, f] }.
+            sort_by(&:first).
+            reverse.
+            map { |pair| feed_menu_entry pair.last, pair.first }
       end
 =begin
       NestedBenchmark.measure 'collect feed links (new)' do

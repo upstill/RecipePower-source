@@ -135,6 +135,10 @@ class Feed < ApplicationRecord
       FeedEntry.where(feed_id: id).order('published_at DESC')
     end
   end
+
+  def entries_since date
+    feed_entries.where 'published_at > ?', (date || Time.now)
+  end
   
   # Check all feeds that are approved for feed-through for updates
   def self.update_now

@@ -1,0 +1,29 @@
+<!--Moved to activity_notification/mailer/users/invitation_sent_event/create.html.erb-->
+<% inviter_name = @resource.invitation_issuer %>
+<% accept_str = link_to("accept the invitation", 
+		accept_user_invitation_url(
+                :rpevent => InvitationAcceptedEvent.event_trigger_data(@resource, @resource.invited_by, @invitation_event),
+                :invitation_token => @resource.raw_invitation_token
+        )) %>
+		
+<p><%= accept_str.sub(/>accept /, ">Accept ").html_safe %></p>
+<%= inviter_name || "Someone" %> is inviting you to join
+<%= link_to("RecipePower", root_url)+(@resource.invitation_message.blank? ? "." : ", saying") %>
+<% unless @resource.invitation_message.blank? %>
+  <% if(@resource.invitation_message.length > 20) %>
+	<blockquote><%= @resource.invitation_message %></blockquote>
+  <% else %>
+	<q><%= @resource.invitation_message %></q><p>
+  <% end %>
+<% end %>
+--<br>
+<p>Hello, <%= @resource.handle %>!</p>
+Welcome to <%= link_to "RecipePower", root_url %>! This is your one-stop repository for keeping
+all your cooking-related findings from the Web. is the place to save your cooking inspirations from
+across the Web and share them with others. Join <%= inviter_name || "us" %> and keep your
+kitchen brain sharp and keen. Getting started takes just a few seconds, then
+you'll find what an amazing cooking tool the Web can be.
+<p>
+--<br>
+Steve Upstill
+<br>RecipePower Founder</p>

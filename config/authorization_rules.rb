@@ -36,6 +36,7 @@ authorization do
     includes :moderator
     has_permission_on [:tags, :referents, :lists, :feeds], :to => [:manage]
     has_permission_on [:tags], :to => [ :define ]
+    has_permission_on [:feeds], :to => [ :rate ]
   end
 
   role :admin do

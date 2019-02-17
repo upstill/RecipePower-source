@@ -88,6 +88,7 @@ class List < ApplicationRecord
     puts "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
+    user.touch l # ...to ensure it's visible in "recently viewed" lists
     l
   end
 

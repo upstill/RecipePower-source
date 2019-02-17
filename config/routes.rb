@@ -192,6 +192,7 @@ RP::Application.routes.draw do
       get 'refresh' # Refresh the feed's entries
       get 'contents'
       post 'approve' # (Admin only) approve the feed for presentation
+      post 'rate'
     end
   end
   match 'feeds', :controller => 'feeds', :action => 'index', :via => [:get, :post]

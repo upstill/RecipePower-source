@@ -16,6 +16,7 @@ class FeedsController < CollectibleController
     update_and_decorate
     # This is when we update the feed. When first showing it, we fire off an update job (as appropriate)
     # When it's time to produce results, we sync up the update process
+    @replacements = [ view_context.feed_menu_entry_replacement(@feed) ]
     smartrender
   end
 
@@ -105,6 +106,16 @@ class FeedsController < CollectibleController
     else
       flash[:popup] = 'Feed update is still in process'
       render :errors
+    end
+  end
+
+  def rate
+    @feed = Feed.find_by id: params[:id]
+    new_hotness = params[:hotness].try :to_i
+    if new_hotness >= 0 && new_hotness <= 5
+      @feed.update_attribute :hotness, new_hotness
+    else
+      flash[:error] = "'#{params[:hotness]}' is not a valid hotness"
     end
   end
 

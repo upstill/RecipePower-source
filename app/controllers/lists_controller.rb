@@ -83,7 +83,7 @@ class ListsController < CollectibleController
 
   def new
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
-    update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id), touch: true
+    update_and_decorate List.new(owner_id: params[:owner_id].to_i || current_user.id)
     smartrender
   end
 

@@ -77,5 +77,28 @@ module FeedsHelper
     [ "div.collectible-buttons##{dom_id decorator}", feed_collectible_buttons(decorator, options) ]
   end
 
+  def feed_menu_entry f, new_entries=f.entries_since(f.touch_date User.current_id).count
+    title = truncate f.title, length: 30
+    title << " (#{new_entries})" if new_entries > 0
+    link_to_submit title, feed_path(f), id: dom_id(f)
+  end
 
+  def feed_menu_entry_replacement f
+    [ "a##{dom_id f}", feed_menu_entry(f) ]
+  end
+
+  def feed_stars f
+    stars =
+    (1..5).to_a.collect do |hotness|
+      star = content_tag :span,
+      '',
+                         class: "glyphicon glyphicon-star#{'-empty' if f.hotness < hotness}"
+      link_to_submit star, rate_feed_path(f, hotness: hotness), method: 'POST'
+    end
+    content_tag :div, safe_join(stars, '&nbsp'.html_safe), id: dom_id(f), class: 'ratings'
+  end
+
+  def feed_stars_replacement f
+    [ "div.ratings##{dom_id f}", feed_stars(f) ]
+  end
 end

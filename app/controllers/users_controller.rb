@@ -104,7 +104,7 @@ class UsersController < CollectibleController
     if response_service.user.id == User.current_or_guest.id
       case params[:result_type]
       when 'recipes', 'cookmarks'
-        @empty_msg = "You haven't collected anything. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get some?".html_safe
+        @empty_msg = "You haven't collected anything. Why not install the #{view_context.link_to_submit 'Cookmark Button', '/cookmark.json', :mode => :modal} and go get something?".html_safe
       when 'feeds'
         @empty_msg = "There are no feeds in your collection. You might want to #{view_context.link_to_submit 'check out our existing offerings here', '/feeds.json'}.".html_safe
       when 'lists.collected'
