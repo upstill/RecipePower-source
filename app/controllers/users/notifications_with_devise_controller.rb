@@ -14,21 +14,6 @@ class Users::NotificationsWithDeviseController < ActivityNotification::Notificat
     end
   end
 
-  # Authenticate devise resource by Devise (e.g. calling authenticate_user! method).
-  # @api protected
-  # @todo Needs to call authenticate method by more secure way
-  # @return [Responce] Redirects for unsigned in target by Devise, returns HTTP 403 without neccesary target method or returns 400 when request parameters are not enough
-=begin
-  def authenticate_devise_resource!
-    begin
-      super
-    rescue Exception => e
-      # Handle Warden exception for not having the right user logged in
-      x=2
-    end
-  end
-=end
-
   # GET /:target_type/:target_id/notifications
   def index
     set_index_options

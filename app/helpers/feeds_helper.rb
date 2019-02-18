@@ -64,7 +64,7 @@ module FeedsHelper
       return if options[:unsub_only]
       label, path = 'Subscribe', collect_feed_path(item)
     end
-    link_to_submit label, path, { method: :post }.merge(options)
+    link_to_submit label, path, { method: :patch }.merge(options)
   end
 
   def feed_collectible_buttons decorator, options={}
