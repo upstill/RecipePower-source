@@ -1,5 +1,6 @@
 # require './lib/seeker.rb'
 require './lib/templateer.rb'
+require './lib/nested_benchmark.rb'
 require 'rp_event'
 require 'reloader/sse'
 require 'results_cache.rb'
