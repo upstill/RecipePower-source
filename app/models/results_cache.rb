@@ -219,7 +219,8 @@ class OrgOptions < Array
            posted: ['LATEST POST', 12],
            alphabetic: ['NAME', 13],
            activity: ['ACTIVITY', 14],
-           meaningless: ['MEANINGLESS', 15]
+           meaningless: ['MEANINGLESS', 15],
+           hotness: [ 'HOTNESS', 16 ]
   )
 
   def self.lookup val
@@ -1241,21 +1242,23 @@ class FeedsIndexCache < ResultsCache
         end
   end
 
-  def orderingscope iscope=itemscope
+  def orderingscope iscope = itemscope
     case org # Blithely assuming a singular itemscope
-      when :updated
-        [ iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"' ]
-      when :approved
-        [ iscope, '"feeds"."approved" DESC', '"feeds"."approved"' ]
-      else
-        super
+    when :hotness
+      [iscope, '"feeds"."hotness" DESC', '"feeds"."hotness"']
+    when :posted
+      [iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"']
+    when :approved
+      [iscope, '"feeds"."approved" DESC', '"feeds"."approved"']
+    else
+      super
     end
   end
 
   protected
 
   def supported_org_options
-    [ :updated, :newest, (:approved if admin_view) ].compact
+    [ :hotness, :posted, :newest, (:approved if admin_view) ].compact
   end
 
 end

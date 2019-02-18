@@ -28,6 +28,7 @@ en:
       alphabetic: 'NAME'
       activity: 'ACTIVITY'
       meaningless: 'UNDEFINED'
+      hotness: 'HOTNESS'
   referent:
     card_labels:
       parents: 'In Categories'

@@ -93,7 +93,7 @@ module FeedsHelper
       star = content_tag :span,
       '',
                          class: "glyphicon glyphicon-star#{'-empty' if f.hotness < hotness}"
-      link_to_submit star, rate_feed_path(f, hotness: hotness), method: 'POST'
+      response_service.admin_view? ? link_to_submit( star, rate_feed_path(f, hotness: hotness), method: 'POST') : star
     end
     content_tag :div, safe_join(stars, '&nbsp'.html_safe), id: dom_id(f), class: 'ratings'
   end

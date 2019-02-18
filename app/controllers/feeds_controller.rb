@@ -23,13 +23,6 @@ class FeedsController < CollectibleController
   def contents
     @active_menu = :feeds
     if update_and_decorate
-=begin
-      if params[:content_mode] && (params[:content_mode] == 'results')
-        @feed.bkg_sync
-      else # Don't bother if the last update came in in the last hour
-        @feed.launch_update (updated_at < Time.now - 1.hour) # Set a job running to update the feed, as necessary
-      end
-=end
       if params[:last_entry_id] # Only return entries that have been gathered since this one
         since = (fe = FeedEntry.find_by(id: params[:last_entry_id])) ?
             (fe.published_at+1.second) :
@@ -114,6 +107,7 @@ class FeedsController < CollectibleController
     new_hotness = params[:hotness].try :to_i
     if new_hotness >= 0 && new_hotness <= 5
       @feed.update_attribute :hotness, new_hotness
+      @feed.update_attribute :updated_at, @feed.updated_at+1.second # Bust the display cache, but only minimally
     else
       flash[:error] = "'#{params[:hotness]}' is not a valid hotness"
     end
