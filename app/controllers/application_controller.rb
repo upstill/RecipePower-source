@@ -130,14 +130,20 @@ class ApplicationController < ActionController::Base
         current_user # Only the current user gets to touch/modify a model
       case options[:touch]
       when true
-        current_user.touch entity
+        entity.be_touched
       when false
         # Do not touch
+      when :collect # Add it to the collection
+        entity.be_collected
       when nil
         # Touch iff previously persisted (i.e., don't add record)
-        current_user.touch(entity) if entity.id
+        entity.be_touched if entity.persisted?
       end
-      entity.update_attributes attribute_params if attribute_params.present? # There are parameters to update
+      if attribute_params.present? # There are parameters to update
+        entity.update_attributes attribute_params
+      elsif entity.persisted? # If not, look at saving the toucher_pointer
+        entity.save
+      end
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{entity.model_name.singular}", entity

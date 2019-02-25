@@ -172,17 +172,12 @@ class CollectibleController < ApplicationController
       misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
       # Now the parameters should reflect the target type, and we can proceed as usual
       update_options = (request.method == 'GET') ?
-                           {} :
+                           { touch: :collect } :  # Ensure that it's collected before editing
                            # We have to provide update parameters, in case the model name doesn't match the controller
                            { update_attributes: true, attribute_params: strong_parameters(modelname) }
       update_and_decorate model, update_options
       # ...now we apply the misc tag tokens (if any) according to the constraints of the decorator
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
-      unless @decorator.errors.any? || @decorator.collectible_collected? # Ensure that it's collected before editing
-        current_user.collect @decorator.object
-        @decorator.save
-        flash.now[:notice] = "'#{@decorator.title.truncate(50)}' has been added to your collection for tagging" # if @decorator.object.errors.empty?
-      end
       if resource_errors_to_flash @decorator, preface: 'Couldn\'t save.'
         render :errors
       else
@@ -301,14 +296,9 @@ class CollectibleController < ApplicationController
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     entity, modelparams = proxify
     params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
-=begin
-    @resource = CollectibleServices.find_or_create params[response_service.controller_model_name],
-                                                 response_service.controller_model_class
-=end
-    update_and_decorate entity, touch: true, update_attributes: true
+    update_and_decorate entity, touch: :collect, update_attributes: true
     entity.bkg_land # Glean title, etc. as necessary
     if entity.errors.empty? # Success (valid recipe, either created or fetched)
-      current_user.collect entity if current_user  # Add to collection
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page.
           redirect_to default_next_path

@@ -18,7 +18,9 @@ module Collectible
     # 2) ensure that changes to refs are saved when the entity is saved.
     # NB: this is because ActiveRecord doesn't keep a record of individual members of an association,
     # and so can't :autosave them
-    before_save do
+    before_save :flush_ref_cache
+
+    def flush_ref_cache
       if @cached_refs
         # We want to save rcprefs that need to be saved because they're not part of an association
         # the sign of which is they're persisted and have an entity_id
@@ -33,8 +35,16 @@ module Collectible
       super
     end
 
+    def save options={}
+      if changed?
+        super
+      else
+        flush_ref_cache
+      end
+    end
+
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
-    has_many :rcprefs, :dependent => :destroy, :as => :entity
+    has_many :rcprefs, :dependent => :destroy, :as => :entity, :autosave => true
 
     # Scope for the collection of entities that are collected by the user denoted by 'id'
     scope :including_user_pointer, -> (id) { includes(:rcprefs).where rcprefs: { user_id: id } }
@@ -108,9 +118,9 @@ module Collectible
     be_touched user_id, true
   end
 
-  # Remove the collectible from the collection of [current user]
-  def uncollect user_id=User.current_id
-    be_touched user_id, false
+  # Ensure that the collectible is in the collection of [current user]
+  def be_collected user_id=User.current_id
+    be_touched user_id, true
   end
 
   # Create or update the touch status of this entity with the user
@@ -174,7 +184,7 @@ module Collectible
       if cr
         yield(cr) if block_given?
       elsif assert
-        cr = rcprefs.new user_id: user_id
+        cr = rcprefs.new user_id: user_id, entity: self
         yield(cr) if block_given?
         cr.ensconce
       end

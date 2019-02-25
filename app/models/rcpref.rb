@@ -51,10 +51,12 @@ class Rcpref < ApplicationRecord
   def ensure_unique
   end
 
+=begin
   def uncollect
     self.in_collection = false
     save
   end
+=end
 
   # Ensure that the ref is properly registered with both the user's and the entity's associations
   def ensconce
