@@ -120,7 +120,11 @@ class FinderServices
         when 'RSS Feed'
         when 'Image'
           result.out = result.out.collect { |url|
-            url.match(/^data:/) ? url : safe_uri_join(pagehome, url).to_s
+            begin
+              url.match(/^data:/) ? url : safe_uri_join(pagehome, url).to_s
+            rescue Exception => e
+              nil
+            end
           }.compact
       end
       if result.found

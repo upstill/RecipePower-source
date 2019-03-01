@@ -15,7 +15,7 @@ class CollectibleController < ApplicationController
       end
       if params.has_key? :in_collection
         was_collected = @decorator.collectible_collected?
-        current_user.touch @decorator.object, params[:in_collection].to_s.to_boolean
+        @decorator.be_touched params[:in_collection].to_s.to_boolean
         @newly_deleted = !(@newly_collected = @decorator.collectible_collected?) if @decorator.collectible_collected? != was_collected
         msg << (@decorator.collectible_collected? ?
             ' now appearing in your collection.' :
@@ -154,7 +154,7 @@ class CollectibleController < ApplicationController
     proxy = PageRefServices.new(page_ref).editable_entity nominal_entity, params
     # We're really going to tag the accompanying entity (Site or Recipe)
     # We need to rejigger the parameters so they find their way to the proxy entity.
-    return proxy, (nominal_entity || page_ref).decorate.translate_params_for(entity_params, proxy)
+    return proxy, (nominal_entity || page_ref).decorate.translate_params_for(entity_params || prparams, proxy)
   end
 
   # GET tag
@@ -320,7 +320,9 @@ class CollectibleController < ApplicationController
       }
       response_service.title = 'Cookmark a ' + entity.class.to_s
       @nav_current = :addcookmark
-      @decorator.url = params[response_service.controller_model_name][:url]
+      linkbearer = params[response_service.controller_model_name] || params[:page_ref]
+      @decorator = (@page_ref = PageRef.new linkbearer.slice(:url)).decorate
+      # @decorator.url = linkbearer[:url]
       smartrender :action => 'new', mode: :modal
     end
   end

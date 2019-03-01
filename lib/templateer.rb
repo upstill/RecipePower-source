@@ -89,7 +89,7 @@ module Templateer
   end
 
   def field_name what
-    "#{object_type}[#{what}]"
+    "#{object_type}[#{attribute_for(what).if_present || what}]"
   end
 
   def object_path

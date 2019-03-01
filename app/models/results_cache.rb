@@ -69,7 +69,9 @@ class Counts < Hash
   # Define an array of itemstubs: strings denoting entity type/value pairs
   def itemstubs sorted=true
     # Sort the count keys in descending order of hits
-    @itemstubs ||= sorted ? self.keys.sort { |k1, k2| self[k2] <=> self[k1] } : self.keys
+    @itemstubs ||= sorted ? self.keys.sort { |k1, k2|
+      self[k2] <=> self[k1]
+    } : self.keys
   end
 
   def partition bounds
@@ -1238,18 +1240,18 @@ class FeedsIndexCache < ResultsCache
           when 'approved' # Default: normal user view for shopping for feeds (only approved feeds)
             Feed.where approved: true
           else
-            Feed.where approved: (admin_view ? approved : true)
+            Feed.unscoped  # where approved: (admin_view ? approved : true)
         end
   end
 
   def orderingscope iscope = itemscope
     case org # Blithely assuming a singular itemscope
     when :hotness
-      [iscope, '"feeds"."hotness" DESC', '"feeds"."hotness"']
+      [ iscope, '"feeds"."hotness" DESC', '"feeds"."hotness"']
     when :posted
-      [iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"']
+      [ iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"']
     when :approved
-      [iscope, '"feeds"."approved" DESC', '"feeds"."approved"']
+      [ iscope, '"feeds"."approved" DESC', 1  ]
     else
       super
     end
