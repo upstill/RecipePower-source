@@ -8,8 +8,8 @@ class CollectibleServices
     self.entity = entity
   end
 
-  # Either fetch an existing object or make a new one, of the given klass, based on the
-  # params. If the params have an :id, we find on that, otherwise we look
+  # Either fetch an existing object or make a new one #    -- of the given klass, #    -- using the page_ref for its external reference #    -- parametrized by the params.
+  # If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. If there are no params, just return a new recipe
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
@@ -55,14 +55,14 @@ class CollectibleServices
       # No id: create based on url
       params.delete :rcpref
       # Assigning title and picurl must wait until the url (and hence the page_ref) is set
-      entity = klass.new
+      entity = (klass==Site) ? Site.find_or_create(page_ref.try(:url) || url) : klass.new
       if uri.to_s.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
         entity.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
       else
         if page_ref
-          entity.page_ref ||= page_ref
+          entity.page_ref ||= page_ref # Assign the provided page_ref to the entity
         else
-          entity.url = url
+          entity.url = url unless entity.url.present? # No pre-existing page_ref => ensure that the entity has one
         end
         entity.decorate.findings = findings # Now set the title, description, etc.
       end

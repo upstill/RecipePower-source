@@ -86,7 +86,7 @@ class PageRef < ApplicationRecord
 =end
 
   after_save do |pr|
-    if !pr.site_id && pr.url.present?
+    if pr.url.present? && !(pr.site_id || pr.site)
       puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
       unless pr.site = Site.find_by(page_ref_id: id)
         pr.site = Site.find_or_create_for pr.url

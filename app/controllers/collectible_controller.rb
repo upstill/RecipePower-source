@@ -320,9 +320,8 @@ class CollectibleController < ApplicationController
       }
       response_service.title = 'Cookmark a ' + entity.class.to_s
       @nav_current = :addcookmark
-      linkbearer = params[response_service.controller_model_name] || params[:page_ref]
-      @decorator = (@page_ref = PageRef.new linkbearer.slice(:url)).decorate
-      # @decorator.url = linkbearer[:url]
+      linkparam = (params[response_service.controller_model_name] || params[:page_ref]).extract!(:kind, :url).permit(:kind, :url)
+      @decorator = (@page_ref = PageRef.new linkparam).decorate
       smartrender :action => 'new', mode: :modal
     end
   end

@@ -1,6 +1,7 @@
 <%# Default modal dialog for editing a (collectible, taggable) item. May be overwritten for other controllers  %>
 <% decorator ||= @decorator || TemplateDecorator.new # If no decorator provided, assume this is for a template    %>
-<%= modal_dialog "tag-collectible new-style green", decorator.title.truncate(70), dialog_class: 'modal-lg' do %>
+<% ttl = decorator.title.if_present || '' %>
+<%= modal_dialog "tag-collectible new-style green", ttl.truncate(70), dialog_class: 'modal-lg' do %>
     <%= render 'form_tag', decorator: @decorator %>
 <% end %>
 
