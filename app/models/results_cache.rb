@@ -286,12 +286,12 @@ module DefaultSearch
     [ iscope,
     case org
       when :newest
-        'created_at'
+        ['created_at DESC', 'created_at']
       when :updated
-        'updated_at'
+        ['updated_at DESC', 'updated_at']
       else # :ratings, :popularity, :random, :viewed, :approved, :referent_id, :recipe_count, :feed_count, :definition_count
         nil
-    end ]
+    end ].flatten
   end
 
   # This is the end of the superclass hierarchy for counting a tag, so we return the unmodified counts
@@ -1014,7 +1014,7 @@ class UserFeedsCache < UsersCollectionCache
   def orderingscope iscope=itemscope
     case org
       when :posted
-        [ iscope, 'last_post_date' ]
+        [ iscope, 'last_post_date DESC', 'last_post_date' ]
       else
         super
     end
@@ -1077,7 +1077,7 @@ class UserOwnedListsCache < ResultsCache
   include CollectibleSearch
 
   def orderingscope iscope = itemscope
-    @org == :newest ? [ iscope, 'created_at' ] : super
+    @org == :newest ? [ iscope, 'created_at DESC', 'created_at' ] : super
   end
 
   def itemscope
@@ -1165,7 +1165,7 @@ class ListsShowCache < ResultsCache
         case org
           when :newest
             # Newest in the list
-            [ iscope, 'taggings.created_at' ]
+            [ iscope, 'taggings.created_at DESC', 'taggings.created_at' ]
           else
             super
         end
@@ -1249,7 +1249,7 @@ class FeedsIndexCache < ResultsCache
     when :hotness
       [ iscope, '"feeds"."hotness" DESC', '"feeds"."hotness"']
     when :posted
-      [ iscope, '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"']
+      [ iscope.where.not(last_post_date: nil), '"feeds"."last_post_date" DESC', '"feeds"."last_post_date"']
     when :approved
       [ iscope, '"feeds"."approved" DESC', 1  ]
     else
@@ -1492,7 +1492,7 @@ class SitesIndexCache < ResultsCache
       when :approved
         [ iscope, (admin_view ? '"sites"."approved"' : '"sites"."id"') ]
       when :newest
-        [ iscope, '"sites"."created_at"' ]
+        [ iscope, '"sites"."created_at" DESC', '"sites"."created_at"' ]
     end || super
   end
 
