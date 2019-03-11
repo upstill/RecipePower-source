@@ -283,15 +283,15 @@ module DefaultSearch
   #  -- (optionally) a key for fetching the sort value from the scope (without ordering)
   # USES @org parameter, which indicates how to sort the iscope relation
   def orderingscope iscope=itemscope
-    [ iscope,
+    [ iscope ] +
     case org
       when :newest
         ['created_at DESC', 'created_at']
       when :updated
         ['updated_at DESC', 'updated_at']
       else # :ratings, :popularity, :random, :viewed, :approved, :referent_id, :recipe_count, :feed_count, :definition_count
-        nil
-    end ].flatten
+        [ ]
+    end
   end
 
   # This is the end of the superclass hierarchy for counting a tag, so we return the unmodified counts
@@ -606,7 +606,7 @@ class ResultsCache < ApplicationRecord
 
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
-  def self.retrieve_or_build session_id, result_types, params_hash={}
+  def self.retrieve_or_build session_id, result_types, viewer, params_hash={}
     # Derive the subclass of ResultsCache that will handle generating items
     caching_class = self
     if (self == ResultsCache) && params_hash['controller'].present? && params_hash['action'].present?
@@ -620,17 +620,14 @@ class ResultsCache < ApplicationRecord
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
       # Give the class a chance to defer to a subclass based on the result type
       cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
-      viewer = params_hash.delete(:viewer) ||
-          ((vid = params_hash.delete(:viewer_id)) && User.find_by(id: vid)) ||
-          User.current_or_guest
       rc_params = cc.extract_params params_hash
       # We SEARCH on the rc_attribs. The rest of the parameters are stored in the model's params.
       # The difference is that the cache gets busted if the params change
       # rc = cc.find_by(rc_attribs) || cc.new(rc_attribs)
       rc = cc.create_with(params: rc_params).
           find_or_initialize_by session_id: session_id,
-                                viewer: viewer,
-                                result_type: params_hash[:result_type]
+                                result_type: result_type, # params_hash[:result_type],
+                                viewer: viewer
 
       # For purposes of busting the cache, we assume that sort direction is irrelevant
       # NB: At the point, the params_hash in rc are in exactly the same form as the query params_hash, i.e. strings

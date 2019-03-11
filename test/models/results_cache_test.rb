@@ -13,7 +13,7 @@ class ResultsCacheTest < ActiveSupport::TestCase
     assert_nil rc.param(:random)
 =end
 
-    rc = UserFeedsCache.retrieve_or_build "abcde", ['integers'], viewer_id: vid, org: :posted
+    rc = UserFeedsCache.retrieve_or_build "abcde", ['integers'], users(:thing1), org: :posted
     rc = rc.first
     assert_equal vid, rc.viewer_id
     assert_equal :posted, rc.param(:org)
