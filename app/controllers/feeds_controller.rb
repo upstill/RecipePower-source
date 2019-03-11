@@ -94,7 +94,10 @@ class FeedsController < CollectibleController
       else
         n_new = @feed.feed_entries_count - n_before
         flash[:popup] = labelled_quantity(n_new, 'New entry')+' found'
-        render :refresh, locals: {followup: (n_new > 0)}
+        respond_to do |format|
+          format.html { redirect_to contents_feed_path(@feed) }
+          format.json { render :refresh, locals: {followup: (n_new > 0)} }
+        end
       end
     else
       flash[:popup] = 'Feed update is still in process'
