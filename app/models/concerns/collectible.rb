@@ -36,8 +36,9 @@ module Collectible
     end
 
     def save options={}
-      super
+      result = super
       flush_ref_cache
+      return result
     end
 
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using

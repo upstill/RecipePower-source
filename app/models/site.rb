@@ -194,7 +194,9 @@ public
     # Steal feeds
     self.feed_ids = feed_ids | other.feed_ids
     other.feeds = []
-    self.page_ref_ids = page_ref_ids | other.page_ref_ids
+    # self.page_ref_ids = page_ref_ids | other.page_ref_ids
+    prids = page_ref_ids
+    other.page_refs.each { |pr| self.page_refs << pr unless prids.include?(pr.id) }
     other.page_refs = []
     super(other) if defined?(super) # Let the taggable, collectible, etc. modules do their work
     other.destroy if destroy

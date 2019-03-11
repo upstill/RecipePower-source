@@ -307,7 +307,7 @@ module DefaultSearch
     oscope = oscope.order sort_key if sort_key
     oscope = oscope.includes(:entity) if %w{ rcprefs taggings }.include? iscope.model_name.collection
     # oscope = oscope.includes(:rcprefs) if iscope.model.is_a?(Collectible)
-    oscope = oscope.including_user_pointer(viewerid) if iscope.model.is_a?(Collectible)
+    oscope = oscope.including_user_pointer(viewer_id) if iscope.model.is_a?(Collectible)
     oscope.offset(offset).limit(limit).to_a
   end
 
@@ -461,7 +461,7 @@ module CollectionCache
   def itemscopes
     # :entity_type => %w{ Recipe Site FeedEntry }, Feed
     @itemscopes ||= [result_type.entity_params[:entity_type]].flatten.collect { |entity_type|
-      entity_type.constantize.collected_by_user @entity_id, viewerid
+      entity_type.constantize.collected_by_user @entity_id, viewer_id
     }.compact
   end
 
@@ -534,7 +534,7 @@ class NullResults
 
   # Declare the parameters needed for this class
   def self.params_needed
-    # [:entity_id, :viewerid, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
+    # [:entity_id, :viewer_id, :admin_view, :querytags, [:org, :newest], :sort_direction, [ :result_type, '' ] ]
     [:admin_view, [:org, :newest]]
   end
 
@@ -604,11 +604,6 @@ class ResultsCache < ApplicationRecord
     @org ||= org_options.first
   end
 
-  # Just a memo for the viewer's id
-  def viewerid
-    @viewerid ||= viewer.id
-  end
-
   # Get the current results cache and return it if relevant. Otherwise,
   # create a new one
   def self.retrieve_or_build session_id, result_types, params_hash={}
@@ -625,16 +620,17 @@ class ResultsCache < ApplicationRecord
       # The choice of handling class, and thus the cache, is a function of the result type required as well as the controller/action pair
       # Give the class a chance to defer to a subclass based on the result type
       cc = caching_class.respond_to?(:subclass_for) ? caching_class.subclass_for(result_type) : caching_class
+      viewer = params_hash.delete(:viewer) ||
+          ((vid = params_hash.delete(:viewer_id)) && User.find_by(id: vid)) ||
+          User.current_or_guest
       rc_params = cc.extract_params params_hash
-      rc_attribs = {
-          session_id: session_id,
-          viewer: User.current_or_guest,
-          result_type: params_hash[:result_type]
-      }
       # We SEARCH on the rc_attribs. The rest of the parameters are stored in the model's params.
       # The difference is that the cache gets busted if the params change
       # rc = cc.find_by(rc_attribs) || cc.new(rc_attribs)
-      rc = cc.create_with(params: rc_params).find_or_initialize_by rc_attribs
+      rc = cc.create_with(params: rc_params).
+          find_or_initialize_by session_id: session_id,
+                                viewer: viewer,
+                                result_type: params_hash[:result_type]
 
       # For purposes of busting the cache, we assume that sort direction is irrelevant
       # NB: At the point, the params_hash in rc are in exactly the same form as the query params_hash, i.e. strings
@@ -1000,7 +996,7 @@ class UsersBiglistCache < UsersCollectionCache
 
   def itemscope
     @itemscope ||=
-        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', viewerid).
+        Rcpref.where('private = false OR "rcprefs"."user_id" = ?', viewer_id).
             where.not(entity_type: %w{ Feed User List})
   end
 end
@@ -1023,7 +1019,7 @@ class UserFeedsCache < UsersCollectionCache
   def itemscope
     # If we're looking at the feeds with the latest post, ignore those
     # with no posts, which would otherwise come up first
-    scope = Feed.collected_by_user @entity_id, viewerid
+    scope = Feed.collected_by_user @entity_id, viewer_id
     org == :posted ? scope.where.not(last_post_date: nil) : scope
   end
 
@@ -1083,7 +1079,7 @@ class UserOwnedListsCache < ResultsCache
   def itemscope
     unless @itemscope
       @itemscope = user.decorate.owned_lists viewer
-      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @org == :viewed
+      @itemscope = @itemscope.viewed_by_user(@entity_id, viewer_id) if @org == :viewed
     end
     @itemscope
   end
@@ -1173,7 +1169,7 @@ class ListsShowCache < ResultsCache
 
   # The itemscope is the initial query for all possible items
   def itemscope
-    @itemscope ||= list_services.tagging_query viewerid
+    @itemscope ||= list_services.tagging_query viewer_id
   end
 
   def stream_id # public
@@ -1230,7 +1226,7 @@ class FeedsIndexCache < ResultsCache
     @itemscope ||=
         case result_type.subtype
           when 'collected' # Feeds actually collected by user and friends
-            persons_of_interest = [viewerid, 1, 3, 5].map(&:to_s).join(',')
+            persons_of_interest = [viewer_id, 1, 3, 5].map(&:to_s).join(',')
             Feed.joins(:collector_pointers).
                 where("rcprefs.user_id in (#{persons_of_interest})").
                 order("rcprefs.user_id DESC").# User's own feeds first
@@ -1324,7 +1320,7 @@ class UsersIndexCache < ResultsCache
               # Exclude the viewer and all their friends
               User.where(private: false).
                   where('count_of_collecteds > 0').
-                  where.not(id: viewer.followee_ids+[viewerid, 4, 5]).
+                  where.not(id: viewer.followee_ids+[viewer_id, 4, 5]).
                   order('count_of_collecteds DESC')
             else
               User.where(private: false).where.not(id: [4, 5])
@@ -1359,7 +1355,7 @@ class UserFriendsCache < ResultsCache
   def itemscope
     unless @itemscope
       @itemscope = user.followees
-      @itemscope = @itemscope.viewed_by_user(@entity_id, viewerid) if @entity_id != viewerid
+      @itemscope = @itemscope.viewed_by_user(@entity_id, viewer_id) if @entity_id != viewer_id
     end
     @itemscope
   end
@@ -1477,7 +1473,7 @@ class SitesIndexCache < ResultsCache
 
   def itemscope
     @itemscope ||= Site.
-        including_user_pointer(viewerid).
+        including_user_pointer(viewer_id).
         includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
         where(approved: approved)
   end

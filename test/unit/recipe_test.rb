@@ -90,13 +90,13 @@ class RecipeTest < ActiveSupport::TestCase
   test "bad url reassigned over good url" do
     good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
     recipe = Recipe.new title: 'some damn thing', url: good_url
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     assert recipe.page_ref.virgin?
     assert_equal good_url, recipe.url
     assert_nil recipe.id
     assert_nil recipe.page_ref.id
     assert recipe.save
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     assert !recipe.page_ref.errors.any?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
@@ -104,7 +104,7 @@ class RecipeTest < ActiveSupport::TestCase
     bad_url = "https://patijinich.com/2012/05/creamy-poblano-soup.html"
     recipe.url = bad_url
     assert_equal bad_url, recipe.url
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     recipe.page_ref.bkg_land
     assert recipe.page_ref.bad?
 
@@ -117,13 +117,13 @@ class RecipeTest < ActiveSupport::TestCase
   test "url reassigned over bad url" do
     bad_url = "https://patijinich.com/2012/05/creamy-poblano-soup.html"
     recipe = Recipe.new title: 'some damn thing', url: bad_url
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     assert recipe.page_ref.virgin?
     assert_equal bad_url, recipe.url
     assert_nil recipe.id
     assert_nil recipe.page_ref.id
     assert recipe.save
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     assert !recipe.page_ref.errors.any?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
@@ -131,7 +131,7 @@ class RecipeTest < ActiveSupport::TestCase
     good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
     recipe.url = good_url
     assert_equal good_url, recipe.url
-    assert !recipe.errors.any?
+    assert recipe.errors.empty?
     recipe.page_ref.bkg_land
     assert recipe.page_ref.good?
 

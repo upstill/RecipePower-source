@@ -23,7 +23,6 @@ class ScraperTest < ActiveSupport::TestCase
     TagsCache.delete_all
     Tagset.delete_all
     User.delete_all
-    UserRelation.delete_all
     Vote.delete_all
     Delayed::Job.delete_all
     User.super_id = (User.find(User.super_id) rescue User.create(email: 'mesuper@bogus.com')).id
