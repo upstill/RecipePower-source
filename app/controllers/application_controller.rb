@@ -126,7 +126,8 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
-    if entity.errors.empty? && # No probs. so far
+    if entity.errors.empty?  &&  # No probs. so far
+        entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model
       case options[:touch]
       when true
