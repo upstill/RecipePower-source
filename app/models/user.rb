@@ -96,6 +96,8 @@ class User < ApplicationRecord
 
   scope :legit, -> { where 'sign_in_count > 0' }
 
+  scope :matching_email, -> (str) { where 'email LIKE ?', '%'+str.downcase+'%' }
+
   has_many :answers
   accepts_nested_attributes_for :answers, allow_destroy: true
   has_many :questions, :through => :answers
