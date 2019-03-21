@@ -22,6 +22,14 @@ class UserServices
     'Users Converted'
   end
 
+  # Read a file of Mailgun errors and unsubscribe users whose email addresses failed
+  def self.unsubscribe_on_errors
+    emails = File.open("failures.txt").collect do |line|
+      line.split[6]
+    end
+    User.where(email: emails, subscribed: true).map { |user| user.update_attribute :subscribed, false }
+  end
+
 =begin
   def analyze_invitees(sender)
     result = {

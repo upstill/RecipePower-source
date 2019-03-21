@@ -30,6 +30,7 @@ gem 'arel', '~> 7.0' # https://github.com/rails/arel
 gem 'pg', '0.20' # TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 # gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
+# TODO: use pg_search
 ## gem 'pg_search' # For full-text search https://robots.thoughtbot.com/optimizing-full-text-search-with-postgres-tsvector-columns-and-triggers
 #### Full-text search with Elasticsearch: https://github.com/elastic/elasticsearch-rails
 # See also https://18f.gsa.gov/2016/04/08/how-we-get-high-availability-with-elasticsearch-and-ruby-on-rails/

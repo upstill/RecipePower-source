@@ -52,10 +52,10 @@ class Edition < ApplicationRecord
   # The edition performs by mailing all subscribed users, one every 20 minutes (to conform to MailGun limitations)
   def perform
     self.number ||= (Edition.maximum(:number) || 0) + 1
-    time = Time.now + 5.seconds
+    time = Time.now
     User.where(subscribed: true).where("last_edition < #{number}").each { |u|
+      time = time + 5.seconds
       u.bkg_launch true, run_at: time
-      time = time + 4.minutes # 360/day per MailGun terms
     }
   end
 
