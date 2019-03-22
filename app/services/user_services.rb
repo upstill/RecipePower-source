@@ -24,10 +24,12 @@ class UserServices
 
   # Read a file of Mailgun errors and unsubscribe users whose email addresses failed
   def self.unsubscribe_on_errors
-    emails = File.open("failures.txt").collect do |line|
+    emails = File.open("failures.txt").collect { |line|
       # The email address follows the '→' character
-      line.sub!( /^[^→]*→\s+/, '').split[0]
-    end
+      if m = line.match(/→\s+(\S*\b)/)
+        m[1]
+      end
+    }.compact
     User.where(email: emails, subscribed: true).map { |user| user.update_attribute :subscribed, false }
   end
 
