@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190217222414) do
+ActiveRecord::Schema.define(version: 20190325022409) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -623,6 +623,7 @@ ActiveRecord::Schema.define(version: 20190217222414) do
     t.integer  "last_edition",                       default: 0
     t.integer  "status",                             default: 0
     t.integer  "dj_id",                              default: 0
+    t.boolean  "email_valid"
     t.index ["confirmation_token"], name: "index_users_on_confirmation_token", unique: true, using: :btree
     t.index ["email"], name: "index_users_on_email", unique: true, using: :btree
     t.index ["invitation_token"], name: "index_users_on_invitation_token", using: :btree
