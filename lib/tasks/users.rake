@@ -3,6 +3,18 @@ require 'json'
 namespace :users do
   desc "Manage the user base"
 
+  # Make an HTTPS request over ssl to get a JSON response
+  def https_request url_or_uri
+    uri = url_or_uri.is_a?(String) ? URI(url_or_uri) : url_or_uri
+    http = Net::HTTP.new(uri.host, uri.port)
+    http.use_ssl = true
+    request = Net::HTTP::Get.new(uri.request_uri)
+    request.basic_auth("api", ENV['MAILGUN_API_KEY'])
+    response = http.request(request)
+
+    JSON.parse response.body
+  end
+
   # Hit the mailgun API with our credentials to get JSON-formatted data on various queries
   # Return a Hash for the JSON data returned
   def mailgun_fetch path, qparams={}
@@ -11,13 +23,7 @@ namespace :users do
     uri = URI::HTTPS.build host: 'api.mailgun.net',
                            path: path,
                            query: URI.encode_www_form(qparams)
-    http = Net::HTTP.new(uri.host, uri.port)
-    http.use_ssl = true
-    request = Net::HTTP::Get.new(uri.request_uri)
-    request.basic_auth("api", ENV['MAILGUN_API_KEY'])
-    response = http.request(request)
-
-    JSON.parse response.body
+    https_request uri
   end
 
   # Take semantic action for a collection of users defined by email addresses
@@ -62,14 +68,30 @@ namespace :users do
       return
     end
     process_users unsubscribes.collect { |item| item['address'] }.compact, false, true
-    x=2
+  end
+
+  def each_event qparams={}
+    qparams = {
+        begin: Time.now.rfc2822,
+        ascending: 'no',
+        limit: 100 # end: (Time.now - 1.day).rfc2822 #
+    }.merge qparams
+    response = mailgun_fetch 'events', qparams
+    while response && response['items'].present? do
+      response['items'].each do |item|
+        item['datetime'] = Time.at(item['timestamp'].to_i).to_datetime
+        yield item
+      end
+      response = response['paging'] && response['paging']['next'] && https_request(response['paging']['next'])
+    end
   end
 
   task mail_events: :environment do
-    response = mailgun_fetch 'events',
-                  begin: (Time.now - 1.day).rfc2822,
-                  ascending: 'yes',
-                  limit: 3
+    addrs = {}
+    each_event(recipient: 'rgeraghtyhhd@yahoo.com') do |item|
+      (addrs[item['recipient']] ||= []) << item
+    end
+    x=2
   end
 
 end
