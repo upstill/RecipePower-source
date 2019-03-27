@@ -28,7 +28,6 @@ namespace :users do
 
   # Take semantic action for a collection of users defined by email addresses
   def process_users(addresses, subscribed=nil, valid=nil)
-    puts "Processing #{addresses.count} users"
     User.where(email: addresses).each { |user|
       if block_given?
         yield user
@@ -40,14 +39,35 @@ namespace :users do
     }
   end
 
-  # A bounce means a permanent failure. Mailgun won't send to previously-bounced addresses
+  # Survey Mailgun statuses and events for changes to email validity
   task mail_check: :environment do
+
+    addrs = {}
+    # Take each 'delivered' event as validation of the email address
+    each_event(event: 'delivered') do |item|
+      addrs[item['recipient']] = true
+    end
+    puts "#{addrs.count} users with delivered messages (=> email_valid = true)"
+    process_users(addrs.keys) do |user|
+      user.update_attribute(:email_valid, true) if user.email_valid.nil?
+    end
+
+    msgs, bogus_addresses, temporarily_deferred = *distill_errors()
+    # Bogus addresses--but not temporarily deferred addresses--are invalid
+    bogus_but_not_deferred = bogus_addresses-temporarily_deferred
+    puts "#{bogus_but_not_deferred.count} users with permanent errors not deferred (=> email_valid = false)"
+    process_users bogus_but_not_deferred, nil, false
+    
+    puts "#{temporarily_deferred.count} users with temporarily deferred messages (=> email_valid = nil)"
+    puts temporarily_deferred.join("\n\t")
+    # Temporarily deferred addresses get nil email_valid
+    User.where(email: temporarily_deferred).where.not(email_valid: nil).each { |u| u.update_attribute :email_valid, nil }
+
     if !bounces = mailgun_fetch('bounces', limit: 1000)['items']
       puts "Can't fetch bounces from Mailgun"
       return
     end
-    # puts "Bounces:"
-    # puts bounces
+    puts "#{bounces.count} bounced users (=> email_valid = false)"
     # => set the address to invalid without affecting the subscription status
     process_users bounces.collect { |item| item['address'] }.compact, nil, false
 
@@ -55,8 +75,7 @@ namespace :users do
       puts "Can't fetch complaints from Mailgun"
       return
     end
-    # puts "Complaints:"
-    # puts complaints
+    puts "#{complaints.count} users with complaints (=> subscribed = false; email_valid = true)"
     # => email_valid is true, subscribed is false
     process_users complaints.collect { |item| item['address'] }.compact, false, true
 
@@ -64,21 +83,9 @@ namespace :users do
       puts "Can't fetch unsubscribes from Mailgun"
       return
     end
-    # puts "Unsubscribes:"
-    # puts bounces
+    puts "#{unsubscribes.count} unsubscribed users (=> subscribed = false; email_valid = true)"
     # => email_valid is true, subscribed is false
     process_users unsubscribes.collect { |item| item['address'] }.compact, false, true
-
-    addrs = {}
-    # Take each 'delivered' event as validation of the email address UNLESS it's otherwise invalid (as above)
-    each_event(event: 'delivered') do |item|
-      addrs[item['recipient']] = true
-    end
-    process_users(addrs.keys) do |user|
-      user.update_attribute(:email_valid, true) if user.email_valid.nil?
-    end
-
-    # Any addresses that still have nil email_valid?
   end
 
   def each_event qparams={}
@@ -97,42 +104,48 @@ namespace :users do
     end
   end
 
-  task mail_events: :environment do
-    addrs = {}
+  def distill_errors
     msgs = { 'yahoo' => {}, 'gmail' => {}, 'misc' => {} }
     bogus_addresses = []
     temporarily_deferred = []
     each_event(severity: 'permanent', event: 'failed') do |item|
-      recipient, domain, errmsg = item['recipient'], item['recipient-domain'], (item['delivery-status']['message'] || '(no errmsg)')
+      recipient, domain, errmsg = item['recipient'], item['recipient-domain'], (item['delivery-status']['message'].if_present || '(no errmsg)')
       bogus_addresses << recipient
+      errmsg.sub! recipient, '..$recipient..'
       errkey =
           if domain.present? && domain.match(/(yahoo|aol|ymail)\./)
+            errmsg.sub! 'yahoo.com', 'yahoo(dot)com'
+            errmsg.sub! /^while reading response: short response: /, ''
+            # puts "#{recipient}: #{errmsg}"
             temporarily_deferred << recipient if errmsg.match /4\.7\.0/
+            # puts "\t=> #{temporarily_deferred.last}"
             'yahoo'
           elsif domain.present? && domain.match('gmail')
             errmsg.sub! /(NoSuchUser|OverQuotaTemp|OverQuotaPerm|DisabledUser).* - gsmtp/, ' <id> gsmtp'
             'gmail'
           else
+            errmsg.sub! /\[[^\[]*.prod.protection.outlook.com\]/, '[$mailbox.prod.protection.outlook.com]'
             match = errmsg.strip.match /^([\d\.]*)/
             (match && match[1].if_present) || ('No MX' if errmsg.match('No MX') ) || 'misc'
           end
-      errmsg.sub! recipient, '..$recipient..'
-      errmsg.sub! 'yahoo.com', 'yahoo(dot)com'
       errmsg.sub!(domain, '..$domain..') if domain.present?
       errmsg.sub! /mta\d*\.mail\.\w\w\w/, '<mtamsg>'
       ((msgs[errkey] ||= {})[errmsg] ||= []) << item
-      (addrs[recipient] ||= []) << item
     end
-    x=2
-    bogus_addresses = bogus_addresses.uniq
-    temporarily_deferred = temporarily_deferred.uniq
-    process_users bogus_addresses-temporarily_deferred, nil, false
-    User.where(email: temporarily_deferred, email_valid: false).each { |u| u.update_attribute :email_valid, nil }
+    [ msgs, bogus_addresses.uniq, temporarily_deferred.uniq ]
+  end
+
+  task mail_events: :environment do
+    msgs, bogus_addresses, temporarily_deferred = *distill_errors()
     msgs.each { |errkey, items|
       puts "\n=============== #{errkey} =============== "
-      puts items.collect { |item|
-        "\t#{item['recipient']} at domain '#{item['recipient-domain']}'"
-      }.join "\n---------------\n"
+      items.each do |errmsg, items_per_msg|
+        puts errmsg
+        items_by_date = items_per_msg.sort { |i1, i2| i1['datetime'] <=> i2['datetime'] }
+        items_by_date.each do |item|
+          puts "\t#{item['recipient']} of domain '#{item['recipient-domain']}' at #{item['datetime']}"
+        end
+      end
     }
   end
 end
