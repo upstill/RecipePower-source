@@ -41,33 +41,44 @@ namespace :users do
   end
 
   # A bounce means a permanent failure. Mailgun won't send to previously-bounced addresses
-  # => set the address to invalid without affecting the subscription status
-  task mail_bounces: :environment do
+  task mail_check: :environment do
     if !bounces = mailgun_fetch('bounces', limit: 1000)['items']
       puts "Can't fetch bounces from Mailgun"
       return
     end
+    # puts "Bounces:"
+    # puts bounces
+    # => set the address to invalid without affecting the subscription status
     process_users bounces.collect { |item| item['address'] }.compact, nil, false
-    x=2
-  end
 
-  # A complaint is from a user who HAS a valid email address but who complained about getting mail
-  # => email_valid is true, subscribed is false
-  task mail_complaints: :environment do
     if !complaints = mailgun_fetch('complaints', limit: 1000)['items']
       puts "Can't fetch complaints from Mailgun"
       return
     end
+    # puts "Complaints:"
+    # puts complaints
+    # => email_valid is true, subscribed is false
     process_users complaints.collect { |item| item['address'] }.compact, false, true
-  end
 
-  # => email_valid is true, subscribed is false
-  task mail_unsubscribes: :environment do
     if !unsubscribes = mailgun_fetch('unsubscribes', limit: 1000)['items']
       puts "Can't fetch unsubscribes from Mailgun"
       return
     end
+    # puts "Unsubscribes:"
+    # puts bounces
+    # => email_valid is true, subscribed is false
     process_users unsubscribes.collect { |item| item['address'] }.compact, false, true
+
+    addrs = {}
+    # Take each 'delivered' event as validation of the email address UNLESS it's otherwise invalid (as above)
+    each_event(event: 'delivered') do |item|
+      addrs[item['recipient']] = true
+    end
+    process_users(addrs.keys) do |user|
+      user.update_attribute(:email_valid, true) if user.email_valid.nil?
+    end
+
+    # Any addresses that still have nil email_valid?
   end
 
   def each_event qparams={}
@@ -88,10 +99,40 @@ namespace :users do
 
   task mail_events: :environment do
     addrs = {}
-    each_event(recipient: 'rgeraghtyhhd@yahoo.com') do |item|
-      (addrs[item['recipient']] ||= []) << item
+    msgs = { 'yahoo' => {}, 'gmail' => {}, 'misc' => {} }
+    bogus_addresses = []
+    temporarily_deferred = []
+    each_event(severity: 'permanent', event: 'failed') do |item|
+      recipient, domain, errmsg = item['recipient'], item['recipient-domain'], (item['delivery-status']['message'] || '(no errmsg)')
+      bogus_addresses << recipient
+      errkey =
+          if domain.present? && domain.match(/(yahoo|aol|ymail)\./)
+            temporarily_deferred << recipient if errmsg.match /4\.7\.0/
+            'yahoo'
+          elsif domain.present? && domain.match('gmail')
+            errmsg.sub! /(NoSuchUser|OverQuotaTemp|OverQuotaPerm|DisabledUser).* - gsmtp/, ' <id> gsmtp'
+            'gmail'
+          else
+            match = errmsg.strip.match /^([\d\.]*)/
+            (match && match[1].if_present) || ('No MX' if errmsg.match('No MX') ) || 'misc'
+          end
+      errmsg.sub! recipient, '..$recipient..'
+      errmsg.sub! 'yahoo.com', 'yahoo(dot)com'
+      errmsg.sub!(domain, '..$domain..') if domain.present?
+      errmsg.sub! /mta\d*\.mail\.\w\w\w/, '<mtamsg>'
+      ((msgs[errkey] ||= {})[errmsg] ||= []) << item
+      (addrs[recipient] ||= []) << item
     end
     x=2
+    bogus_addresses = bogus_addresses.uniq
+    temporarily_deferred = temporarily_deferred.uniq
+    process_users bogus_addresses-temporarily_deferred, nil, false
+    User.where(email: temporarily_deferred).not(email_valid: nil).each { |u| u.update_attribute :email_valid, nil }
+    msgs.each { |errkey, items|
+      puts "\n=============== #{errkey} =============== "
+      puts items.collect { |item|
+        "\t#{item['recipient']} at domain '#{item['recipient-domain']}'"
+      }.join "\n---------------\n"
+    }
   end
-
 end
