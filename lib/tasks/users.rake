@@ -127,7 +127,7 @@ namespace :users do
     bogus_addresses = bogus_addresses.uniq
     temporarily_deferred = temporarily_deferred.uniq
     process_users bogus_addresses-temporarily_deferred, nil, false
-    User.where(email: temporarily_deferred).not(email_valid: nil).each { |u| u.update_attribute :email_valid, nil }
+    User.where(email: temporarily_deferred, email_valid: false).each { |u| u.update_attribute :email_valid, nil }
     msgs.each { |errkey, items|
       puts "\n=============== #{errkey} =============== "
       puts items.collect { |item|
