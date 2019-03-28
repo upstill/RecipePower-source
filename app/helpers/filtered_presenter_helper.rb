@@ -37,7 +37,7 @@ module FilteredPresenterHelper
   end
 
   def filtered_presenter_panel_results viewparams
-    with_format('html') { render "filtered_presenter/present/#{viewparams.results_partial}", viewparams: viewparams }
+    with_format('html') { render viewparams.results_partial, viewparams: viewparams }
   end
 
   def filtered_presenter_panel_results_replacement viewparams
@@ -51,7 +51,7 @@ module FilteredPresenterHelper
   end
 
   def filtered_presenter_table_results viewparams
-    with_format('html') { render "filtered_presenter/present/#{viewparams.results_partial}", viewparams: viewparams }
+    with_format('html') { render viewparams.results_partial, viewparams: viewparams }
   end
 
   def filtered_presenter_table_results_replacement viewparams

@@ -368,7 +368,7 @@ class FilteredPresenter
 
   # This is the name of the partial used to render my results
   def results_partial
-    "results_#{item_mode}"
+    "filtered_presenter/present/results_#{item_mode}"
   end
 
   def tail_partial
