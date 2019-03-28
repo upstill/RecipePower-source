@@ -53,6 +53,11 @@ class PagesController < ApplicationController
     smartrender
   end
 
+  def privacy
+    response_service.title = 'Privacy Policy'
+    smartrender
+  end
+
   def sprites
     render # layout: "naked"
   end
