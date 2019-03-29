@@ -58,10 +58,10 @@ namespace :users do
     puts "#{bogus_but_not_deferred.count} users with permanent errors not deferred (=> email_valid = false)"
     process_users bogus_but_not_deferred, nil, false
     
-    puts "#{temporarily_deferred.count} users with temporarily deferred messages (=> email_valid = nil)"
+    puts "#{temporarily_deferred.count} users with temporarily deferred messages (=> email_valid false-> nil)"
     puts temporarily_deferred.join("\n\t")
-    # Temporarily deferred addresses get nil email_valid
-    User.where(email: temporarily_deferred).where.not(email_valid: nil).each { |u| u.update_attribute :email_valid, nil }
+    # Temporarily deferred addresses that were priorly false get nil email_valid
+    User.where(email: temporarily_deferred, email_valid: false).each { |u| u.update_attribute :email_valid, nil }
 
     if !bounces = mailgun_fetch('bounces', limit: 1000)['items']
       puts "Can't fetch bounces from Mailgun"
