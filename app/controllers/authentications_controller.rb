@@ -46,7 +46,7 @@ class AuthenticationsController < ApplicationController
     # render :text => request.env['omniauth.auth'].to_yaml
     omniauth = request.env['omniauth.auth']
     # render text: omniauth.to_yaml
-    authparams = omniauth.slice('provider', 'uid')
+    authparams = ActionController::Parameters.new(omniauth.slice 'provider', 'uid').permit('provider', 'uid')
     # Our query parameters appear in env['omniauth.params']
     if origin_url = request.env['omniauth.origin']  # Remove any enclosing quotes
       origin_url.sub! /^"?([^"]*)"?/, '\\1'
