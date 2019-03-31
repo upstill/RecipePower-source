@@ -43,7 +43,7 @@ end
 # Return the event items for a given email address
 def mailgun_events_for(address)
   items = []
-  each_mailgun_event(address: address) do |item|
+  each_mailgun_event(recipient: address) do |item|
     items << item
   end
   items

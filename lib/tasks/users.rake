@@ -1,5 +1,6 @@
 require 'net/http'
 require 'json'
+require 'mailgun.rb'
 
 namespace :users do
   desc "Manage the user base"
