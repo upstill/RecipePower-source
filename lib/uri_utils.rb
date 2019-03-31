@@ -1,6 +1,19 @@
 require 'uri'
 require 'open-uri'
 require 'nokogiri'
+require 'json'
+
+# Make an HTTPS request over ssl to get a JSON response
+def https_request url_or_uri
+  uri = url_or_uri.is_a?(String) ? URI(url_or_uri) : url_or_uri
+  http = Net::HTTP.new(uri.host, uri.port)
+  http.use_ssl = true
+  request = Net::HTTP::Get.new(uri.request_uri)
+  request.basic_auth("api", ENV['MAILGUN_API_KEY'])
+  response = http.request(request)
+
+  JSON.parse response.body
+end
 
 def validate_link link, protocols=nil
   if link.present?
