@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20190325022409) do
+ActiveRecord::Schema.define(version: 20190406024546) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -174,6 +174,7 @@ ActiveRecord::Schema.define(version: 20190325022409) do
     t.integer  "recipe_id"
     t.integer  "picture_id"
     t.index ["feed_id", "guid"], name: "index_feed_entries_on_feed_id_and_guid", using: :btree
+    t.index ["feed_id", "published_at"], name: "index_feed_entries_on_feed_id_and_published_at", using: :btree
   end
 
   create_table "feedbacks", force: :cascade do |t|

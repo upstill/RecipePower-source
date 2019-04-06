@@ -8,9 +8,9 @@ module NavtabsHelper
   #   :replacement -- return the portion of the menu that's replaced when elements have changed
   #   :trigger -- the relevant menu, but with a trigger for defining the above in a separate request
   #   :full -- the entire menu: no trigger, no replacement
-  def navtab which, menu_label, go_path, mode, booger=nil
+  def navtab which, menu_label, go_path, mode, booger = nil
     NestedBenchmark.measure ">> construct #{which} navtab" do
-      options={}
+      options = {}
       class_str = 'master-navtab'
       if which == (@active_menu || response_service.active_menu)
         class_str << ' active'
@@ -30,7 +30,7 @@ module NavtabsHelper
               NestedBenchmark.measure '>>>> generate item list' do
                 menu_label << content_tag(:span, '', class: 'caret')
                 content_tag :ul,
-                            menu_items.collect { |item| content_tag :li, item }.join("\n").html_safe,
+                            menu_items.collect {|item| content_tag :li, item}.join("\n").html_safe,
                             class: 'dropdown-menu scrollable-menu',
                             id: navmenu_id(which)
               end
@@ -48,7 +48,7 @@ module NavtabsHelper
                                   data: {toggle: 'dropdown'},
                                   title: "Go To #{menu_label}"
 
-          content = content_tag(:div, header+itemlist, class: 'dropdown')
+          content = content_tag(:div, header + itemlist, class: 'dropdown')
           content += booger if booger
           content_tag :li,
                       content,
@@ -81,7 +81,7 @@ module NavtabsHelper
       User.current.followees.limit 10
     end
     navtab :friends, 'Cookmates', users_path(:select => :followees), mode do
-      friends.collect { |u|
+      friends.collect {|u|
         link_to_submit u.handle, user_path(u), id: dom_id(u)
       } + [
           '<hr class="menu">'.html_safe,
@@ -93,15 +93,15 @@ module NavtabsHelper
 
   def my_lists_navtab mode = :full
     lids =
-    NestedBenchmark.measure '>> query lists' do
-      arr1 = List.where(owner_id: User.current_id).limit(16).pluck :id, :name_tag_id
-      arr2 = Tag.where( id: arr1.map(&:last)).pluck :id, :name
-      # Replace the tag ids in the first array with the corresponding name from the second
-      arr1.map { |elem| [elem.first, arr2.find { |elem2| elem2.first == elem.last}.last ] }
-    end
+        NestedBenchmark.measure '>> query lists' do
+          arr1 = List.where(owner_id: User.current_id).limit(16).pluck :id, :name_tag_id
+          arr2 = Tag.where(id: arr1.map(&:last)).pluck :id, :name
+          # Replace the tag ids in the first array with the corresponding name from the second
+          arr1.map {|elem| [elem.first, arr2.find {|elem2| elem2.first == elem.last}.last]}
+        end
     navtab :my_lists, 'Treasuries', lists_path(access: 'owned'), mode do
       NestedBenchmark.measure('...collect list links') {
-        lids.collect { |lid|
+        lids.collect {|lid|
           link_to_submit lid.last, list_path(lid.first), id: "list_#{lid.first}"
         }
       } +
@@ -142,16 +142,18 @@ module NavtabsHelper
 
   def feeds_navtab mode = :full
     navtab :feeds, 'Feeds', feeds_path(access: 'collected'), mode do
-      feed_set =
+      feed_ids_and_dates =
           NestedBenchmark.measure 'query (old)' do
             User.current.collection_scope(entity_type: 'Feed').
                 joins(:feeds).
                 where('rcprefs.entity_id = feeds.id and feeds.approved = true').
                 order('feeds.last_post_date DESC').
                 limit(16).
-                includes(:entity).
-                map(&:entity).
-                compact
+                pluck(:entity_id, :updated_at).
+                sort_by(&:first)
+            # includes(:entity).
+            # map(&:entity).
+            # compact
           end
 =begin
       data = NestedBenchmark.measure 'query (new)' do
@@ -172,11 +174,22 @@ module NavtabsHelper
         }
       end
 =end
+      feed_set = NestedBenchmark.measure 'get feeds' do
+        Feed.where(id: feed_ids_and_dates.map(&:first)).order(:id).to_a
+      end
+      count_pairs = NestedBenchmark.measure 'count entries (new)' do
+        feed_ids_and_dates.each_with_index.map do |pair, pair_index|
+          id, date = *pair
+          f = (feed_set[pair_index].id == id) ? feed_set[pair_index] : (feed_set.find { |feed| feed.id == id })
+          [f.entries_since(date).count, f] if f
+        end
+      end
       result = NestedBenchmark.measure 'collect feed links (old)' do
-        feed_set.collect { |f| [ f.entries_since(f.touch_date User.current_id).count, f] }.
+        count_pairs.
+            compact.
             sort_by(&:first).
             reverse.
-            map { |pair| feed_menu_entry pair.last, pair.first }
+            map {|pair| feed_menu_entry pair.last, pair.first}
       end
 =begin
       NestedBenchmark.measure 'collect feed links (new)' do
@@ -207,7 +220,7 @@ module NavtabsHelper
     # Include a placeholder for the notifications, which will be rendered in a subsequent call
     notifications = content_tag :div, ''.html_safe, class: 'notification_wrapper' # render_notifications_of current_user
     navtab :home,
-           content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name')+
+           content_tag(:span, "#{current_user.handle}&nbsp;".html_safe, class: 'user-name') +
                content_tag(:span, '', class: 'measuring-spoons'),
            user_path(current_user, :mode => :partial),
            mode, notifications.html_safe do
@@ -265,7 +278,7 @@ module NavtabsHelper
     "#{which}-navmenu"
   end
 
-  def checkbox_menu_item_label label, check=false
+  def checkbox_menu_item_label label, check = false
     content_tag :label, "<input type='checkbox' class='submit' #{'checked=true' if check}>&nbsp;#{label}".html_safe
   end
 
