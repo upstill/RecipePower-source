@@ -113,9 +113,15 @@ class CollectiblePresenter < BasePresenter
   def card_avatar_column
     # content_tag(:div, card_avatar(onlinks: true), class: 'stamp avatar card-column') +
     # content_tag(:div, card_avatar_accompaniment || ''.html_safe, class: 'stamp found-by')
+    av = NestedBenchmark.measure "...capture avatar" do
+      card_avatar onlinks: true
+    end
+    av_acc = NestedBenchmark.measure "...capture avatar accompaniment" do
+      card_avatar_accompaniment || ''.html_safe
+    end
     content_tag :div,
-                (content_tag(:div, card_avatar(onlinks: true)+tag(:br, style: 'clear: both'), class: 'avatar') +
-                    content_tag(:div, (card_avatar_accompaniment || ''.html_safe)+tag(:br, style: 'clear: both'), class: 'found-by') +
+                (content_tag(:div, av+tag(:br, style: 'clear: both'), class: 'avatar') +
+                    content_tag(:div, av_acc+tag(:br, style: 'clear: both'), class: 'found-by') +
                     tag(:br, style: 'clear: both')),
                 class: 'stamp card-column flexor avatar-column'
 

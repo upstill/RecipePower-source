@@ -142,38 +142,30 @@ module NavtabsHelper
 
   def feeds_navtab mode = :full
     navtab :feeds, 'Feeds', feeds_path(access: 'collected'), mode do
-      feed_ids_and_dates =
-          NestedBenchmark.measure 'query (old)' do
+      feed_refs =
+          NestedBenchmark.measure 'query' do
             User.current.collection_scope(entity_type: 'Feed').
+                includes(:entity).
                 joins(:feeds).
                 where('rcprefs.entity_id = feeds.id and feeds.approved = true').
                 order('feeds.last_post_date DESC').
                 limit(16).
-                pluck(:entity_id, :updated_at).
-                sort_by(&:first)
-            # includes(:entity).
-            # map(&:entity).
-            # compact
+                to_a
           end
-=begin
-      data = NestedBenchmark.measure 'query (new)' do
-        fids = User.current.collection_scope(entity_type: 'Feed').pluck :entity_id
-        Feed.where(id: fids, approved: true).
-            order(:last_post_date => 'DESC').
-            limit(16).
-            pluck(:id, :title)
-      end
-=end
-      # feed_set = User.current.collection_scope(entity_type: 'Feed', limit: 16, sort_by: :viewed).includes(:entity).map(&:entity).compact
-=begin
-      if feed_set.count < 16
-        # Try adding the lists owned by friends
-        User.current.followees.each { |friend|
-          feed_set = (feed_set + friend.feeds).uniq
-          break if feed_set.count >= 16
+      result = NestedBenchmark.measure 'collect feed links' do
+        feed_refs.collect { |rcpref|
+          cache rcpref do
+            render partial: 'rcprefs/feed_menu_entry', locals: { rcpref: rcpref }
+          end
         }
       end
+=begin
+      result = NestedBenchmark.measure 'collect feed links (new)' do
+        render partial: 'rcprefs/feed_menu_entries', locals: { feed_refs: feed_refs }
+      end
 =end
+
+=begin
       feed_set = NestedBenchmark.measure 'get feeds' do
         Feed.where(id: feed_ids_and_dates.map(&:first)).order(:id).to_a
       end
@@ -190,12 +182,6 @@ module NavtabsHelper
             sort_by(&:first).
             reverse.
             map {|pair| feed_menu_entry pair.last, pair.first}
-      end
-=begin
-      NestedBenchmark.measure 'collect feed links (new)' do
-        data.collect { |datum|
-          link_to_submit truncate(datum.last, length: 30), feed_path(datum.first), id: "feeds_#{datum.first}"
-        }
       end
 =end
       result + [

@@ -1,15 +1,15 @@
 class NestedBenchmark
   @indent = 0
   def self.measure msg
-    puts 'BBBB >>>>>>>>>>>>>> Begin Benchmarking -----------------' if @indent == 0
+    logger.debug 'BBBB >>>>>>>>>>>>>> Begin Benchmarking ---- user system user+system (total elapsed)' if @indent == 0
     @indent += 4
     result = nil
     vals = Benchmark.measure {
       result = yield
     }
     @indent -= 4
-    puts self.at_left(msg, @indent) + vals.to_s
-    puts 'BBBB <<<<<<<<<<<<<< End Benchmarking -----------------' if @indent == 0
+    logger.debug self.at_left(msg, @indent) + vals.to_s
+    logger.debug 'BBBB <<<<<<<<<<<<<< End Benchmarking -----------------' if @indent == 0
     result
   end
 
