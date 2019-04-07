@@ -1,15 +1,24 @@
 class NestedBenchmark
   @indent = 0
+
+  def self.log msg
+    if Rails.env.development? # Write to console when in development
+      puts msg
+    else
+      Rails.logger.debug 'BENCHMARK: '+msg
+    end
+  end
+
   def self.measure msg
-    logger.debug 'BBBB >>>>>>>>>>>>>> Begin Benchmarking ---- user system user+system (total elapsed)' if @indent == 0
+    log('>>>>>>>>>>>>>> Begin Benchmarking ---- user system user+system (total elapsed)') if @indent == 0
     @indent += 4
     result = nil
     vals = Benchmark.measure {
       result = yield
     }
     @indent -= 4
-    logger.debug self.at_left(msg, @indent) + vals.to_s
-    logger.debug 'BBBB <<<<<<<<<<<<<< End Benchmarking -----------------' if @indent == 0
+    log self.at_left(msg, @indent) + vals.to_s
+    log('<<<<<<<<<<<<<< End Benchmarking -----------------') if @indent == 0
     result
   end
 
