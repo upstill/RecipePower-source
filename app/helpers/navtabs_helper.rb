@@ -155,8 +155,8 @@ module NavtabsHelper
       result = NestedBenchmark.measure 'collect feed links' do
         feed_refs.collect { |rcpref|
           # cache rcpref do
-            feed_menu_entry rcpref.entity, rcpref.entity.entries_since(rcpref.updated_at).count
-            # render partial: 'rcprefs/feed_menu_entry', locals: { rcpref: rcpref }
+          # feed_menu_entry rcpref.entity, rcpref.entity.entries_since(rcpref.updated_at).count
+            render partial: 'rcprefs/feed_menu_entry', locals: { rcpref: rcpref }
           # end
         }
       end
