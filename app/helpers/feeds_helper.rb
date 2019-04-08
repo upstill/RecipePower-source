@@ -79,7 +79,7 @@ module FeedsHelper
 
   def feed_menu_entry f, new_entries=f.entries_since(f.touch_date User.current_id).count
     title = truncate f.title, length: 30
-    title << " (#{new_entries})" if new_entries > 0
+    # title << " (#{new_entries})".html_safe if new_entries > 0
     link_to_submit title, feed_path(f), id: dom_id(f)
   end
 
