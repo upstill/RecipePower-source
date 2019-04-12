@@ -1,5 +1,5 @@
 <!--Render a collection pointer (Rcpref) that points to a feed-->
 <% cache rcpref do %>
-  <% logger.debug "Busted cached on rcpref ##{rcpref.id}" %>
-  <%= feed_menu_entry rcpref.entity, rcpref.entity.entries_since(rcpref.updated_at).count %>
+  <%#  logger.debug "Busted cached on rcpref ##{rcpref.id}" %>
+  <%= feed_menu_entry rcpref.entity, 0 %> <%# rcpref.entity.entries_since(rcpref.updated_at).count %>
 <% end %>
