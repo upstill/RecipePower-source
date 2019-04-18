@@ -1,6 +1,6 @@
 authorization do
   role :guest do
-    has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ, :root, :privacy]
+    has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ, :root, :privacy, :letsencrypt ]
     has_permission_on [:visitors], :to => [:create]
     has_permission_on [:recipes], :to => [:read, :create, :collect, :capture, :uncollect, :touch]
     has_permission_on [:referents], :to => [:read]
