@@ -831,7 +831,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     # e.g., http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080
     if uri
       # Glean title, description and image
-      extractions = HashWithIndifferentAccess.new(
+      extractions = ActiveSupport::HashWithIndifferentAccess.new(
           :Title => find_by_selector("meta[property='og:title']", :content),
           :Description => find_by_selector("meta[property='og:description']", :content),
           'Prep Time' => find_by_selector("p.recipe-metadata__prep-time"),

@@ -302,7 +302,7 @@ GEM
       omniauth-oauth (~> 1.1)
       rack
     orm_adapter (0.5.0)
-    pg (0.20.0)
+    pg (1.0.0)
     poltergeist (1.18.1)
       capybara (>= 2.1, < 4)
       cliver (~> 0.3.1)
@@ -527,7 +527,7 @@ DEPENDENCIES
   omniauth-google-oauth2
   omniauth-openid
   omniauth-twitter
-  pg (= 0.20)
+  pg (= 1.0.0)
   poltergeist
   premailer-rails
   rack-mini-profiler (~> 0.10)
@@ -560,7 +560,7 @@ DEPENDENCIES
   youtube_addy
 
 RUBY VERSION
-   ruby 2.3.6p384
+   ruby 2.3.8p459
 
 BUNDLED WITH
-   1.17.2
+   1.17.3

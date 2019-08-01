@@ -264,9 +264,9 @@ class PageRef < ApplicationRecord
     data =
     case response.code
       when '401'
-        HashWithIndifferentAccess.new(url: url, content: '', errorMessage: '401 Unauthorized')
+        ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: '401 Unauthorized')
       else
-        JSON.parse(response.body) rescue HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+        JSON.parse(response.body) rescue ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
     end
 
     # Do QA on the reported URL

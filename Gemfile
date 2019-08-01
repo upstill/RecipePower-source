@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-ruby '2.3.6'
+ruby '2.3.8'
 ## gem 'bundler', '~> 1.4'
 gem 'rails', '5.0.0'
 gem 'rdoc'
@@ -27,7 +27,7 @@ gem 'barkick' # Handle UPC codes, etc.
 gem 'arel', '~> 7.0' # https://github.com/rails/arel
 
 ####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
-gem 'pg', '0.20' # TODO: 1.0.0 for Rails 5
+gem 'pg', '1.0.0' # TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 # gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
 # TODO: use pg_search

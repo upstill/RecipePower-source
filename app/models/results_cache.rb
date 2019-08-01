@@ -486,7 +486,7 @@ module ExtractParams
   module ClassMethods
     def extract_params params_hash={}
       # Since params_needed may be key/default pairs as well as a list of names
-      defaulted_params = HashWithIndifferentAccess.new
+      defaulted_params = ActiveSupport::HashWithIndifferentAccess.new
       paramlist = self.params_needed.collect { |pspec|
         if pspec.is_a? Array
           defaulted_params[pspec.first] = pspec.last.to_s # They're recorded as strings, since that's what params_hash use
