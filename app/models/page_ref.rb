@@ -253,7 +253,7 @@ class PageRef < ApplicationRecord
   end
 
   def try_mercury url
-    uri = URI.parse 'http://mercury.postlight.com/parser?url=' + url
+    uri = URI.parse 'http://173.255.255.234:8888/myapp?url=' + url
     http = Net::HTTP.new(uri.host, uri.port)
     # http.use_ssl = true
 
