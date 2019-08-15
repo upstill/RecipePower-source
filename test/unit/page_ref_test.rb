@@ -51,16 +51,6 @@ class PageRefTest < ActiveSupport::TestCase
     refute mp.alias_for( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
   end
 
-  test "try substitute" do
-    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
-    mp = PageRef.fetch url
-    assert_equal 200, mp.http_status
-    new_mp = PageRefServices.new(mp).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
-    assert_equal mp, new_mp
-    assert new_mp.alias_for(url)
-    assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
-  end
-
   test "try substitute on patijinich" do
     url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
     mp = PageRef.new url: url
@@ -69,7 +59,7 @@ class PageRefTest < ActiveSupport::TestCase
     new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
     assert_equal mp, new_mp
     assert new_mp.alias_for(url)
-    assert_equal 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/', new_mp.url
+    assert_equal 'https://patijinich.com/lamb_barbacoa_in_adobo/', new_mp.url
   end
 
   test "try substitute absorbs" do
@@ -185,7 +175,7 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "gets URL that can be opened, but not by Mercury" do
-    url = "http://abcnews.go.com/GMA/recipe/mario-batalis-marinated-olives-15088486"
+    url = "https://www.goodmorningamerica.com/food/story/smores-pie-recipe-ultimate-celebrate-national-smores-day-64876560"
     pr = PageRef.fetch url
     pr.bkg_land
     assert pr.good?
@@ -195,7 +185,7 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "follow redirects" do
-    url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
+    url = "https://patijinich.com/recipe/lamb_barbacoa_in_adobo"
     pr = PageRef.fetch url
     assert_equal 200, pr.http_status
     assert pr.alias_for("https://www.tastecooking.com", true)

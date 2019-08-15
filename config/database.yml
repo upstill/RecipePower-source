@@ -9,6 +9,7 @@ common: &common
 development:
   adapter: postgresql
   database: dabpmrobtjc0ei
+  host: /tmp
 
 staging:
   adapter: postgresql
@@ -20,6 +21,7 @@ staging:
 test:
   adapter: postgresql
   database: cookmarks_test
+  host: /tmp
 
 production:
   adapter: postgresql

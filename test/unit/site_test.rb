@@ -16,7 +16,7 @@ class SiteTest < ActiveSupport::TestCase
     site = Site.find_or_create 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
     site.bkg_land
     unless site.respond_to?(:reference)
-      assert_equal 'http://mexicocooks.typepad.com/mexico_cooks', site.home.sub(/\/$/, '')
+      assert_equal 'https://mexicocooks.typepad.com/mexico_cooks', site.home.sub(/\/$/, '')
     end
     assert_not_nil site.page_ref
   end
@@ -220,22 +220,6 @@ class SiteTest < ActiveSupport::TestCase
     site.bkg_land
     assert_equal "http://bladebla.com/esme", site.sample.sub(/\/$/, '')
     assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
-  end
-
-  test "Home page established and maintained" do
-    site = Site.find_or_create_for "http://bladebla.com/food-and-drink/index.html"
-    site.bkg_land
-    # Should now have two references, the canonical one without the slash, and a second one with
-    assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
-    assert_equal "bladebla.com", site.root
-    site.home = "http://bladebla.com"
-    assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
-    assert_equal "bladebla.com", site.root
-    site.home = "http://bladebla.com/food-and-drink/index.html"
-    unless site.respond_to? :reference
-      assert_equal "http://bladebla.com/food-and-drink/index.html", site.home.sub(/\/$/, '')
-    end
-    assert_equal "bladebla.com", site.root
   end
 
 =begin

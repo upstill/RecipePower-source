@@ -253,20 +253,31 @@ class PageRef < ApplicationRecord
   end
 
   def try_mercury url
-    uri = URI.parse 'http://mercury.postlight.com/parser?url=' + url
-    http = Net::HTTP.new(uri.host, uri.port)
-    # http.use_ssl = true
+    previous_probe = nil
+    api = 'http://173.255.255.234:8888/myapp?url='
+    current_probe = api + url
+    data = response = nil
+    while(previous_probe != current_probe) do
+      uri = URI.parse current_probe
+      previous_probe = current_probe
+      http = Net::HTTP.new uri.host, uri.port
+      # http.use_ssl = true
 
-    req = Net::HTTP::Get.new uri.to_s
-    req['x-api-key'] = ENV['MERCURY_API_KEY']
+      req = Net::HTTP::Get.new uri.to_s
+      req['x-api-key'] = ENV['MERCURY_API_KEY']
 
-    response = http.request req
-    data =
-    case response.code
-      when '401'
-        ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: '401 Unauthorized')
-      else
-        JSON.parse(response.body) rescue ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+      response = http.request req
+      data =
+          case response.code
+          when '401'
+            ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: '401 Unauthorized')
+          when '301' # "Permanently Moved"
+            current_probe = response.body.split[2]
+            current_probe.sub! /^\//, api
+            ActiveSupport::HashWithIndifferentAccess.new
+          else
+            JSON.parse(response.body) rescue ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
+          end
     end
 
     # Do QA on the reported URL
@@ -275,7 +286,7 @@ class PageRef < ApplicationRecord
     data['domain'] ||= uri.host
     data['response_code'] = response.code
     # Merge different error states into a mercury_error
-    data['mercury_error'] = data['errorMessage'].if_present || data['error'].if_present
+    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
     data.delete :errorMessage
     data.delete :error
     data

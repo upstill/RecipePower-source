@@ -88,7 +88,7 @@ class RecipeTest < ActiveSupport::TestCase
   end
 
   test "bad url reassigned over good url" do
-    good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
+    good_url = "https://patijinich.com/creamy-poblano-soup/"
     recipe = Recipe.new title: 'some damn thing', url: good_url
     assert recipe.errors.empty?
     assert recipe.page_ref.virgin?
@@ -128,7 +128,7 @@ class RecipeTest < ActiveSupport::TestCase
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
 
-    good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
+    good_url = "https://patijinich.com/creamy-poblano-soup/"
     recipe.url = good_url
     assert_equal good_url, recipe.url
     assert recipe.errors.empty?
