@@ -192,6 +192,7 @@ GEM
       railties (>= 3.0.0)
     faraday (0.15.4)
       multipart-post (>= 1.2, < 3)
+    fast-stemmer (1.0.2)
     feedjira (1.6.0)
       curb (~> 0.8)
       loofah (~> 2.0)
@@ -506,6 +507,7 @@ DEPENDENCIES
   eventmachine (~> 1.0.3)
   exception_notification!
   factory_bot_rails
+  fast-stemmer (~> 1.0.2)
   feedjira (~> 1.6)
   flamegraph
   heapy (= 0.1.1)

@@ -105,3 +105,13 @@ list_test:
   id: 15
   name: Some kind of list
   tagtype: 16
+
+cup:
+  id: 16
+  name: cup
+  tagtype: 5
+
+cups:
+  id: 17
+  name: cups
+  tagtype: 5

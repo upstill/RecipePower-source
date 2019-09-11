@@ -154,6 +154,8 @@ group :test do
   gem 'rspec-html-matchers', '0.9.1'
 end
 
+gem 'fast-stemmer', '~> 1.0.2'
+
 ###### TODO are these even being used?
 
 # Enables use of content_for in your controllers

@@ -1,3 +1,88 @@
+require 'scraping/scanner.rb'
+require 'scraping/lexaur.rb'
+
+# A Seeker is an abstract class for a subclass which looks for a given item in the given stream
+class Seeker
+  attr_accessor :head, :rest
+
+  def initialize(head_stream, rest_stream)
+    @head = head_stream
+    @rest = rest_stream
+  end
+
+  # Find a place in the stream where we can match
+  def self.seek stream, opts={}
+    while stream.more?
+      if sk = self.match(stream, opts)
+        return sk
+      end
+      stream = stream.rest
+    end
+  end
+
+    # Seek to satisfy myself with the contents of the stream AT THIS POSITION.
+  # Return: IFF there's a match, return an instance of the class, which denotes the original stream, and the
+  #   rest of that stream, after parsing.
+  def self.match stream, opts={}
+
+  end
+end
+
+# A Null Seeker simply accepts the next string in the stream and advances past it
+class NullSeeker < Seeker
+
+  def self.match stream, opts={}
+    self.new stream, stream.rest
+  end
+end
+
+# Seek a number at the head of the stream
+class NumberSeeker < Seeker
+
+  # A number can be a non-negative integer, a fraction, or the two in sequence
+  def self.match stream, opts={}
+    return self.new(stream, stream.rest(2)) if stream.peek(2)&.match /^\d*[ -]\d*\/{1}\d*$|^\d*$/
+    return self.new(stream, stream.rest) if stream.peek&.match /^\d*\/{1}\d*$|^\d*$/
+  end
+
+end
+
+class TagSeeker < Seeker
+  attr_reader :tag_ids
+
+  def initialize(stream, next_stream, tag_ids)
+    super stream, next_stream
+    @tag_ids = tag_ids
+  end
+
+  def self.match stream, lexaur, opts={}
+    lexaur.chunk(stream) { |data, next_stream| # Find ids in the tags table
+      # The Lexaur provides the data at sequence end, and the post-consumption stream
+      tag_ids = Tag.of_type(opts[:types]).where(id: data).pluck :id
+      return (self.new(stream, next_stream, tag_ids) if tag_ids.present?)
+    }
+  end
+end
+
+# An Amount is a number followed by an optional amount
+class AmountSeeker < Seeker
+
+  attr_reader :num, :unit
+
+  def initialize stream, next_stream, num, unit
+    super stream, next_stream
+    @num = num
+    @unit = unit
+  end
+
+  def self.match stream, lexaur, opts={}
+    if num = NumberSeeker.match(stream, lexaur)
+      unit = TagSeeker.match num.rest, lexaur, types: 5
+      self.new stream, (unit&.rest || num.rest), num, unit
+    end
+  end
+end
+
 =begin
 require "candihash.rb"
 
