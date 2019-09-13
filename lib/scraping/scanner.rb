@@ -25,12 +25,12 @@ class Scanner < Object
 
 end
 
-# Scan an input (space-separated) input stream. When the stream is exhausted, "#{re
+# Scan an input (space-separated) input stream. When the stream is exhausted, #more? returns false
 class StrScanner < Scanner
 
-  def initialize string, pos=0
+  def initialize strings, pos=0
     # We include punctuation as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
-    @strings = (string.is_a? String) ? string.scan(/[^\s,.]+|[,.]+/) : string
+    @strings = strings
     @pos = pos
     @length = @strings.count
   end

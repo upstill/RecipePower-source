@@ -35,8 +35,7 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   # Stemming may be suppressed by setting do_stem to false
   def take strings, data, do_stem=true
-      strings = strings.scan(/[^\s,.]+|[,.]+/) if strings.is_a? String
-    strings = strings.map { |str| Stemmer::stem_word(str) } if do_stem
+    strings = split strings, do_stem
     first = strings.shift
     if strings.empty? # We're done => store the data in my hash
       (terminals[first] ||= Array.new).push data unless terminals[first]&.include?(data)
@@ -49,11 +48,17 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   # Stemming may be suppressed by setting do_stem to false
   def find strings, do_stem=true # Unsplit, unstemmed string is accepted
-    strings = strings.scan(/[^\s,.]+|[,.]+/) if strings.is_a? String
+    strings = split strings
     strings = strings.map { |str| Stemmer::stem_word(str) } if do_stem
     return nil if strings.empty?
     first = strings.shift
     strings.empty? ? terminals[first] : nexts[first]&.find(strings)
+  end
+
+  # Our own #split function which (currently) separates out punctuation
+  def split string_or_strings, do_stem=true
+    strings = string_or_strings.is_a?(String) ? string_or_strings.scan(/[^\s,.]+|[,.]+/) : string_or_strings
+    do_stem ? strings.map { |str| Stemmer::stem_word(str) } : strings
   end
 
   # Drive a Lexaur using a stream. The stream only needs to implement three methods:

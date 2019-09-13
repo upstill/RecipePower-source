@@ -43,10 +43,10 @@ class LexaurTest < ActiveSupport::TestCase
 
   test 'lexaur chunks simple stream' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new 'jalapeño' # Fail gracefully
+    scanner = StrScanner.new lex.split('jalapeño') # Fail gracefully
     assert_nil lex.chunk(scanner)
 
-    scanner = StrScanner.new 'jalapeño peppers'
+    scanner = StrScanner.new lex.split('jalapeño peppers')
     assert_not_nil lex.chunk(scanner) {|data, stream|
       assert_not_nil data
       assert_includes data, 1
@@ -54,7 +54,7 @@ class LexaurTest < ActiveSupport::TestCase
       assert_nil stream.first
     }
 
-    scanner = StrScanner.new 'jalapeño peppers, and more'
+    scanner = StrScanner.new lex.split('jalapeño peppers, and more')
     assert_not_nil lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       assert_includes data, 1
