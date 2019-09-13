@@ -166,4 +166,82 @@ class SeekerTest < ActiveSupport::TestCase
     assert_equal 7, cs.rest.pos
   end
 
+  test 'match a series of two ingredients' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new lex.split('chili bean and jalapeño peppers')
+    cs = IngredientsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of IngredientsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 2, cs.tag_seekers.count
+    assert_equal 0, cs.head.pos
+    assert_equal 5, cs.rest.pos
+  end
+
+  test 'match a series of three ingredients' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new lex.split('chili bean, cilantro and jalapeño peppers')
+    cs = IngredientsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of IngredientsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 3, cs.tag_seekers.count
+    assert_equal 0, cs.head.pos
+    assert_equal 7, cs.rest.pos
+  end
+
+  test 'match a series of three ingredients embedded in noise' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new lex.split('1/2 cup sifted chili bean, cilantro and jalapeño peppers -- refined')
+    cs = IngredientsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of IngredientsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.head.pos
+    assert_equal 10, cs.rest.pos
+  end
+
+  test 'recognize a full ingredient spec' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new lex.split('cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    ils = IngredientLineSeeker.seek scanner, lex
+    assert_not_nil ils
+    assert_instance_of IngredientLineSeeker, ils
+    assert_nil ils.amount
+    assert_nil ils.condits
+    assert_instance_of IngredientsSeeker, ils.ingreds
+    assert_equal 1, ils.rest.pos
+
+    scanner = StrScanner.new lex.split('peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    ils = IngredientLineSeeker.seek scanner, lex
+    assert_not_nil ils
+    assert_instance_of IngredientLineSeeker, ils
+    assert_nil ils.amount
+    assert_instance_of ConditionsSeeker, ils.condits
+    assert_instance_of IngredientsSeeker, ils.ingreds
+    assert_equal 6, ils.rest.pos
+
+    scanner = StrScanner.new lex.split('1/2 cup cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    ils = IngredientLineSeeker.seek scanner, lex
+    assert_not_nil ils
+    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of AmountSeeker, ils.amount
+    assert_nil ils.condits
+    assert_instance_of IngredientsSeeker, ils.ingreds
+    assert_equal 3, ils.rest.pos
+
+    scanner = StrScanner.new lex.split('1/2 cup  peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    ils = IngredientLineSeeker.seek scanner, lex
+    assert_not_nil ils
+    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of AmountSeeker, ils.amount
+    assert_instance_of ConditionsSeeker, ils.condits
+    assert_instance_of IngredientsSeeker, ils.ingreds
+    assert_equal 8, ils.rest.pos
+  end
+
 end

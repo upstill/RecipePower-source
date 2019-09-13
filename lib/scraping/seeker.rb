@@ -83,8 +83,8 @@ class AmountSeeker < Seeker
   end
 end
 
-# Conditions are a list of { process, }*
-class ConditionsSeeker < Seeker
+# Conditions are a list of { process, }*. Similarly for Ingredients
+class TagsSeeker < Seeker
   attr_accessor :tag_seekers
 
   def initialize stream, rest, tag_seeker
@@ -94,12 +94,12 @@ class ConditionsSeeker < Seeker
 
   def self.match stream, lexaur, opts={}
     # Get a series of zero or more Process tags each followed by a comma
-    if ns = TagSeeker.match(stream, lexaur, types: 3)
+    if ns = TagSeeker.match(stream, lexaur, opts.slice(:types))
       sk = self.new stream, ns.rest, ns
       case ns.rest.peek
       when 'and'
         # We expect a terminating condition
-        if ns2 = TagSeeker.match(ns.rest.rest, lexaur, types: 3)
+        if ns2 = TagSeeker.match(ns.rest.rest, lexaur, opts.slice(:types))
           sk.tag_seekers << ns2
           sk.rest = ns2.rest
         else
@@ -112,6 +112,40 @@ class ConditionsSeeker < Seeker
         end
       end
       return sk
+    end
+  end
+end
+
+class ConditionsSeeker < TagsSeeker
+  def self.match stream, lex
+    super stream, lex, types: 3
+  end
+end
+
+class IngredientsSeeker < TagsSeeker
+  def self.match stream, lex
+    super stream, lex, types: 4
+  end
+end
+
+class IngredientLineSeeker < Seeker
+  attr_reader :amount, :condits, :ingreds
+
+  def initialize stream, rest, amount, condits, ingreds
+    super stream, rest
+    @amount, @condits, @ingreds = amount, condits, ingreds
+  end
+
+  def self.match stream, lex
+    original_stream = stream
+    if amount = AmountSeeker.match(stream, lex)
+      stream = amount.rest
+    end
+    if condits = ConditionsSeeker.match(stream, lex)
+      stream = condits.rest
+    end
+    if ingreds = IngredientsSeeker.match(stream, lex)
+      self.new original_stream, ingreds.rest, amount, condits, ingreds
     end
   end
 end

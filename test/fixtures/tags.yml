@@ -130,3 +130,8 @@ chopped:
   id: 20
   name: chopped
   tagtype: 3
+
+cilantro:
+  id: 21
+  name: cilantro
+  tagtype: 4
