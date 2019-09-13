@@ -98,4 +98,72 @@ class SeekerTest < ActiveSupport::TestCase
     refute ts.unit
   end
 
+  test 'match a single condition' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new 'peeled'
+    cs = ConditionsSeeker.match scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 1, cs.tag_seekers.count
+    assert_equal 0, cs.head.pos
+    assert_equal 1, cs.rest.pos
+    scanner = StrScanner.new '1/2 cup peeled tomatoes'
+    cs = ConditionsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_equal 1, cs.tag_seekers.count
+    assert_instance_of TagSeeker, ts
+    assert_equal 2, cs.head.pos
+    assert_equal 3, cs.rest.pos
+  end
+
+  test 'match two conditions joined with and' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new 'peeled and seeded'
+    cs = ConditionsSeeker.match scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 2, cs.tag_seekers.count
+    assert_equal 0, cs.head.pos
+    assert_equal 3, cs.rest.pos
+
+    scanner = StrScanner.new '1/2 cup peeled and seeded tomatoes'
+    cs = ConditionsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.head.pos
+    assert_equal 5, cs.rest.pos
+  end
+
+  test 'match a series of three conditions' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new 'peeled, seeded and chopped'
+    cs = ConditionsSeeker.match scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 3, cs.tag_seekers.count
+    assert_equal 0, cs.head.pos
+    assert_equal 5, cs.rest.pos
+
+    scanner = StrScanner.new '1/2 cup peeled, seeded and chopped tomatoes'
+    cs = ConditionsSeeker.seek scanner, lex
+    assert_not_nil cs
+    assert_instance_of ConditionsSeeker, cs
+    ts = cs.tag_seekers.first
+    assert_instance_of TagSeeker, ts
+    assert_equal 3, cs.tag_seekers.count
+    assert_equal 2, cs.head.pos
+    assert_equal 7, cs.rest.pos
+  end
+
 end

@@ -115,3 +115,18 @@ cups:
   id: 17
   name: cups
   tagtype: 5
+
+peeled:
+  id: 18
+  name: peeled
+  tagtype: 3
+
+seeded:
+  id: 19
+  name: seeded
+  tagtype: 3
+
+chopped:
+  id: 20
+  name: chopped
+  tagtype: 3

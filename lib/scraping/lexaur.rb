@@ -35,7 +35,7 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   # Stemming may be suppressed by setting do_stem to false
   def take strings, data, do_stem=true
-    strings = strings.split if strings.is_a? String
+      strings = strings.scan(/[^\s,.]+|[,.]+/) if strings.is_a? String
     strings = strings.map { |str| Stemmer::stem_word(str) } if do_stem
     first = strings.shift
     if strings.empty? # We're done => store the data in my hash
@@ -49,7 +49,7 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   # Stemming may be suppressed by setting do_stem to false
   def find strings, do_stem=true # Unsplit, unstemmed string is accepted
-    strings = strings.split if strings.is_a? String
+    strings = strings.scan(/[^\s,.]+|[,.]+/) if strings.is_a? String
     strings = strings.map { |str| Stemmer::stem_word(str) } if do_stem
     return nil if strings.empty?
     first = strings.shift

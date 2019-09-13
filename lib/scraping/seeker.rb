@@ -83,6 +83,39 @@ class AmountSeeker < Seeker
   end
 end
 
+# Conditions are a list of { process, }*
+class ConditionsSeeker < Seeker
+  attr_accessor :tag_seekers
+
+  def initialize stream, rest, tag_seeker
+    super stream, rest
+    @tag_seekers = [ tag_seeker ]
+  end
+
+  def self.match stream, lexaur, opts={}
+    # Get a series of zero or more Process tags each followed by a comma
+    if ns = TagSeeker.match(stream, lexaur, types: 3)
+      sk = self.new stream, ns.rest, ns
+      case ns.rest.peek
+      when 'and'
+        # We expect a terminating condition
+        if ns2 = TagSeeker.match(ns.rest.rest, lexaur, types: 3)
+          sk.tag_seekers << ns2
+          sk.rest = ns2.rest
+        else
+          return nil
+        end
+      when ','
+        if further = self.match(ns.rest.rest, lexaur)
+          sk.tag_seekers += further.tag_seekers
+          sk.rest = further.rest
+        end
+      end
+      return sk
+    end
+  end
+end
+
 =begin
 require "candihash.rb"
 
