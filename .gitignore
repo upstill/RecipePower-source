@@ -16,5 +16,5 @@ eventmachine/
 /config/database.yml
 
 /log/trimmed_pl
-
+/log/heroku
 /log/logout
