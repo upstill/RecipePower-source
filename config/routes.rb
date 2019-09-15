@@ -247,6 +247,7 @@ RP::Application.routes.draw do
   resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
+      resource :gleaning
     end
     collection do
       get 'capture'
