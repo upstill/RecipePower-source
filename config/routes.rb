@@ -21,7 +21,7 @@ RP::Application.routes.draw do
 
   get 'rp_events/destroy'
 
-  match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
+  # match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
   get 'scraper/new'
   post 'scraper/create'
