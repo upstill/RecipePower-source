@@ -35,7 +35,7 @@ class RecipesController < CollectibleController
     	if(params[:what] == 'Tags')
     	end
     end
-    render :text => params[:name]
+    render :plain => params[:name]
     return true
   end
 

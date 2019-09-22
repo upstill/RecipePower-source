@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.3.8'
 ## gem 'bundler', '~> 1.4'
-gem 'rails', '5.0.0'
+gem 'rails', '~> 5.1.0'
 gem 'rdoc'
 
 ###### Rails Extensions
