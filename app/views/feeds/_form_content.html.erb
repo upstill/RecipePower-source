@@ -18,7 +18,7 @@
     </div>
   </div>
 </div>
-<% if permitted_to?(:admin, :feeds) %>
+<% if policy(Feed).admin? %>
     <div class="row">
       <div class="col-md-12">
         <%= f.check_box :approved %>

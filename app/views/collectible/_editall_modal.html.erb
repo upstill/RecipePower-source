@@ -22,7 +22,7 @@
               <%= f.text_area :description, :label => false %>
             </div>
 
-            <% if permitted_to?(:admin, :recipes) %>
+            <% if policy(Recipe).admin? %>
                 <div class='item-enclosure'>
                   <br><%= f.label :url, 'URL' -%>
                   <br><%= f.url_field :url %>
@@ -31,7 +31,7 @@
           </div>
         </div>
         <div class="modal-footer">
-          <% if permitted_to?(:admin, :recipes) && response_service.admin_view? %>
+          <% if response_service.admin_view? && policy(Recipe).admin? %>
               <% link_to_submit 'Destroy This Recipe',
                                 @decorator.object_path,
                                 :class => "pull-left",

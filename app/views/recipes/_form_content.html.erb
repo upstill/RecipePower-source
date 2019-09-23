@@ -16,7 +16,7 @@
       <%= f.text_area :description, :label => false %>
     </div>
 
-    <% if permitted_to?(:admin, :recipes) %>
+    <% if policy(@decorator.object).admin? %>
         <div class='item-enclosure'>
           <br><%= f.label :url, 'URL' -%>
           <br><%= f.url_field :url %>

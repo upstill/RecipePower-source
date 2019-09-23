@@ -1,6 +1,13 @@
 class FeedsController < CollectibleController
   before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :contents, :card, :collect ]
 
+  def check_credentials opts={}
+    # We perform a standard credentials check, but defer to #update_and_decorate for actions that use it
+    # NB This same exclusion will occur in superclasses (specifically, CollectibleController)
+    opts[:except] = (opts[:except] || []) + %w{ show contents edit create refresh }
+    super opts
+  end
+
   # GET /feeds
   # GET /feeds.json
   def index
@@ -114,6 +121,10 @@ class FeedsController < CollectibleController
     else
       flash[:error] = "'#{params[:hotness]}' is not a valid hotness"
     end
+  end
+
+  def set_feed
+    @feed = Feed.find_by id: params[:id]
   end
 
 end

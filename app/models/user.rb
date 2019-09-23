@@ -312,6 +312,26 @@ private
       [@@Roles.sym(role_id)]
   end
 
+  def serves_as? role_sym
+    role_id >= @@Roles.num(role_sym)
+  end
+
+  def is_user? # Guest does not count as user
+    id != User.guest_id
+  end
+
+  def is_moderator?
+    serves_as? :moderator
+  end
+
+  def is_editor?
+    serves_as? :editor
+  end
+
+  def is_admin?
+    serves_as? :admin
+  end
+
   def qa
       # Ensure that everyone gets a role
       self.role_id = @@Roles.num(:user) unless self.role_id && (self.role_id > 0)

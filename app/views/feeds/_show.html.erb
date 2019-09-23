@@ -16,7 +16,7 @@
       <%= link_to_dialog( feed.site.name, site_path(feed.site)) if feed.site %>
     </p>
 
-    <% permitted_to?(:approve, :feeds) do %>
+    <% if policy(feed).approve? %>
         <p>
           Feedthrough <%= feed.approved ? "Approved" : (feed.approved.nil? ? "Not Approved" : "Blocked") %>
         </p>

@@ -1,4 +1,3 @@
-# require './lib/seeker.rb'
 require './lib/templateer.rb'
 require './lib/nested_benchmark.rb'
 require 'rp_event'
@@ -7,16 +6,30 @@ require 'results_cache.rb'
 require 'filtered_presenter.rb'
 
 class ApplicationController < ActionController::Base
+  include Pundit
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
-  def self.filter_access_to *args
-    # We have to declare a bogus before_action so filter_access_to can remove it without error
-    before_action :filter_access_filter
-    super *args
+  # All controller actions are preceded by a check for permissions
+  # This method may be subclassed to assert opt-ins and exclusions
+  def check_credentials opts={}
+    return if opts[:only] && !opts[:only].include?(params[:action])
+    unless opts[:except]&.include?(params[:action])
+      target_model_name = RecipesController.controller_name.classify
+      authorize (target_model_name.constantize rescue :"#{target_model_name.underscore}")
+    end
   end
+
+  def self.filter_access_to *args
+    # TODO: remove this
+    # We have to declare a bogus before_action so filter_access_to can remove it without error
+    before_action { true }
+    # before_action :filter_access_filter
+    # super *args
+  end
+  before_action :check_credentials
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
@@ -41,7 +54,7 @@ class ApplicationController < ActionController::Base
   helper_method :resource_errors_to_flash
   helper_method :resource_errors_to_flash_now
   helper_method :with_format
-  helper_method :'permitted_to?'
+  # helper_method :'permitted_to?'
 
   include ApplicationHelper
 
@@ -115,6 +128,7 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
+    authorize entity # Make sure that the user is authorized for this action
     # Finish whatever background task is associated with the entity
     entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params =
@@ -492,11 +506,6 @@ class ApplicationController < ActionController::Base
     # defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
     # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
-
-  # TODO XXX!!! This is a stub to eliminate the need for the authoreyes gem pending going to Ruby 2.3
-  # def permitted_to? (privilege, object_or_sym = nil, options = {})
-  #   true
-  # end
 
   protected
 

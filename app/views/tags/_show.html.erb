@@ -7,7 +7,7 @@
   <% end %>
 </div>
 <br>
-<% if response_service.admin_view? && permitted_to?(:edit, @tag) %>
+<% if response_service.admin_view? && policy(@tag).edit? %>
     <%= link_to_dialog 'Edit', edit_tag_path(@tag) %>
 <% end %>
 <%= link_to_submit 'All Tags', tags_path, mode: 'partial', item_mode: 'table' %>

@@ -3,6 +3,13 @@ class CollectibleController < ApplicationController
   before_action :allow_iframe, only: :capture
 #  protect_from_forgery except: :capture
 
+  def check_credentials opts={}
+    # We perform a standard credentials check, but defer to #update_and_decorate for actions that use it
+    # NB This same exclusion will occur in superclasses (specifically, CollectibleController)
+    opts[:except] = (opts[:except] || []) + %w{ collect lists glean editpic tag touch absorb associated }
+    super opts
+  end
+
   def collect
     if current_user
       update_and_decorate # Generate a FeedEntryDecorator as @feed_entry and prepares it for editing

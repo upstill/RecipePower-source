@@ -1,5 +1,5 @@
 <%= render "show_page", decorator: decorator, viewparams: viewparams %>
-<% permitted_to?(:approve, :feeds) do %>
+<% if policy(decorator.object).approve? %>
     <p>
       Feed <%= entity_approval decorator %>
     </p>
