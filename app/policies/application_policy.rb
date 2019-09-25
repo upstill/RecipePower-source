@@ -23,7 +23,7 @@ class ApplicationPolicy
   end
 
   def update?
-    @user&.editor?
+    @user&.is_editor?
   end
 
   def edit?
@@ -31,7 +31,7 @@ class ApplicationPolicy
   end
 
   def destroy?
-    @user&.admin?
+    @user&.is_admin?
   end
 
   # All other actions are denied by default

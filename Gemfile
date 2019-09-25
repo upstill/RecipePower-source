@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.3.8'
 ## gem 'bundler', '~> 1.4'
-gem 'rails', '5.0.7.2' # ~> 5.1.0'
+gem 'rails', '~> 5.1.0' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -24,7 +24,7 @@ gem 'with_advisory_lock', '3.0'
 gem 'barkick' # Handle UPC codes, etc.
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
-gem 'arel', '~> 7.0' # ~> 8.0' # https://github.com/rails/arel
+gem 'arel', '~> 8.0' # https://github.com/rails/arel
 
 ####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
 gem 'pg', '0.21.0' # TODO: 1.0.0 for Rails 5
