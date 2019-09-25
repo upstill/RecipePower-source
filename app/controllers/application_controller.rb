@@ -14,11 +14,16 @@ class ApplicationController < ActionController::Base
 
   # All controller actions are preceded by a check for permissions
   # This method may be subclassed to assert opt-ins and exclusions
-  def check_credentials opts={}
+  def check_credentials opts = {}
     return if opts[:only] && !opts[:only].include?(params[:action])
     unless opts[:except]&.include?(params[:action])
-      target_model_name = RecipesController.controller_name.classify
-      authorize (target_model_name.constantize rescue :"#{target_model_name.underscore}")
+      target_model_name = controller_name.classify
+      model_class_or_name = begin
+        target_model_name.constantize
+      rescue
+        :"#{target_model_name.underscore}"
+      end
+      authorize model_class_or_name
     end
   end
 
@@ -119,6 +124,11 @@ class ApplicationController < ActionController::Base
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
   # We also setup an instance variable for the entity according to its class,
   #  and also set up a decorator (@decorator) on the entity
+  # options:
+  #    :update_attributes: if true, update the object's attributes
+  #    :attribute_params: parameters for updating the object (optional)
+  #    :action_authorized asserts that the user is authorized
+  #    :touch: if true, touch the object in question
   # Return value: true if all is well
   def update_and_decorate entity=nil, options={}
     if entity.is_a? Hash
@@ -128,7 +138,6 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
-    authorize entity # Make sure that the user is authorized for this action
     # Finish whatever background task is associated with the entity
     entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params =
@@ -140,6 +149,9 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
+    # The entity has been defined. Now to check that the user is authorized for the current action
+    # NB: Since this method may be called in any context, it's possible to assert authorization
+    options[:action_authorized] || authorize(entity) # Make sure that the user is authorized for this action
     if entity.errors.empty?  &&  # No probs. so far
         entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model

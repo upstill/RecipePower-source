@@ -25,7 +25,7 @@ namespace :policies do
     }
     # puts "------------- controllers:"
     routes.keys.sort.each { |key|
-      file = key.singularize
+        file = key.singularize.sub /^.*\//, ''
       # if File.exists?(Rails.root.join("app", "models", "#{file}.rb"))
       unless file.match('/') # No directories please
         non_crud = []
@@ -40,10 +40,10 @@ namespace :policies do
         crud_report = (" [ + #{crud.join(', ')}]" if crud.present?)
         # puts "#{key}: #{non_crud.join(', ')}#{crud_report}\n\n"
 
-        model_name = key.singularize.camelize
+        model_name = file.camelize
         policy_name = model_name + 'Policy'
         policy_class = policy_name.constantize rescue nil
-        policy_filename = key.singularize + '_policy.rb'
+        policy_filename = file + '_policy.rb'
         policy_filepath = Rails.root.join 'app', 'policies', policy_filename
         actions_needed = crud + non_crud
         head = tail = "\n"
