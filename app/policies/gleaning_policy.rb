@@ -1,5 +1,5 @@
 class GleaningPolicy < ApplicationPolicy
-
+=begin
   def new?
     super
   end
@@ -23,6 +23,7 @@ class GleaningPolicy < ApplicationPolicy
   def create?
     super
   end
+=end
 
 end
 

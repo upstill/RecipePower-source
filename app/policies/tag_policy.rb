@@ -1,38 +1,38 @@
 class TagPolicy < ApplicationPolicy
   def create?
-    super
+    @user.is_user?
   end
 
   def new?
-    super
+    @user.is_user?
   end
 
   def edit?
-    super
+    update?
   end
 
   def show?
-    super
+    true
   end
 
   def update?
-    super
+    @user.is_editor?
   end
 
   def destroy?
-    super
+    @user.is_editor?
   end
 
   def index?
-    super
+    true
   end
 
   def associate?
-    true
+    @user.is_editor?
   end
 
   def owned?
-    true
+    @user.is_user?
   end
 
   def associated?
@@ -40,7 +40,7 @@ class TagPolicy < ApplicationPolicy
   end
 
   def define?
-    true
+    @user&.is_editor?
   end
 
   def list?
@@ -48,7 +48,7 @@ class TagPolicy < ApplicationPolicy
   end
 
   def typify?
-    true
+    @user&.is_editor?
   end
 
   def match?

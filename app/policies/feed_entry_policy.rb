@@ -1,4 +1,6 @@
-class FeedEntryPolicy < ApplicationPolicy
+class FeedEntryPolicy < CollectiblePolicy
+
+=begin
 
   def edit?
     super
@@ -9,44 +11,48 @@ class FeedEntryPolicy < ApplicationPolicy
   end
 
   def update?
-    super
+    @user&.is_user?
   end
 
   def destroy?
     super
   end
+=end
+
+=begin
 
   def tag?
-    true
+    super
   end
 
   def lists?
-    true
+    super
   end
 
   def touch?
-    true
+    super
   end
 
   def associated?
-    true
+    super
   end
 
   def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
   end
 
   def editpic?
-    true
+    super
   end
 
   def glean?
-    true
+    super
   end
+=end
 
 end
 

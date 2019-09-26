@@ -34,6 +34,7 @@ class ApplicationPolicy
     @user&.is_admin?
   end
 
+
   # All other actions are denied by default
   def method_missing(meth, *args, &block)
     false

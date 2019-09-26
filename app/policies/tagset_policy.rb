@@ -1,5 +1,5 @@
 class TagsetPolicy < ApplicationPolicy
-
+=begin
   def index?
     super
   end
@@ -27,6 +27,7 @@ class TagsetPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
 end
 

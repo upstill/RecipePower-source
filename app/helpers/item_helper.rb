@@ -8,7 +8,7 @@ module ItemHelper
     item_mode ||= response_service.item_mode
     if item = (item_or_decorator_or_specs.is_a?(Draper::Decorator) ? item_or_decorator_or_specs.object : item_or_decorator_or_specs) || (@decorator.object if @decorator)
       unless @decorator && @decorator.object == item
-        controller.update_and_decorate item, touch: false, action_authorized: policy(@decorator.object).show?
+        controller.update_and_decorate item, touch: false, action_authorized: policy(item).show?
         @decorator = controller.instance_variable_get :"@decorator"
         instance_variable_set :"@#{item.class.base_class.model_name.singular}", item
       end

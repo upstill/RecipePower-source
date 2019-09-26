@@ -1,5 +1,5 @@
 class ScalePolicy < ApplicationPolicy
-
+=begin
   def index?
     super
   end
@@ -27,6 +27,7 @@ class ScalePolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
 end
 

@@ -5,7 +5,7 @@ class EditionPolicy < ApplicationPolicy
   end
 
   def create?
-    super
+    @user&.is_editor?
   end
 
   def new?
@@ -13,7 +13,7 @@ class EditionPolicy < ApplicationPolicy
   end
 
   def edit?
-    super
+    @user&.is_editor?
   end
 
   def show?
@@ -21,7 +21,7 @@ class EditionPolicy < ApplicationPolicy
   end
 
   def update?
-    super
+    edit?
   end
 
   def destroy?

@@ -1,5 +1,5 @@
 class RatingPolicy < ApplicationPolicy
-
+=begin
   def index?
     super
   end
@@ -27,7 +27,7 @@ class RatingPolicy < ApplicationPolicy
   def destroy?
     super
   end
-
+=end
 end
 
 

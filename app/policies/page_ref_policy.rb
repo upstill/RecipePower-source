@@ -1,5 +1,6 @@
-class PageRefPolicy < ApplicationPolicy
+class PageRefPolicy < CollectiblePolicy
 
+=begin
   def create?
     super
   end
@@ -27,42 +28,45 @@ class PageRefPolicy < ApplicationPolicy
   def destroy?
     super
   end
-
-  def tag?
-    true
-  end
-
-  def lists?
-    true
-  end
-
-  def touch?
-    true
-  end
-
-  def associated?
-    true
-  end
-
-  def collect?
-    true
-  end
-
-  def card?
-    true
-  end
-
-  def editpic?
-    true
-  end
-
-  def glean?
-    true
-  end
+=end
 
   def scrape?
     true
   end
+
+=begin
+  def tag?
+    super
+  end
+
+  def lists?
+    super
+  end
+
+  def touch?
+    super
+  end
+
+  def associated?
+    super
+  end
+
+  def collect?
+    super
+  end
+
+  def card?
+    super
+  end
+
+  def editpic?
+    super
+  end
+
+  def glean?
+    super
+  end
+=end
 
 end
 

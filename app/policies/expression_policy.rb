@@ -5,7 +5,7 @@ class ExpressionPolicy < ApplicationPolicy
   end
 
   def create?
-    super
+    update?
   end
 
   def new?
@@ -13,7 +13,7 @@ class ExpressionPolicy < ApplicationPolicy
   end
 
   def edit?
-    super
+    update?
   end
 
   def show?
@@ -21,7 +21,7 @@ class ExpressionPolicy < ApplicationPolicy
   end
 
   def update?
-    super
+    @user&.is_editor?
   end
 
   def destroy?

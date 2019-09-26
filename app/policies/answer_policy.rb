@@ -1,5 +1,5 @@
 class AnswerPolicy < ApplicationPolicy
-
+=begin
   def index?
     super
   end
@@ -27,6 +27,7 @@ class AnswerPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
 end
 

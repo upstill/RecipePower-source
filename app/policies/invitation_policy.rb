@@ -1,5 +1,5 @@
 class InvitationPolicy < ApplicationPolicy
-
+=begin
   def edit?
     super
   end
@@ -19,6 +19,7 @@ class InvitationPolicy < ApplicationPolicy
   def create?
     super
   end
+=end
 
   def divert?
     true

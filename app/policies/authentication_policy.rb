@@ -1,31 +1,33 @@
 class AuthenticationPolicy < ApplicationPolicy
 
+# Authentication Policy: let Devise handle it
+
   def index?
-    super
+    true
   end
 
   def create?
-    super
+    true
   end
 
   def new?
-    super
+    true
   end
 
   def edit?
-    super
+    true
   end
 
   def show?
-    super
+    true
   end
 
   def update?
-    super
+    true
   end
 
   def destroy?
-    super
+    true
   end
 
   def failure?

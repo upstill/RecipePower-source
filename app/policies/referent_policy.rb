@@ -1,5 +1,6 @@
-class ReferentPolicy < ApplicationPolicy
+class ReferentPolicy < CollectiblePolicy
 
+=begin
   def index?
     super
   end
@@ -27,38 +28,43 @@ class ReferentPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
+
+=begin
 
   def associated?
-    true
+    super
   end
 
   def editpic?
-    true
+    super
   end
 
   def glean?
-    true
+    super
   end
 
   def touch?
-    true
+    super
   end
 
   def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
   end
 
   def tag?
-    true
+    super
   end
 
   def lists?
     true
   end
+
+=end
 
 end
 

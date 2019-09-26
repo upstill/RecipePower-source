@@ -1,4 +1,5 @@
-class FeedPolicy < ApplicationPolicy
+class FeedPolicy < CollectiblePolicy
+=begin
   def create?
     super
   end
@@ -26,6 +27,7 @@ class FeedPolicy < ApplicationPolicy
   def index?
     super
   end
+=end
 
   def refresh?
     true
@@ -36,43 +38,45 @@ class FeedPolicy < ApplicationPolicy
   end
 
   def approve?
-    true
+    @user&.is_editor?
   end
 
   def rate?
     true
   end
 
+=begin
   def editpic?
-    true
+    super
   end
 
   def glean?
-    true
+    super
   end
 
   def touch?
-    true
+    super
   end
 
   def associated?
-    true
+    super
   end
 
   def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
   end
 
   def tag?
-    true
+    super
   end
 
   def lists?
-    true
+    super
   end
+=end
 
 end

@@ -1,5 +1,6 @@
 class RegistrationPolicy < ApplicationPolicy
-
+# Registration Policy: let Devise deal with it
+=begin
   def create?
     super
   end
@@ -19,6 +20,7 @@ class RegistrationPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
   def cancel?
     true

@@ -1,5 +1,5 @@
 class SuggestionPolicy < ApplicationPolicy
-
+=begin
   def index?
     super
   end
@@ -27,6 +27,7 @@ class SuggestionPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
   def results?
     true

@@ -1,4 +1,5 @@
-class RecipePolicy < ApplicationPolicy
+class RecipePolicy < CollectiblePolicy
+=begin
   def index?
     super
   end
@@ -26,12 +27,9 @@ class RecipePolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
   def piclist?
-    true
-  end
-
-  def capture?
     true
   end
 
@@ -39,41 +37,48 @@ class RecipePolicy < ApplicationPolicy
     true
   end
 
-  def editpic?
-    true
-  end
-
-  def glean?
-    true
-  end
-
-  def touch?
-    true
-  end
-
-  def associated?
-    true
-  end
-
-  def collect?
-    true
-  end
-
-  def card?
-    true
-  end
-
-  def tag?
-    true
-  end
-
-  def lists?
-    true
-  end
-
   def revise?
     true
   end
+
+=begin
+  def capture?
+    super
+  end
+
+  def editpic?
+    super
+  end
+
+  def glean?
+    super
+  end
+
+  def touch?
+    super
+  end
+
+  def associated?
+    super
+  end
+
+  def collect?
+    super
+  end
+
+  def card?
+    super
+  end
+
+  def tag?
+    super
+  end
+
+  def lists?
+    super
+  end
+=end
+
 end
 
 

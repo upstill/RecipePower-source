@@ -1,5 +1,6 @@
-class ListPolicy < ApplicationPolicy
+class ListPolicy < CollectiblePolicy
 
+=begin
   def create?
     super
   end
@@ -28,6 +29,8 @@ class ListPolicy < ApplicationPolicy
     super
   end
 
+=end
+
   def pin?
     true
   end
@@ -36,37 +39,44 @@ class ListPolicy < ApplicationPolicy
     true
   end
 
-  def editpic?
-    true
-  end
+=begin
 
   def glean?
-    true
+    super
+  end
+
+  def editpic?
+    super
   end
 
   def tag?
-    true
-  end
-
-  def lists?
-    true
-  end
-
-  def touch?
-    true
-  end
-
-  def associated?
-    true
-  end
-
-  def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
   end
+
+  def collect?
+    super
+  end
+
+  def lists?
+    super
+  end
+
+  def touch?
+    super
+  end
+
+  def associated?
+    super
+  end
+
+  def associated?
+    super
+  end
+=end
 
 end
 

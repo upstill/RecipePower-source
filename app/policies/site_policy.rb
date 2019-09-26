@@ -1,4 +1,5 @@
-class SitePolicy < ApplicationPolicy
+class SitePolicy < CollectiblePolicy
+=begin
   def create?
     super
   end
@@ -26,49 +27,52 @@ class SitePolicy < ApplicationPolicy
   def index?
     super
   end
-
-  def absorb?
-    true
-  end
+=end
 
   def feeds?
     true
   end
 
   def approve?
-    true
+    @user&.is_editor?
   end
 
-  def editpic?
-    true
-  end
-
-  def glean?
-    true
-  end
-
+=begin
   def touch?
-    true
-  end
-
-  def associated?
-    true
-  end
-
-  def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
+  end
+
+  def collect?
+    super
+  end
+
+  def absorb?
+    super
+  end
+
+  def editpic?
+    super
+  end
+
+  def glean?
+    super
+  end
+
+  def associated?
+    super
   end
 
   def tag?
-    true
+    super
   end
 
   def lists?
-    true
+    super
   end
+=end
 
 end

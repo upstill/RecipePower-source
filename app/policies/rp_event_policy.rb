@@ -1,5 +1,5 @@
 class RpEventPolicy < ApplicationPolicy
-
+=begin
   def show?
     super
   end
@@ -23,6 +23,7 @@ class RpEventPolicy < ApplicationPolicy
   def destroy?
     super
   end
+=end
 
   def show_page?
     true

@@ -1,5 +1,5 @@
 class RefermentPolicy < ApplicationPolicy
-
+=begin
   def create?
     super
   end
@@ -15,7 +15,7 @@ class RefermentPolicy < ApplicationPolicy
   def destroy?
     super
   end
-
+=end
 end
 
 

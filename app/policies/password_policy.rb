@@ -1,19 +1,21 @@
 class PasswordPolicy < ApplicationPolicy
 
+# Password Policy: let Devise handle security
+
   def new?
-    super
+    true
   end
 
   def edit?
-    super
+    true
   end
 
   def update?
-    super
+    true
   end
 
   def create?
-    super
+    true
   end
 
 end

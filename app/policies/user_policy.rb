@@ -1,26 +1,33 @@
-class UserPolicy < ApplicationPolicy
+class UserPolicy < CollectiblePolicy
+=begin
   def index?
-    super
-  end
-
-  def new?
-    super
-  end
-
-  def edit?
     super
   end
 
   def show?
     super
   end
+=end
 
-  def update?
-    super
+  def new?
+    true # Deferring to Devise
+  end
+
+  def create?
+    true # Deferring to Devise
+  end
+
+  def edit?
+    update?
   end
 
   def destroy?
-    super
+    @user&.is_admin? || (@user == @record) # Users can destroy themselves
+  end
+
+  def update?
+    # A user can update themself, and an admin can update anybody
+    @user&.is_user? && ((@user == @record) || @user.is_admin?)
   end
 
   def profile?
@@ -56,7 +63,7 @@ class UserPolicy < ApplicationPolicy
   end
 
   def follow?
-    true
+    @user&.is_user?
   end
 
   def getpic?
@@ -64,43 +71,48 @@ class UserPolicy < ApplicationPolicy
   end
 
   def sendmail?
-    true
+    @user&.is_user?
   end
 
   def unsubscribe?
-    true
+    @user&.is_user?
   end
 
+=begin
+# Collectible actions
+
   def editpic?
-    true
+    super
   end
 
   def glean?
-    true
+    super
   end
 
   def tag?
-    true
+    super
   end
 
   def lists?
-    true
+    super
   end
 
   def touch?
-    true
+    super
   end
 
   def associated?
-    true
+    super
   end
 
   def collect?
-    true
+    super
   end
 
   def card?
-    true
+    super
   end
+
+=end
 
 end
