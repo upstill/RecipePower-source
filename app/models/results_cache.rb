@@ -1443,7 +1443,7 @@ class SitesIndexCache < ResultsCache
   end
 
   def supported_org_options
-    [ :newest, :viewed, (:approved if admin_view) ]
+    [ :newest, (:viewed if viewer.current?), (:approved if admin_view) ]
   end
 
 =begin
