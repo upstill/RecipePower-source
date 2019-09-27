@@ -11,7 +11,7 @@ class CollectiblePolicy < ApplicationPolicy
   end
 
   def lists?
-    true
+    update? && @record.is_a?(Taggable)
   end
 
   def glean?
@@ -19,11 +19,11 @@ class CollectiblePolicy < ApplicationPolicy
   end
 
   def editpic?
-    @user&.is_user?
+    update? && @record.is_a?(Picable)
   end
 
   def tag?
-    @user&.is_user?
+    @user&.is_user? && @record.is_a?(Taggable)
   end
 
   def touch?

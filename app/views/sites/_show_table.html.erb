@@ -10,7 +10,7 @@
         <td class="description-column" style="width: 80%">
           <% NestedBenchmark.measure '...description:' do %>
               <%= presenter.card_homelink class: 'title-link' %>
-              <%= presenter.edit_button if decorator.user_can? :edit %>
+              <%= presenter.edit_button if policy(site).edit? %>
               <%= collectible_collect_button decorator, 'lg' %>
               <%# collectible_destroy_button decorator, 'xs', title: 'The Nuclear Option', style: 'margin-left: 3.8em;' %>
               <br><%= site.description.html_safe if site.description.present? %>

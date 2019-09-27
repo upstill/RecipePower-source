@@ -13,7 +13,7 @@
     <% end %>
     <div class="modal-footer">
       <% mn = decorator.human_name %>
-      <% if decorator.user_can?(:destroy) && response_service.admin_view? %>
+      <% if policy(decorator.object).destroy? && response_service.admin_view? %>
           <%= link_to_submit "Destroy This #{mn}",
                             decorator.object_path,
                             :class => "pull-left",

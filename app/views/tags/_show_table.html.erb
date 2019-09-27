@@ -5,7 +5,7 @@
   <strong><%= homelink(item, onload: 'RP.dragdrop.init(event);') %></strong>
   (<%= item.typename %>)
   <br><%= presenter.description %>
-  <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
+  <% if policy(item).edit? && response_service.admin_view? %>
       <%= item.id.to_s %>
       <br>
       <% if @tagserv.is_global %>
@@ -46,7 +46,7 @@
   <% NestedBenchmark.measure 'Meanings:' do %>
     <br><%= safe_join presenter.table_summaries(response_service.admin_view?).compact, '<br>'.html_safe %>
   <% end %>
-  <% if presenter.decorator.user_can?(:edit) && response_service.admin_view? %>
+  <% if policy(item).edit? && response_service.admin_view? %>
       <%= render 'form_synonym', presenter: presenter %>
       <%= render 'form_child', presenter: presenter %>
   <% end %>
@@ -57,8 +57,8 @@
                                  :for => :table,
                                  helper: :summarize_tag_similar,
                                  label: '',
-                                 absorb_btn: (presenter.decorator.user_can?(:edit) && response_service.admin_view?),
-                                 merge_into_btn: (presenter.decorator.user_can?(:edit) && response_service.admin_view?),
+                                 absorb_btn: (policy(item).edit? && response_service.admin_view?),
+                                 merge_into_btn: (policy(item).edit? && response_service.admin_view?),
                                  joiner: '<br>' %>
   <% end %>
 </td>

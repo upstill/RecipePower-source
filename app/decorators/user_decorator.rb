@@ -19,11 +19,6 @@ class UserDecorator < CollectibleDecorator
     object.about
   end
 
-  # Check permissions for current user to access controller method
-  def user_can? what
-    (what.to_sym == :edit) && object.current? ? true : super
-  end
-
   def finderlabels
     super << 'Image'
   end

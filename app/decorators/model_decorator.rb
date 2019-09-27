@@ -105,11 +105,6 @@ class ModelDecorator < Draper::Decorator
     model_name.collection
   end
 
-  # Check permissions for current user to access controller method
-  def user_can? what
-    true # TODO XXX Restore authorization h.permitted_to? what.to_sym, collection_name.to_sym
-  end
-
   # Present an STI subclass as the base class
   def base_object
     object.class == object.class.base_class ? object : object.becomes(object.class.base_class)

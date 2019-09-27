@@ -1469,8 +1469,7 @@ class SitesIndexCache < ResultsCache
   end
 
   def itemscope
-    @itemscope ||= Site.
-        including_user_pointer(viewer_id).
+    @itemscope ||= ((viewer_id == User.guest_id) ? Site.unscoped : Site.including_user_pointer(viewer_id)).
         includes(:page_ref, :thumbnail, :approved_feeds, :recipes => [:page_ref], :referent => [:canonical_expression]).
         where(approved: approved)
   end

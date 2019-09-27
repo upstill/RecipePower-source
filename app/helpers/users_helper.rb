@@ -91,10 +91,6 @@ module UsersHelper
     content_tag :select, options, menu_options # , class: "selectpicker"
   end
 
-  def user_subclass user
-    user.current? ? 'viewer' : 'friend'
-  end
-
   # Operate on a set of tag specifications as defined in UserDecorator for directing a list search
   # Enhance each tokeninput with css class, css id and (as appropriate) owner specifier)
   def classify_listtags tokeninputs

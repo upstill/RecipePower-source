@@ -6,10 +6,10 @@ module DialogPanes
     @button_list ||= # A memoized list of buttons/panels to offer
     [
       (dialog_pane_spec(:comment) if object.is_a?(Collectible)),
-      (dialog_pane_spec(:edit) if user_can?(:admin)),
-      (dialog_pane_spec(:tags) if object.is_a?(Taggable) && user_can?(:tag)),
-      (dialog_pane_spec(:lists) if object.is_a?(Taggable) && user_can?(:lists)),
-      (dialog_pane_spec(:pic) if object.is_a?(Picable) && user_can?(:editpic))
+      (dialog_pane_spec(:edit) if policy(object).edit?),
+      (dialog_pane_spec(:tags) if policy(object).tag?),
+      (dialog_pane_spec(:lists) if policy(object).lists?),
+      (dialog_pane_spec(:pic) if policy(object).editpic?)
     ].compact
   end
 

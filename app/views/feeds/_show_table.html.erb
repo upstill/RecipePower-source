@@ -5,7 +5,7 @@
     </td>
     <td class="description-column">
       <%= presenter.card_homelink class: "title-link" %>
-      <%= presenter.edit_button if decorator.user_can? :edit %>
+      <%= presenter.edit_button if policy(feed).edit? %>
       <%= collectible_collect_button decorator, "lg" %>
       <%= feed_subscribe_button feed, :unsub_only => true %>
       <hr>
