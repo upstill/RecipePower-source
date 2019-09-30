@@ -213,7 +213,8 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    current_user ? collection_user_path(current_user) : home_path
+    # current_user ? collection_user_path(current_user) : home_path
+    current_user ? user_path(current_user) : home_path
   end
 
   # Get a presenter for the object from within a controller

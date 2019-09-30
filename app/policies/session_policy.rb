@@ -1,11 +1,11 @@
 class SessionPolicy < ApplicationPolicy
 
   def new?
-    super
+    true
   end
 
   def create?
-    super
+    true
   end
 
   def destroy?
