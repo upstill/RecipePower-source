@@ -58,7 +58,9 @@ class PageRefServices
           'href' => page_ref.url,
           'Image' => params[:page_ref][:picurl]
       }
-      defaults.merge! params[:extractions] if params[:extractions]
+      params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
+        defaults[key] = value
+      end
       # Produce a set of initializers for the target class
       CollectibleServices.find_or_create page_ref, defaults, klass
     end

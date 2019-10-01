@@ -25,7 +25,7 @@ class Scanner < Object
 
 end
 
-# Scan an input (space-separated) input stream. When the stream is exhausted, #more? returns false
+# Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
 class StrScanner < Scanner
 
   def initialize strings, pos=0

@@ -39,13 +39,13 @@ class ModelDecorator < Draper::Decorator
     return params if ed.class == self.class
     inmap = self.class.attrmap
     outmap = ed.class.attrmap_inverted # ActiveSupport::HashWithIndifferentAccess.new ed.class.attrmap.invert
-    params.inject(ActiveSupport::HashWithIndifferentAccess.new) { |memo, item|
-      key, value = *item
-      next memo unless (common_name = inmap[key])
-      next memo unless (output_key = outmap[common_name])
-      memo[output_key] = value
-      memo
+    result = ActiveSupport::HashWithIndifferentAccess.new
+    params.each {|key, value|
+      (common_name = inmap[key]) &&
+          (output_key = outmap[common_name]) &&
+          (result[output_key] = value)
     }
+    result
   end
 
   # Translation from label names to attribute names
