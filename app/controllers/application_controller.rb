@@ -214,7 +214,11 @@ class ApplicationController < ActionController::Base
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
     # current_user ? collection_user_path(current_user) : home_path
-    current_user ? user_path(current_user) : home_path
+    if Rails.env.development?
+      user_path(User.find 1)
+    else
+      current_user ? user_path(current_user) : home_path
+    end
   end
 
   # Get a presenter for the object from within a controller
@@ -504,9 +508,9 @@ class ApplicationController < ActionController::Base
         deferred_request specs
       elsif current_user.sign_in_count < 2
         flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
-        deferred_request path: collection_user_path(current_user, flash: flash), :format => :html
+        deferred_request path: collection_user_path(current_user, result_type: 'cookmarks', flash: flash), :format => :html
       else
-        deferred_request path: collection_user_path(current_user), :format => :html
+        deferred_request path: collection_user_path(current_user, result_type: 'cookmarks'), :format => :html
       end
     end || super
   end
