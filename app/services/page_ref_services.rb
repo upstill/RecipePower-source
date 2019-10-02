@@ -46,8 +46,8 @@ class PageRefServices
     end
     (page_ref unless page_ref.recipe? || page_ref.site?) ||
         (called_for if called_for.is_a?(Recipe) || called_for.is_a?(Site)) ||
-        page_ref.sites.first ||
-        page_ref.recipes.first ||
+        Site.find_by(page_ref_id: page_ref.id) ||
+        Recipe.find_by(page_ref_id: page_ref.id) ||
     begin
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
       klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
