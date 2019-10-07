@@ -68,6 +68,17 @@ class SiteServices
     end
   end
 
+  # For content derived from a recipe on the site, trim it to
+  def trim_recipe content
+    if content.present?
+      @nkdoc = Nokogiri::HTML.fragment content
+      # Delete 'div.smittenkitchen-print-hide' and 'aside' nodes
+      # @nkdoc.css('div.smittenkitchen-print-hide').map &:remove
+      @nkdoc.css('aside').map &:remove
+      @nkdoc.to_html
+    end
+  end
+
   def get_input(prompt='? ')
     print prompt
     gets.strip

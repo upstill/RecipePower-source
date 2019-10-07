@@ -23,7 +23,7 @@
         </div>
     <% end %>
     <% if response_service.admin_view? %>
-        <% if policy(decorator.object).admin? %>
+        <% if policy(decorator.object).edit? %>
             <div class='item-enclosure'>
               <div class='label-enclosure'>
                 <%= f.label :home, 'Site Home' -%>
@@ -43,7 +43,7 @@
               <%= f.text_field :ttlcut %>
             </div>
         <% end %>
-        <%= render('finders', f: f) if policy(Finder).admin? %>
+        <%= render('finders', f: f) if policy(Finder).edit? %>
     <% end %>
     </div>
     </div>
