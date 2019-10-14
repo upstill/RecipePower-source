@@ -12,10 +12,12 @@ class Site < ApplicationRecord
   pagerefable :home
 
   def self.mass_assignable_attributes
-    super + %i[ description ]
+    super + %i[ description trimmers ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
+
+  serialize :trimmers, Array # An array of CSS selectors used to remove extraneous content
 
   def dependent_page_refs
     page_refs.where.not id: page_ref_id
@@ -102,9 +104,7 @@ class Site < ApplicationRecord
     self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
     self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
     self.description = page_ref.description unless description.present? || page_ref.description.blank?
-    gleaning.extract_all 'RSS Feed' do |value|
-      assert_feed value
-    end if gleaning
+    gleaning&.results_for('RSS Feed').map { |feedstr| assert_feed feedstr }
     save if persisted? && changed?
   end
 

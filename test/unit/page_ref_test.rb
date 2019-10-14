@@ -112,7 +112,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "calls initialize only once" do
     mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     mp.kind = :recipe
-    mp.sync
+    mp.get_mercury_results
     mp.content = ''
     mp.save
     assert_equal mp.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'

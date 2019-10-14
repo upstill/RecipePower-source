@@ -79,13 +79,8 @@ class SiteDecorator < CollectibleDecorator
   end
 
   def after_gleaning gleaning=object.gleaning
-    gleaning.extract1 'Title' do |value|
-      object.name = value
-    end unless object.referent
-
-    gleaning.extract1 'Description' do |value|
-      object.description = value
-    end unless object.description.present?
+    gleaning.result_for('Title') { |value| object.name = value } unless object.referent
+    gleaning.result_for('Description') { |value| object.description = value } unless object.description.present?
     object.save if object.changed?
   end
 

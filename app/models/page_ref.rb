@@ -14,6 +14,30 @@ class PageRef < ApplicationRecord
 
   has_many :aliases, :dependent => :destroy
 
+  serialize :mercury_results, Hash
+
+  # Specify what values from the gleaning correspond to one of our attributes
+  @@gleaning_correspondents = {
+      # domain: nil,
+      'title' => 'title',
+      'description' => 'description',
+      # date_published => nil,
+      'author' => 'author',
+      'content' => 'content',
+      'picurl' => 'image'
+  }
+  # Specify what values from mercury_results correspond to one of our attributes
+  @@mercury_correspondents = {
+      'domain' => 'domain',
+      'title' => 'title',
+      'description' => 'description',
+      'date_published' => 'date_published',
+      'author' => 'author',
+      'content' => 'content',
+      'picurl' => 'lead_image_url'
+  }
+  @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
+
   def self.mass_assignable_attributes
     super + %i[ kind title lead_image_url description ]
   end
@@ -34,9 +58,6 @@ class PageRef < ApplicationRecord
   else
     belongs_to :gleaning, optional: true
   end
-
-  @@mercury_attributes = [ :url, :title, :content, :date_published, :lead_image_url, :domain, :author]
-  @@extraneous_attribs = [ :dek, :excerpt, :word_count, :direction, :total_pages, :rendered_pages, :next_page_url ]
 
   # attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
                   # :error_message, :http_status, :errcode,
@@ -96,15 +117,7 @@ class PageRef < ApplicationRecord
     end
   end
 
-  # serialize :aliases
-  store :extraneity, accessors: @@extraneous_attribs, coder: JSON
-
   scope :matching, ->(str) { where("url ILIKE ?", "%#{str}%") }
-
-  # What attributes are obtained from Mercury?
-  def self.mercury_attributes
-    @@mercury_attributes + [ :extraneity ]
-  end
 
 =begin
   def self.types
@@ -124,9 +137,10 @@ class PageRef < ApplicationRecord
   # Glean info from the page in background as a DelayedJob job
   # force => do the job even if it was priorly complete
   def bkg_launch force=false
-    if force || virgin? || needs_gleaning? || needs_mercury? # Once we've executed once, don't do it again unless forced
+    if force || virgin? || open_attributes.present? # Once we've executed once, don't do it again unless forced
       # Enqueue the gleaning as necessary and set up to process if so
-      self.gleaning ||= create_gleaning(page_ref: self) if needs_gleaning?
+      self.gleaning ||= create_gleaning(page_ref: self) # if needs_gleaning?
+      gleaning.bkg_launch true
       super true
     end
   end
@@ -134,22 +148,21 @@ class PageRef < ApplicationRecord
   # Glean info synchronously, i.e. don't return until it's done
   # force => do the job even if it was priorly complete
   def bkg_land force=false
-    super needs_gleaning? || needs_mercury? || force
+    super open_attributes.present? || force
   end
 
+  # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly
   def perform
-    sync if needs_mercury?
-    # Pick up any attributes from the gleaning
-    if needs_gleaning? && (self.gleaning ||= create_gleaning(page_ref: self)).bkg_land # Ensure the gleaning has happened
-      self.title = gleaning.result_for('Title') unless title.present?
-      if picurl.blank? && (pu = gleaning.result_for('Image') || lead_image_url).present?
-        self.picurl = pu
-      end
-      self.author = gleaning.result_for('Author') unless author.present?
-      self.description = gleaning.result_for('Description') unless description.present?
+    if open_attributes.present?
+      get_mercury_results if mercury_results.blank? || (http_status != 200)
+      errors.add(:url, 'is inaccessible to Mercury') if http_status != 200
+
+      self.gleaning ||= create_gleaning page_ref: self
+      gleaning.bkg_land # Ensure the gleaning has happened
+      errors.add(:url, 'can\'t be gleaned') if gleaning.bad?
+
+      adopt_extractions
     end
-    errors.add(:url, 'can\'t be gleaned') if gleaning.bad?
-    errors.add(:url, 'is inaccessible to Mercury') if needs_mercury?
   end
 
   # Will this page_ref be found when looking for a page_ref of the given url?
@@ -179,16 +192,16 @@ class PageRef < ApplicationRecord
   # The purpose of status is to indicate whether Mercury might be tried again later (:bad)
   # The purpose of http_status is a positive indication that the page can be reached
   # The purpose of errors are to show that the URL is ill-formed and the record should not (probably cannot) be saved.
-  def sync
+  def get_mercury_results
     self.extant_pr = nil # This identifies (unpersistently) a PageRef which clashes with a derived URL
     begin
-      @data = try_mercury url
-      if @data['domain'] == 'www.answers.com'
+      mercury_data = try_mercury url
+      if mercury_data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
-        @data['url'] = url
+        mercury_data['url'] = url
       end
       self.http_status =
-          if @data['mercury_error'].blank? # All good from Mercury
+          if mercury_data['mercury_error'].blank? # All good from Mercury
             200
           else
             # Check the header for the url from the server.
@@ -198,39 +211,39 @@ class PageRef < ApplicationRecord
             redirected_from = nil
             # Loop over the redirects from the link, adding each to the record.
             # Stop when we get to the final page or an error occurs
-            while hr = header_result(@data['url'])
+            while hr = header_result(mercury_data['url'])
               # header_result returns either
               # an integer result code (final result), or
               # a string url for redirection
               if hr.is_a?(Fixnum)
                 if (hr == 404) && redirected_from
                   # Got a redirect via Mercury, but the target failed
-                  @data['url'] = elide_alias redirected_from
+                  mercury_data['url'] = elide_alias redirected_from
                   hr = 303
                 end
                 break;
               end
-              hr = safe_uri_join(@data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
+              hr = safe_uri_join(mercury_data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
               break if alias_for hr # Time to give up when the url has been tried (it already appears among the aliases)
-              puts "Redirecting from #{@data['url']} to #{hr}"
+              puts "Redirecting from #{mercury_data['url']} to #{hr}"
               begin
-                alias_for((redirected_from = @data['url']), true) # Stash the redirection source in the aliases
-                # self.aliases |= [redirected_from = @data['url']]
-                @data = try_mercury hr
-                if (self.error_message = @data['mercury_error']).blank? # Success on redirect
+                alias_for((redirected_from = mercury_data['url']), true) # Stash the redirection source in the aliases
+                # self.aliases |= [redirected_from = mercury_data['url']]
+                mercury_data = try_mercury hr
+                if (self.error_message = mercury_data['mercury_error']).blank? # Success on redirect
                   hr = 200
                   break;
                 end
               rescue Exception => e
                 # Bad URL => Remove the last alias
-                @data['url'] = elide_alias(redirected_from) if redirected_from
+                mercury_data['url'] = elide_alias(redirected_from) if redirected_from
                 hr = 400
               end
             end
             hr.is_a?(String) ? 666 : hr
           end
       # Does the extracted url change to a collision with an existing PageRef of the same type?
-      new_url = @data['url']
+      new_url = mercury_data['url']
       if (new_url != url) &&
           !alias_for(new_url) &&
           (expr = self.class.find_by_url(new_url)) &&
@@ -238,14 +251,12 @@ class PageRef < ApplicationRecord
         self.extant_pr = expr
         puts "Sync'ing #{self.class} ##{id} (#{url}) failed; tried to assert existing url '#{new_url}'"
         self.http_status = 666
-        @data['url'] = url
+        mercury_data['url'] = url
         self.error_message = "URL has already been taken by #{self.class} ##{extant_pr.id}"
       end
-      @data['content'] ||= ''
-      @data['content'].tr! "\x00", ' ' # Mercury can return strings with null bytes for some reason
-      self.extraneity = @data.slice(*(@@extraneous_attribs.map(&:to_s)))
-      self.alias_for(url, true) # if @data['url'] != url # Record the existing url in the aliases if not already there
-      self.assign_attributes @data.slice(*(@@mercury_attributes.map(&:to_s)))
+      self.alias_for(url, true) # if mercury_data['url'] != url # Record the existing url in the aliases if not already there
+      mercury_data['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
+      self.mercury_results = mercury_data
     rescue Exception => e
       self.error_message = "Bad URL '#{url}': #{e}"
       self.http_status = 400
@@ -314,7 +325,7 @@ class PageRef < ApplicationRecord
   # Make a new PageRef (poss. of some subclass), carefully avoiding any extant URL
   def self.build_by_url url
     mp = self.new url: url
-    mp.sync
+    mp.get_mercury_results
     # The sync process follows redirects, accumulating aliases along the way.
     # It may turn up a URL used by another object, in which case we return that instead
     if !mp.errors.any? || mp.extant_pr
@@ -354,18 +365,30 @@ class PageRef < ApplicationRecord
     end
   end
 
-  private
-
-  # We have not extracted information to the full extent needed
-  def needs_mercury?
-    http_status != 200
+  # Enumerate the attributes that remain open
+  def open_attributes
+    @@extractable_attributes.select { |attrname| self.send(attrname).blank? }
   end
 
-  def needs_gleaning?
-    # Pick up any attributes from the gleaning
-    (gleaning && gleaning.good?) ?
-        false :
-        (title.blank? || lead_image_url.blank? || description.blank? || author.blank?)
+  # Once Mercury and gleaning has happened, reconcile our attributes with values from them
+  def adopt_extractions
+    open_attributes.each { |name| adopt_gleaning_value_for name } if gleaning&.good?
+    open_attributes.each { |name| adopt_mercury_value_for name } if mercury_results.present?
+  end
+
+  # Get a value from the gleaning for our attribute of the given name.
+  # This is necessary because the same value isn't necessarily named the same in the two
+  def adopt_gleaning_value_for name
+    # The conditional protects against asking the gleaning for an unknown value
+    return unless @@gleaning_correspondents[name].present? &&
+        (gleaning_val = gleaning&.send(@@gleaning_correspondents[name])).present?
+    self.send name+'=', gleaning_val
+  end
+
+  def adopt_mercury_value_for name
+    # The conditional protects against asking the mercury_results for an unknown value
+    return unless (mercury_val = mercury_results[@@mercury_correspondents[name]]).present?
+    self.send name+'=', mercury_val
   end
 
 end

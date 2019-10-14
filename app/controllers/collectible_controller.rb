@@ -271,6 +271,7 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate touch: true
+    @decorator.bkg_land # Finish scraping, if required
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
@@ -367,7 +368,7 @@ class CollectibleController < ApplicationController
                                                                        title: params[:recipe][:title]
                                                                    }.compact
               @url = page_ref.id ? tag_page_ref_url(page_ref, edit_params) : tag_page_refs_url(edit_params)
-              @site = page_ref.site
+              @site = page_ref.site || Site.find_for(page_ref.url) # Lookup appropriate site if page_ref hasn't been saved
               render
             end
           end

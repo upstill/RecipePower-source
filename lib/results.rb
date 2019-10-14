@@ -17,6 +17,20 @@ class Results < HashWithIndifferentAccess
     results_for(label).first
   end
 
+  def report_for label
+    self[label]&.map &:report
+  end
+
+  # We accept method calls named after the labels
+  def method_missing(meth, *args, &block)
+    label = meth.to_s.gsub('_', ' ')
+    label = label.singularize if is_plural = (label == label.pluralize)
+    if label = (labels.find { |candidate| candidate.downcase == label }) || label.capitalize
+      return is_plural ? results_for(label) : result_for(label)
+    end
+    super
+  end
+
   alias_method :labels, :keys
 
   def assert_result label, val_or_vals

@@ -131,7 +131,13 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		}
 		head.appendChild(style);
 
-		// Define mouse-hover highlighting for images
+		// Send a message to the iframe with the extracted content
+      if(ns.extractions) {
+          ns.extractions.call = 'declareExtractions';
+          ns.postMessage(ns.extractions, "<%= rp_url %>", ifr.contentWindow);
+      }
+
+      // Define mouse-hover highlighting for images
 		for(var i=0; i<ns.imgs.length; i++) {
 			var img = ns.imgs[i];
 			var parent = img.parentNode;
@@ -306,8 +312,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		candidates = ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
 		candidates = ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
 		return candidates;
-	}, 
-	
+	},
+
 	// Goes through a list of finders and extracts elements, one for each label
 	applyFinders: function(finders) {
 		var result = {};
@@ -323,7 +329,11 @@ window.recipePower_namespace = window.recipePower_namespace || {
 				if (candidates.length > 0) {
 					var found = null;
 					if(finder.attribute_name) {
-						found = candidates[0].getAttribute(finder.attribute_name);
+					    if(finder.attribute_name == 'html') {
+					        found = candidates[0].outerHTML;
+              } else {
+                  found = candidates[0].getAttribute(finder.attribute_name);
+              }
 					} else {
 						found = candidates[0].innerHTML;
 					}
@@ -379,12 +389,15 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	var callback = "<%= @url %>".replace( /&amp;/g, '&');
 	// The finders are specifications for extracting data of different types
 	var finders = JSON.parse ("<%= j FinderServices.js_finders(@site).to_json.html_safe %>");
-	var extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
-	if(extractions.URI)
-		extractions.URI = extractions.URI;
-	extractions.href = window.location.href;
-	extractions.title = extractions.title || document.title;
-	callback += ns.encodeExtractions(extractions);
+	ns.extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
+
+    // Report a subset of the extracted fields when calling back
+  var reportback = {};
+	if(ns.extractions.URI)
+		reportback.URI = ns.extractions.URI;
+  reportback.href = window.location.href;
+  reportback.title = ns.extractions.title || document.title;
+	callback += ns.encodeExtractions(reportback);
 	
 	var goer = document.createElement('a');
 	goer.href = "<%= rp_url '/collection' %>"

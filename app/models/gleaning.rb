@@ -20,15 +20,22 @@ class Gleaning < ApplicationRecord
 
   # ------------- safe delegation to (potentially non-existent) results
   def result_for label
-    results.result_for(label) if results
+    val = results&.result_for label
+    # If passed a block, call the block on the value
+    yield(val) if val && block_given?
+    val
   end
 
   def results_for label
-    results.results_for(label) if results
+    results&.results_for label
+  end
+
+  def report_for label
+    results&.report_for label
   end
 
   def labels
-    results ? results.labels : []
+    results&.labels || []
   end
 
   # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
@@ -72,15 +79,7 @@ class Gleaning < ApplicationRecord
 
   # Access the results by label; singular => return first result, plural => return all
   def method_missing namesym, *args
-    namestr = namesym.to_s.gsub('_',' ').titleize
-    namestr = namestr.singularize if is_plural = (namestr == namestr.pluralize)
-    namestr.sub! /Rss/, 'RSS'
-    puts namestr + ' results.'
-    bkg_land # Ensure that gleaning has occurred, whether synch. or asynch.
-    if results && results[namestr]
-      list = results[namestr].collect(&:out).flatten.uniq || []
-      is_plural ? list : list.first
-    end
+    results&.send namesym, *args
   end
 
   # Add results (presumably from a new finder) to the results in a gleaning
@@ -103,6 +102,7 @@ class Gleaning < ApplicationRecord
     do_save || true # Return a boolean indicating whether the finder made a difference
   end
 
+=begin
   def extract_all *labels
     result = ''
     labels.each do |label|
@@ -114,12 +114,7 @@ class Gleaning < ApplicationRecord
     end if results
     result
   end
-
-  def extract1 label
-    if results && result = (results[label] || []).map(&:out).flatten.first
-      yield(result)
-    end
-  end
+=end
 
   def hit_on_attributes attrhash, site
     return unless results.present? && site

@@ -1,7 +1,6 @@
 <% @entity = @decorator.object %>
-<%= form_for @entity, :url => polymorphic_path([:tag, @decorator.as_base_class], :extractions => params[:extractions].to_unsafe_h, :mode => :injector ), :html => {style: 'width:auto;height:auto'} do |f| %>
+<%= form_for @entity, :url => polymorphic_path([:tag, @decorator.as_base_class], :mode => :injector ), :html => {style: 'width:auto;height:auto'} do |f| %>
     <%= form_errors_helper f, @entity %>
-
     <div class="left">
       <div class="pic_picker_field">
         <%= pic_field f,

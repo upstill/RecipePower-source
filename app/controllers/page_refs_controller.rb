@@ -114,7 +114,7 @@ class PageRefsController < CollectibleController
       # :url and :domain cannot be mass-assigned b/c they have to be processed externally.
       # Specifically, a page_ref can be asserted for a novel url, but an existing page_ref is
       # DEFINED to be associated with a specific url. Hence it cannot be changed
-      params.require(:page_ref).permit(:kind, :title, :lead_image_url)
+      params.require(:page_ref).permit(:kind, :title, :picurl
     end
 =end
 end
