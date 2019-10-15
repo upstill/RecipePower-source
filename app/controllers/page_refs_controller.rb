@@ -40,7 +40,7 @@ class PageRefsController < CollectibleController
   def create
     if current_user
       @entity = @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
-      if !@page_ref.errors.any?
+      if !@page_ref.errors.present?
         @page_ref.bkg_land
         update_and_decorate @page_ref # Applies other parameters
         @entity = RefereeServices.new(@page_ref).assert_kind params[:page_ref][:kind], true
@@ -49,7 +49,7 @@ class PageRefsController < CollectibleController
       respond_to do |format|
         format.json {
           # JSON format is for dialogs creating a page_ref
-          if @page_ref.errors.any?
+          if @page_ref.errors.present?
             render json: view_context.flash_notify(@page_ref, false)
           else
             render json: @page_ref.attributes.slice('id', 'url', 'kind', 'title')
@@ -59,7 +59,7 @@ class PageRefsController < CollectibleController
           # This is from the "dialog" in the 'collect' layout. Response depends on errors:
           #   * No errors: present an equally simple page with dialog offering a link to the entity on RecipePower
           #   * Errors: re-render the dialog with an error flash and the provided parameters
-          if @entity.errors.any?
+          if @entity.errors.present?
             resource_errors_to_flash @entity
             render 'pages/collect', layout: 'collect'
           else

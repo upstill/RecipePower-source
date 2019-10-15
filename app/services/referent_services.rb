@@ -121,7 +121,7 @@ class ReferentServices
       else
         # There is no extant referment OR referent, but only the kind and url parameters
         rfmt = assert_referment rfmt_params[:kind], rfmt_params[:url]
-        if rfmt.errors.any?
+        if rfmt.errors.present?
           @referent.errors.add :referments, "have bad kind/url #{rfmt_params[:kind]}/#{rfmt_params[:url]}: #{rfmt.errors.full_messages}"
         elsif !@referent.referments.exists? referee: referee
           @referent.referments << rfmt
@@ -129,7 +129,7 @@ class ReferentServices
         end
       end
     end
-    changed && !@referent.errors.any?
+    changed && @referent.errors.empty?
   end
 
   # Ensure the existence of a Referment of a particular kind with the given url

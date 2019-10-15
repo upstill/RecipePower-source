@@ -87,7 +87,7 @@ class ApplicationController < ActionController::Base
   def destroy
     if update_and_decorate
       @decorator.destroy
-      if @decorator.errors.any? # resource_errors_to_flash(@decorator.object)
+      if @decorator.errors.present? # resource_errors_to_flash(@decorator.object)
         render :errors, locals: { entity: @decorator.object }
       else
         flash[:popup] ||= "#{@decorator.human_name} is no more."

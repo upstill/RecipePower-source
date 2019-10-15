@@ -161,7 +161,7 @@ class ReferentsController < CollectibleController
     name_tag_token = rp.delete :name_tag_token
     @referent.update_attributes rp
     @referent.name_tag_token = name_tag_token # Saved until after expressions are set
-    @referent.save if !@referent.errors.any? && ReferentServices.new(@referent).parse_referment_params(rfmt_params)
+    @referent.save if @referent.errors.blank? && ReferentServices.new(@referent).parse_referment_params(rfmt_params)
     if @referent.errors.empty?
       @referent.reload
       flash[:popup] = "'#{@referent.name}' now updated to serve you better"

@@ -7,10 +7,10 @@ class RefermentsController < ApplicationController
     rfmp = referment_params
     @referent = Referent.find_by id: rfmp[:referent_id]
     @referment = ReferentServices.new(@referent).assert_referment rfmp[:kind], rfmp[:url]
-    @referment.referee.bkg_land if @referment.referee.is_a?(Backgroundable) && !@referment.errors.any? # Scrape title from the page_ref
+    @referment.referee.bkg_land if @referment.referee.is_a?(Backgroundable) && !@referment.errors.present? # Scrape title from the page_ref
     respond_to do |format|
       format.json {
-        if @referment.errors.any?
+        if @referment.errors.present?
           render json: view_context.flash_notify(@referment, false)
         else
           render json: @referment.attributes.slice( 'id', 'referee_type', 'referee_id').

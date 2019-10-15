@@ -273,7 +273,7 @@ module Backgroundable
   # We get to success without throwing an error, throw one if appropriate so DJ doesn't think we're cool
   def success job=nil
     # ...could have gone error-free just because errors were reported only in the record
-    if self.errors.any?
+    if self.errors.present?
       raise Exception, self.errors.full_messages # Make sure DJ gets the memo
     else # With success and no errors, the DelayedJob record--if any--is about to go away, so we remove our pointer to it
       self.dj = nil
@@ -293,7 +293,7 @@ module Backgroundable
   # The #after hook is called after #success and #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=nil
-    self.status = self.errors.any? ? :bad : :good
+    self.status = self.errors.present? ? :bad : :good
     save # By this point, any error state should be part of the record
   end
 

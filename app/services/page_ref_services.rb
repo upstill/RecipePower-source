@@ -183,7 +183,7 @@ class PageRefServices
       klass = page_ref.class
       new_page_ref = klass.fetch new_url
       puts "...got PageRef ##{new_page_ref.id || '<nil>'} '#{new_page_ref.url}' http_status #{new_page_ref.http_status}"
-      unless new_page_ref.errors.any?
+      if new_page_ref.errors.empty?
         if new_page_ref.id # Existed prior =>
           # Make the old page_ref represent the new URL
           PageRefServices.new(new_page_ref).absorb page_ref

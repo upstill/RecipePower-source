@@ -23,7 +23,7 @@ class AnswersController < ApplicationController
   def create
     valid_params = answer_params
     ts = Answer.create_with(valid_params.slice :answer).find_or_create_by valid_params.slice(:user_id, :question_id)
-    if !ts.errors.any?
+    if !ts.errors.present?
       flash[:popup] = 'Answer duly noted.'
     else
       render :new

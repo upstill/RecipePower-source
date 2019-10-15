@@ -1,5 +1,5 @@
 <%= form_for(@rating) do |f| %>
-  <% if @rating.errors.any? %>
+  <% if @rating.errors.present? %>
     <div id="error_explanation">
       <h2><%= pluralize(@rating.errors.count, "error") %> prohibited this rating from being saved:</h2>
 

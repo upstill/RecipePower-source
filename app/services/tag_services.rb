@@ -135,9 +135,9 @@ class TagServices
             parent_ref = Referent.express tag
             parent_ref.make_parent_of child_ref, move
             # Raise an error to back out of the whole thing
-            raise parent_ref.errors.full_messages.join("\n") if parent_ref.errors.any?
+            raise parent_ref.errors.full_messages.join("\n") if parent_ref.errors.present?
             child_tag.save
-            raise child_tag.errors.full_messages.join("\n") if child_tag.errors.any?
+            raise child_tag.errors.full_messages.join("\n") if child_tag.errors.present?
             parent_ref.save
             child_ref.save
             child_tag

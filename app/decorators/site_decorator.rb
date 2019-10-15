@@ -75,7 +75,7 @@ class SiteDecorator < CollectibleDecorator
       site.page_refs.destroy_all
     end
 
-    site.destroy unless site.errors.any?
+    site.destroy unless site.errors.present?
   end
 
   def after_gleaning gleaning=object.gleaning

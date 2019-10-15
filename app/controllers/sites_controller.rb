@@ -20,7 +20,7 @@ class SitesController < CollectibleController
   def create
     @site = Site.create site_params
     respond_to do |format|
-      if !@site.errors.any?
+      if @site.errors.empty?
         format.html { redirect_to @site, notice: 'Site was successfully created.' }
         format.json { render json: @site, status: :created, location: @site }
       else
@@ -36,7 +36,7 @@ class SitesController < CollectibleController
     # TODO: see if mass-assigning gleaning_attributes works in Rails 5
     gleanings = params[:site].delete :gleaning_attributes
     if update_and_decorate
-      unless @site.errors.any?
+      if @site.errors.empty?
         @site.gleaning_attributes = gleanings
         respond_to do |format|
           format.html { redirect_to @site, notice: "Site #{@site.name} was successfully updated." }
