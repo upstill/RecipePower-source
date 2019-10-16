@@ -40,7 +40,7 @@ class PageRefsController < CollectibleController
   def create
     if current_user
       @entity = @page_ref = PageRefServices.assert params[:page_ref][:kind], params[:page_ref][:url]
-      if !@page_ref.errors.present?
+      if @page_ref.errors.empty?
         @page_ref.bkg_land
         update_and_decorate @page_ref # Applies other parameters
         @entity = RefereeServices.new(@page_ref).assert_kind params[:page_ref][:kind], true

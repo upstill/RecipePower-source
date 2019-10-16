@@ -98,10 +98,10 @@ class Recipe < ApplicationRecord
 
   # This is called when the page_ref finishes updating
   def adopt_gleaning
-    self.title = page_ref.title if page_ref.title.present? && !title.present?
-    self.picurl = page_ref.picurl if page_ref.picurl.present? && !picurl.present?
-    self.description = page_ref.description if page_ref.description.present? && !description.present?
-    self.content = SiteServices.new(site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) unless content.present?
+    self.title = page_ref.title if page_ref.title.present? && title.blank?
+    self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
+    self.description = page_ref.description if page_ref.description.present? && description.blank?
+    self.content = SiteServices.new(site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
     super if defined?(super)
   end
 

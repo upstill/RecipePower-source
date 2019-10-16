@@ -129,6 +129,7 @@ class ApplicationController < ActionController::Base
   #    :attribute_params: parameters for updating the object (optional)
   #    :action_authorized asserts that the user is authorized
   #    :touch: if true, touch the object in question
+  #    :adopt_gleaning: refer to the accompanying PageRef (or whatever) for extracted attributes
   # Return value: true if all is well
   def update_and_decorate entity=nil, options={}
     if entity.is_a? Hash
@@ -166,6 +167,7 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
+      entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
       if attribute_params.present? # There are parameters to update
         entity.update_attributes attribute_params
       elsif entity.persisted? # If not, look at saving the toucher_pointer

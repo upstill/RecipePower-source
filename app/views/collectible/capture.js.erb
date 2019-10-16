@@ -132,10 +132,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		head.appendChild(style);
 
 		// Send a message to the iframe with the extracted content
-      if(ns.extractions) {
-          ns.extractions.call = 'declareExtractions';
-          ns.postMessage(ns.extractions, "<%= rp_url %>", ifr.contentWindow);
-      }
+    ns.extractions.call = 'declareExtractions';
+    ns.postMessage(ns.extractions, "<%= rp_url %>", ifr.contentWindow);
 
       // Define mouse-hover highlighting for images
 		for(var i=0; i<ns.imgs.length; i++) {
@@ -344,13 +342,15 @@ window.recipePower_namespace = window.recipePower_namespace || {
 		return result;
 	},
 	
+/*
 	encodeExtractions: function(extrs) {
 		var result = "";
 		for(field in extrs)
 			result += "&extractions["+field+"]="+encodeURIComponent(extrs[field]);
 		return result;
 	}
-	
+*/
+
 };
 
 // Now create the iframe
@@ -387,18 +387,16 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	var ns = window.recipePower_namespace;
   // The extraction_js helper should declare finders for needed elements
 	var callback = "<%= @url %>".replace( /&amp;/g, '&');
-	// The finders are specifications for extracting data of different types
-	var finders = JSON.parse ("<%= j FinderServices.js_finders(@site).to_json.html_safe %>");
-	ns.extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
 
-    // Report a subset of the extracted fields when calling back
+/*
   var reportback = {};
 	if(ns.extractions.URI)
 		reportback.URI = ns.extractions.URI;
   reportback.href = window.location.href;
   reportback.title = ns.extractions.title || document.title;
 	callback += ns.encodeExtractions(reportback);
-	
+*/
+
 	var goer = document.createElement('a');
 	goer.href = "<%= rp_url '/collection' %>"
 	goer.id = 'recipePower-golink';
@@ -428,6 +426,11 @@ window.recipePower_namespace = window.recipePower_namespace || {
 	ifr.style.display = 'block';
   window.recipePower_namespace.iframe = ifr;
 
+    // While awaiting the response, we can scrape for other data, if any
+    // The finders are specifications for extracting data of different types, provided on a per-site basis
+    var finders = JSON.parse("<%= j (@finders || []).to_json.html_safe %>");
+    ns.extractions = ns.applyFinders(finders); // Scrape the page for definitive URL, Title and image (etc.)
+    // We'll send the results into the iframe when it's loaded
 })();
 
 // Define receive-message handler from ba-postmessage.js

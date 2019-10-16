@@ -58,13 +58,18 @@ function declareExtractions(data) {
             if(!elmt[0]) {
                 // No such elmt: construct the input elmt and append it to the parent
                 var html = "<input id='extracted_" +
-                    data.label +
+                    key +
                     "' type='hidden' name='" +
                     name +
                     "'>";
                 elmt = $(html).appendTo(parent);
             }
             elmt.attr('value', data[key]);
+            if(key == 'Title') {
+                $('textarea#recipe_title').attr('value', data['Title'])
+            } else if((key == 'Image') && ($('div.pic_preview input').attr('value') == '')) {
+                replaceImg({url: data['Image']});
+            }
         }
     }
 }

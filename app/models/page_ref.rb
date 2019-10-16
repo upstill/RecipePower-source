@@ -37,6 +37,20 @@ class PageRef < ApplicationRecord
       'picurl' => 'lead_image_url'
   }
   @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
+  
+  @@extractions_correspondents = {
+      # "URI",
+      'picurl' => "Image",
+      'title' => "Title",
+      # "Author Name",
+      # "Author Link",
+      'description' => "Description",
+      # "Tags",
+      # "Site Name",
+      # "RSS Feed",
+      'author' => "Author",
+      'content' => "Content"
+  }
 
   def self.mass_assignable_attributes
     super + %i[ kind title lead_image_url description ]
@@ -319,7 +333,8 @@ class PageRef < ApplicationRecord
   def self.fetch url_or_page_ref
     # Enabling "fetch" of existing page_ref
     return url_or_page_ref if url_or_page_ref.is_a?(PageRef)
-    (self.find_by_url(url_or_page_ref) || self.build_by_url(url_or_page_ref)) if url_or_page_ref.present?
+    # (self.find_by_url(url_or_page_ref) || self.build_by_url(url_or_page_ref)) if url_or_page_ref.present?
+    (self.find_by_url(url_or_page_ref) || self.new(url: url_or_page_ref)) if url_or_page_ref.present?
   end
 
   # Make a new PageRef (poss. of some subclass), carefully avoiding any extant URL
@@ -328,7 +343,7 @@ class PageRef < ApplicationRecord
     mp.get_mercury_results
     # The sync process follows redirects, accumulating aliases along the way.
     # It may turn up a URL used by another object, in which case we return that instead
-    if !mp.errors.any? || mp.extant_pr
+    if mp.errors.empty? || mp.extant_pr
       if extant = mp.extant_pr || self.find_by_url(mp.url) # Check for duplicate URL
         # Found => fold the extracted page data into the existing page
         mp.aliases.each { |al|
@@ -371,7 +386,9 @@ class PageRef < ApplicationRecord
   end
 
   # Once Mercury and gleaning has happened, reconcile our attributes with values from them
-  def adopt_extractions
+  def adopt_extractions extraction_params = {}
+    @extractions = extraction_params
+    open_attributes.each { |name| adopt_extraction_value_for name }
     open_attributes.each { |name| adopt_gleaning_value_for name } if gleaning&.good?
     open_attributes.each { |name| adopt_mercury_value_for name } if mercury_results.present?
   end
@@ -383,6 +400,15 @@ class PageRef < ApplicationRecord
     return unless @@gleaning_correspondents[name].present? &&
         (gleaning_val = gleaning&.send(@@gleaning_correspondents[name])).present?
     self.send name+'=', gleaning_val
+  end
+
+  # Get a value from the gleaning for our attribute of the given name.
+  # This is necessary because the same value isn't necessarily named the same in the two
+  def adopt_extraction_value_for name
+    # The conditional protects against asking the gleaning for an unknown value
+    if (extraction_val = @extractions[@@extractions_correspondents[name]]).present?
+      self.send name+'=', extraction_val
+    end
   end
 
   def adopt_mercury_value_for name
