@@ -37,11 +37,11 @@ class RecipeTest < ActiveSupport::TestCase
     url = 'http://patijinich.com/recipe/creamy-poblano-soup/'
     recipe = Recipe.new url: url
     assert_nil recipe.reference if recipe.respond_to?(:reference)
-    assert !recipe.errors.any?
+    assert !recipe.errors.present?
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
     # assert recipe.page_ref.good?
-    assert recipe.page_ref.alias_for(url) || recipe.url == url
+    assert recipe.page_ref.alias_for?(url) || recipe.url == url
   end
 
   test "url assigned with unsuccessful redirect" do

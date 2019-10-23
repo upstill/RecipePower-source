@@ -33,7 +33,7 @@ class PageRefServices
     pr.persisted? || pr.valid?
     pr
   end
-
+  
   # Get a collectible, taggable entity for the PageRef. Five possibilities:
   # 1) If it has an accompanying site, return the site
   # 2) If it has an accompanying recipe, return that
@@ -75,7 +75,7 @@ class PageRefServices
   end
 
   # Eliminate redundancy in the PageRefs by folding two into one
-  def absorb other, force=false
+  def absorb other, options={}
     return if page_ref == other
 
     # Take on all the recipes of the other
@@ -99,7 +99,7 @@ class PageRefServices
     # The default is to keep the absorber's attributes unless the other is shown to be good. The 'force'
     # parameter allows this issue to be forced.
     # aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
-    if force || ((page_ref.http_status != 200) && (other.http_status == 200))
+    if options[:force] || ((page_ref.http_status != 200) && (other.http_status == 200))
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
       puts "...taking #{hard_attribs} from other"
       page_ref.assign_attributes hard_attribs
@@ -116,7 +116,13 @@ class PageRefServices
     # page_ref.aliases = aliases - [page_ref.url]
     other.aliases.each { |al| page_ref.aliases << al unless page_ref.aliases.exists? url: al.url }
 
-    other.destroy if other.id # May not have been saved
+    if other.id # May not have been saved
+      if options[:retain]
+        other.save
+      else
+        other.destroy
+      end
+    end
     page_ref.save
   end
 
@@ -195,7 +201,7 @@ class PageRefServices
           epr.absorb new_page_ref
           return extant
         else
-          absorb new_page_ref, true
+          absorb new_page_ref, force: true
           puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
           return page_ref
         end

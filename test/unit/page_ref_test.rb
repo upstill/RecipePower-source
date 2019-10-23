@@ -48,7 +48,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal mp.aliases.last, al
     mp.elide_alias url2
     assert_not_equal mp.aliases.last, al
-    refute mp.alias_for( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
+    refute mp.alias_for?( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
   end
 
   test "try substitute on patijinich" do
@@ -58,7 +58,7 @@ class PageRefTest < ActiveSupport::TestCase
     assert mp.bad?
     new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
     assert_equal mp, new_mp
-    assert new_mp.alias_for(url)
+    assert new_mp.alias_for?(url)
     assert_equal 'https://patijinich.com/lamb_barbacoa_in_adobo/', new_mp.url
   end
 
@@ -75,7 +75,7 @@ class PageRefTest < ActiveSupport::TestCase
 
     new_mp = PageRefServices.new(mpbad).try_substitute 'oaktownspiceshop.com/blogs/recipe', 'oaktownspiceshop.com/blogs/recipes'
     assert_equal mpgood, new_mp
-    assert new_mp.alias_for(url)
+    assert new_mp.alias_for?(url)
     assert_nil PageRef.find_by(id: badid)
     assert_equal 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata', new_mp.url
   end

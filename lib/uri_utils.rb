@@ -83,23 +83,6 @@ def safe_parse(url)
   uri
 end
 
-def targetless_url url
-  url.sub /\#[^#]*$/, '' # Elide the fragment for purposes of finding
-end
-
-# This is the version of a url used in indexing PageRefs: no target, no lone slash for a path
-def indexing_url url
-  url = url.sub /\#[^#]*$/, '' # Elide the fragment for purposes of finding
-  begin
-    uri = URI url
-    pth = uri.path
-    uri.path = pth[0..-2] if pth[-1] == '/' # Truncate to elide terminating /
-    uri.to_s
-  rescue
-    url
-  end
-end
-
 # Since URI can't handle diacriticals in the fragment, encode them
 def fix_fragment url
   spl = url.split('#')

@@ -103,6 +103,8 @@ en:
       models:
         page_ref:
           attributes:
+            aliases:
+              invalid: "can't be saved"
             url:
               invalid: "doesn't lead to a web page.<br>Can you open it in a browser?"
         user:

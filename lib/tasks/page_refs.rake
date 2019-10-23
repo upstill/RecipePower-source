@@ -13,54 +13,31 @@ namespace :page_refs do
 
   # Ensure that each page_ref can be found by its indexing_url
   task fix_urls: :environment do
-    count = 0
-    failures = []
-    PageRef.all.each { |pr|
-      if pr.url != indexing_url(pr.url)
-        extant = pr.class.find_by_url(pr.url)
-        if !extant
-          pr.aliases |= [indexing_url(pr.url)]
+    msgs = []
+    PageRef.find_each { |pr|
+      if pr.url != PageRef.standardized_url(pr.url) # i.e., it's not standardized
+        msg = "PageRef ##{pr.id} on url #{pr.url} actually should be #{PageRef.standardized_url(pr.url)}...\n"
+        extant = pr.class.find_by_url pr.url  # There may be another page_ref answering to this url
+        if extant.id == pr.id
+          msg << "...but new url is fine"
+          pr.url = pr.url # ...which puts the url in standard format AND creates an alias on it
           pr.save
-          count += 1
-        elsif extant.id != pr.id
-          failures << [pr.id, extant.id]
+        else
+          msg << "...but new url conflicts with PageRef ##{extant.id}"
+          # PageRefServices.new(extant).absorb pr
         end
+        msgs << msg
       end
     }
-    puts "#{count} PageRefs fixed; #{failures.count} Failures"
-    destroyed = []
-    failures.each { |pair|
-      PageRef.where(id: pair).to_a.each { |pr|
-        if pr.site
-          puts "#{pr.class.to_s} ##{pr.id} has site ##{pr.site.id}"
-          next
-        end
-        case pr
-          when SitePageRef
-            if pr.sites.count > 0
-              puts "SitePageRef ##{pr.id} has sites"
-              next
-            end
-          when RecipePageRef
-            if pr.recipes.count > 0
-              puts "RecipePageRef ##{pr.id} has recipes"
-              next
-            end
-          when ReferrablePageRef
-            if pr.referents.count > 0
-              puts "#{pr.class.to_s} ##{pr.id} has referents"
-              next
-            end
-          else
-            puts "#{pr.class.to_s} ##{pr.id} is non-ordinary type"
-            next
-        end
-        destroyed << "#{pr.class.to_s} ##{pr.id}"
-        pr.destroy
-      }
+    # Now confirm that every PageRef has an alias based on its URL
+    PageRef.includes(:aliases).find_each { |pr|
+      unless pr.alias_for?(pr.url)
+        msgs << "PageRef ##{pr.id} has url #{pr.url} without an alias"
+        msgs << "...indexing_url is #{Alias.indexing_url pr.url}"
+        msgs << "...aliases are #{pr.aliases.map &:url}"
+      end
     }
-    puts "Destroyed #{destroyed.count} PageRefs:"
-    puts destroyed
+    puts msgs
   end
 
 end

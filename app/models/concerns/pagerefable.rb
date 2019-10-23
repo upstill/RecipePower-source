@@ -69,17 +69,18 @@ module Pagerefable
       end
 
       self.instance_eval do
-
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
         define_method "#{url_attribute}=" do |url|
-          unless page_ref && page_ref.answers_to?(url)
-            if pr = PageRef.fetch(url)
-              # pr.glean unless self.errors.present? # Update the gleaning data, if any
-              self.page_ref = pr
-            else
-              self.errors.add :url, 'can\'t be used'
+          if page_ref
+            if page_ref.acceptable_url?(url) { |errmsg| self.errors.add :url, "can't be used: #{errmsg}" }
+              page_ref.url = url
+            end
+          else
+            self.page_ref = PageRef.fetch url
+            if !page_ref || page_ref.errors.any?
+              self.errors.add :url, "can't be used: #{page_ref&.errors.full_messages}"
             end
           end
           url

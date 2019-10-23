@@ -105,10 +105,4 @@ class Recipe < ApplicationRecord
     super if defined?(super)
   end
 
-  def bkg_launch refresh=false, djopts = {}
-    super
-    page_ref.bkg_launch refresh
-    pending?
-  end
-
 end

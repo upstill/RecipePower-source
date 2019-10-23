@@ -188,7 +188,8 @@ module Backgroundable
       end
       puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
-      save if !id # Just in case (so DJ gets a retrievable record)
+      save if !persisted? # Just in case (so DJ gets a retrievable record)
+      yield if block_given? # Give the caller a chance to do any pre-launch work
       self.dj = Delayed::Job.enqueue self, djopts
       update_attribute :dj_id, dj.id
       puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
