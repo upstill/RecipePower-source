@@ -67,7 +67,7 @@ gem 'jquery-fileupload-rails', '~> 1.0' # '0.4.7'
 gem 'sassc', '~> 1.12' # Version 2.0 requires Ruby 2.3
 
 ###### Authentication and authorization
-gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise', '~> 4.7'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
