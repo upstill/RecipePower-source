@@ -1,11 +1,12 @@
 require './lib/results.rb'
 
+# A Gleaning object stores the result of examining a page via Nokogiri--the page linked by the associated page_ref
 class Gleaning < ApplicationRecord
   include Backgroundable
 
   backgroundable :status
 
-  after_create { |gl| gl.bkg_launch }
+  # after_create { |gl| gl.bkg_launch }
 
   require 'finder_services.rb'
 
@@ -51,7 +52,7 @@ class Gleaning < ApplicationRecord
   end
 
   def perform
-    go page_ref.url, site
+    go page_ref.url, page_ref.site
   end
 
   # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
@@ -68,8 +69,8 @@ class Gleaning < ApplicationRecord
         breakdown = FinderServices.err_breakdown url, msg
         self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
         self.http_status = breakdown[:status]
-        # errors.add :url, " #{url} failed to glean (http_status #{http_status}): #{msg}"
-        raise msg
+        errors.add :url, breakdown[:msg]
+        raise breakdown[:msg]
       end
   end
 

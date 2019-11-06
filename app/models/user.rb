@@ -176,6 +176,7 @@ class User < ApplicationRecord
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
     # entity.be_touched id, and_collect
     cached_tp(true, entity) do |cr|
+
       if and_collect.nil?
         cr.touch if cr.persisted? # Touch will effectively happen when it's saved
       else

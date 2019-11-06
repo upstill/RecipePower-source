@@ -10,11 +10,9 @@ class CollectibleDecorator < ModelDecorator
 
   # Wrap a Linkable's glean method, returning the gleaning iff there is one, and it's not bad
   # Also, launch the gleaning as necessary
-  def glean force=false
-    if object.is_a? Backgroundable
-      object.bkg_land force
-      object.gleaning unless (object.gleaning && object.gleaning.bad?)
-    end
+  def glean
+    object.bkg_land if object.is_a?(Backgroundable)
+    object.gleaning if object.respond_to?(:gleaning) && !object.gleaning&.bad?
   end
 
   # sample_page is a full URL somewhere on the associated site so we can absolutize links

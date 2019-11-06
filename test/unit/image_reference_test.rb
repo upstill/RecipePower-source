@@ -5,21 +5,33 @@ class ImageReferenceTest < ActiveSupport::TestCase
   fixtures :tags
 
   test 'image reference gets joined properly' do
-    site = Site.find_or_create_for 'http://www.dailybitesblog.com/'
+    site = Site.find_or_build_for 'http://www.dailybitesblog.com/'
+    refute site.dj
     site.bkg_land
     assert site.good?
-    refute site.errors.any?
-    gl = site.gleaning
+    refute site.errors.present?
     # assert gl.good?, 'Gleaning isn\'t born good'
-    gl.images.each { |img|
+    site.page_ref.gleaning.images.each { |img|
       assert img.match(/^http/), "relative image path #{img}"
-    }
+    } if site.page_ref.gleaning
   end
 
   test 'image reference with valid URL yields it as imgurl' do
     url = "http://img.rasset.ie/000675cb-1600.jpg"
     ir = ImageReference.create url: url
     assert_equal url, ir.imgurl, "doesn't duplicate URL in imgurl"
+    assert ir.dj
+    ir.bkg_land
+    assert ir.good?
+  end
+
+  test 'image reference with bogus URL presents error but does not relaunch' do
+    url = "http://img.rasset.ie/00067.jpg"
+    ir = ImageReference.create url: url
+    assert ir.dj
+    ir.bkg_land
+    assert ir.bad?
+    refute ir.dj
   end
 
   test 'image reference loads thumbnail onto aws' do

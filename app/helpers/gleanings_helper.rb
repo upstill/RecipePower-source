@@ -1,8 +1,8 @@
 module GleaningsHelper
 
   # Declare an element that either provides gleaned choices, or waits for a replacement request to come in
-  def  gleaning_field decorator, what, gleaning=nil
-    return unless gleaning ||= decorator.glean
+  def gleaning_field decorator, what
+    return unless gleaning = decorator.glean
     if gleaning.good?
       gleaning_field_declaration decorator, what, gleaning
     elsif glean_path = polymorphic_path([:glean, decorator.as_base_class], what: what) rescue nil

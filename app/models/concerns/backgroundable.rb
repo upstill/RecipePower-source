@@ -89,6 +89,12 @@ module Backgroundable
   end
 
   included do
+
+    # If an object is virgin, fire it off for background processing
+    after_save { |obj|
+      obj.bkg_launch
+    }
+
 =begin  TODO: Ensure we have some way of clearing dead jobs
     # Clear the status attribute of all entities that may have been interrupted
     # NB: The test pertains when migrating the status and dj_id columns, which don't yet exist
@@ -181,18 +187,22 @@ module Backgroundable
       if refresh # Forces changes to the pending job
         if dj.locked_by.blank? # If necessary and possible, modify parameters
           dj.with_lock do
-            dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now) # Need to undo the failed_at lock, if any
+            dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now, payload_object: self) # Need to undo the failed_at lock, if any
             dj.save if dj.changed?
           end
+          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
         end
       end
-      puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
-      save if !persisted? # Just in case (so DJ gets a retrievable record)
-      yield if block_given? # Give the caller a chance to do any pre-launch work
-      self.dj = Delayed::Job.enqueue self, djopts
-      update_attribute :dj_id, dj.id
-      puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
+      if persisted? # Just in case (so DJ gets a retrievable record)
+        yield if block_given? # Give the caller a chance to do any pre-launch work
+        self.dj = Delayed::Job.enqueue self, djopts
+        update_column :dj_id, dj.id
+        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
+      else
+        # Can't launch until the record is saved
+        self.status = :virgin
+      end
     end
     pending?
   end
@@ -204,13 +214,22 @@ module Backgroundable
   # runs it synchronously. In all cases except a future job (when run_early is not set) bkg_sync doesn't return
   # until the job is complete.
   def bkg_land force=false
-    reload if persisted? # Sync with external version
+    self.status = self.class.where(id: id).pluck(:status).first if persisted? # persisted? ? reload : save # Sync with external version
     if processing? # Wait for worker to return
-      until !processing?
+      secs_till_timeout = 10
+      while processing? do
         sleep 1
-        reload
+        break if (secs_till_timeout -= 1) == 0
+        self.status = self.class.where(id: id).pluck(:status).first
       end
-    elsif dj # Job pending => run it now, as necessary
+      if processing?
+        # Timeout: kill the job and run w/o DelayedJob
+        dj.destroy
+        update_attribute :dj_id, nil
+        virgin!
+      end
+    end
+    if dj # Job pending => run it now, as necessary
       # There's an associated job. If it's due (dj.run_at <= Time.now), or never been run (virgin), run it now.
       # If it HAS run, and it's due in the future, that's either because
       # 1) it failed earlier and is awaiting rerun, or
@@ -271,10 +290,17 @@ module Backgroundable
     processing!
   end
 
+  # relaunch? determines whether a job that didn't return an error should be rerun
+  def relaunch?
+    errors.present?
+  end
+
   # We get to success without throwing an error, throw one if appropriate so DJ doesn't think we're cool
   def success job=nil
-    # ...could have gone error-free just because errors were reported only in the record
-    if self.errors.present?
+    # ...could have gone error-free because errors were reported only in the record
+    # NB: This is a pretty crude report. For more specific info, the model should throw the error
+    # with a proper report, which will then get recorded in errors[:base]
+    if relaunch?
       raise Exception, self.errors.full_messages # Make sure DJ gets the memo
     else # With success and no errors, the DelayedJob record--if any--is about to go away, so we remove our pointer to it
       self.dj = nil
@@ -294,8 +320,8 @@ module Backgroundable
   # The #after hook is called after #success and #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=nil
-    self.status = self.errors.present? ? :bad : :good
-    save # By this point, any error state should be part of the record
+    self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
+    save if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
   end
 
 end

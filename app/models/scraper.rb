@@ -10,6 +10,8 @@ class Scraper < ApplicationRecord
   include Backgroundable
   backgroundable
 
+  after_create { |scraper| scraper.bkg_launch }
+
   # attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate, :page
 
@@ -39,7 +41,6 @@ class Scraper < ApplicationRecord
 
       scraper = subclass.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what)
       Rails.logger.info "!!!#{scraper.persisted? ? 'Scraper Already' : 'New Scraper'} Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
-      scraper.bkg_launch
     else
       scraper = Scraper.new()
       scraper.errors.add :type, "#{subclass} not defined for host #{uri.host}"

@@ -59,6 +59,8 @@ class TaggingServices
     Tagging.where(query).any?
   end
 
+=begin
+# !! #assert and #refute devolved to entity.assert_tagging and entity.refute_tagging
   def assert tag, owner_id=User.current_id
     return unless owner_id
     Tagging.find_or_create_by(
@@ -78,7 +80,8 @@ class TaggingServices
       tagging.destroy
     end
   end
-  
+=end
+
   # Eliminate all references to one tag in favor of another
   def self.change_tag(fromid, toid)
     Tagging.where(tag_id: fromid).each do |tochange| 
@@ -89,6 +92,7 @@ class TaggingServices
     end
   end
 
+=begin
   # Class method meant to be run from a console, to clean up redundant taggings before adding index to prevent them
   def self.qa
     Tagging.all.each { |tagging|
@@ -101,6 +105,7 @@ class TaggingServices
       tagging.destroy if matches.count > 1
     }
   end
+=end
 
   # Assert a tag associated with the given tagger. If a tag
   # given by name doesn't exist, make a new one
