@@ -86,6 +86,14 @@ class ImageReference < ApplicationRecord
           next_try.sub! /^https/, 'http'
       end
     end
+    # Failure to access the image
+    err_msg = "Error #{errcode} reading image at #{url} on ImageReference ##{id}"
+    errors.add :url, 'doesn\'t work: ' + err_msg
+    raise err_msg unless errcode == 404
+  end
+
+  def relaunch?
+    errors.present? && (errcode != 404)
   end
 
   # Index an ImageReference by URL or URLs, assuming it exists (i.e., no initialization or creation)
@@ -135,7 +143,6 @@ class ImageReference < ApplicationRecord
         ref
       else
         ref = self.lookup(redirected) || self.new(url: redirected)
-        ref.bkg_launch # Extract the image data if not already done
         ref
       end
     end
@@ -192,8 +199,10 @@ class ImageReference < ApplicationRecord
           quality = 80
           self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
         rescue Exception => e
-          logger.debug "Failed to parse image data for ImageReference #{id}: #{url} (#{e})"
           self.errcode = -2 # Bad data
+          err_msg = "couldn't parse to image data: ImageReference #{id}: #{url} (#{e})"
+          errors.add :url, err_msg
+          raise err_msg
         end
       end
     end
@@ -218,16 +227,16 @@ class ImageReference < ApplicationRecord
 
   # Ensure the thumbdata is up to date, optionally forcing an update even if previously processed
   def bkg_launch force=false
-    !definitive? && super
+    super unless definitive?
   end
 
   def bkg_land force=false
-    !definitive? && super
+    super unless definitive?
   end
 
   def after
     self.status = (url =~ /^\d\d\d\d-/) || (errcode == 200) ? :good : :bad
-    save
+    super
   end
 
   def thumbdata

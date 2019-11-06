@@ -127,7 +127,8 @@ class ListServices
   def include entity, user_or_id
     user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
     @list.store entity if user_id==owner_id
-    TaggingServices.new(entity).assert @list.name_tag, user_id # Tag with the list's name tag anyway
+    # TaggingServices.new(entity).assert @list.name_tag, user_id # Tag with the list's name tag anyway
+    entity.assert_tagging @list.name_tag, user_id # Tag with the list's name tag anyway
     # owner.touch entity
   end
 
@@ -146,7 +147,8 @@ class ListServices
   def exclude entity, user_or_id
     user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
     @list.remove entity if user_id == owner_id
-    TaggingServices.new(entity).refute @list.name_tag, user_id # Remove tagging (from this user's perspective)
+    # TaggingServices.new(entity).refute @list.name_tag, user_id # Remove tagging (from this user's perspective)
+    entity.refute_tagging @list.name_tag, user_id # Remove tagging (from this user's perspective)
   end
 
   # Remove an entity from the list based on parameters

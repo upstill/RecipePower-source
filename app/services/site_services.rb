@@ -70,10 +70,10 @@ class SiteServices
 
   # For content derived from a recipe on the site, trim it to
   def trim_recipe content
-    return content unless @site.trimmers.present? && content.present?
+    return content unless site.trimmers.present? && content.present?
     @nkdoc = Nokogiri::HTML.fragment content
     # Remove nodes from the content according to the site's :trimmers collection
-    @site.trimmers.each {|trimmer| @nkdoc.css(trimmer).map &:remove}
+    site.trimmers.each {|trimmer| @nkdoc.css(trimmer).map &:remove}
     @nkdoc.to_html
   end
 

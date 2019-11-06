@@ -30,6 +30,7 @@ module Collectible
       end
     end
 
+    # When we reload, the cache gets cleared
     def reload
       @cached_refs = {}
       super

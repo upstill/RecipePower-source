@@ -27,12 +27,11 @@ module Pagerefable
                    optional: true # Is not required
       end
 
-      has_one :site, :through => :page_ref
       # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
       # peg successful hits on finders. (Sites have an associated set of finders, on which they
       # remember successful hits)
-      has_one :gleaning, :through => :page_ref
-      accepts_nested_attributes_for :gleaning
+      # has_one :gleaning , :through => :page_ref
+      # accepts_nested_attributes_for :gleaning
 
 =begin
       if options[:gleanable]
@@ -72,18 +71,22 @@ module Pagerefable
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
-        define_method "#{url_attribute}=" do |url|
+        define_method "#{url_attribute}=" do |url_or_pr|
+          if url_or_pr.is_a? PageRef
+            self.page_ref = url_or_pr
+            return page_ref.url
+          end
           if page_ref
-            if page_ref.acceptable_url?(url) { |errmsg| self.errors.add :url, "can't be used: #{errmsg}" }
-              page_ref.url = url
+            if page_ref.acceptable_url?(url_or_pr) { |errmsg| self.errors.add :url, "can't be used: #{errmsg}" }
+              page_ref.url = url_or_pr
             end
           else
-            self.page_ref = PageRef.fetch url
+            self.page_ref = PageRef.fetch url_or_pr
             if !page_ref || page_ref.errors.any?
-              self.errors.add :url, "can't be used: #{page_ref&.errors.full_messages}"
+              self.errors.add :url, "can't be used: #{page_ref&.errors&.full_messages}"
             end
           end
-          url
+          url_or_pr
         end
 
         define_method url_attribute do
@@ -103,24 +106,36 @@ module Pagerefable
 
   public
 
+=begin
   # Glean info synchronously, i.e. don't return until it's done
   # force => do the job even if it was priorly complete
   def bkg_land force=false
     page_ref.bkg_land force if page_ref # finish the page_ref gleaning
     super force
   end
+=end
 
-  # The site performs its delayed job by forcing the associated page_ref to do its job (synchronously)
+  def site
+    page_ref.site if page_ref
+  end
+
+  # The backgroundable performs its delayed job by forcing the associated page_ref to do its job (synchronously)
+  #    then calling #adopt_gleaning to extract values for the object involved
   def perform
     if page_ref # Finish doing any necessary gleaning of the page_ref
       page_ref.bkg_land
-      adopt_gleaning if page_ref.good?
-      save if persisted? && changed?
+      if page_ref.good?
+        adopt_gleaning # "Abstract" method to be implemented by each pagerefable to adopt extracted values
+      else
+        err_msg = "Page at '#{url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
+        errors.add :url, err_msg
+        raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
+      end
     end
   end
 
   def ensure_site
-    (page_ref.site ||= Site.find_or_create_for(page_ref.url)) if page_ref
+    (page_ref.site ||= Site.find_or_build_for(page_ref)) if page_ref
   end
 
   def url_attribute
@@ -150,7 +165,7 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    gleaning.hit_on_attributes attrhash, site if gleaning && attrhash
+    page_ref.gleaning.hit_on_attributes attrhash, site if page_ref.gleaning && attrhash
   end
 
 end

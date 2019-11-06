@@ -109,7 +109,7 @@ class PageRefServices
       soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
           puts "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
-          page_ref.write_attribute attrname, other.read_attribute(attrname)
+          page_ref.send "#{attrname}=", other.send(attrname)
         end
       }
     end
@@ -171,42 +171,5 @@ class PageRefServices
       page_ref.good!
     end
     sentences.join "\n\t"
-  end
-
-=begin
-  # Make sure the page_ref has a site
-  def ensure_site
-    page_ref.site ||= Site.find_or_create_for(page_ref.url) unless (page_ref.site?) # class == SitePageRef)
-    page_ref.save
-  end
-=end
-
-  # Try to make a URL good by applying a pattern (string or regexp)
-  def try_substitute old_ptn, subst
-    if page_ref.url.match old_ptn
-      new_url = page_ref.url.sub old_ptn, subst
-      puts "Trying to substitute #{new_url} for #{page_ref.url} on PageRef ##{page_ref.id}"
-      klass = page_ref.class
-      new_page_ref = klass.fetch new_url
-      puts "...got PageRef ##{new_page_ref.id || '<nil>'} '#{new_page_ref.url}' http_status #{new_page_ref.http_status}"
-      if new_page_ref.errors.empty?
-        if new_page_ref.id # Existed prior =>
-          # Make the old page_ref represent the new URL
-          PageRefServices.new(new_page_ref).absorb page_ref
-          return new_page_ref
-        elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
-          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-          epr = PageRefServices.new extant
-          epr.absorb page_ref
-          epr.absorb new_page_ref
-          return extant
-        else
-          absorb new_page_ref, force: true
-          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-          return page_ref
-        end
-      end
-    end
-    nil
   end
 end

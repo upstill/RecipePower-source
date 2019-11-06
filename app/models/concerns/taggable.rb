@@ -187,15 +187,27 @@ module Taggable
   # Manage taggings of a given user
   def assert_tagging tag_or_id, user_id=User.current_id
     return unless user_id
-    Tagging.find_or_create_by user_id: user_id,
-                              tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id),
-                              entity: self
+    tag_id = tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+    if persisted?
+      return if taggings.exists? user_id: user_id, tag_id: tag_id
+      taggings.create user_id: user_id, tag_id: tag_id
+    else
+      return if taggings.any? { |tagging| tagging.tag_id == tag_id && tagging.user_id == user_id }
+      taggings.build user_id: user_id, tag_id: tag_id
+    end
   end
 
   def refute_tagging tag_or_id, user_id=User.current_id
     return unless user_id
-    scope = taggings.where tag_id: (tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id)
+    tag_id = tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+=begin
+    scope = taggings.where tag_id: tag_id
     scope = scope.where(user_id: user_id) if user_id
     scope.map &:destroy
+=end
+    extant = persisted? ?
+                 taggings.where(user_id: user_id, tag_id: tag_id).to_a :
+                 taggings.keep_if { |tagging| tagging.tag_id == tag_id && tagging.user_id == user_id }
+    taggings.destroy *extant
   end
 end

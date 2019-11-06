@@ -1,5 +1,5 @@
 require 'test_helper'
-require './lib/array_utils'
+# require './lib/array_utils'
 class AliasTest < ActiveSupport::TestCase
 
   test "urleq" do
