@@ -93,8 +93,7 @@ class FeedsController < CollectibleController
   def refresh
     update_and_decorate
     n_before = @feed.feed_entries_count
-    @feed.bkg_launch true # Make sure it's queued up
-    @feed.bkg_land true # Force it to run
+    @feed.bkg_land true # Force it to run now, as opposed to waiting for an update
     if @feed.good?
       if resource_errors_to_flash(@feed)
         render :errors

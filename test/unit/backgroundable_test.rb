@@ -38,4 +38,39 @@ class BackgroundableTest < ActiveSupport::TestCase
     assert gl.bad?
   end
 
+  test 'permanently fatal error doesnt get re-queued unless virginized' do
+    pr = PageRef.fetch 'https://patijinich.com/2012/05/creamy-poblano-soup.html'
+    pr.bkg_land
+    refute pr.persisted?
+    pr.save # Also launches--but doesn't, because it's failed prior
+    assert pr.persisted?
+    refute pr.dj # Didn't re-queue the job because it was run in-process
+    pr.bkg_launch true
+    assert pr.dj # NOW we're ready to rerun
+    pr.bkg_land
+    # Should run using DJ, fail with 404 error, then give up because it's a permanent error
+    assert pr.bad?
+    refute pr.dj
+    # Now it won't re-queue the job until forced
+    pr.title = 'Changed Title'
+    pr.save
+    refute pr.dj # Doesn't launch when saved
+    pr.bkg_launch
+    refute pr.dj # Doesn't launch when asked to (which saving does anyway)
+    pr.bkg_launch true
+
+  end
+
+  test 'nonpermanent error gets requeued but not re-executed until time unless forced' do
+    url = 'http://www.mariobatali.com/recipes/focaccia-panzanella/'
+    pr = PageRef.fetch url
+    refute pr.persisted?
+    pr.save
+    assert pr.dj # Launch on save
+    runtime = pr.dj.run_at
+    pr.bkg_land
+    assert_equal 500, pr.http_status
+    assert_not_equal runtime, pr.dj.run_at
+  end
+
 end

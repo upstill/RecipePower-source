@@ -10,7 +10,7 @@ class ScraperController < ApplicationController
     if resource_errors_to_flash @scraper
       smartrender :action => :new
     elsif params[:scraper][:immediate] == 'true'
-      @scraper.bkg_land true
+      @scraper.bkg_land 
       if resource_errors_to_flash @scraper
         smartrender :action => :new
       else

@@ -106,15 +106,6 @@ module Pagerefable
 
   public
 
-=begin
-  # Glean info synchronously, i.e. don't return until it's done
-  # force => do the job even if it was priorly complete
-  def bkg_land force=false
-    page_ref.bkg_land force if page_ref # finish the page_ref gleaning
-    super force
-  end
-=end
-
   def site
     page_ref.site if page_ref
   end

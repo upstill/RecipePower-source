@@ -200,7 +200,7 @@ module Backgroundable
         update_column :dj_id, dj.id
         puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
       else
-        # Can't launch until the record is saved
+        # Can't launch until the record is saved, so we'll mark it as virgin for now
         self.status = :virgin
       end
     end
@@ -216,7 +216,7 @@ module Backgroundable
   def bkg_land force=false
     self.status = self.class.where(id: id).pluck(:status).first if persisted? # persisted? ? reload : save # Sync with external version
     if processing? # Wait for worker to return
-      secs_till_timeout = 10
+      secs_till_timeout = 10 # Allow 10 seconds for the job to run before pre-emptively killing it
       while processing? do
         sleep 1
         break if (secs_till_timeout -= 1) == 0
@@ -225,27 +225,26 @@ module Backgroundable
       if processing?
         # Timeout: kill the job and run w/o DelayedJob
         dj.destroy
-        update_attribute :dj_id, nil
-        virgin!
+        update_column :dj_id, dj.id
+        self.dj_id = nil
+        self.status = :virgin
       end
     end
-    if dj # Job pending => run it now, as necessary
+    return true if good? && !force # If done previously and successfully, don't run again unless forced to
+    self.dj_id = nil if dj_id && !dj # In case the job has disappeared 
+    if dj_id # Job pending => run it now, as necessary
       # There's an associated job. If it's due (dj.run_at <= Time.now), or never been run (virgin), run it now.
       # If it HAS run, and it's due in the future, that's either because
       # 1) it failed earlier and is awaiting rerun, or
       # 2) it just needs to be rerun periodically
       # Force execution if it's never been completed, or it's due, or we force the issue
-      begin
-        if virgin? || (dj.run_at <= Time.now)
-          dj.payload_object = self # ...ensuring that the two versions don't get out of sync
-          puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
-          Delayed::Worker.new.run dj
-        end
-          # status = :good
-      rescue Exception => e
-        status = :bad
+      if virgin? || force || (dj && (dj.run_at <= Time.now))
+        dj.payload_object = self # ...ensuring that the two versions don't get out of sync
+        puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
+        Delayed::Worker.new.run dj
+        dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
       end
-    elsif virgin? || force # No DJ
+    elsif virgin? || force # No DJ => run it only if not run before, or things have changed (virgin), or it's needed (force)
       puts ">>>>>>>>>>> bkg_land #{self} (no dj)"
       perform_without_dj
     end
