@@ -143,6 +143,12 @@ class PageRef < ApplicationRecord
     self
   end
 
+  def bkg_launch force=false
+    build_gleaning if !gleaning
+    gleaning.bkg_launch if gleaning.virgin?
+    super
+  end
+
   # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly
   def perform
     self.error_message = nil
@@ -192,9 +198,16 @@ class PageRef < ApplicationRecord
     super
   end
 
-  # We relaunch the job on errors, unless we hit a hard, "Page Not Found", error
+  # We relaunch the job on errors, unless there's a permanent HTTP error
   def relaunch?
-    errors.present? && (http_status != 404)
+    errors.present? && ![
+        400, # Bad Request
+        401, # Unauthorized
+        403, # Forbidden
+        # 404, Not Found
+        414, # URI Too Long
+        # 500 Internal Server Error
+    ].include?(http_status)
   end
 
   # The indexing_url is a simplified url, as stored in an Alias

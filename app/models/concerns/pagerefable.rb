@@ -110,6 +110,11 @@ module Pagerefable
     page_ref.site if page_ref
   end
 
+  def bkg_launch refresh=false
+    page_ref.bkg_launch if page_ref&.virgin?
+    super if defined?(super)
+  end
+
   # The backgroundable performs its delayed job by forcing the associated page_ref to do its job (synchronously)
   #    then calling #adopt_gleaning to extract values for the object involved
   def perform

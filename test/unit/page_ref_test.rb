@@ -86,6 +86,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "try substitute absorbs" do
     mpgood = PageRef.fetch 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
     mpgood.bkg_land
+    assert mpgood.gleaning
     assert mpgood.good?
 
     url = 'https://oaktownspiceshop.com/blogs/recipe/roasted-radicchio-and-squash-salad-with-burrata'

@@ -242,7 +242,9 @@ module Backgroundable
         dj.payload_object = self # ...ensuring that the two versions don't get out of sync
         puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
         Delayed::Worker.new.run dj
-        dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
+        # It doesn't do to reload the job b/c it may have been deleted
+        self.dj = Delayed::Job.find_by id: dj.id if dj
+        # dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
       end
     elsif virgin? || force # No DJ => run it only if not run before, or things have changed (virgin), or it's needed (force)
       puts ">>>>>>>>>>> bkg_land #{self} (no dj)"
@@ -320,6 +322,7 @@ module Backgroundable
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=nil
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
+    self.dj = job # When rerunning the job
     save if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
   end
 
