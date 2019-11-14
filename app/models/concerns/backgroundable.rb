@@ -228,6 +228,8 @@ module Backgroundable
         update_column :dj_id, dj.id
         self.dj_id = nil
         self.status = :virgin
+      else # Job is done; reload to get DJ results
+        reload
       end
     end
     return true if good? && !force # If done previously and successfully, don't run again unless forced to

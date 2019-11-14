@@ -1,0 +1,11 @@
+# Read about fixtures at http://api.rubyonrails.org/classes/ActiveRecord/FixtureSet.html
+
+one:
+  results: MyText
+  http_status: 1
+  error_message: MyText
+
+two:
+  results: MyText
+  http_status: 1
+  error_message: MyText

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191009204722) do
+ActiveRecord::Schema.define(version: 20191110023251) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -294,6 +294,16 @@ ActiveRecord::Schema.define(version: 20191009204722) do
     t.integer "list_id"
   end
 
+  create_table "mercury_results", force: :cascade do |t|
+    t.text "results", default: "--- {}\n"
+    t.integer "http_status"
+    t.text "error_message"
+    t.integer "status", default: 0
+    t.integer "dj_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "notifications", id: :serial, force: :cascade do |t|
     t.integer "target_id", null: false
     t.string "target_type", null: false
@@ -389,7 +399,7 @@ ActiveRecord::Schema.define(version: 20191009204722) do
     t.integer "picture_id"
     t.text "description"
     t.integer "kind", default: 1
-    t.text "mercury_results", default: "--- {}\n"
+    t.integer "mercury_result_id"
     t.index ["url"], name: "page_refs_index_by_url", unique: true
   end
 

@@ -38,8 +38,8 @@ class BackgroundableTest < ActiveSupport::TestCase
     assert gl.bad?
   end
 
-  test 'permanently fatal error doesnt get re-queued unless virginized' do
-    pr = PageRef.fetch 'https://patijinich.com/2012/05/creamy-poblano-soup.html'
+  test 'HTTP 403 error doesnt get re-queued unless virginized' do
+    pr = PageRef.fetch 'http://scrapbook.lacolombe.com/2013/02/14/coffee-caramel-macarons/'
     pr.bkg_land
     refute pr.persisted?
     pr.save # Also launches--but doesn't, because it's failed prior

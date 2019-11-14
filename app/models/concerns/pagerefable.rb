@@ -27,19 +27,6 @@ module Pagerefable
                    optional: true # Is not required
       end
 
-      # A gleaning is the result of cracking a page. The gleaning for a linkable is used mainly to
-      # peg successful hits on finders. (Sites have an associated set of finders, on which they
-      # remember successful hits)
-      # has_one :gleaning , :through => :page_ref
-      # accepts_nested_attributes_for :gleaning
-
-=begin
-      if options[:gleanable]
-        has_one :gleaning, :as => :entity
-        accepts_nested_attributes_for :gleaning
-      end
-=end
-
       self.class_eval do
         # For the one attribute used to index the entity, provide access to its name for use in class and instance methods
         define_singleton_method :url_attribute do
