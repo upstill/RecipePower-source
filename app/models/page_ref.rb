@@ -18,12 +18,12 @@ class PageRef < ApplicationRecord
   @@gleaning_correspondents = {
       # domain: nil,
       'url' => 'URI',
-      'title' => 'title',
-      'description' => 'description',
+      'title' => 'Title',
+      'description' => 'Description',
       # date_published => nil,
-      'author' => 'author',
-      'content' => 'content',
-      'picurl' => 'image'
+      'author' => 'Author',
+      'content' => 'Content',
+      'picurl' => 'Image'
   }
   # Specify what values from mercury_results correspond to one of our attributes
   @@mercury_correspondents = {
@@ -40,21 +40,20 @@ class PageRef < ApplicationRecord
   def self.mercury_attributes
     @@mercury_correspondents.keys
   end
+
   @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
-  
-  @@extractions_correspondents = {
-      'url' => "URI",
-      'picurl' => "Image",
-      'title' => "Title",
-      # "Author Name",
-      # "Author Link",
-      'description' => "Description",
-      # "Tags",
-      # "Site Name",
-      # "RSS Feed",
-      'author' => "Author",
-      'content' => "Content"
-  }
+
+  def content
+    gleaning&.content.if_present || mercury_results['content'].if_present
+  end
+
+=begin
+  # We define accessors for all the mercury results and gleanings that aren't attributes of a page_ref
+  def method_missing meth, *args
+    (mercury_results[@@mercury_correspondents[meth.to_s]] if mercury_results) ||
+        ((gleaning_meth = @@gleaning_correspondents[meth.to_s]) && gleaning&.send(gleaning_meth))
+  end
+=end
 
   def self.mass_assignable_attributes
     super + %i[ kind title lead_image_url description ]
@@ -349,18 +348,14 @@ class PageRef < ApplicationRecord
 
   # Once Mercury and gleaning has happened, reconcile our attributes with values from them
   def adopt_extractions extraction_params
-    @extractions = extraction_params
     # Extractions are only provided in the context of the injector, by analysis of the page in situ
     # Since THAT only occurs when an entity is first captured, we let the extracted title prevail
-    open_attributes+['title'].each { |name| adopt_extraction_value_for name }
-  end
-
-  # Get a value from the gleaning for our attribute of the given name.
-  # This is necessary because the same value isn't necessarily named the same in the two
-  def adopt_extraction_value_for name
-    # The conditional protects against asking the gleaning for an unknown value
-    if (extraction_val = @extractions[@@extractions_correspondents[name]]).present?
-      self.send name+'=', extraction_val unless name == 'url' && !acceptable_url?(extraction_val)
+    open_attributes+['title'].each do |name|
+      # The conditional protects against asking the gleaning for an unknown value
+      if (extraction_val = extraction_params[@@gleaning_correspondents[name]]).present?
+        # We're not doing #set_attribute so as to retain side effects of, e.g., url=
+        self.send name+'=', extraction_val unless name == 'url' && !acceptable_url?(extraction_val)
+      end
     end
   end
 
@@ -412,14 +407,5 @@ class PageRef < ApplicationRecord
     return unless (mercury_val = mercury_results[@@mercury_correspondents[name]]).present?
     self.send name+'=', mercury_val
   end
-
-  private
-
-=begin
-
-  def url= url
-    super
-  end
-=end
-
+  
 end

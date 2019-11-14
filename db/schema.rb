@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191110023251) do
+ActiveRecord::Schema.define(version: 20191114023821) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -386,7 +386,6 @@ ActiveRecord::Schema.define(version: 20191110023251) do
     t.text "error_message"
     t.string "otype", limit: 25, default: "PageRef"
     t.text "title"
-    t.text "content"
     t.datetime "date_published"
     t.string "author"
     t.integer "errcode"
