@@ -10,14 +10,19 @@ class Gleaning < ApplicationRecord
 
   require 'finder_services.rb'
 
-  has_one :page_ref
+  has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
 
   # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
   serialize :results, Results
 
-  # delegate :result_for, :results_for, :labels, :to => :results
+  attr_accessor :needs # A list of labels to satisfy when gleaning
+
+  # Keeps a non-persistent list of labels to satisfy for the gleaning
+  def needs
+    @needs |= []
+  end
 
   # ------------- safe delegation to (potentially non-existent) results
   def result_for label
@@ -39,39 +44,19 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  # Crack a url (or the home page for a decorator) for the information denoted by the set of labels
-  def self.glean url_or_decorator, *labels
-    if url_or_decorator.is_a? String
-      (gleaning = self.new status: :processing).go url_or_decorator
-    elsif url_or_decorator.object.respond_to? :gleaning
-      url = url_or_decorator.pageurl
-      url_or_decorator.bkg_land
-      (gleaning = url_or_decorator.gleaning).go url, (url_or_decorator.site if url_or_decorator.respond_to?(:site))
-    end
-    gleaning
-  end
-
+  # Execute a gleaning on the page_ref's url
   def perform
-    go page_ref.url, page_ref.site
-  end
-
-  # Execute a gleaning on the given url, RIGHT NOW (maybe in an asynchronous execution, maybe not)
-  def go url, site=nil
-    # bkg_execute do
-      self.err_msg = ''
-      self.http_status = 200
-      begin
-        self.results = FinderServices.glean url, site
-      rescue Exception => msg
-        # Handle errors
-        # msg.message
-        # msg.backtrace
-        breakdown = FinderServices.err_breakdown url, msg
-        self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
-        self.http_status = breakdown[:status]
-        errors.add :url, breakdown[:msg]
-        raise breakdown[:msg]
-      end
+    self.err_msg = ''
+    self.http_status = 200
+    begin
+      self.results = FinderServices.glean page_ref.url, page_ref.site, *needs
+    rescue Exception => msg
+      breakdown = FinderServices.err_breakdown page_ref.url, msg
+      self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
+      self.http_status = breakdown[:status]
+      errors.add :url, breakdown[:msg]
+      raise breakdown[:msg]
+    end
   end
 
   def options_for label

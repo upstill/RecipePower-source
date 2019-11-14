@@ -67,18 +67,11 @@ class CollectibleController < ApplicationController
   def glean
     update_and_decorate
     @what = params[:what].to_sym
-    @gleaning =
-        if @pageurl = params[:url] # To glean images from another page
-          Gleaning.glean @pageurl, 'Image'
-        elsif @decorator.object.respond_to?(:gleaning)
-          do_force = params[:force] && params[:force] == 'true'
-          @decorator.bkg_land 
-          if (gl = @decorator.gleaning) && gl.bad?
-            @decorator.errors.add :gleaning, "encountered HTTP #{gl.http_status} error: #{gl.err_msg}"
-          end
-          @decorator.gleaning
-        end
-    if @gleaning
+    @pageurl = params[:url] # To glean images from another page
+    if @gleaning = GleaningServices.completed_gleaning_for((@pageurl || @decorator.object), 'Image')
+      if @gleaning.bad?
+        @decorator.errors.add :gleaning, "encountered HTTP #{@gleaning.http_status} error: #{@gleaning.err_msg}"
+      end
       if @gleaning.errors.present?
         flash.now[:error] = "Can't extract images from there: #{@gleaning.errors.messages}"
       elsif @gleaning.images.blank?
@@ -94,15 +87,9 @@ class CollectibleController < ApplicationController
   def editpic
     update_and_decorate
     @fallback_img = params[:fallback_img]
-    gleaning =
-    if @pageurl = params[:url]
-      Gleaning.glean @pageurl, 'Image'
-    elsif @decorator.object.respond_to?(:gleaning) && @decorator.object.is_a?(Backgroundable) && @decorator.bkg_land
-      @decorator.gleaning
-    else
-      Gleaning.glean @decorator, 'Image'
-    end
-    @image_list = (gleaning && gleaning.images) ? gleaning.images : []
+    @pageurl = params[:url]
+    @gleaning = GleaningServices.completed_gleaning_for (@pageurl || @decorator.object), 'Images'
+    @image_list = @gleaning.images
     if @pageurl && @image_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors
