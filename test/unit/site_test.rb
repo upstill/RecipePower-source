@@ -152,26 +152,52 @@ class SiteTest < ActiveSupport::TestCase
 
   end
 
+  # Test that the relationship between a page_ref and its site is consistent
+  # Providing a site parameter asserts that the given site DOES belong to the page_ref
+  def assert_page_ref_correctness page_ref, site=page_ref.site
+    assert_equal site, page_ref.site, 'Site not associated with page_ref'
+    # The page_ref has a site
+    assert_not_nil site
+    # The site's page_refs includes the page_ref
+    assert site.page_refs.include?(page_ref), "Site misses a page_ref that refers to it"
+  end
+
+  def assert_site_correctness site
+    # Confirm site and its page_ref point to each other
+    sitepr = site.page_ref
+    assert_not_nil sitepr
+    assert_equal sitepr.site, site
+    # site appears on the list of sites for the sitepr
+    assert_equal sitepr.sites.first, site
+  end
+
   test "Lengthening path sorts pagerefs appropriately" do
     nyt1 = "http://www.nytimes.com/2015/08/24/business/economy/as-minimum-wage-rises-restaurants-say-no-to-tips-yes-to-higher-prices.html"
     dpr1 = PageRef.fetch nyt1
     dpr1.kind = 'about'
     dpr1.save
-    site1 = dpr1.site
-    site1.bkg_land
-    assert_equal "www.nytimes.com", site1.root
+    shorter = dpr1.site
+    shorter.reload
+    assert_page_ref_correctness dpr1
+    assert_site_correctness shorter
 
-    longer = Site.create(root: "www.nytimes.com/2015")
-    longer.bkg_land
+    shorter.bkg_land
+    assert_equal "www.nytimes.com", shorter.root
+
+    longer = Site.create(root: "www.nytimes.com/2015", home: nyt1)
+    # Creating a site with a longer path attaches extant matching page_ref to it
     dpr1.reload
-    assert_equal longer, dpr1.site
+    longer.reload
+    assert_page_ref_correctness dpr1, longer
+    assert_site_correctness longer
 
     nyt2 = "http://www.nytimes.com/2015/10/15/dining/danny-meyer-restaurants-no-tips.html"
     dpr2 = PageRef.fetch nyt2
-    dpr2.kind = 'about'
+    assert_nil dpr2.id
+    # New PageRef matching longer site gets the site
+    longer.reload
     dpr2.save
-    dpr2.site.bkg_land
-    assert_equal longer, dpr2.site
+    assert_page_ref_correctness dpr2, longer
 
     longer.root = "www.nytimes.com/2015/08"
     longer.save
@@ -181,8 +207,7 @@ class SiteTest < ActiveSupport::TestCase
     dpr1.reload
     assert_equal longer, dpr1.site
     dpr2.reload
-    assert_equal site1.root, dpr2.site.root
-
+    assert_equal shorter, dpr2.site
   end
 
   test "Different samples from one site map to same site" do

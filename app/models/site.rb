@@ -80,19 +80,20 @@ class Site < ApplicationRecord
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
     # Reassign all of our pagerefs as necessary
     if saved_change_to_root? # Root has changed
-      page_refs.each { |pr|
+      page_refs.each do |pr|
         if (newsite = Site.find_for pr.url) != pr.site
-          pr.site = newsite
-          pr.save
+          page_refs.delete pr
+          newsite.page_refs << pr
         end
-      }
+      end
       # A given domain may have several sites, even if ones where one is a substring of another.
       # The site for a page_ref should be the one with the longest root.
       # Therefore, at this point we may steal any references from a site that has a shorter path
       if shorter_site = Site.with_subroot_of(root)
         PageRef.where(site: shorter_site).joins(:aliases).where(Alias.url_path_query root).each { |pr|
           # Reassign all PageRefs of the parent which apply here
-          pr.update_attribute :site_id, id
+          shorter_site.page_refs.delete pr
+          page_refs << pr
         }
       end
     end
@@ -237,6 +238,15 @@ public
           return
         end
       end
+=begin
+    else
+      if osite = Site.with_subroot_of(new_root)
+        osite.page_refs.where('url ILIKE ?', "%#{new_root}").not(id: page_ref_id).each do |newref|
+          # Move refs that match new root from old site to here
+          osite.page
+        end
+      end
+=end
     end
     super
   end

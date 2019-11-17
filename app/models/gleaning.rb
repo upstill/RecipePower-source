@@ -21,7 +21,7 @@ class Gleaning < ApplicationRecord
 
   # Keeps a non-persistent list of labels to satisfy for the gleaning
   def needs
-    @needs |= []
+    @needs ||= []
   end
 
   # ------------- safe delegation to (potentially non-existent) results

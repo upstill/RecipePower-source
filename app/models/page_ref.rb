@@ -47,6 +47,10 @@ class PageRef < ApplicationRecord
     gleaning&.content.if_present || mercury_results['content'].if_present
   end
 
+  def content= val
+    # Stubbing out the setting of the content attribute
+  end
+
 =begin
   # We define accessors for all the mercury results and gleanings that aren't attributes of a page_ref
   def method_missing meth, *args
@@ -149,17 +153,11 @@ class PageRef < ApplicationRecord
     super
   end
 
-  def http_status
-    mercury_result&.http_status
-  end
-
   def get_mercury_results
     build_mercury_result if !mercury_result
     if mercury_result
       mercury_result.bkg_land # Ensure the mercury_result has happened
-      if mercury_result.good?
-        adopt_mercury_result
-      elsif mercury_result.bad?
+      if !adopt_mercury_result
         errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
       end
       mercury_result.good?
@@ -254,6 +252,10 @@ class PageRef < ApplicationRecord
     Alias.includes(:page_ref).find_by_url(url)&.page_ref
   end
 
+  # This is the key maintainer of URL consistency and uniqueness
+  # PageRef.fetch: provide THE ONE PageRef corresponding to the given url,
+  #   whether an existing one, or a newly-built one. Its URL will be in the
+  #   canonical form (eliding the target)
   # String, PageRef => PageRef; nil => nil
   # Return a (possibly newly-created) PageRef on the given URL
   # NB Since the derived canonical URL may differ from the given url,
@@ -272,6 +274,10 @@ class PageRef < ApplicationRecord
     url.sub /\#[^#]*$/, '' # Elide the fragment for purposes of storage
   end
 
+  # Assigning a new url has several side effects:
+  # * initializing or finding the corresponding site
+  # * clearing http_status and virginizing the PageRef in anticipation of launching it (when/if saved)
+  # * ensuring the existence of virginized MercuryResult and Gleaning associates
   def url= new_url
     new_url = self.class.standardized_url new_url
     return if new_url == url
@@ -290,7 +296,7 @@ class PageRef < ApplicationRecord
     if mercury_result
       mercury_result.status = :virgin
     else
-      mercury_result
+      build_mercury_result
     end
   end
 
@@ -346,7 +352,7 @@ class PageRef < ApplicationRecord
     @@extractable_attributes.select { |attrname| self.send(attrname).blank? }
   end
 
-  # Once Mercury and gleaning has happened, reconcile our attributes with values from them
+  # Accept attribute values extracted from a page
   def adopt_extractions extraction_params
     # Extractions are only provided in the context of the injector, by analysis of the page in situ
     # Since THAT only occurs when an entity is first captured, we let the extracted title prevail
@@ -359,25 +365,24 @@ class PageRef < ApplicationRecord
     end
   end
 
+  # Accept attribute values internally extracted from a page
   def adopt_gleaning_results
-    open_attributes.each { |name| adopt_gleaning_value_for name } if gleaning&.good?
-  end
-
-  # Get a value from the gleaning for our attribute of the given name.
-  # This is necessary because the same value isn't necessarily named the same in the two
-  def adopt_gleaning_value_for name
-    # The conditional protects against asking the gleaning for an unknown value
-    return unless @@gleaning_correspondents[name].present? &&
-        (gleaning_val = gleaning&.send(@@gleaning_correspondents[name])).present?
-    self.send name+'=', gleaning_val unless name == 'url' && !acceptable_url?(gleaning_val)
+    open_attributes.each do |name|
+      # The conditional protects against asking the gleaning for an unknown value
+      if @@gleaning_correspondents[name].present? &&
+          (gleaning_val = gleaning&.send(@@gleaning_correspondents[name])).present?
+        self.send name+'=', gleaning_val unless name == 'url' && !acceptable_url?(gleaning_val)
+      end
+    end if gleaning&.good?
   end
 
   def adopt_mercury_result
     # Mercury leaves an array of redirected URLs found on the way to the final url
     # Assign those that aren't already assigned to this page_ref
+    self.http_status = mercury_result.http_status
     if mercury_result&.good?
       if mercury_results.present?
-        if http_status == 200
+        if mercury_result.http_status == 200
           # We write the extracted url without the side-effects of url= because we don't want our results reset
           if acceptable_url? mercury_results['url'] {|msg| errors.add :url, msg}
             self.write_attribute :url, self.class.standardized_url(mercury_results['url'])
@@ -392,20 +397,21 @@ class PageRef < ApplicationRecord
           # Create a new alias on this page_ref for every derived alias that isn't already in use
           (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true } if new_aliases.present?
           # We take Mercury's ruling on the definitive URL (assuming it's valid)
-          open_attributes.each {|name| adopt_mercury_value_for name }
+          open_attributes.each do |name|
+            # The conditional protects against asking the mercury_results for an unknown value
+            mercury_val = mercury_results[@@mercury_correspondents[name]]
+            self.send name + '=', mercury_val if mercury_val.present?
+          end
+          true
         else
           errors.add :url, "is inaccessible to Mercury: #{mercury_results['mercury_error']}"
+          false
         end
       else
         errors.add :url, 'is inaccessible to Mercury for mysterious reasons'
+        false
       end
     end
   end
 
-  def adopt_mercury_value_for name
-    # The conditional protects against asking the mercury_results for an unknown value
-    return unless (mercury_val = mercury_results[@@mercury_correspondents[name]]).present?
-    self.send name+'=', mercury_val
-  end
-  
 end

@@ -177,8 +177,10 @@ module Backgroundable
   def bkg_launch refresh=false, djopts = {}
     # We need to reload to ensure we're not stepping on existing processing.
     # Therefore, it is an error to be called with a changed record
-    reload if dj
-    return true if processing?
+    if dj
+      xstatus = self.class.where(id: id).pluck(:status).first # persisted? ? reload : save # Sync with external version
+      return true if xstatus == 'processing'
+    end
 
     if refresh.is_a?(Hash)
       refresh, djopts = false, refresh
@@ -214,22 +216,24 @@ module Backgroundable
   # runs it synchronously. In all cases except a future job (when run_early is not set) bkg_sync doesn't return
   # until the job is complete.
   def bkg_land force=false
-    self.status = self.class.where(id: id).pluck(:status).first if persisted? # persisted? ? reload : save # Sync with external version
-    if processing? # Wait for worker to return
-      secs_till_timeout = 10 # Allow 10 seconds for the job to run before pre-emptively killing it
-      while processing? do
-        sleep 1
-        break if (secs_till_timeout -= 1) == 0
-        self.status = self.class.where(id: id).pluck(:status).first
-      end
-      if processing?
-        # Timeout: kill the job and run w/o DelayedJob
-        dj.destroy
-        update_column :dj_id, dj.id
-        self.dj_id = nil
-        self.status = :virgin
-      else # Job is done; reload to get DJ results
-        reload
+    if persisted?
+      xstatus = self.class.where(id: id).pluck(:status).first # persisted? ? reload : save # Sync with external version
+      if xstatus == 'processing' # Wait for worker to return
+        secs_till_timeout = 10 # Allow 10 seconds for the job to run before pre-emptively killing it
+        while xstatus == 'processing' do
+          sleep 1
+          break if (secs_till_timeout -= 1) == 0
+          xstatus = self.class.where(id: id).pluck(:status).first
+        end
+        if xstatus == 'processing' # Timeout
+          # Timeout: kill the job and run w/o DelayedJob
+          dj.destroy
+          update_column :dj_id, dj.id
+          self.dj_id = nil
+          self.status = :virgin
+        else # Job is done; reload to get DJ results
+          reload
+        end
       end
     end
     return true if good? && !force # If done previously and successfully, don't run again unless forced to

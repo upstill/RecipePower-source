@@ -63,7 +63,8 @@ class PageRefTest < ActiveSupport::TestCase
     indirect_url = 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/'
     mp.url = indirect_url
     assert_nil mp.http_status
-    assert_equal 'virgin', mp.status
+    assert mp.virgin?
+    assert mp.mercury_result.virgin?
     mp.save
 =begin
     assert_nil mp.http_status
@@ -76,7 +77,7 @@ class PageRefTest < ActiveSupport::TestCase
     refute mp.errors.present?
     assert_equal [], mp.errors.full_messages
     assert_equal 200, mp.http_status
-    assert_equal 'https://patijinich.com/lamb_barbacoa_in_adobo/', mp.url
+    assert_match  /lamb_barbacoa_in_adobo/, mp.url
     assert mp.alias_for?(bad_url)
     assert mp.alias_for?(indirect_url)
     assert_equal 'good', mp.status
@@ -138,14 +139,14 @@ class PageRefTest < ActiveSupport::TestCase
     mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     mp.kind = :recipe
     mp.get_mercury_results
-    mp.content = ''
+    mp.description = ''
     mp.save
     assert_equal mp.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'
     mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
     mp2.kind = :recipe
     mp2.save
     assert_equal mp2, mp
-    assert_equal '', mp.content
+    assert_equal '', mp.description
   end
 
   test "page record findable by url" do
