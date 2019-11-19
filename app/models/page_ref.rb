@@ -156,7 +156,7 @@ class PageRef < ApplicationRecord
   def get_mercury_results
     build_mercury_result if !mercury_result
     if mercury_result
-      mercury_result.bkg_land # Ensure the mercury_result has happened
+      mercury_result.bkg_land mercury_result.bad? # Ensure the mercury_result has happened
       if !adopt_mercury_result
         errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
       end
@@ -167,7 +167,7 @@ class PageRef < ApplicationRecord
   def get_gleaning_results
     build_gleaning if !gleaning
     if gleaning
-      gleaning.bkg_land # Ensure the gleaning has happened
+      gleaning.bkg_land gleaning.bad? # Ensure the gleaning has happened
       if gleaning.good?
         adopt_gleaning_results
       elsif gleaning.bad?
@@ -183,8 +183,9 @@ class PageRef < ApplicationRecord
 
   # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly
   def perform
-    get_mercury_results
-    get_gleaning_results
+
+    NestedBenchmark.measure('getting Mercury results') { get_mercury_results }
+    NestedBenchmark.measure('getting Gleaning results') { get_gleaning_results }
 
     if errors[:url].present?
       url_errors = errors[:url].join "\n"
@@ -321,7 +322,7 @@ class PageRef < ApplicationRecord
 
     if PageRef.where(url: standardized_url).exists? || Alias.find_by_url(new_url)
       # There's an existing alias--not one of ours--which constitutes a conflict: no good
-      yield 'is already in use elsewhere.' if block_given?
+      yield "'#{standardized_url}' is already in use elsewhere." if block_given?
       false
     else
       true
@@ -384,7 +385,7 @@ class PageRef < ApplicationRecord
       if mercury_results.present?
         if mercury_result.http_status == 200
           # We write the extracted url without the side-effects of url= because we don't want our results reset
-          if acceptable_url? mercury_results['url'] {|msg| errors.add :url, msg}
+          if acceptable_url? mercury_results['url'] # {|msg| errors.add :url, msg}
             self.write_attribute :url, self.class.standardized_url(mercury_results['url'])
             # ...however, we do want to make the gleaning consistent with the uew url
             if gleaning

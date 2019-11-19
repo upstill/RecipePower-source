@@ -57,7 +57,7 @@ class MercuryResult < ApplicationRecord
                 break
               end
               hr = safe_uri_join(mercury_data['url'], hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
-              if alias_for hr # Time to give up when the url has been tried (it already appears among the aliases)
+              if page_ref&.alias_for hr # Time to give up when the url has been tried (it already appears among the aliases)
                 # Report the error arising from direct access
                 hr = header_result hr
                 break
@@ -100,11 +100,12 @@ class MercuryResult < ApplicationRecord
       previous_probe = current_probe
       http = Net::HTTP.new uri.host, uri.port
       # http.use_ssl = true
-
-      req = Net::HTTP::Get.new uri.to_s
-      req['x-api-key'] = ENV['MERCURY_API_KEY']
-
-      response = http.request req
+      response =
+      NestedBenchmark.measure('making Mercury request') do
+        req = Net::HTTP::Get.new uri.to_s
+        req['x-api-key'] = ENV['MERCURY_API_KEY']
+        http.request req
+      end
       data =
           case response.code
           when '401'

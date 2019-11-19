@@ -328,8 +328,15 @@ module Backgroundable
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=nil
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
-    self.dj = job # When rerunning the job
+    dj_status = job.destroyed? ? "(destroyed)" : '(not destroyed)' if dj
+    puts ">>> After #{status} job '#{job}'#{dj_status} on #{self.class.to_s}##{id} -> dj##{dj_id}"
+    self.dj = nil if good?
     save if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
+  end
+
+  def failure job=nil
+    puts "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
+    update_attribute :dj_id, nil
   end
 
 end

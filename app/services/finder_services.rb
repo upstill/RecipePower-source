@@ -128,12 +128,12 @@ class FinderServices
 
     uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
-    nkdoc = self.open_noko url
+    nkdoc = NestedBenchmark.measure('making Nokogiri request') { self.open_noko url }
 
     # Initialize the results
     results = Results.new *finders.map(&:label)
-
-    finders.each do |finder|
+    NestedBenchmark.measure('filtering for results with Nokogiri') do
+      finders.each do |finder|
       label = finder.label
       next unless (selector = finder.selector) &&
           (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
@@ -181,6 +181,7 @@ class FinderServices
       if result.found
         result.report
         results[label] << result
+      end
       end
     end
     results

@@ -33,9 +33,11 @@ class Result
   end
 
   def report
+=begin
     puts '------------------------------------------'
     puts "...results due to Finder #{@finderdata.slice :id, :label, :selector, :attribute_name, :site_id}:"
     puts "\t"+out[0..10].collect { |line| line.truncate(200) }.join("\n\t")
+=end
   end
 
   def is_for(label)
