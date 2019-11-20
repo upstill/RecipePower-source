@@ -54,6 +54,11 @@ class Recipe < ApplicationRecord
     super + [ :title, :description, :content, {:gleaning_attributes => %w{ Title Description }}]
   end
 
+  # The presented content for a recipe defaults to the page ref
+  def presented_content
+    content.if_present || page_ref&.content
+  end
+
   # These HTTP response codes lead us to conclude that the URL is not valid
   @@BadResponseCodes = [400, 404, 410]
 
