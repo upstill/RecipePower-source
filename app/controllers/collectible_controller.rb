@@ -1,6 +1,8 @@
 class CollectibleController < ApplicationController
   before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card ]
   before_action :allow_iframe, only: :capture
+  skip_before_action :verify_authenticity_token, only: [:capture, :tag]
+
 #  protect_from_forgery except: :capture
 
   def check_credentials opts={}
@@ -179,6 +181,7 @@ class CollectibleController < ApplicationController
       if model.is_a? Pagerefable
         model.page_ref.adopt_extractions params[:extractions] if params[:extractions]
         model.page_ref.bkg_land # After-creation followup
+        model.page_ref.content = params[:extractions][:content] if params[:extractions] && params[:extractions][:content]
         update_options[:adopt_gleaning] = true
       end
       update_and_decorate model, update_options
@@ -374,7 +377,7 @@ class CollectibleController < ApplicationController
 
               @url = tag_page_ref_url page_ref, edit_params
               # finders possible for ["URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"]
-              @finders = first_time ? FinderServices.js_finders(page_ref.site) : []
+              @finders = FinderServices.js_finders page_ref.site, (first_time ? {} : { only: ['Content'] })
               render
             end
           end

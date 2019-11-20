@@ -48,7 +48,7 @@ class PageRef < ApplicationRecord
   end
 
   def content= val
-    # Stubbing out the setting of the content attribute
+    gleaning&.content = val
   end
 
 =begin
@@ -357,7 +357,7 @@ class PageRef < ApplicationRecord
   def adopt_extractions extraction_params
     # Extractions are only provided in the context of the injector, by analysis of the page in situ
     # Since THAT only occurs when an entity is first captured, we let the extracted title prevail
-    open_attributes+['title'].each do |name|
+    open_attributes+['title', 'content'].each do |name|
       # The conditional protects against asking the gleaning for an unknown value
       if (extraction_val = extraction_params[@@gleaning_correspondents[name]]).present?
         # We're not doing #set_attribute so as to retain side effects of, e.g., url=

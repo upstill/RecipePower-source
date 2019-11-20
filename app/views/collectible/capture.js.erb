@@ -6,425 +6,440 @@
 
 // Create the namespace and define our functions in it.
 window.recipePower_namespace = window.recipePower_namespace || {
-	
-	imgs: document.getElementsByTagName('img'),
-	imghandlers: [],
-	iframe: undefined, // Will store the associated iframe DOM element
-	
-	/* Called when the X to cancel the dialog is clicked */
-	retire_iframe: function () {
-		if(this.iframe) {
-			this.iframe.style.display = 'none';
-			this.iframe.parentNode.removeChild(this.iframe);		
-		}
-		// Sadly obsolete: unwrapWithoutCloning();
-		var script = document.getElementById("recipePower-injector");
-		if(script) script.parentNode.removeChild(script);
-		
-		// Remove mouse-hover highlighting and click handler for images
-		for(var i=0; i<this.imgs.length; i++) {
-			var img = this.imgs[i];
-			var parent = img.parentNode;
-			var theLink = null;
-			if (parent.nodeName.match(/^A$/))
-				theLink = parent;
-			if (img.removeEventListener) {
-				img.removeEventListener('mouseover', this.mouseon, false);
-				img.removeEventListener('mouseout', this.mouseoff, false);
-				img.removeEventListener('click', this.imgclick, false);
-				if(theLink)
-					theLink.removeEventListener('click', this.aclick, false);
-			} else if (img.detachEvent) {
-				img.detachEvent('onmouseover', this.mouseon );
-				img.detachEvent('onmouseout', this.mouseoff );
-				img.detachEvent('onclick', this.imgclick );
-				if(theLink)
-					theLink.detachEvent('onclick', this.aclick );
-			} else {
-				img.onmouseover = this.imghandlers[i].mouseon;
-				img.onmouseout = this.imghandlers[i].mouseoff;
-				img.onclick = this.imghandlers[i].imgclick;
-				if(theLink)
-					theLink.onclick = this.imghandlers[i].aclick
-			}	
-		}
-		delete this.mouseon;
-		delete this.mouseoff;
-		delete this.imgclick;
-		delete this.aclick;
-		
-		// Finally, remove all trace that we were ever here and return false to stop the AJAX.
-		window.recipePower_namespace = undefined;
-		false;
-	},
-	
-	redirect_from_iframe: function (params) {
-		var url = params.url[0];
-		window.location = url;
-	},
 
-	execute_resize: function (dims) {
-		var width = dims.width[0];
-		var height = dims.height[0];
+    imgs: document.getElementsByTagName('img'),
+    imghandlers: [],
+    iframe: undefined, // Will store the associated iframe DOM element
 
-		/* Set the top margin of the encapsulation to clear the iframe
-		var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
-		var mgn = height+"px 0px 0px 0px";
-		capsule.style.margin=mgn;
-		*/
+    /* Called when the X to cancel the dialog is clicked */
+    retire_iframe: function () {
+        if (this.iframe) {
+            this.iframe.style.display = 'none';
+            this.iframe.parentNode.removeChild(this.iframe);
+        }
+        // Sadly obsolete: unwrapWithoutCloning();
+        var script = document.getElementById("recipePower-injector");
+        if (script) script.parentNode.removeChild(script);
+
+        // Remove mouse-hover highlighting and click handler for images
+        for (var i = 0; i < this.imgs.length; i++) {
+            var img = this.imgs[i];
+            var parent = img.parentNode;
+            var theLink = null;
+            if (parent.nodeName.match(/^A$/))
+                theLink = parent;
+            if (img.removeEventListener) {
+                img.removeEventListener('mouseover', this.mouseon, false);
+                img.removeEventListener('mouseout', this.mouseoff, false);
+                img.removeEventListener('click', this.imgclick, false);
+                if (theLink)
+                    theLink.removeEventListener('click', this.aclick, false);
+            } else if (img.detachEvent) {
+                img.detachEvent('onmouseover', this.mouseon);
+                img.detachEvent('onmouseout', this.mouseoff);
+                img.detachEvent('onclick', this.imgclick);
+                if (theLink)
+                    theLink.detachEvent('onclick', this.aclick);
+            } else {
+                img.onmouseover = this.imghandlers[i].mouseon;
+                img.onmouseout = this.imghandlers[i].mouseoff;
+                img.onclick = this.imghandlers[i].imgclick;
+                if (theLink)
+                    theLink.onclick = this.imghandlers[i].aclick
+            }
+        }
+        delete this.mouseon;
+        delete this.mouseoff;
+        delete this.imgclick;
+        delete this.aclick;
+
+        // Finally, remove all trace that we were ever here and return false to stop the AJAX.
+        window.recipePower_namespace = undefined;
+        false;
+    },
+
+    redirect_from_iframe: function (params) {
+        var url = params.url[0];
+        window.location = url;
+    },
+
+    execute_resize: function (dims) {
+        var width = dims.width[0];
+        var height = dims.height[0];
+
+        /* Set the top margin of the encapsulation to clear the iframe
+        var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
+        var mgn = height+"px 0px 0px 0px";
+        capsule.style.margin=mgn;
+        */
         console.log("execute_resize(75)");
         var ifr = document.getElementById("recipePower-iframe");
-		ifr.style.width = width.toString() + "px";
-		ifr.style.height = height.toString() + "px";
-		ifr.style.top = "0";
-		ifr.style.left = ((window.outerWidth-width)/2).toString() + "px";
-		ifr.style.display = 'block';
-	}, 
-	
-	// Respond to message from embedded page redirecting the whole window elsewhere
-	redirect_to: function (msg) {
-		var url = msg.url[0];
-		window.location.href = url;
-	},
-	
-	ifrOnload: function () {
-		// First, dispose of the placeholder and spinner images, if any
-		var img = document.getElementById("recipePower-placeholder");
-		var spinner = document.getElementById("recipePower-spinner");
-		var ifr = this;
-		if(img) {
-			ifr.style.left = img.style.left;
-			img.style.display = "none";
-			img.parentNode.removeChild(img);			
-		}
-		if(spinner) {
-			spinner.style.display = "none";
-			spinner.parentNode.removeChild(spinner);
-		}
-		/*
-		// Move the iframe onscreen
-		var width = ifr.style.width.replace("px","");
-		var offset = window.outerWidth-ifr.outerWidth;
-		ifr.style.left = ((offset)/2).toString() + "px";
-		*/
-		ifr.style.top = "0px";
-		
-	  var ns = window.recipePower_namespace;
-	/* We would love to encapsulate the window content so we can move the top out of the way
-	   of the injected content, but it doesn't seem to work, at least on htmldog.com
-		var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
-		if(!capsule) { 
-		  capsule = wrapWithoutCloning(ifr);
-		} 
-		ifr.style.display = 'box';
-	*/
-		/* Define the style for highlighting images for picking */
-		var css = 'img.recipePower-highlight { outline:#ffaa66 5px solid; }',
-		    head = document.getElementsByTagName('head')[0],
-		    style = document.createElement('style');
+        ifr.style.width = width.toString() + "px";
+        ifr.style.height = height.toString() + "px";
+        ifr.style.top = "0";
+        ifr.style.left = ((window.outerWidth - width) / 2).toString() + "px";
+        ifr.style.display = 'block';
+    },
 
-		style.type = 'text/css';
-		if(style.styleSheet){
-			style.styleSheet.cssText = css;
-		}else{
-			style.appendChild(document.createTextNode(css));
-		}
-		head.appendChild(style);
+    // Respond to message from embedded page redirecting the whole window elsewhere
+    redirect_to: function (msg) {
+        var url = msg.url[0];
+        window.location.href = url;
+    },
 
-		// Send a message to the iframe with the extracted content
-    ns.extractions.call = 'declareExtractions';
-    ns.postMessage(ns.extractions, "<%= rp_url %>", ifr.contentWindow);
+    ifrOnload: function () {
+        // First, dispose of the placeholder and spinner images, if any
+        var img = document.getElementById("recipePower-placeholder");
+        var spinner = document.getElementById("recipePower-spinner");
+        var ifr = this;
+        if (img) {
+            ifr.style.left = img.style.left;
+            img.style.display = "none";
+            img.parentNode.removeChild(img);
+        }
+        if (spinner) {
+            spinner.style.display = "none";
+            spinner.parentNode.removeChild(spinner);
+        }
+        /*
+        // Move the iframe onscreen
+        var width = ifr.style.width.replace("px","");
+        var offset = window.outerWidth-ifr.outerWidth;
+        ifr.style.left = ((offset)/2).toString() + "px";
+        */
+        ifr.style.top = "0px";
 
-      // Define mouse-hover highlighting for images
-		for(var i=0; i<ns.imgs.length; i++) {
-			var img = ns.imgs[i];
-			var parent = img.parentNode;
-			var theLink = null;
-			if (parent.nodeName.match(/^A$/))
-				theLink = parent;
-			if (img.addEventListener) {
-				img.addEventListener('mouseover', ns.mouseon, false);
-				img.addEventListener('mouseout', ns.mouseoff, false);
-				img.addEventListener('click', ns.imgclick, false);
-				if (theLink)
-					theLink.addEventListener('click', ns.aclick, true);
-			} else if (img.attachEvent) {
-				img.attachEvent('onmouseover', ns.mouseon );
-				img.attachEvent('onmouseout', ns.mouseoff );
-				img.attachEvent('onclick', ns.imgclick );
-				if (theLink)
-					theLink.attachEvent('onclick', ns.aclick );
-			} else {
-				// We save the existing event handlers for restoral when closing out
-				ns.imghandlers[i] = {
-					mouseover: img.onmouseover,
-					onmouseout: img.onmouseout,
-					onclick: img.onclick
-				}
-				img.onmouseover = ns.mouseon;
-				img.onmouseout = ns.mouseoff;
-				img.onclick = ns.imgclick;
-				if (theLink) {
-					ns.imghandlers[i].aclick = theLink.onclick;
-					theLInk.onclick = ns.aclick;
-				}
-			}	
-		}
-		// Finally, bind the retire_iframe function to that link
-		// $('#retire_iframe').bind("ajax:beforeSend", retire_iframe )
-	},
-	
-	// For the benefit of mouse tracking functions below
-  prev: undefined,
+        var ns = window.recipePower_namespace;
+        /* We would love to encapsulate the window content so we can move the top out of the way
+           of the injected content, but it doesn't seem to work, at least on htmldog.com
+          var capsule = document.getElementById("RecipePowerInjectedEncapsulation");
+          if(!capsule) {
+            capsule = wrapWithoutCloning(ifr);
+          }
+          ifr.style.display = 'box';
+        */
+        /* Define the style for highlighting images for picking */
+        var css = 'img.recipePower-highlight { outline:#ffaa66 5px solid; }',
+            head = document.getElementsByTagName('head')[0],
+            style = document.createElement('style');
 
-  mouseon: function (event) {
-	  // event = event || window.event;
-		var ns = window.recipePower_namespace;
-    if (this != ns.prev) {
-			if (ns.prev) {
-				ns.prev.className = ns.prev.className.replace(/\brecipePower-highlight/, '');
-				ns.prev = undefined;
-			}
-			(ns.prev = this).className += " recipePower-highlight";
-		}
-	},
+        style.type = 'text/css';
+        if (style.styleSheet) {
+            style.styleSheet.cssText = css;
+        } else {
+            style.appendChild(document.createTextNode(css));
+        }
+        head.appendChild(style);
 
-  mouseoff: function (event) {
+        // Send a message to the iframe with the extracted content
+        ns.extractions.call = 'declareExtractions';
+        ns.postMessage(ns.extractions, "<%= rp_url %>", ifr.contentWindow);
+
+        // Define mouse-hover highlighting for images
+        for (var i = 0; i < ns.imgs.length; i++) {
+            var img = ns.imgs[i];
+            var parent = img.parentNode;
+            var theLink = null;
+            if (parent.nodeName.match(/^A$/))
+                theLink = parent;
+            if (img.addEventListener) {
+                img.addEventListener('mouseover', ns.mouseon, false);
+                img.addEventListener('mouseout', ns.mouseoff, false);
+                img.addEventListener('click', ns.imgclick, false);
+                if (theLink)
+                    theLink.addEventListener('click', ns.aclick, true);
+            } else if (img.attachEvent) {
+                img.attachEvent('onmouseover', ns.mouseon);
+                img.attachEvent('onmouseout', ns.mouseoff);
+                img.attachEvent('onclick', ns.imgclick);
+                if (theLink)
+                    theLink.attachEvent('onclick', ns.aclick);
+            } else {
+                // We save the existing event handlers for restoral when closing out
+                ns.imghandlers[i] = {
+                    mouseover: img.onmouseover,
+                    onmouseout: img.onmouseout,
+                    onclick: img.onclick
+                }
+                img.onmouseover = ns.mouseon;
+                img.onmouseout = ns.mouseoff;
+                img.onclick = ns.imgclick;
+                if (theLink) {
+                    ns.imghandlers[i].aclick = theLink.onclick;
+                    theLInk.onclick = ns.aclick;
+                }
+            }
+        }
+        // Finally, bind the retire_iframe function to that link
+        // $('#retire_iframe').bind("ajax:beforeSend", retire_iframe )
+    },
+
+    // For the benefit of mouse tracking functions below
+    prev: undefined,
+
+    mouseon: function (event) {
+        // event = event || window.event;
+        var ns = window.recipePower_namespace;
+        if (this != ns.prev) {
+            if (ns.prev) {
+                ns.prev.className = ns.prev.className.replace(/\brecipePower-highlight/, '');
+                ns.prev = undefined;
+            }
+            (ns.prev = this).className += " recipePower-highlight";
+        }
+    },
+
+    mouseoff: function (event) {
 // 	  event = event || window.event;
-		this.className = this.className.replace(/\brecipePower-highlight\b/, '');
-		window.recipePower_namespace.prev = undefined;
-  },
+        this.className = this.className.replace(/\brecipePower-highlight\b/, '');
+        window.recipePower_namespace.prev = undefined;
+    },
 
-  imgclick: function (event) { // Handle a click on an image by sending its url to the iframe
+    imgclick: function (event) { // Handle a click on an image by sending its url to the iframe
 // 	  event = event || window.event;
-		var ns = window.recipePower_namespace;
-		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
-		ns.postMessage(
-			{ url: this.src,
-				call: "replaceImg"
-			}, "<%= rp_url %>", iframe.contentWindow);
-		event.preventDefault();
-		event.stopPropagation();
-	},
-	
-  aclick: function (event) { // Handle a click on a link enclosing an image by sending its url to the iframe
+        var ns = window.recipePower_namespace;
+        var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
+        ns.postMessage(
+            {
+                url: this.src,
+                call: "replaceImg"
+            }, "<%= rp_url %>", iframe.contentWindow);
+        event.preventDefault();
+        event.stopPropagation();
+    },
+
+    aclick: function (event) { // Handle a click on a link enclosing an image by sending its url to the iframe
 // 	  event = event || window.event;
-		var ns = window.recipePower_namespace;
-		var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
-		var childImgs = this.getElementsByTagName('img')
-		for(var i=0; i<childImgs.length; i++)
-			ns.postMessage(
-				{ url: childImgs[i].src,
-					call: "replaceImg"
-				}, "<%= rp_url %>", iframe.contentWindow);
-		event.preventDefault();
-		event.stopPropagation();
-	},
+        var ns = window.recipePower_namespace;
+        var iframe = ns.iframe; // document.getElementById('recipePower-iframe')
+        var childImgs = this.getElementsByTagName('img')
+        for (var i = 0; i < childImgs.length; i++)
+            ns.postMessage(
+                {
+                    url: childImgs[i].src,
+                    call: "replaceImg"
+                }, "<%= rp_url %>", iframe.contentWindow);
+        event.preventDefault();
+        event.stopPropagation();
+    },
 
-  // Function for cracking param string
-	ptq: function(q) {
-		/* parse the message */
-		/* semicolons are nonstandard but we accept them */
-		var x = q.replace(/;/g, '&').split('&'), i, name, t;
-		/* q changes from string version of query to object */
-		for (q={}, i=0; i<x.length; i++) {
-			t = x[i].split('=', 2);
-			name = unescape(t[0]);
-			if (!q[name])
-				q[name] = [];
-			if (t.length > 1) {
-				q[name][q[name].length] = unescape(t[1]);
-			} else
-			/* next two lines are nonstandard */
-				q[name][q[name].length] = true;
-		}
-		return q;
-	},
-	
-	nlToArr: function(nl) {
-		var arr = [];
-		for(var i = 0; i < nl.length; i++)
-			arr.push(nl[i]);
-		return arr;
-	},
-	
-	filterElementsByTag: function(candidates, tagname) {
-		if(!tagname) return candidates;
-		var ns = window.recipePower_namespace;
-		var results = [];
-		for(var i=0; i<candidates.length; i++) {
-			var candidate = candidates[i];
-			results = results.concat( ns.nlToArr(candidate.getElementsByTagName(tagname)) );
-		}
-		return results;
-	},
-	
-	filterElementsByClassOrID: function(candidates, propname, name) {
-		if(!propname) return candidates;
-		var ns = window.recipePower_namespace;
-		var results = [];
-		for(var i=0; i<candidates.length; i++) {
-			var candidate = candidates[i];
-			if(propname == '.')
-				results = results.concat( ns.nlToArr(candidate.getElementsByClassName(name)) );
-			else if (candidate = candidate.getElementByID)
-				results.push( candidate );
-		}
-		return results;
-	},
-	
-	filterElementsByAttribute: function(candidates, attrname, attrval) {
-		if(!attrname) return candidates;
-		var results = [];
-		for(var i=0; i<candidates.length; i++) {
-			var candidate = candidates[i];
-			var actualVal = candidate.getAttribute(attrname);
-			if (actualVal && (actualVal == attrval))
-				results.push( candidate );
-		}
-		return results;
-	},
-	
-	getAttributeFromElements: function(elements, attrname) {
-		var results = [];
-		for(var i=0; i<candidates.length; i++) {
-			var attrval = candidates[i].getAttribute(attrname);
-			if (attrval) 
-				results.push( attrval );
-		}
-		return results;
-	},
-	
-	pathFilter: function(candidates, specstring) {
-		var ns = window.recipePower_namespace;
-		var breakdown = specstring.match(/^(\w*)((([.#])(.*))|(\[(\w*)=\'([^']*)\'\]))?/);
-		var spec = { 
-			tag:  breakdown[1],
-			classOrIDChoice:  breakdown[4],
-			classOrIDName:  breakdown[5],
-			propspec:  breakdown[6],
-			propname:  breakdown[7],
-			propval:  breakdown[8]
-		}
-		candidates = ns.filterElementsByTag(candidates, spec.tag)
-		candidates = ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
-		candidates = ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
-		return candidates;
-	},
+    // Function for cracking param string
+    ptq: function (q) {
+        /* parse the message */
+        /* semicolons are nonstandard but we accept them */
+        var x = q.replace(/;/g, '&').split('&'), i, name, t;
+        /* q changes from string version of query to object */
+        for (q = {}, i = 0; i < x.length; i++) {
+            t = x[i].split('=', 2);
+            name = unescape(t[0]);
+            if (!q[name])
+                q[name] = [];
+            if (t.length > 1) {
+                q[name][q[name].length] = unescape(t[1]);
+            } else
+            /* next two lines are nonstandard */
+                q[name][q[name].length] = true;
+        }
+        return q;
+    },
 
-	// Goes through a list of finders and extracts elements, one for each label
-	applyFinders: function(finders) {
-		var result = {};
-		var ns = window.recipePower_namespace;
-		for(var ix=0; ix<finders.length; ix++) {
-			finder = finders[ix];
-			if (!result[finder.label]) {
-				var candidates = [window.document];
-				var pathlist = finder.selector.split(/\s+/);
-				for(var jx=0; jx<pathlist.length; jx++) {
-					candidates = ns.pathFilter(candidates, pathlist[jx]);
-				}
-				if (candidates.length > 0) {
-					var found = null;
-					if(finder.attribute_name) {
-					    if(finder.attribute_name == 'html') {
-					        found = candidates[0].outerHTML;
-              } else {
-                  found = candidates[0].getAttribute(finder.attribute_name);
-              }
-					} else {
-						found = candidates[0].innerHTML;
-					}
-					result[finder.label] = found;
-				} 
-			}
-		}
-		return result;
-	},
-	
-/*
-	encodeExtractions: function(extrs) {
-		var result = "";
-		for(field in extrs)
-			result += "&extractions["+field+"]="+encodeURIComponent(extrs[field]);
-		return result;
-	}
-*/
+    nlToArr: function (nl) {
+        var arr = [];
+        for (var i = 0; i < nl.length; i++)
+            arr.push(nl[i]);
+        return arr;
+    },
+
+    filterElementsByTag: function (candidates, tagname) {
+        if (!tagname) return candidates;
+        var ns = window.recipePower_namespace;
+        var results = [];
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = candidates[i];
+            results = results.concat(ns.nlToArr(candidate.getElementsByTagName(tagname)));
+        }
+        return results;
+    },
+
+    filterElementsByClassOrID: function (candidates, propname, name) {
+        if (!propname) return candidates;
+        var ns = window.recipePower_namespace;
+        var results = [];
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = candidates[i];
+            if (propname == '.')
+                results = results.concat(ns.nlToArr(candidate.getElementsByClassName(name)));
+            else if (candidate = candidate.getElementByID)
+                results.push(candidate);
+        }
+        return results;
+    },
+
+    filterElementsByAttribute: function (candidates, attrname, attrval) {
+        if (!attrname) return candidates;
+        var results = [];
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = candidates[i];
+            var actualVal = candidate.getAttribute(attrname);
+            if (actualVal && (actualVal == attrval))
+                results.push(candidate);
+        }
+        return results;
+    },
+
+    getAttributeFromElements: function (elements, attrname) {
+        var results = [];
+        for (var i = 0; i < candidates.length; i++) {
+            var attrval = candidates[i].getAttribute(attrname);
+            if (attrval)
+                results.push(attrval);
+        }
+        return results;
+    },
+
+    pathFilter: function (candidates, specstring) {
+        var ns = window.recipePower_namespace;
+        var breakdown = specstring.match(/^(\w*)((([.#])(.*))|(\[(\w*)=\'([^']*)\'\]))?/);
+        var spec = {
+            tag: breakdown[1],
+            classOrIDChoice: breakdown[4],
+            classOrIDName: breakdown[5],
+            propspec: breakdown[6],
+            propname: breakdown[7],
+            propval: breakdown[8]
+        }
+        candidates = ns.filterElementsByTag(candidates, spec.tag)
+        candidates = ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
+        candidates = ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
+        return candidates;
+    },
+
+    applySelector: function (selector, attribute_name) {
+        var ns = window.recipePower_namespace;
+        var candidates = [window.document];
+        var pathlist = selector.split(/\s+/);
+        for (var jx = 0; jx < pathlist.length; jx++) {
+            candidates = ns.pathFilter(candidates, pathlist[jx]);
+        }
+        if (candidates.length > 0) {
+            var found = null;
+            if (attribute_name) {
+                if (attribute_name == 'html') {
+                    return candidates[0].outerHTML;
+                } else {
+                    return candidates[0].getAttribute(attribute_name);
+                }
+            } else {
+                return candidates[0].innerHTML;
+            }
+            return found;
+        }
+        return '';
+    },
+
+    // Goes through a list of finders and extracts elements, one for each label
+    applyFinders: function (finders) {
+        var results = {};
+        var ns = window.recipePower_namespace;
+        for (var ix = 0; ix < finders.length; ix++) {
+            finder = finders[ix];
+            if (!results[finder.label]) {  // First result only
+                var selectorlist = finder.selector.split(/,/);
+                var result = "";
+                for (var jx = 0; jx < selectorlist.length; jx++) {
+                    result += ns.applySelector(selectorlist[jx], finder.attribute_name);
+                }
+                if (result.length > 0) {
+                    results[finder.label] = result;
+                }
+            }
+        }
+        return results;
+    },
+
+    /*
+      encodeExtractions: function(extrs) {
+        var result = "";
+        for(field in extrs)
+          result += "&extractions["+field+"]="+encodeURIComponent(extrs[field]);
+        return result;
+      }
+    */
 
 };
 
 // Now create the iframe
-(function() {
+(function () {
     var img = document.createElement("img");
-	// First, load the placeholder image
+    // First, load the placeholder image
     img.src = "data:image/png;base64,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";
-	img.style.display = 'block';
+    img.style.display = 'block';
     img.style.position = 'fixed';
-	img.style.top = '0';
-    img.style.left = ((window.outerWidth-748)/2).toString() + "px";
-	// img.style.left = "5000px";
+    img.style.top = '0';
+    img.style.left = ((window.outerWidth - 748) / 2).toString() + "px";
+    // img.style.left = "5000px";
     img.style.width = "748px";
     img.style.height = "auto";
-	img.style.zIndex = 100000002;
+    img.style.zIndex = 100000002;
     img.id = "recipePower-placeholder";
     document.body.appendChild(img);
-	// Move the image onscreen, centered
-	img.style.left = ((window.outerWidth-748)/2).toString() + "px";
+    // Move the image onscreen, centered
+    img.style.left = ((window.outerWidth - 748) / 2).toString() + "px";
 
-  var spinner = document.createElement("img");
-  spinner.src = "data:image/gif;base64,R0lGODlhIAAgAPMAAP///wAAAMbGxoSEhLa2tpqamjY2NlZWVtjY2OTk5Ly8vB4eHgQEBAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/hpDcmVhdGVkIHdpdGggYWpheGxvYWQuaW5mbwAh+QQJCgAAACwAAAAAIAAgAAAE5xDISWlhperN52JLhSSdRgwVo1ICQZRUsiwHpTJT4iowNS8vyW2icCF6k8HMMBkCEDskxTBDAZwuAkkqIfxIQyhBQBFvAQSDITM5VDW6XNE4KagNh6Bgwe60smQUB3d4Rz1ZBApnFASDd0hihh12BkE9kjAJVlycXIg7CQIFA6SlnJ87paqbSKiKoqusnbMdmDC2tXQlkUhziYtyWTxIfy6BE8WJt5YJvpJivxNaGmLHT0VnOgSYf0dZXS7APdpB309RnHOG5gDqXGLDaC457D1zZ/V/nmOM82XiHRLYKhKP1oZmADdEAAAh+QQJCgAAACwAAAAAIAAgAAAE6hDISWlZpOrNp1lGNRSdRpDUolIGw5RUYhhHukqFu8DsrEyqnWThGvAmhVlteBvojpTDDBUEIFwMFBRAmBkSgOrBFZogCASwBDEY/CZSg7GSE0gSCjQBMVG023xWBhklAnoEdhQEfyNqMIcKjhRsjEdnezB+A4k8gTwJhFuiW4dokXiloUepBAp5qaKpp6+Ho7aWW54wl7obvEe0kRuoplCGepwSx2jJvqHEmGt6whJpGpfJCHmOoNHKaHx61WiSR92E4lbFoq+B6QDtuetcaBPnW6+O7wDHpIiK9SaVK5GgV543tzjgGcghAgAh+QQJCgAAACwAAAAAIAAgAAAE7hDISSkxpOrN5zFHNWRdhSiVoVLHspRUMoyUakyEe8PTPCATW9A14E0UvuAKMNAZKYUZCiBMuBakSQKG8G2FzUWox2AUtAQFcBKlVQoLgQReZhQlCIJesQXI5B0CBnUMOxMCenoCfTCEWBsJColTMANldx15BGs8B5wlCZ9Po6OJkwmRpnqkqnuSrayqfKmqpLajoiW5HJq7FL1Gr2mMMcKUMIiJgIemy7xZtJsTmsM4xHiKv5KMCXqfyUCJEonXPN2rAOIAmsfB3uPoAK++G+w48edZPK+M6hLJpQg484enXIdQFSS1u6UhksENEQAAIfkECQoAAAAsAAAAACAAIAAABOcQyEmpGKLqzWcZRVUQnZYg1aBSh2GUVEIQ2aQOE+G+cD4ntpWkZQj1JIiZIogDFFyHI0UxQwFugMSOFIPJftfVAEoZLBbcLEFhlQiqGp1Vd140AUklUN3eCA51C1EWMzMCezCBBmkxVIVHBWd3HHl9JQOIJSdSnJ0TDKChCwUJjoWMPaGqDKannasMo6WnM562R5YluZRwur0wpgqZE7NKUm+FNRPIhjBJxKZteWuIBMN4zRMIVIhffcgojwCF117i4nlLnY5ztRLsnOk+aV+oJY7V7m76PdkS4trKcdg0Zc0tTcKkRAAAIfkECQoAAAAsAAAAACAAIAAABO4QyEkpKqjqzScpRaVkXZWQEximw1BSCUEIlDohrft6cpKCk5xid5MNJTaAIkekKGQkWyKHkvhKsR7ARmitkAYDYRIbUQRQjWBwJRzChi9CRlBcY1UN4g0/VNB0AlcvcAYHRyZPdEQFYV8ccwR5HWxEJ02YmRMLnJ1xCYp0Y5idpQuhopmmC2KgojKasUQDk5BNAwwMOh2RtRq5uQuPZKGIJQIGwAwGf6I0JXMpC8C7kXWDBINFMxS4DKMAWVWAGYsAdNqW5uaRxkSKJOZKaU3tPOBZ4DuK2LATgJhkPJMgTwKCdFjyPHEnKxFCDhEAACH5BAkKAAAALAAAAAAgACAAAATzEMhJaVKp6s2nIkolIJ2WkBShpkVRWqqQrhLSEu9MZJKK9y1ZrqYK9WiClmvoUaF8gIQSNeF1Er4MNFn4SRSDARWroAIETg1iVwuHjYB1kYc1mwruwXKC9gmsJXliGxc+XiUCby9ydh1sOSdMkpMTBpaXBzsfhoc5l58Gm5yToAaZhaOUqjkDgCWNHAULCwOLaTmzswadEqggQwgHuQsHIoZCHQMMQgQGubVEcxOPFAcMDAYUA85eWARmfSRQCdcMe0zeP1AAygwLlJtPNAAL19DARdPzBOWSm1brJBi45soRAWQAAkrQIykShQ9wVhHCwCQCACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiRMDjI0Fd30/iI2UA5GSS5UDj2l6NoqgOgN4gksEBgYFf0FDqKgHnyZ9OX8HrgYHdHpcHQULXAS2qKpENRg7eAMLC7kTBaixUYFkKAzWAAnLC7FLVxLWDBLKCwaKTULgEwbLA4hJtOkSBNqITT3xEgfLpBtzE/jiuL04RGEBgwWhShRgQExHBAAh+QQJCgAAACwAAAAAIAAgAAAE7xDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfZiCqGk5dTESJeaOAlClzsJsqwiJwiqnFrb2nS9kmIcgEsjQydLiIlHehhpejaIjzh9eomSjZR+ipslWIRLAgMDOR2DOqKogTB9pCUJBagDBXR6XB0EBkIIsaRsGGMMAxoDBgYHTKJiUYEGDAzHC9EACcUGkIgFzgwZ0QsSBcXHiQvOwgDdEwfFs0sDzt4S6BK4xYjkDOzn0unFeBzOBijIm1Dgmg5YFQwsCMjp1oJ8LyIAACH5BAkKAAAALAAAAAAgACAAAATwEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GGl6NoiPOH16iZKNlH6KmyWFOggHhEEvAwwMA0N9GBsEC6amhnVcEwavDAazGwIDaH1ipaYLBUTCGgQDA8NdHz0FpqgTBwsLqAbWAAnIA4FWKdMLGdYGEgraigbT0OITBcg5QwPT4xLrROZL6AuQAPUS7bxLpoWidY0JtxLHKhwwMJBTHgPKdEQAACH5BAkKAAAALAAAAAAgACAAAATrEMhJaVKp6s2nIkqFZF2VIBWhUsJaTokqUCoBq+E71SRQeyqUToLA7VxF0JDyIQh/MVVPMt1ECZlfcjZJ9mIKoaTl1MRIl5o4CUKXOwmyrCInCKqcWtvadL2SYhyASyNDJ0uIiUd6GAULDJCRiXo1CpGXDJOUjY+Yip9DhToJA4RBLwMLCwVDfRgbBAaqqoZ1XBMHswsHtxtFaH1iqaoGNgAIxRpbFAgfPQSqpbgGBqUD1wBXeCYp1AYZ19JJOYgH1KwA4UBvQwXUBxPqVD9L3sbp2BNk2xvvFPJd+MFCN6HAAIKgNggY0KtEBAAh+QQJCgAAACwAAAAAIAAgAAAE6BDISWlSqerNpyJKhWRdlSAVoVLCWk6JKlAqAavhO9UkUHsqlE6CwO1cRdCQ8iEIfzFVTzLdRAmZX3I2SfYIDMaAFdTESJeaEDAIMxYFqrOUaNW4E4ObYcCXaiBVEgULe0NJaxxtYksjh2NLkZISgDgJhHthkpU4mW6blRiYmZOlh4JWkDqILwUGBnE6TYEbCgevr0N1gH4At7gHiRpFaLNrrq8HNgAJA70AWxQIH1+vsYMDAzZQPC9VCNkDWUhGkuE5PxJNwiUK4UfLzOlD4WvzAHaoG9nxPi5d+jYUqfAhhykOFwJWiAAAIfkECQoAAAAsAAAAACAAIAAABPAQyElpUqnqzaciSoVkXVUMFaFSwlpOCcMYlErAavhOMnNLNo8KsZsMZItJEIDIFSkLGQoQTNhIsFehRww2CQLKF0tYGKYSg+ygsZIuNqJksKgbfgIGepNo2cIUB3V1B3IvNiBYNQaDSTtfhhx0CwVPI0UJe0+bm4g5VgcGoqOcnjmjqDSdnhgEoamcsZuXO1aWQy8KAwOAuTYYGwi7w5h+Kr0SJ8MFihpNbx+4Erq7BYBuzsdiH1jCAzoSfl0rVirNbRXlBBlLX+BP0XJLAPGzTkAuAOqb0WT5AH7OcdCm5B8TgRwSRKIHQtaLCwg1RAAAOwAAAAAAAAAAAA==";
-	spinner.style.display = 'block';
-  spinner.style.position = 'fixed';
-	spinner.style.top = '70px';
-	spinner.style.left = "5000px";
-	spinner.style['z-index'] = 100000003;
-	spinner.id = "recipePower-spinner";
-	document.body.appendChild(spinner);
-	// Move the image onscreen, centered
-	spinner.style.left = ((window.outerWidth-32)/2).toString() + "px";
-	
-	// Extract a proposed, canonical URL
-	var ns = window.recipePower_namespace;
-  // The extraction_js helper should declare finders for needed elements
-	var callback = "<%= @url %>".replace( /&amp;/g, '&');
+    var spinner = document.createElement("img");
+    spinner.src = "data:image/gif;base64,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";
+    spinner.style.display = 'block';
+    spinner.style.position = 'fixed';
+    spinner.style.top = '70px';
+    spinner.style.left = "5000px";
+    spinner.style['z-index'] = 100000003;
+    spinner.id = "recipePower-spinner";
+    document.body.appendChild(spinner);
+    // Move the image onscreen, centered
+    spinner.style.left = ((window.outerWidth - 32) / 2).toString() + "px";
 
-/*
-  var reportback = {};
-	if(ns.extractions.URI)
-		reportback.URI = ns.extractions.URI;
-  reportback.href = window.location.href;
-  reportback.title = ns.extractions.title || document.title;
-	callback += ns.encodeExtractions(reportback);
-*/
+    // Extract a proposed, canonical URL
+    var ns = window.recipePower_namespace;
+    // The extraction_js helper should declare finders for needed elements
+    var callback = "<%= @url %>".replace(/&amp;/g, '&');
 
-	var goer = document.createElement('a');
-	goer.href = "<%= rp_url '/collection' %>"
-	goer.id = 'recipePower-golink';
-	goer.style.display = 'none';
-	document.body.appendChild(goer);
+    /*
+      var reportback = {};
+      if(ns.extractions.URI)
+        reportback.URI = ns.extractions.URI;
+      reportback.href = window.location.href;
+      reportback.title = ns.extractions.title || document.title;
+      callback += ns.encodeExtractions(reportback);
+    */
 
-	var ifr = document.createElement("iframe");
-	// ifr.style.margin="1em";
-	// Set the size of the frame to that of the placeholder image
-	ifr.style.zIndex = 2000000000;
-	ifr.style.position = "fixed";
-	ifr.style.left = "5000px"; // initially offscreen
-	ifr.style.padding = "0";
-	ifr.style.margin = "0";
-	ifr.style.display = 'block';
-	ifr.style.overflow = 'visible';
-	ifr.style.border = "0px";
-	ifr.style.width = "1000px";
-	ifr.id = "recipePower-iframe";
-	ifr.src = callback;
-	if (ifr.attachEvent){
+    var goer = document.createElement('a');
+    goer.href = "<%= rp_url '/collection' %>"
+    goer.id = 'recipePower-golink';
+    goer.style.display = 'none';
+    document.body.appendChild(goer);
+
+    var ifr = document.createElement("iframe");
+    // ifr.style.margin="1em";
+    // Set the size of the frame to that of the placeholder image
+    ifr.style.zIndex = 2000000000;
+    ifr.style.position = "fixed";
+    ifr.style.left = "5000px"; // initially offscreen
+    ifr.style.padding = "0";
+    ifr.style.margin = "0";
+    ifr.style.display = 'block';
+    ifr.style.overflow = 'visible';
+    ifr.style.border = "0px";
+    ifr.style.width = "1000px";
+    ifr.id = "recipePower-iframe";
+    ifr.src = callback;
+    if (ifr.attachEvent) {
         ifr.attachEvent("onload", window.recipePower_namespace.ifrOnload);
-	} else {
+    } else {
         ifr.onload = window.recipePower_namespace.ifrOnload;
-	}
-  document.body.appendChild(ifr);
-	ifr.style.display = 'block';
-  window.recipePower_namespace.iframe = ifr;
+    }
+    document.body.appendChild(ifr);
+    ifr.style.display = 'block';
+    window.recipePower_namespace.iframe = ifr;
 
     // While awaiting the response, we can scrape for other data, if any
     // The finders are specifications for extracting data of different types, provided on a per-site basis
@@ -434,138 +449,140 @@ window.recipePower_namespace = window.recipePower_namespace || {
 })();
 
 // Define receive-message handler from ba-postmessage.js
-(function($){
-  // '$:nomunge'; // Used by YUI compressor.
-  
-  // A few vars used in non-awesome browsers.
-  var interval_id,
-    last_hash,
-    cache_bust = 1,
-    
-    // A var used in awesome browsers.
-    rm_callback,
-    
-    // A few convenient shortcuts.
-    window = this,
-    FALSE = !1,
-    
-    // Reused internal strings.
-    postMessage = 'postMessage',
-    addEventListener = 'addEventListener',
-    
-    p_receiveMessage,
-    
-    // I couldn't get window.postMessage to actually work in Opera 9.64!
-    has_postMessage = window[postMessage] // XXX && !$.browser.opera;
-  
-  $.buildParam = function(parameters){
-	  var qs = "";
-	  for(var key in parameters) {
-	    var value = parameters[key];
-	    qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
-	  }
-	  if (qs.length > 0) {
-	    qs = qs.substring(0, qs.length-1); //chop off last "&"
-	  }
-	  return qs;
-	}
-	
-  $.postMessage = function( message, target_url, target ) {
-    if ( !target_url ) { return; }
-  console.log("postMessage(490): to "+target_url);
-    
-    // Serialize the message if not a string. Note that this is the only real
-    // jQuery dependency for this script. If removed, this script could be
-    // written as very basic JavaScript.
-    message = typeof message === 'string' ? message : $.buildParam( message );
-    
-    // Default to parent if unspecified.
-    target = target || parent;
-    
-    if ( has_postMessage ) {
-      // The browser supports window.postMessage, so call it with a targetOrigin
-      // set appropriately, based on the target_url parameter.
-      target[postMessage]( message, target_url.replace( /([^:]+:\/\/[^\/]+).*/, '$1' ) );
-      
-    } else if ( target_url ) {
-      // The browser does not support window.postMessage, so set the location
-      // of the target to target_url#message. A bit ugly, but it works! A cache
-      // bust parameter is added to ensure that repeat messages trigger the
-      // callback.
-      target.location = target_url.replace( /#.*$/, '' ) + '#' + (+new Date) + (cache_bust++) + '&' + message;
+(function ($) {
+    // '$:nomunge'; // Used by YUI compressor.
+
+    // A few vars used in non-awesome browsers.
+    var interval_id,
+        last_hash,
+        cache_bust = 1,
+
+        // A var used in awesome browsers.
+        rm_callback,
+
+        // A few convenient shortcuts.
+        window = this,
+        FALSE = !1,
+
+        // Reused internal strings.
+        postMessage = 'postMessage',
+        addEventListener = 'addEventListener',
+
+        p_receiveMessage,
+
+        // I couldn't get window.postMessage to actually work in Opera 9.64!
+        has_postMessage = window[postMessage] // XXX && !$.browser.opera;
+
+    $.buildParam = function (parameters) {
+        var qs = "";
+        for (var key in parameters) {
+            var value = parameters[key];
+            qs += encodeURIComponent(key) + "=" + encodeURIComponent(value) + "&";
+        }
+        if (qs.length > 0) {
+            qs = qs.substring(0, qs.length - 1); //chop off last "&"
+        }
+        return qs;
     }
-  };
-  
-  $.receiveMessage = p_receiveMessage = function( callback, source_origin, delay ) {
-    console.log("receiveMessage(515): Receiving a message");
-    if ( has_postMessage ) {
-      // Since the browser supports window.postMessage, the callback will be
-      // bound to the actual event associated with window.postMessage.
-      
-      if ( callback ) {
-        // Unbind an existing callback if it exists.
-        rm_callback && p_receiveMessage();
-        
-        // Bind the callback. A reference to the callback is stored for ease of
-        // unbinding.
-        rm_callback = function(e) {
-            if ( typeof source_origin === 'string' ) {
-                console.log("receiveMessage(528): message from '"+source_origin+"' on '"+ e.origin+"'");
+
+    $.postMessage = function (message, target_url, target) {
+        if (!target_url) {
+            return;
+        }
+        console.log("postMessage(490): to " + target_url);
+
+        // Serialize the message if not a string. Note that this is the only real
+        // jQuery dependency for this script. If removed, this script could be
+        // written as very basic JavaScript.
+        message = typeof message === 'string' ? message : $.buildParam(message);
+
+        // Default to parent if unspecified.
+        target = target || parent;
+
+        if (has_postMessage) {
+            // The browser supports window.postMessage, so call it with a targetOrigin
+            // set appropriately, based on the target_url parameter.
+            target[postMessage](message, target_url.replace(/([^:]+:\/\/[^\/]+).*/, '$1'));
+
+        } else if (target_url) {
+            // The browser does not support window.postMessage, so set the location
+            // of the target to target_url#message. A bit ugly, but it works! A cache
+            // bust parameter is added to ensure that repeat messages trigger the
+            // callback.
+            target.location = target_url.replace(/#.*$/, '') + '#' + (+new Date) + (cache_bust++) + '&' + message;
+        }
+    };
+
+    $.receiveMessage = p_receiveMessage = function (callback, source_origin, delay) {
+        console.log("receiveMessage(515): Receiving a message");
+        if (has_postMessage) {
+            // Since the browser supports window.postMessage, the callback will be
+            // bound to the actual event associated with window.postMessage.
+
+            if (callback) {
+                // Unbind an existing callback if it exists.
+                rm_callback && p_receiveMessage();
+
+                // Bind the callback. A reference to the callback is stored for ease of
+                // unbinding.
+                rm_callback = function (e) {
+                    if (typeof source_origin === 'string') {
+                        console.log("receiveMessage(528): message from '" + source_origin + "' on '" + e.origin + "'");
+                    }
+                    if ((typeof source_origin === 'string' && e.origin !== source_origin)
+                        || ((typeof source_origin === 'function') && source_origin(e.origin) === FALSE)) {
+                        return FALSE;
+                    }
+                    callback(e);
+                };
             }
-          if ( ( typeof source_origin === 'string' && e.origin !== source_origin )
-             || ( (typeof source_origin === 'function') && source_origin( e.origin ) === FALSE ) ) {
-            return FALSE;
-          }
-          callback( e );
-        };
-      }
-      
-      if ( window[addEventListener] ) {
-        window[ callback ? addEventListener : 'removeEventListener' ]( 'message', rm_callback, FALSE );
-      } else {
-        window[ callback ? 'attachEvent' : 'detachEvent' ]( 'onmessage', rm_callback );
-      }
-      
-    } else {
-      // Since the browser sucks, a polling loop will be started, and the
-      // callback will be called whenever the location.hash changes.
-      
-      interval_id && clearInterval( interval_id );
-      interval_id = null;
-      
-      if ( callback ) {
-        delay = typeof source_origin === 'number'
-          ? source_origin
-          : typeof delay === 'number'
-            ? delay
-            : 100;
-        
-        interval_id = setInterval(function(){
-          var hash = document.location.hash,
-            re = /^#?\d+&/;
-          if ( hash !== last_hash && re.test( hash ) ) {
-            last_hash = hash;
-            callback({ data: hash.replace( re, '' ) });
-          }
-        }, delay );
-      }
-    }
-  };
+
+            if (window[addEventListener]) {
+                window[callback ? addEventListener : 'removeEventListener']('message', rm_callback, FALSE);
+            } else {
+                window[callback ? 'attachEvent' : 'detachEvent']('onmessage', rm_callback);
+            }
+
+        } else {
+            // Since the browser sucks, a polling loop will be started, and the
+            // callback will be called whenever the location.hash changes.
+
+            interval_id && clearInterval(interval_id);
+            interval_id = null;
+
+            if (callback) {
+                delay = typeof source_origin === 'number'
+                    ? source_origin
+                    : typeof delay === 'number'
+                        ? delay
+                        : 100;
+
+                interval_id = setInterval(function () {
+                    var hash = document.location.hash,
+                        re = /^#?\d+&/;
+                    if (hash !== last_hash && re.test(hash)) {
+                        last_hash = hash;
+                        callback({data: hash.replace(re, '')});
+                    }
+                }, delay);
+            }
+        }
+    };
 
 })(window.recipePower_namespace);
 
-window.recipePower_namespace.receiveMessage( function(evt) {
-	var namespace = window.recipePower_namespace;
-	if(namespace) {
-		// By convention, messages arrive as a query string which gets turned
-		// into an object whose 'call' parameter denotes a function to call, 
-		// passing in the object carrying the rest of the parameters.
-		// Parse the data string as a conventional set of queryparams
-		var data = namespace.ptq(evt.data);
-		// Now we have a data array and a function to call
-		var calls = data.call, call;
-		if(calls && (call = calls[0]) && (typeof namespace[call] === 'function')) {
-			namespace[call](data);
-		}
-	}
-}, "<%= rp_url %>" );
+window.recipePower_namespace.receiveMessage(function (evt) {
+    var namespace = window.recipePower_namespace;
+    if (namespace) {
+        // By convention, messages arrive as a query string which gets turned
+        // into an object whose 'call' parameter denotes a function to call,
+        // passing in the object carrying the rest of the parameters.
+        // Parse the data string as a conventional set of queryparams
+        var data = namespace.ptq(evt.data);
+        // Now we have a data array and a function to call
+        var calls = data.call, call;
+        if (calls && (call = calls[0]) && (typeof namespace[call] === 'function')) {
+            namespace[call](data);
+        }
+    }
+}, "<%= rp_url %>");

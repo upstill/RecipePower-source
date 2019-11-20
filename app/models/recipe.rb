@@ -51,7 +51,7 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, {:gleaning_attributes => %w{ Title Description }}]
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -103,7 +103,8 @@ class Recipe < ApplicationRecord
     self.title = page_ref.title if page_ref.title.present? && title.blank?
     self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
     self.description = page_ref.description if page_ref.description.present? && description.blank?
-    self.content = SiteServices.new(page_ref.site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
+    # We do NOT accept extracted content; instead, we defer to the PageRef until it's set directly
+    # self.content = SiteServices.new(page_ref.site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
     super if defined?(super)
   end
 

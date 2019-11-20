@@ -69,6 +69,11 @@ function declareExtractions(data) {
                 $('textarea#recipe_title').attr('value', data['Title'])
             } else if((key == 'Image') && ($('div.pic_preview input').attr('value') == '')) {
                 replaceImg({url: data['Image']});
+            } else if ((key == 'Content') && $('input#recipe_content')[0]) {
+                elmt = $('input#recipe_content')[0];
+                if(elmt && !elmt.hasAttribute('value')) {
+                  elmt.setAttribute('value', data[key]);
+                }
             }
         }
     }
