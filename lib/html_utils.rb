@@ -10,6 +10,7 @@ def massage_content html
 end
 
 # Perform whatever processing is needed on the node
+# TODO: make links that are local to the source site global
 def process_dom html
   nk = Nokogiri::HTML::fragment html
   nk.traverse do |node|

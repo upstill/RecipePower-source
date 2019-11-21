@@ -16,8 +16,8 @@ class ContentTest < ActiveSupport::TestCase
   end
 
   test "eliminate br tags preceding p tags" do
-    str = "some text, then some breaks\n<br>\n<p>\n<br>"
-    assert_equal "some text, then some breaks<p><br>", process_dom(str)
+    str = "some text, then some breaks\n<br>\n<p>\n<br></p>"
+    assert_equal "some text, then some breaks<p><br></p>", process_dom(str)
   end
 
   test "eliminate silly whitespace" do

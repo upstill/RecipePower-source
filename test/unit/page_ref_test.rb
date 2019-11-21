@@ -206,10 +206,10 @@ class PageRefTest < ActiveSupport::TestCase
     pr.bkg_launch true
     assert pr.dj
     pr.bkg_land
-    # Now after failure, 404 status foregoes further attempts to re-run (Mercury gets 400)
+    # Now after failure, 404 reruns
     assert [400, 404].include?(pr.http_status)
     assert pr.error_message.present?
-    refute pr.dj # Should have given up
+    assert pr.dj # Shouldn't have given up
   end
 
   test "gets URL that can be opened, but not by Mercury" do

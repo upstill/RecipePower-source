@@ -26,7 +26,7 @@ class NestedBenchmark
     @indent -= 4
     # log self.at_left(msg, @indent) + vals.to_s
     log self.at_right(msg, vals.to_s)
-    log self.at_right('', ' End Benchmarking ------ user system user+system (total elapsed)')+"\n", '>' if @indent == 0
+    log self.at_right('', ' End Benchmarking ------ user system user+system (total elapsed)', '>')+"\n" if @indent == 0
     # log("<<<<<<<<<<<<<< End Benchmarking -----------------\n") if @indent == 0
     raise err if err
     result
