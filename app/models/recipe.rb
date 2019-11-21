@@ -1,6 +1,7 @@
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
 require './lib/my_constants.rb'
+require './lib/html_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
@@ -56,7 +57,18 @@ class Recipe < ApplicationRecord
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    content.if_present || page_ref&.content
+    ct = content.if_present || page_ref&.content
+    massage_content ct if ct.present?
+  end
+
+  # When the content is explicitly set for the first time, trim it according to the site
+  def content= html
+    if content.blank?
+      # Here's where we adapt the recipe's content to our needs
+      # Perform site-specific editing after standard editing
+      html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
+    end
+    super html
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
