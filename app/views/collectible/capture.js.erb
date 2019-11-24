@@ -250,7 +250,8 @@ window.recipePower_namespace = window.recipePower_namespace || {
         return arr;
     },
 
-    filterElementsByTag: function (candidates, tagname) {
+/*
+    getDescendantsByTag: function (candidates, tagname) {
         if (!tagname) return candidates;
         var ns = window.recipePower_namespace;
         var results = [];
@@ -260,16 +261,26 @@ window.recipePower_namespace = window.recipePower_namespace || {
         }
         return results;
     },
+*/
 
+    hasClass: function (x, classname) {
+        if (x.classList) {
+            return x.classList.contains(classname);
+        } else {
+            return RegExp(`\\b${classname}\\b`).test(x.className);
+        }
+    },
+
+/*
     filterElementsByClassOrID: function (candidates, propname, name) {
         if (!propname) return candidates;
         var ns = window.recipePower_namespace;
         var results = [];
         for (var i = 0; i < candidates.length; i++) {
             var candidate = candidates[i];
-            if (propname == '.')
-                results = results.concat(ns.nlToArr(candidate.getElementsByClassName(name)));
-            else if (candidate = candidate.getElementByID)
+            if (propname == '.') {
+                if (ns.hasClass(candidate, name)) results.push(candidate);
+            } else if (candidate.id == name)
                 results.push(candidate);
         }
         return results;
@@ -286,7 +297,22 @@ window.recipePower_namespace = window.recipePower_namespace || {
         }
         return results;
     },
+*/
 
+    remapElements: function (candidates, mapFunc) {
+        var results = [];
+        for (var i = 0; i < candidates.length; i++) {
+            var candidate = candidates[i];
+            var result_or_results = mapFunc(candidate);
+            if(Array.isArray(result_or_results))
+                results = results.concat(result_or_results);
+            else if(result_or_results != undefined)
+                results.push(result_or_results);
+        }
+        return results;
+    },
+
+/*
     getAttributeFromElements: function (elements, attrname) {
         var results = [];
         for (var i = 0; i < candidates.length; i++) {
@@ -296,6 +322,7 @@ window.recipePower_namespace = window.recipePower_namespace || {
         }
         return results;
     },
+*/
 
     pathFilter: function (candidates, specstring) {
         var ns = window.recipePower_namespace;
@@ -308,9 +335,45 @@ window.recipePower_namespace = window.recipePower_namespace || {
             propname: breakdown[7],
             propval: breakdown[8]
         }
-        candidates = ns.filterElementsByTag(candidates, spec.tag)
-        candidates = ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
-        candidates = ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
+        function getDescendantsByTag (candidate) {
+            return ns.nlToArr(candidate.getElementsByTagName(spec.tag));
+        }
+        function getDescendantsByClassOrID (candidate) {
+            if (spec.classOrIDChoice == '.') {
+                return ns.nlToArr(candidate.getElementsByClassName(spec.classOrIDName));
+            } else {
+                return candidate.getElementById(spec.classOrIDName);
+            }
+        }
+        function getDescendantsByAttribute (candidate) {
+          return candidate;
+        }
+        function candidateMatchesClassOrID (candidate) {
+            if (spec.classOrIDChoice == '.') {
+                if (ns.hasClass(candidate, spec.classOrIDName))
+                    return candidate;
+            } else if (spec.classOrIDChoice == '#') {
+                if (candidate.id == spec.classOrIDName)
+                    return candidate;
+            } else
+                return candidate;
+        }
+        function candidateMatchesAttribute (candidate) {
+            if(!spec.propname) return candidate ;
+            var actualVal = candidate.getAttribute(spec.propname);
+            if (actualVal && (actualVal == spec.propval))
+                return candidate;
+        }
+        if(spec.tag) {
+            candidates = ns.remapElements(candidates, getDescendantsByTag); // ns.getDescendantsByTag(candidates, spec.tag);
+            candidates = ns.remapElements(candidates, candidateMatchesClassOrID); // ns.filterElementsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName);
+            candidates = ns.remapElements(candidates, candidateMatchesAttribute); // ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
+        } else if(spec.classOrIDChoice) {
+            candidates = ns.remapElements(candidates, getDescendantsByClassOrID); // ns.getDescendantsByClassOrID(candidates, spec.classOrIDChoice, spec.classOrIDName)
+            candidates = ns.remapElements(candidates, candidateMatchesAttribute); // ns.filterElementsByAttribute(candidates, spec.propname, spec.propval)
+        } else if(spec.propName) {
+            candidates = ns.remapElements(candidates, getDescendantsByAttribute); // ns.getDescendantsByAttribute(candidates, spec.propname, spec.propval)
+        }
         return candidates;
     },
 
@@ -323,12 +386,10 @@ window.recipePower_namespace = window.recipePower_namespace || {
         }
         if (candidates.length > 0) {
             var found = null;
-            if (attribute_name) {
-                if (attribute_name == 'html') {
-                    return candidates[0].outerHTML;
-                } else {
-                    return candidates[0].getAttribute(attribute_name);
-                }
+            if (attribute_name == 'html') {
+                return candidates[0].outerHTML;
+            } else if (attribute_name) {
+                return candidates[0].getAttribute(attribute_name);
             } else {
                 return candidates[0].innerHTML;
             }

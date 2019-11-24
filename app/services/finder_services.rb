@@ -2,6 +2,7 @@
 # require 'image_reference.rb'
 require 'site.rb'
 require './lib/results.rb'
+require './lib/html_utils.rb'
 
 class FinderServices
   attr_accessor :finder
@@ -220,6 +221,47 @@ class FinderServices
       end
     else
       @finder.errors.add :selector, 'doesn\'t find anything on the page'
+    end
+  end
+
+  def self.content_finder_for site_or_root, selector
+    site = nil
+    case site_or_root
+    when String
+      matching_sites = Site.where('root ILIKE ?', "%#{site_or_root}%")
+      case matching_sites.count
+      when 0 # No match found
+        puts "Can't find a site to match #{site_or_root}"
+      when 1
+        site = matching_sites.first
+      else
+        puts "More than one site matches #{site_or_root}"
+      end
+    when Site
+      site = site_or_root
+    else
+      puts "FinderServices.content_finder_for must take a site or a string that matches ONE site's root"
+    end
+    if site
+      # Create
+      self.new Finder.find_or_initialize_by(site: site, label: 'Content', selector: selector, attribute_name: 'html')
+    end
+  end
+
+  # Try extracting content from the finder to a recipe
+  def test_fly recipe=nil
+    # If no recipe provided, pick one from the site
+    recipe ||= @finder.site.recipes.first
+    result = FinderServices.glean recipe.url, @finder.site, @finder
+    if html = result&.content.if_present
+      puts "------------------ Raw HTML as gleaned:"
+      puts html
+      trimmed = SiteServices.new(@finder.site).trim_recipe(html)
+      puts "------------------ Trimmed:\n#{trimmed}" if trimmed != html
+      puts "------------------ Trimmed and Massaged:"
+      puts massage_content(SiteServices.new(@finder.site).trim_recipe(html))
+    else
+      puts "Nothing gleanable from selector #{@finder.selector}"
     end
   end
 
