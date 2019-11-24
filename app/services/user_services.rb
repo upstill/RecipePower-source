@@ -44,7 +44,7 @@ class UserServices
     @user.invitee_tokens.each do |invitee|
       u = 
       case invitee
-      when Fixnum # ID of existing friend
+      when Integer # ID of existing friend
         User.find invitee
       when String # email address which may or may not be external
         User.where(email: invitee.downcase).first

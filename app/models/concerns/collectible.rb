@@ -125,7 +125,7 @@ module Collectible
   # Create or update the touch status of this entity with the user
   # collect: true or false sets the in_collection status; nil ignores it
   def be_touched user_id = User.current_id, collect = nil
-    unless user_id.class == Fixnum
+    unless user_id.class == Integer
       user_id, collect = User.current_id, user_id
     end
     cached_ref(true, user_id) do |cr|
@@ -167,7 +167,7 @@ module Collectible
   # assert: build it if it doesn't already exist
   # user_id: the user_id that identifies rcpref for this entity
   def cached_ref assert=false, user_id=User.current_id
-    if assert.class == Fixnum
+    if assert.class == Integer
       assert, user_id = false, assert
     end
     if cr = (@cached_refs ||= {})[user_id]

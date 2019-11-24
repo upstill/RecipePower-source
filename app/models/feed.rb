@@ -157,7 +157,7 @@ class Feed < ApplicationRecord
                                          },
                                          :max_redirects => 5,
                                          :timeout => 4
-      f = nil if [Fixnum, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
+      f = nil if [Integer, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
     rescue Exception => e
       f = nil
     end

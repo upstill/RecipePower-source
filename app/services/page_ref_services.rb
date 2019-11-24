@@ -22,7 +22,7 @@ class PageRefServices
 
   # Try to translate a PageRef kind into English
   def self.kind_to_name kind
-    kind.is_a?(Fixnum) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
+    kind.is_a?(Integer) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
   end
 
   # Ensure the existence of a page_ref of a particular kind with the given url

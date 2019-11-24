@@ -98,7 +98,7 @@ class PageRef < ApplicationRecord
   # Provides access to PageRefs of a particular named kind, denoted by either symbol or integer
   scope :of_kind, -> (kind) {
     # TODO: Rails 5 supports both string and fixnum kinds directly
-    kind.is_a?(Fixnum) ? where(kind: kind) : where(kind: PageRef.kinds[kind])
+    kind.is_a?(Integer) ? where(kind: kind) : where(kind: PageRef.kinds[kind])
   }
 
   has_many :recipes, :dependent => :nullify # , foreign_key: 'page_ref_id'

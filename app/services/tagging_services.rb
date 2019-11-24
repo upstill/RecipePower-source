@@ -42,7 +42,7 @@ class TaggingServices
   # The latter may also be nil, to find taggings by anyone
   def exists? tag_or_tags_or_id_or_ids, owners_or_ids=nil
     tag_ids = (tag_or_tags_or_id_or_ids.is_a?(Array) ? tag_or_tags_or_id_or_ids : [ tag_or_tags_or_id_or_ids ] ).collect { |tag_or_id|
-      tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+      tag_or_id.is_a?(Integer) ? tag_or_id : tag_or_id.id
     }
     return false if tag_ids.empty? # Empty in, empty out
     tag_ids = tag_ids.first if tag_ids.count == 1
@@ -52,7 +52,7 @@ class TaggingServices
 
     if owners_or_ids
       owner_ids = (owners_or_ids.is_a?(Array) ? owners_or_ids : [ owners_or_ids ] ).collect { |owner_or_id|
-        owner_or_id.is_a?(Fixnum) ? owner_or_id : owner_or_id.id
+        owner_or_id.is_a?(Integer) ? owner_or_id : owner_or_id.id
       }
       query[:user_id] = ((owner_ids.count == 1) ? owner_ids.first : owner_ids) unless owner_ids.empty?
     end

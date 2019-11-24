@@ -57,7 +57,7 @@ class AnalyticsServices
     # Get new users of all kinds (accepted invitations + uninvited signups)
     @data[:new_users] = @data[:accepted_invitations] + @data[:cold_signups]
 
-    @data[:net_new_users] = @data[:dropouts].class==Fixnum ? (@data[:new_users] - @data[:dropouts]) : "n/a"
+    @data[:net_new_users] = @data[:dropouts].class==Integer ? (@data[:new_users] - @data[:dropouts]) : "n/a"
 
     @data[:viral_coefficient] = @data[:accepted_invitations].to_f / User.all.count
 

@@ -24,7 +24,7 @@ class TypeMap < Array
     end
     
     def num(tt)
-        if tt.kind_of? Fixnum 
+        if tt.kind_of? Integer 
             @TypeToSym[tt] ? tt : 0
         elsif (tt.kind_of? Symbol)
             @SymToType[tt] || @NameToType[tt.to_s.downcase] || 0

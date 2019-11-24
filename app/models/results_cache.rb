@@ -26,7 +26,7 @@ class Counts < Hash
         # Late-breaking conversion of scope into items
         modelname = key_or_keys.model.to_s
         NestedBenchmark.measure "Counted #{modelname}s" do
-          if pluck_key_or_increment.is_a?(Fixnum)
+          if pluck_key_or_increment.is_a?(Integer)
             # We are accumulating hits, weighted by pluck_key_or_increment
             key_or_keys.pluck(:id).uniq.each do |id|
               key = modelname+'/'+id.to_s
@@ -46,14 +46,14 @@ class Counts < Hash
           key_or_keys.each { |k| self.include k, pluck_key_or_increment }
         end
       when String
-        if pluck_key_or_increment.is_a?(Fixnum) && accumulate
+        if pluck_key_or_increment.is_a?(Integer) && accumulate
           self[key_or_keys] += pluck_key_or_increment
         else
           self[key_or_keys] = pluck_key_or_increment
         end
       when ApplicationRecord
         key = "#{key_or_keys.model_name.name}/#{key_or_keys.id}"
-        if pluck_key_or_increment.is_a?(Fixnum) && accumulate
+        if pluck_key_or_increment.is_a?(Integer) && accumulate
           self[key_or_keys] += pluck_key_or_increment
         else
           self[key_or_keys] = pluck_key_or_increment
@@ -504,9 +504,7 @@ module ExtractParams
       defaulted_params.merge(params_hash).slice *paramlist
     end
   end
-
-  private
-
+  
   # Whenever the params get assigned--whether directly by assignment, by mass-assignment, or by fetching records--we
   # copy the param values into the cache object
 
@@ -583,6 +581,10 @@ class ResultsCache < ApplicationRecord
   serialize :partition
   attr_accessor :items
   delegate :window, :next_index, :'done!', :'done?', :max_window_size, :to => :safe_partition
+
+  def self.mass_assignable_attributes
+    [ :params ]
+  end
 
   # What to present as choices for sorting the results
   def org_options

@@ -27,7 +27,7 @@ module Taggable
 
     # Scope for objects tagged by a given tag, as visible to the given viewer
     scope :tagged_by, -> (tag_or_tags_or_id_or_ids, viewer_id_or_ids=nil) {
-      ids = [tag_or_tags_or_id_or_ids].flatten.map { |tag_or_id| tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id }
+      ids = [tag_or_tags_or_id_or_ids].flatten.map { |tag_or_id| tag_or_id.is_a?(Integer) ? tag_or_id : tag_or_id.id }
       joins(:taggings).where( taggings: { user_id: viewer_id_or_ids.if_present, tag_id: ids }.compact )
     }
 
@@ -42,7 +42,7 @@ module Taggable
     ListServices.associate( # Assign tags to the taggable entity, relative to the current user
         self,
         TokenInput.parse_tokens(tokenlist_str) { |token| # parse_tokens analyzes each token in the list as either integer or string
-          token.is_a?(Fixnum) ?
+          token.is_a?(Integer) ?
               Tag.find(token) :
               Tag.strmatch(token, userid: User.current_id, tagtype: :List, assert: true)[0] # Match or assert the tag
         }
@@ -138,7 +138,7 @@ module Taggable
           if tokens
             # Map the elements of the token string to tags, whether existing or new
             TokenInput.parse_tokens(args.first) {|token| # parse_tokens analyzes each token in the list as either integer or string
-              token.is_a?(Fixnum) ?
+              token.is_a?(Integer) ?
                   token :
                   Tag.strmatch(token, filter_options.merge(assert: true, userid: User.current_id))[0].id # Match or assert the string
             }
@@ -187,7 +187,7 @@ module Taggable
   # Manage taggings of a given user
   def assert_tagging tag_or_id, user_id=User.current_id
     return unless user_id
-    tag_id = tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+    tag_id = tag_or_id.is_a?(Integer) ? tag_or_id : tag_or_id.id
     if persisted?
       return if taggings.exists? user_id: user_id, tag_id: tag_id
       taggings.create user_id: user_id, tag_id: tag_id
@@ -199,7 +199,7 @@ module Taggable
 
   def refute_tagging tag_or_id, user_id=User.current_id
     return unless user_id
-    tag_id = tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+    tag_id = tag_or_id.is_a?(Integer) ? tag_or_id : tag_or_id.id
 =begin
     scope = taggings.where tag_id: tag_id
     scope = scope.where(user_id: user_id) if user_id

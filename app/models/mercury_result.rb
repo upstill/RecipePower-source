@@ -47,7 +47,7 @@ class MercuryResult < ApplicationRecord
               # header_result returns either
               # an integer result code (final result), or
               # a string url for redirection
-              if hr.is_a?(Fixnum)
+              if hr.is_a?(Integer)
                 if (hr == 404) && redirected_from
                   # Got a redirect via Mercury, but the target failed
                   mercury_data['url'] = new_aliases.delete redirected_from
