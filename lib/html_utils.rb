@@ -10,7 +10,6 @@ def massage_content html
 end
 
 # Perform whatever processing is needed on the node
-# TODO: make links that are local to the source site global
 def process_dom html
   nk = Nokogiri::HTML::fragment html
   nk.traverse do |node|
@@ -18,8 +17,9 @@ def process_dom html
     when node.cdata? # type == CDATA_SECTION_NODE
     when node.comment? # type == COMMENT_NODE
     when node.element? # type == ELEMENT_NODE alias node.elem?
-      if %w{ br p }.include?(node.name) && node.previous&.element? && node.previous.name == 'br'
-        node.previous.remove
+      case node.name
+      when 'br', 'p'
+        node.previous.remove if node.previous&.element? && node.previous.name == 'br'
       end
     when node.fragment? # type == DOCUMENT_FRAG_NODE (Document fragment node Nokogiri::HTML::DocumentFragment/11)
     when node.html? # type == HTML_DOCUMENT_NODE

@@ -57,8 +57,7 @@ class Recipe < ApplicationRecord
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    ct = content.if_present || page_ref&.content
-    massage_content ct if ct.present?
+    content.if_present || massage_content(page_ref&.content)
   end
 
   # When the content is explicitly set for the first time, trim it according to the site
