@@ -26,8 +26,8 @@ def process_dom html
     when node.xml? # type == DOCUMENT_NODE (Document node type)
     when node.text? # type == TEXT_NODE (Nokogiri::XML::Text/3)
       # From text, replace all internal newlines with a space
-      node.content = node.text.strip.gsub /\s*\n+\s*/, ' '
-      node.remove if node.text.match /^\s*$/
+      node.content = node.text.gsub /\s*\n+\s*/, ' '
+      # node.remove if node.text.match /^\s*$/
     when node.document?
       # For elements, remove CSS classes
     when node.xml?
