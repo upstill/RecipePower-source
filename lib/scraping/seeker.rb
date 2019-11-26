@@ -41,8 +41,8 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
-    return self.new(stream, stream.rest(2)) if stream.peek(2)&.match /^\d*[ -]\d*\/{1}\d*$|^\d*$/
-    return self.new(stream, stream.rest) if stream.peek&.match /^\d*\/{1}\d*$|^\d*$/
+    return self.new(stream, stream.rest(2)) if stream.peek(2)&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
+    return self.new(stream, stream.rest) if stream.peek&.match /^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
   end
 
 end

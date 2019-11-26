@@ -40,6 +40,21 @@ class SeekerTest < ActiveSupport::TestCase
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 3, ns.rest.pos
+    scanner = StrScanner.new %w{ Fourscore and ⅐ years ago }
+    ns = NumberSeeker.seek(scanner)
+    assert_not_nil ns
+    assert_equal 2, ns.head.pos
+    assert_equal 3, ns.rest.pos
+    scanner = StrScanner.new %w{ Fourscore and 7⅐ years ago }
+    ns = NumberSeeker.seek(scanner)
+    assert_not_nil ns
+    assert_equal 2, ns.head.pos
+    assert_equal 3, ns.rest.pos
+    scanner = StrScanner.new %w{ Fourscore and 7 ⅐ years ago }
+    ns = NumberSeeker.seek(scanner)
+    assert_not_nil ns
+    assert_equal 2, ns.head.pos
+    assert_equal 4, ns.rest.pos
   end
 
   test 'check validity of NullSeeker results' do
