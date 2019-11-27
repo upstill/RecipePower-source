@@ -64,10 +64,10 @@ class TagSeeker < Seeker
   end
 end
 
-# An Amount is a number followed by an optional amount
+# An Amount is a number followed by an optional amount, optionally followed by an alternative amount in parentheses
 class AmountSeeker < Seeker
 
-  attr_reader :num, :unit
+  attr_reader :num, :unit, :alt_num, :alt_unit
 
   def initialize stream, next_stream, num, unit
     super stream, next_stream
@@ -79,6 +79,22 @@ class AmountSeeker < Seeker
     if num = NumberSeeker.match(stream, lexaur)
       unit = TagSeeker.match num.rest, lexaur, types: 5
       self.new stream, (unit&.rest || num.rest), num, unit
+    end
+  end
+end
+
+# Check for a matched set of parentheses in the stream and call a block on the contents
+class ParentheticalSeeker < Seeker
+  def self.match stream, lexaur, opts={}
+    if match = stream.peek.match(/^\(/)
+      # Consume the opening paren
+      # Look for the closing paren
+      stream.next while stream.peak && !(match = stream.peek.match /^([^)]*)\)$/)
+      # The last token may include the closing paren
+      # Now we have a stream to present to the block
+      if (found_inside = yield inner_stream)
+      else
+      end
     end
   end
 end

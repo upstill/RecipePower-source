@@ -3,7 +3,7 @@ require 'scraping/seeker.rb'
 
 class SeekerTest < ActiveSupport::TestCase
   test 'seeking null produces null' do
-    scanner = StrScanner.new %w{ Fourscore and seven years ago }
+    scanner = StrScanner.from_string "Fourscore and seven years ago"
     ns = NullSeeker.match scanner
     subsq_scanner = ns.rest
     assert_equal ns.head, scanner
@@ -12,7 +12,7 @@ class SeekerTest < ActiveSupport::TestCase
   end
 
   test 'null sequence' do
-    scanner = StrScanner.new %w{ Fourscore and seven years ago }
+    scanner = StrScanner.from_string "Fourscore and seven years ago "
     ns = NullSeeker.match scanner
     ns = NullSeeker.match ns.rest
     ns = NullSeeker.match ns.rest
@@ -23,34 +23,34 @@ class SeekerTest < ActiveSupport::TestCase
   end
 
   test 'find a number in a stream' do
-    scanner = StrScanner.new %w{ Fourscore and seven years ago }
+    scanner = StrScanner.from_string "Fourscore and seven years ago "
     assert_nil NumberSeeker.seek(scanner)
-    scanner = StrScanner.new %w{ Fourscore and 7 years ago }
+    scanner = StrScanner.from_string "Fourscore and 7 years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 3, ns.rest.pos
-    scanner = StrScanner.new %w{ Fourscore and 7 1/2 years ago }
+    scanner = StrScanner.from_string "Fourscore and 7 1/2 years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 4, ns.rest.pos
-    scanner = StrScanner.new %w{ Fourscore and 7/2 years ago }
+    scanner = StrScanner.from_string "Fourscore and 7/2 years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 3, ns.rest.pos
-    scanner = StrScanner.new %w{ Fourscore and ⅐ years ago }
+    scanner = StrScanner.from_string "Fourscore and ⅐ years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 3, ns.rest.pos
-    scanner = StrScanner.new %w{ Fourscore and 7⅐ years ago }
+    scanner = StrScanner.from_string "Fourscore and 7⅐ years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
     assert_equal 3, ns.rest.pos
-    scanner = StrScanner.new %w{ Fourscore and 7 ⅐ years ago }
+    scanner = StrScanner.from_string "Fourscore and 7 ⅐ years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
     assert_equal 2, ns.head.pos
@@ -58,7 +58,7 @@ class SeekerTest < ActiveSupport::TestCase
   end
 
   test 'check validity of NullSeeker results' do
-    scanner = StrScanner.new %w{ Fourscore and 7 years ago }
+    scanner = StrScanner.from_string "Fourscore and 7 years ago "
     results = []
     pos = 0
     while ns = NullSeeker.match(scanner)
@@ -75,7 +75,7 @@ class SeekerTest < ActiveSupport::TestCase
   end
 
   test 'scan a string that includes a number' do
-    scanner = StrScanner.new %w{ Fourscore and 7 1/2 years ago }
+    scanner = StrScanner.from_string "Fourscore and 7 1/2 years ago "
     results = []
     while scanner.more? && (ns = NumberSeeker.match(scanner) || NullSeeker.match(scanner))
       results << ns
@@ -87,7 +87,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'scan a string with an embedded tag' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('jalapeño peppers')
+    scanner = StrScanner.from_string('jalapeño peppers')
     ts = TagSeeker.match scanner, lex
     assert_not_empty ts.tag_ids
     assert_equal 1, ts.tag_ids.first
@@ -96,17 +96,17 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match an amount' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('fourscore and 1/2 cup ago')
+    scanner = StrScanner.from_string('fourscore and 1/2 cup ago')
     ts = AmountSeeker.seek scanner, lex
     assert ts
     assert ts.num
     assert ts.unit
 
-    scanner = StrScanner.new lex.split('fourscore and cup ago')
+    scanner = StrScanner.from_string('fourscore and cup ago')
     ts = AmountSeeker.seek scanner, lex
     refute ts
 
-    scanner = StrScanner.new lex.split('fourscore and 1/2 ago')
+    scanner = StrScanner.from_string('fourscore and 1/2 ago')
     ts = AmountSeeker.seek scanner, lex
     assert ts
     assert ts.num
@@ -115,7 +115,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match a single condition' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('peeled')
+    scanner = StrScanner.from_string('peeled')
     cs = ConditionsSeeker.match scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -124,7 +124,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_equal 1, cs.tag_seekers.count
     assert_equal 0, cs.head.pos
     assert_equal 1, cs.rest.pos
-    scanner = StrScanner.new lex.split('1/2 cup peeled tomatoes')
+    scanner = StrScanner.from_string('1/2 cup peeled tomatoes')
     cs = ConditionsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -137,7 +137,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match two conditions joined with and' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('peeled and seeded')
+    scanner = StrScanner.from_string('peeled and seeded')
     cs = ConditionsSeeker.match scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -147,7 +147,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_equal 0, cs.head.pos
     assert_equal 3, cs.rest.pos
 
-    scanner = StrScanner.new lex.split('1/2 cup peeled and seeded tomatoes')
+    scanner = StrScanner.from_string('1/2 cup peeled and seeded tomatoes')
     cs = ConditionsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -160,7 +160,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match a series of three conditions' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('peeled, seeded and chopped')
+    scanner = StrScanner.from_string('peeled, seeded and chopped')
     cs = ConditionsSeeker.match scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -170,7 +170,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_equal 0, cs.head.pos
     assert_equal 5, cs.rest.pos
 
-    scanner = StrScanner.new lex.split('1/2 cup peeled, seeded and chopped tomatoes')
+    scanner = StrScanner.from_string('1/2 cup peeled, seeded and chopped tomatoes')
     cs = ConditionsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
@@ -183,7 +183,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match a series of two ingredients' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('chili bean and jalapeño peppers')
+    scanner = StrScanner.from_string('chili bean and jalapeño peppers')
     cs = IngredientsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
@@ -196,7 +196,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match a series of three ingredients' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('chili bean, cilantro and jalapeño peppers')
+    scanner = StrScanner.from_string('chili bean, cilantro and jalapeño peppers')
     cs = IngredientsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
@@ -209,7 +209,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match a series of three ingredients embedded in noise' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('1/2 cup sifted chili bean, cilantro and jalapeño peppers -- refined')
+    scanner = StrScanner.from_string('1/2 cup sifted chili bean, cilantro and jalapeño peppers -- refined')
     cs = IngredientsSeeker.seek scanner, lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
@@ -222,7 +222,7 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'recognize a full ingredient spec' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.new lex.split('cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    scanner = StrScanner.from_string('cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientLineSeeker.seek scanner, lex
     assert_not_nil ils
     assert_instance_of IngredientLineSeeker, ils
@@ -231,7 +231,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 1, ils.rest.pos
 
-    scanner = StrScanner.new lex.split('peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    scanner = StrScanner.from_string('peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientLineSeeker.seek scanner, lex
     assert_not_nil ils
     assert_instance_of IngredientLineSeeker, ils
@@ -240,7 +240,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 6, ils.rest.pos
 
-    scanner = StrScanner.new lex.split('1/2 cup cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    scanner = StrScanner.from_string('1/2 cup cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientLineSeeker.seek scanner, lex
     assert_not_nil ils
     assert_instance_of IngredientLineSeeker, ils
@@ -249,7 +249,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 3, ils.rest.pos
 
-    scanner = StrScanner.new lex.split('1/2 cup  peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
+    scanner = StrScanner.from_string('1/2 cup  peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientLineSeeker.seek scanner, lex
     assert_not_nil ils
     assert_instance_of IngredientLineSeeker, ils

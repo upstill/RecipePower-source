@@ -1,4 +1,5 @@
-# A Scanner object provides a stream of input strings
+# A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
+# This is an "abstract" class for defining what methods the Scanner provides
 class Scanner < Object
   attr_reader :pos
 
@@ -27,12 +28,18 @@ end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
 class StrScanner < Scanner
+  attr_reader :strings, :pos, :length
 
   def initialize strings, pos=0
-    # We include punctuation as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
+    # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
     @strings = strings
     @pos = pos
     @length = @strings.count
+  end
+
+  def self.from_string string, pos=0
+    # self.new string.scan(/[\w'-\/¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]+|[()\[\]{}]+/), pos
+    self.new string.scan(/[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/), pos
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
@@ -63,3 +70,44 @@ class StrScanner < Scanner
   end
 
 end
+
+class NokoScanner
+  attr_reader :pos, :nkdoc, :strings
+
+  def initialize nkdoc, pos=0
+    @nkdoc = nkdoc
+    @pos = pos
+    @text = ''
+    @nkdoc.traverse do |node|
+      if node.text?
+        @text << node.text
+      end
+    end
+    @strings = @text.split /\s/
+  end
+
+  # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
+  def peek nchars=1
+
+  end
+
+  # first: return the string in the current "read position" after advancing to the 'next' position
+  def first
+    val = @strings[pos]
+    @pos += 1
+    val
+  end
+
+  # Move past the current string, adjusting 'next' and returning a stream for the remainder
+  def rest ntokens=1
+
+  end
+
+  def chunk data
+    if(data || (ptr == (head+1)))
+      head = ptr
+    end
+  end
+
+end
+
