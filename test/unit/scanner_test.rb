@@ -29,7 +29,25 @@ class ScannerTest < ActiveSupport::TestCase
   <p>3. Bring a large pot of water to a boil and add salt. Add the Brussels sprouts and cook for 3 minutes. Then add the other vegetables and continue to cook until tender, about 5 minutes. Drain, shake off any excess water, then toss with the mustard-caper butter. Taste for salt, season with pepper and toss again.</p>
    </div>
 EOF
+    @ings_list = <<EOF
+  <p>2 garlic cloves<br>
+     Sea salt<br>
+     6 tablespoons butter, softened<br>
+     2 teaspoons Dijon mustard<br>
+     1/4 cup drained small capers, rinsed<br>
+     Grated zest of 1 lemon<br>
+     3 tablespoons chopped marjoram<br>
+     Black pepper<br>
+     1 pound Brussels sprouts<br>
+     1 small head (1/2 pound) white cauliflower<br>
+     1 small head (1/2 pound) Romanesco (green) cauliflower</p>
+EOF
   end
+
+  test 'find ingredient list' do
+    nokoscan = NokoScanner.from_string @ings_list
+  end
+
   test 'basic stream operations' do
     scanner = StrScanner.from_string "Fourscore and seven years ago "
     assert_equal 'Fourscore', scanner.first
@@ -51,6 +69,6 @@ EOF
       scanout << ch
     end
     assert_equal scanout, nokoscan.strings
-    assert_equal scanout.join(' '), nkdoc.inner_text
+    assert_equal scanout[1..-1].join(' '), nkdoc.inner_text
   end
 end

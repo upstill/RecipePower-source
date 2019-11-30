@@ -20,7 +20,7 @@ class Seeker
     end
   end
 
-    # Seek to satisfy myself with the contents of the stream AT THIS POSITION.
+  # Seek to satisfy myself with the contents of the stream AT THIS POSITION.
   # Return: IFF there's a match, return an instance of the class, which denotes the original stream, and the
   #   rest of that stream, after parsing.
   def self.match stream, opts={}
@@ -35,6 +35,23 @@ class NullSeeker < Seeker
     self.new stream, stream.rest
   end
 end
+
+# Top-level Seeker: for a recipe
+# We seek individual elements of the recipe, and when found, enclose them in an Element of that class.
+# The following is the grammar implemented by this search.
+# TODO: Author, Yield
+# Ingredient list (rp_inglist): rp_ingspec*  An ingredient list is a sequence of ingredient specs
+# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingname | rp_ingalts]+ [rp_ingcomment]?
+# Ingredient amount (rp_amount): rp_num | rp_unit | (rp_num rp_unit) [rp_altamt]?
+# Alternate amount (rp_altamt): \(rp_amt\)
+# Steps before measurement (rp_presteps): rp_process [{,'or'} rp_process]*
+# Process (rp_process): <Tag type: :Process>
+# Ingredient name (rp_ingname): <Tag type: :Ingredient>
+# Alternate ingredients (rp_ingalts): rp_ingname [',|or' rp_inglist]+
+# List of ingredients (rp_inglist): rp_ingname [',|and' rp_ingname]+
+# Ingredient comment (rp_ingcomment): <content to end of line>
+# Amount number (rp_num): defined by NumberSeeker
+# Amount unit (rp_unit): <Tag type: :Unit>
 
 # Seek a number at the head of the stream
 class NumberSeeker < Seeker
@@ -144,7 +161,7 @@ class IngredientsSeeker < TagsSeeker
   end
 end
 
-class IngredientLineSeeker < Seeker
+class IngredientSpecSeeker < Seeker
   attr_reader :amount, :condits, :ingreds
 
   def initialize stream, rest, amount, condits, ingreds

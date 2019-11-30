@@ -57,7 +57,7 @@ class Lexaur < Object
 
   # Our own #split function which (currently) separates out punctuation
   def split string_or_strings, do_stem=true
-    strings = string_or_strings.is_a?(String) ? string_or_strings.scan(/[^\s,.]+|[,.]+/) : string_or_strings
+    strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
     do_stem ? strings.map { |str| Stemmer::stem_word(str) } : strings
   end
 

@@ -223,36 +223,36 @@ class SeekerTest < ActiveSupport::TestCase
   test 'recognize a full ingredient spec' do
     lex = Lexaur.from_tags
     scanner = StrScanner.from_string('cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
-    ils = IngredientLineSeeker.seek scanner, lex
+    ils = IngredientSpecSeeker.seek scanner, lex
     assert_not_nil ils
-    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of IngredientSpecSeeker, ils
     assert_nil ils.amount
     assert_nil ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 1, ils.rest.pos
 
     scanner = StrScanner.from_string('peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
-    ils = IngredientLineSeeker.seek scanner, lex
+    ils = IngredientSpecSeeker.seek scanner, lex
     assert_not_nil ils
-    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of IngredientSpecSeeker, ils
     assert_nil ils.amount
     assert_instance_of ConditionsSeeker, ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 6, ils.rest.pos
 
     scanner = StrScanner.from_string('1/2 cup cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
-    ils = IngredientLineSeeker.seek scanner, lex
+    ils = IngredientSpecSeeker.seek scanner, lex
     assert_not_nil ils
-    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of IngredientSpecSeeker, ils
     assert_instance_of AmountSeeker, ils.amount
     assert_nil ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 3, ils.rest.pos
 
     scanner = StrScanner.from_string('1/2 cup  peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
-    ils = IngredientLineSeeker.seek scanner, lex
+    ils = IngredientSpecSeeker.seek scanner, lex
     assert_not_nil ils
-    assert_instance_of IngredientLineSeeker, ils
+    assert_instance_of IngredientSpecSeeker, ils
     assert_instance_of AmountSeeker, ils.amount
     assert_instance_of ConditionsSeeker, ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds

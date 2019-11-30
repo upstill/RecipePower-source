@@ -1,3 +1,7 @@
+# Split a string, emitting delimiters and punctuation as separate entities
+def tokenize str
+  str.scan(/[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/)
+end
 
 def splitstr(str, ncols=80)
   str = HTMLEntities.new.decode(str)
