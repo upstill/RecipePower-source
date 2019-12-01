@@ -38,8 +38,7 @@ class StrScanner < Scanner
   end
 
   def self.from_string string, pos=0
-    # self.new string.scan(/[\w'-\/¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]+|[()\[\]{}]+/), pos
-    self.new string.scan(/[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/), pos
+    self.new tokenize(string), pos
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
@@ -72,18 +71,37 @@ class StrScanner < Scanner
 end
 
 class NokoScanner
-  attr_reader :pos, :nkdoc, :strings
+  attr_reader :pos, :nkdoc, :tokens
 
   def initialize nkdoc, pos=0
+    def do_child child
+      case
+      when child.text?
+        @text << child.text.gsub("\n", ' ')
+      when child.attributes['class']&.value&.match(/\brp_elmt\b/)
+        @tokens += @text.split("\n").collect { |line| ["\n"] + tokenize(line) }.flatten
+        @text = ''
+        @tokens << NokoScanner.new(child)
+      when child.element?
+        @text << "\n" if child.name == 'p' || child.name == 'br'
+        child.children.each{ |j| do_child j }
+      end
+    end
     @nkdoc = nkdoc
     @pos = pos
     @text = ''
-    @nkdoc.traverse do |node|
-      if node.text?
-        @text << node.text
-      end
-    end
-    @strings = @text.split /\s/
+    @tokens = []
+    @nkdoc.children.each{|j| do_child j }
+    @tokens += @text.split("\n").collect { |line| ["\n"] + tokenize(line) }.flatten
+  end
+
+  def self.from_string html
+    self.new Nokogiri::HTML.fragment(html)
+  end
+
+  # Return the stream of tokens as an array of strings
+  def strings
+    @tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
@@ -93,7 +111,7 @@ class NokoScanner
 
   # first: return the string in the current "read position" after advancing to the 'next' position
   def first
-    val = @strings[pos]
+    val = @tokens[pos]
     @pos += 1
     val
   end

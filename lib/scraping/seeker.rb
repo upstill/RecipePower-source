@@ -39,6 +39,8 @@ end
 # Top-level Seeker: for a recipe
 # We seek individual elements of the recipe, and when found, enclose them in an Element of that class.
 # The following is the grammar implemented by this search.
+# The CSS class denoting such an element is given in parentheses. All such elements
+# are also marked with the rp_elmt class
 # TODO: Author, Yield
 # Ingredient list (rp_inglist): rp_ingspec*  An ingredient list is a sequence of ingredient specs
 # Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingname | rp_ingalts]+ [rp_ingcomment]?

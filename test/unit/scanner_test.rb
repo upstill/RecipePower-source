@@ -71,4 +71,23 @@ EOF
     assert_equal scanout, nokoscan.strings
     assert_equal scanout[1..-1].join(' '), nkdoc.inner_text
   end
+
+  test 'nkscanner with rp_elmt' do
+    html = <<EOF
+top-level text<span>spanned text</span>
+<div class="rp_elmt">rp_elmt div</div><div>child<span>child span</span><a>child link </a></div>and more top-level text
+<br>with newline<p>and new paragraph</p>
+EOF
+    nkdoc = Nokogiri::HTML.fragment html
+    nokoscan = NokoScanner.new nkdoc
+    scanout = []
+    while ch = nokoscan.first
+      if ch.is_a?(String)
+        scanout << ch
+      else
+        scanout += ch.strings
+      end
+    end
+    assert_equal scanout, nokoscan.strings
+  end
 end
