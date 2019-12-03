@@ -172,35 +172,58 @@ class NokoScanner
 
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
   def enclose pos_begin, pos_end, classes=''
+    def replace_elmt elmt, replacement
+      # We enclose all the material in a <span> node, then collapse it
+      replacement = "<span>#{replacement}</span>"
+      puts "Replacing '#{elmt.text}' with '#{replacement}'."
+      parent = elmt.parent
+      nodeset = elmt.replace replacement
+      newnode = parent.children.find { |child|
+        child == nodeset[0]
+      }
+      newnode.replace newnode.children
+    end
     first_ix = binsearch @elmt_bounds, pos_begin, &:last
     # first_ix gives the @elmt_bounds index of the first token
+    first_text_elmt, first_token = @elmt_bounds[first_ix]
+
     last_ix = binsearch @elmt_bounds, pos_end, &:last
     # last_ix gives the @elmt_bounds index of the last token
-    if first_ix == last_ix
-      first = @elmt_bounds[first_ix].first
-      startoff = @elmt_bounds[first_ix].last
+    last_text_elmt, last_token = @elmt_bounds[last_ix]
+
+    if first_text_elmt == last_text_elmt
       endoff = @elmt_bounds[first_ix+1]&.last || @tokens.count
-      puts "text node starts at #{startoff} and ends at #{endoff}"
+      puts "text node starts at #{first_token} and ends at #{endoff}"
       # We're in luck! We landed on the same text node
-      before = @tokens[startoff...pos_begin].join ' '
+      before = @tokens[first_token...pos_begin].join ' '
       content = @tokens[pos_begin...pos_end].join ' '
       after = @tokens[pos_end...endoff].join ' '
-      replacement = "#{before}<div class='np_elmt #{classes}'>#{content}</div>#{after}"
-      puts "Replacing '#{first.text}' with '#{replacement}'."
-      newnode = first.replace replacement
-      shrinkage = pos_end - pos_begin - 1
-      @tokens[pos_begin...pos_end] = NokoScanner.new newnode
-      @elmt_bounds.delete_at first_ix
+
+      newchildren = replace_elmt first_text_elmt,
+                            "#{before}<div class='np_elmt #{classes}'> #{content} </div>#{after}"
+
+      # We've lost some number of tokens and added the one for the new NokoScanner
+      shrinkage = @tokens.count
+      @tokens[pos_begin...pos_end] = NokoScanner.new(newchildren.find { |child| child.element? })
+      shrinkage -= @tokens.count
+      # @elmt_bounds past the replacement point need to have their token indices adjusted accordingly
+      newbounds = []
+      if (tn = newchildren[0]).text?
+        newbounds << [tn, first_token]
+        update_from = first_ix+1
+      else
+        update_from = first_ix
+      end
+      if (tn = newchildren[-1]).text?
+        newbounds << [tn, pos_end]
+      end
+      if newbounds.empty?
+        @elmt_bounds.delete_at first_ix
+      else
+        @elmt_bounds[first_ix..first_ix] = newbounds
+      end
       if shrinkage != 0
-        @elmt_bounds[first_ix..-1].each { |pair| pair[1] += shrinkage }
-      end
-      if after.present?
-        # Find the terminating text node and add it to @elmt_bounds
-        @elmt_bounds.insert first_ix, [elmt_node, pos_end]
-      end
-      if before.present?
-        # Find the beginning text node and add it to @elmt_bounds
-        @elmt_bounds.insert first_ix, [elmt_node, pos_begin]
+        @elmt_bounds[update_from..-1].each { |pair| pair[1] -= shrinkage }
       end
     end
   end
