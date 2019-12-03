@@ -4,56 +4,12 @@ require 'scraping/scanner.rb'
 
 class LexaurTest < ActiveSupport::TestCase
   def setup
-    @longstr = <<EOF
-<div class="entry-content"> 
-  <p><b>Cauliflower and Brussels Sprouts Salad with Mustard-Caper Butter</b><br>
-     Adapted from Deborah Madison, via <a href="http://www.latimes.com/features/food/la-fo-cauliflowerrec1jan10,1,2176865.story?coll=la-headlines-food">The Los Angeles Times, 1/10/07</a></p>
-   
-  <p>Servings: 8 (Deb: Wha?)</p>
-   
-  <p>2 garlic cloves<br>
-     Sea salt<br>
-     6 tablespoons butter, softened<br>
-     2 teaspoons Dijon mustard<br>
-     1/4 cup drained small capers, rinsed<br>
-     Grated zest of 1 lemon<br>
-     3 tablespoons chopped marjoram<br>
-     Black pepper<br>
-     1 pound Brussels sprouts<br>
-     1 small head (1/2 pound) white cauliflower<br>
-     1 small head (1/2 pound) Romanesco (green) cauliflower</p>
-   
-  <p>1. To make the mustard-caper butter, pound the garlic with a half-teaspoon salt in a mortar until smooth. Stir the garlic into the butter with the mustard, capers, lemon zest and marjoram. Season to taste with pepper. (The butter can be made a day ahead and refrigerated. Bring to room temperature before serving.)</p>
-   
-  <p>2. Trim the base off the Brussels sprouts, then slice them in half or, if large, into quarters. Cut the cauliflower into bite-sized pieces.</p>
-   
-  <p>3. Bring a large pot of water to a boil and add salt. Add the Brussels sprouts and cook for 3 minutes. Then add the other vegetables and continue to cook until tender, about 5 minutes. Drain, shake off any excess water, then toss with the mustard-caper butter. Taste for salt, season with pepper and toss again.</p>
-   </div>
-EOF
-    @ings_list = <<EOF
-  <p>
-     Sea salt<br>
-     6 tablespoons butter, softened<br>
-     2 teaspoons Dijon mustard<br>
-     1/4 cup drained small capers, rinsed<br>
-     2 garlic cloves<br>
-     Grated zest of 1 lemon<br>
-     3 tablespoons chopped marjoram<br>
-     Black pepper<br>
-     1 pound Brussels sprouts<br>
-     1 small head (1/2 pound) white cauliflower<br>
-     1 small head (1/2 pound) Romanesco (green) cauliflower</p>
-EOF
     @ingred_tags = ['garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'].
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ 'tablespoon teaspoon cup pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed }.
         each { |name| Tag.assert name, :Unit }
-  end
-
-  test 'find ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
   end
 
   # A Lexaur gets initialized properly
@@ -100,7 +56,7 @@ EOF
     assert_nil lex.chunk(scanner)
 
     scanner = StrScanner.from_string 'jalapeño peppers'
-    assert_not_nil lex.chunk(scanner) {|data, stream|
+    lex.chunk(scanner) {|data, stream|
       assert_not_nil data
       assert_includes data, 1
       assert_equal 2, stream.pos

@@ -2,51 +2,6 @@ require 'test_helper'
 require 'scraping/scanner.rb'
 
 class ScannerTest < ActiveSupport::TestCase
-  def setup
-    @longstr = <<EOF
-<div class="entry-content"> 
-  <p><b>Cauliflower and Brussels Sprouts Salad with Mustard-Caper Butter</b><br>
-     Adapted from Deborah Madison, via <a href="http://www.latimes.com/features/food/la-fo-cauliflowerrec1jan10,1,2176865.story?coll=la-headlines-food">The Los Angeles Times, 1/10/07</a></p>
-   
-  <p>Servings: 8 (Deb: Wha?)</p>
-   
-  <p>2 garlic cloves<br>
-     Sea salt<br>
-     6 tablespoons butter, softened<br>
-     2 teaspoons Dijon mustard<br>
-     1/4 cup drained small capers, rinsed<br>
-     Grated zest of 1 lemon<br>
-     3 tablespoons chopped marjoram<br>
-     Black pepper<br>
-     1 pound Brussels sprouts<br>
-     1 small head (1/2 pound) white cauliflower<br>
-     1 small head (1/2 pound) Romanesco (green) cauliflower</p>
-   
-  <p>1. To make the mustard-caper butter, pound the garlic with a half-teaspoon salt in a mortar until smooth. Stir the garlic into the butter with the mustard, capers, lemon zest and marjoram. Season to taste with pepper. (The butter can be made a day ahead and refrigerated. Bring to room temperature before serving.)</p>
-   
-  <p>2. Trim the base off the Brussels sprouts, then slice them in half or, if large, into quarters. Cut the cauliflower into bite-sized pieces.</p>
-   
-  <p>3. Bring a large pot of water to a boil and add salt. Add the Brussels sprouts and cook for 3 minutes. Then add the other vegetables and continue to cook until tender, about 5 minutes. Drain, shake off any excess water, then toss with the mustard-caper butter. Taste for salt, season with pepper and toss again.</p>
-   </div>
-EOF
-    @ings_list = <<EOF
-  <p>2 garlic cloves<br>
-     Sea salt<br>
-     6 tablespoons butter, softened<br>
-     2 teaspoons Dijon mustard<br>
-     1/4 cup drained small capers, rinsed<br>
-     Grated zest of 1 lemon<br>
-     3 tablespoons chopped marjoram<br>
-     Black pepper<br>
-     1 pound Brussels sprouts<br>
-     1 small head (1/2 pound) white cauliflower<br>
-     1 small head (1/2 pound) Romanesco (green) cauliflower</p>
-EOF
-  end
-
-  test 'find ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
-  end
 
   test 'basic stream operations' do
     scanner = StrScanner.from_string "Fourscore and seven years ago "
@@ -69,7 +24,7 @@ EOF
       scanout << ch
     end
     assert_equal scanout, nokoscan.strings
-    assert_equal scanout[1..-1].join(' '), nkdoc.inner_text
+    assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
   test 'nkscanner with rp_elmt' do
@@ -89,5 +44,46 @@ EOF
       end
     end
     assert_equal scanout, nokoscan.strings
+  end
+
+  test "simple text replacement in nkscanner" do
+    html = "a simple undifferentiated text string"
+    nks = NokoScanner.from_string html
+    assert_equal 5, nks.tokens.count
+
+    # Enclose two strings in the middle
+    nks.enclose 2,4
+    assert_equal 4, nks.tokens.count
+    assert nks.tokens[1].is_a?(String)
+    assert nks.tokens[2].is_a?(NokoScanner)
+    assert nks.tokens[3].is_a?(String)
+
+    # Enclose the last two strings
+    nks = NokoScanner.from_string html
+    nks.enclose 3,5
+    assert_equal 4, nks.tokens.count
+    assert nks.tokens[2].is_a?(String)
+    assert nks.tokens[3].is_a?(NokoScanner)
+
+    # Enclose the first two strings
+    nks = NokoScanner.from_string html
+    nks.enclose 0,2
+    assert_equal 4, nks.tokens.count
+    assert nks.tokens[0].is_a?(NokoScanner)
+    assert nks.tokens[1].is_a?(String)
+
+    # Enclose the last string
+    nks = NokoScanner.from_string html
+    nks.enclose 4,5
+    assert_equal 5, nks.tokens.count
+    assert nks.tokens[3].is_a?(String)
+    assert nks.tokens[4].is_a?(NokoScanner)
+
+    # Enclose the first string
+    nks = NokoScanner.from_string html
+    nks.enclose 0,1
+    assert_equal 5, nks.tokens.count
+    assert nks.tokens[0].is_a?(NokoScanner)
+    assert nks.tokens[1].is_a?(String)
   end
 end

@@ -55,6 +55,26 @@ end
 # Amount number (rp_num): defined by NumberSeeker
 # Amount unit (rp_unit): <Tag type: :Unit>
 
+# Seek an ingredient list
+class IngredientListSeeker < Seeker
+
+  # Seek by probing for an ingredient spec at each newline
+  def self.seek stream, opts={}
+    ils = []
+    while stream.more?
+      if stream.peek == "\n" # Only seek at line boundaries
+        if is = IngredientSpecSeeker.match(stream.rest)
+          ils << is
+        end
+      end
+    end
+    if ils.present?
+      # Package the stream from the first spec to the last as the ingredient list
+    end
+  end
+
+end
+
 # Seek a number at the head of the stream
 class NumberSeeker < Seeker
 
@@ -74,8 +94,8 @@ class TagSeeker < Seeker
     @tag_ids = tag_ids
   end
 
-  def self.match stream, lexaur, opts={}
-    lexaur.chunk(stream) { |data, next_stream| # Find ids in the tags table
+  def self.match stream, opts={}
+    opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       tag_ids = Tag.of_type(opts[:types]).where(id: data).pluck :id
       return (self.new(stream, next_stream, tag_ids) if tag_ids.present?)
@@ -127,21 +147,21 @@ class TagsSeeker < Seeker
     @tag_seekers = [ tag_seeker ]
   end
 
-  def self.match stream, lexaur, opts={}
-    # Get a series of zero or more Process tags each followed by a comma
-    if ns = TagSeeker.match(stream, lexaur, opts.slice(:types))
+  def self.match stream, opts
+    # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
+    if ns = TagSeeker.match(stream, opts.slice( :lexaur, :types))
       sk = self.new stream, ns.rest, ns
       case ns.rest.peek
-      when 'and'
+      when 'and', 'or'
         # We expect a terminating condition
-        if ns2 = TagSeeker.match(ns.rest.rest, lexaur, opts.slice(:types))
+        if ns2 = TagSeeker.match(ns.rest.rest, opts.slice( :lexaur, :types))
           sk.tag_seekers << ns2
           sk.rest = ns2.rest
         else
           return nil
         end
       when ','
-        if further = self.match(ns.rest.rest, lexaur)
+        if further = self.match(ns.rest.rest, opts)
           sk.tag_seekers += further.tag_seekers
           sk.rest = further.rest
         end
@@ -152,14 +172,14 @@ class TagsSeeker < Seeker
 end
 
 class ConditionsSeeker < TagsSeeker
-  def self.match stream, lex
-    super stream, lex, types: 3
+  def self.match stream, opts
+    super stream, opts.merge(types: 3)
   end
 end
 
 class IngredientsSeeker < TagsSeeker
-  def self.match stream, lex
-    super stream, lex, types: 4
+  def self.match stream, opts
+    super stream, opts.merge(types: 4)
   end
 end
 
@@ -171,15 +191,16 @@ class IngredientSpecSeeker < Seeker
     @amount, @condits, @ingreds = amount, condits, ingreds
   end
 
-  def self.match stream, lex
+  def self.match stream, opts
     original_stream = stream
-    if amount = AmountSeeker.match(stream, lex)
+    if amount = AmountSeeker.match(stream, opts)
+      puts "Found amount #{amount.num} #{amount.unit}" if Rails.env.test?
       stream = amount.rest
     end
-    if condits = ConditionsSeeker.match(stream, lex)
+    if condits = ConditionsSeeker.match(stream, opts)
       stream = condits.rest
     end
-    if ingreds = IngredientsSeeker.match(stream, lex)
+    if ingreds = IngredientsSeeker.match(stream, opts)
       self.new original_stream, ingreds.rest, amount, condits, ingreds
     end
   end
