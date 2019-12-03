@@ -183,50 +183,85 @@ class NokoScanner
       }
       newnode.replace newnode.children
     end
-    first_ix = binsearch @elmt_bounds, pos_begin, &:last
-    # first_ix gives the @elmt_bounds index of the first token
-    first_text_elmt, first_token = @elmt_bounds[first_ix]
-
-    last_ix = binsearch @elmt_bounds, pos_end, &:last
-    # last_ix gives the @elmt_bounds index of the last token
-    last_text_elmt, last_token = @elmt_bounds[last_ix]
-
-    if first_text_elmt == last_text_elmt
-      endoff = @elmt_bounds[first_ix+1]&.last || @tokens.count
-      puts "text node starts at #{first_token} and ends at #{endoff}"
+    def text_elmt_data token_ix
+      result = {}
+      boundsix = binsearch @elmt_bounds, token_ix, &:last
+      result[:elmt_bounds_index] = boundsix
+      result[:text_element], result[:first_token_index] = @elmt_bounds[boundsix]
+      result[:tokens_limit] = @elmt_bounds[boundsix+1]&.last || @tokens.count
+      result
+    end
+    # Provide a hash of data about the text node that has the token at 'token_ix'
+    tedata_first = TextElmtData.new pos_begin, @tokens, @elmt_bounds
+    tedata_last = TextElmtData.new pos_end, @tokens, @elmt_bounds
+    # We've lost some number of tokens and added the one for the new NokoScanner
+    shrinkage = @tokens.count ; update_from = nil
+    if tedata_first.text_element == tedata_last.text_element
+      puts "text node starts at #{tedata_first.first_token_index} and ends at #{tedata_first.tokens_limit}"
       # We're in luck! We landed on the same text node
-      before = @tokens[first_token...pos_begin].join ' '
       content = @tokens[pos_begin...pos_end].join ' '
-      after = @tokens[pos_end...endoff].join ' '
 
-      newchildren = replace_elmt first_text_elmt,
-                            "#{before}<div class='np_elmt #{classes}'> #{content} </div>#{after}"
+      newchildren = replace_elmt tedata_first.text_element,
+                            "#{tedata_first.prior_text}<div class='np_elmt #{classes}'> #{content} </div>#{tedata_last.subsq_text}"
 
-      # We've lost some number of tokens and added the one for the new NokoScanner
-      shrinkage = @tokens.count
       @tokens[pos_begin...pos_end] = NokoScanner.new(newchildren.find { |child| child.element? })
-      shrinkage -= @tokens.count
-      # @elmt_bounds past the replacement point need to have their token indices adjusted accordingly
+
       newbounds = []
       if (tn = newchildren[0]).text?
-        newbounds << [tn, first_token]
-        update_from = first_ix+1
+        newbounds << [tn, tedata_first.first_token_index]
+        update_from = tedata_first.elmt_bounds_index+1
       else
-        update_from = first_ix
+        update_from = tedata_first.elmt_bounds_index
       end
       if (tn = newchildren[-1]).text?
         newbounds << [tn, pos_end]
       end
       if newbounds.empty?
-        @elmt_bounds.delete_at first_ix
+        @elmt_bounds.delete_at tedata_first.elmt_bounds_index
       else
-        @elmt_bounds[first_ix..first_ix] = newbounds
+        @elmt_bounds[tedata_first.elmt_bounds_index..tedata_first.elmt_bounds_index] = newbounds
       end
-      if shrinkage != 0
-        @elmt_bounds[update_from..-1].each { |pair| pair[1] -= shrinkage }
+    else
+      # Find the common ancestor of the two text nodes
+      common_ancestor = (tedata_first.text_element.ancestors & tedata_last.text_element.ancestors).first.to_s
+      # Capture the elements between the two text elements
+      # Capture the text from the first element
+      content = @tokens[pos_begin...pos_end].join ' '
+      if tedata_first.prior_text.present?
+        tedata_first.text_element.text = tedata_first.prior_text
+      else
+        tedata_first.text_element.delete
       end
+      # The two elements have a common parent
+      parent = tedata_first.text_element.parent
+    end
+    # @elmt_bounds past the replacement point need to have their token indices adjusted accordingly
+    shrinkage -= @tokens.count
+    if shrinkage != 0
+      @elmt_bounds[update_from..-1].each { |pair| pair[1] -= shrinkage }
     end
   end
 
 end
 
+class TextElmtData < Object
+  attr_accessor :token_ix, :elmt_bounds_index, :text_element, :first_token_index, :tokens_limit
+
+  def initialize token_ix, tokens, elmt_bounds
+    @token_ix = token_ix
+    @tokens = tokens
+    @elmt_bounds = elmt_bounds
+    boundsix = binsearch elmt_bounds, token_ix, &:last
+    @elmt_bounds_index = boundsix
+    @text_element, @first_token_index = elmt_bounds[boundsix]
+    @tokens_limit = elmt_bounds[boundsix+1]&.last || tokens.count
+  end
+
+  def prior_text
+    @tokens[first_token_index...token_ix].join ' '
+  end
+
+  def subsq_text
+    @tokens[token_ix...tokens_limit].join ' '
+  end
+end
