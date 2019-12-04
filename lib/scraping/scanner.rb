@@ -183,57 +183,49 @@ class NokoScanner
       }
       newnode.replace newnode.children
     end
-    def text_elmt_data token_ix
-      result = {}
-      boundsix = binsearch @elmt_bounds, token_ix, &:last
-      result[:elmt_bounds_index] = boundsix
-      result[:text_element], result[:first_token_index] = @elmt_bounds[boundsix]
-      result[:tokens_limit] = @elmt_bounds[boundsix+1]&.last || @tokens.count
-      result
-    end
-    # Provide a hash of data about the text node that has the token at 'token_ix'
-    tedata_first = TextElmtData.new pos_begin, @tokens, @elmt_bounds
-    tedata_last = TextElmtData.new pos_end, @tokens, @elmt_bounds
-    # We've lost some number of tokens and added the one for the new NokoScanner
+    # We're going to suck up some number of tokens and add one for the new NokoScanner, so we'll
+    # need to adjust token bounds later
     shrinkage = @tokens.count ; update_from = nil
-    if tedata_first.text_element == tedata_last.text_element
-      puts "text node starts at #{tedata_first.first_token_index} and ends at #{tedata_first.tokens_limit}"
-      # We're in luck! We landed on the same text node
-      content = @tokens[pos_begin...pos_end].join ' '
-
-      newchildren = replace_elmt tedata_first.text_element,
-                            "#{tedata_first.prior_text}<div class='np_elmt #{classes}'> #{content} </div>#{tedata_last.subsq_text}"
+    # Provide a hash of data about the text node that has the token at 'token_ix'
+    tefirst = TextElmtData.new pos_begin, @tokens, @elmt_bounds
+    if pos_end <= tefirst.tokens_limit
+      puts "text node starts at #{tefirst.first_token_index} and ends at #{tefirst.tokens_limit}"
+      # We're in luck! Both beginning and end are on the same text node
+      newchildren = replace_elmt tefirst.text_element,
+                            "#{tefirst.prior_text}<div class='np_elmt #{classes}'> #{tefirst.delimited_text pos_end} </div>#{tefirst.subsq_text pos_end}"
 
       @tokens[pos_begin...pos_end] = NokoScanner.new(newchildren.find { |child| child.element? })
 
       newbounds = []
       if (tn = newchildren[0]).text?
-        newbounds << [tn, tedata_first.first_token_index]
-        update_from = tedata_first.elmt_bounds_index+1
+        newbounds << [tn, tefirst.first_token_index]
+        update_from = tefirst.elmt_bounds_index+1
       else
-        update_from = tedata_first.elmt_bounds_index
+        update_from = tefirst.elmt_bounds_index
       end
       if (tn = newchildren[-1]).text?
         newbounds << [tn, pos_end]
       end
-      if newbounds.empty?
-        @elmt_bounds.delete_at tedata_first.elmt_bounds_index
-      else
-        @elmt_bounds[tedata_first.elmt_bounds_index..tedata_first.elmt_bounds_index] = newbounds
-      end
+      tefirst.replace_bound newbounds
     else
+      telast = TextElmtData.new pos_end, @tokens, @elmt_bounds
       # Find the common ancestor of the two text nodes
-      common_ancestor = (tedata_first.text_element.ancestors & tedata_last.text_element.ancestors).first.to_s
+      common_ancestor = (tefirst.ancestors & telast.ancestors).first.to_s
       # Capture the elements between the two text elements
       # Capture the text from the first element
       content = @tokens[pos_begin...pos_end].join ' '
-      if tedata_first.prior_text.present?
-        tedata_first.text_element.text = tedata_first.prior_text
+      if tefirst.prior_text.present?
+        tefirst.text = tefirst.prior_text
       else
-        tedata_first.text_element.delete
+        tefirst.text_element.delete
+      end
+      if telast.subs_text.present?
+        telast.text = telast.subs_text
+      else
+        telast.text_element.delete
       end
       # The two elements have a common parent
-      parent = tedata_first.text_element.parent
+      parent = tefirst.text_element.parent
     end
     # @elmt_bounds past the replacement point need to have their token indices adjusted accordingly
     shrinkage -= @tokens.count
@@ -245,6 +237,7 @@ class NokoScanner
 end
 
 class TextElmtData < Object
+  delegate :parent, :text, :'text=', :delete, :ancestors, to: :text_element
   attr_accessor :token_ix, :elmt_bounds_index, :text_element, :first_token_index, :tokens_limit
 
   def initialize token_ix, tokens, elmt_bounds
@@ -257,11 +250,25 @@ class TextElmtData < Object
     @tokens_limit = elmt_bounds[boundsix+1]&.last || tokens.count
   end
 
-  def prior_text
-    @tokens[first_token_index...token_ix].join ' '
+  # Return the text up to, but not including, the mark, which defaults to the token_ix
+  def prior_text mark=token_ix
+    @tokens[first_token_index...mark].join ' '
   end
 
-  def subsq_text
-    @tokens[token_ix...tokens_limit].join ' '
+  # Return the text from the mark to the end of the text element
+  def subsq_text mark=token_ix
+    @tokens[mark...tokens_limit].join ' '
+  end
+
+  def delimited_text mark=tokens_limit
+    @tokens[token_ix...mark].join ' '
+  end
+
+  def replace_bound newbounds
+    if newbounds.empty?
+      @elmt_bounds.delete_at @elmt_bounds_index
+    else
+      @elmt_bounds[@elmt_bounds_index..@elmt_bounds_index] = newbounds
+    end
   end
 end
