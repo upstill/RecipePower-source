@@ -183,62 +183,39 @@ class NokoScanner
       }
       newnode.replace newnode.children
     end
-    # We're going to suck up some number of tokens and add one for the new NokoScanner, so we'll
-    # need to adjust token bounds later
-    shrinkage = @tokens.count ; update_from = nil
     # Provide a hash of data about the text node that has the token at 'token_ix'
     tefirst = TextElmtData.new pos_begin, @tokens, @elmt_bounds
     if pos_end <= tefirst.tokens_limit
-      puts "text node starts at #{tefirst.first_token_index} and ends at #{tefirst.tokens_limit}"
       # We're in luck! Both beginning and end are on the same text node
+      puts "text node starts at #{tefirst.first_token_index} and ends at #{tefirst.tokens_limit}"
       newchildren = replace_elmt tefirst.text_element,
                             "#{tefirst.prior_text}<div class='np_elmt #{classes}'> #{tefirst.delimited_text pos_end} </div>#{tefirst.subsq_text pos_end}"
 
       @tokens[pos_begin...pos_end] = NokoScanner.new(newchildren.find { |child| child.element? })
 
       newbounds = []
-      if (tn = newchildren[0]).text?
-        newbounds << [tn, tefirst.first_token_index]
-        update_from = tefirst.elmt_bounds_index+1
-      else
-        update_from = tefirst.elmt_bounds_index
-      end
-      if (tn = newchildren[-1]).text?
-        newbounds << [tn, pos_end]
-      end
-      tefirst.replace_bound newbounds
+      newbounds << [newchildren.first, tefirst.first_token_index] if newchildren.first.text?
+      newbounds << [newchildren.last, pos_begin+1] if newchildren.last.text?
+      tefirst.replace_bound newbounds, pos_end-pos_begin-1
     else
       telast = TextElmtData.new pos_end, @tokens, @elmt_bounds
       # Find the common ancestor of the two text nodes
       common_ancestor = (tefirst.ancestors & telast.ancestors).first.to_s
       # Capture the elements between the two text elements
       # Capture the text from the first element
-      content = @tokens[pos_begin...pos_end].join ' '
-      if tefirst.prior_text.present?
-        tefirst.text = tefirst.prior_text
-      else
-        tefirst.text_element.delete
-      end
-      if telast.subs_text.present?
-        telast.text = telast.subs_text
-      else
-        telast.text_element.delete
-      end
+      tefirst.text = tefirst.prior_text
+      telast.text = telast.subsq_text
       # The two elements have a common parent
       parent = tefirst.text_element.parent
-    end
-    # @elmt_bounds past the replacement point need to have their token indices adjusted accordingly
-    shrinkage -= @tokens.count
-    if shrinkage != 0
-      @elmt_bounds[update_from..-1].each { |pair| pair[1] -= shrinkage }
     end
   end
 
 end
 
 class TextElmtData < Object
-  delegate :parent, :text, :'text=', :delete, :ancestors, to: :text_element
-  attr_accessor :token_ix, :elmt_bounds_index, :text_element, :first_token_index, :tokens_limit
+  delegate :parent, :text, :delete, :ancestors, to: :text_element
+  attr_accessor :token_ix, :elmt_bounds_index, :text_element, :first_token_index, :tokens_limit,
+                :parent
 
   def initialize token_ix, tokens, elmt_bounds
     @token_ix = token_ix
@@ -248,6 +225,7 @@ class TextElmtData < Object
     @elmt_bounds_index = boundsix
     @text_element, @first_token_index = elmt_bounds[boundsix]
     @tokens_limit = elmt_bounds[boundsix+1]&.last || tokens.count
+    @parent = @text_element.parent
   end
 
   # Return the text up to, but not including, the mark, which defaults to the token_ix
@@ -264,11 +242,22 @@ class TextElmtData < Object
     @tokens[token_ix...mark].join ' '
   end
 
-  def replace_bound newbounds
+  def replace_bound newbounds, token_shrinkage=0
+    @elmt_bounds[@elmt_bounds_index..-1].each { |pair| pair[1] -= token_shrinkage } if token_shrinkage != 0
     if newbounds.empty?
       @elmt_bounds.delete_at @elmt_bounds_index
     else
       @elmt_bounds[@elmt_bounds_index..@elmt_bounds_index] = newbounds
+    end
+  end
+
+  # Set the text for the element to 'str'. Delete the element if the text is empty
+  def text= str
+    if str.present?
+      @text_element.text = str
+    else
+      @text_element.delete
+      @text_element = nil
     end
   end
 end
