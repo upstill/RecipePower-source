@@ -1,6 +1,19 @@
 # Split a string, emitting delimiters and punctuation as separate entities
-def tokenize str
-  str.scan(/[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/)
+# If the block is given, call it with the found token and the offset within the string at which it's found
+def tokenize str, &block
+  if block_given?
+    offset = 0
+    out = []
+    while str.present? do
+      str = str.sub /(^\s*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?])/, ''
+      offset += $1.length
+      block.call $2, offset
+      offset += $2.length
+      out << $2
+    end
+  else
+    str.scan /[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/
+  end
 end
 
 def splitstr(str, ncols=80)
