@@ -1,18 +1,32 @@
 # Split a string, emitting delimiters and punctuation as separate entities
 # If the block is given, call it with the found token and the offset within the string at which it's found
-def tokenize str, &block
+def tokenize str, terminates=false, &block
   if block_given?
     offset = 0
-    out = []
-    while str.present? do
-      str = str.sub /(^\s*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?])/, ''
-      offset += $1.length
-      block.call $2, offset
-      offset += $2.length
-      out << $2
+    while str.length > 0 do
+      ostr = str
+      str = ostr.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, '' # Pluck the next token
+      spaces, token = $1, $2
+      if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{},.?\n]/)) # This string really ends here (no continuation of non-delimiter)
+        offset += spaces&.length || 0
+        block.call token, offset
+        offset += token&.length || 0
+      else
+        return ostr # Return the unprocessed remainder of the string (which may be blank)
+      end
     end
+    ''
   else
-    str.scan /[^\]\[)(}{,.?\s]+|[()\[\]{},.?]/
+    tokens = []
+    while str.length > 0
+      str = str.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, ''
+      if $2
+        tokens << $2
+      else
+        break
+      end
+    end
+    tokens
   end
 end
 
