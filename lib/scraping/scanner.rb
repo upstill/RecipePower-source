@@ -194,9 +194,16 @@ class NokoScanner
       newchildren = replace_elmt teleft.text_element,
                             "#{teleft.prior_text}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{teleft.subsq_text pos_end}"
 
+      # Now we need to adjust the elmt bounds for the 
       new_elmt = newchildren.find { |child| child.element? }
-      newbounds << [newchildren.first, teleft.global_start_offset] if newchildren.first.text?
-      newbounds << [newchildren.last, pos_begin+1] if newchildren.last.text?
+      where = teleft.global_start_offset
+      if newchildren.first.text?
+        newbounds << [newchildren.first, where]
+        where += newchildren.first.text.length
+      end
+      newbounds << [new_elmt.children.first, where]
+      where += new_elmt.children.first.text.length
+      newbounds << [newchildren.last, where] if newchildren.last.text?
     else
       teright = text_elmt_data -(pos_end)
       # Find the common ancestor of the two text nodes
@@ -242,7 +249,7 @@ class NokoScanner
       new_elmt.next_sibling.remove if node_empty? new_elmt.next_sibling
     end
     # @tokens[pos_begin...pos_end] = NokoScanner.new new_elmt
-    # teleft.replace_bound newbounds, pos_end-pos_begin-1
+    teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
   end
 
   def text_elmt_data char_offset

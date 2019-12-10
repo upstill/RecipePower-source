@@ -78,47 +78,52 @@ EOF
     html = "a simple undifferentiated text string"
     nks = NokoScanner.from_string html
     assert_equal 5, nks.tokens.count
+    assert_equal [0], nks.elmt_bounds.map(&:last)
 
     # Enclose two strings in the middle
     nks.enclose nks.token_starts[2],nks.token_starts[4]
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
-    assert_equal 4, nks.tokens.count
-    assert nks.tokens[1].is_a?(String)
-    assert nks.tokens[2].is_a?(NokoScanner)
-    assert nks.tokens[3].is_a?(String)
-    assert_equal [0,3], nks.elmt_bounds.map(&:last)
+    # assert_equal 4, nks.tokens.count
+    # assert nks.tokens[1].is_a?(String)
+    # assert nks.tokens[2].is_a?(NokoScanner)
+    # assert nks.tokens[3].is_a?(String)
+    assert_equal [0, 9, 31], nks.elmt_bounds.map(&:last)
 
     # Enclose the last two strings
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[3], nks.token_starts[5]
-    assert_equal 4, nks.tokens.count
-    assert nks.tokens[2].is_a?(String)
-    assert nks.tokens[3].is_a?(NokoScanner)
-    assert_equal [0], nks.elmt_bounds.map(&:last)
+    nks.enclose nks.token_starts[3], 37 # nks.token_starts[5]
+    assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
+    #assert_equal 4, nks.tokens.count
+    #assert nks.tokens[2].is_a?(String)
+    #assert nks.tokens[3].is_a?(NokoScanner)
+    assert_equal [0, 26], nks.elmt_bounds.map(&:last)
 
     # Enclose the first two strings
     nks = NokoScanner.from_string html
     nks.enclose nks.token_starts[0], nks.token_starts[2]
-    assert_equal 4, nks.tokens.count
-    assert nks.tokens[0].is_a?(NokoScanner)
-    assert nks.tokens[1].is_a?(String)
-    assert_equal [1], nks.elmt_bounds.map(&:last)
+    assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
+    #assert_equal 4, nks.tokens.count
+    #assert nks.tokens[0].is_a?(NokoScanner)
+    #assert nks.tokens[1].is_a?(String)
+    assert_equal [0, 9 ], nks.elmt_bounds.map(&:last)
 
     # Enclose the last string
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[4], nks.token_starts[5]
-    assert_equal 5, nks.tokens.count
-    assert nks.tokens[3].is_a?(String)
-    assert nks.tokens[4].is_a?(NokoScanner)
-    assert_equal [0], nks.elmt_bounds.map(&:last)
+    nks.enclose nks.token_starts[4], 37 # nks.token_starts[5]
+    assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
+    #assert_equal 5, nks.tokens.count
+    #assert nks.tokens[3].is_a?(String)
+    #assert nks.tokens[4].is_a?(NokoScanner)
+    assert_equal [0, 31], nks.elmt_bounds.map(&:last)
 
     # Enclose the first string
     nks = NokoScanner.from_string html
     nks.enclose nks.token_starts[0], nks.token_starts[1]
-    assert_equal 5, nks.tokens.count
-    assert nks.tokens[0].is_a?(NokoScanner)
-    assert nks.tokens[1].is_a?(String)
-    assert_equal [1], nks.elmt_bounds.map(&:last)
+    assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
+    #assert_equal 5, nks.tokens.count
+    #assert nks.tokens[0].is_a?(NokoScanner)
+    #assert nks.tokens[1].is_a?(String)
+    assert_equal [0, 2], nks.elmt_bounds.map(&:last)
   end
 
   test 'element Bounds in text' do
