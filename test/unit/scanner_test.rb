@@ -133,12 +133,39 @@ EOF
   end
 
   test "Replace tokens separated in tree" do
-    html = "<div class=\"upper div\"><div class=\"lower div\">\n<div class=\"lower left\">text1</div>\n<div class=\"lower right\">text2</div>\n</div></div>"
+    html = <<EOF
+<div class="upper div">
+  <div class="lower div">
+    <div class="lower left">
+      <span>text1 </span>
+    </div>
+    <div class="lower right">
+      text2
+    </div>
+  </div>
+</div>
+EOF
+    html = html.gsub(/\n\s+/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[1], nks.token_starts[4]
+    nks.enclose nks.token_starts[0], nks.token_starts[2]
     assert_equal html, nks.nkdoc.inner_html
-    assert nks.tokens[0].is_a?(NokoScanner)
-    assert_equal "<div class=\"np_elmt\">text1 text2</div>", nks.tokens[0].nkdoc.to_s
+    # assert nks.tokens[0].is_a?(NokoScanner)
+    expected = <<EOF
+<div class="upper div">
+  <div class="lower div">
+    <div class="rp_elmt">
+      <div class="lower left">
+        <span>text1 </span>
+      </div>
+      <div class="lower right">
+        text2
+      </div>
+    </div>
+  </div>
+</div>
+EOF
+    expected = expected.gsub(/\n\s+/, '')
+    assert_equal "<div class=\"upper div\"><div class=\"lower div\">\n<div class=\"np_elmt\"><span>text1</span>\n<div class=\"lower right\">text2</div></div></div>\n</div>", nks.nkdoc.to_s
   end
 
   test "TextElmtData" do

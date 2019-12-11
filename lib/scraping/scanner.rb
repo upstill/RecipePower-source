@@ -13,7 +13,7 @@ class Scanner < Object
   attr_reader :pos
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
-  def peek nchars=1
+  def peek nchars = 1
 
   end
 
@@ -23,12 +23,12 @@ class Scanner < Object
   end
 
   # Move past the current string, adjusting 'next' and returning a stream for the remainder
-  def rest nchars=1
+  def rest nchars = 1
 
   end
 
   def chunk data
-    if(data || (ptr == (head+1)))
+    if (data || (ptr == (head + 1)))
       head = ptr
     end
   end
@@ -39,21 +39,21 @@ end
 class StrScanner < Scanner
   attr_reader :strings, :pos, :length
 
-  def initialize strings, pos=0
+  def initialize strings, pos = 0
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
     @strings = strings
     @pos = pos
     @length = @strings.count
   end
 
-  def self.from_string string, pos=0
+  def self.from_string string, pos = 0
     self.new tokenize(string), pos
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
-  def peek nchars=1
+  def peek nchars = 1
     if @pos < @length
-      (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos+nchars)].join(' ')
+      (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos + nchars)].join(' ')
     end
   end
 
@@ -68,7 +68,7 @@ class StrScanner < Scanner
   end
 
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars=1
+  def rest nchars = 1
     newpos = @pos + nchars
     StrScanner.new(@strings, (newpos > @length ? @length : newpos))
   end
@@ -81,11 +81,12 @@ end
 
 class NokoScanner
   attr_reader :pos, :nkdoc, :tokens, :elmt_bounds, :token_starts
+  delegate :pp, to: :nkdoc
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc, pos=0, tokens=nil
+  def initialize nkdoc, pos = 0, tokens = nil
     def to_tokens newtext = nil
       # Prepend the string to the priorly held text, if any
       newtext = @held_text + newtext if newtext && @held_text && (@held_text.length > 0)
@@ -101,7 +102,7 @@ class NokoScanner
       case
       when child.text?
         # Save this element and its starting point
-        @elmt_bounds << [child, (@processed_text_len+@held_text.length)]
+        @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.attributes['class']&.value&.match(/\brp_elmt\b/)
         to_tokens
@@ -137,12 +138,12 @@ class NokoScanner
     @tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
   end
 
-  def peek nchars=1
+  def peek nchars = 1
     if @pos < @length
       if nchars == 1
         @tokens[@pos]
-      elsif @tokens[@pos...(@pos+nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
-        @tokens[@pos...(@pos+nchars)].join(' ')
+      elsif @tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
+        @tokens[@pos...(@pos + nchars)].join(' ')
       end
     end
   end
@@ -157,13 +158,13 @@ class NokoScanner
   end
 
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars=1
+  def rest nchars = 1
     newpos = @pos + nchars
     NokoScanner.new @nkdoc, (newpos > @length ? @length : newpos), @tokens
   end
 
   def chunk data
-    if(data || (ptr == (head+1)))
+    if (data || (ptr == (head + 1)))
       head = ptr
     end
   end
@@ -173,7 +174,7 @@ class NokoScanner
   end
 
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
-  def enclose pos_begin, pos_end, classes=''
+  def enclose pos_begin, pos_end, classes = ''
     def replace_elmt elmt, replacement
       # We enclose all the material in a <span> node, then collapse it
       replacement = "<span>#{replacement}</span>"
@@ -185,6 +186,14 @@ class NokoScanner
       }
       newnode.replace newnode.children
     end
+
+    def seek_upwards elmt, limiting_elmt, &block
+      while (elmt != limiting_elmt) && block.call(elmt)
+        elmt = elmt.parent
+      end
+      elmt
+    end
+
     # Provide a hash of data about the text node that has the token at 'pos_begin'
     teleft = text_elmt_data pos_begin
     newbounds = []
@@ -192,7 +201,7 @@ class NokoScanner
       # We're in luck! Both beginning and end are on the same text node
       # so we replace the text node with (possibly) two text nodes surrounding the new element
       newchildren = replace_elmt teleft.text_element,
-                            "#{teleft.prior_text}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{teleft.subsq_text pos_end}"
+                                 "#{teleft.prior_text}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{teleft.subsq_text pos_end}"
 
       # Now we need to adjust the elmt bounds for the 
       new_elmt = newchildren.find { |child| child.element? }
@@ -211,45 +220,60 @@ class NokoScanner
       # Capture the elements between the two text elements
       # Capture the text from the first element
       start_html = teleft.subsq_text
+      highest_whole_left =
+          seek_upwards(teleft.text_element, common_ancestor) do |elmt|
+            start_html = elmt.parent.to_s if !elmt.previous_sibling && (elmt.parent != common_ancestor)
+          end if (runup_text = teleft.prior_text).blank? && !teleft.text_element.previous_sibling
+      x=2
       # For all ancestors of the start node, up to but not including the common ancestor, add their rightmost
       # elements to the enclosure
-
-      left_elmt = teleft.text_element
-      while (left_elmt.parent != common_ancestor)
-        while sib = left_elmt.next_sibling
-          start_html << sib.to_s
-          sib.remove
+      left_elmt = seek_upwards((highest_whole_left || teleft.text_element), common_ancestor) do |elmt|
+        if elmt.parent != common_ancestor
+          while sib = elmt.next_sibling
+            start_html << sib.to_s
+            sib.remove
+          end
+          true
         end
-        left_elmt = left_elmt.parent
       end
 
       end_html = teright.prior_text
-      right_elmt = teright.text_element
-      while (right_elmt != common_ancestor)
+
+      highest_whole_right = seek_upwards(teright.text_element, common_ancestor) do |elmt|
+        end_html = elmt.parent.to_s if !((elmt.parent == common_ancestor) || elmt.next_sibling)
+      end if (rundown_text = teright.subsq_text).empty? && !teright.text_element.next_sibling
+      x=2
+      right_elmt = seek_upwards((highest_whole_right || teright.text_element), common_ancestor) do |elmt|
         # Collect elements to the left
-        while (sib = right_elmt.previous_sibling) && (sib != left_elmt)
+        while (sib = elmt.previous_sibling) && (sib != left_elmt)
           end_html = sib.to_s + end_html
           sib.remove
         end
-        right_elmt = right_elmt.parent
       end
+    end
 
-      # right_elmt has ascended to the common ancestor.
-      # All relevant nodes have been converted to html and deleted
-      # All html for the replacement is in start_html + end_html
-      # left_elmt is the first relevant child of the common ancestor
-      left_elmt.next = "<div class='np_elmt #{classes}'> #{start_html} #{end_html} </div>"
-      new_elmt = left_elmt.next_sibling
-
-      # Now the appropriate elements have been built, we can reset the text of the initial
-      # text elements, and Nokogiri can maintain the tree appropriately
-      teleft.content = teleft.prior_text
-      left_elmt.remove if node_empty? left_elmt
-      teright.content = teright.subsq_text
-      new_elmt.next_sibling.remove if node_empty? new_elmt.next_sibling
+    # All relevant nodes have been converted to html and deleted
+    # All html for the replacement is in start_html + end_html
+    # left_elmt is the first relevant child of the common ancestor
+    html = "<div class='np_elmt #{classes}'>#{start_html}#{end_html}</div>"
+    case
+    when left_elmt == highest_whole_left
+      if right_elmt == highest_whole_right
+        right_elmt.remove
+      elsif !highest_whole_right
+        teright.content = rundown_text
+      end
+      left_elmt.replace html
+    when right_elmt == highest_whole_right
+      right_elmt.replace html
+    else
+      # Reset the text of the initial text elements
+      teleft.content = runup_text if !highest_whole_left
+      teright.content = rundown_text if !highest_whole_right
+      left_elmt.next = html
     end
     # @tokens[pos_begin...pos_end] = NokoScanner.new new_elmt
-    teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
+    # teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
   end
 
   def text_elmt_data char_offset
@@ -286,15 +310,15 @@ class TextElmtData < Object
   end
 
   # Return the text from the mark to the end of the text element
-  def subsq_text mark=@local_char_offset
+  def subsq_text mark = @local_char_offset
     text[mark..-1]
   end
 
-  def delimited_text mark=nil
+  def delimited_text mark = nil
     text[mark ? @local_char_offset...mark : @local_char_offset..-1]
   end
 
-  def replace_bound newbounds, text_shrinkage=0
+  def replace_bound newbounds, text_shrinkage = 0
     elmt_bounds[@elmt_bounds_index..-1].each { |pair| pair[1] -= text_shrinkage } if text_shrinkage != 0
     if newbounds.empty?
       elmt_bounds.delete_at @elmt_bounds_index
