@@ -200,21 +200,25 @@ class NokoScanner
     if teleft.encompasses_offset pos_end
       # We're in luck! Both beginning and end are on the same text node
       # so we replace the text node with (possibly) two text nodes surrounding the new element
+      left_remainder = teleft.prior_text ; right_remainder = teleft.subsq_text pos_end
       newchildren = replace_elmt teleft.text_element,
-                                 "#{teleft.prior_text}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{teleft.subsq_text pos_end}"
+                                 "#{left_remainder}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{right_remainder}"
 
-      # Now we need to adjust the elmt bounds for the 
+      # Now we need to adjust the elmt bounds for the
       new_elmt = newchildren.find { |child| child.element? }
       where = teleft.global_start_offset
-      if newchildren.first.text?
+      if left_remainder.present?
         newbounds << [newchildren.first, where]
-        where += newchildren.first.text.length
+        where += left_remainder.length
       end
       newbounds << [new_elmt.children.first, where]
-      where += new_elmt.children.first.text.length
-      newbounds << [newchildren.last, where] if newchildren.last.text?
+      if right_remainder.present?
+        newbounds << [newchildren.last, where+new_elmt.children.first.text.length]
+      end
+      teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
     else
       teright = text_elmt_data -(pos_end)
+      left_remainder = teleft.prior_text ; right_remainder = teright.subsq_text pos_end
       # Find the common ancestor of the two text nodes
       common_ancestor = (teleft.ancestors & teright.ancestors).first
       # Capture the elements between the two text elements
@@ -250,30 +254,28 @@ class NokoScanner
           sib.remove
         end
       end
-    end
-
-    # All relevant nodes have been converted to html and deleted
-    # All html for the replacement is in start_html + end_html
-    # left_elmt is the first relevant child of the common ancestor
-    html = "<div class='np_elmt #{classes}'>#{start_html}#{end_html}</div>"
-    case
-    when left_elmt == highest_whole_left
-      if right_elmt == highest_whole_right
-        right_elmt.remove
-      elsif !highest_whole_right
-        teright.content = rundown_text
+      # All relevant nodes have been converted to html and deleted
+      # All html for the replacement is in start_html + end_html
+      # left_elmt is the first relevant child of the common ancestor
+      html = "<div class='np_elmt #{classes}'>#{start_html}#{end_html}</div>"
+      newelmt =
+      case
+      when left_elmt == highest_whole_left
+        if right_elmt == highest_whole_right
+          right_elmt.remove
+        elsif !highest_whole_right
+          teright.content = rundown_text
+        end
+        left_elmt.replace html
+      when right_elmt == highest_whole_right
+        right_elmt.replace html
+      else
+        # Reset the text of the initial text elements
+        teleft.content = runup_text if !highest_whole_left
+        teright.content = rundown_text if !highest_whole_right
+        left_elmt.next = html
       end
-      left_elmt.replace html
-    when right_elmt == highest_whole_right
-      right_elmt.replace html
-    else
-      # Reset the text of the initial text elements
-      teleft.content = runup_text if !highest_whole_left
-      teright.content = rundown_text if !highest_whole_right
-      left_elmt.next = html
     end
-    # @tokens[pos_begin...pos_end] = NokoScanner.new new_elmt
-    # teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
   end
 
   def text_elmt_data char_offset
