@@ -201,10 +201,11 @@ class NokoScanner
     if teleft.encompasses_offset pos_end
       # We're in luck! Both beginning and end are on the same text node
       teleft.split_left
-      teright = text_elmt_data -(pos_end)
-      teright.split_right
-      teright.text_element.next = html
-      teright.text_element.next.add_child teright.text_element
+      teleft.mark_at pos_end
+      teleft.split_right
+      elmt = teleft.text_element
+      elmt.next = html
+      elmt.next.add_child elmt
 =begin
       # so we replace the text node with (possibly) two text nodes surrounding the new element
       left_remainder = teleft.prior_text ; right_remainder = teleft.subsq_text pos_end
@@ -226,7 +227,6 @@ class NokoScanner
 =end
     else
       teright = text_elmt_data -(pos_end)
-      left_remainder = teleft.prior_text ; right_remainder = teright.subsq_text pos_end
       # Find the common ancestor of the two text nodes
       common_ancestor = (teleft.ancestors & teright.ancestors).first
       left_ancestor = (teleft.ancestors - teright.ancestors).first
@@ -344,8 +344,13 @@ class TextElmtData < Object
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
     @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
-    @local_char_offset = global_char_offset - @global_start_offset
+    mark_at global_char_offset
     @parent = @text_element.parent
+  end
+
+  # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
+  def mark_at offset
+    @local_char_offset = offset - @global_start_offset
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
