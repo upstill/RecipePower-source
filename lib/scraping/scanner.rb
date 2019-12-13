@@ -196,9 +196,16 @@ class NokoScanner
 
     # Provide a hash of data about the text node that has the token at 'pos_begin'
     teleft = text_elmt_data pos_begin
-    newbounds = []
+    html = "<div class='np_elmt #{classes}'></div>" # For constructing the new node
+    #  newbounds = []
     if teleft.encompasses_offset pos_end
       # We're in luck! Both beginning and end are on the same text node
+      teleft.split_left
+      teright = text_elmt_data -(pos_end)
+      teright.split_right
+      teright.text_element.next = html
+      teright.text_element.next.add_child teright.text_element
+=begin
       # so we replace the text node with (possibly) two text nodes surrounding the new element
       left_remainder = teleft.prior_text ; right_remainder = teleft.subsq_text pos_end
       newchildren = replace_elmt teleft.text_element,
@@ -216,11 +223,50 @@ class NokoScanner
         newbounds << [newchildren.last, where+new_elmt.children.first.text.length]
       end
       teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
+=end
     else
       teright = text_elmt_data -(pos_end)
       left_remainder = teleft.prior_text ; right_remainder = teright.subsq_text pos_end
       # Find the common ancestor of the two text nodes
       common_ancestor = (teleft.ancestors & teright.ancestors).first
+      left_ancestor = (teleft.ancestors - teright.ancestors).first
+      newtree = (left_ancestor.next = html)
+      # Remove unselected text from the two text elements and leave adjacent elements next door
+      teleft.split_left ; teright.split_right
+      # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
+      highest_whole_left = teleft.text_element
+      while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
+        highest_whole_left = highest_whole_left.parent
+      end
+      # Starting with the highest whole node
+      elmt = highest_whole_left
+      while (elmt != common_ancestor)
+        parent = elmt.parent
+        while (right_sib = elmt) do
+          elmt = right_sib.next
+          newtree.add_child right_sib
+        end
+        elmt = parent
+      end
+
+      highest_whole_right = teright.text_element
+      while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
+        highest_whole_right = highest_whole_right.parent
+      end
+      # Starting with the highest whole node
+      elmt = highest_whole_right
+      while (elmt != common_ancestor)
+        parent = elmt.parent
+        left_sib = (parent == common_ancestor) ? newtree.next_sibling : parent.children[0]
+        while left_sib do
+          next_sib = left_sib.next_sibling
+          newtree.add_child left_sib
+          break if next_sib == elmt
+          left_sib = next_sib
+        end
+        elmt = parent
+      end
+=begin
       # Capture the elements between the two text elements
       # Capture the text from the first element
       start_html = teleft.subsq_text
@@ -275,6 +321,7 @@ class NokoScanner
         teright.content = rundown_text if !highest_whole_right
         left_elmt.next = html
       end
+=end
     end
   end
 
@@ -299,6 +346,26 @@ class TextElmtData < Object
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
     @local_char_offset = global_char_offset - @global_start_offset
     @parent = @text_element.parent
+  end
+
+  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
+  def split_left
+    return if prior_text.length == 0 # No need to split
+    text_element.next = subsq_text
+    text_element.content = prior_text
+    @global_start_offset += @local_char_offset
+    elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
+    @local_char_offset = 0
+  end
+
+  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
+  def split_right
+    return if subsq_text.length == 0 # No need to split
+    text_element.previous = prior_text
+    text_element.content = subsq_text
+    elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
+    elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
+    @local_char_offset = text.length # Goes to the end of this node
   end
 
   # Does the text element include the text at the end offset
