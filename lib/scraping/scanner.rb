@@ -89,12 +89,16 @@ class NokoScanner
   def initialize nkdoc, pos = 0, tokens = nil
     def to_tokens newtext = nil
       # Prepend the string to the priorly held text, if any
-      newtext = @held_text + newtext if newtext && @held_text && (@held_text.length > 0)
+      if newtext
+        newtext = @held_text + newtext if @held_text && (@held_text.length > 0)
+      else
+        held_len = @held_text.length
+      end
       @held_text = tokenize((newtext || @held_text), newtext == nil) { |token, offset|
         @tokens.push token
         @token_starts.push @processed_text_len + offset
       }
-      @processed_text_len += newtext.length if newtext
+      @processed_text_len += newtext&.length || held_len
       @processed_text_len -= @held_text.length
     end
 
@@ -136,6 +140,10 @@ class NokoScanner
   # Return the stream of tokens as an array of strings
   def strings
     @tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
+  end
+
+  def token_offset_at index
+    @token_starts[index] || @processed_text_len
   end
 
   def peek nchars = 1
@@ -196,7 +204,8 @@ class NokoScanner
 
     # Provide a hash of data about the text node that has the token at 'pos_begin'
     teleft = text_elmt_data pos_begin
-    html = "<div class='np_elmt #{classes}'></div>" # For constructing the new node
+    classes = "rp_elmt #{classes}".strip
+    html = "<div class='#{classes}'></div>" # For constructing the new node
     #  newbounds = []
     if teleft.encompasses_offset pos_end
       # We're in luck! Both beginning and end are on the same text node
@@ -206,122 +215,61 @@ class NokoScanner
       elmt = teleft.text_element
       elmt.next = html
       elmt.next.add_child elmt
-=begin
-      # so we replace the text node with (possibly) two text nodes surrounding the new element
-      left_remainder = teleft.prior_text ; right_remainder = teleft.subsq_text pos_end
-      newchildren = replace_elmt teleft.text_element,
-                                 "#{left_remainder}<div class='np_elmt #{classes}'>#{teleft.delimited_text pos_end}</div>#{right_remainder}"
-
-      # Now we need to adjust the elmt bounds for the
-      new_elmt = newchildren.find { |child| child.element? }
-      where = teleft.global_start_offset
-      if left_remainder.present?
-        newbounds << [newchildren.first, where]
-        where += left_remainder.length
-      end
-      newbounds << [new_elmt.children.first, where]
-      if right_remainder.present?
-        newbounds << [newchildren.last, where+new_elmt.children.first.text.length]
-      end
-      teleft.replace_bound newbounds, 0 # pos_end-pos_begin-1
-=end
     else
       teright = text_elmt_data -(pos_end)
       # Find the common ancestor of the two text nodes
       common_ancestor = (teleft.ancestors & teright.ancestors).first
-      left_ancestor = (teleft.ancestors - teright.ancestors).first
-      newtree = (left_ancestor.next = html)
-      # Remove unselected text from the two text elements and leave adjacent elements next door
+      left_ancestor = (teleft.text_element if teleft.text_element.parent == common_ancestor) ||
+          teleft.ancestors.find { |elmt| elmt.parent == common_ancestor }
+      left_ancestor.next = html
+      newtree = left_ancestor.next
+      # Remove unselected text from the two text elements and leave remaining text, if any, next door
       teleft.split_left ; teright.split_right
       # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
       highest_whole_left = teleft.text_element
       while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
         highest_whole_left = highest_whole_left.parent
       end
-      # Starting with the highest whole node
-      elmt = highest_whole_left
-      while (elmt != common_ancestor)
+      # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
+      elmt = highest_whole_left.next
+      newtree.add_child highest_whole_left
+      while (elmt.parent != common_ancestor)
         parent = elmt.parent
-        while (right_sib = elmt) do
+        while (right_sib = elmt.next) do
           elmt = right_sib.next
           newtree.add_child right_sib
         end
         elmt = parent
       end
 
+      # Now do the same with the right side, adding preceding elements
       highest_whole_right = teright.text_element
       while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
         highest_whole_right = highest_whole_right.parent
       end
-      # Starting with the highest whole node
-      elmt = highest_whole_right
-      while (elmt != common_ancestor)
-        parent = elmt.parent
-        left_sib = (parent == common_ancestor) ? newtree.next_sibling : parent.children[0]
-        while left_sib do
+      # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
+      stack = [ highest_whole_right ]
+      while stack.last.parent != common_ancestor
+        stack.push stack.last.parent
+      end
+      left_sib = newtree.next_sibling
+      while ancestor = stack.pop
+        while left_sib != ancestor do
           next_sib = left_sib.next_sibling
           newtree.add_child left_sib
-          break if next_sib == elmt
           left_sib = next_sib
         end
-        elmt = parent
+        left_sib = ancestor.children[0] unless stack.empty?
       end
-=begin
-      # Capture the elements between the two text elements
-      # Capture the text from the first element
-      start_html = teleft.subsq_text
-      highest_whole_left =
-          seek_upwards(teleft.text_element, common_ancestor) do |elmt|
-            start_html = elmt.parent.to_s if !elmt.previous_sibling && (elmt.parent != common_ancestor)
-          end if (runup_text = teleft.prior_text).blank? && !teleft.text_element.previous_sibling
-      x=2
-      # For all ancestors of the start node, up to but not including the common ancestor, add their rightmost
-      # elements to the enclosure
-      left_elmt = seek_upwards((highest_whole_left || teleft.text_element), common_ancestor) do |elmt|
-        if elmt.parent != common_ancestor
-          while sib = elmt.next_sibling
-            start_html << sib.to_s
-            sib.remove
-          end
-          true
-        end
+      newtree.add_child highest_whole_right
+    end
+    # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
+    ix = 0
+    nkdoc.traverse do |node|
+      if node.text?
+        @elmt_bounds[ix][0] = node
+        ix += 1
       end
-
-      end_html = teright.prior_text
-
-      highest_whole_right = seek_upwards(teright.text_element, common_ancestor) do |elmt|
-        end_html = elmt.parent.to_s if !((elmt.parent == common_ancestor) || elmt.next_sibling)
-      end if (rundown_text = teright.subsq_text).empty? && !teright.text_element.next_sibling
-      x=2
-      right_elmt = seek_upwards((highest_whole_right || teright.text_element), common_ancestor) do |elmt|
-        # Collect elements to the left
-        while (sib = elmt.previous_sibling) && (sib != left_elmt)
-          end_html = sib.to_s + end_html
-          sib.remove
-        end
-      end
-      # All relevant nodes have been converted to html and deleted
-      # All html for the replacement is in start_html + end_html
-      # left_elmt is the first relevant child of the common ancestor
-      html = "<div class='np_elmt #{classes}'>#{start_html}#{end_html}</div>"
-      newelmt =
-      case
-      when left_elmt == highest_whole_left
-        if right_elmt == highest_whole_right
-          right_elmt.remove
-        elsif !highest_whole_right
-          teright.content = rundown_text
-        end
-        left_elmt.replace html
-      when right_elmt == highest_whole_right
-        right_elmt.replace html
-      else
-        # Reset the text of the initial text elements
-        teleft.content = runup_text if !highest_whole_left
-        teright.content = rundown_text if !highest_whole_right
-        left_elmt.next = html
-      end
-=end
     end
   end
 

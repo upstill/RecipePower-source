@@ -2,6 +2,17 @@ require 'test_helper'
 require 'scraping/scanner.rb'
 
 class ScannerTest < ActiveSupport::TestCase
+
+  def check_integrity nks
+    tn = 0
+    nks.nkdoc.traverse do |node|
+      if node.text?
+        assert_equal node, nks.elmt_bounds[tn].first, "node '#{node.to_s}' does not match '#{nks.elmt_bounds[tn].first.to_s}'"
+        tn += 1
+      end
+    end
+  end
+
   test 'tokenize' do
     assert_equal [], tokenize('')
     assert_equal [], tokenize(' ')
@@ -47,6 +58,7 @@ class ScannerTest < ActiveSupport::TestCase
     html = 'top-level text<span>spanned text</span><div>div opener<div>child<span>child span</span><a>child link </a></div>and more top-level text'
     nkdoc = Nokogiri::HTML.fragment html
     nokoscan = NokoScanner.new nkdoc
+    check_integrity nokoscan
     scanout = []
     while ch = nokoscan.first
       scanout << ch
@@ -81,7 +93,8 @@ EOF
     assert_equal [0], nks.elmt_bounds.map(&:last)
 
     # Enclose two strings in the middle
-    nks.enclose nks.token_starts[2],nks.token_starts[4]
+    nks.enclose nks.token_offset_at(2),nks.token_offset_at(4)
+    check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     # assert_equal 4, nks.tokens.count
     # assert nks.tokens[1].is_a?(String)
@@ -91,7 +104,8 @@ EOF
 
     # Enclose the last two strings
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[3], 37 # nks.token_starts[5]
+    nks.enclose nks.token_offset_at(3), 37 # nks.token_offset_at(5)
+    check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
     #assert nks.tokens[2].is_a?(String)
@@ -100,7 +114,8 @@ EOF
 
     # Enclose the first two strings
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[0], nks.token_starts[2]
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
     #assert nks.tokens[0].is_a?(NokoScanner)
@@ -109,7 +124,8 @@ EOF
 
     # Enclose the last string
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[4], 37 # nks.token_starts[5]
+    nks.enclose nks.token_offset_at(4), 37 # nks.token_offset_at(5)
+    check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
     #assert nks.tokens[3].is_a?(String)
@@ -118,7 +134,8 @@ EOF
 
     # Enclose the first string
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[0], nks.token_starts[1]
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(1)
+    check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
     #assert nks.tokens[0].is_a?(NokoScanner)
@@ -130,6 +147,75 @@ EOF
     html = "<div class=\"upper div\"><div class=\"lower div\">\n<div class=\"lower left\">text1</div>\n<div class=\"lower right\">text2</div>\n</div></div>"
     nks = NokoScanner.from_string html
     assert_equal [0,1,6,7,12], nks.elmt_bounds.collect(&:last)
+  end
+
+  test "Replace tokens in span element" do
+    html = <<EOF
+<div class="upper div">
+      <span>text1 </span>
+      text2
+</div>
+EOF
+    html = html.gsub(/\n+\s*/, '')
+    nks = NokoScanner.from_string html
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    check_integrity nks
+    # assert nks.tokens[0].is_a?(NokoScanner)
+    expected = <<EOF
+<div class="upper div">
+    <div class="rp_elmt">
+        <span>text1 </span>
+        text2
+    </div>
+</div>
+EOF
+    expected = expected.gsub(/\n+\s*/, '')
+    assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
+
+    # Span at the other end
+    html = <<EOF
+<div class="upper div">
+      text2 
+      <span>text1</span>
+</div>
+EOF
+    html = html.gsub(/\n+\s*/, '')
+    nks = NokoScanner.from_string html
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    check_integrity nks
+    # assert nks.tokens[0].is_a?(NokoScanner)
+    expected = <<EOF
+<div class="upper div">
+    <div class="rp_elmt">
+        text2 
+        <span>text1</span>
+    </div>
+</div>
+EOF
+    expected = expected.gsub(/\n+\s*/, '')
+    assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
+    # Span at the other end
+    html = <<EOF
+<div class="upper div">
+      <span>text1 </span>
+      <span>text2</span>
+</div>
+EOF
+    html = html.gsub(/\n+\s*/, '')
+    nks = NokoScanner.from_string html
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    check_integrity nks
+    # assert nks.tokens[0].is_a?(NokoScanner)
+    expected = <<EOF
+<div class="upper div">
+    <div class="rp_elmt">
+        <span>text1 </span>
+        <span>text2</span>
+    </div>
+</div>
+EOF
+    expected = expected.gsub(/\n+\s*/, '')
+    assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
   end
 
   test "Replace tokens separated in tree" do
@@ -145,10 +231,10 @@ EOF
   </div>
 </div>
 EOF
-    html = html.gsub(/\n\s+/, '')
+    html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_starts[0], nks.token_starts[2]
-    assert_equal html, nks.nkdoc.inner_html
+    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
 <div class="upper div">
@@ -164,8 +250,8 @@ EOF
   </div>
 </div>
 EOF
-    expected = expected.gsub(/\n\s+/, '')
-    assert_equal "<div class=\"upper div\"><div class=\"lower div\">\n<div class=\"np_elmt\"><span>text1</span>\n<div class=\"lower right\">text2</div></div></div>\n</div>", nks.nkdoc.to_s
+    expected = expected.gsub(/\n+\s*/, '')
+    assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
   end
 
   test "TextElmtData" do
