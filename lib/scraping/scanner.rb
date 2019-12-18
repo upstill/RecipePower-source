@@ -79,14 +79,12 @@ class StrScanner < Scanner
 
 end
 
-class NokoScanner
-  attr_reader :pos, :nkdoc, :tokens, :elmt_bounds, :token_starts
+# This class encloses a Nokogiri doc, breaking it down into text tokens
+# Once defined, it (but not the doc) is immutable
+class NokoTokens < Array
+  attr_reader :nkdoc, :elmt_bounds, :token_starts, :length
   delegate :pp, to: :nkdoc
-
-  # To initialize the scanner, we build:
-  # - an array of tokens, each either a string or an rp_elmt node
-  # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc, pos = 0, tokens = nil
+  def initialize nkdoc
     def to_tokens newtext = nil
       # Prepend the string to the priorly held text, if any
       if newtext
@@ -95,7 +93,7 @@ class NokoScanner
         held_len = @held_text.length
       end
       @held_text = tokenize((newtext || @held_text), newtext == nil) { |token, offset|
-        @tokens.push token
+        push token
         @token_starts.push @processed_text_len + offset
       }
       @processed_text_len += newtext&.length || held_len
@@ -110,7 +108,7 @@ class NokoScanner
         to_tokens child.text
       when child.attributes['class']&.value&.match(/\brp_elmt\b/)
         to_tokens
-        @tokens << NokoScanner.new(child)
+        self << NokoScanner.new(child)
       when child.element?
         to_tokens "\n" if child.name.match(/^(p|br|li)$/)
         child.children.each { |j| do_child j }
@@ -119,66 +117,22 @@ class NokoScanner
 
     # Take the parameters as instance variables, creating @tokens if nec.
     @nkdoc = nkdoc
-    @pos = pos
-
-    if !(@tokens = tokens)
-      @tokens = []
-      @elmt_bounds = []
-      @token_starts = []
-      @processed_text_len = 0
-      @held_text = ''
-      @nkdoc.children.each { |j| do_child j }
-      to_tokens # Finally flush the last text
-    end
-    @length = @tokens.count
-  end
-
-  def self.from_string html
-    self.new Nokogiri::HTML.fragment(html)
-  end
-
-  # Return the stream of tokens as an array of strings
-  def strings
-    @tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
+    @elmt_bounds = []
+    @token_starts = []
+    @processed_text_len = 0
+    @held_text = ''
+    @nkdoc.children.each { |j| do_child j }
+    to_tokens # Finally flush the last text
+    @length = count
   end
 
   def token_offset_at index
     @token_starts[index] || @processed_text_len
   end
 
-  def peek nchars = 1
-    if @pos < @length
-      if nchars == 1
-        @tokens[@pos]
-      elsif @tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
-        @tokens[@pos...(@pos + nchars)].join(' ')
-      end
-    end
-  end
-
-  # first: return the string in the current "read position" after advancing to the 'next' position
-  def first nchars = 1
-    if str = peek(nchars)
-      @pos += nchars
-      @pos = @length if @pos > @length
-    end
-    str
-  end
-
-  # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars = 1
-    newpos = @pos + nchars
-    NokoScanner.new @nkdoc, (newpos > @length ? @length : newpos), @tokens
-  end
-
-  def chunk data
-    if (data || (ptr == (head + 1)))
-      head = ptr
-    end
-  end
-
-  def more?
-    @pos < @length
+  # Convenience method to specify requisite text in terms of tokens
+  def enclose_tokens first_token, limiting_token, classes=''
+    enclose token_offset_at(first_token), token_offset_at(limiting_token), classes
   end
 
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
@@ -276,18 +230,83 @@ class NokoScanner
   def text_elmt_data char_offset
     TextElmtData.new self, char_offset
   end
+end
+
+class NokoScanner
+  attr_reader :nkdoc, :pos, :tokens
+  delegate :pp, to: :nkdoc
+  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_tokens, :enclose, :text_elmt_data, to: :tokens
+
+  # To initialize the scanner, we build:
+  # - an array of tokens, each either a string or an rp_elmt node
+  # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
+  def initialize nkdoc_or_nktokens, pos = 0
+    # Take the parameters as instance variables, creating @tokens if nec.
+    if nkdoc_or_nktokens.class == NokoTokens
+      @tokens = nkdoc_or_nktokens
+      @nkdoc = nkdoc_or_nktokens.nkdoc
+    else
+      @nkdoc = nkdoc_or_nktokens
+      @tokens = NokoTokens.new(nkdoc_or_nktokens)
+    end
+    @pos = pos
+  end
+
+  def self.from_string html
+    self.new Nokogiri::HTML.fragment(html)
+  end
+
+  # Return the stream of tokens as an array of strings
+  def strings
+    tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
+  end
+
+  def peek nchars = 1
+    if @pos < @tokens.length
+      if nchars == 1
+        tokens[@pos]
+      elsif tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
+        tokens[@pos...(@pos + nchars)].join(' ')
+      end
+    end
+  end
+
+  # first: return the string in the current "read position" after advancing to the 'next' position
+  def first nchars = 1
+    if str = peek(nchars)
+      @pos += nchars
+      @pos = @tokens.length if @pos > @tokens.length
+    end
+    str
+  end
+
+  # Move past the current string, adjusting '@pos' and returning a stream for the remainder
+  def rest nchars = 1
+    newpos = @pos + nchars
+    NokoScanner.new tokens, (newpos > @tokens.length ? @tokens.length : newpos)
+  end
+
+  def chunk data
+    if (data || (ptr == (head + 1)))
+      head = ptr
+    end
+  end
+
+  def more?
+    @pos < @tokens.length
+  end
 
 end
 
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  delegate :elmt_bounds, to: :noko_scanner
+  delegate :elmt_bounds, to: :noko_tokens
   attr_accessor :elmt_bounds_index, :text_element, :parent
-  attr_reader :noko_scanner, :local_char_offset, :global_start_offset
+  attr_reader :noko_tokens, :local_char_offset, :global_start_offset
 
-  def initialize nks, global_char_offset # character offset (global)
+  def initialize nkt, global_char_offset # character offset (global)
     global_char_offset = (terminating = global_char_offset < 0) ? (-global_char_offset) : global_char_offset
-    @noko_scanner = nks
+    @noko_tokens = nkt
     @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
     @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)

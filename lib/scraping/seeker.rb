@@ -3,11 +3,12 @@ require 'scraping/lexaur.rb'
 
 # A Seeker is an abstract class for a subclass which looks for a given item in the given stream
 class Seeker
-  attr_accessor :head, :rest
+  attr_accessor :head, :rest, :tag, :children
 
-  def initialize(head_stream, rest_stream)
+  def initialize(head_stream, rest_stream, children=[])
     @head = head_stream
     @rest = rest_stream
+    @children = children
   end
 
   # Find a place in the stream where we can match
@@ -24,15 +25,40 @@ class Seeker
   # Return: IFF there's a match, return an instance of the class, which denotes the original stream, and the
   #   rest of that stream, after parsing.
   def self.match stream, opts={}
+  end
 
+  # Convenience method to determine if a match has occurred and return a possibly tagged Seeker
+  def self.match_and_tag stream, options={}
+    if seeker = self.match(stream, options)
+      seeker.tag = options[:tag]
+      seeker
+    end
+  end
+
+  # Apply the results of the parse to the Nokogiri scanner
+  def apply
+    @children.each { |child| child.apply }
+    head.enclose_tokens(@start_scanner, @end_scanner, @tag) if @tag
+  end
+end
+
+# An Empty Seeker does nothing, and does not advance the stream
+class EmptySeeker < Seeker
+  def self.match stream, opts={}
+    self.new stream, stream
   end
 end
 
 # A Null Seeker simply accepts the next string in the stream and advances past it
 class NullSeeker < Seeker
-
   def self.match stream, opts={}
     self.new stream, stream.rest
+  end
+end
+
+class StringSeeker < Seeker
+  def self.match stream, options={}
+    self.new stream, stream.rest if stream.peek == options[:string]
   end
 end
 
