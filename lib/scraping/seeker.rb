@@ -3,11 +3,15 @@ require 'scraping/lexaur.rb'
 
 # A Seeker is an abstract class for a subclass which looks for a given item in the given stream
 class Seeker
-  attr_accessor :head, :rest, :tag, :children
+  attr_accessor :head, :rest, :token, :children
 
-  def initialize(head_stream, rest_stream, children=[])
+  def initialize(head_stream, rest_stream, token = nil, children=[])
+    if token.is_a?(Array)
+      token, children = nil, token
+    end
     @head = head_stream
     @rest = rest_stream
+    @token = token
     @children = children
   end
 
@@ -27,18 +31,10 @@ class Seeker
   def self.match stream, opts={}
   end
 
-  # Convenience method to determine if a match has occurred and return a possibly tagged Seeker
-  def self.match_and_tag stream, options={}
-    if seeker = self.match(stream, options)
-      seeker.tag = options[:tag]
-      seeker
-    end
-  end
-
   # Apply the results of the parse to the Nokogiri scanner
   def apply
     @children.each { |child| child.apply }
-    head.enclose_tokens(@start_scanner, @end_scanner, @tag) if @tag
+    head.enclose_tokens(@start_scanner, @end_scanner, @token) if @token
   end
 end
 
