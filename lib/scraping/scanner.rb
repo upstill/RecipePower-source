@@ -79,7 +79,7 @@ class StrScanner < Scanner
 
 end
 
-# This class encloses a Nokogiri doc, breaking it down into text tokens
+# This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
   attr_reader :nkdoc, :elmt_bounds, :token_starts, :length
@@ -128,6 +128,10 @@ class NokoTokens < Array
 
   def token_offset_at index
     @token_starts[index] || @processed_text_len
+  end
+
+  def elmt_offset_at index
+    @elmt_bounds[index]&.last || @processed_text_len
   end
 
   # Convenience method to specify requisite text in terms of tokens
@@ -230,6 +234,48 @@ class NokoTokens < Array
   def text_elmt_data char_offset
     TextElmtData.new self, char_offset
   end
+
+  # Provide the token range enclosed by the CSS selector
+  # RETURNS: if found, a Range value denoting the first token offset and token limit in the DOM.
+  # If not found, nil
+  def dom_range selector
+    return unless found = nkdoc.search(selector).first
+    range_from_subtree found
+  end
+
+  # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
+  def dom_ranges selector
+    nkdoc.search(selector)&.map { |found| range_from_subtree found } || []
+  end
+
+  def range_from_subtree found
+    first_text_element = nil
+    last_text_element = nil
+    found.traverse do |child|
+      if child.text?
+        last_text_element = child
+        first_text_element ||= child
+      end
+    end
+    first_pos = last_pos = last_limit = nil
+    @elmt_bounds.each_with_index do |pair, index|
+      if !first_pos && pair.first == first_text_element
+        first_pos = pair.last
+      end
+      if !last_pos && pair.first == last_text_element
+        last_pos = pair.last
+        last_limit = elmt_offset_at(index+1)
+        break
+      end
+    end
+    # Now we have an index in the elmts array, but we need a range in the tokens array.
+    # Fortunately, that is sorted by index, so: binsearch!
+    first_token_index = binsearch(@token_starts, first_pos) || 0 # Find the token at this position
+    first_token_index += 1 if token_offset_at(first_token_index) < first_pos # Round up if the token overlaps the boundary
+    last_token_index = binsearch @token_starts, last_limit # The last token is a limit
+    last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
+    return first_token_index...last_token_index
+  end
 end
 
 class NokoScanner
@@ -240,15 +286,16 @@ class NokoScanner
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc_or_nktokens, pos = 0
+  def initialize nkdoc_or_nktokens, pos = 0, length=nil
     # Take the parameters as instance variables, creating @tokens if nec.
     if nkdoc_or_nktokens.class == NokoTokens
       @tokens = nkdoc_or_nktokens
       @nkdoc = nkdoc_or_nktokens.nkdoc
     else
       @nkdoc = nkdoc_or_nktokens
-      @tokens = NokoTokens.new(nkdoc_or_nktokens)
+      @tokens = NokoTokens.new nkdoc_or_nktokens
     end
+    @length = length || @tokens.length
     @pos = pos
   end
 
@@ -262,7 +309,7 @@ class NokoScanner
   end
 
   def peek nchars = 1
-    if @pos < @tokens.length
+    if @pos < @length
       if nchars == 1
         tokens[@pos]
       elsif tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
@@ -275,7 +322,7 @@ class NokoScanner
   def first nchars = 1
     if str = peek(nchars)
       @pos += nchars
-      @pos = @tokens.length if @pos > @tokens.length
+      @pos = @length if @pos > @length
     end
     str
   end
@@ -283,7 +330,7 @@ class NokoScanner
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest nchars = 1
     newpos = @pos + nchars
-    NokoScanner.new tokens, (newpos > @tokens.length ? @tokens.length : newpos)
+    NokoScanner.new tokens, (newpos > @length ? @length : newpos)
   end
 
   def chunk data
@@ -293,7 +340,36 @@ class NokoScanner
   end
 
   def more?
-    @pos < @tokens.length
+    @pos < @length
+  end
+
+  # Create a scanner that ends at the given scanner
+  def except s2
+    @length = s2.pos
+  end
+
+  # Make the end of the stream coincident with another stream
+  def encompass s2
+    @length = s2.length
+  end
+
+  # Return an ARRAY of seekers
+  def within_css_matches str
+
+  end
+
+  # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
+  def within_css_match str
+    if range = @tokens.dom_range(str)
+      return NokoScanner.new @tokens, range.begin, range.end
+    end
+  end
+
+  # Return an ARRAY of scanners, as above
+  def within_css_matches str
+    @tokens.dom_ranges(str).map do |range|
+      NokoScanner.new @tokens, range.begin, range.end-range.begin
+    end
   end
 
 end
@@ -377,15 +453,4 @@ class TextElmtData < Object
     end
   end
 
-=begin
-  # Set the text for the element to 'str'. Delete the element if the text is empty
-  def text= str
-    if str.present?
-      @text_element.text = str
-    else
-      @text_element.delete
-      @text_element = nil
-    end
-  end
-=end
 end

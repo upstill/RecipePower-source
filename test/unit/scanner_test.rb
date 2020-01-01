@@ -218,6 +218,44 @@ EOF
     assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
   end
 
+  test "Find token positions by DOM selector" do
+    html = <<EOF
+<div class="upper div">
+  <div class="lower div">
+    <div class="lower left">
+      <span>text1 </span>
+    </div>
+    <div class="lower right">
+      text2
+    </div>
+  </div>
+</div>
+EOF
+    html = html.gsub(/\n+\s*/, '')
+    nks = NokoScanner.from_string html
+    assert_equal 0...2, nks.tokens.dom_range('div.div')
+    assert_equal 1...2, nks.tokens.dom_range('div.right')
+    html = "some text<span>and spanned text</span>extended"
+    nks = NokoScanner.from_string html
+    assert_equal 2...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
+
+    html = "some text <span>and spanned text</span> extended"
+    nks = NokoScanner.from_string html
+    assert_equal 2...5, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
+
+    html = "some text<span> and spanned text </span>extended"
+    nks = NokoScanner.from_string html
+    assert_equal 2...5, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
+
+    html = "<span>some spanned text</span>"
+    nks = NokoScanner.from_string html
+    assert_equal 0...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
+
+    html = "<span> some spanned text </span>"
+    nks = NokoScanner.from_string html
+    assert_equal 0...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
+  end
+
   test "Replace tokens separated in tree" do
     html = <<EOF
 <div class="upper div">

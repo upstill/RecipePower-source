@@ -1,22 +1,22 @@
 require 'test_helper'
 require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
-require 'scraping/seeker.rb'
+require 'scraping/parser.rb'
 
 class ParserTest < ActiveSupport::TestCase
   def setup
     @amounts = [
-        '2 cloves',
+        '1 head',
         '1 1/2 cup',
+        '2 cloves',
         '1/4 cup',
         '½ cup',
-        '1 head',
         '1 small head'
     ]
     @ingred_specs = [
         '2 cloves garlic',
         '2 garlic cloves',
-        'Sea salt',
+        'Sea salt',             # Case shouldn't matter
         '6 tablespoons butter, softened',
         '2 teaspoons Dijon mustard',
         '1/4 cup drained small capers, rinsed',
@@ -27,9 +27,9 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) white cauliflower',
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
-    @ingred_tags = %w{ 'garlic sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
+    @ingred_tags = %w{ garlic salt baking\ soda sugar sea\ salt butter Dijon\ mustard capers small\ capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ 'tablespoon teaspoon cup pound small\ head clove }.
+    @unit_tags = %w{ tablespoon T. teaspoon tsp. cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed }.
         each { |name| Tag.assert name, :Unit }
@@ -59,8 +59,15 @@ EOF
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
       nokoscan = NokoScanner.from_string amtstr
-      is = AmountSeeker.match nokoscan, @lex
+      is = AmountSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{amtstr} doesn't parse"
+      parser = ParserSeeker.new nokoscan, @lex
+      seeker = parser.match :rp_amt
+      assert seeker
+      assert_equal 2, seeker.children.count
+      assert_equal :rp_amt, seeker.token
+      assert_equal :rp_num, seeker.children.first.token
+      assert_equal :rp_unit, seeker.children.last.token
     end
   end
 
@@ -69,21 +76,43 @@ EOF
     nokoscan = NokoScanner.from_string ingstr
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
+    # ...and again using a ParserSeeker
+    parser = ParserSeeker.new nokoscan, @lex
+    seeker = parser.match :rp_ingname
+    assert_equal 1, seeker.tag_ids.count
+    assert_equal :rp_ingname, seeker.token
   end
 
   test 'parse alt ingredient' do
     ingstr = 'small capers, black pepper or Brussels sprouts'
     nokoscan = NokoScanner.from_string ingstr
-    is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 4
+    is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
+    # ...and again using a ParserSeeker
+    parser = ParserSeeker.new nokoscan, @lex
+    seeker = parser.match :rp_ingspec
+    refute seeker.empty?
+    assert_equal 1, seeker.children.count
+    assert_equal :rp_ingspec, seeker.token
+
+    seeker = seeker.children.first
+    refute seeker.empty?
+    assert_equal 3, seeker.children.count
+    assert_equal :rp_ingalts, seeker.token
+
+    seeker = seeker.children.first
+    refute seeker.empty?
+    assert_equal 0, seeker.children.count
+    assert_equal :rp_ingname, seeker.token
   end
 
+=begin
   test 'parse individual ingredient specs' do
     @ingred_specs.each do |ingspec|
       puts "Parsing '#{ingspec}'"
       nokoscan = NokoScanner.from_string ingspec
-      is = IngredientSpecSeeker.match nokoscan, @lex
+      is = IngredientSpecSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{ingspec} doesn't parse"
     end
   end
@@ -96,6 +125,25 @@ EOF
     nokoscan = NokoScanner.from_string @recipe
     il = IngredientListSeeker nokoscan
     assert_not_nil il
+  end
+=end
+
+  test 'parse ing list from modified grammar' do
+    html = <<EOF
+<ul>
+  <li>1 tsp. salt</li>
+  <li>1 T. sugar</li>
+  <li>1/2 t. baking soda</li>
+</ul>
+EOF
+    html = html.gsub(/\n+\s*/, '')
+    nks = NokoScanner.from_string html
+    parser = ParserSeeker.new(nks, @lex) do |grammar|
+      # Here's our chance to modify the grammar
+      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
+      grammar[:rp_inglist][:within_css_match] = 'ul'
+    end
+    seeker = parser.match :rp_inglist
   end
 
 end

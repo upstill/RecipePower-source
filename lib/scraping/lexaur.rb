@@ -76,9 +76,12 @@ protected
     # If there's a :nexts entry on the head of the stream, we try chunking the remainder,
     if (head = stream.peek) && head.is_a?(String) # More in the stream
       head = Stemmer::stem_word head if do_stem
-      nexts[head]&.chunk1(stream.rest, do_stem, block) ||
+      # We allow a case-sensitive match but do not require it
+      (nexts[head] || nexts[head.downcase])&.chunk1(stream.rest, do_stem, block) ||
           # ...otherwise, we consume the head of the stream
-          (block.call(terminals[head], stream.rest) if terminals[head])
+          if terms = terminals[head] || terminals[head.downcase]
+            block.call(terms, stream.rest)
+          end
     end
   end
 end
