@@ -18,7 +18,7 @@ class Seeker
   # Find a place in the stream where we can match
   def self.seek stream, opts={}
     while stream.more?
-      if sk = self.match(stream, opts)
+      if sk = block_given? ? yield(stream) : self.match(stream, opts)
         return sk
       end
       stream = stream.rest

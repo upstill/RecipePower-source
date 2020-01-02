@@ -37,13 +37,14 @@ end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
 class StrScanner < Scanner
-  attr_reader :strings, :pos, :length
+  attr_reader :strings, :pos, :bound # :length
 
-  def initialize strings, pos = 0
+  def initialize strings, pos = 0, bound = nil
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
     @strings = strings
     @pos = pos
-    @length = @strings.count
+    # @length = @strings.count
+    @bound = bound || @strings.count
   end
 
   def self.from_string string, pos = 0
@@ -52,17 +53,17 @@ class StrScanner < Scanner
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
   def peek nchars = 1
-    if @pos < @length
+    if @pos < @bound # @length
       (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos + nchars)].join(' ')
     end
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position
   def first nchars = 1
-    if @pos < @length
+    if @pos < @bound # @length
       f = @strings[@pos...(@pos + nchars)]&.join(' ')
       @pos += nchars
-      @pos = @length if @pos > @length
+      @pos = @bound if @pos > @bound # @length if @pos > @length
       f
     end
   end
@@ -70,11 +71,12 @@ class StrScanner < Scanner
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest nchars = 1
     newpos = @pos + nchars
-    StrScanner.new(@strings, (newpos > @length ? @length : newpos))
+    # StrScanner.new(@strings, (newpos > @length ? @length : newpos))
+    StrScanner.new(@strings, (newpos > @bound ? @bound : newpos), @bound)
   end
 
   def more?
-    @pos < @length
+    @pos < @bound # @length
   end
 
 end
@@ -82,7 +84,7 @@ end
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
-  attr_reader :nkdoc, :elmt_bounds, :token_starts, :length
+  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
   delegate :pp, to: :nkdoc
   def initialize nkdoc
     def to_tokens newtext = nil
@@ -123,7 +125,8 @@ class NokoTokens < Array
     @held_text = ''
     @nkdoc.children.each { |j| do_child j }
     to_tokens # Finally flush the last text
-    @length = count
+    # @length = count
+    @bound = count
   end
 
   def token_offset_at index
@@ -279,14 +282,14 @@ class NokoTokens < Array
 end
 
 class NokoScanner
-  attr_reader :nkdoc, :pos, :tokens
+  attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_tokens, :enclose, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc_or_nktokens, pos = 0, length=nil
+  def initialize nkdoc_or_nktokens, pos = 0, bound=nil # length=nil
     # Take the parameters as instance variables, creating @tokens if nec.
     if nkdoc_or_nktokens.class == NokoTokens
       @tokens = nkdoc_or_nktokens
@@ -295,7 +298,8 @@ class NokoScanner
       @nkdoc = nkdoc_or_nktokens
       @tokens = NokoTokens.new nkdoc_or_nktokens
     end
-    @length = length || @tokens.length
+    # @length = length || @tokens.length
+    @bound = bound || @tokens.length
     @pos = pos
   end
 
@@ -309,7 +313,7 @@ class NokoScanner
   end
 
   def peek nchars = 1
-    if @pos < @length
+    if @pos < @bound # @length
       if nchars == 1
         tokens[@pos]
       elsif tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
@@ -322,7 +326,7 @@ class NokoScanner
   def first nchars = 1
     if str = peek(nchars)
       @pos += nchars
-      @pos = @length if @pos > @length
+      @pos = @bound if @pos > @bound # @length if @pos > @length
     end
     str
   end
@@ -330,7 +334,7 @@ class NokoScanner
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest nchars = 1
     newpos = @pos + nchars
-    NokoScanner.new tokens, (newpos > @length ? @length : newpos)
+    NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
   end
 
   def chunk data
@@ -340,22 +344,18 @@ class NokoScanner
   end
 
   def more?
-    @pos < @length
+    @pos < @bound # @length
   end
 
   # Create a scanner that ends at the given scanner
   def except s2
-    @length = s2.pos
+    NokoScanner.new tokens, @pos, s2.pos # (newpos > @length ? @length : newpos), @length
   end
 
   # Make the end of the stream coincident with another stream
   def encompass s2
-    @length = s2.length
-  end
-
-  # Return an ARRAY of seekers
-  def within_css_matches str
-
+    # @length = s2.length
+    @bound = s2.bound if s2.bound > @bound
   end
 
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
@@ -368,7 +368,7 @@ class NokoScanner
   # Return an ARRAY of scanners, as above
   def within_css_matches str
     @tokens.dom_ranges(str).map do |range|
-      NokoScanner.new @tokens, range.begin, range.end-range.begin
+      NokoScanner.new @tokens, range.begin, range.end
     end
   end
 

@@ -131,9 +131,9 @@ EOF
   test 'parse ing list from modified grammar' do
     html = <<EOF
 <ul>
+  <li>1/2 tsp. baking soda</li>
   <li>1 tsp. salt</li>
   <li>1 T. sugar</li>
-  <li>1/2 t. baking soda</li>
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
@@ -144,6 +144,12 @@ EOF
       grammar[:rp_inglist][:within_css_match] = 'ul'
     end
     seeker = parser.match :rp_inglist
+    assert_not_nil seeker
+    assert_equal :rp_inglist, seeker.token
+    assert_equal 3, seeker.children.count
+
+    seeker = seeker.children.first
+    assert_equal :rp_ingline, seeker.token
   end
 
 end
