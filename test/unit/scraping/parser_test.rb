@@ -61,7 +61,7 @@ EOF
       nokoscan = NokoScanner.from_string amtstr
       is = AmountSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{amtstr} doesn't parse"
-      parser = ParserSeeker.new nokoscan, @lex
+      parser = Parser.new nokoscan, @lex
       seeker = parser.match :rp_amt
       assert seeker
       assert_equal 2, seeker.children.count
@@ -77,7 +77,7 @@ EOF
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
-    parser = ParserSeeker.new nokoscan, @lex
+    parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingname
     assert_equal 1, seeker.tag_ids.count
     assert_equal :rp_ingname, seeker.token
@@ -90,7 +90,7 @@ EOF
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
-    parser = ParserSeeker.new nokoscan, @lex
+    parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec
     refute seeker.empty?
     assert_equal 1, seeker.children.count
@@ -138,7 +138,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    parser = ParserSeeker.new(nks, @lex) do |grammar|
+    parser = Parser.new(nks, @lex) do |grammar|
       # Here's our chance to modify the grammar
       grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
       grammar[:rp_inglist][:within_css_match] = 'ul'

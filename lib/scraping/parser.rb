@@ -22,7 +22,7 @@ class ParseNode
 end
 =end
 
-class ParserSeeker < Seeker
+class Parser
   # This is the DSL for parsing a recipe. The parsing engine, however, doesn't really concern recipes per se. It only
   # takes a grammar and a token generator and, if successful, creates an abstract syntax tree that just denotes what range of
   # tokens went into each match. In the case of a NokoScanner token generator, that syntax tree can be used to modify the
@@ -122,39 +122,33 @@ class ParserSeeker < Seeker
       rp_unit: { tag: 'Unit' }
   }
 
-  @@Grammar = @@DefaultGrammar
-
-  def initialize noko_scanner_or_nkdoc_or_nktokens, grammar=@@Grammar, lexaur = nil
-    if !grammar.is_a?(Hash)
-      grammar, lexaur = @@Grammar, grammar
+  def initialize noko_scanner_or_nkdoc_or_nktokens, grammar = nil, lexaur = nil
+    if grammar.is_a?(Lexaur)
+      grammar, lexaur = nil, grammar
     end
+    grammar ||= @@DefaultGrammar.clone
     yield(grammar) if block_given? # This is the chance to modify the default grammar
     gramerrs = []
-    ParserSeeker.grammar_check( grammar ) { |error| gramerrs << error }
+    Parser.grammar_check(grammar ) { |error| gramerrs << error }
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
     end
     @grammar = grammar
-    @@Lexaur = lexaur if lexaur
-    stream = (noko_scanner_or_nkdoc_or_nktokens if noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner)) ||
+    @lexaur = lexaur if lexaur
+    @stream = (noko_scanner_or_nkdoc_or_nktokens if noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner)) ||
         NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
-    super stream, stream
   end
 
-  # Apply the grammar to matching the token, which must exist as a key in the Grammar hash
-  def match token
-    self.children = []
-    if match = ParserSeeker.match_specification(head_stream, @grammar[token], token)
-      self.children = [ match ]
-      self.tail_stream = match.tail_stream
-      match
-    end
+  # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
+  def match spec, at=@stream
+    match_specification at, spec
   end
 
-  def self.seek stream, spec={}
+  # Scan down the stream, one token at a time, for the block to return true
+  def seek stream, spec={}
     while stream.more?
-      if match = yield( stream)
-        return match
+      if mtch = (block_given? ? yield(stream) : match(spec, stream))
+        return mtch
       end
       stream = stream.rest
     end
@@ -165,11 +159,13 @@ class ParserSeeker < Seeker
   # Match by applying the grammar to the stream, attempting to match 'token' at the current position
   # 'options' are those specified in the reference to this token in the grammar
   # If successful, return a Seeker which gives the abstract parse tree in terms of token ranges in the text
+=begin
   def self.match stream, token, options={}
-    @@Grammar = (grammar_check(options[:grammar]) if options[:grammar]) || @@DefaultGrammar
-    @@Lexaur = options[:lexaur] if options[:lexaur]
-    ParserSeeker.match_specification stream, @@Grammar[token], token, options.except(:grammar)
+    @@DefaultGrammar = (grammar_check(options[:grammar]) if options[:grammar]) || @@DefaultGrammar
+    @lexaur = options[:lexaur] if options[:lexaur]
+    match_specification stream, @@DefaultGrammar[token], token, options.except(:grammar)
   end
+=end
 
   # Run an integrity check on the grammar, calling the block when an error is found
   def self.grammar_check grammar
@@ -245,7 +241,7 @@ class ParserSeeker < Seeker
     #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
     #       are found. But they eventually get there anyway, either via successful parsing or user intervention.
     #    unremarked: stipulates that the matching material will not be marked in the DOM
-  def self.match_specification scanner, spec, token=nil, context={}
+  def match_specification scanner, spec, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
     end
@@ -254,7 +250,7 @@ class ParserSeeker < Seeker
       subscanners = scanner.within_css_matches context[:within_css_match]
       seekers = []
       subscanners.each do |subscanner|
-        seeker = ParserSeeker.match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
+        seeker = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
         if seeker && !seeker&.empty?  # Find the first valid result, or list all
           if context[:repeating]
             seekers << seeker
@@ -271,7 +267,7 @@ class ParserSeeker < Seeker
     end
     if context[:repeating] # Match the spec repeatedly
       matches = []
-      while (found = ParserSeeker.match_specification scanner, spec, context.except(:repeating)) do # No token except what the spec dictates
+      while (found = match_specification scanner, spec, context.except(:repeating)) do # No token except what the spec dictates
         matches << found
         scanner = found.tail_stream
       end
@@ -280,14 +276,12 @@ class ParserSeeker < Seeker
     if context[:bound] # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
       # match = match_specification scanner, options[:bound]
-      match = ParserSeeker.seek(scanner) { |scanner|
-        ParserSeeker.match_specification scanner, context[:bound]
-      }
+      match = seek(scanner) { |scanner| match_specification scanner, context[:bound] }
       if match
-        seeker = ParserSeeker.match_specification (scanner.except match.head_stream), spec, token, context.except(:bound)
+        seeker = match_specification (scanner.except match.head_stream), spec, token, context.except(:bound)
         seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
       else # No bound found => proceed as normal, without the :bound specifier
-        seeker = ParserSeeker.match_specification scanner, spec, token, context.except(:bound)
+        seeker = match_specification scanner, spec, token, context.except(:bound)
       end
       return seeker
     end
@@ -295,13 +289,13 @@ class ParserSeeker < Seeker
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
-      while child = ParserSeeker.match_specification(scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+      while child = match_specification(scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         children << child
         scanner = child.tail_stream
         case scanner.peek
         when 'and', 'or'
           # We expect a terminating entity
-          if child = ParserSeeker.match_specification(scanner.rest, spec)
+          if child = match_specification(scanner.rest, spec)
             children << child
             found = Seeker.new start_scanner, child.tail_stream, token, children
             break
@@ -321,16 +315,16 @@ class ParserSeeker < Seeker
     found =
     case spec
     when Symbol
-      ParserSeeker.match scanner, spec
+      match_specification scanner, @grammar[spec], spec
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
-      ParserSeeker.match_list scanner, spec, token, context
+      match_list scanner, spec, token, context
     when Hash
-      ParserSeeker.match_hash scanner, spec, token
+      match_hash scanner, spec, token
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner, context.merge(token: token, lexaur: @@Lexaur)
+      spec.match scanner, context.merge(token: token, lexaur: @lexaur)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
@@ -341,7 +335,7 @@ class ParserSeeker < Seeker
   private
   # Take an array of specifications and match them according to the context :checklist, :repeating, :or. If no option,
   # seek to satisfy all specifications in the array once.
-  def self.match_list start_stream, list_of_specs, token=nil, context={}
+  def match_list start_stream, list_of_specs, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
     end
@@ -353,7 +347,7 @@ class ParserSeeker < Seeker
     case
     when context[:checklist] # All elements must be matched, but the order is unimportant
       list_of_specs.each do |spec|
-        return if !(child = ParserSeeker.match_specification start_stream, spec, distributed_context) # Options get distributed down
+        return if !(child = match_specification start_stream, spec, distributed_context) # Options get distributed down
         end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos
         children << child
       end
@@ -367,14 +361,14 @@ class ParserSeeker < Seeker
       return if children.empty?
     when context[:or]  # The list is taken as an ordered set of alternatives, any of which will match the list
       list_of_specs.each do |spec|
-        if child = ParserSeeker.match_specification( scanner, spec, token, distributed_context)
+        if child = match_specification(scanner, spec, token, distributed_context)
           return child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
         end
       end
       return
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
-        return if !(child = ParserSeeker.match_specification end_stream, spec, distributed_context)
+        return if !(child = match_specification end_stream, spec, distributed_context)
         end_stream = child.tail_stream
         children << child
       end
@@ -385,7 +379,7 @@ class ParserSeeker < Seeker
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),
   #   and the remainder of the input spec is context for the matcher.
   # This is where the option of asserting a list with :checklist, :repeating and :or options is interpreted.
-  def self.match_hash scanner, inspec, token=nil
+  def match_hash scanner, inspec, token=nil
     if token.is_a?(Hash)
       token, context = nil, token
     end
@@ -400,7 +394,7 @@ class ParserSeeker < Seeker
             match = spec[flag]
     elsif match = spec[:tag] # Special processing for :tag specifier
       # Important: the :repeating and :orlist options will have been applied at a higher level
-      return TagSeeker.match scanner, lexaur: @@Lexaur, token: token, types: match
+      return TagSeeker.match scanner, lexaur: @lexaur, token: token, types: match
     elsif match = spec[:regexp]
       match = Regexp.new match
     else
@@ -408,6 +402,6 @@ class ParserSeeker < Seeker
     end
     match = spec.delete :match if match == true # If any of the above appeared as flags, get match from the :match value
     # We've extracted the specification to be matched into 'match', and use what's left as context for matching
-    ParserSeeker.match_specification(scanner, match, token, spec) if match
+    match_specification(scanner, match, token, spec) if match
   end
 end

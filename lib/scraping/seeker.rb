@@ -131,7 +131,8 @@ class TagSeeker < Seeker
   def self.match stream, opts={}
     opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
       # The Lexaur provides the data at sequence end, and the post-consumption stream
-      tag_ids = Tag.of_type(Tag.typenum opts[:types]).where(id: data).pluck :id
+      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
+      tag_ids = scope.where(id: data).pluck :id
       return (self.new(stream, next_stream, tag_ids, opts[:token]) if tag_ids.present?)
     }
   end
@@ -225,7 +226,7 @@ class IngredientSpecSeeker < Seeker
     @amount, @condits, @ingreds = amount, condits, ingreds
   end
 
-  def self.match stream, opts
+  def self.match stream, opts={}
     original_stream = stream
     if amount = AmountSeeker.match(stream, opts)
       puts "Found amount #{amount.num} #{amount.unit}" if Rails.env.test?
