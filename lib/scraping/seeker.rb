@@ -189,7 +189,7 @@ class TagsSeeker < Seeker
       case ns.tail_stream.peek
       when 'and', 'or'
         # We expect a terminating condition
-        if ns2 = TagSeeker.match(ns.tail_stream.rest, opts.slice( :lexaur, :types))
+        if ns2 = TagSeeker.match(ns.tail_stream.rest, opts.slice(:lexaur, :types))
           sk.tag_seekers << ns2
           sk.tail_stream = ns2.tail_stream
         else

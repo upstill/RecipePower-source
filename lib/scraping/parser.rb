@@ -154,6 +154,11 @@ class Parser
     end
   end
 
+  # Advance the stream past the seeker result
+  def advance seeker
+    @stream = seeker.tail_stream
+  end
+
   # Match a stream to a grammar, starting with an initial token. Since this method is re-entrant, we allow the
   # first call to set the grammar to be used in matching
   # Match by applying the grammar to the stream, attempting to match 'token' at the current position

@@ -125,8 +125,12 @@ class NokoTokens < Array
     @held_text = ''
     @nkdoc.children.each { |j| do_child j }
     to_tokens # Finally flush the last text
-    # @length = count
+
+    # Make this data immutable! No transforms to the tree should affect any token
+    @token_starts.freeze
+    self.map &:freeze
     @bound = count
+    self.freeze
   end
 
   def token_offset_at index
@@ -298,7 +302,6 @@ class NokoScanner
       @nkdoc = nkdoc_or_nktokens
       @tokens = NokoTokens.new nkdoc_or_nktokens
     end
-    # @length = length || @tokens.length
     @bound = bound || @tokens.length
     @pos = pos
   end
