@@ -152,4 +152,13 @@ EOF
     assert_equal :rp_ingline, seeker.token
   end
 
+  test 'finds title in h1 tag' do
+    html = "irrelevant noise <h1>Title Goes Here</h1> followed by more noise"
+    nks = NokoScanner.from_string html
+    parser = Parser.new nks, @lex
+    seeker = parser.match :rp_title
+    assert_equal "Title", seeker.head_stream.token_at
+    assert_equal "followed", seeker.tail_stream.token_at
+  end
+
 end

@@ -325,6 +325,11 @@ class NokoScanner
     end
   end
 
+  # Report the token no matter if the position is beyond the bound
+  def token_at
+    tokens[@pos]
+  end
+
   # first: return the string in the current "read position" after advancing to the 'next' position
   def first nchars = 1
     if str = peek(nchars)

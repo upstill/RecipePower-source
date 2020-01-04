@@ -66,7 +66,7 @@ end
 
 class RegexpSeeker < Seeker
   def self.match stream, options={}
-    self.new stream, stream.rest, options[:token] if stream.peek.match options[:regexp]
+    self.new stream, stream.rest, options[:token] if stream.peek&.match options[:regexp]
   end
 end
 

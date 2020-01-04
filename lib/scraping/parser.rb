@@ -88,7 +88,7 @@ class Parser
           ]
       },
       # Hopefully sites will specify how to find the title in the extracted text
-      rp_title: { repeating: Regexp.new('^.*$'), within_css_match: 'h1' }, # Match all tokens within an <h1> tag
+      rp_title: { accumulate: Regexp.new('^.*$'), within_css_match: 'h1' }, # Match all tokens within an <h1> tag
       rp_author: [],
       rp_yield: [],
       rp_makes: [],
@@ -144,7 +144,7 @@ class Parser
     match_specification at, spec
   end
 
-  # Scan down the stream, one token at a time, for the block to return true
+  # Scan down the stream, one token at a time, until the block returns true or the stream runs out
   def seek stream, spec={}
     while stream.more?
       if mtch = (block_given? ? yield(stream) : match(spec, stream))
@@ -214,7 +214,9 @@ class Parser
     end if grammar
     grammar
   end
-  
+
+  private
+
   # Match a single specification to the provided stream, whether the spec is given directly in the grammar or included in a list.
   # Return a Seeker for the result that includes:
   # -- the beginning stream,
@@ -290,6 +292,16 @@ class Parser
       end
       return seeker
     end
+    if context[:accumulate] # Collect matches as long as they're valid
+      while child = match_specification(found&.tail_stream || scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        if found
+          found.tail_stream = child.tail_stream
+        else
+          found = child
+        end
+      end
+      return found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
+    end
     if context[:orlist]
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
@@ -337,7 +349,6 @@ class Parser
     found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
   end
 
-  private
   # Take an array of specifications and match them according to the context :checklist, :repeating, :or. If no option,
   # seek to satisfy all specifications in the array once.
   def match_list start_stream, list_of_specs, token=nil, context={}
@@ -394,11 +405,12 @@ class Parser
                  :repeating, # The spec will be matched repeatedly until the end of input
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
                  :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
+                 :accumulate, # Accumulate matches serially in a single child
                  :optional # Failure to match is not a failure
               ].find { |flag| spec[flag] }
             match = spec[flag]
     elsif match = spec[:tag] # Special processing for :tag specifier
-      # Important: the :repeating and :orlist options will have been applied at a higher level
+      # Important: the :repeating, :accumulate and :orlist options will have been applied at a higher level
       return TagSeeker.match scanner, lexaur: @lexaur, token: token, types: match
     elsif match = spec[:regexp]
       match = Regexp.new match
