@@ -114,8 +114,18 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
-    return self.new(stream, stream.rest(2), opts[:token]) if stream.peek(2)&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
-    return self.new(stream, stream.rest, opts[:token]) if stream.peek&.match /^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
+    return self.new(stream, stream.rest(2), opts[:token]) if self.num1 stream.peek(2)
+    return self.new(stream, stream.rest, opts[:token]) if self.num2 stream.peek
+  end
+
+  # Is the string either an integer or a fraction?
+  def self.num1 str
+    str&.match /^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
+  end
+
+  # Does the string have an integer followed by a fraction?
+  def self.num2 str
+    str&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
   end
 
 end
@@ -153,6 +163,10 @@ class AmountSeeker < Seeker
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
+      num = $1
+      unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
+      self.new(stream, stream.rest, num, unit)
     end
   end
 end

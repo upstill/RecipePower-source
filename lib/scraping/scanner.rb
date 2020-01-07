@@ -355,6 +355,11 @@ class NokoScanner
     @pos < @bound # @length
   end
 
+  # Create a scanner that starts where the given scanner starts
+  def goto s2
+    NokoScanner.new tokens, s2.pos, @bound
+  end
+
   # Create a scanner that ends at the given scanner
   def except s2
     NokoScanner.new tokens, @pos, s2.pos # (newpos > @length ? @length : newpos), @length

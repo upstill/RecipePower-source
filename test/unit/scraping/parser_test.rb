@@ -27,12 +27,12 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) white cauliflower',
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
-    @ingred_tags = %w{ garlic salt baking\ soda sugar sea\ salt butter Dijon\ mustard capers small\ capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
+    @ingred_tags = %w{ sourdough\ bread garlic salt baking\ soda sugar sea\ salt butter Dijon\ mustard capers small\ capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ tablespoon T. teaspoon tsp. cup head pound small\ head clove }.
+    @unit_tags = %w{ g tablespoon T. teaspoon tsp. cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
-    @process_tags = %w{ chopped softened rinsed }.
-        each { |name| Tag.assert name, :Unit }
+    @process_tags = %w{ chopped softened rinsed crustless }.
+        each { |name| Tag.assert name, :Process }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF
   <p>#{@ingred_specs.join "<br>\n"}</p>
@@ -159,6 +159,77 @@ EOF
     seeker = parser.match :rp_title
     assert_equal "Title", seeker.head_stream.token_at
     assert_equal "followed", seeker.tail_stream.token_at
+  end
+
+  test 'parse Ottolenghi ingredient list' do
+    html = <<EOF
+  <p><strong>30g crustless sourdough bread</strong></p>
+EOF
+    #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+    nks = NokoScanner.from_string html
+    parser = Parser.new(nks, @lex) do |grammar|
+      #grammar[:rp_ingline][:match]  = [
+      #:rp_ingname,
+      #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
+      #]
+    end
+    seeker = parser.match :rp_inglist
+    assert seeker
+  end
+
+  test 'parse single recipe' do
+    html = <<EOF
+<div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
+  <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
+  <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
+  <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
+</div>
+EOF
+    nks = NokoScanner.from_string html
+    parser = Parser.new(nks, @lex)  do |grammar|
+      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2'}
+      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+    end
+    seeker = parser.match :rp_recipe
+    assert seeker
+  end
+
+  test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
+    html = <<EOF
+<div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
+  <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
+  <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
+  <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
+  <h2>Soft-boiled egg with avocado, chorizo and asparagus</h2>
+
+  <p>Play around with this egg-in-a-cup dish, depending on what you have around: sliced cherry tomatoes are a good addition, for example, as is grated cheese or a drizzle of truffle oil. Omit the chorizo, if you like, to make it vegetarian. Serve with toasted bread.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>15 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>70g cooking chorizo</strong>, skinned and broken into 2cm chunks<br><strong>4 large eggs</strong>, at room temperature<br><strong>8 asparagus spears,</strong> woody ends trimmed and cut into 6cm-long pieces<br><strong>2 ripe avocados</strong>, stoned and flesh scooped out<br><strong>1 tbsp olive oil</strong><br><strong>2 tsp lemon juice</strong><br><strong>Flaked sea salt and black pepper</strong><br><strong>80g Greek-style yoghurt</strong><br><strong>5g parsley leaves</strong>, finely chopped</p>
+  <h2>Kale and grilled asparagus salad</h2>
+
+  <p>There’s a little bit of massaging and marinating involved here, but you can do that well ahead of time, if need be. Just don’t mix everything together until the last minute.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>35 min</strong><br>Serves <strong>4-6</strong></p>
+  <p><strong>30g sunflower seeds</strong><br><strong>30g pumpkin seeds</strong><br><strong>1½ tsp maple syrup</strong><br><strong>Salt and black pepper</strong><br><strong>250g kale</strong>, stems discarded, leaves torn into roughly 4-5cm pieces<br><strong>3 tbsp olive oil</strong><br><strong>1½ tbsp white-wine vinegar</strong><br><strong>2 tsp wholegrain mustard</strong><br><strong>500g asparagus</strong>, woody ends trimmed<br><strong>120g frozen shelled edamame</strong>, defrosted<br><strong>10g tarragon leaves</strong>, roughly chopped<br><strong>5g dill</strong>, roughly chopped</p>
+  <p>To serve, toss the edamame and herbs into the kale, then spread out on a large platter. Top with the asparagus and candied seeds, and serve at once.</p>
+
+</div>
+EOF
+    # This page has several recipes, each begun with an h2 header
+    nks = NokoScanner.from_string html
+    parser = Parser.new(nks, @lex)  do |grammar|
+      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2'}
+      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+    end
+    seeker = parser.match :rp_recipelist
+    assert seeker
   end
 
 end
