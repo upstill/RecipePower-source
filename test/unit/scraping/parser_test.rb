@@ -27,7 +27,31 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) white cauliflower',
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
-    @ingred_tags = %w{ sourdough\ bread garlic salt baking\ soda sugar sea\ salt butter Dijon\ mustard capers small\ capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
+    @ingred_tags = %w{
+      lemon\ zest
+      lemon\ juice
+      anchovy\ fillets
+      asparagus
+      flaked\ sea\ salt
+      sourdough\ bread
+      garlic
+      garlic\ clove
+      basil\ leaves
+      salt
+      baking\ soda
+      sugar
+      sea\ salt
+      butter
+      unsalted\ butter
+      Dijon\ mustard
+      capers
+      small\ capers
+      olive\ oil
+      marjoram
+      black\ pepper
+      Brussels\ sprouts
+      white\ cauliflower
+      Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ g tablespoon T. teaspoon tsp. cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
@@ -163,9 +187,19 @@ EOF
 
   test 'parse Ottolenghi ingredient list' do
     html = <<EOF
-  <p><strong>30g crustless sourdough bread</strong></p>
+  <p><strong>30g crustless sourdough bread</strong><br>
+    <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
+    <strong>Flaked sea salt and black pepper</strong><br>
+    <strong>25g unsalted butter</strong><br>
+    <strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br>
+    <strong>1 tbsp olive oil</strong><br>
+    <strong>1 garlic clove</strong>, peeled and crushed<br>
+    <strong>10g basil leaves</strong>, finely shredded<br>
+    <strong>½ tsp each finely grated lemon zest and juice</strong>
+  </p>
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+    html = html.gsub /\n+\s*/, ''
     nks = NokoScanner.from_string html
     parser = Parser.new(nks, @lex) do |grammar|
       #grammar[:rp_ingline][:match]  = [

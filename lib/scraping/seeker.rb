@@ -114,8 +114,8 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
-    return self.new(stream, stream.rest(2), opts[:token]) if self.num1 stream.peek(2)
-    return self.new(stream, stream.rest, opts[:token]) if self.num2 stream.peek
+    return self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)
+    return self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek
   end
 
   # Is the string either an integer or a fraction?

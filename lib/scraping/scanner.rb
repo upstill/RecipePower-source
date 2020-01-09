@@ -330,6 +330,11 @@ class NokoScanner
     tokens[@pos]
   end
 
+  # Is the scanner at a newline: either the first token, or a token preceded by "\n"
+  def atline?
+    (@pos >= 0) && (tokens[@pos-1] == "\n")
+  end
+
   # first: return the string in the current "read position" after advancing to the 'next' position
   def first nchars = 1
     if str = peek(nchars)

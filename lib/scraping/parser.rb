@@ -78,7 +78,6 @@ class Parser
   #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :within_css_match to the stipulated
   #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
   #       are found. But they eventually get there anyway.
-  #    unremarked: stipulates that the matching material will not be marked in the DOM
   @@DefaultGrammar = {
       rp_recipelist: { repeating: :rp_recipe },
       rp_recipe: {
@@ -96,7 +95,7 @@ class Parser
       rp_makes: [],
       rp_inglist: {
           # The ingredient list(s) for a recipe
-          match: { repeating: [ "\n", :rp_ingline ] }
+          match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
       },
       rp_ingline: {
           match: [
@@ -106,7 +105,7 @@ class Parser
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
           ],
           bound: "\n"},
-      rp_ing_comment: { optional: { regexp: '^.*$' }, repeating: true, unremarked: true, bound: "\n" }, # NB: matches even if the bound is immediate
+      rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, bound: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
                or: [
@@ -250,106 +249,120 @@ class Parser
     #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :within_css_match to the stipulated
     #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
     #       are found. But they eventually get there anyway, either via successful parsing or user intervention.
-    #    unremarked: stipulates that the matching material will not be marked in the DOM
   def match_specification scanner, spec, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
     end
       found = nil
-      if context[:within_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
-        subscanners = scanner.within_css_matches context[:within_css_match]
-        seekers = []
-        subscanners.each do |subscanner|
-          seeker = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
-          if seeker && !seeker&.empty?  # Find the first valid result, or list all
-            if context[:repeating]
-              seekers << seeker
-            else
-              return seeker # Singular result requires no higher-level parent
-            end
+    if context[:atline]
+      start_scanner = scanner.clone
+      until scanner.atline? do
+        if scanner.peek
+          scanner = scanner.rest
+        else
+          return (Seeker.new start_scanner, scanner, token if context[:optional])
+        end
+      end
+      return match_specification(scanner, spec, token, context.except( :atline))
+    end
+    if context[:within_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
+      subscanners = scanner.within_css_matches context[:within_css_match]
+      seekers = []
+      subscanners.each do |subscanner|
+        seeker = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
+        if seeker && !seeker&.empty?  # Find the first valid result, or list all
+          if context[:repeating]
+            seekers << seeker
+          else
+            return seeker # Singular result requires no higher-level parent
           end
         end
-        # In order to preserve the current stream placement while recording the found stream placement,
-        # we return a single seeker with no token and matching children
-        return seekers.present? ?
-                   Seeker.new(seekers.first.head_stream, seekers.last.tail_stream, token, seekers) :
-                   (Seeker.new(scanner, scanner, token, seekers) if context[:optional])
       end
-      if context[:repeating] # Match the spec repeatedly
-        matches = []
-        while found = match_specification( scanner, spec, context.except(:repeating)) do # No token except what the spec dictates
+      # In order to preserve the current stream placement while recording the found stream placement,
+      # we return a single seeker with no token and matching children
+      return seekers.present? ?
+                 Seeker.new(seekers.first.head_stream, seekers.last.tail_stream, token, seekers) :
+                 (Seeker.new(scanner, scanner, token, seekers) if context[:optional])
+    end
+    if context[:repeating] # Match the spec repeatedly until EOF
+      matches = []
+      while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
+        if found.empty?
+          scanner = scanner.rest # Advance and continue scanning
+        else
           matches << found
           scanner = found.tail_stream
         end
-        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) if matches.present? # Token only applied to the top level
       end
-      if context[:start] # Advance the scan to the point matching the spec
-        match = seek(scanner) { |scanner| match_specification scanner, context[:start] }
-        scanner = scanner.goto(match.head_stream) if match
-        found = match_specification scanner, spec, token, context.except(:start)
-      end
-      if context[:bound] # Terminate the search when the given specification is matched, WITHOUT consuming the match
-        # Foreshorten the stream and recur
-        # match = match_specification scanner, options[:bound]
-        match = seek(scanner) { |scanner| match_specification scanner, context[:bound] }
-        if match
-          if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
-            seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
-          end
-        else # No bound found => proceed as normal, without the :bound specifier
-          seeker = match_specification scanner, spec, token, context.except(:bound)
+      return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) if matches.present? # Token only applied to the top level
+    end
+    if context[:start] # Advance the scan to the point matching the spec
+      match = seek(scanner) { |scanner| match_specification scanner, context[:start] }
+      scanner = scanner.goto(match.head_stream) if match
+      found = match_specification scanner, spec, token, context.except(:start)
+    end
+    if context[:bound] # Terminate the search when the given specification is matched, WITHOUT consuming the match
+      # Foreshorten the stream and recur
+      # match = match_specification scanner, options[:bound]
+      match = seek(scanner) { |scanner| match_specification scanner, context[:bound] }
+      if match
+        if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
+          seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
         end
-        return seeker
+      else # No bound found => proceed as normal, without the :bound specifier
+        seeker = match_specification scanner, spec, token, context.except(:bound)
       end
-      if context[:accumulate] # Collect matches as long as they're valid
-        while child = match_specification(found&.tail_stream || scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
-          if found
-            found.tail_stream = child.tail_stream
-          else
-            found = child
-          end
+      return seeker
+    end
+    if context[:accumulate] # Collect matches as long as they're valid
+      while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        if found
+          found.tail_stream = child.tail_stream
+        else
+          found = child
         end
-        return found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
       end
-      if context[:orlist]
-        # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
-        children = []
-        start_scanner = scanner
-        while child = match_specification(scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
-          children << child
-          scanner = child.tail_stream
-          case scanner.peek
-          when 'and', 'or'
-            # We expect a terminating entity
-            if child = match_specification(scanner.rest, spec)
-              children << child
-              found = Seeker.new start_scanner, child.tail_stream, token, children
-              break
-            end
-          when ','
-            scanner = scanner.rest
-          else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
+      return found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
+    end
+    if context[:orlist]
+      # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
+      children = []
+      start_scanner = scanner
+      while child = match_specification(scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        children << child
+        scanner = child.tail_stream
+        case scanner.peek
+        when 'and', 'or'
+          # We expect a terminating entity
+          if child = match_specification(scanner.rest, spec)
+            children << child
+            found = Seeker.new start_scanner, child.tail_stream, token, children
             break
           end
+        when ','
+          scanner = scanner.rest
+        else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
+          break
         end
-        return found || (Seeker.new start_scanner, start_scanner, token if context[:optional]) # Leave an empty result for optional if not found
       end
-      found =
-      case spec
-      when Symbol
-        match_specification scanner, @grammar[spec], spec
-      when String
-        StringSeeker.match scanner, string: spec, token: token
-      when Array
-        # The context is distributed to each member of the list
-        match_list scanner, spec, token, context
-      when Hash
-        match_hash scanner, spec, token
-      when Class # The match will be performed by a subclass of Seeker
-        spec.match scanner, context.merge(token: token, lexaur: @lexaur)
-      when Regexp
-        RegexpSeeker.match scanner, regexp: spec, token: token
-      end
+      return found || (Seeker.new start_scanner, start_scanner, token if context[:optional]) # Leave an empty result for optional if not found
+    end
+    found =
+    case spec
+    when Symbol
+      match_specification scanner, @grammar[spec], spec
+    when String
+      StringSeeker.match scanner, string: spec, token: token
+    when Array
+      # The context is distributed to each member of the list
+      match_list scanner, spec, token, context
+    when Hash
+      match_hash scanner, spec, token
+    when Class # The match will be performed by a subclass of Seeker
+      spec.match scanner, context.merge(token: token, lexaur: @lexaur)
+    when Regexp
+      RegexpSeeker.match scanner, regexp: spec, token: token
+    end
     # Return an empty seeker even if no match was found, as long as the match was declared optional
     found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
   end
@@ -407,6 +420,7 @@ class Parser
     # Check for an array to match
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
+                 :atline, # match must start at the beginning of a line; matching scans until positioned at a line break
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
                  :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
                  :accumulate, # Accumulate matches serially in a single child
