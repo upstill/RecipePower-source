@@ -82,7 +82,7 @@ class Parser
       rp_recipelist: { repeating: :rp_recipe },
       rp_recipe: {
           checklist: [
-              [ { optional: :rp_title }, { match: :rp_inglist, repeating: true } ],
+              [ { optional: :rp_title }, { match: :rp_inglist } ],
               { optional: :rp_author },
               { optional: :rp_yield },
           ]

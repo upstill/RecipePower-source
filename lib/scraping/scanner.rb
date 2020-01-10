@@ -385,9 +385,10 @@ class NokoScanner
 
   # Return an ARRAY of scanners, as above
   def within_css_matches str
-    @tokens.dom_ranges(str).map do |range|
+    @tokens.dom_ranges(str).map { |range|
+      next if range.begin < @pos
       NokoScanner.new @tokens, range.begin, range.end
-    end
+    }.compact
   end
 
 end

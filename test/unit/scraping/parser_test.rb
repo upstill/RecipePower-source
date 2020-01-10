@@ -259,7 +259,7 @@ EOF
     nks = NokoScanner.from_string html
     parser = Parser.new(nks, @lex)  do |grammar|
       grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2'}
+      grammar[:rp_recipe][:checklist][0][-1][:bound] = { match: //, within_css_match: 'h2'}
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipelist
