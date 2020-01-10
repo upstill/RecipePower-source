@@ -53,7 +53,7 @@ class ParserTest < ActiveSupport::TestCase
       white\ cauliflower
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ g tablespoon tbsp T. teaspoon tsp tsp. cup head pound small\ head clove }.
+    @unit_tags = %w{ g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed crustless }.
         each { |name| Tag.assert name, :Process }
@@ -224,12 +224,14 @@ EOF
 EOF
     nks = NokoScanner.from_string html
     parser = Parser.new(nks, @lex)  do |grammar|
-      # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      # grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2' } # Bound the ingredient-list search at the next h2 tag
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe
     assert seeker
+    assert_equal :rp_recipe, seeker.token
+    assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
+    assert_equal :rp_inglist, seeker.children[1].token
+    assert_equal 8, seeker.children[1].children.count
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
@@ -258,12 +260,17 @@ EOF
     # This page has several recipes, each begun with an h2 header
     nks = NokoScanner.from_string html
     parser = Parser.new(nks, @lex)  do |grammar|
+      # We start by seeking to the next h2 (title) tag
       grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_recipe][:checklist][0][-1][:bound] = { match: //, within_css_match: 'h2'}
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      # Stop seeking ingredients at the next h2 tag
+      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
     end
     seeker = parser.match :rp_recipelist
     assert seeker
+    assert_equal :rp_recipelist, seeker.token
+    assert_equal 4, seeker.children.count
+    seeker.children.each { |child| assert_equal :rp_recipe, child.token }
   end
 
 end

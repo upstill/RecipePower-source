@@ -81,10 +81,10 @@ class Parser
   @@DefaultGrammar = {
       rp_recipelist: { repeating: :rp_recipe },
       rp_recipe: {
-          checklist: [
-              [ { optional: :rp_title }, { match: :rp_inglist } ],
-              { optional: :rp_author },
-              { optional: :rp_yield },
+          match: [
+              { optional: :rp_title },
+              :rp_inglist ,
+              { checklist: [ { optional: :rp_author }, { optional: :rp_yield } ] },
           ]
       },
       # Hopefully sites will specify how to find the title in the extracted text
