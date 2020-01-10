@@ -53,7 +53,7 @@ class ParserTest < ActiveSupport::TestCase
       white\ cauliflower
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ g tablespoon T. teaspoon tsp. cup head pound small\ head clove }.
+    @unit_tags = %w{ g tablespoon tbsp T. teaspoon tsp tsp. cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed crustless }.
         each { |name| Tag.assert name, :Process }
@@ -187,7 +187,7 @@ EOF
 
   test 'parse Ottolenghi ingredient list' do
     html = <<EOF
-  <p><strong>30g crustless sourdough bread</strong><br>
+  <p><strong>30g each crustless sourdough bread</strong><br>
     <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
     <strong>Flaked sea salt and black pepper</strong><br>
     <strong>25g unsalted butter</strong><br>
@@ -224,8 +224,8 @@ EOF
 EOF
     nks = NokoScanner.from_string html
     parser = Parser.new(nks, @lex)  do |grammar|
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2'}
+      # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      # grammar[:rp_recipe][:checklist][-1][:bound] = { match: //, within_css_match: 'h2' } # Bound the ingredient-list search at the next h2 tag
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe

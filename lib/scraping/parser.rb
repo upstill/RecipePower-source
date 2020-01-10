@@ -82,10 +82,9 @@ class Parser
       rp_recipelist: { repeating: :rp_recipe },
       rp_recipe: {
           checklist: [
-              { optional: :rp_title },
+              [ { optional: :rp_title }, { match: :rp_inglist, repeating: true } ],
               { optional: :rp_author },
               { optional: :rp_yield },
-              { match: :rp_inglist, repeating: true }
           ]
       },
       # Hopefully sites will specify how to find the title in the extracted text
@@ -99,7 +98,7 @@ class Parser
       },
       rp_ingline: {
           match: [
-              {optional: :rp_amt_with_alt},
+              {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
@@ -254,36 +253,6 @@ class Parser
       token, context = nil, token
     end
       found = nil
-    if context[:atline]
-      start_scanner = scanner.clone
-      until scanner.atline? do
-        if scanner.peek
-          scanner = scanner.rest
-        else
-          return (Seeker.new start_scanner, scanner, token if context[:optional])
-        end
-      end
-      return match_specification(scanner, spec, token, context.except( :atline))
-    end
-    if context[:within_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
-      subscanners = scanner.within_css_matches context[:within_css_match]
-      seekers = []
-      subscanners.each do |subscanner|
-        seeker = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
-        if seeker && !seeker&.empty?  # Find the first valid result, or list all
-          if context[:repeating]
-            seekers << seeker
-          else
-            return seeker # Singular result requires no higher-level parent
-          end
-        end
-      end
-      # In order to preserve the current stream placement while recording the found stream placement,
-      # we return a single seeker with no token and matching children
-      return seekers.present? ?
-                 Seeker.new(seekers.first.head_stream, seekers.last.tail_stream, token, seekers) :
-                 (Seeker.new(scanner, scanner, token, seekers) if context[:optional])
-    end
     if context[:repeating] # Match the spec repeatedly until EOF
       matches = []
       while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
@@ -296,12 +265,44 @@ class Parser
       end
       return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) if matches.present? # Token only applied to the top level
     end
+    if context[:atline]
+      start_scanner = scanner.clone
+      until scanner.atline? do
+        if scanner.peek
+          scanner = scanner.rest
+        else
+          return (Seeker.new start_scanner, scanner.rest, token if context[:optional])
+        end
+      end
+      return match_specification(scanner, spec, token, context.except( :atline))
+    end
+    if context[:within_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
+      subscanners = scanner.within_css_matches context[:within_css_match]
+      founds = []
+      subscanners.each do |subscanner|
+        found = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
+        if found && !found&.empty?  # Find the first valid result, or list all
+          if context[:repeating]
+            founds << found
+          else
+            found.tail_stream.encompass scanner
+            return found # Singular result requires no higher-level parent
+          end
+        end
+      end
+      # In order to preserve the current stream placement while recording the found stream placement,
+      # we return a single seeker with no token and matching children
+      return founds.present? ?
+                 Seeker.new(founds.first.head_stream, founds.last.tail_stream, token, founds) :
+                 (Seeker.new(scanner, scanner, token, founds) if context[:optional])
+    end
     if context[:start] # Advance the scan to the point matching the spec
       match = seek(scanner) { |scanner| match_specification scanner, context[:start] }
       scanner = scanner.goto(match.head_stream) if match
       found = match_specification scanner, spec, token, context.except(:start)
     end
-    if context[:bound] # Terminate the search when the given specification is matched, WITHOUT consuming the match
+    if context[:bound]
+      # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
       # match = match_specification scanner, options[:bound]
       match = seek(scanner) { |scanner| match_specification scanner, context[:bound] }
