@@ -257,7 +257,7 @@ class Parser
       matches = []
       while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
         if found.empty?
-          scanner = scanner.rest # Advance and continue scanning
+          scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
         else
           matches << found
           scanner = found.tail_stream
@@ -402,7 +402,9 @@ class Parser
       return
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
-        return if !(child = match_specification end_stream, spec, distributed_context)
+        if !(child = match_specification end_stream, spec, distributed_context)
+          return nil
+        end
         end_stream = child.tail_stream
         children << child
       end
