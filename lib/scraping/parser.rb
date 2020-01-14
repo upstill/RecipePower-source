@@ -252,7 +252,7 @@ class Parser
     if token.is_a?(Hash)
       token, context = nil, token
     end
-      found = nil
+    found = nil
     if context[:repeating] # Match the spec repeatedly until EOF
       matches = []
       while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
@@ -313,7 +313,7 @@ class Parser
       else # No bound found => proceed as normal, without the :bound specifier
         seeker = match_specification scanner, spec, token, context.except(:bound)
       end
-      return seeker
+        return seeker
     end
     if context[:accumulate] # Collect matches as long as they're valid
       while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))

@@ -57,7 +57,7 @@ class Tag < ApplicationRecord
   has_many :owners, :through => :tag_owners, :class_name => 'User', :foreign_key => 'user_id'
 
   scope :of_type, -> (type_or_types) {
-    type_or_types.present? ? where(tagtype: type_or_types) : unscoped
+    type_or_types.present? ? where(tagtype: Tag.typenum(type_or_types)) : unscoped
   }
 
   scope :meaningless, -> {

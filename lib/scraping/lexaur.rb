@@ -22,9 +22,10 @@ class Lexaur < Object
   end
 
   # Build a Lexaur tree from the collection of tags in the database
-  def self.from_tags
+  def self.from_tags *types
     lex = self.new
-    Tag.all.each { |tag|
+    puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
+    Tag.of_type(types).each { |tag|
       puts "#{tag.typename}: (#{tag.id}) #{tag.name}"
       lex.take tag.name, tag.id
     }
