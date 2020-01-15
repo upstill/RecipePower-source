@@ -368,8 +368,8 @@ class Parser
     found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
   end
 
-  # Take an array of specifications and match them according to the context :checklist, :repeating, :or. If no option,
-  # seek to satisfy all specifications in the array once.
+  # Take an array of specifications and match them according to the context :checklist, :repeating, or :or. If no option,
+  # seek to satisfy all specifications in the array, in order, once.
   def match_list start_stream, list_of_specs, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
