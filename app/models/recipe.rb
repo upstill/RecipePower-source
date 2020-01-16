@@ -17,6 +17,8 @@ class Recipe < ApplicationRecord
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
+  delegate :recipe_page, :to => :page_ref
+
   # after_create { |recipe| recipe.bkg_launch }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,

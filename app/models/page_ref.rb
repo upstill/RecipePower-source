@@ -14,6 +14,9 @@ class PageRef < ApplicationRecord
 
   has_many :aliases, :dependent => :destroy
 
+  # The associated recipe page maintains the page's content in a parsed form
+  belongs_to :recipe_page
+
   # Specify what values from the gleaning correspond to one of our attributes
   @@gleaning_correspondents = {
       # domain: nil,

@@ -1,0 +1,18 @@
+<%= simple_form_for(@recipe_page) do |f| %>
+  <%= form_errors_helper f %>
+
+  <%= f.simple_fields_for :recipes do |builder| %>
+    <% render 'recipe_fields', f: builder %>
+  <% end %>
+  <%= link_to_add_fields '+', f, :recipes %>
+  <%#= link_to "Partition", '#', class: 'submit', onclick: 'RP.recipe_pages.submit_selection' %>
+
+  <div class="form-inputs">
+    <%= f.hidden_field :content %>
+    <%#= f.input :content %>
+  </div>
+
+  <div class="form-actions">
+    <%= f.button :submit %>
+  </div>
+<% end %>

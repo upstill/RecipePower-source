@@ -73,7 +73,10 @@ class SiteServices
     if content.present?
       @nkdoc = Nokogiri::HTML.fragment content
       # Remove nodes from the content according to the site's :trimmers collection
-      site.trimmers.each {|trimmer| @nkdoc.css(trimmer).map &:remove} if site.trimmers.present?
+      site.trimmers.each do |trimmer|
+        puts "Trimming with CSS selector #{trimmer}"
+        @nkdoc.css(trimmer).map &:remove
+      end if site.trimmers.present?
       @nkdoc.traverse do |node|
         # Ensure that link tags have a global url
         if node.element?

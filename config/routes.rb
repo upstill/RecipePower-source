@@ -4,6 +4,7 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
+  resources :recipe_pages
   resources :offerings
   resources :editions
 
