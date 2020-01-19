@@ -182,7 +182,7 @@ class FilteredPresenter
       @entity = decorator.object
       @klass = @entity.class
     else
-      name = params_hash['controller'].sub(/Controller$/, '').singularize.capitalize
+      name = params_hash['controller'].sub(/Controller$/, '').singularize.camelize
       @klass = name.constantize rescue nil
     end
 
