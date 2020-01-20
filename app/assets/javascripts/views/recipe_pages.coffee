@@ -4,6 +4,7 @@
 
 RP.recipe_pages = RP.recipe_pages || {}
 
+# Code adapted from https://stackoverflow.com/questions/7312730/using-xpath-to-restore-a-dom-range-in-javascript
 RP.recipe_pages.serialize = (node) ->
 	if (typeof XMLSerializer != "undefined")
 		# Firefox, etc.
