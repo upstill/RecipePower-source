@@ -4,15 +4,21 @@
   <%= f.simple_fields_for :recipes do |builder| %>
     <% render 'recipe_fields', f: builder %>
   <% end %>
-  <%= link_to_add_fields '+', f, :recipes %>
+  <div class="row">
+    <div class="col-md-1 offset1">
+      <%= link_to_add_fields '+', f, :recipes %>
+    </div>
+  </div>
   <%#= link_to "Partition", '#', class: 'submit', onclick: 'RP.recipe_pages.submit_selection' %>
 
   <div class="form-inputs">
     <%= f.hidden_field :content %>
     <%#= f.input :content %>
   </div>
-
-  <div class="form-actions">
-    <%= f.button :submit %>
+  
+  <div class="modal-footer form-actions">
+    <%= dialog_submit_button 'Save' %>
+    <%= dialog_cancel_button 'Cancel' %>
+    <%#= f.button :submit %>
   </div>
 <% end %>

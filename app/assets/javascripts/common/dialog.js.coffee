@@ -127,13 +127,18 @@ open_modal = (dlog, omit_button) ->
 	if (onget = $(dlog).data "onget" ) && (fcn = RP.named_function "RP." + onget.shift() )
 		fcn.apply null, onget
 	RP.hide_all_empty()
-	$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
 	# Ensure that the dialog is attached to the DOM
 	unless dlog.parentElement
 		$('body')[0].appendChild dlog
-	# Unhide it, as needed
-	if $(dlog).modal
-		$(dlog).modal 'show'
+	if $(dlog).hasClass 'modeless'
+		$(dlog).removeClass('hide').removeClass 'modal-pending'
+		$(dlog).draggable ->
+			handle: ".modal-header"
+	else
+		$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
+		# Unhide it, as needed
+		if $(dlog).modal
+			$(dlog).modal 'show'
 	RP.dialog.notify "load", dlog
 	RP.state.onDialogOpen dlog
 	if !(omit_button || $('button.close', dlog)[0])

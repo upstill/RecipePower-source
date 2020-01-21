@@ -1,12 +1,14 @@
-<div class="notifs-holder" style="position: absolute; width: 100%; top: 50px;" , onload="RP.notifs.onload(event);">
-  <div class="new-style notifs <%= 'wide' if defined?(wide) %>">
+<div class="dialog modeless notifs-holder recipe_pages new-style green">
+  <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header">
+      <div class="modal-header" style="padding: 30px">
         <p>Edit title and select recipe content from the page.</p>
         <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
       </div>
+      <!--Define the pane displayed in the panel-->
+      <div class="modal-body">
+        <%= render "#{pane_for}/form" %>
+      </div>
     </div>
-    <!--Define the pane displayed in the panel-->
-    <%= render "#{pane_for}/form" %>
   </div>
 </div>

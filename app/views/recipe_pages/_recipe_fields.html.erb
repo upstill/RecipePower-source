@@ -1,6 +1,19 @@
 <div class="row recipe-fields">
-  <%= f.text_field :title %>
-  <div class="col-md-1">
-    <%= f.input :_destroy, :as => :hidden, label: false %>
+  <div class="recipe-field listing_item title" style="padding-left: 80px"><%= f.object.title %></div>
+  <div class="recipe-field listing_item icon" style="padding-left: 25px">
+    <a href='#', class='glyphicon glyphicon-pencil edit-recipe'></a>
   </div>
+  <div class="recipe-field editing_item title hidden">
+    <%= f.text_field :title %>
+  </div>
+  <div class="recipe-field editing_item icon hidden" style="">
+    <a href='#', class='glyphicon glyphicon-copy copy-selection'></a>
+  </div>
+  <div class="recipe-field editing_item icon hidden">
+    <%= link_to '',
+                f.object,
+                title: 'Open Recipe',
+                class: 'glyphicon glyphicon-new-window' %>
+  </div>
+  <%#= f.input :_destroy, :as => :hidden, label: false %>
 </div>

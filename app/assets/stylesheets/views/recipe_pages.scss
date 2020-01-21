@@ -1,0 +1,19 @@
+// Place all the styles related to the RecipePages controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+div.dialog.recipe_pages.new-style.recipe_pages.green {
+  div.recipe-fields a.glyphicon {
+    font-size: 30px;
+    color:  #D9E3CA;
+  }
+  div.recipe-field {
+    display: inline-block;
+    &.title {
+      width: 85%;
+    }
+    &.icon {
+      padding-left: 10px;
+    }
+  }
+}

@@ -33,3 +33,10 @@ RP.recipe_pages.submit_selection = () ->
 
 	# Insert elements back into document (I used replace in order to show that the document is actually changed)
 	contentNode.parentNode.replaceChild xpathResult.singleNodeValue.firstChild, contentNode
+
+RP.recipe_pages.onload = (dlog) ->
+	$(dlog).on "click", '.edit-recipe', (event) ->
+		$('.listing_item', dlog).removeClass('visible').addClass('hidden')
+		$('.editing_item', dlog).removeClass('hidden').addClass('visible')
+	$(dlog).on "click", '.copy-selection', (event) ->
+		x=2 # Extract copy!!
