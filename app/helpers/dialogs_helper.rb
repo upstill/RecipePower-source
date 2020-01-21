@@ -115,7 +115,7 @@ module DialogsHelper
         ''
     response_service.injector? ?
         injector_cancel_button('X') :
-        content_tag(:div, contents, class: 'modal-header')
+        content_tag(:div, contents, options.slice(:style).merge(class: "modal-header #{options[:class]}"))
   end
 
   def modal_body options={}, &block

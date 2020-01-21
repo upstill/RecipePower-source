@@ -1,10 +1,7 @@
-<div class="dialog modeless notifs-holder recipe_pages new-style green">
+<div class="dialog modeless notifs-holder recipe-pages new-style green">
   <div class="modal-dialog modal-lg">
     <div class="modal-content">
-      <div class="modal-header" style="padding: 30px">
-        <p>Edit title and select recipe content from the page.</p>
-        <%= dialog_close_button false, class: 'select-content rollup', data: {activate: 'waiting'} %>
-      </div>
+      <%= modal_header 'Edit title and select recipe content from the page.', style: "border-bottom: 1px solid #c0f3c2b5" %>
       <!--Define the pane displayed in the panel-->
       <div class="modal-body">
         <%= render "#{pane_for}/form" %>

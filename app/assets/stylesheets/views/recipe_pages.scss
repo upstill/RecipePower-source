@@ -2,18 +2,39 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
-div.dialog.recipe_pages.new-style.recipe_pages.green {
-  div.recipe-fields a.glyphicon {
-    font-size: 30px;
-    color:  #D9E3CA;
+div.dialog.recipe-pages.new-style.green {
+  z-index: 1500;
+  div.modal-dialog div.modal-content {
+    div.modal-header {
+      padding: 0;
+      button.dialog-x-box {
+        // top: 0;
+      }
+    }
+
+    div.modal-body {
+      padding-top: 20px;
+    }
+    div.modal-footer {
+      padding: 0;
+    }
   }
+
+  div.recipe-fields a.glyphicon {
+    font-size: 24px;
+    color: #D9E3CA;
+  }
+
   div.recipe-field {
     display: inline-block;
+
     &.title {
       width: 85%;
     }
+
     &.icon {
       padding-left: 10px;
     }
   }
+
 }

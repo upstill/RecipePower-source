@@ -55,7 +55,7 @@ RP.dialog.push_modal = (newdlog, odlog) ->
 	newdlog = assert_modal newdlog, odlog # Grab the new dialog as a detached DOM element
 	# push_modal newdlog, odlog # Hide, detach and store the parent with the child
 	# hide_modal odlog
-	if $(odlog).modal
+	if $(odlog).hasClass 'modal'
 		$(odlog).modal('hide').on 'hidden.bs.modal', ->
 			$(odlog).detach()
 			newdlog = attach_modal newdlog
@@ -71,7 +71,7 @@ RP.dialog.push_modal = (newdlog, odlog) ->
 attach_modal = (newdlog, parentnode) ->
 	parentnode ||= document.getElementsByTagName("body")[0]
 	newdlog = parentnode.appendChild newdlog
-	if $(newdlog).modal
+	if $(newdlog).hasClass 'modal'
 		$(newdlog).modal() # Brand the dialog for bootstrap
 	newdlog
 
@@ -114,7 +114,7 @@ RP.dialog.target_modal = (event) ->
 
 # Return the dialog in which the given element may be found, or any old modal if no element
 RP.dialog.enclosing_modal = (elmt) ->
-	dlogs = $('div.dialog.modal')
+	dlogs = $('div.dialog')
 	if elmt
 		for dlog in dlogs
 			if $(elmt, dlog)[0]
@@ -177,7 +177,7 @@ close_modal = (dlog, action, next) ->
 		if action != 'cancel' && parent = $(dlog).data 'parent'
 			next = assert_modal parent, dlog
 		RP.dialog.notify action, dlog
-		if $(dlog).modal
+		if $(dlog).hasClass 'modal'
 			$(dlog).modal('hide').on 'hidden.bs.modal', ->
 				$(dlog).remove()
 				if next

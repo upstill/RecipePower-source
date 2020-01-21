@@ -36,7 +36,7 @@ RP.recipe_pages.submit_selection = () ->
 
 RP.recipe_pages.onload = (dlog) ->
 	$(dlog).on "click", '.edit-recipe', (event) ->
-		$('.listing_item', dlog).removeClass('visible').addClass('hidden')
-		$('.editing_item', dlog).removeClass('hidden').addClass('visible')
+		$('.listing-item', dlog).removeClass('visible').addClass('hidden')
+		$('.editing-item', dlog).removeClass('hidden').addClass('visible')
 	$(dlog).on "click", '.copy-selection', (event) ->
 		x=2 # Extract copy!!

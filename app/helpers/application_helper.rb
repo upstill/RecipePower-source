@@ -72,7 +72,7 @@ module ApplicationHelper
     data = data_to_add_fields f, association, *initializers
     link_to name,
             '#',
-            class: 'add_fields',
+            class: "add_fields #{'glyphicon glyphicon-plus' unless name.present?}",
             data: data
   end
 
