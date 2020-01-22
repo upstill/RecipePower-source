@@ -45,10 +45,10 @@ getPathTo = (element, relative_to) ->
 	ix= 0;
 	for sibling in element.parentNode.childNodes
 		if sibling == element
-			toHere = getPathTo element.parentNode, relative_to
-			if toHere != ''
-				toHere += '/'
-			return toHere+element.tagName+'['+(ix+1)+']';
+			toParent = getPathTo element.parentNode, relative_to
+			if toParent != ''
+				toParent += '/'
+			return toParent+element.tagName+'['+(ix+1)+']';
 		if sibling.nodeType == 1 && sibling.tagName == element.tagName
 			ix++
 
@@ -62,10 +62,13 @@ RP.recipe_pages.onload = (dlog) ->
 			rootNode = document.getElementById 'rp_recipe_content'
 			rootPath = 'id("rp_recipe_content")'
 			anchorNode = sel.anchorNode
+			focusNode = sel.focusNode
+			if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
+				alert "You need to select viable content for the recipe"
+				return
 			anchorOffset = sel.anchorOffset
 			anchorPath = getPathTo anchorNode, rootNode
 			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
-			focusNode = sel.focusNode
 			focusOffset = sel.focusOffset
 			focusPath = getPathTo focusNode, rootNode
 			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
