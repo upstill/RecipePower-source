@@ -58,9 +58,11 @@ RP.recipe_pages.onload = (dlog) ->
 		$('.editing-item', dlog).removeClass('hidden').addClass('visible')
 	$(dlog).on "click", '.copy-selection', (event) ->
 		sel = window.getSelection()
+		event.preventDefault()
 		if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
 			rootNode = document.getElementById 'rp_recipe_content'
 			rootPath = 'id("rp_recipe_content")'
+			fieldsNode = $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
 			anchorNode = sel.anchorNode
 			focusNode = sel.focusNode
 			if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
@@ -68,9 +70,11 @@ RP.recipe_pages.onload = (dlog) ->
 				return
 			anchorOffset = sel.anchorOffset
 			anchorPath = getPathTo anchorNode, rootNode
+			$('input.anchorPath', fieldsNode)[0].value = anchorPath
 			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
 			focusOffset = sel.focusOffset
 			focusPath = getPathTo focusNode, rootNode
+			$('input.focusPath', fieldsNode)[0].value = focusPath
 			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
 		else
 			alert "Select the body of this recipe in the page before grabbing it."

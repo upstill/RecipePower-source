@@ -54,7 +54,7 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchorPath, :focusPath, {:gleaning_attributes => %w{ Title Description }}]
   end
 
   # The presented content for a recipe defaults to the page ref

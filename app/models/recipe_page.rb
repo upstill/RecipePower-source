@@ -2,7 +2,9 @@ class RecipePage < ApplicationRecord
   include Backgroundable
   backgroundable
 
-  mass_assignable_attributes :content
+  def self.mass_assignable_attributes
+    [ :content, :recipes_attributes ]
+  end
 
   has_one :page_ref
   has_many :recipes, :through => :page_ref

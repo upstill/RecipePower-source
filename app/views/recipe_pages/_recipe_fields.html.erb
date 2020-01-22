@@ -3,6 +3,8 @@
   <div class="recipe-field listing-item icon" style="padding-left: 25px">
     <a href='#', class='glyphicon glyphicon-pencil edit-recipe'></a>
   </div>
+  <%= f.hidden_field :anchorPath, class: 'anchorPath' %>
+  <%= f.hidden_field :focusPath, class: 'focusPath' %>
   <div class="recipe-field editing-item title hidden">
     <%= f.text_field :title %>
   </div>
