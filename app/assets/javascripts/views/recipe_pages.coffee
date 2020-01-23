@@ -29,7 +29,7 @@ RP.recipe_pages.submit_selection = () ->
 	doc = RP.recipe_pages.parseXMLString xmlString
 
 	# Get elements from document using XPath
-	xpathResult = doc.evaluate '//.', doc.firstChild, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
+	xpathResult = document.evaluate '//.', doc.firstChild, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
 
 	# Insert elements back into document (I used replace in order to show that the document is actually changed)
 	contentNode.parentNode.replaceChild xpathResult.singleNodeValue.firstChild, contentNode
@@ -48,7 +48,10 @@ getPathTo = (element, relative_to) ->
 			toParent = getPathTo element.parentNode, relative_to
 			if toParent != ''
 				toParent += '/'
-			return toParent+element.tagName+'['+(ix+1)+']';
+			etag = element.tagName
+			if ix > 0 # Don't specify an index of 1 (JS is happy with it, but not Nokogiri)
+				etag += '['+(ix+1)+']'
+			return toParent + etag
 		if sibling.nodeType == 1 && sibling.tagName == element.tagName
 			ix++
 
@@ -69,6 +72,7 @@ edit_field = (recipeFieldsElmt) ->
 		# Hide the editing fields
 		display_fields fe, 'listing-item'
 	display_fields recipeFieldsElmt, 'editing-item'
+	set_selection $('input.anchorPath', recipeFieldsElmt)[0].value, $('input.focusPath', recipeFieldsElmt)[0].value
 
 adopt_selection = (fieldsNode) ->
 	sel = window.getSelection()
@@ -90,6 +94,18 @@ adopt_selection = (fieldsNode) ->
 		f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
 	else
 		alert "Select the body of this recipe in the page before grabbing it."
+
+set_selection = (anchorPath, focusPath) ->
+	if anchorPath && (anchorPath != '') && focusPath && (focusPath != '')
+		rootNode = document.getElementById 'rp_recipe_content'
+		anchorNode = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
+		focusNode = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
+		range = document.createRange()
+		range.setStartBefore anchorNode
+		range.setEndAfter focusNode
+		selection = window.getSelection()
+		selection.removeAllRanges()
+		selection.addRange range
 
 RP.recipe_pages.onload = (dlog) ->
 	$(dlog).on 'click', '.add_fields', (event) ->
