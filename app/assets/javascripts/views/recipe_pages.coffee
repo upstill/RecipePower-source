@@ -76,10 +76,12 @@ edit_field = (recipeFieldsElmt) ->
 
 adopt_selection = (fieldsNode) ->
 	sel = window.getSelection()
+	anchorText = ''
 	if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
 		rootNode = document.getElementById 'rp_recipe_content'
 		rootPath = 'id("rp_recipe_content")'
 		anchorNode = sel.anchorNode
+		anchorText = anchorNode.textContent
 		focusNode = sel.focusNode
 		if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
 			alert "You need to select viable content for the recipe"
@@ -94,6 +96,7 @@ adopt_selection = (fieldsNode) ->
 		f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
 	else
 		alert "Select the body of this recipe in the page before grabbing it."
+	anchorText # Return the text in the anchorNode (for use as a title)
 
 set_selection = (anchorPath, focusPath) ->
 	if anchorPath && (anchorPath != '') && focusPath && (focusPath != '')
@@ -113,11 +116,13 @@ RP.recipe_pages.onload = (dlog) ->
 		time = new Date().getTime()
 		regexp = new RegExp($(this).data('id'), 'g')
 		row = $(this).parents('div.row')[0]
-		new_field = $(row).before($(this).data('fields').replace(regexp, time))
+		$(row).before($(this).data('fields').replace(regexp, time))
 		new_field = $('div.recipe-fields').last()[0]
+		ttl = adopt_selection new_field
+		if ttl && (ttl != '')
+			$('.listing-item.title h3', new_field).text ttl
+			$('.editing-item.title input', new_field).val ttl
 		edit_field new_field # Edit the newly-created fields
-		adopt_selection new_field
-		# TODO: grab selection, if any
 		event.preventDefault()
 	$(dlog).on "click", '.edit-recipe', (event) ->
 		edit_field $(event.target).parents('div.recipe-fields')[0]  # The enclosing fields set
