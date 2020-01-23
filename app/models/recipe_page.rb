@@ -7,8 +7,8 @@ class RecipePage < ApplicationRecord
   end
 
   has_one :page_ref
+  accepts_nested_attributes_for :page_ref
   has_many :recipes, :through => :page_ref
-  accepts_nested_attributes_for :recipes
 
   # The page performs by parsing the content from its page_ref
   def perform

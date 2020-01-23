@@ -105,6 +105,7 @@ class PageRef < ApplicationRecord
   }
 
   has_many :recipes, :dependent => :nullify # , foreign_key: 'page_ref_id'
+  accepts_nested_attributes_for :recipes
   has_many :sites, :dependent => :nullify # , foreign_key: 'page_ref_id'
 
   # alias_method :host, :domain

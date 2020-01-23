@@ -55,6 +55,6 @@ class RecipePagesController < ApplicationController
 
     # Only allow a trusted parameter "white list" through.
     def recipe_page_params
-      params.require(:recipe_page).permit(:content, :recipes_attributes => [ :title, :id, :anchorPath, :focusPath ] )
+      params.require(:recipe_page).permit(:content, :page_ref_attributes => [ :id, recipes_attributes: [:title, :id, :anchorPath, :focusPath] ] )
     end
 end
