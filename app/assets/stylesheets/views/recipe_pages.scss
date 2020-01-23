@@ -20,9 +20,13 @@ div.dialog.recipe-pages.new-style.green {
     }
   }
 
-  div.recipe-fields a.glyphicon {
-    font-size: 24px;
-    color: #D9E3CA;
+  div.recipe-fields {
+    padding: 15px;
+    border-bottom: 1px solid #91aa6a;
+    a.glyphicon {
+      font-size: 24px;
+      color: #D9E3CA;
+    }
   }
 
   div.recipe-field {

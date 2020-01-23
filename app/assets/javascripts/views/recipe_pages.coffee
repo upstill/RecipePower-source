@@ -52,30 +52,60 @@ getPathTo = (element, relative_to) ->
 		if sibling.nodeType == 1 && sibling.tagName == element.tagName
 			ix++
 
+display_fields = (recipeFieldsElmt, itemClass) ->
+	# Show all and only the fields of the given class (editing-item or listing-item)
+	$('div.recipe-field', recipeFieldsElmt).removeClass 'visible'
+	$('div.recipe-field', recipeFieldsElmt).addClass 'hidden'
+	$(('div.' + itemClass), recipeFieldsElmt).removeClass 'hidden'
+	$(('div.' + itemClass), recipeFieldsElmt).addClass 'visible'
+
+edit_field = (recipeFieldsElmt) ->
+	$('div.recipe-fields').each (index, fe) ->
+		# Copy the edited title to the display title
+		ttl = $('.editing-item.title input', fe)[0].value
+		if ttl == ''
+			ttl = 'Recipe needs a title!'
+		$('.listing-item.title h3', fe).text ttl
+		# Hide the editing fields
+		display_fields fe, 'listing-item'
+	display_fields recipeFieldsElmt, 'editing-item'
+
+adopt_selection = (fieldsNode) ->
+	sel = window.getSelection()
+	if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
+		rootNode = document.getElementById 'rp_recipe_content'
+		rootPath = 'id("rp_recipe_content")'
+		anchorNode = sel.anchorNode
+		focusNode = sel.focusNode
+		if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
+			alert "You need to select viable content for the recipe"
+			return
+		anchorOffset = sel.anchorOffset
+		anchorPath = getPathTo anchorNode, rootNode
+		$('input.anchorPath', fieldsNode)[0].value = anchorPath
+		a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
+		focusOffset = sel.focusOffset
+		focusPath = getPathTo focusNode, rootNode
+		$('input.focusPath', fieldsNode)[0].value = focusPath
+		f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
+	else
+		alert "Select the body of this recipe in the page before grabbing it."
+
 RP.recipe_pages.onload = (dlog) ->
-	$(dlog).on "click", '.edit-recipe', (event) ->
-		$('.listing-item', dlog).removeClass('visible').addClass('hidden')
-		$('.editing-item', dlog).removeClass('hidden').addClass('visible')
-	$(dlog).on "click", '.copy-selection', (event) ->
-		sel = window.getSelection()
+	$(dlog).on 'click', '.add_fields', (event) ->
+		# Initialize a recipe by giving it a bogus, but unique, ID
+		time = new Date().getTime()
+		regexp = new RegExp($(this).data('id'), 'g')
+		row = $(this).parents('div.row')[0]
+		new_field = $(row).before($(this).data('fields').replace(regexp, time))
+		new_field = $('div.recipe-fields').last()[0]
+		edit_field new_field # Edit the newly-created fields
+		adopt_selection new_field
+		# TODO: grab selection, if any
 		event.preventDefault()
-		if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
-			rootNode = document.getElementById 'rp_recipe_content'
-			rootPath = 'id("rp_recipe_content")'
-			fieldsNode = $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
-			anchorNode = sel.anchorNode
-			focusNode = sel.focusNode
-			if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
-				alert "You need to select viable content for the recipe"
-				return
-			anchorOffset = sel.anchorOffset
-			anchorPath = getPathTo anchorNode, rootNode
-			$('input.anchorPath', fieldsNode)[0].value = anchorPath
-			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
-			focusOffset = sel.focusOffset
-			focusPath = getPathTo focusNode, rootNode
-			$('input.focusPath', fieldsNode)[0].value = focusPath
-			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
-		else
-			alert "Select the body of this recipe in the page before grabbing it."
-		x=2 # Extract copy!! /html/body/div[4]/div[2]/div/div/div[1]/div/h2[3]
+	$(dlog).on "click", '.edit-recipe', (event) ->
+		edit_field $(event.target).parents('div.recipe-fields')[0]  # The enclosing fields set
+		event.preventDefault()
+	$(dlog).on "click", '.copy-selection', (event) ->
+		adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
+		event.preventDefault()
