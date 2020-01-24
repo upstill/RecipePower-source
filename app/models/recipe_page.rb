@@ -3,7 +3,7 @@ class RecipePage < ApplicationRecord
   backgroundable
 
   def self.mass_assignable_attributes
-    [ :content, :recipes_attributes ]
+    [ :content ]
   end
 
   has_one :page_ref
@@ -32,6 +32,10 @@ class RecipePage < ApplicationRecord
   end
 
   def parse
+
+  end
+
+  def selected_content anchor_path, focus_path
 
   end
 

@@ -473,8 +473,8 @@ ActiveRecord::Schema.define(version: 2020_01_22_063233) do
     t.integer "dj_id"
     t.integer "status", default: 0
     t.text "content"
-    t.string "anchorPath"
-    t.string "focusPath"
+    t.string "anchor_path"
+    t.string "focus_path"
     t.index ["id"], name: "recipes_index_by_id", unique: true
     t.index ["title"], name: "recipes_index_by_title"
   end

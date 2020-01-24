@@ -1,10 +1,10 @@
 <div class="row recipe-fields">
-  <div class="recipe-field listing-item title visible" style="padding-left: 30px"><h3><%= f.object.title %></h3></div>
+  <div class="recipe-field listing-item title visible" style="padding-left: 30px"><h4><%= f.object.title %></h4></div>
   <div class="recipe-field listing-item icon visible" style="padding-left: 25px">
     <a href='#', class='glyphicon glyphicon-pencil edit-recipe'></a>
   </div>
-  <%= f.hidden_field :anchorPath, class: 'anchorPath' %>
-  <%= f.hidden_field :focusPath, class: 'focusPath' %>
+  <%= f.hidden_field :anchor_path, class: 'anchorPath' %>
+  <%= f.hidden_field :focus_path, class: 'focusPath' %>
   <div class="recipe-field editing-item title hidden">
     <%= f.text_field :title, placeholder: 'Title the recipe here' %>
   </div>

@@ -259,7 +259,7 @@ class FinderServices
       trimmed = SiteServices.new(@finder.site).trim_recipe(html)
       puts "------------------ Trimmed:\n#{trimmed}" if trimmed != html
       puts "------------------ Trimmed and Massaged:"
-      puts massage_content(SiteServices.new(@finder.site).trim_recipe(html))
+      puts recipe.massage_content(SiteServices.new(@finder.site).trim_recipe(html))
     else
       puts "Nothing gleanable from selector #{@finder.selector}"
     end

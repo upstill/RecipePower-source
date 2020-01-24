@@ -130,3 +130,5 @@ RP.recipe_pages.onload = (dlog) ->
 	$(dlog).on "click", '.copy-selection', (event) ->
 		adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
 		event.preventDefault()
+		RP.notifications.post 'Selection copied to recipe', 'popup'
+

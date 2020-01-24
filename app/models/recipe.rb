@@ -5,6 +5,7 @@ require './lib/html_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
+require 'htmlbeautifier'
 
 class Recipe < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
@@ -54,12 +55,27 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, :anchorPath, :focusPath, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
+  end
+
+  # This is the SOP for turning a random grab of HTML into something presentable on a recipe card
+  def massage_content html
+    return nil if html.blank? # Protect against bad input
+    nk = process_dom html
+    # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
+    HtmlBeautifier.beautify nk.to_s
   end
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    content.if_present || massage_content(page_ref&.content)
+    case
+    when content.present?
+      content
+    when focusPath.present?
+      recipe_page.selected_content anchor_path, focus_path
+    else
+      massage_content(page_ref&.content)
+    end
   end
 
   # When the content is explicitly set for the first time, trim it according to the site
@@ -69,7 +85,7 @@ class Recipe < ApplicationRecord
       # Perform site-specific editing after standard editing
       html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
     end
-    super html
+    super html # Set the attribute
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid

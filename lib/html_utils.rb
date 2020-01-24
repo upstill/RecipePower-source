@@ -1,13 +1,4 @@
 require 'nokogiri'
-require 'htmlbeautifier'
-
-# This is the SOP for turning a random grab of HTML into something presentable on a recipe card
-def massage_content html
-  return nil if html.blank? # Protect against bad input
-  nk = process_dom html
-  # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
-  HtmlBeautifier.beautify nk.to_s
-end
 
 # Perform whatever processing is needed on the node
 def process_dom html
