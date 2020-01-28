@@ -8,27 +8,35 @@ def node_empty? nokonode
 end
 
 # Move
-def assemble_tree_from_nodes html, anchor_elmt, focus_elmt
+def assemble_tree_from_nodes html, anchor_elmt, focus_elmt, insert=true
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+
+  # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
-  left_ancestor.next = html
-  newtree = left_ancestor.next
+  newtree =
+      if insert
+        left_ancestor.previous = html
+        left_ancestor.previous
+      else
+        Nokogiri::HTML.fragment html
+      end
+  left_collector = left_ancestor.next
   
   highest_whole_left = anchor_elmt
   while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
     highest_whole_left = highest_whole_left.parent
   end
   # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
-  collector = highest_whole_left.next
+  right_collector = highest_whole_left.next
   newtree.add_child highest_whole_left
-  while (collector.parent != common_ancestor)
-    parent = collector.parent
-    while (right_sib = collector.next) do
-      collector = right_sib.next
+  while (right_collector.parent != common_ancestor)
+    parent = right_collector.parent
+    while (right_sib = right_collector.next) do
+      right_collector = right_sib.next
       newtree.add_child right_sib
     end
-    collector = parent
+    right_collector = parent
   end
   ## Now do the same with the right side, adding preceding elements
   # Find the highest node that can be moved whole
@@ -41,17 +49,17 @@ def assemble_tree_from_nodes html, anchor_elmt, focus_elmt
   while stack.last.parent != common_ancestor
     stack.push stack.last.parent
   end
-  left_sib = newtree.next_sibling
   # Go down the tree, collecting all the siblings before and including each ancestor
   while ancestor = stack.pop
-    while left_sib != ancestor do
-      next_sib = left_sib.next_sibling
-      newtree.add_child left_sib
-      left_sib = next_sib
+    while left_collector != ancestor do
+      next_sib = left_collector.next_sibling
+      newtree.add_child left_collector
+      left_collector = next_sib
     end
-    left_sib = ancestor.children[0] unless stack.empty?
+    left_collector = ancestor.children[0] unless stack.empty?
   end
   newtree.add_child highest_whole_right
+  newtree
 end
 
 
@@ -230,13 +238,8 @@ class NokoTokens < Array
       elmt.next.add_child elmt
     else
       teright = text_elmt_data -(pos_end)
-      # Find the common ancestor of the two text nodes
-      common_ancestor = (teleft.ancestors & teright.ancestors).first
       # Remove unselected text from the two text elements and leave remaining text, if any, next door
       teleft.split_left ; teright.split_right
-      # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
-      # highest_whole_left = teleft.text_element
-      # highest_whole_right = teright.text_element
       assemble_tree_from_nodes html, teleft.text_element, teright.text_element
     end
     # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
