@@ -8,7 +8,13 @@ def node_empty? nokonode
 end
 
 # Move
-def assemble_tree_from_nodes newtree, anchor_elmt, focus_elmt, common_ancestor
+def assemble_tree_from_nodes html, anchor_elmt, focus_elmt
+  common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+  left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
+      anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
+  left_ancestor.next = html
+  newtree = left_ancestor.next
+  
   highest_whole_left = anchor_elmt
   while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
     highest_whole_left = highest_whole_left.parent
@@ -226,16 +232,12 @@ class NokoTokens < Array
       teright = text_elmt_data -(pos_end)
       # Find the common ancestor of the two text nodes
       common_ancestor = (teleft.ancestors & teright.ancestors).first
-      left_ancestor = (teleft.text_element if teleft.text_element.parent == common_ancestor) ||
-          teleft.ancestors.find { |elmt| elmt.parent == common_ancestor }
-      left_ancestor.next = html
-      newtree = left_ancestor.next
       # Remove unselected text from the two text elements and leave remaining text, if any, next door
       teleft.split_left ; teright.split_right
       # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
       # highest_whole_left = teleft.text_element
       # highest_whole_right = teright.text_element
-      assemble_tree_from_nodes newtree, teleft.text_element, teright.text_element, common_ancestor
+      assemble_tree_from_nodes html, teleft.text_element, teright.text_element
     end
     # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
     ix = 0
