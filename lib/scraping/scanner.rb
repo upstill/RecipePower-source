@@ -7,6 +7,48 @@ def node_empty? nokonode
   nokonode.children.blank? || nokonode.children.all? { |child| node_empty? child }
 end
 
+# Move
+def assemble_tree_from_nodes newtree, anchor_elmt, focus_elmt, common_ancestor
+  highest_whole_left = anchor_elmt
+  while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
+    highest_whole_left = highest_whole_left.parent
+  end
+  # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
+  collector = highest_whole_left.next
+  newtree.add_child highest_whole_left
+  while (collector.parent != common_ancestor)
+    parent = collector.parent
+    while (right_sib = collector.next) do
+      collector = right_sib.next
+      newtree.add_child right_sib
+    end
+    collector = parent
+  end
+  ## Now do the same with the right side, adding preceding elements
+  # Find the highest node that can be moved whole
+  highest_whole_right = focus_elmt
+  while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
+    highest_whole_right = highest_whole_right.parent
+  end
+  # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
+  stack = [ highest_whole_right ]
+  while stack.last.parent != common_ancestor
+    stack.push stack.last.parent
+  end
+  left_sib = newtree.next_sibling
+  # Go down the tree, collecting all the siblings before and including each ancestor
+  while ancestor = stack.pop
+    while left_sib != ancestor do
+      next_sib = left_sib.next_sibling
+      newtree.add_child left_sib
+      left_sib = next_sib
+    end
+    left_sib = ancestor.children[0] unless stack.empty?
+  end
+  newtree.add_child highest_whole_right
+end
+
+
 # A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
 # This is an "abstract" class for defining what methods the Scanner provides
 class Scanner < Object
@@ -191,42 +233,9 @@ class NokoTokens < Array
       # Remove unselected text from the two text elements and leave remaining text, if any, next door
       teleft.split_left ; teright.split_right
       # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
-      highest_whole_left = teleft.text_element
-      while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
-        highest_whole_left = highest_whole_left.parent
-      end
-      # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
-      elmt = highest_whole_left.next
-      newtree.add_child highest_whole_left
-      while (elmt.parent != common_ancestor)
-        parent = elmt.parent
-        while (right_sib = elmt.next) do
-          elmt = right_sib.next
-          newtree.add_child right_sib
-        end
-        elmt = parent
-      end
-
-      # Now do the same with the right side, adding preceding elements
-      highest_whole_right = teright.text_element
-      while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
-        highest_whole_right = highest_whole_right.parent
-      end
-      # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
-      stack = [ highest_whole_right ]
-      while stack.last.parent != common_ancestor
-        stack.push stack.last.parent
-      end
-      left_sib = newtree.next_sibling
-      while ancestor = stack.pop
-        while left_sib != ancestor do
-          next_sib = left_sib.next_sibling
-          newtree.add_child left_sib
-          left_sib = next_sib
-        end
-        left_sib = ancestor.children[0] unless stack.empty?
-      end
-      newtree.add_child highest_whole_right
+      # highest_whole_left = teleft.text_element
+      # highest_whole_right = teright.text_element
+      assemble_tree_from_nodes newtree, teleft.text_element, teright.text_element, common_ancestor
     end
     # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
     ix = 0
