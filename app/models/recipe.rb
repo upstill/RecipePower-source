@@ -68,14 +68,7 @@ class Recipe < ApplicationRecord
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    case
-    when content.present?
-      content
-    when focus_path.present?
-      recipe_page.selected_content anchor_path, focus_path
-    else
-      massage_content(page_ref&.content)
-    end
+    content.if_present || recipe_page.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   # When the content is explicitly set for the first time, trim it according to the site

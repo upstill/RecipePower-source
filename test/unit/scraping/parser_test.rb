@@ -161,8 +161,7 @@ EOF
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex) do |grammar|
+    parser = Parser.new(html, @lex) do |grammar|
       # Here's our chance to modify the grammar
       grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
       grammar[:rp_inglist][:within_css_match] = 'ul'
@@ -178,8 +177,7 @@ EOF
 
   test 'finds title in h1 tag' do
     html = "irrelevant noise <h1>Title Goes Here</h1> followed by more noise"
-    nks = NokoScanner.from_string html
-    parser = Parser.new nks, @lex
+    parser = Parser.new html, @lex
     seeker = parser.match :rp_title
     assert_equal "Title", seeker.head_stream.token_at
     assert_equal "followed", seeker.tail_stream.token_at
@@ -200,8 +198,7 @@ EOF
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
     html = html.gsub /\n+\s*/, ''
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex) do |grammar|
+    parser = Parser.new(html, @lex) do |grammar|
       #grammar[:rp_ingline][:match]  = [
       #:rp_ingname,
       #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
@@ -222,8 +219,7 @@ EOF
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex)  do |grammar|
+    parser = Parser.new(html, @lex)  do |grammar|
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe
@@ -258,8 +254,7 @@ EOF
 </div>
 EOF
     # This page has several recipes, each begun with an h2 header
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex)  do |grammar|
+    parser = Parser.new(html, @lex)  do |grammar|
       # We start by seeking to the next h2 (title) tag
       grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag

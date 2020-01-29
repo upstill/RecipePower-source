@@ -136,8 +136,16 @@ class Parser
     end
     @grammar = grammar
     @lexaur = lexaur if lexaur
-    @stream = (noko_scanner_or_nkdoc_or_nktokens if noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner)) ||
-        NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
+    @stream = case noko_scanner_or_nkdoc_or_nktokens
+              when NokoScanner
+                noko_scanner_or_nkdoc_or_nktokens
+              when String
+                NokoScanner.from_string noko_scanner_or_nkdoc_or_nktokens
+              when NokoTokens
+                NokoScanner.new noko_scanner_or_nkdoc_or_nktokens
+              else
+                raise "Trying to initialize Parser with #{noko_scanner_or_nkdoc_or_nktokens.class.to_s}"
+              end
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream

@@ -39,16 +39,18 @@ class RecipePage < ApplicationRecord
   # Return the content within the selection. Presumably this is the actual content of a recipe. There may also be
   # multiple selections on a page, each for a different recipe.
   def selected_content anchor_path, focus_path
+    return unless anchor_path.present? && focus_path.present?
     nk = Nokogiri::HTML.fragment content
-    anchor_node = nk.xpath(anchor_path.downcase).first   # Presumably there's only one match!
-    focus_node = nk.xpath(focus_path.downcase).last
+    anchor_node = nk.xpath(anchor_path.downcase)&.first   # Presumably there's only one match!
+    focus_node = nk.xpath(focus_path.downcase)&.last
+    return unless anchor_node && focus_node
     if anchor_node == focus_node
       # Degenerate case where the selection only has one node
-      return anchor_node
+      return anchor_node.to_html
     end
     classes = "rp_elmt #{classes}".strip
     nokotree = assemble_tree_from_nodes "<div class='#{classes}'></div>", anchor_node, focus_node, false
-    nokotree.to_html
+    nokotree.to_html if nokotree
   end
 
 end

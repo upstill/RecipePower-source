@@ -174,7 +174,7 @@ class NokoTokens < Array
     end
 
     # Take the parameters as instance variables, creating @tokens if nec.
-    @nkdoc = nkdoc
+    @nkdoc = nkdoc.is_a?(String) ? Nokogiri::HTML.fragment(nkdoc) : nkdoc
     @elmt_bounds = []
     @token_starts = []
     @processed_text_len = 0
@@ -307,14 +307,18 @@ class NokoScanner
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc_or_nktokens, pos = 0, bound=nil # length=nil
+  def initialize nkdoc_or_nktokens_or_html, pos = 0, bound=nil # length=nil
     # Take the parameters as instance variables, creating @tokens if nec.
-    if nkdoc_or_nktokens.class == NokoTokens
-      @tokens = nkdoc_or_nktokens
-      @nkdoc = nkdoc_or_nktokens.nkdoc
-    else
-      @nkdoc = nkdoc_or_nktokens
-      @tokens = NokoTokens.new nkdoc_or_nktokens
+    case nkdoc_or_nktokens_or_html
+    when NokoTokens
+      @tokens = nkdoc_or_nktokens_or_html
+      @nkdoc = nkdoc_or_nktokens_or_html.nkdoc
+    when String
+      @nkdoc = Nokogiri::HTML.fragment nkdoc_or_nktokens_or_html
+      @tokens = NokoTokens.new @nkdoc
+    else # It's a Nokogiri doc!
+      @nkdoc = nkdoc_or_nktokens_or_html
+      @tokens = NokoTokens.new nkdoc_or_nktokens_or_html
     end
     @bound = bound || @tokens.length
     @pos = pos
