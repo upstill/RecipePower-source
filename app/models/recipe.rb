@@ -71,7 +71,7 @@ class Recipe < ApplicationRecord
     case
     when content.present?
       content
-    when focusPath.present?
+    when focus_path.present?
       recipe_page.selected_content anchor_path, focus_path
     else
       massage_content(page_ref&.content)
