@@ -4,6 +4,16 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 class ParserTest < ActiveSupport::TestCase
+
+  def add_tags type, names
+    typenum = Tag.typenum(type)
+    names.each { |name|
+      next if Tag.strmatch(name, tagtype: typenum).present?
+      tag = Tag.assert name, typenum
+      @lex.take tag.name, tag.id
+    }
+  end
+
   def setup
     @amounts = [
         '1 head',
@@ -230,13 +240,21 @@ EOF
     assert_equal 8, seeker.children[1].children.count
   end
 
+  test 'ingredient list with pine nuts' do
+    html = '  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
+    add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new(html, @lex)
+    seeker = parser.match :rp_inglist
+    assert seeker
+  end
+
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
     html = <<EOF
 <div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
   <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
   <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
   <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
-  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p>Prep <strong>5 min</strong><br>Cook: <strong>20 min</strong><br>Serves <strong>4</strong></p>
   <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
   <h2>Soft-boiled egg with avocado, chorizo and asparagus</h2>
@@ -254,12 +272,14 @@ EOF
 </div>
 EOF
     # This page has several recipes, each begun with an h2 header
+    ingreds = %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    add_tags :Ingredient, ingreds
     parser = Parser.new(html, @lex)  do |grammar|
       # We start by seeking to the next h2 (title) tag
       grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
+      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2' }
     end
     seeker = parser.match :rp_recipelist
     assert seeker
@@ -273,9 +293,12 @@ EOF
     assert (prep_seeker = parser.seek :rp_prep_time)
     assert_equal 'Prep 5 min', prep_seeker.to_s
     assert (cook_seeker = parser.seek :rp_cook_time)
-    assert_equal 'Cook 20 min', cook_seeker.to_s
+    assert_equal 'Cook: 20 min', cook_seeker.to_s
     assert (servings_seeker = parser.seek :rp_serves)
     assert_equal 'Serves 4', servings_seeker.to_s
+    ingred_seekers = rcp_seeker.find :rp_ingname
+    ingreds_found = ingred_seekers.map &:to_s
+    assert_equal ingreds, ingreds_found
   end
 
 end

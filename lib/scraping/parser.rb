@@ -98,9 +98,9 @@ class Parser
       # Hopefully sites will specify how to find the title in the extracted text
       rp_title: { accumulate: Regexp.new('^.*$'), within_css_match: 'h1' }, # Match all tokens within an <h1> tag
       rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
-      rp_prep_time: { atline: [ Regexp.new('Prep'), :rp_time ] },
-      rp_cook_time: { atline: [ Regexp.new('Cook'), :rp_time ] },
-      rp_total_time: { atline: [ Regexp.new('Total'), :rp_time ] },
+      rp_prep_time: { atline: [ Regexp.new('Prep'), { optional: ':' }, :rp_time ] },
+      rp_cook_time: { atline: [ Regexp.new('Cook'), { optional: ':' }, :rp_time ] },
+      rp_total_time: { atline: [ Regexp.new('Total'), { optional: ':' }, :rp_time ] },
       rp_time: [ :rp_num, 'min' ],
       rp_yield: [],
       rp_serves: { atline: [ Regexp.new('Serves'), :rp_num ] },
