@@ -7,6 +7,18 @@ def node_empty? nokonode
   nokonode.children.blank? || nokonode.children.all? { |child| node_empty? child }
 end
 
+# Return all the siblings BEFORE this node
+def prev_siblings nokonode
+  found = false
+  nokonode.parent.children.collect { |child| child unless (found ||= child == nokonode) }.compact
+end
+
+# Return all the siblings AFTER this node
+def next_siblings nokonode
+  found = false
+  nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode ; nil) }.compact
+end
+
 # Move
 def assemble_tree_from_nodes html, anchor_elmt, focus_elmt, insert=true
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
@@ -69,7 +81,7 @@ class Scanner < Object
   attr_reader :pos
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
-  def peek nchars = 1
+  def peek ntokens = 1
 
   end
 
@@ -87,6 +99,11 @@ class Scanner < Object
     if (data || (ptr == (head + 1)))
       head = ptr
     end
+  end
+
+  # Provide a string representing the content of the stream from its current position, terminating at the bound
+  def to_s limit=@bound
+    peek (limit - @pos)
   end
 
 end
@@ -200,6 +217,23 @@ class NokoTokens < Array
   # Convenience method to specify requisite text in terms of tokens
   def enclose_tokens first_token, limiting_token, classes=''
     enclose token_offset_at(first_token), token_offset_at(limiting_token), classes
+  end
+
+  # Return the string representing all the text given by the two token positions
+  def text_from first_token, limiting_token
+    pos_begin = token_offset_at(first_token) ; pos_end = token_offset_at(limiting_token)
+    teleft = text_elmt_data pos_begin
+    if teleft.encompasses_offset pos_end
+      return teleft.delimited_text(pos_end)
+    end
+    teright = text_elmt_data -(pos_end) # The TextElmtData for the terminating token
+    left_ancestors = teleft.ancestors - teright.ancestors # All ancestors below the common ancestor
+    right_ancestors = teright.ancestors - teleft.ancestors
+    topleft = left_ancestors.pop || teleft ; topright = right_ancestors.pop || teright # Special processing here
+    nodes = left_ancestors.collect { |left_ancestor| next_siblings left_ancestor } +
+        (next_siblings(topleft) & prev_siblings(topright)) +
+        right_ancestors.reverse.collect { |right_ancestor| prev_siblings right_ancestor }
+    teleft.subsq_text + nodes.flatten.map(&:text).join + teright.prior_text
   end
 
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
@@ -333,14 +367,20 @@ class NokoScanner
     tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
   end
 
-  def peek nchars = 1
+  def peek ntokens = 1
     if @pos < @bound # @length
-      if nchars == 1
+      if ntokens == 1
         tokens[@pos]
-      elsif tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
-        tokens[@pos...(@pos + nchars)].join(' ')
+      elsif tokens[@pos...(@pos + ntokens)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
+        tokens[@pos...(@pos + ntokens)].join(' ')
       end
     end
+  end
+
+  # Output version of #peek: the original text, rather than a joined set of tokens
+  def to_s limit=@bound
+    # peek limit-@pos      Gives tokens joined by a space: not quite the same thing
+    tokens.text_from @pos, limit
   end
 
   # Report the token no matter if the position is beyond the bound
@@ -354,17 +394,17 @@ class NokoScanner
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position
-  def first nchars = 1
-    if str = peek(nchars)
-      @pos += nchars
+  def first ntokens = 1
+    if str = peek(ntokens)
+      @pos += ntokens
       @pos = @bound if @pos > @bound # @length if @pos > @length
     end
     str
   end
 
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars = 1
-    newpos = @pos + nchars
+  def rest ntokens = 1
+    newpos = @pos + ntokens
     NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
   end
 

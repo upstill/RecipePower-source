@@ -33,7 +33,35 @@ class RecipePage < ApplicationRecord
   end
 
   def parse
-
+    def report name, seekers
+      if ingredients.present?
+        puts "Found ingredients '#{ingredients.map(&:to_s).join('\', \'')}'"
+      else
+        puts "No ingredients"
+      end
+    end
+    parser = Parser.new(content, Lexaur.from_tags)  do |grammar|
+      # We start by seeking to the next h2 (title) tag
+      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      # Stop seeking ingredients at the next h2 tag
+      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
+    end
+    seeker = parser.match :rp_recipelist
+    # The seeker should present the token :rp_recipelist and have several children
+    recipes = seeker.find { |child| child.token == :rp_recipe && child.find(:rp_title).present? }
+    recipes.each do |recipe_seeker|
+      title_seeker = recipe_seeker.find(:rp_title).first
+      puts "Parsed out recipe '#{title_seeker.to_s}'"
+      ingredients = recipe_seeker.find(:rp_ingname)
+      report 'ingredients', ingredients
+      rp_yield = recipe_seeker.find(:rp_yield)
+      report 'yield', rp_yield
+      author = recipe_seeker.find(:rp_author)
+      report 'author', author
+      makes = recipe_seeker.find(:rp_makes)
+      report 'makes', makes
+    end
   end
 
   # Return the content within the selection. Presumably this is the actual content of a recipe. There may also be

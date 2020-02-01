@@ -31,6 +31,23 @@ class Seeker
   def self.match stream, opts={}
   end
 
+  # From a seeker tree, find those of the given token
+  def find token=nil, &block
+    results = @children.map do |child|
+      if block_given? ? block.call(child) : (child.token == token)
+        child
+      else
+        child.find token, &block
+      end
+    end
+    results.flatten.compact
+  end
+
+  # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
+  def to_s
+    head_stream.to_s tail_stream.pos
+  end
+
   # Apply the results of the parse to the Nokogiri scanner
   def apply
     @children.each { |child| child.apply }

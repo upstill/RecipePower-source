@@ -266,6 +266,16 @@ EOF
     assert_equal :rp_recipelist, seeker.token
     assert_equal 4, seeker.children.count
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }
+    assert (rcp_seeker = seeker.find(:rp_recipe).first)
+    assert (ttl_seeker = rcp_seeker.find(:rp_title).first)
+    puts rcp_seeker.to_s
+    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
+    assert (prep_seeker = parser.seek :rp_prep_time)
+    assert_equal 'Prep 5 min', prep_seeker.to_s
+    assert (cook_seeker = parser.seek :rp_cook_time)
+    assert_equal 'Cook 20 min', cook_seeker.to_s
+    assert (servings_seeker = parser.seek :rp_serves)
+    assert_equal 'Serves 4', servings_seeker.to_s
   end
 
 end

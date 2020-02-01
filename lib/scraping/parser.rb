@@ -84,14 +84,26 @@ class Parser
           match: [
               { optional: :rp_title },
               :rp_inglist ,
-              { checklist: [ { optional: :rp_author }, { optional: :rp_yield } ] },
+              { checklist: [
+                  { optional: :rp_author },
+                  { optional: :rp_prep_time },
+                  { optional: :rp_cook_time },
+                  { optional: :rp_total_time },
+                  { optional: :rp_serves },
+                  { optional: :rp_author },
+                  { optional: :rp_yield }
+              ] },
           ]
       },
       # Hopefully sites will specify how to find the title in the extracted text
       rp_title: { accumulate: Regexp.new('^.*$'), within_css_match: 'h1' }, # Match all tokens within an <h1> tag
-      rp_author: [],
+      rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
+      rp_prep_time: { atline: [ Regexp.new('Prep'), :rp_time ] },
+      rp_cook_time: { atline: [ Regexp.new('Cook'), :rp_time ] },
+      rp_total_time: { atline: [ Regexp.new('Total'), :rp_time ] },
+      rp_time: [ :rp_num, 'min' ],
       rp_yield: [],
-      rp_makes: [],
+      rp_serves: { atline: [ Regexp.new('Serves'), :rp_num ] },
       rp_inglist: {
           # The ingredient list(s) for a recipe
           match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
@@ -154,7 +166,10 @@ class Parser
   end
 
   # Scan down the stream, one token at a time, until the block returns true or the stream runs out
-  def seek stream, spec={}
+  def seek stream=@stream, spec={}
+    unless stream.is_a?(NokoScanner)
+      stream, spec = @stream, stream
+    end
     while stream.more?
       if mtch = (block_given? ? yield(stream) : match(spec, stream))
         return mtch
