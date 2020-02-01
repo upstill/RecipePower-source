@@ -65,8 +65,8 @@ class ParserTest < ActiveSupport::TestCase
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
-    @process_tags = %w{ chopped softened rinsed crustless }.
-        each { |name| Tag.assert name, :Process }
+    @condition_tags = %w{ chopped softened rinsed crustless }.
+        each { |name| Tag.assert name, :Condition }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF
   <p>#{@ingred_specs.join "<br>\n"}</p>
@@ -241,11 +241,13 @@ EOF
   end
 
   test 'ingredient list with pine nuts' do
-    html = '  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
+    html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
     add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
     parser = Parser.new(html, @lex)
     seeker = parser.match :rp_inglist
     assert seeker
+    ingline_seeker = seeker.find(:rp_ingline)[2]
+    assert_equal '2 anchovy fillets, drained and finely chopped', ingline_seeker.to_s
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes

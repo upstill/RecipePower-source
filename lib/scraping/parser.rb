@@ -102,8 +102,8 @@ class Parser
       rp_cook_time: { atline: [ Regexp.new('Cook'), { optional: ':' }, :rp_time ] },
       rp_total_time: { atline: [ Regexp.new('Total'), { optional: ':' }, :rp_time ] },
       rp_time: [ :rp_num, 'min' ],
-      rp_yield: [],
-      rp_serves: { atline: [ Regexp.new('Serves'), :rp_num ] },
+      rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
+      rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
       rp_inglist: {
           # The ingredient list(s) for a recipe
           match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
@@ -127,7 +127,7 @@ class Parser
                ]
       },
       rp_altamt: ["(", :rp_amt, ")"],
-      rp_presteps: { tag: 'Process', list: true }, # There may be one or more presteps (instructions before measuring)
+      rp_presteps: { tag: 'Condition', list: true }, # There may be one or more presteps (instructions before measuring)
       rp_ingspec: { or: [:rp_ingalts, :rp_ingname] },
       rp_ingname: { tag: 'Ingredient' },
       rp_ingalts: { match: :rp_ingname, orlist: true },

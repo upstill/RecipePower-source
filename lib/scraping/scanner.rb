@@ -229,7 +229,7 @@ class NokoTokens < Array
     teright = text_elmt_data -(pos_end) # The TextElmtData for the terminating token
     left_ancestors = teleft.ancestors - teright.ancestors # All ancestors below the common ancestor
     right_ancestors = teright.ancestors - teleft.ancestors
-    topleft = left_ancestors.pop || teleft ; topright = right_ancestors.pop || teright # Special processing here
+    topleft = left_ancestors.pop || teleft.text_element ; topright = right_ancestors.pop || teright.text_element # Special processing here
     nodes = left_ancestors.collect { |left_ancestor| next_siblings left_ancestor } +
         (next_siblings(topleft) & prev_siblings(topright)) +
         right_ancestors.reverse.collect { |right_ancestor| prev_siblings right_ancestor }

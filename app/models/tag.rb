@@ -24,7 +24,8 @@ class Tag < ApplicationRecord
            Course: ['Course', 18],
            Time: ['Time', 19],
            Hidden: ['Hidden', 20],
-           Dual: ['Dual', 21]
+           Dual: ['Dual', 21],
+           Condition: [ 'Condition', 22 ]
   )
 
   has_many :taggings, :dependent => :destroy
