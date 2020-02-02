@@ -1,0 +1,14 @@
+class RecipeContentPolicy < RecipePolicy
+
+end
+
+
+
+
+
+
+
+
+
+
+

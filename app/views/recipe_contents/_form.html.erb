@@ -1,0 +1,12 @@
+<%= simple_form_for(@recipe) do |f| %>
+  <%= form_errors_helper f %>
+  <% render 'recipe_pages/recipe_fields', f: f %>
+  
+  <%= f.hidden_field :content %>
+
+  <div class="modal-footer form-actions">
+    <%= dialog_submit_button 'Save' %>
+    <%= dialog_cancel_button 'Cancel' %>
+    <%#= f.button :submit %>
+  </div>
+<% end %>
