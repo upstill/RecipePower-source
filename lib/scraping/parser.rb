@@ -23,6 +23,19 @@ end
 =end
 
 class Parser
+
+  @@TokenTitles = {
+      :rp_title => 'Title',
+      :rp_ingname => 'Ingredient Name'
+  }
+
+  def self.token_to_title token
+    @@TokenTitles[token]
+  end
+
+  def self.title_to_token title
+
+  end
   # This is the DSL for parsing a recipe. The parsing engine, however, doesn't really concern recipes per se. It only
   # takes a grammar and a token generator and, if successful, creates an abstract syntax tree that just denotes what range of
   # tokens went into each match. In the case of a NokoScanner token generator, that syntax tree can be used to modify the

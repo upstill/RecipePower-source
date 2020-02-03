@@ -209,12 +209,18 @@ RP.submit.filter_submit = (eventdata) ->
 		# To sort out errors from subsequent dialogs, we submit the form synchronously
 		#  and use the result to determine whether to do normal forms processing.
 		method = $(clicked).data("method") || $('input[name=_method]', this).attr "value"
+		formdata = $(context).serializeArray()
+		for own k, v of $(clicked).data()
+			if k != 'method'
+				formdata[formdata.length] = { name: k, value: v }
+		# Include the button's title in the payload
+		# data[data.length] = { name: 'button_title', value: $(clicked).attr("value") }
 		$(context).ajaxSubmit
 			url: $(clicked).data("action") || context.action,
-			type: method, # $('input[name=_method]', this).attr("value"),
+			type: method,
 			async: false,
 			dataType: 'json',
-			data: $(context).serializeArray(),
+			data: formdata,
 			complete: (jqXHR, statusText) ->
 				RP.submit.dequeue() # Check for queued-up requests
 			error: (jqXHR, textStatus, errorThrown) ->

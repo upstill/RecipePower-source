@@ -10,4 +10,8 @@ class RecipeContentDecorator < Draper::Decorator
   #     end
   #   end
 
+  # annotate: apply a parsing token to the given html, using the XML paths denoting the selection
+  def annotate html, token, anchor_path, focus_path
+    x=2
+  end
 end
