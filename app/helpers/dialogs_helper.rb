@@ -234,7 +234,7 @@ module DialogsHelper
         name: 'commit',
         type: 'submit',
         value: label||'Save',
-        data: { method: options[:method] || 'post' }
+        data: (options[:data] || {}).merge( method: options[:method] || 'post' )
   end
 
   def dialog_answer_button label = nil, options={}

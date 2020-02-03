@@ -1,15 +1,17 @@
 <% NestedBenchmark.measure '...content' do %>
   <div class="card-content" style="width:100%">
-    <% if decorator.object.is_a?(Recipe) && policy(decorator.object).update? %>
-      <%= button_to_submit '',
-                           edit_recipe_contents_path(decorator.object),
-                           'glyph-edit-red',
-                           'xl',
-                           mode: :modal,
-                           class: 'annotate-content',
-                           title: 'Annotate Content' %>
-      <%# collectible_edit_button decorator.object %>
+    <% if decorator.object.is_a?(Recipe) %>
+      <% if policy(decorator.object).update? %>
+        <%= button_to_submit '',
+                             edit_recipe_contents_path(decorator.object),
+                             'glyph-edit-red',
+                             'xl',
+                             mode: :modal,
+                             class: 'annotate-content',
+                             title: 'Annotate Content' %>
+        <%# collectible_edit_button decorator.object %>
+      <% end %>
+      <%= presenter.card_content&.html_safe %>
     <% end %>
-    <%= presenter.card_content&.html_safe %>
   </div>
 <% end %>

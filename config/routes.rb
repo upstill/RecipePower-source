@@ -249,7 +249,9 @@ RP::Application.routes.draw do
     member do
       get 'piclist'
       resource :gleaning
-      resource :recipe_contents
+      resource :recipe_contents do
+        patch 'annotate'
+      end
     end
     collection do
       get 'capture'

@@ -1,12 +1,17 @@
-<%= simple_form_for(@recipe) do |f| %>
+<%= simple_form_for(@recipe, url: annotate_recipe_contents_path(@recipe) ) do |f| %>
   <%= form_errors_helper f %>
-  <% render 'recipe_pages/recipe_fields', f: f %>
-  
+  <%# render 'recipe_pages/recipe_fields', f: f %>
+  <div class="row"><p>Use the mouse to select a part of the recipe, then click a button to identify it.</p></div>
+
+  <%= f.hidden_field :anchor_path, class: 'anchorPath' %>
+  <%= f.hidden_field :focus_path, class: 'focusPath' %>
   <%= f.hidden_field :content %>
+
+  <%= annotation_button 'Title', :rp_title, class: 'text-only' %>
+  <%= annotation_button 'Ingredient Name', :rp_ingname, class: 'text-only' %>
 
   <div class="modal-footer form-actions">
     <%= dialog_submit_button 'Save' %>
     <%= dialog_cancel_button 'Cancel' %>
-    <%#= f.button :submit %>
   </div>
 <% end %>
