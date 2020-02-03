@@ -11,6 +11,7 @@ class RecipeContentsController < ApplicationController
   end
 
   def patch
+    x=2
   end
 
   def create
