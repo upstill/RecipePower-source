@@ -1,15 +1,21 @@
-<%= simple_form_for(@recipe, url: annotate_recipe_contents_path(@recipe) ) do |f| %>
+<%= form_for([:recipe_contents, @recipe ], url: annotate_recipe_contents_path(@recipe), html: { class: 'annotate-recipe' } ) do |f| %>
   <%= form_errors_helper f %>
   <%# render 'recipe_pages/recipe_fields', f: f %>
   <div class="row"><p>Use the mouse to select a part of the recipe, then click a button to identify it.</p></div>
   <input class="anchorPath" type="hidden" name="recipe[recipeContents][anchor_path]" id="recipe_anchor_path">
+  <input class="anchorOffset" type="hidden" name="recipe[recipeContents][anchor_offset]" id="recipe_anchor_offset">
   <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
-  <%# f.hidden_field :anchor_path, class: 'anchorPath' %>
-  <%# f.hidden_field :focus_path, class: 'focusPath' %>
-  <%= f.hidden_field :content %>
+  <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
+  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content">
 
   <%= annotation_button :rp_title, class: 'text-only' %>
   <%= annotation_button :rp_ingname, class: 'text-only' %>
+<% end %>
+
+<!--Submitting the modified content for final saving-->
+<%= simple_form_for(@recipe) do |f| %>
+
+  <%= f.hidden_field :content %>
 
   <div class="modal-footer form-actions">
     <%= dialog_submit_button 'Save' %>
