@@ -24,7 +24,7 @@ RP.recipe_pages.parseXMLString = (xml) ->
 		doc
 
 RP.recipe_pages.submit_selection = () ->
-	contentNode = document.getElementById 'rp_recipe_content'
+	contentNode = document.getElementById 'rp-html-content'
 	xmlString = RP.recipe_pages.serialize contentNode
 	doc = RP.recipe_pages.parseXMLString xmlString
 
@@ -34,9 +34,9 @@ RP.recipe_pages.submit_selection = () ->
 	# Insert elements back into document (I used replace in order to show that the document is actually changed)
 	contentNode.parentNode.replaceChild xpathResult.singleNodeValue.firstChild, contentNode
 
-getPathTo = (element, relative_to) ->
+RP.recipe_pages.getPathTo = (element, relative_to) ->
 	if element.nodeType == 3
-		return getPathTo(element.parentNode, relative_to)
+		return RP.recipe_pages.getPathTo(element.parentNode, relative_to)
 	if element == relative_to
 		return '' # element.tagName;
 	if element.id
@@ -45,7 +45,7 @@ getPathTo = (element, relative_to) ->
 	ix= 0;
 	for sibling in element.parentNode.childNodes
 		if sibling == element
-			toParent = getPathTo element.parentNode, relative_to
+			toParent = RP.recipe_pages.getPathTo element.parentNode, relative_to
 			if toParent != ''
 				toParent += '/'
 			etag = element.tagName
@@ -78,29 +78,26 @@ adopt_selection = (fieldsNode) ->
 	sel = window.getSelection()
 	anchorText = ''
 	if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
-		rootNode = document.getElementById 'rp_recipe_content'
-		rootPath = 'id("rp_recipe_content")'
-		anchorNode = sel.anchorNode
-		anchorText = anchorNode.textContent
-		focusNode = sel.focusNode
-		if $(anchorNode).parents('div#rp_recipe_content').length != 1 || $(focusNode).parents('div#rp_recipe_content').length != 1
-			alert "You need to select viable content for the recipe"
-			return
-		anchorOffset = sel.anchorOffset
-		anchorPath = getPathTo anchorNode, rootNode
-		$('input.anchorPath', fieldsNode)[0].value = anchorPath
-		a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
-		focusOffset = sel.focusOffset
-		focusPath = getPathTo focusNode, rootNode
-		$('input.focusPath', fieldsNode)[0].value = focusPath
-		f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
+		rootNode = document.getElementById 'rp-html-content'
+		RP.recipe_contents.registerSelectionData rootNode, (anchorPath, anchorOffset, focusPath, focusOffset) =>
+			if $(sel.anchorNode).parents('div#rp-html-content').length != 1 || $(sel.focusNode).parents('div#rp-html-content').length != 1
+				alert "You need to select viable content for the recipe"
+				return ''
+#			console.debug "Registered data"
+#			console.debug 'anchorPath, anchorOffset: ' + anchorPath + ', ' + anchorOffset
+#			console.debug 'focusPath, focusOffset: ' + focusPath + ', ' + focusOffset
+			$('input.anchorPath', fieldsNode)[0].value = anchorPath
+			$('input.focusPath', fieldsNode)[0].value = focusPath
+#			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
+#			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
+			anchorText = sel.anchorNode.textContent
 	else
 		alert "Select the body of this recipe in the page before grabbing it."
-	anchorText # Return the text in the anchorNode (for use as a title)
+	anchorText
 
 set_selection = (anchorPath, focusPath) ->
 	if anchorPath && (anchorPath != '') && focusPath && (focusPath != '')
-		rootNode = document.getElementById 'rp_recipe_content'
+		rootNode = document.getElementById 'rp-html-content'
 		anchorNode = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
 		focusNode = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
 		range = document.createRange()

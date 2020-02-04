@@ -1,5 +1,5 @@
-<div class="dialog modeless notifs-holder <%= pane_for %> new-style green">
-  <div class="modal-dialog modal-lg">
+<div class="dialog modeless notifs-holder <%= pane_for.to_s.gsub '_', '-' %> new-style green">
+  <div class="modal-dialog modal-xl">
     <div class="modal-content">
       <%= modal_header title, style: "border-bottom: 1px solid #c0f3c2b5" %>
       <!--Define the pane displayed in the panel-->
