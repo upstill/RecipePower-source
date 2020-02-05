@@ -229,12 +229,10 @@ module DialogsHelper
                                            button_style: (options[:button_style] || 'success'),
                                            class: "#{options[:class]} #{options[:style] || 'form-button'}"
                                        )
-    tag :input,
-        class: "#{options[:class]} dialog-submit-button",
-        name: 'commit',
-        type: 'submit',
-        value: label||'Save',
-        data: (options[:data] || {}).merge( method: options[:method] || 'post' )
+    options[:class] << ' dialog-submit-button'
+    options[:data] ||= {}
+    options[:data][:method] = options[:method] || 'post'
+    tag :input, { name: 'commit', type: 'submit', value: label||'Save' }.merge(options)
   end
 
   def dialog_answer_button label = nil, options={}

@@ -71,6 +71,10 @@ class Recipe < ApplicationRecord
     content.if_present || recipe_page.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
+  def content
+    super.if_present || recipe_page.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+  end
+
   # When the content is explicitly set for the first time, trim it according to the site
   def content= html
     if content.blank?

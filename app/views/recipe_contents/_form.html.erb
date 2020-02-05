@@ -6,7 +6,7 @@
   <input class="anchorOffset" type="hidden" name="recipe[recipeContents][anchor_offset]" id="recipe_anchor_offset">
   <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
   <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
-  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content">
+  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
 
   <%= annotation_button :rp_title, class: 'text-only' %>
   <%= annotation_button :rp_ingname, class: 'text-only' %>
@@ -15,10 +15,11 @@
 <!--Submitting the modified content for final saving-->
 <%= simple_form_for(@recipe) do |f| %>
 
-  <%= f.hidden_field :content %>
+  <%# f.hidden_field :content %>
+  <input type='hidden' name='recipe[content]' id='recipe_content'>
 
   <div class="modal-footer form-actions">
-    <%= dialog_submit_button 'Save' %>
+    <%= dialog_submit_button 'Save', disabled: true %>
     <%= dialog_cancel_button 'Cancel' %>
   </div>
 <% end %>
