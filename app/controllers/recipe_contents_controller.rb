@@ -7,7 +7,7 @@ class RecipeContentsController < ApplicationController
 
   # Modify the content HTML to mark a selection with a parsing tag
   def annotate
-    RecipeContentDecorator.new(@recipe).annotate params[:recipe][:content], params[:recipe][:recipeContents][:token], params[:recipe][:recipeContents][:anchor_path], params[:recipe][:recipeContents][:focus_path]
+    ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
   end
 
   def patch
