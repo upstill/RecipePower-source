@@ -19,9 +19,10 @@ def next_siblings nokonode
   nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode ; nil) }.compact
 end
 
-# Move
+# Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
+# the common ancestor of the two.
 def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
-  html = html_from_classes(classes)
+  html = html_enclosure(classes)
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
@@ -32,7 +33,7 @@ def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
         left_ancestor.previous = html
         left_ancestor.previous
       else
-        Nokogiri::HTML.fragment html
+        Nokogiri::HTML.fragment(html).children[0]
       end
   left_collector = left_ancestor.next
   
@@ -75,6 +76,13 @@ def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
   newtree
 end
 
+def html_enclosure classes='', tag=:div
+  if classes.is_a? Symbol
+    classes, tag = '', classes
+  end
+  classes = "rp_elmt #{classes}".strip
+  "<#{tag} class='#{classes}'></#{tag}>" # For constructing the new node
+end
 
 # A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
 # This is an "abstract" class for defining what methods the Scanner provides
@@ -237,16 +245,11 @@ class NokoTokens < Array
     enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), classes
   end
 
-  def html_from_classes classes=''
-    classes = "rp_elmt #{classes}".strip
-    "<div class='#{classes}'></div>" # For constructing the new node
-  end
-
   # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
   def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
     first_te = TextElmtData.new self, anchor_path
     if anchor_path == focus_path
-      first_te.enclose_to (first_te.global_start_offset+focus_offset), html_from_classes(classes)
+      first_te.enclose_to (first_te.global_start_offset+focus_offset), html_enclosure(classes, :span)
       update
     else
       first_te.local_char_offset = anchor_offset # TODO: ensure that the mark is on a token boundary
@@ -274,7 +277,7 @@ class NokoTokens < Array
     teleft = text_elmt_data global_character_position_start
     if teleft.encompasses_offset global_character_position_end
       # Both beginning and end are on the same text node
-      teleft.enclose_to global_character_position_end, html_from_classes(classes)
+      teleft.enclose_to global_character_position_end, html_enclosure(classes, :span)
       update
     else
       teright = text_elmt_data -(global_character_position_end)
