@@ -20,7 +20,8 @@ def next_siblings nokonode
 end
 
 # Move
-def assemble_tree_from_nodes html, anchor_elmt, focus_elmt, insert=true
+def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
+  html = html_from_classes(classes)
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
@@ -206,22 +207,17 @@ class NokoTokens < Array
     self.freeze
   end
 
-  def token_offset_at index
-    @token_starts[index] || @processed_text_len
+  def token_offset_at token_index
+    @token_starts[token_index] || @processed_text_len
   end
 
-  def elmt_offset_at index
-    @elmt_bounds[index]&.last || @processed_text_len
-  end
-
-  # Convenience method to specify requisite text in terms of tokens
-  def enclose_tokens first_token, limiting_token, classes=''
-    enclose token_offset_at(first_token), token_offset_at(limiting_token), classes
+  def elmt_offset_at token_index
+    @elmt_bounds[token_index]&.last || @processed_text_len
   end
 
   # Return the string representing all the text given by the two token positions
-  def text_from first_token, limiting_token
-    pos_begin = token_offset_at(first_token) ; pos_end = token_offset_at(limiting_token)
+  def text_from first_token_index, limiting_token_index
+    pos_begin = token_offset_at(first_token_index) ; pos_end = token_offset_at(limiting_token_index)
     teleft = text_elmt_data pos_begin
     if teleft.encompasses_offset pos_end
       return teleft.delimited_text(pos_end)
@@ -236,46 +232,57 @@ class NokoTokens < Array
     teleft.subsq_text + nodes.flatten.map(&:text).join + teright.prior_text
   end
 
-  # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
-  def enclose pos_begin, pos_end, classes = ''
-    def replace_elmt elmt, replacement
-      # We enclose all the material in a <span> node, then collapse it
-      replacement = "<span>#{replacement}</span>"
-      puts "Replacing '#{elmt.text}' with '#{replacement}'."
-      parent = elmt.parent
-      nodeset = elmt.replace replacement
-      newnode = parent.children.find { |child|
-        child == nodeset[0]
-      }
-      newnode.replace newnode.children
-    end
+  # Convenience method to specify requisite text in terms of tokens
+  def enclose_by_token_indices first_token_index, limiting_token_index, classes=''
+    enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), classes
+  end
 
-    def seek_upwards elmt, limiting_elmt, &block
-      while (elmt != limiting_elmt) && block.call(elmt)
-        elmt = elmt.parent
-      end
-      elmt
-    end
-
-    # Provide a hash of data about the text node that has the token at 'pos_begin'
-    teleft = text_elmt_data pos_begin
+  def html_from_classes classes=''
     classes = "rp_elmt #{classes}".strip
-    html = "<div class='#{classes}'></div>" # For constructing the new node
-    #  newbounds = []
-    if teleft.encompasses_offset pos_end
-      # We're in luck! Both beginning and end are on the same text node
-      teleft.split_left
-      teleft.mark_at pos_end
-      teleft.split_right
-      elmt = teleft.text_element
-      elmt.next = html
-      elmt.next.add_child elmt
+    "<div class='#{classes}'></div>" # For constructing the new node
+  end
+
+  # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
+  def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
+    first_te = TextElmtData.new self, anchor_path
+    if anchor_path == focus_path
+      first_te.enclose_to (first_te.global_start_offset+focus_offset), html_from_classes(classes)
+      update
     else
-      teright = text_elmt_data -(pos_end)
-      # Remove unselected text from the two text elements and leave remaining text, if any, next door
-      teleft.split_left ; teright.split_right
-      assemble_tree_from_nodes html, teleft.text_element, teright.text_element
+      first_te.local_char_offset = anchor_offset # TODO: ensure that the mark is on a token boundary
+      last_te = TextElmtData.new self, focus_path
+      last_te.local_char_offset = focus_offset # TODO: ensure that the mark is on a token boundary
+      # Need to ensure the selection is in the proper order
+      if last_te.elmt_bounds_index < first_te.elmt_bounds_index
+        first_te, last_te = last_te, first_te
+      end
+      # The two elmt datae are marked, ready for enclosing
+      enclose_by_text_elmt_data first_te, last_te, classes
     end
+  end
+
+  def enclose_by_text_elmt_data teleft, teright, classes=''
+    # Remove unselected text from the two text elements and leave remaining text, if any, next door
+    teleft.split_left ; teright.split_right
+    assemble_tree_from_nodes classes, teleft.text_element, teright.text_element
+    update
+  end
+
+  # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
+  def enclose_by_global_character_positions global_character_position_start, global_character_position_end, classes = ''
+    # Provide a hash of data about the text node that has the token at 'global_character_position_start'
+    teleft = text_elmt_data global_character_position_start
+    if teleft.encompasses_offset global_character_position_end
+      # Both beginning and end are on the same text node
+      teleft.enclose_to global_character_position_end, html_from_classes(classes)
+      update
+    else
+      teright = text_elmt_data -(global_character_position_end)
+      enclose_by_text_elmt_data teleft, teright, classes
+    end
+  end
+
+  def update
     # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
     ix = 0
     nkdoc.traverse do |node|
@@ -286,8 +293,8 @@ class NokoTokens < Array
     end
   end
 
-  def text_elmt_data char_offset
-    TextElmtData.new self, char_offset
+  def text_elmt_data global_char_offset
+    TextElmtData.new self, global_char_offset
   end
 
   # Provide the token range enclosed by the CSS selector
@@ -336,7 +343,7 @@ end
 class NokoScanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_tokens, :enclose, :text_elmt_data, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :enclose_by_global_character_positions, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -454,23 +461,34 @@ end
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
   delegate :elmt_bounds, to: :noko_tokens
-  attr_accessor :elmt_bounds_index, :text_element, :parent
-  attr_reader :noko_tokens, :local_char_offset, :global_start_offset
+  attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset
+  attr_reader :noko_tokens, :global_start_offset
 
-  def initialize nkt, global_char_offset # character offset (global)
-    global_char_offset = (terminating = global_char_offset < 0) ? (-global_char_offset) : global_char_offset
+  def initialize nkt, global_char_offset_or_path # character offset (global)
     @noko_tokens = nkt
-    @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
-    # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
+    @local_char_offset = 0
+    if global_char_offset_or_path.is_a? Fixnum
+      global_char_offset = global_char_offset_or_path
+      global_char_offset = (terminating = global_char_offset < 0) ? (-global_char_offset) : global_char_offset
+      @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
+      # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
+      @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
+      mark_at global_char_offset
+    else
+      # Find the element from the path
+      path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
+      # Linear search: SAD!
+      @elmt_bounds_index = elmt_bounds.find_index { |elmt|
+        path_end == elmt.first || (path_end.children.include? elmt.first)
+      }
+    end
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
-    mark_at global_char_offset
     @parent = @text_element.parent
   end
 
   # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
-  def mark_at offset
-    @local_char_offset = offset - @global_start_offset
+  def mark_at global_char_offset
+    @local_char_offset = global_char_offset - @global_start_offset
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
@@ -496,6 +514,21 @@ class TextElmtData < Object
   # Does the text element include the text at the end offset
   def encompasses_offset end_offset
     text_element.text[end_offset - @global_start_offset - 1] != nil
+  end
+
+  # Divide an existing text element, splitting off the text between the mark and the given end mark into
+  # an element that encloses that text
+  def enclose_to global_character_position_end, html
+    # Split off a text element for text to the left of the mark (if any such text)
+    split_left
+    # Split off a text element for text to the right of the limit (if any such text)
+    mark_at global_character_position_end
+    split_right
+    # Now add a next element: the html shell
+    elmt = text_element
+    elmt.next = html
+    # Move the element under the shell
+    elmt.next.add_child elmt
   end
 
   # Return the text of the text element prior to the selection point
