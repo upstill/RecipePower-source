@@ -9,7 +9,10 @@ class ParsingServices
   def annotate html, token, anchor_path, anchor_offset, focus_path, focus_offset
     nkdoc = Nokogiri::HTML.fragment html
     nokoscan = NokoScanner.new nkdoc
-    nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, token
-    nkdoc.to_s
+    # Do QA on the parameters
+    if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
+      nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, token
+      nkdoc.to_s
+    end
   end
 end

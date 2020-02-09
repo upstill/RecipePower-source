@@ -190,9 +190,11 @@ class NokoTokens < Array
         # Save this element and its starting point
         @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
+=begin
       when child.attributes['class']&.value&.match(/\brp_elmt\b/)
         to_tokens
         self << NokoScanner.new(child)
+=end
       when child.element?
         to_tokens "\n" if child.name.match(/^(p|br|li)$/)
         child.children.each { |j| do_child j }
@@ -247,14 +249,12 @@ class NokoTokens < Array
 
   # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
   def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
-    first_te = TextElmtData.new self, anchor_path
+    first_te = TextElmtData.new self, anchor_path, anchor_offset
     if anchor_path == focus_path
       first_te.enclose_to (first_te.global_start_offset+focus_offset), html_enclosure(classes, :span)
       update
     else
-      first_te.local_char_offset = anchor_offset # TODO: ensure that the mark is on a token boundary
-      last_te = TextElmtData.new self, focus_path
-      last_te.local_char_offset = focus_offset # TODO: ensure that the mark is on a token boundary
+      last_te = TextElmtData.new self, focus_path, focus_offset
       # Need to ensure the selection is in the proper order
       if last_te.elmt_bounds_index < first_te.elmt_bounds_index
         first_te, last_te = last_te, first_te
@@ -467,30 +467,40 @@ class TextElmtData < Object
   attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset
   attr_reader :noko_tokens, :global_start_offset
 
-  def initialize nkt, global_char_offset_or_path # character offset (global)
+  def initialize nkt, global_char_offset_or_path, local_offset_mark=0 # character offset (global)
     @noko_tokens = nkt
     @local_char_offset = 0
-    if global_char_offset_or_path.is_a? Fixnum
-      global_char_offset = global_char_offset_or_path
-      global_char_offset = (terminating = global_char_offset < 0) ? (-global_char_offset) : global_char_offset
-      @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
-      # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-      @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
-      mark_at global_char_offset
-    else
+    signed_global_char_offset =
+    if global_char_offset_or_path.is_a? String
+      # This is a path/offset specification, so we have to derive the global offset first
       # Find the element from the path
       path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
       # Linear search: SAD!
       @elmt_bounds_index = elmt_bounds.find_index { |elmt|
         path_end == elmt.first || (path_end.children.include? elmt.first)
       }
+      local_offset_mark < 0 ? (local_offset_mark - elmt_bounds[@elmt_bounds_index].last) : (elmt_bounds[@elmt_bounds_index].last + local_offset_mark)
+    else
+      global_char_offset_or_path
     end
+    # A negative global character offset denotes a terminating position.
+    # Here, we split that into a non-negative character offset and a 'terminating' flag
+    global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
+    @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
+    # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
+    @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
+    mark_at global_char_offset, terminating
     @parent = @text_element.parent
   end
 
   # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
-  def mark_at global_char_offset
+  def mark_at global_char_offset, terminating=false
+    token_index = binsearch @noko_tokens.token_starts, global_char_offset
+    token_index -= 1 if terminating && (token_index > 0) && (@noko_tokens.token_starts[token_index] == global_char_offset)
+    global_char_offset = @noko_tokens.token_starts[token_index]
+    # Set the mark at the end of the token if terminating
+    global_char_offset += @noko_tokens[token_index].length if terminating
     @local_char_offset = global_char_offset - @global_start_offset
   end
 
@@ -525,7 +535,7 @@ class TextElmtData < Object
     # Split off a text element for text to the left of the mark (if any such text)
     split_left
     # Split off a text element for text to the right of the limit (if any such text)
-    mark_at global_character_position_end
+    mark_at global_character_position_end, true
     split_right
     # Now add a next element: the html shell
     elmt = text_element

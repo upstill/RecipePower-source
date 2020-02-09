@@ -2,6 +2,12 @@
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
+.rp_elmt {
+  .rp_ingname {
+    color: #6B7794;
+  }
+}
+
 div.dialog.recipe-pages.new-style.green {
   z-index: 1500;
   div.modal-dialog div.modal-content {
