@@ -9,6 +9,7 @@ class RecipePagesController < ApplicationController
 
   # GET /recipe_pages/1
   def show
+    @recipe_page.bkg_land(true) unless @recipe_page.content.present?
     # smartrender
   end
 

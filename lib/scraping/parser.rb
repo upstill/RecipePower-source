@@ -28,9 +28,13 @@ class Parser
       :rp_title => 'Title',
       :rp_ingname => 'Ingredient Name'
   }
+  # Provide a list of tokens available to match
+  def tokens
+    @grammar.keys
+  end
 
   def self.token_to_title token
-    @@TokenTitles[token]
+    @@TokenTitles[token] || "Unnamed Token #{token.to_s}"
   end
 
   def self.title_to_token title

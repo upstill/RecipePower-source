@@ -1,5 +1,6 @@
 require 'scraping/scanner.rb'
 class RecipePage < ApplicationRecord
+  include Pagerefable
   include Backgroundable
   backgroundable
 
@@ -11,56 +12,48 @@ class RecipePage < ApplicationRecord
   accepts_nested_attributes_for :page_ref
   has_many :recipes, :through => :page_ref
 
-  # The page performs by parsing the content from its page_ref
-  def perform
-    if content.blank?
-      # Need to get content from page_ref before we can do anything
-      if page_ref # Finish doing any necessary gleaning of the page_ref
-        page_ref.bkg_land
-        if page_ref.good?
-          self.content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
-        else
-          err_msg = "Page at '#{url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
-          errors.add :url, err_msg
-          raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
-        end
-      end
-    end
-
-    # Now we presumably have valid content. Now to parse it.
-    parse if content.present?
-    save
-  end
-
-  def parse
+  # When a RecipePage is landing, once the page_ref is done gleaning content (etc.), it calls #adopt_gleaning
+  def adopt_gleaning
+=begin
     def report name, seekers
-      if ingredients.present?
-        puts "Found ingredients '#{ingredients.map(&:to_s).join('\', \'')}'"
+      if seekers.present?
+        puts "Found #{name.pluralize(seekers.count)} '#{seekers.map(&:to_s).join('\', \'')}'"
       else
-        puts "No ingredients"
+        puts "No #{name.pluralize 0}"
       end
     end
-    parser = Parser.new(content, Lexaur.from_tags)  do |grammar|
-      # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
-      # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
-    end
-    seeker = parser.match :rp_recipelist
-    # The seeker should present the token :rp_recipelist and have several children
-    recipes = seeker.find { |child| child.token == :rp_recipe && child.find(:rp_title).present? }
-    recipes.each do |recipe_seeker|
-      title_seeker = recipe_seeker.find(:rp_title).first
-      puts "Parsed out recipe '#{title_seeker.to_s}'"
-      ingredients = recipe_seeker.find(:rp_ingname)
-      report 'ingredients', ingredients
-      rp_yield = recipe_seeker.find(:rp_yield)
-      report 'yield', rp_yield
-      author = recipe_seeker.find(:rp_author)
-      report 'author', author
-      makes = recipe_seeker.find(:rp_makes)
-      report 'makes', makes
+=end
+    # The first time content is adopted from our page_ref, parse it for recipe content
+    if content.blank?
+      content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
+      if content.present?
+        parser = ParsingServices.new(self)
+        parser.parse content
+        # Apply the results of the parsing by ensuring there are recipes for each section
+        # The seeker should present the token :rp_recipelist and have several children
+        parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
+          if sub_parser.has? :rp_title
+            puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
+            puts sub_parser.report_for( :except => :rp_title) # All other token types
+          end
+        end
+        self.content = content # Copied directly from page_ref
+=begin
+      recipe_seekers = parser.seeker.find { |child| child.token == :rp_recipe && child.find(:rp_title).present? }
+      recipe_seekers.each do |recipe_seeker|
+        title_seeker = recipe_seeker.find(:rp_title).first
+        puts "Parsed out recipe '#{title_seeker.to_s}'"
+        ingredients = recipe_seeker.find(:rp_ingname)
+        report 'ingredients', ingredients
+        rp_yield = recipe_seeker.find(:rp_yield)
+        report 'yield', rp_yield
+        author = recipe_seeker.find(:rp_author)
+        report 'author', author
+        makes = recipe_seeker.find(:rp_makes)
+        report 'makes', makes
+      end
+=end
+      end
     end
   end
 
