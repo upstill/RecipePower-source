@@ -8,8 +8,11 @@
   <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
   <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
 
-  <%= annotation_button :rp_title, class: 'text-only' %>
-  <%= annotation_button :rp_ingname, class: 'text-only' %>
+  <div class="row">
+    <%= annotation_button :rp_title, class: 'text-only' %>
+    <%= annotation_button :rp_ingline, class: 'text-only' %>
+    <%= annotation_button :rp_ingname, class: 'text-only' %>
+  </div>
 <% end %>
 
 <!--Submitting the modified content for final saving-->

@@ -249,11 +249,13 @@ class NokoTokens < Array
 
   # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
   def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
-    first_te = TextElmtData.new self, anchor_path, anchor_offset
     if anchor_path == focus_path
-      first_te.enclose_to (first_te.global_start_offset+focus_offset), html_enclosure(classes, :span)
+      anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
+      first_te = TextElmtData.new self, anchor_path, anchor_offset
+      first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure(classes, :span)
       update
     else
+      first_te = TextElmtData.new self, anchor_path, anchor_offset
       last_te = TextElmtData.new self, focus_path, focus_offset
       # Need to ensure the selection is in the proper order
       if last_te.elmt_bounds_index < first_te.elmt_bounds_index
@@ -477,7 +479,6 @@ class TextElmtData < Object
   def initialize nkt, global_char_offset_or_path, local_offset_mark=0 # character offset (global)
     @noko_tokens = nkt
     @local_char_offset = 0
-    signed_global_char_offset =
     if global_char_offset_or_path.is_a? String
       # This is a path/offset specification, so we have to derive the global offset first
       # Find the element from the path
@@ -486,19 +487,27 @@ class TextElmtData < Object
       @elmt_bounds_index = elmt_bounds.find_index { |elmt|
         path_end == elmt.first || (path_end.children.include? elmt.first)
       }
-      local_offset_mark < 0 ? (local_offset_mark - elmt_bounds[@elmt_bounds_index].last) : (elmt_bounds[@elmt_bounds_index].last + local_offset_mark)
+      global_char_offset = elmt_bounds[@elmt_bounds_index].last
+      signed_global_char_offset = local_offset_mark < 0 ?
+                                      (local_offset_mark - global_char_offset) :
+                                      (global_char_offset + local_offset_mark)
     else
-      global_char_offset_or_path
+      signed_global_char_offset = global_char_offset_or_path
     end
+    locate_text_element signed_global_char_offset
+    @parent = @text_element.parent
+  end
+
+  # Get the Nokogiri text element, its global character offset, and its index in the tokens scanner, based on global character offset
+  def locate_text_element signed_global_char_offset
     # A negative global character offset denotes a terminating position.
-    # Here, we split that into a non-negative character offset and a 'terminating' flag
+    # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
     @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
     @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
     mark_at global_char_offset, terminating
-    @parent = @text_element.parent
   end
 
   # Return the Xpath and offset to find the marked token in the document
@@ -514,7 +523,16 @@ class TextElmtData < Object
     global_char_offset = @noko_tokens.token_starts[token_index]
     # Set the mark at the end of the token if terminating
     global_char_offset += @noko_tokens[token_index].length if terminating
-    @local_char_offset = global_char_offset - @global_start_offset
+    @local_char_offset = global_to_local global_char_offset
+  end
+
+  # Express a local offset in the text element as a global one
+  def local_to_global local_offset
+    @global_start_offset+local_offset
+  end
+
+  def global_to_local global_offset
+    global_offset - @global_start_offset
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
@@ -529,7 +547,7 @@ class TextElmtData < Object
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_right
-    return if subsq_text.length == 0 # No need to split
+    return if subsq_text.blank? # No need to split
     text_element.previous = prior_text
     text_element.content = subsq_text
     elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry

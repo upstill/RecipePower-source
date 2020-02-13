@@ -35,8 +35,6 @@ RP.recipe_pages.submit_selection = () ->
 	contentNode.parentNode.replaceChild xpathResult.singleNodeValue.firstChild, contentNode
 
 RP.recipe_pages.getPathTo = (element, relative_to) ->
-	if element.nodeType == 3
-		return RP.recipe_pages.getPathTo(element.parentNode, relative_to)
 	if element == relative_to
 		return '' # element.tagName;
 	if element.id
@@ -48,11 +46,16 @@ RP.recipe_pages.getPathTo = (element, relative_to) ->
 			toParent = RP.recipe_pages.getPathTo element.parentNode, relative_to
 			if toParent != ''
 				toParent += '/'
-			etag = element.tagName
+			if element.nodeType == 3
+				etag = 'text()'
+			else
+				etag = element.tagName
 			if ix > 0 # Don't specify an index of 1 (JS is happy with it, but not Nokogiri)
 				etag += '['+(ix+1)+']'
 			return toParent + etag
-		if sibling.nodeType == 1 && sibling.tagName == element.tagName
+		if sibling.nodeType == 1 && element.nodeType == 1 && sibling.tagName == element.tagName
+			ix++
+		else if sibling.nodeType == 3 && element.nodeType == 3
 			ix++
 
 display_fields = (recipeFieldsElmt, itemClass) ->

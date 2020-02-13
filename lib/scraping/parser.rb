@@ -26,7 +26,8 @@ class Parser
 
   @@TokenTitles = {
       :rp_title => 'Title',
-      :rp_ingname => 'Ingredient Name'
+      :rp_ingname => 'Ingredient Name',
+      :rp_ingline => 'Ingredient with amount'
   }
   # Provide a list of tokens available to match
   def tokens
@@ -130,6 +131,7 @@ class Parser
       rp_ingline: {
           match: [
               {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
+              { optional: 'of' },
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
