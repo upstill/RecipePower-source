@@ -31,11 +31,23 @@ class RecipePage < ApplicationRecord
         parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
+        rset = recipes.order(:id => :ASC).to_a
+        # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
-          if sub_parser.has? :rp_title
-            puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
-            puts sub_parser.report_for( :except => :rp_title) # All other token types
+          title = sub_parser.value_for :rp_title
+          recipe = rset.shift
+          xb = sub_parser.xbounds
+          if title.present? # There's an existing recipe
+            if recipe
+              recipe.update_column :title, title
+              recipe.update_column :anchor_path, xb.first
+              recipe.update_column :focus_path, xb.last
+            else
+              page_ref.recipes.create title: title, anchor_path: xb.first, focus_path: xb.last
+            end
           end
+          puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
+          puts sub_parser.report_for(:except => :rp_title) # All other token types
         end
         self.content = content # Copied directly from page_ref
 =begin

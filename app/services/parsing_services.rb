@@ -83,6 +83,15 @@ class ParsingServices
     @seeker.find(token).present?
   end
 
+  def value_for token
+    @seeker.find(token).first&.to_s
+  end
+
+  # Provide a path and offset in the Nokogiri doc for the results of the parse
+  def xbounds
+    [ @seeker.head_stream.xpath, @seeker.tail_stream.xpath(true) ]
+  end
+
 private
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)

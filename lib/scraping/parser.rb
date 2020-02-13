@@ -101,6 +101,7 @@ class Parser
           match: [
               { optional: :rp_title },
               :rp_inglist ,
+              :rp_instructions,
               { checklist: [
                   { optional: :rp_author },
                   { optional: :rp_prep_time },
@@ -121,6 +122,7 @@ class Parser
       rp_time: [ :rp_num, 'min' ],
       rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
+      rp_instructions: { repeating: //, bound: { match: //, within_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
           match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
@@ -303,7 +305,11 @@ class Parser
           scanner = found.tail_stream
         end
       end
-      return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) if matches.present? # Token only applied to the top level
+      if matches.present?
+        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+      else
+        return (Seeker.new(scanner, scanner, token) if context[:optional])
+      end
     end
     if context[:atline]
       start_scanner = scanner.clone

@@ -459,6 +459,13 @@ class NokoScanner
     }.compact
   end
 
+  # Provide xpath and offset for locating the current position in the document
+  def xpath terminating=false
+    @nkdoc.children.first
+    ted = TextElmtData.new @tokens, @tokens.token_offset_at(@pos)*(terminating ? -1 : 1)
+    ted.xpath
+  end
+
 end
 
 class TextElmtData < Object
@@ -492,6 +499,12 @@ class TextElmtData < Object
     @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
     mark_at global_char_offset, terminating
     @parent = @text_element.parent
+  end
+
+  # Return the Xpath and offset to find the marked token in the document
+  def xpath
+    csspath = @text_element.css_path
+    Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
   end
 
   # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
