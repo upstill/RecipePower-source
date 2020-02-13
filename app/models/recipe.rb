@@ -6,6 +6,7 @@ require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
 require 'htmlbeautifier'
+require 'site_services.rb'
 
 class Recipe < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
@@ -68,11 +69,11 @@ class Recipe < ApplicationRecord
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    content.if_present || recipe_page.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+    content.if_present || recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   def content
-    super.if_present || recipe_page.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+    super.if_present || recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   # When the content is explicitly set for the first time, trim it according to the site

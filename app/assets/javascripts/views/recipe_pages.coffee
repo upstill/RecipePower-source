@@ -117,7 +117,7 @@ RP.recipe_pages.onload = (dlog) ->
 		new_field = $('div.recipe-fields').last()[0]
 		ttl = adopt_selection new_field
 		if ttl && (ttl != '')
-			$('.listing-item.title h3', new_field).text ttl
+			$('.listing-item.title h4', new_field).text ttl
 			$('.editing-item.title input', new_field).val ttl
 		edit_field new_field # Edit the newly-created fields
 		event.preventDefault()

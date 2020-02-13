@@ -70,6 +70,7 @@ class ParsingServices
   end
 
   def do_for *tokens, &block
+    return unless @seeker
     glean_tokens(tokens).each do |token|  # For each specified token
       @seeker.find(token).each do |seeker| # For each result under that token
         with_seeker(seeker) do |parser| # Call the given block with a parser using that seeker
@@ -80,16 +81,16 @@ class ParsingServices
   end
 
   def has? token
-    @seeker.find(token).present?
+    @seeker&.find(token).present?
   end
 
   def value_for token
-    @seeker.find(token).first&.to_s
+    @seeker&.find(token).first&.to_s
   end
 
   # Provide a path and offset in the Nokogiri doc for the results of the parse
   def xbounds
-    [ @seeker.head_stream.xpath, @seeker.tail_stream.xpath(true) ]
+    @seeker ? [ @seeker.head_stream.xpath, @seeker.tail_stream.xpath(true) ] : []
   end
 
 private

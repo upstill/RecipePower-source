@@ -150,6 +150,8 @@ class PageRef < ApplicationRecord
   end
 
   def bkg_launch force=false
+    build_recipe_page if recipe? && !recipe_page
+    recipe_page.bkg_launch if recipe_page&.virgin?
     build_gleaning if !gleaning
     gleaning.bkg_launch if gleaning.virgin?
     build_mercury_result unless mercury_result
