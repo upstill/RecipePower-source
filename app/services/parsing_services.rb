@@ -13,9 +13,27 @@ class ParsingServices
     nokoscan = NokoScanner.new nkdoc
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, token
-      nkdoc.to_s
+      newnode = nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, token
+      csspath = newnode.css_path
+      xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
+      [ nkdoc.to_s, xpath ]
     end
+  end
+
+  # parse_on_path: assert the grammar on the element denoted by the path, getting the target token from the element
+  def parse_on_path html, path
+    nkdoc = Nokogiri::HTML.fragment html
+    # Get the target element
+    elmt = nkdoc.xpath(path.downcase)&.first # Extract the token at that element
+    nokoscan = NokoScanner.new elmt
+    if (class_attr = elmt.attribute('class')) &&
+        (token = class_attr.to_s.split.find { |cl| cl.match(/^rp_/) && cl != 'rp_elmt' }) &&
+        token.present?
+      @parser = Parser.new nokoscan, Lexaur.from_tags
+      seeker = @parser.match token.to_sym
+      seeker.to_s
+    end
+    nkdoc.to_s
   end
 
   # Extract information from an entity (Recipe or RecipePage)

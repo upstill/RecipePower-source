@@ -228,6 +228,7 @@ class NokoTokens < Array
   # Return the string representing all the text given by the two token positions
   def text_from first_token_index, limiting_token_index
     pos_begin = token_offset_at(first_token_index) ; pos_end = token_offset_at(limiting_token_index)
+    return '' if pos_begin == @processed_text_len # Boundary condition: no more text!
     teleft = text_elmt_data pos_begin
     if teleft.encompasses_offset pos_end
       return teleft.delimited_text(pos_end)
@@ -248,11 +249,13 @@ class NokoTokens < Array
   end
 
   # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
+  # Return the Nokogiri node that was built
   def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
+    newnode = nil
     if anchor_path == focus_path
       anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
       first_te = TextElmtData.new self, anchor_path, anchor_offset
-      first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure(classes, :span)
+      newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure(classes, :span)
       update
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
@@ -261,9 +264,10 @@ class NokoTokens < Array
       if last_te.elmt_bounds_index < first_te.elmt_bounds_index
         first_te, last_te = last_te, first_te
       end
-      # The two elmt datae are marked, ready for enclosing
-      enclose_by_text_elmt_data first_te, last_te, classes
+      # The two elmt data are marked, ready for enclosing
+      newnode = enclose_by_text_elmt_data first_te, last_te, classes
     end
+    newnode
   end
 
   def enclose_by_text_elmt_data teleft, teright, classes=''
@@ -492,6 +496,7 @@ class TextElmtData < Object
                                       (local_offset_mark - global_char_offset) :
                                       (global_char_offset + local_offset_mark)
     else
+      @elmt_bounds_index = nil
       signed_global_char_offset = global_char_offset_or_path
     end
     locate_text_element signed_global_char_offset
@@ -571,8 +576,10 @@ class TextElmtData < Object
     # Now add a next element: the html shell
     elmt = text_element
     elmt.next = html
+    newnode = elmt.next
     # Move the element under the shell
     elmt.next.add_child elmt
+    newnode
   end
 
   # Return the text of the text element prior to the selection point

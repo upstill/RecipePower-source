@@ -1,3 +1,4 @@
+require 'parsing_services.rb'
 class RecipeContentsController < ApplicationController
   before_action :set_recipe, only: [:show, :edit, :update, :destroy, :annotate]
   before_action :login_required
@@ -7,7 +8,14 @@ class RecipeContentsController < ApplicationController
 
   # Modify the content HTML to mark a selection with a parsing tag
   def annotate
-    @annotation = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
+    if params[:recipe][:recipeContents][:parse_path]
+      # We simply report the prior annotation back
+      @annotation = ParsingServices.new(@recipe).parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path)
+      @parse_path = nil
+    else
+      @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
+      x=2
+    end
   end
 
   def patch

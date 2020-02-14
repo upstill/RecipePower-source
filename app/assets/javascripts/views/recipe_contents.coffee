@@ -33,6 +33,10 @@ RP.recipe_contents.onload = (dlog) ->
 	rootNode = document.getElementById 'rp-html-content'
 	rootNode.innerHTML = content_html
 	document.addEventListener "mouseup", RP.recipe_contents.registerSelection, false
+	if $('input#trigger-parse')[0]
+		$('input#trigger-parse').trigger 'click'
+# $('form.annotate-recipe').trigger 'submit'
+		# RP.submit.fire $('input#trigger-parse')[0] # submit the parsing of the designated (by parse_path) tree
 #	$(dlog).on "click", '.submit-selection', (event) ->
 #		# When submitting
 #		# adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set

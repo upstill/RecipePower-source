@@ -7,11 +7,14 @@
   <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
   <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
   <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
-
+  <% if @parse_path %>
+    <input class="content" type="hidden" name="recipe[recipeContents][parse_path]" id="recipe_parse_path" value="<%= @parse_path %>">
+    <%= dialog_submit_button 'parse it!' %>
+  <% end %>
   <div class="row">
-    <%= annotation_button :rp_title, class: 'text-only' %>
-    <%= annotation_button :rp_ingline, class: 'text-only' %>
-    <%= annotation_button :rp_ingname, class: 'text-only' %>
+    <% [ :rp_title, :rp_ingline, :rp_ingname ].each do |token| %>
+      <%= annotation_button token, class: 'text-only tag-button' %>
+    <% end %>
   </div>
 <% end %>
 

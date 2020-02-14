@@ -4,9 +4,9 @@ require 'scraping/scanner.rb'
 
 class LexaurTest < ActiveSupport::TestCase
   def setup
-    @ingred_tags = ['garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'].
+    @ingred_tags = %w{ lemon lemon\ juice garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ 'tablespoon teaspoon cup pound small\ head clove }.
+    @unit_tags = %w{ tablespoon teaspoon cup pound small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed }.
         each { |name| Tag.assert name, :Unit }
@@ -48,6 +48,12 @@ class LexaurTest < ActiveSupport::TestCase
   test 'lexaur initialized from tags database' do
     lex = Lexaur.from_tags
     assert_not_empty lex.find('jalapeño peppers')
+  end
+
+  test 'lexaur finds longer tag' do
+    lex = Lexaur.from_tags
+    result = lex.find('lemon juice')
+    assert_not_empty result
   end
 
   test 'lexaur chunks simple stream' do

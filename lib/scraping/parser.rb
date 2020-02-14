@@ -183,7 +183,8 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match spec, at=@stream
-    match_specification at, spec
+    matched = match_specification at, spec
+    matched
   end
 
   # Scan down the stream, one token at a time, until the block returns true or the stream runs out

@@ -55,7 +55,7 @@ class ScannerTest < ActiveSupport::TestCase
   end
 
   test 'basic nkscanner test' do
-    html = 'top-level text<span>spanned text</span><div>div opener<div>child<span>child span</span><a>child link </a></div>and more top-level text'
+    html = 'top-level text<span class=\'rp_elmt rp_text\'>spanned text</span><div>div opener<div>child<span>child span</span><a>child link </a></div>and more top-level text'
     nkdoc = Nokogiri::HTML.fragment html
     nokoscan = NokoScanner.new nkdoc
     check_integrity nokoscan
