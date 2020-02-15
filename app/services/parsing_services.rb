@@ -13,7 +13,7 @@ class ParsingServices
     nokoscan = NokoScanner.new nkdoc
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      newnode = nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, token
+      newnode = nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, tag: token
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
       [ nkdoc.to_s, xpath ]
@@ -31,7 +31,14 @@ class ParsingServices
         token.present?
       @parser = Parser.new nokoscan, Lexaur.from_tags
       seeker = @parser.match token.to_sym
-      seeker.to_s
+      # The seeker reflects a successful parsing of the (subtree) scanner against the token.
+      # Now we should modify the Nokogiri DOM to reflect the elements found
+      seeker.traverse do |inner|
+        if inner != seeker && inner.token
+          tagname = [ :rp_recipelist, :rp_recipe, :rp_inglist ].include?(inner.token) ? 'div' : 'span'
+          inner.enclose tagname
+        end
+      end
     end
     nkdoc.to_s
   end

@@ -21,15 +21,15 @@ end
 
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
-def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
-  html = html_enclosure(classes)
+ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options={}
+  html = html_enclosure(options) # insert=true
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
   newtree =
-      if insert
+      if options[:insert] != false
         left_ancestor.previous = html
         left_ancestor.previous
       else
@@ -76,11 +76,9 @@ def assemble_tree_from_nodes classes, anchor_elmt, focus_elmt, insert=true
   newtree
 end
 
-def html_enclosure classes='', tag=:div
-  if classes.is_a? Symbol
-    classes, tag = '', classes
-  end
-  classes = "rp_elmt #{classes}".strip
+def html_enclosure options={}
+  tag = options[:tag] || 'div'
+  classes = "rp_elmt #{options[:classes]}".strip
   "<#{tag} class='#{classes}'></#{tag}>" # For constructing the new node
 end
 
@@ -190,11 +188,6 @@ class NokoTokens < Array
         # Save this element and its starting point
         @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
-=begin
-      when child.attributes['class']&.value&.match(/\brp_elmt\b/)
-        to_tokens
-        self << NokoScanner.new(child)
-=end
       when child.element?
         to_tokens "\n" if child.name.match(/^(p|br|li)$/)
         child.children.each { |j| do_child j }
@@ -244,18 +237,18 @@ class NokoTokens < Array
   end
 
   # Convenience method to specify requisite text in terms of tokens
-  def enclose_by_token_indices first_token_index, limiting_token_index, classes=''
-    enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), classes
+  def enclose_by_token_indices first_token_index, limiting_token_index, options={}
+    enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), options
   end
 
   # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
   # Return the Nokogiri node that was built
-  def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, classes=''
+  def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, options={}
     newnode = nil
     if anchor_path == focus_path
       anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
       first_te = TextElmtData.new self, anchor_path, anchor_offset
-      newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure(classes, :span)
+      newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
       update
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
@@ -265,29 +258,29 @@ class NokoTokens < Array
         first_te, last_te = last_te, first_te
       end
       # The two elmt data are marked, ready for enclosing
-      newnode = enclose_by_text_elmt_data first_te, last_te, classes
+      newnode = enclose_by_text_elmt_data first_te, last_te, options
     end
     newnode
   end
 
-  def enclose_by_text_elmt_data teleft, teright, classes=''
+  def enclose_by_text_elmt_data teleft, teright, options={}
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
     teleft.split_left ; teright.split_right
-    assemble_tree_from_nodes classes, teleft.text_element, teright.text_element
+    assemble_tree_from_nodes teleft.text_element, teright.text_element, options
     update
   end
 
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
-  def enclose_by_global_character_positions global_character_position_start, global_character_position_end, classes = ''
+  def enclose_by_global_character_positions global_character_position_start, global_character_position_end, options={}
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft = text_elmt_data global_character_position_start
     if teleft.encompasses_offset global_character_position_end
       # Both beginning and end are on the same text node
-      teleft.enclose_to global_character_position_end, html_enclosure(classes, :span)
+      teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
       update
     else
       teright = text_elmt_data -(global_character_position_end)
-      enclose_by_text_elmt_data teleft, teright, classes
+      enclose_by_text_elmt_data teleft, teright, options
     end
   end
 
@@ -470,6 +463,11 @@ class NokoScanner
     @nkdoc.children.first
     ted = TextElmtData.new @tokens, @tokens.token_offset_at(@pos)*(terminating ? -1 : 1)
     ted.xpath
+  end
+
+  def enclose_to limit, options={}
+    return unless limit > pos
+    @tokens.enclose_by_token_indices @pos, limit, options
   end
 
 end

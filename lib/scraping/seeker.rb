@@ -51,12 +51,22 @@ class Seeker
   # Apply the results of the parse to the Nokogiri scanner
   def apply
     @children.each { |child| child.apply }
-    head_stream.enclose_by_token_indices(@head_stream, @tail_stream, @token) if @token
+    head_stream.enclose_by_token_indices(@head_stream, @tail_stream, tag: @token) if @token
   end
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
     (@head_stream == @tail_stream) && @children.empty?
+  end
+
+  def traverse &block
+    children.each { |child| block.call child }
+    block.call self
+  end
+
+  # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
+  def enclose tagname='span'
+    @head_stream.enclose_to @tail_stream.pos, @token.to_s, tagname
   end
 end
 
