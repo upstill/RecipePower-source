@@ -265,7 +265,8 @@ class NokoTokens < Array
 
   def enclose_by_text_elmt_data teleft, teright, options={}
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
-    teleft.split_left ; teright.split_right
+    teleft.split_left
+    teright.split_right
     assemble_tree_from_nodes teleft.text_element, teright.text_element, options
     update
   end
@@ -274,12 +275,20 @@ class NokoTokens < Array
   def enclose_by_global_character_positions global_character_position_start, global_character_position_end, options={}
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft = text_elmt_data global_character_position_start
-    if teleft.encompasses_offset global_character_position_end
+    teright = text_elmt_data -(global_character_position_end)
+    if teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
-      teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
-      update
+      # Either add the specified class to the parent, or enclose the selected text in a new span element
+      if teleft.parent.name == 'span' &&
+          options[:classes] &&
+          teleft.prior_text.blank? &&
+          teright.subsq_text.blank?
+        teleft.parent[:class] << " #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes])
+      else
+        teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
+        update
+      end
     else
-      teright = text_elmt_data -(global_character_position_end)
       enclose_by_text_elmt_data teleft, teright, options
     end
   end
@@ -295,7 +304,18 @@ class NokoTokens < Array
     end
   end
 
+  # Extract the text element data for the character "at" the given global position.
+  # A negative sign on signed_global_char_offset signifies that this position terminates a selection.
   def text_elmt_data global_char_offset
+    if global_char_offset < 0
+      global_char_offset = -global_char_offset
+      token_ix = binsearch token_starts, global_char_offset
+      token_ix -= 1 if token_ix > 0 && token_starts[token_ix] == global_char_offset
+      # Clamp the global character offset to be within the token
+      token_end = token_starts[token_ix] + self[token_ix].length
+      global_char_offset = token_end if (global_char_offset > token_end)
+      global_char_offset = -global_char_offset
+    end
     TextElmtData.new self, global_char_offset
   end
 

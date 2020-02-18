@@ -60,13 +60,15 @@ class Seeker
   end
 
   def traverse &block
-    children.each { |child| block.call child }
     block.call self
+    children.each do |child|
+      child.traverse &block
+    end
   end
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
   def enclose tagname='span'
-    @head_stream.enclose_to @tail_stream.pos, @token.to_s, tagname
+    @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname
   end
 end
 
