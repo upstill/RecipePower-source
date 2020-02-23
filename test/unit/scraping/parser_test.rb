@@ -286,7 +286,7 @@ EOF
     seeker = parser.match :rp_recipelist
     assert seeker
     assert_equal :rp_recipelist, seeker.token
-    assert_equal 4, seeker.children.count
+    assert_equal 3, seeker.children.count
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }
     assert (rcp_seeker = seeker.find(:rp_recipe).first)
     assert (ttl_seeker = rcp_seeker.find(:rp_title).first)

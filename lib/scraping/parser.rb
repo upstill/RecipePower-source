@@ -123,7 +123,7 @@ class Parser
       rp_time: [ :rp_num, 'min' ],
       rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
-      rp_instructions: { repeating: //, bound: { match: //, within_css_match: 'h2'} },
+      rp_instructions: { repeating: //, bound: { optional: //, within_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
           match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
@@ -354,7 +354,9 @@ class Parser
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
       # match = match_specification scanner, options[:bound]
-      match = seek(scanner) { |scanner| match_specification scanner, context[:bound] }
+      match = seek(scanner) do |scanner|
+        match_specification scanner, context[:bound]
+      end
       if match
         if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
           seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail

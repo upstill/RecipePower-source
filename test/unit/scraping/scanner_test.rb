@@ -93,18 +93,18 @@ EOF
     assert_equal [0], nks.elmt_bounds.map(&:last)
 
     # Enclose two strings in the middle
-    nks.enclose nks.token_offset_at(2),nks.token_offset_at(4)
+    nks.enclose_by_token_indices 2, 4
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     # assert_equal 4, nks.tokens.count
     # assert nks.tokens[1].is_a?(String)
     # assert nks.tokens[2].is_a?(NokoScanner)
     # assert nks.tokens[3].is_a?(String)
-    assert_equal [0, 9, 31], nks.elmt_bounds.map(&:last)
+    assert_equal [0, 9, 30], nks.elmt_bounds.map(&:last)
 
     # Enclose the last two strings
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(3), 37 # nks.token_offset_at(5)
+    nks.enclose_by_token_indices 3,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
@@ -114,17 +114,17 @@ EOF
 
     # Enclose the first two strings
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    nks.enclose_by_token_indices 0,2
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
     #assert nks.tokens[0].is_a?(NokoScanner)
     #assert nks.tokens[1].is_a?(String)
-    assert_equal [0, 9 ], nks.elmt_bounds.map(&:last)
+    assert_equal [0, 8], nks.elmt_bounds.map(&:last)
 
     # Enclose the last string
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(4), 37 # nks.token_offset_at(5)
+    nks.enclose_by_token_indices 4,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
@@ -134,13 +134,13 @@ EOF
 
     # Enclose the first string
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(1)
+    nks.enclose_by_token_indices 0,1
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
     #assert nks.tokens[0].is_a?(NokoScanner)
     #assert nks.tokens[1].is_a?(String)
-    assert_equal [0, 2], nks.elmt_bounds.map(&:last)
+    assert_equal [0, 1], nks.elmt_bounds.map(&:last)
   end
 
   test 'element Bounds in text' do
@@ -158,7 +158,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    nks.enclose_by_token_indices 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -181,7 +181,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    nks.enclose_by_token_indices 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -203,7 +203,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    nks.enclose_by_token_indices 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -271,7 +271,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose nks.token_offset_at(0), nks.token_offset_at(2)
+    nks.enclose_by_token_indices 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -306,41 +306,43 @@ EOF
     assert_equal 'then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data -19
-    assert_equal 'and ', ted.prior_text
-    assert_equal 'then a random text stream', ted.subsq_text
+    assert_equal 'and', ted.prior_text
+    assert_equal ' then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data 15
     assert_equal '', ted.prior_text
     assert_equal 'and then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data -15
-    assert_equal 'Beginning text ', ted.prior_text
-    assert_equal '', ted.subsq_text
+    assert_equal 'Beginning text', ted.prior_text
+    assert_equal ' ', ted.subsq_text
 
     ted = nks.text_elmt_data -33
-    assert_equal 'and then a random ', ted.prior_text
-    assert_equal 'text stream', ted.subsq_text
+    assert_equal 'and then a random', ted.prior_text
+    assert_equal ' text stream', ted.subsq_text
 
     html = "<span>Beginning text</span>and then a random text stream<span>followed by more text"
     nks = NokoScanner.from_string html
     assert_equal [0, 10, 18, 23, 25, 32, 37, 52, 55, 60 ], nks.token_starts
     assert_equal [0, 14, 43], nks.elmt_bounds.map(&:last)
 
+    # Landing in the middle of a token, the pointer should retreat to the token's beginning, with associated text element
     ted = nks.text_elmt_data 14
-    assert_equal '', ted.prior_text
-    assert_equal 'and then a random text stream', ted.subsq_text
+    assert_equal 'Beginning ', ted.prior_text
+    assert_equal 'text', ted.subsq_text
 
+    # A terminating mark landing in the middle of a token should mark the END of the token
     ted = nks.text_elmt_data -14
-    assert_equal 'Beginning text', ted.prior_text
-    assert_equal '', ted.subsq_text
+    assert_equal 'and', ted.prior_text
+    assert_equal ' then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data 43
-    assert_equal '', ted.prior_text
-    assert_equal 'followed by more text', ted.subsq_text
+    assert_equal 'stream', ted.subsq_text
+    assert_equal 'and then a random text ', ted.prior_text
 
     ted = nks.text_elmt_data -43
-    assert_equal 'and then a random text stream', ted.prior_text
-    assert_equal '', ted.subsq_text
+    assert_equal 'followed', ted.prior_text
+    assert_equal ' by more text', ted.subsq_text
 
     ted = nks.text_elmt_data -64
     assert_equal 'followed by more text', ted.prior_text

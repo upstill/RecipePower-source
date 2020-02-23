@@ -1,5 +1,6 @@
 require 'string_utils.rb'
 require 'binsearch.rb'
+require 'scraping/text_elmt_data.rb'
 
 # Is the node ready to delete?
 def node_empty? nokonode
@@ -214,22 +215,30 @@ class NokoTokens < Array
     @token_starts[token_index] || @processed_text_len
   end
 
+  # What's the global character offset at the END of the token before the limiting token?
+  def token_limit_at token_limit_index
+    return 0 if token_limit_index == 0
+    token_offset_at(token_limit_index-1) + self[token_limit_index-1].length
+  end
+
   def elmt_offset_at token_index
     @elmt_bounds[token_index]&.last || @processed_text_len
   end
 
   # Return the string representing all the text given by the two token positions
+  # NB This is NOT the space-separated join of all tokens in the range, b/c any intervening whitespace is not collapsed
   def text_from first_token_index, limiting_token_index
-    pos_begin = token_offset_at(first_token_index) ; pos_end = token_offset_at(limiting_token_index)
+    pos_begin = token_offset_at first_token_index
+    pos_end = token_limit_at limiting_token_index
     return '' if pos_begin == @processed_text_len # Boundary condition: no more text!
-    teleft = text_elmt_data pos_begin
-    if teleft.encompasses_offset pos_end
-      return teleft.delimited_text(pos_end)
-    end
-    teright = text_elmt_data -(pos_end) # The TextElmtData for the terminating token
+
+    teleft, teright = TextElmtData.for_range self, pos_begin...pos_end
+    return teleft.delimited_text(pos_end) if teleft.text_element == teright.text_element
+
     left_ancestors = teleft.ancestors - teright.ancestors # All ancestors below the common ancestor
     right_ancestors = teright.ancestors - teleft.ancestors
-    topleft = left_ancestors.pop || teleft.text_element ; topright = right_ancestors.pop || teright.text_element # Special processing here
+    topleft = left_ancestors.pop || teleft.text_element
+    topright = right_ancestors.pop || teright.text_element # Special processing here
     nodes = left_ancestors.collect { |left_ancestor| next_siblings left_ancestor } +
         (next_siblings(topleft) & prev_siblings(topright)) +
         right_ancestors.reverse.collect { |right_ancestor| prev_siblings right_ancestor }
@@ -238,10 +247,32 @@ class NokoTokens < Array
 
   # Convenience method to specify requisite text in terms of tokens
   def enclose_by_token_indices first_token_index, limiting_token_index, options={}
-    enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), options
+    # enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), options
+    global_character_position_start = token_offset_at first_token_index
+    global_character_position_end = token_limit_at limiting_token_index
+    # Provide a hash of data about the text node that has the token at 'global_character_position_start'
+    teleft, teright = TextElmtData.for_range self, global_character_position_start...global_character_position_end
+    # teleft = text_elmt_data global_character_position_start
+    # teright = text_elmt_data -(global_character_position_end)
+    if teleft.text_element == teright.text_element
+      # Both beginning and end are on the same text node
+      # Either add the specified class to the parent, or enclose the selected text in a new span element
+      # If the enclosed text is all alone in a span, just add to the classes of the span
+      if teleft.parent.name == 'span' &&
+          options[:classes] &&
+          teleft.prior_text.blank? &&
+          teright.subsq_text.blank? &&
+          teleft.parent.children.count == 1
+        teleft.parent[:class] << " #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes])
+      else
+        teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
+        update
+      end
+    else
+      enclose_by_text_elmt_data teleft, teright, options
+    end
   end
 
-  # Do the same thing as #enclose_by_global_character_positions, only using a selection specification
   # Return the Nokogiri node that was built
   def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, options={}
     newnode = nil
@@ -271,6 +302,7 @@ class NokoTokens < Array
     update
   end
 
+=begin
   # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
   def enclose_by_global_character_positions global_character_position_start, global_character_position_end, options={}
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
@@ -291,6 +323,53 @@ class NokoTokens < Array
     else
       enclose_by_text_elmt_data teleft, teright, options
     end
+  end
+=end
+
+  # What is the index of the token that includes the given offset (where negative offset denotes a terminating location)
+  def token_index_for signed_global_char_offset
+    global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
+    token_ix = binsearch token_starts, global_char_offset
+    # A terminating mark at the beginning of a token is interpreted at the end of the prior token
+    (terminating && token_starts[token_ix] == global_char_offset && token_ix > 0) ? (token_ix-1) : token_ix
+  end
+
+  # "Round" the character offset to the boundary of a token--either the first character (if a start mark) or
+  # the limiting character (if a terminating one)
+  def to_token_bound signed_global_char_offset
+    token_ix = token_index_for signed_global_char_offset
+    token_start = token_starts[token_ix]
+    signed_global_char_offset < 0 ? -(token_start+self[token_ix].length) : token_start
+  end
+
+  # Raise an error if a proposed marker doesn't conform to token bounds:
+  # -- It can't be within a token
+  # -- A beginning marker must be at the head of a token
+  # -- An ending marker must be at the end of the token
+  def valid_mark? signed_global_char_offset
+    return true if to_token_bound(signed_global_char_offset) == signed_global_char_offset
+    raise "TextElmtData error: proposed marker #{signed_global_char_offset} violates token constraints"
+  end
+
+  # Provide TextElmtData objects for the beginning and ending of the (globally expressed) range.
+  # If both ends of the range are in the same Nokogiri text element, the same TextElmtData object gets returned.
+  # NB: if either end of the range falls inside a token, it's rounded to token boundaries
+  def text_elmt_data_for_range global_range
+    # Round the range to the boundaries of a token
+    # Identify the token (by index) that the range starts in
+    start_ix = binsearch token_starts, global_range.first
+    # Start the range at the beginning of the token
+    global_range = token_starts[start_ix]...global_range.last if global_range.first > token_starts[start_ix]
+
+    # Identify the token (by index) that the range ends in
+    end_ix = binsearch token_starts, global_range.last
+    # If the range ends at the beginning of a token, identify the previous token
+    end_ix -= 1 if token_ix > 0 && token_starts[end_ix] == global_char_offset
+    # Get the character offset of the end of the token
+    token_end = token_starts[end_ix] + self[endix].length
+    # End the range at the end of the token
+    global_range = global_range.first...token_end if global_range.last < token_end
+    return TextElmtData.for_range(self, global_range)
   end
 
   def update
@@ -365,7 +444,7 @@ end
 class NokoScanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :enclose_by_global_character_positions, :text_elmt_data, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -488,149 +567,6 @@ class NokoScanner
   def enclose_to limit, options={}
     return unless limit > pos
     @tokens.enclose_by_token_indices @pos, limit, options
-  end
-
-end
-
-class TextElmtData < Object
-  delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  delegate :elmt_bounds, to: :noko_tokens
-  attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset
-  attr_reader :noko_tokens, :global_start_offset
-
-  def initialize nkt, global_char_offset_or_path, local_offset_mark=0 # character offset (global)
-    @noko_tokens = nkt
-    @local_char_offset = 0
-    if global_char_offset_or_path.is_a? String
-      # This is a path/offset specification, so we have to derive the global offset first
-      # Find the element from the path
-      path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
-      # Linear search: SAD!
-      @elmt_bounds_index = elmt_bounds.find_index { |elmt|
-        path_end == elmt.first || (path_end.children.include? elmt.first)
-      }
-      global_char_offset = elmt_bounds[@elmt_bounds_index].last
-      signed_global_char_offset = local_offset_mark < 0 ?
-                                      (local_offset_mark - global_char_offset) :
-                                      (global_char_offset + local_offset_mark)
-    else
-      @elmt_bounds_index = nil
-      signed_global_char_offset = global_char_offset_or_path
-    end
-    locate_text_element signed_global_char_offset
-    @parent = @text_element.parent
-  end
-
-  # Get the Nokogiri text element, its global character offset, and its index in the tokens scanner, based on global character offset
-  def locate_text_element signed_global_char_offset
-    # A negative global character offset denotes a terminating position.
-    # Here, we split that into a non-negative global character offset and a 'terminating' flag
-    global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
-    @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
-    # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
-    @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
-    mark_at global_char_offset, terminating
-  end
-
-  # Return the Xpath and offset to find the marked token in the document
-  def xpath
-    csspath = @text_element.css_path
-    Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
-  end
-
-  # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
-  def mark_at global_char_offset, terminating=false
-    token_index = binsearch @noko_tokens.token_starts, global_char_offset
-    token_index -= 1 if terminating && (token_index > 0) && (@noko_tokens.token_starts[token_index] == global_char_offset)
-    global_char_offset = @noko_tokens.token_starts[token_index]
-    # Set the mark at the end of the token if terminating
-    global_char_offset += @noko_tokens[token_index].length if terminating
-    @local_char_offset = global_to_local global_char_offset
-  end
-
-  # Express a local offset in the text element as a global one
-  def local_to_global local_offset
-    @global_start_offset+local_offset
-  end
-
-  def global_to_local global_offset
-    global_offset - @global_start_offset
-  end
-
-  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_left
-    return if prior_text.length == 0 # No need to split
-    text_element.next = subsq_text
-    text_element.content = prior_text
-    @global_start_offset += @local_char_offset
-    elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
-    @local_char_offset = 0
-  end
-
-  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_right
-    return if subsq_text.blank? # No need to split
-    text_element.previous = prior_text
-    text_element.content = subsq_text
-    elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
-    elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
-    @local_char_offset = text.length # Goes to the end of this node
-  end
-
-  # Does the text element include the text at the end offset
-  def encompasses_offset end_offset
-    text_element.text[end_offset - @global_start_offset - 1] != nil
-  end
-
-  # Divide an existing text element, splitting off the text between the mark and the given end mark into
-  # an element that encloses that text
-  def enclose_to global_character_position_end, html
-    # Split off a text element for text to the left of the mark (if any such text)
-    split_left
-    # Split off a text element for text to the right of the limit (if any such text)
-    mark_at global_character_position_end, true
-    split_right
-    # Now add a next element: the html shell
-    elmt = text_element
-    elmt.next = html
-    newnode = elmt.next
-    # Move the element under the shell
-    elmt.next.add_child elmt
-    newnode
-  end
-
-  # Return the text of the text element prior to the selection point
-  def prior_text
-    text[0...@local_char_offset]
-  end
-
-  # Return the text from the mark to the end of the text element
-  def subsq_text mark = @local_char_offset
-    text[mark..-1]
-  end
-
-  # Return the text from the beginning to the mark (expressed globally)
-  def delimited_text mark = nil
-    text[mark ? @local_char_offset...(mark-@global_start_offset) : @local_char_offset..-1].strip
-  end
-
-  def replace_bound newbounds, text_shrinkage = 0
-    elmt_bounds[@elmt_bounds_index..-1].each { |pair| pair[1] -= text_shrinkage } if text_shrinkage != 0
-    if newbounds.empty?
-      elmt_bounds.delete_at @elmt_bounds_index
-    else
-      elmt_bounds[@elmt_bounds_index..@elmt_bounds_index] = newbounds
-    end
-  end
-
-  def remove
-    child = text_element
-    while (parent = child.parent)
-      child.remove
-      break if parent.children.count != 0
-      child = parent
-    end
   end
 
 end
