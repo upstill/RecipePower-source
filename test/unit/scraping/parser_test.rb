@@ -234,6 +234,7 @@ EOF
     end
     seeker = parser.match :rp_recipe
     assert seeker
+    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285,295)
     assert_equal :rp_recipe, seeker.token
     assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
     assert_equal :rp_inglist, seeker.children[1].token

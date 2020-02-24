@@ -237,11 +237,24 @@ class NokoTokens < Array
 
     left_ancestors = teleft.ancestors - teright.ancestors # All ancestors below the common ancestor
     right_ancestors = teright.ancestors - teleft.ancestors
-    topleft = left_ancestors.pop || teleft.text_element
-    topright = right_ancestors.pop || teright.text_element # Special processing here
-    nodes = left_ancestors.collect { |left_ancestor| next_siblings left_ancestor } +
-        (next_siblings(topleft) & prev_siblings(topright)) +
-        right_ancestors.reverse.collect { |right_ancestor| prev_siblings right_ancestor }
+    if topleft = left_ancestors.pop
+      left_ancestors = [teleft.text_element] + left_ancestors
+    else
+      topleft = teleft.text_element
+    end
+    if topright = right_ancestors.pop
+      right_ancestors = [teright.text_element] + right_ancestors
+    else
+      topright = teright.text_element # Special processing here
+    end
+    nodes =
+        left_ancestors.collect do |left_ancestor|
+          next_siblings left_ancestor
+        end +
+            (next_siblings(topleft) & prev_siblings(topright)) +
+        right_ancestors.reverse.collect do |right_ancestor|
+          prev_siblings right_ancestor
+        end
     teleft.subsq_text + nodes.flatten.map(&:text).join + teright.prior_text
   end
 

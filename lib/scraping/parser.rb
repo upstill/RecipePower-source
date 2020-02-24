@@ -298,6 +298,22 @@ class Parser
       token, context = nil, token
     end
     found = nil
+    if context[:bound]
+      # Terminate the search when the given specification is matched, WITHOUT consuming the match
+      # Foreshorten the stream and recur
+      # match = match_specification scanner, options[:bound]
+      match = seek(scanner) do |scanner|
+        match_specification scanner, context[:bound]
+      end
+      if match && (match.head_stream != match.tail_stream) # Non-trivial match
+        if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
+          seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
+        end
+      else # No bound found => proceed as normal, without the :bound specifier
+        seeker = match_specification scanner, spec, token, context.except(:bound)
+      end
+      return seeker
+    end
     if context[:repeating] # Match the spec repeatedly until EOF
       matches = []
       while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
@@ -349,22 +365,6 @@ class Parser
       match = seek(scanner) { |scanner| match_specification scanner, context[:start] }
       scanner = scanner.goto(match.head_stream) if match
       found = match_specification scanner, spec, token, context.except(:start)
-    end
-    if context[:bound]
-      # Terminate the search when the given specification is matched, WITHOUT consuming the match
-      # Foreshorten the stream and recur
-      # match = match_specification scanner, options[:bound]
-      match = seek(scanner) do |scanner|
-        match_specification scanner, context[:bound]
-      end
-      if match
-        if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
-          seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
-        end
-      else # No bound found => proceed as normal, without the :bound specifier
-        seeker = match_specification scanner, spec, token, context.except(:bound)
-      end
-        return seeker
     end
     if context[:accumulate] # Collect matches as long as they're valid
       while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
