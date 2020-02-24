@@ -33,7 +33,7 @@ class ParsingServices
       seeker = @parser.match token.to_sym
       # The seeker reflects a successful parsing of the (subtree) scanner against the token.
       # Now we should modify the Nokogiri DOM to reflect the elements found
-      seeker.traverse do |inner|
+      seeker&.traverse do |inner|
         if inner != seeker && inner.token
           tagname = [ :rp_recipelist, :rp_recipe, :rp_inglist ].include?(inner.token) ? 'div' : 'span'
           inner.enclose tagname

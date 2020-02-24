@@ -68,7 +68,7 @@ class TextElmtData < Object
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_left
     # return if prior_text.length == 0 # No need to split
-    return if prior_text.blank? || subsq_text.blank?
+    return if prior_text.empty? || subsq_text.empty?
     text_element.next = subsq_text
     text_element.content = prior_text
     @global_start_offset += @local_char_offset
@@ -78,7 +78,7 @@ class TextElmtData < Object
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_right
-    return if prior_text.blank? || subsq_text.blank?
+    return if prior_text.empty? || subsq_text.empty?
     text_element.previous = prior_text
     text_element.content = subsq_text
     elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
