@@ -11,9 +11,9 @@ module RecipeContentsHelper
 
   # Assert an annotation button in the recipe_contents editor. Give it a title, and declare its token for submission
   def annotation_button token, options={}
-    dialog_submit_button Parser.token_to_title(token),
-                         options.merge(data: {'recipe[recipe_contents][token]' => token},
-                                       class: "#{options[:class]} submit-selection",
-                                       button_style: 'default')
+    button_options = options.merge(data: {'recipe[recipe_contents][token]' => token},
+                                   class: "#{options[:class]} submit-selection",
+                                   button_style: 'default')
+    dialog_submit_button Parser.token_to_title(token), button_options
   end
 end

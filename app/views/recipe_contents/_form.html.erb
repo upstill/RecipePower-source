@@ -12,7 +12,7 @@
     <%= dialog_submit_button 'parse it!' %>
   <% end %>
   <div class="row">
-    <% [ :rp_title, :rp_ingline, :rp_ingname ].each do |token| %>
+    <% [ :rp_title, :rp_inglist, :rp_ingline, :rp_ingname, :rp_instructions ].each do |token| %>
       <%= annotation_button token, class: 'text-only tag-button' %>
     <% end %>
   </div>

@@ -99,13 +99,10 @@ class NokoTokens < Array
 
   # Convenience method to specify requisite text in terms of tokens
   def enclose_by_token_indices first_token_index, limiting_token_index, options={}
-    # enclose_by_global_character_positions token_offset_at(first_token_index), token_offset_at(limiting_token_index), options
     global_character_position_start = token_offset_at first_token_index
     global_character_position_end = token_limit_at limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range self, global_character_position_start...global_character_position_end
-    # teleft = text_elmt_data global_character_position_start
-    # teright = text_elmt_data -(global_character_position_end)
     if teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
       # Either add the specified class to the parent, or enclose the selected text in a new span element
@@ -150,8 +147,9 @@ class NokoTokens < Array
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
     teleft.split_left
     teright.split_right
-    assemble_tree_from_nodes teleft.text_element, teright.text_element, options
+    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options
     update
+    newnode
   end
 
 =begin

@@ -23,12 +23,21 @@ end
 =end
 
 class Parser
+  attr_reader :grammar
 
   @@TokenTitles = {
       :rp_title => 'Title',
       :rp_ingname => 'Ingredient Name',
-      :rp_ingline => 'Ingredient with amount'
+      :rp_ingline => 'Ingredient with amount',
+      :rp_inglist => 'Ingredient List',
+      :rp_instructions => 'Instructions'
   }
+
+  # How should the token be enclosed?
+  def self.tag_for_token token
+    [ :rp_recipelist, :rp_recipe, :rp_inglist ].include?(token.to_sym) ? 'div' : 'span'
+  end
+
   # Provide a list of tokens available to match
   def tokens
     @grammar.keys
@@ -41,6 +50,7 @@ class Parser
   def self.title_to_token title
 
   end
+
   # This is the DSL for parsing a recipe. The parsing engine, however, doesn't really concern recipes per se. It only
   # takes a grammar and a token generator and, if successful, creates an abstract syntax tree that just denotes what range of
   # tokens went into each match. In the case of a NokoScanner token generator, that syntax tree can be used to modify the
@@ -126,7 +136,7 @@ class Parser
       rp_instructions: { repeating: //, bound: { optional: //, within_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
-          match: { repeating: { :match => :rp_ingline, atline: true, optional: true } }
+          match: { repeating: { :match => :rp_ingline, optional: true } }  # atline: true
       },
       rp_ingline: {
           match: [
@@ -136,7 +146,7 @@ class Parser
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
           ],
-          bound: "\n"},
+          bound: ',' }, # "\n"},
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, bound: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -148,7 +158,8 @@ class Parser
                ]
       },
       rp_altamt: ["(", :rp_amt, ")"],
-      rp_presteps: { tag: 'Condition', list: true }, # There may be one or more presteps (instructions before measuring)
+      rp_presteps: { match: :rp_condition, list: true }, # There may be one or more presteps (instructions before measuring)
+      rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
       rp_ingspec: { or: [:rp_ingalts, :rp_ingname] },
       rp_ingname: { tag: 'Ingredient' },
       rp_ingalts: { match: :rp_ingname, orlist: true },
@@ -168,6 +179,7 @@ class Parser
       raise 'Provided grammar has errors: ', *gramerrs
     end
     @grammar = grammar
+    @grammar.freeze
     @lexaur = lexaur if lexaur
     @stream = case noko_scanner_or_nkdoc_or_nktokens
               when NokoScanner
@@ -210,13 +222,6 @@ class Parser
   # Match by applying the grammar to the stream, attempting to match 'token' at the current position
   # 'options' are those specified in the reference to this token in the grammar
   # If successful, return a Seeker which gives the abstract parse tree in terms of token ranges in the text
-=begin
-  def self.match stream, token, options={}
-    @@DefaultGrammar = (grammar_check(options[:grammar]) if options[:grammar]) || @@DefaultGrammar
-    @lexaur = options[:lexaur] if options[:lexaur]
-    match_specification stream, @@DefaultGrammar[token], token, options.except(:grammar)
-  end
-=end
 
   # Run an integrity check on the grammar, calling the block when an error is found
   def self.grammar_check grammar
@@ -402,6 +407,7 @@ class Parser
     found =
     case spec
     when Symbol
+      # If there's a parent node tagged with the appropriate grammar entry, we just use that
       match_specification scanner, @grammar[spec], spec
     when String
       StringSeeker.match scanner, string: spec, token: token
