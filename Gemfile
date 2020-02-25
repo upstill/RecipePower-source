@@ -48,27 +48,27 @@ gem 'unicorn-rails'
 gem 'thin'
 
 # Activity Notification
-gem 'activity_notification', '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
+gem 'activity_notification', '1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.1.1' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
-gem 'jquery-ui-rails', '~> 3.0'
-gem 'coffee-rails', "~> 4.2"
+gem 'jquery-ui-rails', '~> 3.0', '>= 3.0.1'
+gem 'coffee-rails', '~> 4.2', '>= 4.2.2'
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 5.0', '>= 5.0.7'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
 # gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
-gem 'masonry-rails'
-gem 'jquery-fileupload-rails', '~> 1.0' # '0.4.7'
+gem 'masonry-rails', '>= 0.2.4'
+gem 'jquery-fileupload-rails', '~> 1.0', '>= 1.0.0' # '0.4.7'
 gem 'sassc', '~> 1.12' # Version 2.0 requires Ruby 2.3
 
 ###### Authentication and authorization
-gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise', '~> 4.5', '>= 4.5.0' # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.7', '>= 1.7.5' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
@@ -94,9 +94,9 @@ gem 'hirefire-resource'
 gem 'sshkit', '~> 1.3.0'
 gem 'net-ssh', '~> 2.9'
 gem 'capistrano', '~> 3.3.5'
-gem 'capistrano-rails', '~> 1.1.2'
+gem 'capistrano-rails', '~> 1.1.8'
 gem 'capistrano-bundler', '~> 1.1.4'
-gem 'capistrano-rbenv', '~> 2.0.3'
+gem 'capistrano-rbenv', '~> 2.0.4'
 
 ###### External interfaces
 # Extract Pocket/Readability page data into PageRefs
@@ -122,7 +122,7 @@ group :development do
   gem "binding_of_caller"
   ## gem "json"
   gem 'rack-mini-profiler', '~> 0.10'  # Subsequent versions require Ruby 2.3
-  gem 'derailed'
+  gem 'derailed', '>= 0.1.0'
   gem 'heapy', '0.1.1' # Subsequent versions require Ruby 2.3
   gem 'stackprof'
   gem 'flamegraph'
@@ -147,7 +147,7 @@ group :test do
   gem 'turn', :require => false
   gem 'webrat', '~> 0.7.3'
   ### gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
-  gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
+  gem 'factory_bot_rails' , '>= 4.11.1' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
   gem 'rspec-rails', '3.8.1'
