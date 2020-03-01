@@ -348,4 +348,46 @@ EOF
     assert_equal 'followed by more text', ted.prior_text
     assert_equal '', ted.subsq_text
   end
+
+  test 'pathfinding' do
+    html = '<div class="rp_elmt rp_recipe">
+<p>Like its cousin the Amaretto Sour.</p>
+<p>ice, combine <span>1 ounce of bourbon</span>, 1 ounce of Frangelico, <span>3/4 ounce lemon juice</span> blah blah blah.</p></div>'
+    nkdoc = Nokogiri::HTML.fragment(html)
+    nks = NokoScanner.new nkdoc
+    assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=1]').first.name
+    assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=2]').first.name
+    nks.enclose_by_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
+                             'div/p[position()=2]/span[position()=2]/text()', 21,
+                             tag: 'div', classes: 'rp_inglist'
+    p = nkdoc.xpath('div/p[position()=2]').first
+    assert_equal 'div', p.next.name
+    assert_equal 'p', p.next.next.name
+
+    html = '<div class="rp_elmt rp_recipe">
+<p>Like its cousin the Amaretto Sour.</p>
+<p>ice, combine <span>1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice</span> blah blah blah.</p></div>'
+    nkdoc = Nokogiri::HTML.fragment(html)
+    nks = NokoScanner.new nkdoc
+    assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=1]').first.name
+    nks.enclose_by_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
+                             'div/p[position()=2]/span[position()=1]/text()', 63,
+                             tag: 'div', classes: 'rp_inglist'
+    p = nkdoc.xpath('div/p[position()=2]').first
+    assert_equal 'div', p.next.name
+    assert_equal 'p', p.next.next.name
+
+    html = '<div class="rp_elmt rp_recipe">
+<p>Like its cousin the Amaretto Sour.</p>
+<p>ice, combine 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice blah blah blah.</p></div>'
+    nkdoc = Nokogiri::HTML.fragment(html)
+    nks = NokoScanner.new nkdoc
+    nks.enclose_by_selection 'div/p[position()=2]/text()', 13,
+                             'div/p[position()=2]/text()', 76,
+                             tag: 'div', classes: 'rp_inglist'
+    p = nkdoc.xpath('div/p[position()=2]').first
+    assert_equal 'div', p.next.name
+    assert_equal 'p', p.next.next.name
+    
+  end
 end

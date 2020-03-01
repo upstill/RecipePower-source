@@ -5,7 +5,7 @@ require 'scraping/text_elmt_data.rb'
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
   attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
-  delegate :pp, to: :nkdoc
+  delegate :pp, :to => :nkdoc
   def initialize nkdoc
     def to_tokens newtext = nil
       # Prepend the string to the priorly held text, if any
@@ -151,30 +151,6 @@ class NokoTokens < Array
     update
     newnode
   end
-
-=begin
-  # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
-  def enclose_by_global_character_positions global_character_position_start, global_character_position_end, options={}
-    # Provide a hash of data about the text node that has the token at 'global_character_position_start'
-    teleft = text_elmt_data global_character_position_start
-    teright = text_elmt_data -(global_character_position_end)
-    if teleft.text_element == teright.text_element
-      # Both beginning and end are on the same text node
-      # Either add the specified class to the parent, or enclose the selected text in a new span element
-      if teleft.parent.name == 'span' &&
-          options[:classes] &&
-          teleft.prior_text.blank? &&
-          teright.subsq_text.blank?
-        teleft.parent[:class] << " #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes])
-      else
-        teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
-        update
-      end
-    else
-      enclose_by_text_elmt_data teleft, teright, options
-    end
-  end
-=end
 
   # What is the index of the token that includes the given offset (where negative offset denotes a terminating location)
   def token_index_for signed_global_char_offset

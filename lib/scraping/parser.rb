@@ -408,7 +408,11 @@ class Parser
     case spec
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      match_specification scanner, @grammar[spec], spec
+      if nokonode = scanner.parent_tagged_with(spec)
+        Seeker.new scanner, scanner.past(nokonode), token
+      else
+        match_specification scanner, @grammar[spec], spec
+      end
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array

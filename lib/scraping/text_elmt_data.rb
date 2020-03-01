@@ -105,7 +105,7 @@ class TextElmtData < Object
     newnode = elmt.next
     # Move the element under the shell
     elmt.next.add_child elmt
-    newnode
+    validate_embedding newnode
   end
 
   # Return the text of the text element prior to the selection point
