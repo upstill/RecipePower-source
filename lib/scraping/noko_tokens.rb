@@ -107,12 +107,12 @@ class NokoTokens < Array
       # Both beginning and end are on the same text node
       # Either add the specified class to the parent, or enclose the selected text in a new span element
       # If the enclosed text is all alone in a span, just add to the classes of the span
-      if teleft.parent.name == 'span' &&
+      if teleft.parent.name == (options[:tag].to_s || 'span') &&
           options[:classes] &&
-          teleft.prior_text.empty? &&
-          teright.subsq_text.empty? &&
+          !teleft.prior_text.present? &&
+          !teright.subsq_text.present? &&
           teleft.parent.children.count == 1
-        teleft.parent[:class] = "#{teleft.parent[:class]} #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes])
+        teleft.parent[:class] = "#{teleft.parent[:class]} #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes].to_s)
       else
         teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
         update

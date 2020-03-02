@@ -68,7 +68,21 @@ class Seeker
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
   def enclose tagname='span'
-    @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname
+    # Check that some ancestor doesn't already have the tag
+    if @token && !head_stream.descends_from?(tagname, @token)
+      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname
+    end
+  end
+
+  # Recursively modify the Nokogiri tree to reflect seekers
+  def enclose_all
+    # The seeker reflects a successful parsing of the (subtree) scanner against the token.
+    # Now we should modify the Nokogiri DOM to reflect the elements found
+    traverse do |inner|
+      if inner.token
+        inner.enclose Parser.tag_for_token(inner.token)
+      end
+    end
   end
 end
 

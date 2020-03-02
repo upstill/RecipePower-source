@@ -68,7 +68,7 @@ class TextElmtData < Object
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_left
     # return if prior_text.length == 0 # No need to split
-    return if prior_text.empty? || subsq_text.empty?
+    return unless prior_text.present? && subsq_text.present?
     text_element.next = subsq_text
     text_element.content = prior_text
     @global_start_offset += @local_char_offset
@@ -78,7 +78,7 @@ class TextElmtData < Object
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_right
-    return if prior_text.empty? || subsq_text.empty?
+    return unless prior_text.present? && subsq_text.present?
     text_element.previous = prior_text
     text_element.content = subsq_text
     elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
@@ -138,6 +138,19 @@ class TextElmtData < Object
       child.remove
       break if parent.children.count != 0
       child = parent
+    end
+  end
+
+  # See if a parent of the current text element has been tagged with a token
+  # Returns: the Nokogiri node with that tag that contains the token
+  def parent_tagged_with token
+    text_element.parent if text_element.parent['class']&.split&.include? token.to_s
+  end
+
+  # Does this text element have an ancestor of the given tag, with a class that includes the token?
+  def descends_from? tag, token
+    text_element.ancestors.find do |ancestor|
+      ancestor.name == tag && ancestor['class']&.split&.include?(token.to_s)
     end
   end
 

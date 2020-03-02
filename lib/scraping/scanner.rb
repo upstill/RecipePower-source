@@ -46,13 +46,15 @@ end
   # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
   right_collector = highest_whole_left.next
   newtree.add_child highest_whole_left
-  while (right_collector.parent != common_ancestor)
-    parent = right_collector.parent
-    while (right_sib = right_collector.next) do
-      right_collector = right_sib.next
-      newtree.add_child right_sib
+  if right_collector
+    while (right_collector.parent != common_ancestor)
+      parent = right_collector.parent
+      while (right_sib = right_collector.next) do
+        right_collector = right_sib.next
+        newtree.add_child right_sib
+      end
+      right_collector = parent
     end
-    right_collector = parent
   end
   ## Now do the same with the right side, adding preceding elements
   # Find the highest node that can be moved whole
@@ -67,7 +69,7 @@ end
   end
   # Go down the tree, collecting all the siblings before and including each ancestor
   while ancestor = stack.pop
-    while left_collector != ancestor do
+    while left_collector && left_collector != ancestor do
       next_sib = left_collector.next_sibling
       newtree.add_child left_collector
       left_collector = next_sib
@@ -84,13 +86,21 @@ def validate_embedding newtree
     # We have to split ancestors up to and including any <p>
     while newtree.ancestors.find { |node| node.name == 'p' } do
       parent = newtree.parent
-      newtree.next = newtree.document.create_element parent.name, parent.attributes
-      split_end = newtree.next
-      while parent.children[-1] != split_end do
-        split_end.add_child parent.children[-1]
-      end
-      parent.next = newtree
-      newtree.next = split_end
+=begin
+      if !newtree.next
+        parent.next = newtree
+      elsif !newtree.previous
+        parent.previous = newtree
+      else
+=end
+        newtree.next = newtree.document.create_element parent.name, parent.attributes
+        split_end = newtree.next
+        while parent.children[-1] != split_end do
+          split_end.add_child parent.children[-1]
+        end
+        parent.next = newtree
+        newtree.next = split_end
+#      end
     end
   end
   newtree
@@ -185,6 +195,7 @@ class NokoScanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
+  delegate :parent_tagged_with, :descends_from?, :to => :text_elmt_data
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -314,15 +325,6 @@ class NokoScanner
     @tokens.text_elmt_data @tokens.token_offset_at(pos)
   end
 
-  # See if a parent of the current token has been tagged with a token
-  # Returns: the Nokogiri node with that tag that contains the token
-  def parent_tagged_with token
-    if token == :rp_ingname
-      ted = text_elmt_data
-      ted.parent if ted.parent.attribute('class').to_s.split.include? token.to_s
-    end
-  end
-
   # Get a scanner whose position is past the end of the given nokonode,
   # aka the end of the nokonode's last text element
   def past nokonode
@@ -343,7 +345,7 @@ class NokoScanner
       # Now that we've passed up one text element, we check if there's more
       break if ted.text_element == last_text_element # If this is the last text element in the nokonode, we're done
       # Advance to the NEXT text element
-      ted = TextElmtData.new self, global_token_offset
+      ted = TextElmtData.new tokens, global_token_offset
     end
     NokoScanner.new tokens, new_pos, @bound
   end

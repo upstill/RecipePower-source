@@ -10,7 +10,7 @@ class RecipeContentsController < ApplicationController
   def annotate
     if params[:recipe][:recipeContents][:parse_path]
       # We simply report the prior annotation back
-      @annotation = ParsingServices.new(@recipe).parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path)
+      @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path)
       @parse_path = nil
     else
       @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)

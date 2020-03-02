@@ -136,7 +136,7 @@ class Parser
       rp_instructions: { repeating: //, bound: { optional: //, within_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
-          match: { repeating: { :match => :rp_ingline, optional: true } }  # atline: true
+          match: { repeating: { :match => :rp_ingline, optional: true, bound: ',' } }  # atline: true
       },
       rp_ingline: {
           match: [
@@ -145,8 +145,8 @@ class Parser
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ],
-          bound: ',' }, # "\n"},
+          ] },
+          # bound: ',' }, # "\n"},
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, bound: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -303,6 +303,10 @@ class Parser
       token, context = nil, token
     end
     found = nil
+    # Grammar entries for simple tags are accepted without further inspection
+    if @grammar[token].is_a?(Hash) && @grammar[token][:tag] && nokonode = scanner.parent_tagged_with(token)
+      return Seeker.new scanner, @stream.past(nokonode), token
+    end
     if context[:bound]
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
@@ -408,11 +412,7 @@ class Parser
     case spec
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      if nokonode = scanner.parent_tagged_with(spec)
-        Seeker.new scanner, scanner.past(nokonode), token
-      else
-        match_specification scanner, @grammar[spec], spec
-      end
+      match_specification scanner, @grammar[spec], spec
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array

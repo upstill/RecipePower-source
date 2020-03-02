@@ -21,7 +21,7 @@ class ParsingServices
   end
 
   # parse_on_path: assert the grammar on the element denoted by the path, getting the target token from the element
-  def parse_on_path html, path
+  def self.parse_on_path html, path
     nkdoc = Nokogiri::HTML.fragment html
     # Get the target element
     elmt = nkdoc.xpath(path.downcase)&.first # Extract the token at that element
@@ -31,13 +31,7 @@ class ParsingServices
         token.present?
       @parser = Parser.new nokoscan, Lexaur.from_tags
       if seeker = @parser.match(token.to_sym)
-        # The seeker reflects a successful parsing of the (subtree) scanner against the token.
-        # Now we should modify the Nokogiri DOM to reflect the elements found
-        seeker.traverse do |inner|
-          if inner != seeker && inner.token
-            inner.enclose Parser.tag_for_token(inner.token)
-          end
-        end
+        seeker.enclose_all
       end
     end
     nkdoc.to_s
