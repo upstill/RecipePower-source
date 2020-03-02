@@ -174,7 +174,7 @@ class Parser
     grammar ||= @@DefaultGrammar.clone
     yield(grammar) if block_given? # This is the chance to modify the default grammar
     gramerrs = []
-    Parser.grammar_check(grammar ) { |error| gramerrs << error }
+    @atomic_tokens = Parser.grammar_check(grammar) { |error| gramerrs << error }
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
     end
@@ -223,7 +223,8 @@ class Parser
   # 'options' are those specified in the reference to this token in the grammar
   # If successful, return a Seeker which gives the abstract parse tree in terms of token ranges in the text
 
-  # Run an integrity check on the grammar, calling the block when an error is found
+  # Run an integrity check on the grammar, calling the block when an error is found.
+  # As a side effect, generate a list of grammar entries that don't need secondary parsing
   def self.grammar_check grammar
     def self.check_entry entry, grammar
       case entry
@@ -260,10 +261,13 @@ class Parser
 
       end
     end
+    # atomic_tokens collects the set of tokens for pre-parsed elements which aren't further analyzed
+    atomic_tokens = {}
     grammar.keys.each do |key|
       self.check_entry grammar[key], grammar
+      atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && grammar[key][:tag]) || [ :rp_ing_comment ].include?(key)
     end if grammar
-    grammar
+    atomic_tokens
   end
 
   private
@@ -304,7 +308,7 @@ class Parser
     end
     found = nil
     # Grammar entries for simple tags are accepted without further inspection
-    if @grammar[token].is_a?(Hash) && @grammar[token][:tag] && nokonode = scanner.parent_tagged_with(token)
+    if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
       return Seeker.new scanner, @stream.past(nokonode), token
     end
     if context[:bound]

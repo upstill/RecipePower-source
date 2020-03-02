@@ -195,7 +195,6 @@ class NokoScanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
-  delegate :parent_tagged_with, :descends_from?, :to => :text_elmt_data
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -322,10 +321,18 @@ class NokoScanner
 
   # Provide the text element data for the current character position
   def text_elmt_data pos=@pos
-    @tokens.text_elmt_data @tokens.token_offset_at(pos)
+    @tokens.text_elmt_data(@tokens.token_offset_at pos) if pos < @bound
   end
 
-  # Get a scanner whose position is past the end of the given nokonode,
+  def parent_tagged_with token
+    text_elmt_data&.parent_tagged_with token
+  end
+
+  def descends_from? tag, token
+    text_elmt_data&.descends_from? tag, token
+  end
+
+    # Get a scanner whose position is past the end of the given nokonode,
   # aka the end of the nokonode's last text element
   def past nokonode
     last_text_element = nil
