@@ -318,13 +318,13 @@ EOF
   test 'parses ingredient list properly' do
     html = '1 ounce of bourbon, gently warmed'
     nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span><span class="rp_elmt rp_unit"> ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
+    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit">ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
                  nkdoc.to_s
 
     # Should have exactly the same result with content priorly enclosed in span
     html = '<span class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</span>'
     nkdoc, seeker = parse html, :rp_ingline
-    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span><span class="rp_elmt rp_unit"> ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
+    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit">ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
                  nkdoc.to_s
 
     # Parsing a fully marked-up ingline shouldn't change it

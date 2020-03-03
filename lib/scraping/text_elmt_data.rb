@@ -67,8 +67,8 @@ class TextElmtData < Object
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_left
-    # return if prior_text.length == 0 # No need to split
-    return unless prior_text.present? && subsq_text.present?
+    # No need to split at the beginning or end of the text
+    return if subsq_text.empty? || prior_text.empty?
     text_element.next = subsq_text
     text_element.content = prior_text
     @global_start_offset += @local_char_offset
@@ -78,7 +78,8 @@ class TextElmtData < Object
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
   def split_right
-    return unless prior_text.present? && subsq_text.present?
+    # No need to split at the beginning or end of the text
+    return if prior_text.empty? || subsq_text.empty?
     text_element.previous = prior_text
     text_element.content = subsq_text
     elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
@@ -115,7 +116,7 @@ class TextElmtData < Object
 
   # Return the text from the mark to the end of the text element
   def subsq_text mark = @local_char_offset
-    text[mark..-1]
+    text[mark..-1] || ''
   end
 
   # Return the text from the beginning to the mark (expressed globally)

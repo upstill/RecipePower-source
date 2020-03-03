@@ -28,7 +28,7 @@ class Parser
   @@TokenTitles = {
       :rp_title => 'Title',
       :rp_ingname => 'Ingredient Name',
-      :rp_ingline => 'Ingredient with amount',
+      :rp_ingline => 'Ingredient Line Item',
       :rp_inglist => 'Ingredient List',
       :rp_instructions => 'Instructions'
   }
@@ -265,7 +265,7 @@ class Parser
     atomic_tokens = {}
     grammar.keys.each do |key|
       self.check_entry grammar[key], grammar
-      atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && grammar[key][:tag]) || [ :rp_ing_comment ].include?(key)
+      atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && grammar[key][:tag]) || [ :rp_title, :rp_ing_comment ].include?(key)
     end if grammar
     atomic_tokens
   end
