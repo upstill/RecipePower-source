@@ -62,6 +62,7 @@ class User < ApplicationRecord
   @@Guest_user = nil
   @@Guest_user_id = 4
   @@Super_user_id = 5
+  @@Inventory_user_id = 47
 
   include Taggable # Can be tagged using the Tagging model
   include Collectible
@@ -268,7 +269,7 @@ private
   # Start an invited user off with two friends: the person who invited them (if any) and 'guest'
   def initial_setup
     # Give him friends: upstill, garrone, Super and whomever invited them
-    self.followee_ids = [ 1, 3, User.super_id, invited_by_id ].compact.uniq
+    self.followee_ids = [ 1, 3, User.super_id, User.inventory_id, invited_by_id ].compact.uniq
 
     # Give him some lists  'Keepers', 'To Try', 'Now Cooking'
     List.assert 'Keepers', self, create: true
@@ -433,9 +434,16 @@ private
     @@Roles.list
   end
 
+  def self.inventory_user_id
+    @@Inventory_user_id
+  end
+
+  def self.inventory_user
+    @@Inventory_user ||= self.find(@@Inventory_user_id) # by_name(:guest))
+  end
+
   def self.super_id
     @@Super_user_id
-    # (@@Super_user || (@@Super_user = self.find(@@Super_user_id)) # (self.by_name(:super) || self.by_name('RecipePower')))).id
   end
 
   def self.superuser
