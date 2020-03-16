@@ -24,7 +24,10 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'find a number in a stream' do
     scanner = StrScanner.from_string "Fourscore and seven years ago "
-    assert_nil NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek(scanner)
+    assert_not_nil ns
+    assert_equal 2, ns.head_stream.pos
+    assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.from_string "Fourscore and 7 years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns

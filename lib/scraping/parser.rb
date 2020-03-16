@@ -35,7 +35,16 @@ class Parser
 
   # How should the token be enclosed?
   def self.tag_for_token token
-    [ :rp_recipelist, :rp_recipe, :rp_inglist ].include?(token.to_sym) ? 'div' : 'span'
+    case token.to_sym
+    when :rp_recipelist, :rp_recipe
+      'div'
+    when :rp_inglist
+      'ul'
+    when :rp_ingline
+      'li'
+    else
+      'span'
+    end
   end
 
   # Provide a list of tokens available to match
@@ -136,7 +145,7 @@ class Parser
       rp_instructions: { repeating: //, bound: { optional: //, within_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
-          match: { repeating: { :match => :rp_ingline, optional: true, bound: ',' } }  # atline: true
+          match: { repeating: { :match => :rp_ingline, optional: true, terminus: ',' } }  # atline: true
       },
       rp_ingline: {
           match: [
@@ -147,7 +156,7 @@ class Parser
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
           ] },
           # bound: ',' }, # "\n"},
-      rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, bound: "\n" }, # NB: matches even if the bound is immediate
+      rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
                or: [
@@ -311,19 +320,19 @@ class Parser
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
       return Seeker.new scanner, @stream.past(nokonode), token
     end
-    if context[:bound]
+    if terminator = (context[:bound] || context[:terminus])
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
-      # match = match_specification scanner, options[:bound]
       match = seek(scanner) do |scanner|
-        match_specification scanner, context[:bound]
+        match_specification scanner, terminator
       end
-      if match && (match.head_stream != match.tail_stream) # Non-trivial match
-        if seeker = match_specification( (scanner.except match.head_stream), spec, token, context.except(:bound))
+      cutoff = match && (context[:bound] ? match.head_stream : match.tail_stream)
+      if cutoff && (match.head_stream != match.tail_stream) # Non-trivial match
+        if seeker = match_specification( (scanner.except cutoff), spec, token, context.except(:bound, :terminus))
           seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
         end
-      else # No bound found => proceed as normal, without the :bound specifier
-        seeker = match_specification scanner, spec, token, context.except(:bound)
+      else # No bound found => proceed as normal, without the :bound (or :terminus) specifier
+        seeker = match_specification scanner, spec, token, context.except(:bound, :terminus)
       end
       return seeker
     end

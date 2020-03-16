@@ -301,23 +301,23 @@ EOF
     assert_equal '', ted.prior_text
     assert_equal 'Beginning text ', ted.subsq_text
 
-    ted = nks.text_elmt_data 19
+    ted = nks.text_elmt_data nks.token_index_for(19)
     assert_equal 'and ', ted.prior_text
     assert_equal 'then a random text stream', ted.subsq_text
 
-    ted = nks.text_elmt_data -19
+    ted = nks.text_elmt_data nks.token_index_for(-19)
     assert_equal 'and', ted.prior_text
     assert_equal ' then a random text stream', ted.subsq_text
 
-    ted = nks.text_elmt_data 15
+    ted = nks.text_elmt_data nks.token_index_for(15)
     assert_equal '', ted.prior_text
     assert_equal 'and then a random text stream', ted.subsq_text
 
-    ted = nks.text_elmt_data -15
+    ted = nks.text_elmt_data nks.token_index_for(-15)
     assert_equal 'Beginning text', ted.prior_text
     assert_equal ' ', ted.subsq_text
 
-    ted = nks.text_elmt_data -33
+    ted = nks.text_elmt_data nks.token_index_for(-33)
     assert_equal 'and then a random', ted.prior_text
     assert_equal ' text stream', ted.subsq_text
 
@@ -327,24 +327,24 @@ EOF
     assert_equal [0, 14, 43], nks.elmt_bounds.map(&:last)
 
     # Landing in the middle of a token, the pointer should retreat to the token's beginning, with associated text element
-    ted = nks.text_elmt_data 14
+    ted = nks.text_elmt_data nks.token_index_for(14)
     assert_equal 'Beginning ', ted.prior_text
     assert_equal 'text', ted.subsq_text
 
     # A terminating mark landing in the middle of a token should mark the END of the token
-    ted = nks.text_elmt_data -14
+    ted = nks.text_elmt_data nks.token_index_for(-14)
     assert_equal 'and', ted.prior_text
     assert_equal ' then a random text stream', ted.subsq_text
 
-    ted = nks.text_elmt_data 43
+    ted = nks.text_elmt_data nks.token_index_for(43)
     assert_equal 'stream', ted.subsq_text
     assert_equal 'and then a random text ', ted.prior_text
 
-    ted = nks.text_elmt_data -43
+    ted = nks.text_elmt_data nks.token_index_for(-43)
     assert_equal 'followed', ted.prior_text
     assert_equal ' by more text', ted.subsq_text
 
-    ted = nks.text_elmt_data -64
+    ted = nks.text_elmt_data nks.token_index_for(-64)
     assert_equal 'followed by more text', ted.prior_text
     assert_equal '', ted.subsq_text
   end

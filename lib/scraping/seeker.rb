@@ -157,18 +157,38 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
+    return self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)
     return self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)
     return self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek
   end
 
   # Is the string either an integer or a fraction?
   def self.num1 str
-    str&.match /^a$|^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
+    str&.match(/^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/) ||
+        (str && self.num_word(str))
+  end
+
+  def self.fraction str
+    str&.match(/^\d*\/{1}\d*$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/)
+  end
+
+  def self.whole_num str
+    str&.match(/^\d*$/) || (str && self.num_word(str))
   end
 
   # Does the string have an integer followed by a fraction?
   def self.num2 str
     str&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
+  end
+
+  # Does the string have an integer followed by a fraction?
+  def self.num3 str
+    strs = str.split
+    self.whole_num(strs.first) && %q{ and plus }.include?(strs[1]) && self.fraction(strs.last)
+  end
+
+  def self.num_word str
+    (@NumWords ||= Hash[%w{ a one two three four five six seven eight nine ten }.product([true])])[str.downcase]
   end
 
 end
@@ -206,7 +226,7 @@ class AmountSeeker < Seeker
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
-    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])(.*)/)
       num = $1
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
       self.new(stream, stream.rest, num, unit)

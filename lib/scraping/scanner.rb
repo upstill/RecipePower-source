@@ -30,14 +30,24 @@ end
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
-  newtree =
+  newtree = left_collector = left_collector_minus = nil
       if options[:insert] != false
-        left_ancestor.previous = html
-        left_ancestor.previous
+        if anchor_elmt.parent == common_ancestor
+          left_ancestor.previous = html
+          newtree = left_ancestor.previous
+          left_collector_minus = left_ancestor
+          left_collector = left_ancestor.next
+        else
+          left_ancestor.next = html
+          newtree = left_ancestor.next
+          left_collector_minus = newtree
+          # left_collector = newtree.next
+        end
       else
-        Nokogiri::HTML.fragment(html).children[0]
+        newtree = Nokogiri::HTML.fragment(html).children[0]
+        left_collector_minus = left_ancestor
+        left_collector = left_ancestor.next
       end
-  left_collector = left_ancestor.next
 
   highest_whole_left = anchor_elmt
   while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
@@ -68,6 +78,7 @@ end
     stack.push stack.last.parent
   end
   # Go down the tree, collecting all the siblings before and including each ancestor
+  left_collector ||= left_collector_minus.next
   while ancestor = stack.pop
     while left_collector && left_collector != ancestor do
       next_sib = left_collector.next_sibling
@@ -82,25 +93,24 @@ end
 
 # Special case: You can't put a <div> inside a <p>, so we may have to split the common ancestor to accommodate
 def validate_embedding newtree
-  if newtree.name == 'div'
+  if %w{ div ul li }.include? newtree.name
     # We have to split ancestors up to and including any <p>
     while newtree.ancestors.find { |node| node.name == 'p' } do
       parent = newtree.parent
-=begin
+      # If the interfering element has no successor or predecessor in the paragraph, simply hoist it up to be a sibling
       if !newtree.next
         parent.next = newtree
       elsif !newtree.previous
         parent.previous = newtree
       else
-=end
-        newtree.next = newtree.document.create_element parent.name, parent.attributes
-        split_end = newtree.next
-        while parent.children[-1] != split_end do
-          split_end.add_child parent.children[-1]
-        end
+        # We have to split the paragraph, leaving the new tree between parts
+        ix = parent.children.find_index { |child| child == newtree }
         parent.next = newtree
-        newtree.next = split_end
-#      end
+        # break if ix == parent.children.count # No more work to do if this is the last child of the parent
+        newtree.next = newtree.document.create_element parent.name, parent.attributes
+        # Move the paragraph content following the new tree into the new paragraph
+        newtree.next.children = parent.children[ix..-1]
+      end
     end
   end
   newtree
@@ -194,7 +204,7 @@ end
 class NokoScanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
