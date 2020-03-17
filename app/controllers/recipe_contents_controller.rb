@@ -19,7 +19,7 @@ class RecipeContentsController < ApplicationController
   end
 
   def patch
-    x=2
+    @recipe.recipe_contents = params[:recipe][:recipeContents][:content]
   end
 
   def create

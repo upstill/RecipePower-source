@@ -1,5 +1,9 @@
 require 'scraping/scanner.rb'
 
+def nknode_has_class? node, css_class
+  node['class']&.split&.include?(css_class.to_s) if node
+end
+
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
@@ -145,13 +149,13 @@ class TextElmtData < Object
   # See if a parent of the current text element has been tagged with a token
   # Returns: the Nokogiri node with that tag that contains the token
   def parent_tagged_with token
-    text_element.parent if text_element.parent['class']&.split&.include? token.to_s
+    text_element.parent if nknode_has_class?(text_element.parent, token)
   end
 
   # Does this text element have an ancestor of the given tag, with a class that includes the token?
   def descends_from? tag, token
     text_element.ancestors.find do |ancestor|
-      ancestor.name == tag && ancestor['class']&.split&.include?(token.to_s)
+      ancestor.name == tag && nknode_has_class?(ancestor, token)
     end
   end
 

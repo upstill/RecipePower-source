@@ -188,7 +188,7 @@ class NumberSeeker < Seeker
   end
 
   def self.num_word str
-    (@NumWords ||= Hash[%w{ a one two three four five six seven eight nine ten }.product([true])])[str.downcase]
+    (@NumWords ||= Hash[%w{ a an one two three four five six seven eight nine ten }.product([true])])[str.downcase]
   end
 
 end

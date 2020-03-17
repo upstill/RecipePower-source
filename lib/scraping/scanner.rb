@@ -21,11 +21,17 @@ def next_siblings nokonode
   nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode ; nil) }.compact
 end
 
+# Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
+def enclosable? subtree, anchor_elmt, focus_elmt, options
+  options[:classes].blank? || !nknode_has_class?(subtree, options[:classes])
+end
+
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
  def assemble_tree_from_nodes anchor_elmt, focus_elmt, options={}
   html = html_enclosure(options) # insert=true
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+  return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
 
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||

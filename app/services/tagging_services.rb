@@ -167,4 +167,15 @@ class TaggingServices
     end
   end
 
+  # Ensure that the tags associated with the entity by this user are all and only those given.
+  # Input: a hash mapping from tag types to tags, tag ids, or tag names
+  # Tags associated with tagstrs are created anew if not priorly existing.
+  def set_tags tagger_id, tag_spec={}
+    tag_ids = []
+    tag_spec.each do |key, values|
+      tag_ids += values.collect { |value| Tag.assert(value, key).id }
+    end
+    @taggable_entity.set_tag_ids tagger_id, tag_ids
+  end
+
 end

@@ -84,6 +84,7 @@ class Recipe < ApplicationRecord
       html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
     end
     super html # Set the attribute
+    RecipeServices.new(self).inventory
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
