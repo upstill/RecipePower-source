@@ -26,6 +26,6 @@
 
   <div class="modal-footer form-actions">
     <%= dialog_submit_button 'Save', disabled: true %>
-    <%= dialog_cancel_button 'Cancel' %>
+    <%= dialog_cancel_button 'Cancel', data: { :'oncancel' => recipe_contents_path(@recipe) } %>
   </div>
 <% end %>

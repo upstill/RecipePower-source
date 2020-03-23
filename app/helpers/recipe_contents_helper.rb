@@ -16,4 +16,13 @@ module RecipeContentsHelper
                                    button_style: 'default')
     dialog_submit_button Parser.token_to_title(token), button_options
   end
+
+  def do_recipe_contents_panel title # do_panel
+    render('recipe_pages/panel',
+           title: title,
+           pane_for: :recipe_contents,
+           wide: true,
+           data: {oncancel: recipe_contents_path(@recipe)}
+    )
+  end
 end

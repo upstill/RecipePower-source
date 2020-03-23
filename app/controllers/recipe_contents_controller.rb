@@ -12,9 +12,10 @@ class RecipeContentsController < ApplicationController
       # We simply report the prior annotation back
       @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path)
       @parse_path = nil
-    else
+    elsif params[:recipe][:recipeContents]
       @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
-      x=2
+    else
+      redirect_to :show
     end
   end
 

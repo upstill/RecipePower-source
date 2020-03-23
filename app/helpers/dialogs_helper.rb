@@ -269,7 +269,7 @@ module DialogsHelper
                                        )
     tag :input,
         class: "#{options[:class]} cancel dialog-cancel-button",
-        data: {dismiss: 'modal'},
+        data: {dismiss: 'modal'}.merge(options[:data]),
         name: 'commit',
         type: 'submit',
         value: label||'Cancel'

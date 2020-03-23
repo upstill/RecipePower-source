@@ -157,6 +157,8 @@ open_modal = (dlog, omit_button) ->
 		$('input[name="button_name"]').val $(this).attr('value')
 	$('.dialog-cancel-button', dlog).click (event) ->
 		# When canceling, check for pending dialog/page, following instructions in the response
+		if url = $(event.target).data('oncancel') || $(dlog).data 'oncancel'
+			RP.submit.submit_and_process url, dlog
 		close_modal RP.dialog.enclosing_modal(event.target), 'close'
 		event.preventDefault()
 		event.isDefaultPrevented()

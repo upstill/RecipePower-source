@@ -3,6 +3,6 @@
       recipe_content_replacement(@recipe)
   ],
   dlog: with_format('html') {
-    do_recipe_pages_panel 'Replacement Annotator', :recipe_contents
+    do_recipe_contents_panel 'Replacement Annotator'
   }
 }.merge(flash_notify).to_json
