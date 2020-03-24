@@ -119,6 +119,12 @@ end
             class: 'btn btn-default btn-xs'
   end
 
+  def recipe_page_button recipe
+    return unless recipe.is_a?(Recipe) && recipe.recipe_page
+    #         <%= link_to_submit '^', recipe_page_path(decorator.object.recipe_page), mode: :partial, title: 'Full Page' %>
+    link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'annotate-content glyphicon glyphicon-chevron-up'
+  end
+
 def tagjoin tags, enquote = false, before = '', after = '', joiner = ','
     strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: 'rcp_list_element_tag' }, before, after, joiner
 end

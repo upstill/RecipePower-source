@@ -2,6 +2,7 @@
   <div class="card-content" style="width:100%">
     <% if decorator.object.is_a?(Recipe) %>
       <% if policy(decorator.object).update? %>
+        <%= recipe_page_button decorator.object %>
         <%= button_to_submit '',
                              edit_recipe_contents_path(decorator.object),
                              'glyph-edit-red',

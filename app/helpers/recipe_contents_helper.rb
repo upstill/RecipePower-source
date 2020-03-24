@@ -18,7 +18,7 @@ module RecipeContentsHelper
   end
 
   def do_recipe_contents_panel title # do_panel
-    render('recipe_pages/panel',
+    render('recipe_contents/panel',
            title: title,
            pane_for: :recipe_contents,
            wide: true,
