@@ -13,7 +13,7 @@ class RecipePage < ApplicationRecord
   has_many :recipes, :through => :page_ref
 
   # When a RecipePage is landing, once the page_ref is done gleaning content (etc.), it calls #adopt_gleaning
-  def adopt_gleaning
+  def adopt_gleaning force=false
 =begin
     def report name, seekers
       if seekers.present?
@@ -24,7 +24,7 @@ class RecipePage < ApplicationRecord
     end
 =end
     # The first time content is adopted from our page_ref, parse it for recipe content
-    if content.blank?
+    if force || content.blank?
       content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
       if content.present?
         parser = ParsingServices.new(self)

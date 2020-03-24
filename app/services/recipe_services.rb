@@ -30,11 +30,11 @@ class RecipeServices
   # Keep the recipe up to date wrt its content with tagging on the Inventory user
   def inventory
     # Open a Nokogiri document on the content and extract all the tags
-    nkdoc = Nokogiri::HTML.fragment @recipe.content
-    if nkdoc.css('.rp_elmt').present? # This content has been tagged
-      ing_tag_names = nkdoc.css('.rp_ingname').map &:text
+    ing_tag_names = if @recipe.content.present?
+      nkdoc = Nokogiri::HTML.fragment @recipe.content
+      nkdoc.css('.rp_ingname').map(&:text) if nkdoc.css('.rp_elmt').present? # This content has been tagged
     end
-    TaggingServices.new(@recipe).set_tags User.inventory_user_id, :Ingredient => ing_tag_names
+    TaggingServices.new(@recipe).set_tags User.inventory_user_id, :Ingredient => (ing_tag_names || [])
   end
 
   def show_tags(file=STDOUT)
