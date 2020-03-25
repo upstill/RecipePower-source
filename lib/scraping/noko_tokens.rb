@@ -132,10 +132,11 @@ class NokoTokens < Array
       update
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
-      last_te = TextElmtData.new self, focus_path, focus_offset
+      last_te = TextElmtData.new self, focus_path, -focus_offset
       # Need to ensure the selection is in the proper order
       if last_te.elmt_bounds_index < first_te.elmt_bounds_index
-        first_te, last_te = last_te, first_te
+        first_te = TextElmtData.new self, focus_path, focus_offset
+        last_te = TextElmtData.new self, anchor_path, -anchor_offset
       end
       # The two elmt data are marked, ready for enclosing
       newnode = enclose_by_text_elmt_data first_te, last_te, options

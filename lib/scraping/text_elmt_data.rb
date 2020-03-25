@@ -4,6 +4,13 @@ def nknode_has_class? node, css_class
   node['class']&.split&.include?(css_class.to_s) if node
 end
 
+def nknode_add_classes node, css_classes
+  absent = css_classes.split.collect { |css_class|
+    css_class unless nknode_has_class? node, css_class
+  }.compact.join(' ')
+  node['class'] = "#{node['class']} #{absent}"
+end
+
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
@@ -157,6 +164,10 @@ class TextElmtData < Object
     text_element.ancestors.find do |ancestor|
       ancestor.name == tag && nknode_has_class?(ancestor, token)
     end
+  end
+
+  def to_s
+    text_element.text
   end
 
 end

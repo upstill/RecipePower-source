@@ -26,34 +26,88 @@ def enclosable? subtree, anchor_elmt, focus_elmt, options
   options[:classes].blank? || !nknode_has_class?(subtree, options[:classes])
 end
 
+def first_text_element node, blanks_okay=false
+  node.traverse do |child|
+    return child if child.text? && (blanks_okay || child.text.present?)
+  end
+end
+
+def last_text_element node, blanks_okay=false
+  last = nil
+  node.traverse do |child|
+    last = child if child.text? && (blanks_okay || child.text.present?)
+  end
+  last
+end
+
+def predecessor_text tree, text_elmt
+  prev = nil
+  tree.traverse do |node|
+    return prev if node == text_elmt # NB: will return nil if no predecessor
+    if node.text?
+      prev = node
+    end
+  end
+end
+
+def successor_text tree, text_elmt
+  prev = false
+  tree.traverse do |node|
+    return node if passed && node.text?
+    passed = true if node == text_elmt
+  end
+end
+
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
- def assemble_tree_from_nodes anchor_elmt, focus_elmt, options={}
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   html = html_enclosure(options) # insert=true
+
+  # Back the focus_elmt up as long as it's blank
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+  
+  # We can just apply the class to the parent element if the two text elements are the first and last text elements in the subtree
+  while anchor_elmt.to_s.blank? do
+    anchor_elmt = successor_text common_ancestor, anchor_elmt
+  end
+  while focus_elmt.to_s.blank? do
+    focus_elmt = predecessor_text common_ancestor, focus_elmt
+  end
+  common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
+  anc = common_ancestor
+  while !anc.fragment? &&
+      first_text_element(anc) == anchor_elmt &&
+      last_text_element(anc) == focus_elmt do
+    if anc.name == options[:tag]
+      nknode_add_classes anc, 'rp_elmt ' + options[:classes]
+      return anc
+    else
+      anc = anc.parent
+    end
+  end
   return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
 
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
   newtree = left_collector = left_collector_minus = nil
-      if options[:insert] != false
-        if anchor_elmt.parent == common_ancestor
-          left_ancestor.previous = html
-          newtree = left_ancestor.previous
-          left_collector_minus = left_ancestor
-          left_collector = left_ancestor.next
-        else
-          left_ancestor.next = html
-          newtree = left_ancestor.next
-          left_collector_minus = newtree
-          # left_collector = newtree.next
-        end
-      else
-        newtree = Nokogiri::HTML.fragment(html).children[0]
-        left_collector_minus = left_ancestor
-        left_collector = left_ancestor.next
-      end
+  if options[:insert] != false
+    if anchor_elmt.parent == common_ancestor
+      left_ancestor.previous = html
+      newtree = left_ancestor.previous
+      left_collector_minus = left_ancestor
+      left_collector = left_ancestor.next
+    else
+      left_ancestor.next = html
+      newtree = left_ancestor.next
+      left_collector_minus = newtree
+      # left_collector = newtree.next
+    end
+  else
+    newtree = Nokogiri::HTML.fragment(html).children[0]
+    left_collector_minus = left_ancestor
+    left_collector = left_ancestor.next
+  end
 
   highest_whole_left = anchor_elmt
   while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
@@ -79,7 +133,7 @@ end
     highest_whole_right = highest_whole_right.parent
   end
   # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
-  stack = [ highest_whole_right ]
+  stack = [highest_whole_right]
   while stack.last.parent != common_ancestor
     stack.push stack.last.parent
   end
