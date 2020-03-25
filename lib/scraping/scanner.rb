@@ -58,6 +58,30 @@ def successor_text tree, text_elmt
   end
 end
 
+# An ancestor of a node is markable if the first text elmt and the last text element are the entirety of non-blank text
+def scan_ancestors node, first_text_elmt, last_text_elmt
+  while !node.fragment? &&
+      first_text_element(node) == first_text_elmt &&
+      last_text_element(node) == last_text_elmt do
+    yield node
+    node = node.parent
+  end
+end
+
+# If possible, apply the classes to an ancestor of the two text elements
+# "possible" means that all text of the ancestor before the first and after the last
+# text element is blank
+def tag_ancestor node, first_te, last_te, tag='span', classes=''
+  tag, classes = 'span', tag if tag&.match('rp_')
+  scan_ancestors node, first_te, last_te do |anc|
+    if anc.name == tag&.to_s
+      nknode_add_classes anc, "rp_elmt #{classes}"
+      return anc
+    end
+  end
+  nil
+end
+
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
 def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
@@ -74,16 +98,9 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
     focus_elmt = predecessor_text common_ancestor, focus_elmt
   end
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
-  anc = common_ancestor
-  while !anc.fragment? &&
-      first_text_element(anc) == anchor_elmt &&
-      last_text_element(anc) == focus_elmt do
-    if anc.name == options[:tag]
-      nknode_add_classes anc, 'rp_elmt ' + options[:classes]
-      return anc
-    else
-      anc = anc.parent
-    end
+  # If there's an ancestor with no preceding or succeeding text, mark that and return
+  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options[:tag], options[:classes])
+    return anc
   end
   return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
 

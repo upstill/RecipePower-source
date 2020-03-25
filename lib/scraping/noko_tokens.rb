@@ -128,8 +128,13 @@ class NokoTokens < Array
     if anchor_path == focus_path
       anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
       first_te = TextElmtData.new self, anchor_path, anchor_offset
-      newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
-      update
+      # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
+      unless first_te.text[0...anchor_offset].blank? &&
+          first_te.text[focus_offset...-1].blank? &&
+        newnode = tag_ancestor(first_te.parent, first_te.text_element, first_te.text_element, (options[:tag]&.to_s || 'span'), options[:classes])
+        newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
+        update
+      end
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
       last_te = TextElmtData.new self, focus_path, -focus_offset
