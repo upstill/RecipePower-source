@@ -90,6 +90,19 @@ EOF
 EOF
   end
 
+  test 'grammar mods' do
+    nonsense = 'No Intention To Parse This String'
+    grammar_mods = {
+        :rp_ingname => { terminus: ',' }, # Test value gets added
+        :rp_altamt => { }, # Make sure array gets embedded in entry
+        :rp_ing_comment => { terminus: ',' } # Make sure value gets replaced
+    }
+    parser = Parser.new NokoScanner.from_string(nonsense), grammar_mods
+    assert_equal ',', parser.grammar[:rp_ingname][:terminus]
+    assert parser.grammar[:rp_altamt][:match].is_a?(Array)
+    assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
+  end
+
   test 'parse amount specs' do
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"

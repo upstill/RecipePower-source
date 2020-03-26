@@ -39,6 +39,12 @@ class ParsingServices
 
   # Extract information from an entity (Recipe or RecipePage)
   def parse content
+    grammar_mods =       {
+        :recipelist => { start: { match: //, within_css_match: 'h2' } },
+        :rcp_title => { within_css_match: 'h2' },
+        :rp_inglist => { bound: { match: //, within_css_match: 'h2'} }
+    }
+
     case @entity
     when Recipe
       parse_recipe content
@@ -51,9 +57,9 @@ class ParsingServices
     end
   end
 
-  def parse_recipe_page content
+  def parse_recipe_page content, grammar_mods={}
     # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
-    @parser = Parser.new(content, Lexaur.from_tags)  do |grammar|
+    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
       # We start by seeking to the next h2 (title) tag
       grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
@@ -63,9 +69,9 @@ class ParsingServices
     @seeker = parser.match :rp_recipelist
   end
 
-  def parse_recipe content
+  def parse_recipe content, grammar_mods={}
     # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
-    @parser = Parser.new(content, Lexaur.from_tags)  do |grammar|
+    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
       # We start by seeking to the next h2 (title) tag
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag

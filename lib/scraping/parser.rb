@@ -172,22 +172,20 @@ class Parser
       rp_ingspec: { or: [:rp_ingalts, :rp_ingname] },
       rp_ingname: { tag: 'Ingredient' },
       rp_ingalts: { match: :rp_ingname, orlist: true },
-      rp_num: NumberSeeker,
+      rp_num: { match: NumberSeeker },
       rp_unit: { tag: 'Unit' }
   }
 
-  def initialize noko_scanner_or_nkdoc_or_nktokens, grammar = nil, lexaur = nil
-    if grammar.is_a?(Lexaur)
-      grammar, lexaur = nil, grammar
-    end
-    grammar ||= @@DefaultGrammar.clone
-    yield(grammar) if block_given? # This is the chance to modify the default grammar
+  def initialize noko_scanner_or_nkdoc_or_nktokens, lexaur = nil, grammar_mods={}
+    lexaur, grammar_mods = nil, lexaur if lexaur.is_a?(Hash)
+    @grammar = @@DefaultGrammar.clone
+    modify_grammar grammar_mods
+    yield(@grammar) if block_given? # This is the chance to modify the default grammar
     gramerrs = []
-    @atomic_tokens = Parser.grammar_check(grammar) { |error| gramerrs << error }
+    @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
     end
-    @grammar = grammar
     @grammar.freeze
     @lexaur = lexaur if lexaur
     @stream = case noko_scanner_or_nkdoc_or_nktokens
@@ -200,6 +198,18 @@ class Parser
               else
                 raise "Trying to initialize Parser with #{noko_scanner_or_nkdoc_or_nktokens.class.to_s}"
               end
+  end
+
+  # Revise the default grammar by specifying new bindings for tokens
+  # 'gm' is a hash:
+  # -- keys are tokens in the grammar
+  # -- values are hashes to be merged with the existing entries
+  def modify_grammar gm
+    gm.keys.each do |key|
+      key = key.to_sym
+      @grammar[key] = { match: @grammar[key] } if @grammar[key].is_a?(Array)
+      @grammar[key].merge! gm[key]
+    end
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
