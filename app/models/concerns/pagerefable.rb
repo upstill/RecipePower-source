@@ -110,7 +110,7 @@ module Pagerefable
       if page_ref.good?
         adopt_gleaning # "Abstract" method to be implemented by each pagerefable to adopt extracted values
       else
-        err_msg = "Page at '#{url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
+        err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
         errors.add :url, err_msg
         raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
       end

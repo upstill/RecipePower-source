@@ -35,13 +35,17 @@ class RecipePage < ApplicationRecord
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           title = sub_parser.value_for :rp_title
-          recipe = rset.shift
+          recipe = rset.shift || page_ref.recipes.first
           xb = sub_parser.xbounds
           if title.present? # There's an existing recipe
-            if recipe
+            if recipe&.persisted?
               recipe.update_column :title, title
               recipe.update_column :anchor_path, xb.first
               recipe.update_column :focus_path, xb.last
+            elsif recipe
+              recipe.title = title
+              recipe.anchor_path = xb.first
+              recipe.focus_path = xb.last
             else
               page_ref.recipes.create title: title, anchor_path: xb.first, focus_path: xb.last
             end

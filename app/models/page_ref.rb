@@ -192,6 +192,7 @@ class PageRef < ApplicationRecord
 
     NestedBenchmark.measure('getting Mercury results') { get_mercury_results }
     NestedBenchmark.measure('getting Gleaning results') { get_gleaning_results }
+    build_recipe_page if recipe? && !recipe_page # NestedBenchmark.measure('getting RecipePage results') { get_recipe_page_results }
 
     if errors[:url].present?
       url_errors = errors[:url].join "\n"

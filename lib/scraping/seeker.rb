@@ -183,8 +183,8 @@ class NumberSeeker < Seeker
 
   # Does the string have an integer followed by a fraction?
   def self.num3 str
-    strs = str.split
-    self.whole_num(strs.first) && %q{ and plus }.include?(strs[1]) && self.fraction(strs.last)
+    strs = str.split (/\ /)
+    self.whole_num(strs.first) && strs[1] && %q{ and plus }.include?(strs[1]) && self.fraction(strs.last)
   end
 
   def self.num_word str
