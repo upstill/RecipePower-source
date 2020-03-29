@@ -51,7 +51,7 @@ def predecessor_text tree, text_elmt
 end
 
 def successor_text tree, text_elmt
-  prev = false
+  passed = false
   tree.traverse do |node|
     return node if passed && node.text?
     passed = true if node == text_elmt
@@ -82,6 +82,106 @@ def tag_ancestor node, first_te, last_te, tag='span', classes=''
   nil
 end
 
+# Test that the nodes have a parent and appropriate siblings
+def confirm_integrity *nodes
+  nodes.each do |node|
+
+  end
+end
+
+# Add a child to a node while ensuring that the child's old environment is maintained
+def add_child node, newchild
+  if (node == newchild) || (newchild.parent == node)
+    return newchild.next
+  end
+  rtnval = newchild.next
+  if newchild == node.next
+    node.add_child newchild
+    return node.next
+  else
+    node.add_child newchild
+    return rtnval
+  end
+  begin
+    orig_prev, orig_next = newchild.previous, newchild.next
+    node_prev, node_next = node.previous, node.next
+    newchild.remove # node.add_child newchild
+    if orig_prev
+      raise '1: Previous node lost its parent after removing' unless orig_prev.parent
+      raise '2: Previous node not linked to next node after removing' unless orig_prev.next == orig_next
+    end
+    if orig_next
+      raise '3: Next node lost its parent after removing' unless orig_next.parent
+      raise '4: Next node not linked back to previous node after removing' unless orig_next.previous == orig_prev
+    end
+    node.add_child newchild
+    if node == orig_prev && node.next != orig_next
+      # Somehow the original next node has gotten unlinked from the DOM.
+      return
+    end
+    if node == orig_next && node.prev != orig_prev
+      return
+    end
+    if orig_prev
+      raise '5: Previous node lost its parent after adding' unless orig_prev.parent
+      raise '6: Previous node not linked to next node after adding' unless orig_prev.next == orig_next
+    end
+    if orig_next
+      raise '7: Next node lost its parent after adding' unless orig_next.parent
+      raise '8: Next node not linked back to previous node after adding' unless orig_next.previous == orig_prev
+    end
+    raise '9: New child not linked in with parent' unless newchild.parent == node
+  rescue Exception => e
+    x=2
+  end
+
+end
+
+# Insert a node before the given node and return the former
+def insert_before node_or_html, node
+  begin
+    old_prev = node.previous
+    parent = node.parent
+    node.previous = node_or_html
+    newtree = node.previous
+    if old_prev
+      raise 'Prior node not relinked properly' unless old_prev.next == newtree
+      raise 'Old previous lost its parent' unless old_prev.parent == parent
+    end
+    if node_or_html.is_a? String
+      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
+    else
+      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
+    end
+  rescue Exception => e
+    x=2
+  end
+  newtree
+end
+
+
+# Insert a node before the given node and return the former
+def insert_after node, node_or_html
+  begin
+    old_next = node.next
+    parent = node.parent
+    node.next = node_or_html
+    newtree = node.next
+    if old_next
+      raise 'Subsequent node not relinked properly' unless old_next.previous == newtree
+      raise 'Old next lost its parent' unless old_next.parent == parent
+    end
+    if node_or_html.is_a? String
+      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
+    else
+      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
+    end
+  rescue Exception => e
+    x=2
+  end
+  newtree
+end
+
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
 def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
@@ -107,38 +207,44 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
-  newtree = left_collector = left_collector_minus = nil
-  if options[:insert] != false
-    if anchor_elmt.parent == common_ancestor
-      left_ancestor.previous = html
-      newtree = left_ancestor.previous
-      left_collector_minus = left_ancestor
-      left_collector = left_ancestor.next
-    else
-      left_ancestor.next = html
-      newtree = left_ancestor.next
-      left_collector_minus = newtree
-      # left_collector = newtree.next
-    end
-  else
-    newtree = Nokogiri::HTML.fragment(html).children[0]
-    left_collector_minus = left_ancestor
-    left_collector = left_ancestor.next
-  end
+  newtree = nil
+  left_collector = if options[:insert] != false
+                     if anchor_elmt.parent == common_ancestor
+                       newtree = insert_before html, left_ancestor
+                       # left_ancestor.previous = html
+                       # newtree = left_ancestor.previous
+                       left_ancestor.next
+                     else
+                       newtree = insert_after left_ancestor, html
+                       # left_ancestor.next = html
+                       # newtree = left_ancestor.next
+                       newtree.next
+                     end
+                   else
+                     newtree = Nokogiri::HTML.fragment(html).children[0]
+                     left_ancestor.next
+                   end
 
   highest_whole_left = anchor_elmt
   while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
     highest_whole_left = highest_whole_left.parent
   end
   # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
-  right_collector = highest_whole_left.next
-  newtree.add_child highest_whole_left
+  if highest_whole_left == focus_elmt
+    add_child newtree, highest_whole_left
+    return newtree
+  end
+  if (newtree.next == focus_elmt) # (newtree.next == highest_whole_left) && (highest_whole_left.next == focus_elmt)
+    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+    focus_elmt = newtree.next
+  else
+    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+  end
   if right_collector
     while (right_collector.parent != common_ancestor)
       parent = right_collector.parent
       while (right_sib = right_collector.next) do
-        right_collector = right_sib.next
-        newtree.add_child right_sib
+        right_collector = add_child newtree, right_sib # newtree.add_child right_sib
       end
       right_collector = parent
     end
@@ -155,16 +261,13 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
     stack.push stack.last.parent
   end
   # Go down the tree, collecting all the siblings before and including each ancestor
-  left_collector ||= left_collector_minus.next
   while ancestor = stack.pop
     while left_collector && left_collector != ancestor do
-      next_sib = left_collector.next_sibling
-      newtree.add_child left_collector
-      left_collector = next_sib
+      left_collector = add_child newtree, left_collector # newtree.add_child left_collector
     end
     left_collector = ancestor.children[0] unless stack.empty?
   end
-  newtree.add_child highest_whole_right
+  add_child newtree, highest_whole_right # newtree.add_child highest_whole_right
   validate_embedding newtree
 end
 

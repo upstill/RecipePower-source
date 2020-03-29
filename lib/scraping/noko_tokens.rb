@@ -29,7 +29,7 @@ class NokoTokens < Array
         @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
-        to_tokens "\n" if child.name.match(/^(p|br|li)$/)
+        # to_tokens "\n" if child.name.match(/^(p|br|li)$/)
         child.children.each { |j| do_child j }
       end
     end
