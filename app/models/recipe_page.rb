@@ -27,16 +27,16 @@ class RecipePage < ApplicationRecord
     if force || content.blank?
       content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
       if content.present?
-        parser = ParsingServices.new(self)
+        parser = ParsingServices.new self
         parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
-        rset = recipes.order(:id => :ASC).to_a
+        rset = page_ref.recipes.to_a
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           title = sub_parser.value_for :rp_title
-          recipe = rset.shift || page_ref.recipes.first
           xb = sub_parser.xbounds
+          recipe = rset.find { |r| r.anchor_path == xb.first && r.focus_path == xb.last } || rset.first
           if title.present? # There's an existing recipe
             if recipe&.persisted?
               recipe.update_column :title, title
@@ -47,7 +47,7 @@ class RecipePage < ApplicationRecord
               recipe.anchor_path = xb.first
               recipe.focus_path = xb.last
             else
-              page_ref.recipes.create title: title, anchor_path: xb.first, focus_path: xb.last
+              rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
             end
           end
           puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }

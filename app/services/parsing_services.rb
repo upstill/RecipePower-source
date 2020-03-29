@@ -37,6 +37,21 @@ class ParsingServices
     nkdoc.to_s
   end
 
+  # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
+  def parse_and_annotate content
+    if seeker = parse(content)
+      [ :ingline ].each do |token|
+        puts "-------------- #{token} ---------------"
+        seekers = seeker.find(token)
+        seekers.each { |seeker|
+          puts seeker.head_stream.to_s
+        }
+      end
+      seeker.enclose_all
+      seeker.head_stream.nkdoc.to_s
+    end
+  end
+
   # Extract information from an entity (Recipe or RecipePage)
   def parse content
     grammar_mods =       {
@@ -55,29 +70,6 @@ class ParsingServices
       errors.add :url, err_msg
       raise err_msg
     end
-  end
-
-  def parse_recipe_page content, grammar_mods={}
-    # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
-    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
-      # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
-      # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
-    end
-    @seeker = parser.match :rp_recipelist
-  end
-
-  def parse_recipe content, grammar_mods={}
-    # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
-    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
-      # We start by seeking to the next h2 (title) tag
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
-      # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
-    end
-    @seeker = parser.match :rp_recipe
   end
 
   # Report out the parsing results for the given elements of the grammar
@@ -119,6 +111,29 @@ class ParsingServices
   end
 
 private
+
+  def parse_recipe_page content, grammar_mods={}
+    # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
+    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
+      # We start by seeking to the next h2 (title) tag
+      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      # Stop seeking ingredients at the next h2 tag
+      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
+    end
+    @seeker = parser.match :rp_recipelist
+  end
+
+  def parse_recipe content, grammar_mods={}
+    # TODO: This is a grammar for guardian.co.uk. It should be a function of sites in general
+    @parser = Parser.new(content, Lexaur.from_tags, grammar_mods)  do |grammar|
+      # We start by seeking to the next h2 (title) tag
+      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      # Stop seeking ingredients at the next h2 tag
+      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
+    end
+    @seeker = parser.match :rp_recipe
+  end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)
   def with_seeker seeker, &block

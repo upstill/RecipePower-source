@@ -1,106 +1,59 @@
 require 'test_helper'
+require 'parse_test_helper'
 require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
-class ParserTest < ActiveSupport::TestCase
-
-  def add_tags type, names
-    return unless names.present?
-    typenum = Tag.typenum(type)
-    names.each { |name|
-      next if Tag.strmatch(name, tagtype: typenum).present?
-      tag = Tag.assert name, typenum
-      @lex.take tag.name, tag.id
-    }
-  end
+class ParseTheguardianTest < ActiveSupport::TestCase
 
   def setup
-    @amounts = [
-        '1 head',
-        '1 1/2 cup',
-        '2 cloves',
-        '1/4 cup',
-        '½ cup',
-        '1 small head'
-    ]
-    @ingred_specs = [
-        '2 cloves garlic',
-        '2 garlic cloves',
-        'Sea salt',             # Case shouldn't matter
-        '6 tablespoons butter, softened',
-        '2 teaspoons Dijon mustard',
-        '1/4 cup drained small capers, rinsed',
-        'Grated zest of 1 lemon',
-        '3 tablespoons chopped marjoram',
-        'Black pepper',
-        '1 pound Brussels sprouts',
-        '1 small head (1/2 pound) white cauliflower',
-        '1 small head (1/2 pound) Romanesco (green) cauliflower'
-    ]
-    @ingred_tags = %w{
-      lemon\ zest
-      lemon\ juice
-      anchovy\ fillets
-      asparagus
-      flaked\ sea\ salt
-      sourdough\ bread
-      garlic
-      garlic\ clove
-      basil\ leaves
-      salt
-      baking\ soda
-      sugar
-      sea\ salt
-      butter
-      unsalted\ butter
-      Dijon\ mustard
-      capers
-      small\ capers
-      olive\ oil
-      marjoram
-      black\ pepper
-      Brussels\ sprouts
-      white\ cauliflower
-      Romanesco\ (green)\ cauliflower}.
-        each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove }.
-        each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless }.
-        each { |name| Tag.assert name, :Condition }
+    # Define all the tags we'll need for the site. (These will need to be extant on RecipePower itself)
+    add_tags :Ingredient,
+             %w{ lemon\ zest salt sea\ salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves
+    cooking\ chorizo eggs asparagus\ spears avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves
+    sunflower\ seeds pumpkin\ seeds maple\ syrup Salt kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill
+}
+    add_tags :Unit, %w{ g tbsp tsp large }
+    add_tags :Condition, %w{ crustless ripe }
     @lex = Lexaur.from_tags
-    @ings_list = <<EOF
-  <p>#{@ingred_specs.join "<br>\n"}</p>
-EOF
-    @recipe = <<EOF
-<div class="entry-content"> 
-  <p><b>Cauliflower and Brussels Sprouts Salad with Mustard-Caper Butter</b><br>
-     Adapted from Deborah Madison, via <a href="http://www.latimes.com/features/food/la-fo-cauliflowerrec1jan10,1,2176865.story?coll=la-headlines-food">The Los Angeles Times, 1/10/07</a></p>
-   
-  <p>Servings: 8 (Deb: Wha?)</p>
-   
-#{@ings_list}
-   
-  <p>1. To make the mustard-caper butter, pound the garlic with a half-teaspoon salt in a mortar until smooth. Stir the garlic into the butter with the mustard, capers, lemon zest and marjoram. Season to taste with pepper. (The butter can be made a day ahead and refrigerated. Bring to room temperature before serving.)</p>
-   
-  <p>2. Trim the base off the Brussels sprouts, then slice them in half or, if large, into quarters. Cut the cauliflower into bite-sized pieces.</p>
-   
-  <p>3. Bring a large pot of water to a boil and add salt. Add the Brussels sprouts and cook for 3 minutes. Then add the other vegetables and continue to cook until tender, about 5 minutes. Drain, shake off any excess water, then toss with the mustard-caper butter. Taste for salt, season with pepper and toss again.</p>
-   </div>
-EOF
+    setup_content 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
   end
 
-  test 'grammar mods' do
-    nonsense = 'No Intention To Parse This String'
+  # Do what it takes to setup a recipe for parsing
+  def setup_content url
+    # In practice, grammar mods will get bound to the site
     grammar_mods = {
-        :rp_ingname => { terminus: ',' }, # Test value gets added
-        :rp_altamt => { }, # Make sure array gets embedded in entry
-        :rp_ing_comment => { terminus: ',' } # Make sure value gets replaced
+        :rp_recipelist => {start: {match: //, within_css_match: 'h2'}},
+        :rp_title => {within_css_match: 'h2'}, # Match all tokens within an <h2> tag
+        # Stop seeking ingredients at the next h2 tag
+        :rp_inglist => {bound: {match: //, within_css_match: 'h2'}}
     }
-    parser = Parser.new NokoScanner.from_string(nonsense), grammar_mods
-    assert_equal ',', parser.grammar[:rp_ingname][:terminus]
-    assert parser.grammar[:rp_altamt][:match].is_a?(Array)
-    assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
+    # The selector will get associated with the recipe's site (as a 'Content' finder)
+    # The trimmers will kept on the site as well, to remove extraneous elements
+    @page_ref = load_page_ref url, 'div.content__article-body', ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"], grammar_mods
+    refute @page_ref.errors.any?
+    assert @page_ref.good? # Should have loaded and settled down
+    assert (@recipe_page = @page_ref.recipe_page)
+    @recipe_page.bkg_land
+    assert @recipe_page.good?
+    @content = SiteServices.new(@page_ref.site).trim_recipe @page_ref.content
+    assert_equal @content, @recipe_page.content
+    @parser = Parser.new @content, @lex, grammar_mods
+    @page_ref.recipes.to_a.map &:bkg_land # Complete parsing within the recipes
+  end
+
+  test 'recipes parsed out correctly' do
+    assert_equal 3, @page_ref.recipes.to_a.count
+    assert_equal [
+                     "Asparagus with pine nut and sourdough crumbs (pictured above)",
+                     "Soft-boiled egg with avocado, chorizo and asparagus",
+                     "Kale and grilled asparagus salad"
+                 ].sort, @page_ref.recipes.map(&:title).sort
+    assert_equal "Yotam Ottolenghi’s asparagus recipes | Food | The Guardian", @page_ref.title
+  end
+
+  test 'ingredient line' do
+
   end
 
   test 'parse amount specs' do
@@ -187,7 +140,7 @@ EOF
     html = html.gsub(/\n+\s*/, '')
     parser = Parser.new(html, @lex) do |grammar|
       # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
+      grammar[:rp_inglist][:match] = {repeating: :rp_ingline, :within_css_match => 'li'}
       grammar[:rp_inglist][:within_css_match] = 'ul'
     end
     seeker = parser.match :rp_inglist
@@ -243,12 +196,12 @@ EOF
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    parser = Parser.new(html, @lex)  do |grammar|
+    parser = Parser.new(html, @lex) do |grammar|
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe
     assert seeker
-    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285,295)
+    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285, 295)
     assert_equal :rp_recipe, seeker.token
     assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
     assert_equal :rp_inglist, seeker.children[1].token
@@ -289,17 +242,14 @@ EOF
 </div>
 EOF
     # This page has several recipes, each begun with an h2 header
-    ingreds = %w{ lemon\ zest salt sea\ salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves
-    cooking\ chorizo eggs asparagus\ spears ripe\ avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves
-    sunflower\ seeds pumpkin\ seeds maple\ syrup Salt kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill
-}.uniq.sort
+    ingreds = %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
     add_tags :Ingredient, ingreds
-    parser = Parser.new(html, @lex)  do |grammar|
+    parser = Parser.new(html, @lex) do |grammar|
       # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_recipelist][:start] = {match: //, within_css_match: 'h2'}
       grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_inglist][:bound] = {match: //, within_css_match: 'h2'}
     end
     seeker = parser.match :rp_recipelist
     assert seeker
@@ -318,56 +268,43 @@ EOF
     assert_equal 'Serves 4', servings_seeker.to_s
     ingred_seekers = rcp_seeker.find :rp_ingname
     ingreds_found = ingred_seekers.map &:to_s
-    assert_equal ingreds.sort, ingreds_found.uniq.sort
+    assert_equal ingreds, ingreds_found
   end
 
-  def parse html, token, options={}
+  def parse html, token, options = {}
     add_tags :Ingredient, options[:ingredients]
     nokoscan = NokoScanner.from_string html
     parser = Parser.new(nokoscan, @lex)
     if seeker = parser.match(token)
       seeker.enclose_all
     end
-    [ nokoscan.nkdoc, seeker ]
+    [nokoscan.nkdoc, seeker]
   end
 
   test 'parses ingredient list properly' do
     html = '1 ounce of bourbon, gently warmed'
     nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal 'bourbon', nkdoc.css('.rp_ingname').text
-    assert_equal '1', nkdoc.css('.rp_num').text
-    assert_equal 'ounce', nkdoc.css('.rp_unit').text
-    assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text
-    assert_equal html, nkdoc.text
+    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit">ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
+                 nkdoc.to_s
 
     # Should have exactly the same result with content priorly enclosed in span
-    html = '<li class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</li>'
+    html = '<span class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</span>'
     nkdoc, seeker = parse html, :rp_ingline
-    assert_equal '1', nkdoc.css('.rp_num').text
-    assert_equal 'ounce', nkdoc.css('.rp_unit').text
-    assert_equal 'bourbon', nkdoc.css('.rp_ingname').text
-    assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text
+    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit">ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
+                 nkdoc.to_s
 
     # Parsing a fully marked-up ingline shouldn't change it
     html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
     nkdoc, seeker = parse html, :rp_ingline
-    assert_equal '3/4', nkdoc.css('.rp_num').text
-    assert_equal 'ounce', nkdoc.css('.rp_unit').text
-    assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text
-    assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text
+    assert_equal html, nkdoc.to_s
 
     html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal '3/4', nkdoc.css('.rp_num').text
-    assert_equal 'ounce', nkdoc.css('.rp_unit').text
-    assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text
-    assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text
+    assert_equal html, nkdoc.to_s
 
-=begin
     html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
     assert_equal html.gsub("\n", ''), nkdoc.to_s.gsub("\n", '')
-=end
 
     html = '<div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
@@ -376,6 +313,6 @@ EOF
     html = '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>'
     nkdoc, seeker = parse html, :rp_recipe
     assert_equal html, nkdoc.to_s
-    x=2
+    x = 2
   end
 end

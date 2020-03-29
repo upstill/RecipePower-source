@@ -154,8 +154,7 @@ class Parser
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ] },
-          # bound: ',' }, # "\n"},
+          ] }, # , bound: "\n" },
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)

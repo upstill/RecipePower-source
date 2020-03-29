@@ -131,6 +131,7 @@ class Recipe < ApplicationRecord
     save
   end
 
+  # Having given the recipe page the chance to parse the page into recipes, parse our section of it
   def get_recipe_page_results
     page_ref.build_recipe_page if !recipe_page
     if recipe_page
@@ -139,8 +140,9 @@ class Recipe < ApplicationRecord
       #  adopt_recipe_page_results
       if recipe_page.bad?
         errors.add :url, "can\'t access recipe_page: #{recipe_page.errors[:base]}"
+      elsif recipe_page.good?
+        self.content = ParsingServices.new(self).parse_and_annotate recipe_page.selected_content(anchor_path, focus_path)
       end
-      recipe_page.good?
     end
   end
 

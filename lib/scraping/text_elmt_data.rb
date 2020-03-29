@@ -45,6 +45,13 @@ class TextElmtData < Object
     # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
     @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
+=begin
+    if !@elmt_bounds_index = binsearch(elmt_bounds, global_char_offset, &:last)
+      # Too low (before the first text element)
+      @elmt_bounds_index = 0
+      signed_global_char_offset = elmt_bounds[0].last
+    end
+=end
     # The FIRST character of a text element is treated as the LAST character of the previous text element for a terminating offset
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
     @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
