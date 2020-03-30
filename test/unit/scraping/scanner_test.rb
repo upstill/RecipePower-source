@@ -67,6 +67,33 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
+  test 'is_at' do
+    def test_str html, seeking, spec
+      nkdoc = Nokogiri::HTML.fragment html
+      nokoscan = NokoScanner.new nkdoc
+      check_integrity nokoscan
+      while nokoscan.more? do
+        if found = nokoscan.is_at?(spec)
+          assert_equal seeking, found.to_s
+        end
+        nokoscan = nokoscan.rest
+      end
+    end
+    html = "top-level <br>afterbr <span class='rp_elmt rp_text'>within span</span> after\nspan"
+    test_str html, "within span", within_elmt: 'span'
+    test_str html,  "after\nspan", after_elmt: 'span'
+    test_str html,  "afterbr within span after\nspan", after_elmt: 'br'
+    # Should get the same result independent of spacing
+    html = "top-level <br> afterbr<span class='rp_elmt rp_text'>within span</span>after\nspan"
+    test_str html, "text", within_elmt: 'span'
+    test_str html,  "text after\nspan", after_elmt: 'span'
+    test_str html,  "afterbrwithin spanafter\nspan", after_elmt: 'br'
+    html = "top-level <br>afterbr<span class='rp_elmt rp_text'>    within span</span>  after\nspan"
+    test_str html, "within span", within_elmt: 'span'
+    test_str html,  "after\nspan", after_elmt: 'span'
+    test_str html,  "afterbr    within span  after\nspan", after_elmt: 'br'
+  end
+
   test 'nkscanner with rp_elmt' do
     html = <<EOF
 top-level text<span>spanned text</span>

@@ -29,7 +29,7 @@ class NokoTokens < Array
         @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
-        # to_tokens "\n" if child.name.match(/^(p|br|li)$/)
+        # to_tokens "\n" if child.name.match(/^(p|br)$/)
         child.children.each { |j| do_child j }
       end
     end
@@ -239,9 +239,9 @@ class NokoTokens < Array
   # Provide the token range enclosed by the CSS selector
   # RETURNS: if found, a Range value denoting the first token offset and token limit in the DOM.
   # If not found, nil
-  def dom_range selector
-    return unless found = nkdoc.search(selector).first
-    range_from_subtree found
+  def dom_range selector_or_node
+    return unless node = selector_or_node.is_a?(String) ? nkdoc.search(selector_or_node).first : selector_or_node
+    range_from_subtree node
   end
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
@@ -249,10 +249,10 @@ class NokoTokens < Array
     nkdoc.search(selector)&.map { |found| range_from_subtree found } || []
   end
 
-  def range_from_subtree found
+  def range_from_subtree node
     first_text_element = nil
     last_text_element = nil
-    found.traverse do |child|
+    node.traverse do |child|
       if child.text?
         last_text_element = child
         first_text_element ||= child

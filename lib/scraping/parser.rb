@@ -106,7 +106,10 @@ class Parser
   #       terminated with 'and' or 'or'. If the option is set to a string, that's used as the terminator
   #    optional: stipulates that the match is optional.
   #       For convenience/syntactic sugar, { optional: :token } is equivalent to { match: :token, optional: true }
-  #    start: specifies a match that will begin a search, without consuming the match
+  #    start: specifies a precondition for beginning a search. Tests the position, but does not consume the current token
+  #       The value marked by :start can be a hash with the following values, or an array of such hashes, denoting disjunction:
+  #       * after_elmt: gives a CSS selector for an element that must precede the current token with no intervening tokens (usually 'br')
+  #       * within_elmt: a CSS selector for an element which the next token begins
   #    bound: gives a match that terminates the process, for example an EOL token. The given match is NOT consumed: the
   #       stream reverts to the beginning of the matched bound. This is useful,
   #       for example, to terminate processing at the end of a line, while leaving the EOL token for subsequent processing
@@ -154,7 +157,7 @@ class Parser
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ] }, # , bound: "\n" },
+          ] }, 
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -328,6 +331,15 @@ class Parser
     # Grammar entries for simple tags are accepted without further inspection
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
       return Seeker.new scanner, @stream.past(nokonode), token
+    end
+    if start_spec = context[:start]
+      is_at = case start_spec
+              when Symbol # Straight-up token
+                scanner.is_at? start_spec
+              when Array
+                start_spec.any? { |ss| scanner.is_at? ss }
+              end
+      return is_at ? match_specification(is_at, spec, token, context.except(:start)) : nil
     end
     if terminator = (context[:bound] || context[:terminus])
       # Terminate the search when the given specification is matched, WITHOUT consuming the match

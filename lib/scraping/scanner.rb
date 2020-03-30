@@ -482,16 +482,57 @@ class NokoScanner
     @bound = s2.bound if s2.bound > @bound
   end
 
+  # Get the text_elmt_data info for the current position
+  def current_ted
+    TextElmtData.new @tokens, @tokens.token_offset_at(@pos) # Locate the text element that we're in
+  end
+
+  # Test certain conditions about the current token. According to key on h, test
+  #   after_elmt: token is immediately preceded by a tag that matches(nominally <br>)
+  #   within_elmt: token is the first non-blank content within the element
+  #   newline: the token is preceded by a newline
+  def is_at? h
+    tedata = current_ted
+    if tedata.prior_text.blank? # Only counts at beginning of a text element
+      start = tedata.text_element
+      if selector = h[:after_elmt]
+        previous = start.previous
+        while previous do
+          return self if previous.matches?(selector)
+          return if previous.inner_text.present?
+          previous = previous.previous
+        end
+      elsif selector = h[:within_elmt]
+        # We must be the first non-blank element within an element
+        start.ancestors.each do |ancestor|
+          return if ancestor.is_a? Nokogiri::HTML::DocumentFragment
+          if ancestor.matches? selector
+            ancestor.traverse do |node|
+              return within_css_match(ancestor) if node == start
+              return if node.text? && node.inner_text.present?
+            end
+          end
+        end
+        parent = start.parent
+        previous = start.previous
+        while previous do
+          return false if previous.inner_text.present?
+        end
+      elsif selector = h[:newline]
+      end
+    end
+  end
+
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
-  def within_css_match str
-    if range = @tokens.dom_range(str)
+  def within_css_match selector_or_node
+    if range = @tokens.dom_range(selector_or_node)
       return NokoScanner.new @tokens, range.begin, range.end
     end
   end
 
   # Return an ARRAY of scanners, as above
-  def within_css_matches str
-    @tokens.dom_ranges(str).map { |range|
+  def within_css_matches selector
+    @tokens.dom_ranges(selector).map { |range|
       next if range.begin < @pos
       NokoScanner.new @tokens, range.begin, range.end
     }.compact
