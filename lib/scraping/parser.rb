@@ -1,27 +1,5 @@
 require 'scraping/seeker.rb'
 
-=begin
-# The ParseOut class is for nodes in the abstract syntax tree accumulated by the parser.
-# At the end of a successful parse, the root ParseOut element can be used to modify the DOM
-class ParseNode
-  attr_reader :seeker, # The seeker that succeeded in matching
-              :children, # Child ParseNodes
-              :token # Token for applying to the DOM
-
-  def initialize seeker, children, token=nil
-    @seeker = seeker;
-    @children = children
-    @token = token
-  end
-
-  # Apply the results of the parse to the Nokogiri scanner
-  def apply nokoscanner
-    @children.each { |child| child.apply nokoscanner }
-    nokoscanner.enclose_tokens(@seeker.head_stream, @seeker.rest, @token) if @token
-  end
-end
-=end
-
 class Parser
   attr_reader :grammar
 
@@ -106,18 +84,18 @@ class Parser
   #       terminated with 'and' or 'or'. If the option is set to a string, that's used as the terminator
   #    optional: stipulates that the match is optional.
   #       For convenience/syntactic sugar, { optional: :token } is equivalent to { match: :token, optional: true }
-  #    start: specifies a precondition for beginning a search. Tests the position, but does not consume the current token
-  #       The value marked by :start can be a hash with the following values, or an array of such hashes, denoting disjunction:
-  #       * after_elmt: gives a CSS selector for an element that must precede the current token with no intervening tokens (usually 'br')
-  #       * within_elmt: a CSS selector for an element which the next token begins
   #    bound: gives a match that terminates the process, for example an EOL token. The given match is NOT consumed: the
   #       stream reverts to the beginning of the matched bound. This is useful,
   #       for example, to terminate processing at the end of a line, while leaving the EOL token for subsequent processing
-  #    within_css_match: stipulates that the match is to be found within a part of the Nokogiri tree given by the CSS selector.
-  #       Presumably this is used to exploit site-(or format)-specific style markers
-  #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :within_css_match to the stipulated
+  #    in_css_match: the search is constrained to the contents of the first node matching the associated CSS selector
+  #    at_css_match: the search advances to the first node matching the associated CSS selector
+  #    after_css_match: the search starts immediately after the first node matching the associated CSS selector
+  #        NB: the three css matchers may appear in context with the :repeating flag; in that case, the search proceeds
+  #         in parallel on all matching nodes. (multiple matches from :at_css_match do not overlap: after the first,
+  #         each one foreshortens the previous one)
+  #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :on_css_match to the stipulated
   #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
-  #       are found. But they eventually get there anyway.
+  #       are found. But they eventually get there when the seeker encloses found content.
   @@DefaultGrammar = {
       rp_recipelist: { repeating: :rp_recipe },
       rp_recipe: {
@@ -137,7 +115,7 @@ class Parser
           ]
       },
       # Hopefully sites will specify how to find the title in the extracted text
-      rp_title: { accumulate: Regexp.new('^.*$'), within_css_match: 'h1' }, # Match all tokens within an <h1> tag
+      rp_title: { in_css_match: 'h1' }, # Match all tokens within an <h1> tag
       rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
       rp_prep_time: { atline: [ Regexp.new('Prep'), { optional: ':' }, :rp_time ] },
       rp_cook_time: { atline: [ Regexp.new('Cook'), { optional: ':' }, :rp_time ] },
@@ -145,7 +123,7 @@ class Parser
       rp_time: [ :rp_num, 'min' ],
       rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
-      rp_instructions: { repeating: //, bound: { optional: //, within_css_match: 'h2'} },
+      rp_instructions: { repeating: //, bound: { optional: //, in_css_match: 'h2'} },
       rp_inglist: {
           # The ingredient list(s) for a recipe
           match: { repeating: { :match => :rp_ingline, optional: true, terminus: ',' } }  # atline: true
@@ -157,7 +135,7 @@ class Parser
               {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ] }, 
+          ] },
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -182,7 +160,7 @@ class Parser
     lexaur, grammar_mods = nil, lexaur if lexaur.is_a?(Hash)
     @grammar = @@DefaultGrammar.clone
     modify_grammar grammar_mods
-    yield(@grammar) if block_given? # This is the chance to modify the default grammar
+    yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
     if gramerrs.present?
@@ -207,10 +185,11 @@ class Parser
   # -- keys are tokens in the grammar
   # -- values are hashes to be merged with the existing entries
   def modify_grammar gm
+    return unless gm.present?
     gm.keys.each do |key|
       key = key.to_sym
       @grammar[key] = { match: @grammar[key] } if @grammar[key].is_a?(Array)
-      @grammar[key].merge! gm[key]
+      @grammar[key] = @grammar[key].merge(gm[key]).compact # Allows elements to be removed
     end
   end
 
@@ -263,6 +242,9 @@ class Parser
         if list = entry[:match] || (entry[:optional] if entry[:optional] != true)
           self.check_entry list, grammar
         end
+        if entry.slice( :in_css_match, :at_css_match, :after_css_match).count > 1
+          raise 'Entry has more than one of :in_css_match, :at_css_match, and :after_css_match'
+        end
         if tagtype = entry[:tag]
           if !Tag.typenum(tagtype)
             raise "Tag specifier is of unknown type #{tagtype}"
@@ -279,13 +261,16 @@ class Parser
             raise "Seeker specification '#{seeker}' is not a Seeker"
           end
         end
-
       end
     end
     # atomic_tokens collects the set of tokens for pre-parsed elements which aren't further analyzed
     atomic_tokens = {}
     grammar.keys.each do |key|
-      self.check_entry grammar[key], grammar
+      begin
+        self.check_entry grammar[key], grammar
+      rescue Exception => e
+        puts "Error in grammar [:#{key}]: " + e.to_s
+      end
       atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && grammar[key][:tag]) || [ :rp_title, :rp_ing_comment ].include?(key)
     end if grammar
     atomic_tokens
@@ -318,9 +303,13 @@ class Parser
     #    bound: gives a match that terminates the process, for example an EOL token. The given match is NOT consumed: the
     #       stream reverts to the beginning of the matched bound. This is useful,
     #       for example, to terminate processing at the end of a line, while leaving the EOL token for subsequent processing
-    #    within_css_match: stipulates that the match is to be found within a part of the Nokogiri tree given by the CSS selector.
-    #       Presumably this is used to exploit site-(or format)-specific style markers
-    #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :within_css_match to the stipulated
+    #    in_css_match: the search is constrained to the contents of the first node matching the associated CSS selector
+    #    at_css_match: the search advances to the first node matching the associated CSS selector
+    #    after_css_match: the search starts immediately after the first node matching the associated CSS selector
+    #        NB: the three css matchers may appear in context with the :repeating flag; in that case, the search proceeds
+    #         in parallel on all matching nodes. (multiple matches from :at_css_match do not overlap: after the first,
+    #         each one foreshortens the previous one)
+    #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :in_css_match to the stipulated
     #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
     #       are found. But they eventually get there anyway, either via successful parsing or user intervention.
   def match_specification scanner, spec, token=nil, context={}
@@ -331,15 +320,6 @@ class Parser
     # Grammar entries for simple tags are accepted without further inspection
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
       return Seeker.new scanner, @stream.past(nokonode), token
-    end
-    if start_spec = context[:start]
-      is_at = case start_spec
-              when Symbol # Straight-up token
-                scanner.is_at? start_spec
-              when Array
-                start_spec.any? { |ss| scanner.is_at? ss }
-              end
-      return is_at ? match_specification(is_at, spec, token, context.except(:start)) : nil
     end
     if terminator = (context[:bound] || context[:terminus])
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
@@ -358,15 +338,28 @@ class Parser
       return seeker
     end
     if context[:repeating] # Match the spec repeatedly until EOF
-      matches = []
-      while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
-        if found.empty?
-          scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
-        else
-          matches << found
-          scanner = found.tail_stream
+      matches =
+      if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
+        subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
+        subscanners.collect { |subscanner|
+          found = match_specification subscanner, spec, token, context.except(:repeating, :in_css_match, :at_css_match, :after_css_match)
+          found if found && !found&.empty?  # Find the first valid result, or list all
+        }.compact
+      else
+        # Unless working from a css match, scan repeatedly
+        founds = []
+        while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
+          if found.empty?
+            scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
+          else
+            founds << found
+            scanner = found.tail_stream
+          end
         end
+        founds
       end
+      # In order to preserve the current stream placement while recording the found stream placement,
+      # we return a single seeker with no token and matching children
       if matches.present?
         return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
       else
@@ -384,8 +377,17 @@ class Parser
       end
       return match_specification(scanner, spec, token, context.except( :atline))
     end
-    if context[:within_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
-      subscanners = scanner.within_css_matches context[:within_css_match]
+    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
+      found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
+                match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+              end
+      if found && !found.empty?
+        found.tail_stream.encompass scanner # subscanner??!?
+        return found # Singular result requires no higher-level parent
+      else
+        return (Seeker.new(scanner, scanner, token) if context[:optional])
+      end
+=begin
       founds = []
       subscanners.each do |subscanner|
         found = match_specification subscanner, spec, token, context.except(:repeating, :within_css_match)
@@ -400,14 +402,7 @@ class Parser
       end
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
-      return founds.present? ?
-                 Seeker.new(founds.first.head_stream, founds.last.tail_stream, token, founds) :
-                 (Seeker.new(scanner, scanner, token, founds) if context[:optional])
-    end
-    if context[:start] # Advance the scan to the point matching the spec
-      match = seek(scanner) { |scanner| match_specification scanner, context[:start] }
-      scanner = scanner.goto(match.head_stream) if match
-      found = match_specification scanner, spec, token, context.except(:start)
+=end
     end
     if context[:accumulate] # Collect matches as long as they're valid
       while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
@@ -444,6 +439,8 @@ class Parser
     end
     found =
     case spec
+    when nil # nil spec means to match the full contents
+      Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       match_specification scanner, @grammar[spec], spec
@@ -535,6 +532,6 @@ class Parser
     end
     match = spec.delete :match if match == true # If any of the above appeared as flags, get match from the :match value
     # We've extracted the specification to be matched into 'match', and use what's left as context for matching
-    match_specification(scanner, match, token, spec) if match
+    match_specification(scanner, match, token, spec)
   end
 end

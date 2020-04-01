@@ -121,8 +121,8 @@ EOF
     html = html.gsub(/\n+\s*/, '')
     parser = Parser.new(html, @lex) do |grammar|
       # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
-      grammar[:rp_inglist][:within_css_match] = 'ul'
+      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :in_css_match => 'li' }
+      grammar[:rp_inglist][:in_css_match] = 'ul'
     end
     seeker = parser.match :rp_inglist
     assert_not_nil seeker
@@ -178,7 +178,7 @@ EOF
 </div>
 EOF
     parser = Parser.new(html, @lex)  do |grammar|
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe
     assert seeker
@@ -227,10 +227,10 @@ EOF
     add_tags :Ingredient, ingreds
     parser = Parser.new(html, @lex)  do |grammar|
       # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      grammar[:rp_recipelist][:start] = {match: //, in_css_match: 'h2' }
+      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2' }
+      grammar[:rp_inglist][:bound] = {match: //, in_css_match: 'h2' }
     end
     seeker = parser.match :rp_recipelist
     assert seeker

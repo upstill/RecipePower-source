@@ -452,7 +452,7 @@ class NokoScanner
 
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest ntokens = 1
-    newpos = @pos + ntokens
+    newpos = (ntokens < 0) ? @bound : (@pos + ntokens)
     NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
   end
 
@@ -530,12 +530,46 @@ class NokoScanner
     end
   end
 
+  def scanner_for_range range, how
+    if range.begin >= @pos
+      case how
+      when :in_css_match
+        NokoScanner.new @tokens, range.begin, range.end
+      when :at_css_match
+        range == @pos..@bound ? self : NokoScanner.new(@tokens, range.begin, range.end)
+      when :after_css_match
+        NokoScanner.new @tokens, range.end + 1
+      end
+    end
+  end
+
+  # Return a scanner that matches the spec.
+  # spec: a Hash with one key-value pair. In all cases, the value is a CSS selector
+  # -- if the key is :in_css_match, find the first node that matches the css and return a scanner for all and only that node's contents
+  # -- if the key is :at_css_match, find the first node that matches the css and return a scanner that starts with that node's contents
+  # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
+  def on_css_match spec
+    flag, selector = spec.to_a.first
+    @tokens.dom_ranges(selector).each do |range|
+      if range.begin >= @pos &&
+          range.end <= @bound &&
+          newscanner = scanner_for_range(range, flag)
+        return newscanner
+      end
+    end
+    nil
+  end
+
   # Return an ARRAY of scanners, as above
-  def within_css_matches selector
-    @tokens.dom_ranges(selector).map { |range|
-      next if range.begin < @pos
-      NokoScanner.new @tokens, range.begin, range.end
-    }.compact
+  def on_css_matches spec
+    flag = spec.keys.first
+    selector = spec[flag]
+    ranges = @tokens.dom_ranges selector
+    # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
+    ranges.each_index do |ix|
+      ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)
+    end if flag == :at_css_match
+    ranges.map { |range| scanner_for_range range, flag }.compact
   end
 
   # Provide xpath and offset for locating the current position in the document

@@ -11,6 +11,10 @@ class Site < ApplicationRecord
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
 
+  # TODO: this needs to persist in the database
+  # :grammar_mods: a hash of modifications to the parsing grammar for the site
+  attr_accessor :grammar_mods
+
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes

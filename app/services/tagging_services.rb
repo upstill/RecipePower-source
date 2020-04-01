@@ -173,7 +173,7 @@ class TaggingServices
   def set_tags tagger_id, tag_spec={}
     tag_ids = []
     tag_spec.each do |key, values|
-      tag_ids += values.collect { |value| Tag.assert(value, key).id }
+      tag_ids += values.collect { |value| Tag.assert(value, key)&.id }.compact
     end
     @taggable_entity.set_tag_ids tagger_id, tag_ids
   end

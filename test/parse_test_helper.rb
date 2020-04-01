@@ -11,7 +11,14 @@ end
 def prep_site site, selector, trimmers, grammar_mods={}
   site.finders.build label: 'Content', selector: selector, attribute_name: 'html'
   site.trimmers = trimmers
+  site.grammar_mods = grammar_mods
   site.bkg_land # Now the site should be prepared to trim recipes
+end
+
+def test_grammar_mods mods, grammar
+  mods.each do |key, value|
+    assert_equal mods[key][value], grammar[key][value]
+  end
 end
 
 def load_page_ref url_or_page_ref, selector, trimmers, grammar_mods={}
@@ -23,7 +30,7 @@ def load_page_ref url_or_page_ref, selector, trimmers, grammar_mods={}
              when Recipe
                url_or_page_ref.page_ref
              end
-  prep_site page_ref.site, selector, trimmers, grammar_mods={}
+  prep_site page_ref.site, selector, trimmers, grammar_mods
   page_ref.bkg_land # Perform all due diligence
   page_ref
 end
@@ -33,9 +40,8 @@ end
 # selector: a CSS selector for extracting content from the page
 # trimmers: CSS selectors for content to be removed from the result
 def load_recipe url, selector, trimmers, grammar_mods={}
-  # TODO: install grammar_mods in the Site for the use of the recipe parse
   recipe = Recipe.new url: url
-  prep_site recipe.site, selector, trimmers, grammar_mods={}
+  prep_site recipe.site, selector, trimmers, grammar_mods
   recipe.bkg_land
   recipe
 end

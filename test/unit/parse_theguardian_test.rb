@@ -23,14 +23,17 @@ class ParseTheguardianTest < ActiveSupport::TestCase
   def setup_content url
     # In practice, grammar mods will get bound to the site
     grammar_mods = {
-        :rp_recipelist => {start: {match: //, within_css_match: 'h2'}},
-        :rp_title => {within_css_match: 'h2'}, # Match all tokens within an <h2> tag
-        # Stop seeking ingredients at the next h2 tag
-        :rp_inglist => {bound: {match: //, within_css_match: 'h2'}}
+        :rp_recipelist => { at_css_match: 'h2' },
+        :rp_title => { in_css_match: 'h2' }, # Match all tokens within an <h2> tag
     }
     # The selector will get associated with the recipe's site (as a 'Content' finder)
     # The trimmers will kept on the site as well, to remove extraneous elements
-    @page_ref = load_page_ref url, 'div.content__article-body', ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"], grammar_mods
+    # The grammar_mods will get applied to the parser's grammar for site-specific modification
+    @page_ref = load_page_ref url,
+                              'div.content__article-body',
+                              ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"],
+                              grammar_mods
+    assert_equal grammar_mods, @page_ref.site.grammar_mods
     refute @page_ref.errors.any?
     assert @page_ref.good? # Should have loaded and settled down
     assert (@recipe_page = @page_ref.recipe_page)
@@ -39,7 +42,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     @content = SiteServices.new(@page_ref.site).trim_recipe @page_ref.content
     assert_equal @content, @recipe_page.content
     @parser = Parser.new @content, @lex, grammar_mods
-    @page_ref.recipes.to_a.map &:bkg_land # Complete parsing within the recipes
+    test_grammar_mods grammar_mods, @parser.grammar
   end
 
   test 'recipes parsed out correctly' do
@@ -49,7 +52,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
                      "Soft-boiled egg with avocado, chorizo and asparagus",
                      "Kale and grilled asparagus salad"
                  ].sort, @page_ref.recipes.map(&:title).sort
-    assert_equal "Yotam Ottolenghi’s asparagus recipes | Food | The Guardian", @page_ref.title
+    assert_equal "Yotam Ottolenghi’s asparagus recipes", @page_ref.title
   end
 
   test 'ingredient line' do
@@ -140,8 +143,8 @@ EOF
     html = html.gsub(/\n+\s*/, '')
     parser = Parser.new(html, @lex) do |grammar|
       # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = {repeating: :rp_ingline, :within_css_match => 'li'}
-      grammar[:rp_inglist][:within_css_match] = 'ul'
+      grammar[:rp_inglist][:match] = {repeating: :rp_ingline, :in_css_match => 'li'}
+      grammar[:rp_inglist][:in_css_match] = 'ul'
     end
     seeker = parser.match :rp_inglist
     assert_not_nil seeker
@@ -197,7 +200,7 @@ EOF
 </div>
 EOF
     parser = Parser.new(html, @lex) do |grammar|
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
     end
     seeker = parser.match :rp_recipe
     assert seeker
@@ -246,10 +249,10 @@ EOF
     add_tags :Ingredient, ingreds
     parser = Parser.new(html, @lex) do |grammar|
       # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = {match: //, within_css_match: 'h2'}
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
+      grammar[:rp_recipelist][:start] = {match: //, in_css_match: 'h2'}
+      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = {match: //, within_css_match: 'h2'}
+      grammar[:rp_inglist][:bound] = {match: //, in_css_match: 'h2'}
     end
     seeker = parser.match :rp_recipelist
     assert seeker
