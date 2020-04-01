@@ -355,6 +355,8 @@ class StrScanner < Scanner
   def peek nchars = 1
     if @pos < @bound # @length
       (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos + nchars)].join(' ')
+    else
+      ''
     end
   end
 
@@ -379,9 +381,38 @@ class StrScanner < Scanner
     @pos < @bound # @length
   end
 
+  # Is the scanner at a newline: either the first token, or a token preceded by "\n"
+  def atline?
+    (@pos >= 0) && (@strings[@pos-1] == "\n")
+  end
+
+  def lineseek tokens, opos, obound
+    
+  end
+
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within=false
+    if (newpos = @pos) > 0 && @strings[newpos] != "\n"
+      while (newpos < @bound) && (@strings[newpos-1] != "\n") do
+        newpos += 1
+      end
+    end
+    if newpos < @bound # Should we really be returning an empty scanner once we hit the end?
+      if within
+        newbound = newpos
+        while (newbound < @bound) && (@strings[newbound] != "\n") do
+          newbound += 1
+        end
+      else
+        newbound = @bound
+      end
+      StrScanner.new @strings, newpos, newbound
+    end
+  end
+
 end
 
-class NokoScanner
+class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
@@ -436,9 +467,9 @@ class NokoScanner
     tokens[@pos]
   end
 
-  # Is the scanner at a newline: either the first token, or a token preceded by "\n"
-  def atline?
-    (@pos >= 0) && (tokens[@pos-1] == "\n")
+  # Progress the scanner to either the next newline character, or content of <p> tag, or after <br> tag--whichever comes first
+  def atline within=false
+
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position

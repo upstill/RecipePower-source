@@ -124,18 +124,15 @@ class Parser
       rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
       rp_instructions: { repeating: //, bound: { optional: //, in_css_match: 'h2'} },
-      rp_inglist: {
+      rp_inglist: { repeating: :rp_ingline },
           # The ingredient list(s) for a recipe
-          match: { repeating: { :match => :rp_ingline, optional: true, terminus: ',' } }  # atline: true
-      },
+      #          match: { repeating: { :match => :rp_ingline, optional: true, terminus: ',' } }  # atline: true
+      #      },
       rp_ingline: {
           match: [
-              {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
-              { optional: 'of' },
-              {optional: :rp_presteps},
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ] },
+          ], atline: true },
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -149,7 +146,12 @@ class Parser
       rp_altamt: ["(", :rp_amt, ")"],
       rp_presteps: { match: :rp_condition, list: true }, # There may be one or more presteps (instructions before measuring)
       rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
-      rp_ingspec: { or: [:rp_ingalts, :rp_ingname] },
+      rp_ingspec: { match: [
+          { optional: [:rp_amt_with_alt, {optional: 'each'} ] },
+          { optional: 'of' },
+          { optional: :rp_presteps},
+          { or: [:rp_ingalts, :rp_ingname] }
+      ] },
       rp_ingname: { tag: 'Ingredient' },
       rp_ingalts: { match: :rp_ingname, orlist: true },
       rp_num: { match: NumberSeeker },
@@ -366,8 +368,11 @@ class Parser
         return (Seeker.new(scanner, scanner, token) if context[:optional])
       end
     end
-    if context[:atline]
-      start_scanner = scanner.clone
+    if context[:atline] # Skip to either the next newline character, or content of <p> tag, or after <br> tag--whichever comes first
+      return (toline = scanner.toline context[:inline]) ?
+                 match_specification(toline, spec, token, context.except(:atline, :inline)) :
+                 (Seeker.new(scanner, scanner.rest, token) if context[:optional])
+=begin
       until scanner.atline? do
         if scanner.peek
           scanner = scanner.rest
@@ -376,6 +381,7 @@ class Parser
         end
       end
       return match_specification(scanner, spec, token, context.except( :atline))
+  =end
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
       found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))

@@ -16,24 +16,24 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     add_tags :Unit, %w{ g tbsp tsp large }
     add_tags :Condition, %w{ crustless ripe }
     @lex = Lexaur.from_tags
-    setup_content 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
+    @grammar_mods = {
+        :rp_recipelist => { at_css_match: 'h2' },
+        :rp_title => { in_css_match: 'h2' }, # Match all tokens within an <h2> tag
+        :rp_ingspec => { in_css_match: 'strong' }
+    }
+    @selector = 'div.content__article-body'
+    @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
+    @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
   end
 
   # Do what it takes to setup a recipe for parsing
-  def setup_content url
+  def setup_recipe_page url
     # In practice, grammar mods will get bound to the site
-    grammar_mods = {
-        :rp_recipelist => { at_css_match: 'h2' },
-        :rp_title => { in_css_match: 'h2' }, # Match all tokens within an <h2> tag
-    }
     # The selector will get associated with the recipe's site (as a 'Content' finder)
     # The trimmers will kept on the site as well, to remove extraneous elements
     # The grammar_mods will get applied to the parser's grammar for site-specific modification
-    @page_ref = load_page_ref url,
-                              'div.content__article-body',
-                              ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"],
-                              grammar_mods
-    assert_equal grammar_mods, @page_ref.site.grammar_mods
+    @page_ref = load_page_ref url, @selector, @trimmers, @grammar_mods
+    assert_equal @grammar_mods, @page_ref.site.grammar_mods
     refute @page_ref.errors.any?
     assert @page_ref.good? # Should have loaded and settled down
     assert (@recipe_page = @page_ref.recipe_page)
@@ -41,11 +41,12 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     assert @recipe_page.good?
     @content = SiteServices.new(@page_ref.site).trim_recipe @page_ref.content
     assert_equal @content, @recipe_page.content
-    @parser = Parser.new @content, @lex, grammar_mods
-    test_grammar_mods grammar_mods, @parser.grammar
+    @parser = Parser.new @content, @lex, @grammar_mods
+    test_grammar_mods @grammar_mods, @parser.grammar
   end
 
   test 'recipes parsed out correctly' do
+    setup_recipe_page @page
     assert_equal 3, @page_ref.recipes.to_a.count
     assert_equal [
                      "Asparagus with pine nut and sourdough crumbs (pictured above)",
@@ -65,7 +66,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
       nokoscan = NokoScanner.from_string amtstr
       is = AmountSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{amtstr} doesn't parse"
-      parser = Parser.new nokoscan, @lex
+      parser = Parser.new nokoscan, @lex, @grammar_mods
       seeker = parser.match :rp_amt
       assert seeker
       assert_equal 2, seeker.children.count
@@ -81,7 +82,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex
+    parser = Parser.new nokoscan, @lex, @grammar_mods
     seeker = parser.match :rp_ingname
     assert_equal 1, seeker.tag_ids.count
     assert_equal :rp_ingname, seeker.token
@@ -94,7 +95,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex
+    parser = Parser.new nokoscan, @lex, @grammar_mods
     seeker = parser.match :rp_ingspec
     refute seeker.empty?
     assert_equal 1, seeker.children.count
@@ -141,9 +142,9 @@ class ParseTheguardianTest < ActiveSupport::TestCase
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    parser = Parser.new(html, @lex) do |grammar|
+    parser = Parser.new(html, @lex, @grammar_mods) do |grammar|
       # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = {repeating: :rp_ingline, :in_css_match => 'li'}
+      grammar[:rp_inglist][:in_css_match] = 'li'
       grammar[:rp_inglist][:in_css_match] = 'ul'
     end
     seeker = parser.match :rp_inglist
@@ -178,12 +179,7 @@ EOF
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
     html = html.gsub /\n+\s*/, ''
-    parser = Parser.new(html, @lex) do |grammar|
-      #grammar[:rp_ingline][:match]  = [
-      #:rp_ingname,
-      #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
-      #]
-    end
+    parser = Parser.new(html, @lex, @grammar_mods)
     seeker = parser.match :rp_inglist
     assert seeker
   end
@@ -199,9 +195,7 @@ EOF
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    parser = Parser.new(html, @lex) do |grammar|
-      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
-    end
+    parser = Parser.new html, @lex, @grammar_mods
     seeker = parser.match :rp_recipe
     assert seeker
     assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285, 295)
@@ -214,7 +208,7 @@ EOF
   test 'ingredient list with pine nuts' do
     html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
     add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
-    parser = Parser.new(html, @lex)
+    parser = Parser.new html, @lex, @grammar_mods
     seeker = parser.match :rp_inglist
     assert seeker
     ingline_seeker = seeker.find(:rp_ingline)[2]

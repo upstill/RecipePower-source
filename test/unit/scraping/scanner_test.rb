@@ -67,6 +67,48 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
+  test 'toline' do
+    str = "first line \n second line \n third line \n"
+    scanner = StrScanner.from_string str
+    line1 = scanner.toline
+    assert_equal str, line1.to_s
+    line2 = line1.rest.toline
+    assert_equal "second line \n third line \n", line2.to_s
+    line3 = line2.rest.toline
+    assert_equal "third line \n", line3.to_s
+    line4 = line3.rest.toline
+    assert_nil line4
+
+    line1 = scanner.toline true
+    assert_equal "first line", line1.to_s
+    line2 = scanner.rest.toline true
+    assert_equal "second line", line2.to_s
+
+    scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
+    line1 = scanner.toline
+    assert_equal "\n \n \n", line1.to_s
+    line2 = line1.rest.toline
+    assert_equal "\n \n", line2.to_s
+    line3 = line2.rest.toline
+    assert_equal "\n", line3.to_s
+    assert_nil line3.rest.toline
+
+    scanner = StrScanner.from_string "\nend" # Should produce a blank, then 'end'
+    line1 = scanner.toline true
+    assert_equal '', line1.to_s
+    line2 = scanner.rest.toline true
+    assert_equal 'end', line2.to_s
+
+    scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
+    line1 = scanner.toline true
+    assert_equal '', line1.to_s
+    line2 = scanner.rest.toline true
+    assert_equal '', line2.to_s
+    line3 = scanner.rest.rest.toline true
+    assert_equal '', line3.to_s
+    assert_nil scanner.rest.rest.rest.toline true
+  end
+
   test 'is_at' do
     def test_str html, seeking, spec
       nkdoc = Nokogiri::HTML.fragment html
