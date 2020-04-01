@@ -302,6 +302,25 @@ def html_enclosure options={}
   "<#{tag} class='#{classes}'></#{tag}>" # For constructing the new node
 end
 
+def seekline tokens, within, opos, obound
+  if (newpos = opos) > 0 && tokens[newpos] != "\n"
+    while (newpos < obound) && (tokens[newpos-1] != "\n") do
+      newpos += 1
+    end
+  end
+  if newpos < obound # Should we really be returning an empty scanner once we hit the end?
+    if within
+      newbound = newpos
+      while (newbound < obound) && (tokens[newbound] != "\n") do
+        newbound += 1
+      end
+    else
+      newbound = obound
+    end
+    yield newpos, newbound
+  end
+end
+
 # A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
 # This is an "abstract" class for defining what methods the Scanner provides
 class Scanner < Object
@@ -386,26 +405,9 @@ class StrScanner < Scanner
     (@pos >= 0) && (@strings[@pos-1] == "\n")
   end
 
-  def lineseek tokens, opos, obound
-    
-  end
-
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
   def toline within=false
-    if (newpos = @pos) > 0 && @strings[newpos] != "\n"
-      while (newpos < @bound) && (@strings[newpos-1] != "\n") do
-        newpos += 1
-      end
-    end
-    if newpos < @bound # Should we really be returning an empty scanner once we hit the end?
-      if within
-        newbound = newpos
-        while (newbound < @bound) && (@strings[newbound] != "\n") do
-          newbound += 1
-        end
-      else
-        newbound = @bound
-      end
+    seekline @strings, within, @pos, @bound do |newpos, newbound|
       StrScanner.new @strings, newpos, newbound
     end
   end
