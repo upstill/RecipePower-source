@@ -596,7 +596,7 @@ class NokoScanner # < Scanner
   # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    @tokens.dom_ranges(selector).each do |range|
+    @tokens.dom_ranges(spec).each do |range|
       if range.begin >= @pos &&
           range.end <= @bound &&
           newscanner = scanner_for_range(range, flag)
@@ -608,13 +608,8 @@ class NokoScanner # < Scanner
 
   # Return an ARRAY of scanners, as above
   def on_css_matches spec
-    flag = spec.keys.first
-    selector = spec[flag]
-    ranges = @tokens.dom_ranges selector
-    # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
-    ranges.each_index do |ix|
-      ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)
-    end if flag == :at_css_match
+    flag, selector = spec.to_a.first # Fetch the key and value from the spec
+    ranges = @tokens.dom_ranges spec
     ranges.map { |range| scanner_for_range range, flag }.compact
   end
 

@@ -245,10 +245,16 @@ class NokoTokens < Array
   end
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
-  def dom_ranges selector
-    nkdoc.search(selector)&.map do |found|
+  def dom_ranges spec
+    flag, selector = spec.to_a.first # Fetch the key and value from the spec
+    ranges = nkdoc.search(selector)&.map do |found|
       range_from_subtree found
     end || []
+    # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
+    ranges.each_index do |ix|
+      ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)
+    end if flag == :at_css_match
+    ranges
   end
 
   def range_from_subtree node
