@@ -246,7 +246,9 @@ class NokoTokens < Array
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
   def dom_ranges selector
-    nkdoc.search(selector)&.map { |found| range_from_subtree found } || []
+    nkdoc.search(selector)&.map do |found|
+      range_from_subtree found
+    end || []
   end
 
   def range_from_subtree node
@@ -258,6 +260,7 @@ class NokoTokens < Array
         first_text_element ||= child
       end
     end
+    first_text_element ||= successor_text @nkdoc, node # The node has no text elements, perhaps because it's a <br> tag. Return an empty range for the next text element
     first_pos = last_pos = last_limit = nil
     @elmt_bounds.each_with_index do |pair, index|
       if !first_pos && pair.first == first_text_element
@@ -273,8 +276,12 @@ class NokoTokens < Array
     # Fortunately, that is sorted by index, so: binsearch!
     first_token_index = binsearch(@token_starts, first_pos) || 0 # Find the token at this position
     first_token_index += 1 if token_offset_at(first_token_index) < first_pos # Round up if the token overlaps the boundary
-    last_token_index = binsearch @token_starts, last_limit # The last token is a limit
-    last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
-    return first_token_index...last_token_index
+    if last_limit
+      last_token_index = binsearch @token_starts, last_limit # The last token is a limit
+      last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
+      return first_token_index...last_token_index
+    else
+      return first_token_index..first_token_index
+    end
   end
 end

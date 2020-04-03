@@ -67,7 +67,7 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
-  test 'toline' do
+  test 'toline text' do
     str = "first line \n second line \n third line \n"
     scanner = StrScanner.from_string str
     line1 = scanner.toline
@@ -134,6 +134,30 @@ class ScannerTest < ActiveSupport::TestCase
     test_str html, "within span", within_elmt: 'span'
     test_str html,  "after\nspan", after_elmt: 'span'
     test_str html,  "afterbr    within span  after\nspan", after_elmt: 'br'
+  end
+
+  test 'toline tag' do
+    def test_str html, seeking, within=false
+      nkdoc = Nokogiri::HTML.fragment html
+      nokoscan = NokoScanner.new nkdoc
+      check_integrity nokoscan
+      # 'seeking' is an array of strings to match successively
+      seeking.map do |str|
+        result = nokoscan.toline(within).to_s
+        assert_equal str, result
+        nokoscan = nokoscan.rest
+      end
+    end
+    html = "top-level <br>afterbr <span class='rp_elmt rp_text'>within span</span> after\nspan"
+    test_str html, ["top-level afterbr within span after\nspan"]
+    test_str html, ['top-level', "afterbr within span after\n", 'span'], true
+    # Should get the same result independent of spacing
+    html = "top-level <br> afterbr<span class='rp_elmt rp_text'>within span</span>after\nspan"
+    test_str html, ["top-level  afterbrwithin spanafter\nspan"]
+    test_str html, ['top-level', "afterbrwithin spanafter\n", 'span'], true
+    html = "top-level <br>afterbr<span class='rp_elmt rp_text'>    within span</span>  after\nspan"
+    test_str html, ["top-level afterbr    within span  after\nspan"]
+    test_str html, ['top-level', "afterbr    within span  after\n", 'span'], true
   end
 
   test 'nkscanner with rp_elmt' do

@@ -368,10 +368,16 @@ class Parser
         return (Seeker.new(scanner, scanner, token) if context[:optional])
       end
     end
-    if context[:atline] # Skip to either the next newline character, or content of <p> tag, or after <br> tag--whichever comes first
-      return (toline = scanner.toline context[:inline]) ?
-                 match_specification(toline, spec, token, context.except(:atline, :inline)) :
-                 (Seeker.new(scanner, scanner.rest, token) if context[:optional])
+    if context[:atline] || context[:inline] # Skip to either the next newline character, or content of <p> or <li> tags, or after <br> tag--whichever comes first
+      toline = scanner.toline context[:inline]
+      if toline
+        match = match_specification(toline, spec, token, context.except(:atline, :inline))
+        match.tail_stream.encompass scanner if match # Restore the stream to its full length
+        return match
+      elsif context[:optional]
+        return Seeker.new scanner, scanner.rest, token
+      end
+    end
 =begin
       until scanner.atline? do
         if scanner.peek
@@ -381,8 +387,7 @@ class Parser
         end
       end
       return match_specification(scanner, spec, token, context.except( :atline))
-  =end
-    end
+=end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
       found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
                 match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
@@ -521,7 +526,8 @@ class Parser
     # Check for an array to match
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
-                 :atline, # match must start at the beginning of a line; matching scans until positioned at a line break
+                 :atline, # match must start at the beginning of a line; scanner skips to the next line break
+                 :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
                  :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
                  :accumulate, # Accumulate matches serially in a single child

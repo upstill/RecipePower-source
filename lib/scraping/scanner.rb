@@ -469,9 +469,21 @@ class NokoScanner # < Scanner
     tokens[@pos]
   end
 
-  # Progress the scanner to either the next newline character, or content of <p> tag, or after <br> tag--whichever comes first
-  def atline within=false
-
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within = false
+    # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
+    s1 = seekline(@tokens, within, @pos, @bound) do |newpos, newbound|
+      NokoScanner.new @tokens, newpos, newbound
+    end
+    s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
+    s3 = on_css_match(:after_css_match => 'br')
+    inorder = [s1, s2, s3].compact
+    if inorder.present?
+      inorder.sort! { |sc1, sc2| sc1.pos <=> sc2.pos }
+      result = inorder.shift
+      # Constrain the result to the beginning of the next node, if any
+      within ? result.except(inorder.shift) : result
+    end
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position
@@ -506,7 +518,8 @@ class NokoScanner # < Scanner
 
   # Create a scanner that ends at the given scanner
   def except s2
-    NokoScanner.new tokens, @pos, s2.pos # (newpos > @length ? @length : newpos), @length
+    return self if !s2 || s2.pos > @bound
+    s2 ? NokoScanner.new( tokens, @pos, s2.pos) : self
   end
 
   # Make the end of the stream coincident with another stream
@@ -571,7 +584,7 @@ class NokoScanner # < Scanner
       when :at_css_match
         range == @pos..@bound ? self : NokoScanner.new(@tokens, range.begin, range.end)
       when :after_css_match
-        NokoScanner.new @tokens, range.end + 1
+        NokoScanner.new @tokens, range.end
       end
     end
   end
@@ -582,7 +595,7 @@ class NokoScanner # < Scanner
   # -- if the key is :at_css_match, find the first node that matches the css and return a scanner that starts with that node's contents
   # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
   def on_css_match spec
-    flag, selector = spec.to_a.first
+    flag, selector = spec.to_a.first # Fetch the key and value from the spec
     @tokens.dom_ranges(selector).each do |range|
       if range.begin >= @pos &&
           range.end <= @bound &&
