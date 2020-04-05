@@ -477,13 +477,16 @@ class NokoScanner # < Scanner
     end
     s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
     s3 = on_css_match(:after_css_match => 'br')
-    inorder = [s1, s2, s3].compact
-    if inorder.present?
-      inorder.sort! { |sc1, sc2| sc1.pos <=> sc2.pos }
-      result = inorder.shift
-      # Constrain the result to the beginning of the next node, if any
-      within ? result.except(inorder.shift) : result
-    end
+    inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
+    result = inorder.first
+    return result unless within
+    # Need to find an end at the next line
+    s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
+    s5 = seekline(@tokens, false, s1.pos+1, @bound) do |newpos, newbound|
+      NokoScanner.new @tokens, newpos, newbound
+    end if s1
+    # Constrain the result to the beginning of the next node, if any
+    result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position

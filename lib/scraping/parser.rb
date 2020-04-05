@@ -132,7 +132,7 @@ class Parser
           match: [
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ], atline: true },
+          ] },
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -189,7 +189,8 @@ class Parser
   def modify_grammar gm
     def cleanup_entry token, entry
       return {} if entry.nil?
-      return { match: entry.map { |subentry| cleanup_entry token, subentry } } if entry.is_a?(Array)
+      return entry.map { |subentry| cleanup_entry token, subentry } if entry.is_a?(Array)
+      # return { match: entry.map { |subentry| cleanup_entry token, subentry } } if entry.is_a?(Array)
       return entry unless entry.is_a?(Hash)
       # Syntactic sugar: these flags may specify the actual match. Make this explicit
       [
@@ -226,11 +227,14 @@ class Parser
     def merge_entries original, mod
       return original unless mod
       return mod unless original
-      cl = original.clone
       mod.each do |key, value|
-        cl[key] = value.is_a?(Hash) ? merge_entries(cl[key], value) : value
+        if value.nil?
+          original.delete key
+        else
+          original[key] = value.is_a?(Hash) ? merge_entries(original[key], value) : value
+        end
       end
-      cl
+      original
     end
     return unless gm.present?
     @grammar.keys.each do |key|
@@ -394,6 +398,35 @@ class Parser
         return (Seeker.new(scanner, scanner, token) if context[:optional])
       end
     end
+    if context[:repeating] # Match the spec repeatedly until EOF
+      matches =
+          if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
+            subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
+            subscanners.collect { |subscanner|
+              found = match_specification subscanner, spec, token, context.except(:repeating, :in_css_match, :at_css_match, :after_css_match)
+              found if found && !found&.empty?  # Find the first valid result, or list all
+            }.compact
+          else
+            # Unless working from a css match, scan repeatedly
+            founds = []
+            while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
+              if found.empty?
+                scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
+              else
+                founds << found
+                scanner = found.tail_stream
+              end
+            end
+            founds
+          end
+      # In order to preserve the current stream placement while recording the found stream placement,
+      # we return a single seeker with no token and matching children
+      if matches.present?
+        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+      else
+        return (Seeker.new(scanner, scanner, token) if context[:optional])
+      end
+    end
     if terminator = (context[:bound] || context[:terminus])
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
@@ -409,35 +442,6 @@ class Parser
         seeker = match_specification scanner, spec, token, context.except(:bound, :terminus)
       end
       return seeker
-    end
-    if context[:repeating] # Match the spec repeatedly until EOF
-      matches =
-      if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
-        subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
-        subscanners.collect { |subscanner|
-          found = match_specification subscanner, spec, token, context.except(:repeating, :in_css_match, :at_css_match, :after_css_match)
-          found if found && !found&.empty?  # Find the first valid result, or list all
-        }.compact
-      else
-        # Unless working from a css match, scan repeatedly
-        founds = []
-        while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
-          if found.empty?
-            scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
-          else
-            founds << found
-            scanner = found.tail_stream
-          end
-        end
-        founds
-      end
-      # In order to preserve the current stream placement while recording the found stream placement,
-      # we return a single seeker with no token and matching children
-      if matches.present?
-        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
-      else
-        return (Seeker.new(scanner, scanner, token) if context[:optional])
-      end
     end
     if context[:accumulate] # Collect matches as long as they're valid
       while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))

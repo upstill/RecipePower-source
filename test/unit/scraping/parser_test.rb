@@ -3,6 +3,7 @@ require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
+# These are tests for the default configuration of the Parser grammar
 class ParserTest < ActiveSupport::TestCase
 
   def add_tags type, names
@@ -93,19 +94,21 @@ EOF
   test 'grammar mods' do
     nonsense = 'No Intention To Parse This String'
 
-    # Check for grammar violations
+    # Check that the grammar doesn't get changed gratuitously
+    grammar = Parser.new(nonsense, @lex, { :rp_bogus1 => :rp_bogus2 }).grammar.except(:rp_bogus1)
+    assert_equal Array, grammar[:rp_amt][:match].class
+
+                                             # Check for grammar violations
     assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :inline => true, :atline => true}}) }
     assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :bound => true, :terminus => true}}) }
     assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { at_css_match: true, after_css_match: true}}) }
 
     grammar_mods = {
         :rp_ingname => { terminus: ',' }, # Test value gets added
-        :rp_altamt => { }, # Make sure array gets embedded in entry
         :rp_ing_comment => { terminus: ',' } # Make sure value gets replaced
     }
     parser = Parser.new NokoScanner.from_string(nonsense), grammar_mods
     assert_equal ',', parser.grammar[:rp_ingname][:terminus]
-    assert parser.grammar[:rp_altamt][:match].is_a?(Array)
     assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
   end
 
@@ -147,18 +150,13 @@ EOF
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec
     refute seeker.empty?
-    assert_equal 1, seeker.children.count
     assert_equal :rp_ingspec, seeker.token
+    alts = seeker.find(:rp_ingalts)
+    assert_equal 1, alts.count
+    assert_equal 3, alts.first.children.count
 
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 3, seeker.children.count
-    assert_equal :rp_ingalts, seeker.token
-
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 0, seeker.children.count
-    assert_equal :rp_ingname, seeker.token
+    ingnames = alts.first.find :rp_ingname
+    assert_equal 3, ingnames.count
   end
 
 =begin
@@ -182,6 +180,18 @@ EOF
   end
 =end
 
+  test 'parse ingredient line' do
+    html = '1/2 tsp. baking soda'
+    parser = Parser.new html, @lex
+
+    seeker = parser.match :rp_ingline
+    assert_not_nil seeker
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 2, seeker.children.count
+    assert_equal :rp_ingspec, seeker.children.first.token
+    assert_equal :rp_ing_comment, seeker.children.last.token
+  end
+
   test 'parse ing list from modified grammar' do
     html = <<EOF
 <ul>
@@ -191,11 +201,11 @@ EOF
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    parser = Parser.new(html, @lex) do |grammar|
-      # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :in_css_match => 'li' }
-      grammar[:rp_inglist][:in_css_match] = 'ul'
-    end
+    parser = Parser.new html, @lex,
+                        # Here's our chance to modify the grammar
+                        :rp_inglist => { :in_css_match => 'ul' },
+                        :rp_ingline => { :atline => nil, :in_css_match => 'li' }
+
     seeker = parser.match :rp_inglist
     assert_not_nil seeker
     assert_equal :rp_inglist, seeker.token
@@ -264,7 +274,10 @@ EOF
   test 'ingredient list with pine nuts' do
     html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
     add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
-    parser = Parser.new(html, @lex)
+    parser = Parser.new html,
+                        @lex,
+                        :rp_ingline => { inline: true }
+                        # :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
     assert seeker
     ingline_seeker = seeker.find(:rp_ingline)[2]
@@ -338,15 +351,19 @@ EOF
     sunflower\ seeds pumpkin\ seeds maple\ syrup Salt kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill
 }.uniq.sort
     add_tags :Ingredient, ingreds
-    parser = Parser.new(html, @lex)  do |grammar|
+    parser = Parser.new html, @lex,
+                        rp_recipelist: { repeating: :rp_recipe, at_css_match: 'h2' },
+                        rp_title: { in_css_match: 'h2' }
+=begin
+    do |grammar|
       # We start by seeking to the next h2 (title) tag
       grammar[:rp_recipe][:at_css_match] = 'h2' # Cuts off at next <h2> tag
       # grammar[:rp_recipe][:bound] = { at_css_match: 'h2' }
-      grammar[:rp_recipe][:match] = [ :rp_title, nil ] # A Title (defined by <h2> tag) followed by everything else
       grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
       grammar[:rp_inglist][:bound] = {match: //, at_css_match: 'h2' }
     end
+=end
     seeker = parser.match :rp_recipelist
     assert seeker
     assert_equal :rp_recipelist, seeker.token

@@ -8,7 +8,7 @@ class NokoTokens < Array
   delegate :pp, :to => :nkdoc
   def initialize nkdoc
     def to_tokens newtext = nil
-      # Prepend the string to the priorly held text, if any
+      # Append the string to the priorly held text, if any
       if newtext
         newtext = @held_text + newtext if @held_text && (@held_text.length > 0)
       else
@@ -29,7 +29,7 @@ class NokoTokens < Array
         @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
-        # to_tokens "\n" if child.name.match(/^(p|br)$/)
+        to_tokens if child.name.match(/^(p|br|ul|li)$/)
         child.children.each { |j| do_child j }
       end
     end
