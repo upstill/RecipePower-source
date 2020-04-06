@@ -183,7 +183,6 @@ EOF
   test 'parse ingredient line' do
     html = '1/2 tsp. baking soda'
     parser = Parser.new html, @lex
-
     seeker = parser.match :rp_ingline
     assert_not_nil seeker
     assert_equal :rp_ingline, seeker.token
@@ -238,14 +237,13 @@ EOF
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
     html = html.gsub /\n+\s*/, ''
-    parser = Parser.new(html, @lex) do |grammar|
-      #grammar[:rp_ingline][:match]  = [
-      #:rp_ingname,
-      #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
-      #]
-    end
+    # add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new html,
+                        @lex,
+                        :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
     assert seeker
+    assert_equal 9, seeker.children.count
   end
 
   test 'parse single recipe' do
@@ -255,20 +253,21 @@ EOF
   <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
   <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
   <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
-  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p class="inglist"><strong>30g crustless sourdough bread</strong><br><strong>½ tsp each finely grated lemon zest and juice</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded</p>
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    parser = Parser.new(html, @lex)  do |grammar|
-      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
-    end
+    add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new html,
+                        @lex,
+                        :rp_title => {:in_css_match => 'h2'}, # Match everything within an <h2> tag
+                        :rp_ingspec => {:in_css_match => 'strong'},
+                        :rp_inglist => {in_css_match: 'p.inglist'}
     seeker = parser.match :rp_recipe
     assert seeker
-    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285,295)
     assert_equal :rp_recipe, seeker.token
-    assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
     assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 8, seeker.children[1].children.count
+    assert_equal 9, seeker.children[1].children.count
   end
 
   test 'ingredient list with pine nuts' do
@@ -276,8 +275,8 @@ EOF
     add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
     parser = Parser.new html,
                         @lex,
-                        :rp_ingline => { inline: true }
-                        # :rp_inglist => { in_css_match: 'p' }
+                        :rp_ingline => { inline: true },
+                        :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
     assert seeker
     ingline_seeker = seeker.find(:rp_ingline)[2]
@@ -354,16 +353,6 @@ EOF
     parser = Parser.new html, @lex,
                         rp_recipelist: { repeating: :rp_recipe, at_css_match: 'h2' },
                         rp_title: { in_css_match: 'h2' }
-=begin
-    do |grammar|
-      # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipe][:at_css_match] = 'h2' # Cuts off at next <h2> tag
-      # grammar[:rp_recipe][:bound] = { at_css_match: 'h2' }
-      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
-      # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = {match: //, at_css_match: 'h2' }
-    end
-=end
     seeker = parser.match :rp_recipelist
     assert seeker
     assert_equal :rp_recipelist, seeker.token

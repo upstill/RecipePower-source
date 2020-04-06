@@ -311,8 +311,9 @@ def seekline tokens, within, opos, obound
   if newpos < obound # Should we really be returning an empty scanner once we hit the end?
     if within
       newbound = newpos
-      while (newbound < obound) && (tokens[newbound] != "\n") do
+      while newbound < obound do
         newbound += 1
+        break if tokens[newbound-1] == "\n"
       end
     else
       newbound = obound
@@ -479,7 +480,7 @@ class NokoScanner # < Scanner
     s3 = on_css_match(:after_css_match => 'br')
     inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
     result = inorder.first
-    return result unless within
+    return result unless result && within
     # Need to find an end at the next line
     s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
     s5 = seekline(@tokens, false, s1.pos+1, @bound) do |newpos, newbound|
@@ -583,7 +584,7 @@ class NokoScanner # < Scanner
     if range.begin >= @pos
       case how
       when :in_css_match
-        NokoScanner.new @tokens, range.begin, range.end
+        NokoScanner.new @tokens, range.begin, range.end if range.end > range.begin
       when :at_css_match
         range == @pos..@bound ? self : NokoScanner.new(@tokens, range.begin, range.end)
       when :after_css_match

@@ -125,14 +125,11 @@ class Parser
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
       rp_instructions: { repeating: //, bound: { optional: //, in_css_match: 'h2'} },
       rp_inglist: { repeating: :rp_ingline },
-          # The ingredient list(s) for a recipe
-      #          match: { repeating: { :match => :rp_ingline, optional: true, terminus: ',' } }  # atline: true
-      #      },
       rp_ingline: {
           match: [
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
-          ] },
+          ], inline: true },
       rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
@@ -387,31 +384,21 @@ class Parser
         return Seeker.new scanner, scanner.rest, token
       end
     end
-    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
-      found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-                match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-              end
-      if found && !found.empty?
-        found.tail_stream.encompass scanner # subscanner??!?
-        return found # Singular result requires no higher-level parent
-      else
-        return (Seeker.new(scanner, scanner, token) if context[:optional])
-      end
-    end
     if context[:repeating] # Match the spec repeatedly until EOF
       matches =
           if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
             subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
             subscanners.collect { |subscanner|
-              found = match_specification subscanner, spec, token, context.except(:repeating, :in_css_match, :at_css_match, :after_css_match)
+              found = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
               found if found && !found&.empty?  # Find the first valid result, or list all
             }.compact
           else
             # Unless working from a css match, scan repeatedly
             founds = []
-            while scanner.peek && (found = match_specification( scanner, spec, context.except(:repeating))) do # No token except what the spec dictates
-              if found.empty?
-                scanner = found.tail_stream.rest # scanner.rest # Advance and continue scanning
+            while scanner.peek do # No token except what the spec dictates
+              found = match_specification scanner, spec, context.except(:repeating)
+              if !found || found.empty?
+                scanner = found ? found.tail_stream.rest : scanner.rest # scanner.rest # Advance and continue scanning
               else
                 founds << found
                 scanner = found.tail_stream
@@ -423,6 +410,17 @@ class Parser
       # we return a single seeker with no token and matching children
       if matches.present?
         return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+      else
+        return (Seeker.new(scanner, scanner, token) if context[:optional])
+      end
+    end
+    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
+      found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
+                match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+              end
+      if found && !found.empty?
+        found.tail_stream.encompass scanner # subscanner??!?
+        return found # Singular result requires no higher-level parent
       else
         return (Seeker.new(scanner, scanner, token) if context[:optional])
       end
