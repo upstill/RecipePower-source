@@ -116,7 +116,8 @@ class Parser
       },
       # Hopefully sites will specify how to find the title in the extracted text
       rp_title: { in_css_match: 'h1' }, # Match all tokens within an <h1> tag
-      rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
+      # rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
+      rp_author: { match: [ Regexp.new('Author'), nil ],  inline: true },
       rp_prep_time: { atline: [ Regexp.new('Prep'), { optional: ':' }, :rp_time ] },
       rp_cook_time: { atline: [ Regexp.new('Cook'), { optional: ':' }, :rp_time ] },
       rp_total_time: { atline: [ Regexp.new('Total'), { optional: ':' }, :rp_time ] },
@@ -124,13 +125,14 @@ class Parser
       rp_yield: { atline: [ Regexp.new('Makes'), { optional: ':' }, :rp_amt ] },
       rp_serves: { atline: [ Regexp.new('Serves'), { optional: ':' }, :rp_num ] },
       rp_instructions: { repeating: //, bound: { optional: //, in_css_match: 'h2'} },
-      rp_inglist: { repeating: :rp_ingline },
+      rp_inglist: { repeating: { match: :rp_ingline, optional: true } },
       rp_ingline: {
           match: [
               :rp_ingspec,
               {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
           ], inline: true },
-      rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
+      # rp_ing_comment: { optional: { accumulate: Regexp.new('^.*$') }, terminus: "\n" }, # NB: matches even if the bound is immediate
+      rp_ing_comment: { match: nil, terminus: "\n" }, # NB: matches even if the bound is immediate
       rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
       rp_amt: {# An Amount is a number followed by a unit (only one required)
                or: [
@@ -197,7 +199,7 @@ class Parser
         :atline, # match must start at the beginning of a line; scanner skips to the next line break
         :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
         :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
-        :accumulate, # Accumulate matches serially in a single child
+        # :accumulate, # Accumulate matches serially in a single child
         :optional # Failure to match is not a failure
       ].each do |flag|
         if entry[flag] && entry[flag] != true
@@ -441,6 +443,7 @@ class Parser
       end
       return seeker
     end
+=begin
     if context[:accumulate] # Collect matches as long as they're valid
       while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         if found
@@ -451,6 +454,7 @@ class Parser
       end
       return found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
     end
+=end
     if context[:orlist]
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
@@ -474,6 +478,8 @@ class Parser
       end
       return found || (Seeker.new start_scanner, start_scanner, token if context[:optional]) # Leave an empty result for optional if not found
     end
+
+    # Finally, if no modifiers in the context, just match the spec
     found =
     case spec
     when nil # nil spec means to match the full contents
@@ -556,7 +562,7 @@ class Parser
                  :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
                  :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
-                 :accumulate, # Accumulate matches serially in a single child
+                 # :accumulate, # Accumulate matches serially in a single child
                  :optional # Failure to match is not a failure
               ].find { |flag| spec[flag] }
             match = spec[flag]
