@@ -351,7 +351,8 @@ EOF
 }.uniq.sort
     add_tags :Ingredient, ingreds
     parser = Parser.new html, @lex,
-                        rp_recipelist: { repeating: :rp_recipe, at_css_match: 'h2' },
+                        rp_recipelist: { repeating: :rp_recipe },
+                        rp_recipe: { at_css_match: 'h2' },
                         rp_title: { in_css_match: 'h2' }
     seeker = parser.match :rp_recipelist
     assert seeker

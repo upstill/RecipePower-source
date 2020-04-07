@@ -530,6 +530,7 @@ class NokoScanner # < Scanner
   def encompass s2
     # @length = s2.length
     @bound = s2.bound if s2.bound > @bound
+    self
   end
 
   # Get the text_elmt_data info for the current position
@@ -642,9 +643,14 @@ class NokoScanner # < Scanner
     text_elmt_data&.descends_from? tag, token
   end
 
-    # Get a scanner whose position is past the end of the given nokonode,
+  # Get a scanner whose position is past the end of the given nokonode or nokoscanner,
   # aka the end of the nokonode's last text element
-  def past nokonode
+  def past nokonode_or_nokoscanner
+    if nokonode_or_nokoscanner.is_a?(NokoScanner)
+      return NokoScanner.new tokens, nokonode_or_nokoscanner.bound, @bound
+    else
+      nokonode = nokonode_or_nokoscanner
+    end
     last_text_element = nil
     nokonode.traverse do |related|
       last_text_element = related if related.text?

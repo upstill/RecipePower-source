@@ -15,6 +15,17 @@ class Seeker
     @children = children
   end
 
+  # Return a Seeker for a failed parsing attempt
+  # The head_stream and tail_stream will denote the range scanned
+  def self.failed head_stream, tail_stream=nil, optional=false
+    optional = tail_stream if (tail_stream == true || tail_stream == false)
+    tail_stream = head_stream unless tail_stream.is_a?(Seeker)
+    skr = self.new head_stream, tail_stream
+    skr.instance_variable_set :@failed, true
+    skr.instance_variable_set :@optional, optional
+    skr
+  end
+
   # Find a place in the stream where we can match
   def self.seek stream, opts={}
     while stream.more?
@@ -59,6 +70,17 @@ class Seeker
     (@head_stream == @tail_stream) && @children.empty?
   end
 
+  def consumed?
+    # Did the result consume any tokens?
+    @tail_stream.pos > @head_stream.pos
+  end
+
+  def encompass scanner
+    @head_stream.encompass scanner
+    @tail_stream.encompass scanner
+    self
+  end
+
   def traverse &block
     block.call self
     children.each do |child|
@@ -83,6 +105,21 @@ class Seeker
         inner.enclose Parser.tag_for_token(inner.token)
       end
     end
+  end
+
+  # Match failed altogether
+  def failed?
+    @failed
+  end
+
+  # Match succeeded; returns self for chaining purposes
+  def success?
+    self unless @failed # if @token || @children.present?
+  end
+
+  # Match might have failed, but the match was optional
+  def satisfices?
+    self if !@failed || @optional
   end
 end
 
