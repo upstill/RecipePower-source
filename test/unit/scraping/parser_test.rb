@@ -184,7 +184,7 @@ EOF
     html = '1/2 tsp. baking soda'
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingline
-    assert_not_nil seeker
+    assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 2, seeker.children.count
     assert_equal :rp_ingspec, seeker.children.first.token
@@ -278,7 +278,7 @@ EOF
                         :rp_ingline => { inline: true },
                         :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
-    assert seeker
+    assert seeker.success?
     ingline_seeker = seeker.find(:rp_ingline)[2]
     assert_equal '2 anchovy fillets, drained and finely chopped', ingline_seeker.to_s
   end
@@ -311,7 +311,7 @@ EOF
                         rp_recipelist: { repeating: { at_css_match: 'h2' } },
                         rp_title: { in_css_match: 'h2' }
     seeker = parser.match :rp_recipelist
-    assert seeker
+    assert seeker.success?
     assert_equal :rp_recipelist, seeker.token
     assert_equal 3, seeker.children.count
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }

@@ -18,8 +18,10 @@ class Seeker
   # Return a Seeker for a failed parsing attempt
   # The head_stream and tail_stream will denote the range scanned
   def self.failed head_stream, tail_stream=nil, optional=false
-    optional = tail_stream if (tail_stream == true || tail_stream == false)
-    tail_stream = head_stream unless tail_stream.is_a?(Seeker)
+    unless tail_stream.is_a?(Scanner)
+      optional = tail_stream unless tail_stream.nil?
+      tail_stream = head_stream.rest
+    end
     skr = self.new head_stream, tail_stream
     skr.instance_variable_set :@failed, true
     skr.instance_variable_set :@optional, optional
@@ -112,14 +114,35 @@ class Seeker
     @failed
   end
 
+  def hard_fail?
+    @failed && !@optional
+  end
+
+  def soft_fail?
+    @failed && @optional
+  end
+
   # Match succeeded; returns self for chaining purposes
   def success?
     self unless @failed # if @token || @children.present?
   end
+  alias_method :if_succeeded, :'success?'
 
-  # Match might have failed, but the match was optional
-  def satisfices?
-    self if !@failed || @optional
+  # What's the next token to try? Three possibilities:
+  # * The match succeeded: the next token is just after the match, i.e. @tail_stream
+  # * the match failed: the next token is the successor of the present token, i.e. @head_stream.rest
+  # * the match was optional: the tokens are consumed anyway: @head_stream.rest at a minimum, possibly @tail_stream
+  def next context=nil
+    subsq = if @failed
+              if @optional
+                @tail_stream.pos > @head_stream.pos ? @tail_stream : @head_stream.rest
+              else
+                @head_stream.rest
+              end
+            else # Success!
+              @tail_stream
+            end
+    context ? subsq.encompass(context) : subsq
   end
 end
 

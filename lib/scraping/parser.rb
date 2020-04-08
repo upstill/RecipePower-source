@@ -256,16 +256,10 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      if mtch = (block_given? ? yield(stream) : match(spec, stream))
-        return mtch
-      end
-      stream = stream.rest
+      mtch = (block_given? ? yield(stream) : match(spec, stream))
+      return mtch if mtch.success?
+      stream = mtch.rest
     end
-  end
-
-  # Advance the stream past the seeker result
-  def advance seeker
-    @stream = seeker.tail_stream
   end
 
   # Match a stream to a grammar, starting with an initial token. Since this method is re-entrant, we allow the
@@ -378,70 +372,52 @@ class Parser
       return Seeker.new scanner, @stream.past(nokonode), token
     end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
-      if toline = scanner.toline(context[:inline])
-        match = match_specification(toline, spec, token, context.except(:atline, :inline))
-        match.tail_stream.encompass scanner if match # Restore the stream to its full length
-        return match
-      elsif context[:optional]
-        return Seeker.new scanner, scanner.rest, token
-      end
+      toline = scanner.toline(context[:inline])
+      return Seeker.failed(scanner, context[:optional]) unless toline
+      match = match_specification(toline, spec, token, context.except(:atline, :inline))
+      match.tail_stream = scanner.past(toline) if context[:inline]
+      return match.encompass(scanner)
+    end
+    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
+      subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
+      return Seeker.failed(scanner, context[:optional]) unless subscanner
+      match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+      match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
+      return match.encompass(scanner)
     end
     if context[:repeating] # Match the spec repeatedly until EOF
-      matches =
-          if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
-            subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
-            subscanners.collect { |subscanner|
-              found = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-              found if found && !found&.empty?  # Find the first valid result, or list all
-            }.compact
-          else
-            # Unless working from a css match, scan repeatedly
-            founds = []
-            while scanner.peek do # No token except what the spec dictates
-              found = match_specification scanner, spec, context.except(:repeating)
-              if !found || found.empty?
-                scanner = found ? found.tail_stream.rest : scanner.rest # scanner.rest # Advance and continue scanning
-              else
-                founds << found
-                scanner = found.tail_stream
-              end
-            end
-            founds
-          end
+      matches = []
+      if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]
+        subscanners = scanner.on_css_matches context.slice(:in_css_match, :at_css_match, :after_css_match )
+        matches = subscanners.collect { |subscanner|
+          match_specification( subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)).if_succeeded
+        }
+      else
+        # Unless working from a css match, scan repeatedly
+        while scanner.peek do # No token except what the spec dictates
+          match = match_specification scanner, spec, context.except(:repeating)
+          matches << match.if_succeeded
+          scanner = match.next
+        end
+      end
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
-      if matches.present?
-        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
-      else
-        return (Seeker.new(scanner, scanner, token) if context[:optional])
-      end
+      matches = matches.compact
+      return matches.present? ?
+        Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) : # Token only applied to the top level
+        Seeker.failed(scanner, context[:optional])
     end
-    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match]  # Use a stream derived from a CSS match in the Nokogiri DOM
-      found = if subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-                match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-              end
-      if found && !found.empty?
-        found.tail_stream.encompass scanner # subscanner??!?
-        return found # Singular result requires no higher-level parent
-      else
-        return (Seeker.new(scanner, scanner, token) if context[:optional])
-      end
-    end
+    # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
       # Terminate the search when the given specification is matched, WITHOUT consuming the match
       # Foreshorten the stream and recur
       match = seek(scanner.rest) do |subscanner|
         match_specification subscanner, terminator
       end
-      cutoff = match && (context[:bound] ? match.head_stream : match.tail_stream)
-      if cutoff && (match.head_stream != match.tail_stream) # Non-trivial match
-        if seeker = match_specification( (scanner.except cutoff), spec, token, context.except(:bound, :terminus))
-          seeker.head_stream.encompass scanner ; seeker.tail_stream.encompass scanner # Restore the length of the head and tail
-        end
-      else # No bound found => proceed as normal, without the :bound (or :terminus) specifier
-        seeker = match_specification scanner, spec, token, context.except(:bound, :terminus)
-      end
-      return seeker
+      scannable = match&.success? ?
+                      scanner.except( context[:bound] ? match.head_stream : match.tail_stream ) :
+                      scanner
+      return match_specification(scannable, spec, token, context.except(:bound, :terminus)).encompass(scanner)
     end
 =begin
     if context[:accumulate] # Collect matches as long as they're valid
@@ -459,16 +435,20 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
-      while child = match_specification(scanner, spec) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+      while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        child = match_specification scanner, spec
+        return Seeker.failed(start_scanner, context[:optional]) if !child.success?
         children << child
-        scanner = child.tail_stream
+        scanner = child.next
         case scanner.peek
         when 'and', 'or'
           # We expect a terminating entity
-          if child = match_specification(scanner.rest, spec)
+          child = match_specification scanner.rest, spec
+          if child.success?
             children << child
-            found = Seeker.new start_scanner, child.tail_stream, token, children
             break
+          else
+            return Seeker.failed(start_scanner, context[:optional])
           end
         when ','
           scanner = scanner.rest
@@ -476,7 +456,7 @@ class Parser
           break
         end
       end
-      return found || (Seeker.new start_scanner, start_scanner, token if context[:optional]) # Leave an empty result for optional if not found
+      return Seeker.new(start_scanner, children.last.next, token, children)
     end
 
     # Finally, if no modifiers in the context, just match the spec
@@ -486,21 +466,21 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      match_specification scanner, @grammar[spec], spec
+      match_specification scanner, @grammar[spec], spec, context
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Hash
-      match_hash scanner, spec, token
+      match_hash scanner, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
       spec.match scanner, context.merge(token: token, lexaur: @lexaur)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
-    # Return an empty seeker even if no match was found, as long as the match was declared optional
-    found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
+    # Return an empty seeker if no match was found. (Some Seekers may return nil)
+    found || (Seeker.failed scanner, context[:optional]) # Leave an empty result for optional if not found
   end
 
   # Take an array of specifications and match them according to the context :checklist, :repeating, or :or. If no option,
@@ -513,44 +493,51 @@ class Parser
     children = []
     end_stream = start_stream
     # Individual elements get the same context as the list as a whole, except for the list-processing options
-    distributed_context = context.except :checklist, :repeating, :or
+    distributed_context = context.except :checklist, :repeating, :or, :optional
     case
     when context[:checklist] # All elements must be matched, but the order is unimportant
       list_of_specs.each do |spec|
-        return if !(child = match_specification start_stream, spec, distributed_context) # Options get distributed down
-        end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos
-        children << child
+        child = match_specification start_stream, spec, distributed_context # Options get distributed down
+        if child.success?
+          end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
+          children << child
+        elsif child.hard_fail?
+          return child
+        end
       end
     when context[:repeating] # The list will be matched repeatedly until the end of input
       # Note: If there's no bound, the list will consume the entire stream
-      while child = match_list(end_stream, list_of_specs, context.except(:repeating)) do
-        children << child
-        end_stream = child.tail_stream
+      while end_stream.more? do
+        child = match_list end_stream, list_of_specs, context.except(:repeating)
+        children << child.if_succeeded
+        end_stream = child.next
       end
-      return if children.empty?
     when context[:or]  # The list is taken as an ordered set of alternatives, any of which will match the list
       list_of_specs.each do |spec|
-        if child = match_specification(scanner, spec, token, distributed_context)
+        child = match_specification start_stream, spec, token, distributed_context
+        if child.success?
           return child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
         end
       end
-      return
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
-        if !(child = match_specification end_stream, spec, distributed_context)
-          return nil
+        child = match_specification end_stream, spec, distributed_context
+        if child.success?
+          children << child
+          end_stream = child.tail_stream
+        elsif child.hard_fail?
+          # Bail and return to the beginning if any spec fails
+          return Seeker.failed start_stream, context[:optional]
         end
-        end_stream = child.tail_stream
-        children << child
       end
     end
-    Seeker.new start_stream, end_stream, token, children
+    Seeker.new start_stream, end_stream, token, children.compact
   end
 
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),
   #   and the remainder of the input spec is context for the matcher.
   # This is where the option of asserting a list with :checklist, :repeating and :or options is interpreted.
-  def match_hash scanner, inspec, token=nil
+  def match_hash scanner, inspec, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
     end
@@ -564,11 +551,12 @@ class Parser
                  :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
                  # :accumulate, # Accumulate matches serially in a single child
                  :optional # Failure to match is not a failure
-              ].find { |flag| spec[flag] }
-            match = spec[flag]
+              ].find { |flag| spec.key?(flag) && spec[flag] != true }
+            match, spec[flag] = spec[flag], true
     elsif match = spec[:tag] # Special processing for :tag specifier
       # Important: the :repeating, :accumulate and :orlist options will have been applied at a higher level
-      return TagSeeker.match scanner, lexaur: @lexaur, token: token, types: match
+      return TagSeeker.match(scanner, lexaur: @lexaur, token: token, types: match) ||
+          Seeker.failed(scanner, spec[:optional])
     elsif match = spec[:regexp]
       match = Regexp.new match
     else
@@ -576,6 +564,8 @@ class Parser
     end
     match = spec.delete :match if match == true # If any of the above appeared as flags, get match from the :match value
     # We've extracted the specification to be matched into 'match', and use what's left as context for matching
-    match_specification(scanner, match, token, spec)
+    match = match_specification scanner, match, token, spec
+    return match if match.success?
+    return Seeker.failed(scanner, context[:optional] || match.soft_fail?)
   end
 end
