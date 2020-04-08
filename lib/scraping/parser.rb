@@ -258,7 +258,7 @@ class Parser
     while stream.more?
       mtch = (block_given? ? yield(stream) : match(spec, stream))
       return mtch if mtch.success?
-      stream = mtch.rest
+      stream = mtch.next
     end
   end
 
@@ -519,6 +519,7 @@ class Parser
           return child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
         end
       end
+      return Seeker.failed(start_stream, context[:optional])
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
         child = match_specification end_stream, spec, distributed_context

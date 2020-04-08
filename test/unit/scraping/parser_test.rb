@@ -181,6 +181,12 @@ EOF
 =end
 
   test 'parse ingredient line' do
+    # Test a failed ingredient line
+    html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingline
+    assert seeker.hard_fail?
+
     html = '1/2 tsp. baking soda'
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingline
@@ -206,7 +212,7 @@ EOF
                         :rp_ingline => { :atline => nil, :in_css_match => 'li' }
 
     seeker = parser.match :rp_inglist
-    assert_not_nil seeker
+    assert seeker.success?
     assert_equal :rp_inglist, seeker.token
     assert_equal 3, seeker.children.count
 
@@ -225,14 +231,14 @@ EOF
   test 'parse Ottolenghi ingredient list' do
     html = <<EOF
   <p><strong>30g each crustless sourdough bread</strong><br>
+    <strong>½ tsp each finely grated lemon zest and juice</strong><br>
     <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
     <strong>Flaked sea salt and black pepper</strong><br>
     <strong>25g unsalted butter</strong><br>
     <strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br>
     <strong>1 tbsp olive oil</strong><br>
     <strong>1 garlic clove</strong>, peeled and crushed<br>
-    <strong>10g basil leaves</strong>, finely shredded<br>
-    <strong>½ tsp each finely grated lemon zest and juice</strong>
+    <strong>10g basil leaves</strong>, finely shredded
   </p>
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
@@ -242,7 +248,7 @@ EOF
                         @lex,
                         :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
-    assert seeker
+    assert seeker.success?
     assert_equal 9, seeker.children.count
   end
 
