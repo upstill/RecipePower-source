@@ -249,7 +249,7 @@ EOF
                         :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
     assert seeker.success?
-    assert_equal 9, seeker.children.count
+    assert_equal 8, seeker.children.count
   end
 
   test 'parse single recipe' do
@@ -314,7 +314,9 @@ EOF
 EOF
     # This page has several recipes, each begun with an h2 header
     parser = Parser.new html,
-                        rp_recipelist: { repeating: { at_css_match: 'h2' } },
+                        rp_recipelist: {
+                            match: { at_css_match: 'h2' }
+                        },
                         rp_title: { in_css_match: 'h2' }
     seeker = parser.match :rp_recipelist
     assert seeker.success?
@@ -361,7 +363,7 @@ EOF
                         rp_recipe: { at_css_match: 'h2' },
                         rp_title: { in_css_match: 'h2' }
     seeker = parser.match :rp_recipelist
-    assert seeker
+    assert seeker.success?
     assert_equal :rp_recipelist, seeker.token
     assert_equal 3, seeker.children.count
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }
