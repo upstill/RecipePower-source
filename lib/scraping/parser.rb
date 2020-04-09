@@ -122,7 +122,6 @@ class Parser
       end
       original
     end
-    return unless gm.present?
     @grammar.keys.each do |key|
       key = key.to_sym
       entry = cleanup_entry key, @grammar[key]
@@ -260,14 +259,14 @@ class Parser
     end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline])
-      return Seeker.failed(scanner, context[:optional]) unless toline
+      return Seeker.failed(scanner, context) unless toline
       match = match_specification(toline, spec, token, context.except(:atline, :inline))
-      match.tail_stream = scanner.past(toline) if context[:inline]
+      match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
       return match.encompass(scanner)
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, context[:optional]) unless subscanner
+      return Seeker.failed(scanner, context) unless subscanner
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
       match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
       return match.encompass(scanner)
@@ -292,7 +291,7 @@ class Parser
       matches = matches.compact
       return matches.present? ?
         Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) : # Token only applied to the top level
-        Seeker.failed(scanner, context[:optional])
+        Seeker.failed(scanner, context)
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
@@ -324,7 +323,7 @@ class Parser
       start_scanner = scanner
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
-        return Seeker.failed(start_scanner, context[:optional]) if !child.success?
+        return Seeker.failed(start_scanner, context) if !child.success?
         children << child
         scanner = child.next
         case scanner.peek
@@ -335,7 +334,7 @@ class Parser
             children << child
             break
           else
-            return Seeker.failed(start_scanner, context[:optional])
+            return Seeker.failed(start_scanner, context)
           end
         when ','
           scanner = scanner.rest
@@ -343,7 +342,9 @@ class Parser
           break
         end
       end
-      return Seeker.new(start_scanner, children.last.next, token, children)
+      return children.present? ?
+                 Seeker.new(start_scanner, children.last.next, token, children) :
+                 Seeker.failed(start_scanner, context[:optional])
     end
 
     # Finally, if no modifiers in the context, just match the spec
@@ -367,7 +368,7 @@ class Parser
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
     # Return an empty seeker if no match was found. (Some Seekers may return nil)
-    found || (Seeker.failed scanner, context[:optional]) # Leave an empty result for optional if not found
+    found || (Seeker.failed scanner, context) # Leave an empty result for optional if not found
   end
 
   # Take an array of specifications and match them according to the context :checklist, :repeating, or :or. If no option,
@@ -406,7 +407,7 @@ class Parser
           return child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
         end
       end
-      return Seeker.failed(start_stream, context[:optional])
+      return Seeker.failed(start_stream, context)
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
         child = match_specification end_stream, spec, distributed_context
@@ -415,7 +416,7 @@ class Parser
           end_stream = child.tail_stream
         elsif child.hard_fail?
           # Bail and return to the beginning if any spec fails
-          return Seeker.failed start_stream, context[:optional]
+          return Seeker.failed start_stream, context
         end
       end
     end
@@ -444,7 +445,7 @@ class Parser
     elsif match = spec[:tag] # Special processing for :tag specifier
       # Important: the :repeating, :accumulate and :orlist options will have been applied at a higher level
       return TagSeeker.match(scanner, lexaur: @lexaur, token: token, types: match) ||
-          Seeker.failed(scanner, spec[:optional])
+          Seeker.failed(scanner, spec)
     elsif match = spec[:regexp]
       match = Regexp.new match
     else
@@ -454,6 +455,6 @@ class Parser
     # We've extracted the specification to be matched into 'match', and use what's left as context for matching
     match = match_specification scanner, match, token, spec
     return match if match.success?
-    return Seeker.failed(scanner, context[:optional] || match.soft_fail?)
+    return Seeker.failed(match.head_stream, match.tail_stream, optional: context[:optional] || match.soft_fail?)
   end
 end

@@ -17,14 +17,11 @@ class Seeker
 
   # Return a Seeker for a failed parsing attempt
   # The head_stream and tail_stream will denote the range scanned
-  def self.failed head_stream, tail_stream=nil, optional=false
-    unless tail_stream.is_a?(Scanner)
-      optional = tail_stream unless tail_stream.nil?
-      tail_stream = head_stream.rest
-    end
-    skr = self.new head_stream, tail_stream
+  def self.failed head_stream, tail_stream=nil, options={}
+    tail_stream, options = head_stream.rest, tail_stream if tail_stream.is_a?(Hash)
+    skr = self.new head_stream, (tail_stream || head_stream.rest)
     skr.instance_variable_set :@failed, true
-    skr.instance_variable_set :@optional, optional
+    skr.instance_variable_set :@optional, options[:optional]
     skr
   end
 
