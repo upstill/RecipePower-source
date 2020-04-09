@@ -75,7 +75,8 @@ class Parser
     def cleanup_entry token, entry
       return {} if entry.nil?
       return entry.map { |subentry| cleanup_entry token, subentry } if entry.is_a?(Array)
-      # return { match: entry.map { |subentry| cleanup_entry token, subentry } } if entry.is_a?(Array)
+      # Convert a reference to a Seeker class to the class itself
+      return entry.constantize if entry.is_a?(String) && entry.match(/Seeker$/)
       return entry unless entry.is_a?(Hash)
       # Syntactic sugar: these flags may specify the actual match. Make this explicit
       [
@@ -89,11 +90,11 @@ class Parser
         :optional # Failure to match is not a failure
       ].each do |flag|
         if entry[flag] && entry[flag] != true
-          entry[:match] = cleanup_entry token, entry[flag]
-          entry[flag] = true
+          entry[:match], entry[flag] = entry[flag], true
         end
       end
-      keys = entry.keys.map &:to_sym
+      entry[:match] = cleanup_entry :match, entry[:match] if entry[:match]
+      keys = entry.keys.map &:to_sym # Ensure all keys are symbols
       [
           %i{ bound terminus }, # :bound and :terminus are exclusive options
           %i{ atline inline },  # :atline and :inline are exclusive options
