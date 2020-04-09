@@ -34,9 +34,8 @@ class Lexaur < Object
 
   # Process a string or an array of strings to find a place in the tree to store the data
   # The input may be a space-separated string which can be split into the array
-  # Stemming may be suppressed by setting do_stem to false
-  def take strings, data, do_stem=true
-    strings = split strings, do_stem
+  def take strings, data
+    strings = split strings
     first = strings.shift
     if strings.empty? # We're done => store the data in my hash
       (terminals[first] ||= Array.new).push data unless terminals[first]&.include?(data)
@@ -47,19 +46,12 @@ class Lexaur < Object
 
   # Find the data for the sequence of strings
   # The input may be a space-separated string which can be split into the array
-  # Stemming may be suppressed by setting do_stem to false
-  def find strings, do_stem=true # Unsplit, unstemmed string is accepted
-    strings = split strings
-    strings = strings.map { |str| Stemmer::stem_word(str) } if do_stem
+  def find string_or_strings # Unsplit, unstemmed string is accepted
+    strings = split string_or_strings
+    strings = strings.map { |str| Stemmer::stem_word(str) }
     return nil if strings.empty?
     first = strings.shift
     strings.empty? ? terminals[first] : nexts[first]&.find(strings)
-  end
-
-  # Our own #split function which (currently) separates out punctuation
-  def split string_or_strings, do_stem=true
-    strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    do_stem ? strings.map { |str| Stemmer::stem_word(str) } : strings
   end
 
   # Drive a Lexaur using a stream. The stream only needs to implement three methods:
@@ -67,18 +59,24 @@ class Lexaur < Object
   # -- #first peaks at the head but also advances the stream, consuming the first element
   #     for the remainder
   # -- #rest returns a stream for the stream minus the head.
-  def chunk stream, do_stem=true, &block
-    chunk1 stream, do_stem, block
+  def chunk stream, &block
+    chunk1 stream, block
   end
 
 protected
-  
-  def chunk1 stream, do_stem, block
+
+  # Our own #split function which (currently) separates out punctuation
+  def split string_or_strings
+    strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
+    strings.map { |str| Stemmer::stem_word(str) }
+  end
+
+  def chunk1 stream, block
     # If there's a :nexts entry on the head of the stream, we try chunking the remainder,
     if (head = stream.peek) && head.is_a?(String) # More in the stream
-      head = Stemmer::stem_word head if do_stem
+      head = Stemmer::stem_word head
       # We allow a case-sensitive match but do not require it
-      (nexts[head] || nexts[head.downcase])&.chunk1(stream.rest, do_stem, block) ||
+      (nexts[head] || nexts[head.downcase])&.chunk1(stream.rest, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = terminals[head] || terminals[head.downcase]
             block.call(terms, stream.rest)
