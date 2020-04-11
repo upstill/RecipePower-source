@@ -6,7 +6,7 @@ class LexaurTest < ActiveSupport::TestCase
   def setup
     @ingred_tags = %w{ lemon lemon\ juice garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ tablespoon teaspoon cup pound small\ head clove }.
+    @unit_tags = %w{ tablespoon teaspoon cup pound lb small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed }.
         each { |name| Tag.assert name, :Unit }
@@ -77,17 +77,55 @@ class LexaurTest < ActiveSupport::TestCase
     }
   end
 
+  # Test whether the lex finds the given string, and consumes the entire string
+  def assert_finds_tag lex, string
+    scanner = StrScanner.from_string string
+    tag_id = nil
+    lex.chunk(scanner) { |data, stream|
+      assert_not_nil data
+      tag_id = data
+      assert_empty stream.rest.to_s
+    }
+    tag = Tag.by_string(string).first
+    assert_not_nil tag_id, "Lexaur didn't find any tag by searching for '#{string}'; should have found '#{tag.name}'/'#{tag.normalized_name}'"
+    assert_equal tag.id, tag_id.first, "Found tag '#{tag.name}'/'#{tag.normalized_name}' doesn't match search on '#{string}'"
+  end
+
+  test 'Lexaur handles two tags with the same normalized name' do
+    Tag.assert 'tsp.', :Unit
+    assert_equal Tag.by_string('tsp'), Tag.by_string('Tsp.')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'Tsp.')
+    assert_finds_tag(lex, 'tsp')
+  end
+
+  test 'Lexaur elides punctuation not seen in normalized_name' do
+    Tag.assert 'lb', :Unit
+    assert_equal Tag.by_string('lb'), Tag.by_string('lb.')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'lb.')
+    assert_finds_tag(lex, 'lb')
+  end
+
+  test 'Lexaur manages tokens with embedded dash correctly' do
+    Tag.assert 'a silly god damned tag', :Unit
+    assert_equal Tag.by_string('a silly god-damned tag'), Tag.by_string('a silly god damned tag')
+    Tag.assert 'another silly god damned tag', :Unit
+    assert_equal Tag.by_string('another silly god-damned tag'), Tag.by_string('another silly god damned tag')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'a silly god-damned tag')
+    assert_finds_tag(lex, 'a silly god damned tag')
+    assert_finds_tag(lex, 'another silly god-damned tag')
+    assert_finds_tag(lex, 'another silly god damned tag')
+  end
+
   # Called after every test method runs. Can be used to tear
   # down fixture information.
 
   def teardown
     # Do nothing
   end
-
-  # Fake test
-=begin
-  def test_fail
-    fail('Not implemented')
-  end
-=end
 end

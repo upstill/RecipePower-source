@@ -48,7 +48,8 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   def find string_or_strings # Unsplit, unstemmed string is accepted
     strings = split string_or_strings
-    strings = strings.map { |str| Stemmer::stem_word(str) }
+    # strings = strings.map { |str| Stemmer::stem_word(str) }
+    strings = strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
     return nil if strings.empty?
     first = strings.shift
     strings.empty? ? terminals[first] : nexts[first]&.find(strings)
@@ -68,17 +69,24 @@ protected
   # Our own #split function which (currently) separates out punctuation
   def split string_or_strings
     strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    strings.map { |str| Stemmer::stem_word(str) }
+    # strings.map { |str| Stemmer::stem_word(str) }
+    strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
   end
 
   def chunk1 stream, block
-    # If there's a :nexts entry on the head of the stream, we try chunking the remainder,
-    if (head = stream.peek) && head.is_a?(String) # More in the stream
-      head = Stemmer::stem_word head
+    # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
+    if (token = stream.peek) && token.is_a?(String) # More in the stream
+      substrs = Tag.normalizeName(token).split '-'
+      tracker = self
+      head = substrs.pop || ''
+      substrs.each do |substr|
+        tracker = tracker.nexts[substr] || tracker.nexts[substr.downcase]
+        return if tracker.nil?
+      end
       # We allow a case-sensitive match but do not require it
-      (nexts[head] || nexts[head.downcase])&.chunk1(stream.rest, block) ||
+      (tracker.nexts[head] || tracker.nexts[head.downcase])&.chunk1(stream.rest, block) ||
           # ...otherwise, we consume the head of the stream
-          if terms = terminals[head] || terminals[head.downcase]
+          if terms = tracker.terminals[head] || tracker.terminals[head.downcase]
             block.call(terms, stream.rest)
           end
     end

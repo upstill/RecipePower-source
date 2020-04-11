@@ -199,25 +199,9 @@ class Tag < ApplicationRecord
     str.sub(/^[\s,]*/,'').sub(/[,\s]*$/, '').gsub(/\s+/, ' ')
   end
 
-  @@wordmap = {
-      "chili" => "chile",
-      "chilli" => "chile",
-      "chille" => "chile",
-      "chilly" => "chile",
-      "chilie" => "chile",
-      "chillie" => "chile",
-      "chilis" => "chiles",
-      "chillis" => "chiles",
-      "chiles" => "chiles",
-      "chilles" => "chiles",
-      "chillys" => "chiles",
-      "chilies" => "chiles",
-      "chillies" => "chiles",
-  }
-
   # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
   def self.normalizeName(str)
-    str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect { |word| @@wordmap[word] || word }.join('-')
+    str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize # .split('-').join('-')
   end
 
 =begin
