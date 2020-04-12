@@ -3,8 +3,10 @@ class ParsingServices
                 :parser, # Parser, possibly with modified grammar, to be employed
                 :seeker  # Resulting tree of seeker results
 
-  def initialize entity=nil
+  def initialize entity, options={}
     @entity = entity
+    @lexaur = options[:lexaur]
+    @grammar = options[:grammar]
   end
 
   # annotate: apply a parsing token to the given html, using the XML paths denoting the selection
@@ -29,7 +31,7 @@ class ParsingServices
     if (class_attr = elmt.attribute('class')) &&
         (token = class_attr.to_s.split.find { |cl| cl.match(/^rp_/) && cl != 'rp_elmt' }) &&
         token.present?
-      @parser = Parser.new nokoscan, Lexaur.from_tags
+      @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
       if seeker = @parser.match(token.to_sym)
         seeker.enclose_all
       end
@@ -53,12 +55,12 @@ class ParsingServices
   end
 
   # Extract information from an entity (Recipe or RecipePage)
-  def parse content, grammar_mods={}
+  def parse content=nil
     case @entity
     when Recipe
-      parse_recipe content, grammar_mods
+      parse_recipe content || @entity.content
     when RecipePage
-      parse_recipe_page content, grammar_mods
+      parse_recipe_page content || @entity.content
     else
       err_msg = "Illegal attempt to parse #{@entity.class.to_s} object"
       errors.add :url, err_msg
@@ -106,14 +108,14 @@ class ParsingServices
 
 private
 
-  def parse_recipe_page content, grammar_mods={}
+  def parse_recipe_page content
     # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-    @parser = Parser.new content, Lexaur.from_tags, @entity.site.grammar_mods.clone.merge(grammar_mods)
+    @parser = Parser.new content, @lexaur || Lexaur.from_tags, @entity.site.grammar_mods.clone
     @seeker = parser.match :rp_recipelist
   end
 
-  def parse_recipe content, grammar_mods={}
-    @parser = Parser.new content, Lexaur.from_tags, @entity.site.grammar_mods.clone.merge(grammar_mods)
+  def parse_recipe content
+    @parser = Parser.new content, @lexaur || Lexaur.from_tags, @entity.site.grammar_mods.clone
     @seeker = parser.match :rp_recipe
   end
 

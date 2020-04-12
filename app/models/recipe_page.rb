@@ -29,7 +29,7 @@ class RecipePage < ApplicationRecord
       if content.present?
         parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
-        parser.parse content, :rp_recipe => { match: [ { optional: :rp_title }, nil ] }
+        parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
         rset = page_ref.recipes.to_a

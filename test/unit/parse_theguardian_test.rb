@@ -4,8 +4,23 @@ require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
+# This file is a template for tests to develop site-specific scraping parameters. There are three:
+# -- content selector: a CSS selector to pull the recipe content from a page
+# -- trimmers: a set of CSS selectors for elements that should be removed from the content
+# -- modifications to the Parser grammar for parsing either
+#      1) a recipe page into multiple recipes, or
+#      2) a single recipe into title, ingredient list, and other information
 class ParseTheguardianTest < ActiveSupport::TestCase
 
+  # The setup function defines
+  # -- tags of various types that will be used in the recipe's page, defined in the test database
+  # -- @lex: a Lexaur generated from those tags
+  # -- @grammar_mods: a Hash defining modifications to the default Parser grammar. This will be bound to
+  #     the associated Site, both in testing and (by hand) in the production database
+  # -- @selector: a CSS selector for the smallest element on the page containing the entire recipe. This
+  #     will be the basis of a Finder for Content, used when the PageRef gets gleaned
+  # -- @trimmers: an array of CSS selectors; elements that answer to those selectors will be removed from the content
+  # -- @page: the page used for the test
   def setup
     # Define all the tags we'll need for the site. (These will need to be extant on RecipePower itself)
     add_tags :Ingredient,
@@ -16,18 +31,29 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     add_tags :Unit, %w{ g tbsp tsp large }
     add_tags :Condition, %w{ crustless ripe }
     @lex = Lexaur.from_tags
+    # These are the definitive grammar mods for the site
     @grammar_mods = {
-        :rp_recipelist => { at_css_match: 'h2' },
-        :rp_title => { in_css_match: 'h2' }, # Match all tokens within an <h2> tag
-        :rp_ingspec => { in_css_match: 'strong' }
+        rp_recipelist: { repeating: :rp_recipe },
+        rp_recipe: { at_css_match: 'h2' },
+        rp_title: { in_css_match: 'h2' }
+        #:rp_recipelist => { at_css_match: 'h2' },
+        #:rp_title => { in_css_match: 'h2' }, # Match all tokens within an <h2> tag
+        #:rp_ingspec => { in_css_match: 'strong' }
     }
+    # This selector defines a Content finder for the PageRef
     @selector = 'div.content__article-body'
+    # These selectors remove elements from the page
     @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
     @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
   end
 
   # Do what it takes to setup a recipe for parsing
-  def setup_recipe_page url
+  # The PageRef
+  #   * loads the page at the given URL
+  #   * builds a Site initialized with the @selector, @trimmers and @grammar_mods
+  #   * sets up associated Gleaning, MercuryResult and RecipePage objects
+  #   * drives the RecipePage to parse the page for recipes by title
+  def setup_page_ref url
     # In practice, grammar mods will get bound to the site
     # The selector will get associated with the recipe's site (as a 'Content' finder)
     # The trimmers will kept on the site as well, to remove extraneous elements
@@ -41,12 +67,10 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     assert @recipe_page.good?
     @content = SiteServices.new(@page_ref.site).trim_recipe @page_ref.content
     assert_equal @content, @recipe_page.content
-    @parser = Parser.new @content, @lex, @grammar_mods
-    test_grammar_mods @grammar_mods, @parser.grammar
   end
 
   test 'recipes parsed out correctly' do
-    setup_recipe_page @page
+    setup_page_ref @page
     assert_equal 3, @page_ref.recipes.to_a.count
     assert_equal [
                      "Asparagus with pine nut and sourdough crumbs (pictured above)",
@@ -56,153 +80,12 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     assert_equal "Yotam Ottolenghi’s asparagus recipes", @page_ref.title
   end
 
-  test 'ingredient line' do
-
-  end
-
-  test 'parse amount specs' do
-    @amounts.each do |amtstr|
-      puts "Parsing '#{amtstr}'"
-      nokoscan = NokoScanner.from_string amtstr
-      is = AmountSeeker.match nokoscan, lexaur: @lex
-      assert_not_nil is, "#{amtstr} doesn't parse"
-      parser = Parser.new nokoscan, @lex, @grammar_mods
-      seeker = parser.match :rp_amt
-      assert seeker
-      assert_equal 2, seeker.children.count
-      assert_equal :rp_amt, seeker.token
-      assert_equal :rp_num, seeker.children.first.token
-      assert_equal :rp_unit, seeker.children.last.token
-    end
-  end
-
-  test 'parse individual ingredient' do
-    ingstr = 'Dijon mustard'
-    nokoscan = NokoScanner.from_string ingstr
-    is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
-    assert_not_nil is, "#{ingstr} doesn't parse"
-    # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex, @grammar_mods
-    seeker = parser.match :rp_ingname
-    assert_equal 1, seeker.tag_ids.count
-    assert_equal :rp_ingname, seeker.token
-  end
-
-  test 'parse alt ingredient' do
-    ingstr = 'small capers, black pepper or Brussels sprouts'
-    nokoscan = NokoScanner.from_string ingstr
-    is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
-    assert_not_nil is, "#{ingstr} doesn't parse"
-    assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
-    # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex, @grammar_mods
-    seeker = parser.match :rp_ingspec
-    refute seeker.empty?
-    assert_equal 1, seeker.children.count
-    assert_equal :rp_ingspec, seeker.token
-
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 3, seeker.children.count
-    assert_equal :rp_ingalts, seeker.token
-
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 0, seeker.children.count
-    assert_equal :rp_ingname, seeker.token
-  end
-
-=begin
-  test 'parse individual ingredient specs' do
-    @ingred_specs.each do |ingspec|
-      puts "Parsing '#{ingspec}'"
-      nokoscan = NokoScanner.from_string ingspec
-      is = IngredientSpecSeeker.match nokoscan, lexaur: @lex
-      assert_not_nil is, "#{ingspec} doesn't parse"
-    end
-  end
-
-  test 'parse a whole ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
-  end
-
-  test 'find the ingredient list embedded in a recipe' do
-    nokoscan = NokoScanner.from_string @recipe
-    il = IngredientListSeeker nokoscan
-    assert_not_nil il
-  end
-=end
-
-  test 'parse ing list from modified grammar' do
-    html = <<EOF
-<ul>
-  <li>1/2 tsp. baking soda</li>
-  <li>1 tsp. salt</li>
-  <li>1 T. sugar</li>
-</ul>
-EOF
-    html = html.gsub(/\n+\s*/, '')
-    parser = Parser.new(html, @lex, @grammar_mods) do |grammar|
-      # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:in_css_match] = 'li'
-      grammar[:rp_inglist][:in_css_match] = 'ul'
-    end
-    seeker = parser.match :rp_inglist
-    assert_not_nil seeker
-    assert_equal :rp_inglist, seeker.token
-    assert_equal 3, seeker.children.count
-
-    seeker = seeker.children.first
-    assert_equal :rp_ingline, seeker.token
-  end
-
-  test 'finds title in h1 tag' do
-    html = "irrelevant noise <h1>Title Goes Here</h1> followed by more noise"
-    parser = Parser.new html, @lex
-    seeker = parser.match :rp_title
-    assert_equal "Title", seeker.head_stream.token_at
-    assert_equal "followed", seeker.tail_stream.token_at
-  end
-
-  test 'parse Ottolenghi ingredient list' do
-    html = <<EOF
-  <p><strong>30g each crustless sourdough bread</strong><br>
-    <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
-    <strong>Flaked sea salt and black pepper</strong><br>
-    <strong>25g unsalted butter</strong><br>
-    <strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br>
-    <strong>1 tbsp olive oil</strong><br>
-    <strong>1 garlic clove</strong>, peeled and crushed<br>
-    <strong>10g basil leaves</strong>, finely shredded<br>
-    <strong>½ tsp each finely grated lemon zest and juice</strong>
-  </p>
-EOF
-    #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
-    html = html.gsub /\n+\s*/, ''
-    parser = Parser.new(html, @lex, @grammar_mods)
-    seeker = parser.match :rp_inglist
-    assert seeker
-  end
-
   test 'parse single recipe' do
-    html = <<EOF
-<div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
-  <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
-  <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
-  <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
-  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
-  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
-  <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
-</div>
-EOF
-    parser = Parser.new html, @lex, @grammar_mods
-    seeker = parser.match :rp_recipe
-    assert seeker
-    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285, 295)
-    assert_equal :rp_recipe, seeker.token
-    assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
-    assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 8, seeker.children[1].children.count
+    setup_page_ref @page
+    recipes = @page_ref.recipes.to_a
+    assert_equal 3, recipes.count
+    seeker = ParsingServices.new(recipes.first, lexaur: @lexaur).parse
+    assert seeker.success?
   end
 
   test 'ingredient list with pine nuts' do

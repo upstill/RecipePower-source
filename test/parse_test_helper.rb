@@ -15,12 +15,6 @@ def prep_site site, selector, trimmers, grammar_mods={}
   site.bkg_land # Now the site should be prepared to trim recipes
 end
 
-def test_grammar_mods mods, grammar
-  mods.each do |key, value|
-    assert_equal mods[key][value], grammar[key][value]
-  end
-end
-
 def load_page_ref url_or_page_ref, selector, trimmers, grammar_mods={}
   page_ref = case url_or_page_ref
              when String
