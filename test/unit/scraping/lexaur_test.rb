@@ -73,7 +73,7 @@ class LexaurTest < ActiveSupport::TestCase
     assert_not_nil lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       assert_includes data, 1
-      assert_equal 2, stream.pos
+      assert_equal 3, stream.pos
     }
   end
 
@@ -84,7 +84,7 @@ class LexaurTest < ActiveSupport::TestCase
     lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       tag_id = data
-      assert_empty stream.rest.to_s
+      assert_empty stream.to_s
     }
     tag = Tag.by_string(string).first
     assert_not_nil tag_id, "Lexaur didn't find any tag by searching for '#{string}'; should have found '#{tag.name}'/'#{tag.normalized_name}'"

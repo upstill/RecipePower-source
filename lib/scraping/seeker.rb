@@ -287,7 +287,7 @@ class AmountSeeker < Seeker
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
       num = $1
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
-      self.new(stream, stream.rest, num, unit)
+      self.new(stream, stream.rest, num, unit) if unit
     end
   end
 end

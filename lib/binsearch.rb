@@ -12,10 +12,10 @@ def binsearch arr, target
     bin_upper = yield(bin_upper) if bin_upper and block_given?
     if target >= bin_lower
       return choice if !bin_upper || (bin_upper > target)
-      puts "Rejected #{arr[choice]}->#{arr[choice+1]}: too low"
+      # puts "Rejected #{arr[choice]}->#{arr[choice+1]}: too low"
       low = choice + 1
     else
-      puts "Rejected #{arr[choice]}->#{arr[choice+1]}: too high"
+      # puts "Rejected #{arr[choice]}->#{arr[choice+1]}: too high"
       return nil if high == choice
       high = choice
     end

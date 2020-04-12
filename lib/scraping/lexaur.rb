@@ -48,7 +48,6 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   def find string_or_strings # Unsplit, unstemmed string is accepted
     strings = split string_or_strings
-    # strings = strings.map { |str| Stemmer::stem_word(str) }
     strings = strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
     return nil if strings.empty?
     first = strings.shift
@@ -69,25 +68,27 @@ protected
   # Our own #split function which (currently) separates out punctuation
   def split string_or_strings
     strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    # strings.map { |str| Stemmer::stem_word(str) }
     strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
   end
 
   def chunk1 stream, block
     # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
-    if (token = stream.peek) && token.is_a?(String) # More in the stream
+    if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       substrs = Tag.normalizeName(token).split '-'
       tracker = self
-      head = substrs.pop || ''
+      head = substrs.pop || '' # Save the last substring
+      # Descend the tree for each substring, depending on there being a head marker at each step along the way
       substrs.each do |substr|
-        tracker = tracker.nexts[substr] || tracker.nexts[substr.downcase]
+        tracker = tracker.nexts[substr]
         return if tracker.nil?
       end
-      # We allow a case-sensitive match but do not require it
-      (tracker.nexts[head] || tracker.nexts[head.downcase])&.chunk1(stream.rest, block) ||
+      # Peek ahead and consume any tokens which are empty in the normalized name
+      onward = stream.rest
+      onward = onward.rest if onward.peek == '.'
+      tracker.nexts[head]&.chunk1(onward, block) ||
           # ...otherwise, we consume the head of the stream
-          if terms = tracker.terminals[head] || tracker.terminals[head.downcase]
-            block.call(terms, stream.rest)
+          if terms = tracker.terminals[head]
+            block.call terms, onward
           end
     end
   end
