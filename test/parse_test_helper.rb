@@ -9,7 +9,12 @@ def add_tags type, names
 end
 
 def prep_site site, selector, trimmers, grammar_mods={}
-  site.finders.build label: 'Content', selector: selector, attribute_name: 'html'
+  finder = site.finders.find { |f| f.label == 'Content' && f.attribute_name == 'html' }
+  if finder
+    finder.selector = selector
+  else
+    site.finders.build( label: 'Content', selector: selector, attribute_name: 'html')
+  end
   site.trimmers = trimmers
   site.grammar_mods = grammar_mods
   site.bkg_land # Now the site should be prepared to trim recipes
@@ -26,6 +31,14 @@ def load_page_ref url_or_page_ref, selector, trimmers, grammar_mods={}
              end
   prep_site page_ref.site, selector, trimmers, grammar_mods
   page_ref.bkg_land # Perform all due diligence
+  assert_equal grammar_mods, page_ref.site.grammar_mods
+  refute page_ref.errors.any?
+  assert page_ref.good? # Should have loaded and settled down
+  assert (recipe_page = page_ref.recipe_page)
+  recipe_page.bkg_land # Parse the RecipePage out into recipes
+  assert recipe_page.good?
+  content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
+  assert_equal content, page_ref.recipe_page.content
   page_ref
 end
 
