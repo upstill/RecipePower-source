@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_01_22_063233) do
+ActiveRecord::Schema.define(version: 2020_04_13_021915) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -575,6 +575,7 @@ ActiveRecord::Schema.define(version: 2020_01_22_063233) do
     t.integer "dj_id"
     t.integer "status", default: 0
     t.text "trimmers", default: "--- []\n"
+    t.text "grammar_mods"
     t.index ["id"], name: "sites_index_by_id", unique: true
   end
 

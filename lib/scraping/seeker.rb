@@ -4,6 +4,7 @@ require 'scraping/lexaur.rb'
 # A Seeker is an abstract class for a subclass which looks for a given item in the given stream
 class Seeker
   attr_accessor :head_stream, :tail_stream, :token, :children
+  attr_reader :value
 
   def initialize(head_stream, tail_stream, token = nil, children=[])
     if token.is_a?(Array)
@@ -91,7 +92,7 @@ class Seeker
   def enclose tagname='span'
     # Check that some ancestor doesn't already have the tag
     if @token && !head_stream.descends_from?(tagname, @token)
-      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname
+      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname, value: @value
     end
   end
 
@@ -252,19 +253,20 @@ class NumberSeeker < Seeker
 end
 
 class TagSeeker < Seeker
-  attr_reader :tag_ids
+  attr_reader :tagdata
 
-  def initialize(stream, next_stream, tag_ids, token=nil)
+  def initialize(stream, next_stream, tagdata, token=nil)
     super stream, next_stream, token
-    @tag_ids = tag_ids
+    @value = tagdata[:name] if (@tagdata = tagdata).present?
   end
 
   def self.match stream, opts={}
     opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
-      tag_ids = scope.where(id: data).pluck :id
-      return (self.new(stream, next_stream, tag_ids, opts[:token]) if tag_ids.present?)
+      return unless tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+      tagdata = [:id, :name].zip(tagdata).to_h
+      return self.new(stream, next_stream, tagdata, opts[:token])
     }
   end
 end

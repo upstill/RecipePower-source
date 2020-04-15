@@ -3,7 +3,7 @@ class ParsingServices
                 :parser, # Parser, possibly with modified grammar, to be employed
                 :seeker  # Resulting tree of seeker results
 
-  def initialize entity, options={}
+  def initialize entity=nil, options={}
     @entity = entity
     @lexaur = options[:lexaur]
     @grammar = options[:grammar]
@@ -22,18 +22,39 @@ class ParsingServices
     end
   end
 
-  # parse_on_path: assert the grammar on the element denoted by the path, getting the target token from the element
-  def self.parse_on_path html, path
+  def self.extract_via_path html, path
     nkdoc = Nokogiri::HTML.fragment html
     # Get the target element
-    elmt = nkdoc.xpath(path.downcase)&.first # Extract the token at that element
+    nkdoc.xpath(path.downcase)&.first # Extract the token at that element
+  end
+
+  # parse_on_path: assert the grammar on the element denoted by the path, getting the target token from the element
+  def self.parse_on_path html, path
+    elmt = self.extract_via_path html, path
+    nkdoc = elmt.ancestors.last
     nokoscan = NokoScanner.new elmt
     if (class_attr = elmt.attribute('class')) &&
         (token = class_attr.to_s.split.find { |cl| cl.match(/^rp_/) && cl != 'rp_elmt' }) &&
         token.present?
       @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
-      if seeker = @parser.match(token.to_sym)
+      token = token.to_sym
+      seeker = @parser.match token
+      if seeker.children.first
         seeker.enclose_all
+        return nkdoc.to_s
+      end
+      # Parse failed. Now we do token-dependent processing to handle the problem
+      grammar_entry = @parser.grammar[token]
+      # If this token is meant to represent a tag in the database...
+      if grammar_entry.is_a?(Hash) && tagtype = grammar_entry[:tag]
+        # We need a decision from the user, whether to
+        # 1) assert the tag into the database, or
+        # 2) identify an existing tag to which it corresponds.
+        # To get a ruling, we present a dialog which asks the question, possibly getting a tag to use.
+        # If 1), life goes on and the unparsed tag will be asserted when the page is finally accepted
+        # If 2), upon choosing a tag, the submission specifies a value that's asserted as above
+        # In any event, we let the calling controller handle it
+        yield Tag.typenum(tagtype), seeker.to_s if block_given?
       end
     end
     nkdoc.to_s
@@ -63,7 +84,7 @@ class ParsingServices
       parse_recipe_page content || @entity.content
     else
       err_msg = "Illegal attempt to parse #{@entity.class.to_s} object"
-      errors.add :url, err_msg
+      @entity.errors.add :url, err_msg
       raise err_msg
     end
   end

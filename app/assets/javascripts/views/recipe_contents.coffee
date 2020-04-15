@@ -25,6 +25,14 @@ RP.recipe_contents.registerSelection = (event) ->
 RP.recipe_contents.onclose = (dlog) ->
 	document.removeEventListener "mouseup", RP.recipe_contents.registerSelection
 
+# When a replacement tag is selected, arm the Submit button
+RP.recipe_contents.onAdd = (evt) ->
+	$('input.btn-success[value="Submit"').prop 'disabled', false
+
+# When a previously selected replacement tag is removed, disarm the Submit button
+RP.recipe_contents.onDelete = (evt) ->
+	$('input.btn-success[value="Submit"').prop 'disabled', true
+
 # When the dialog is first loaded, copy the content from the annotation form to the recipe form and the page
 RP.recipe_contents.onload = (dlog) ->
 	content_html = $('input#recipe_annotation_content').val()

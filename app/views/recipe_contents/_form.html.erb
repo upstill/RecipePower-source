@@ -2,14 +2,15 @@
   <%= form_errors_helper f %>
   <%# render 'recipe_pages/recipe_fields', f: f %>
   <div class="row"><p>Use the mouse to select a part of the recipe, then click a button to identify it.</p></div>
-  <input class="anchorPath" type="hidden" name="recipe[recipeContents][anchor_path]" id="recipe_anchor_path">
-  <input class="anchorOffset" type="hidden" name="recipe[recipeContents][anchor_offset]" id="recipe_anchor_offset">
-  <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
-  <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
   <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
   <% if @parse_path %>
     <input class="content" type="hidden" name="recipe[recipeContents][parse_path]" id="recipe_parse_path" value="<%= @parse_path %>">
     <%= dialog_submit_button 'parse it!' %>
+  <% else %>
+    <input class="anchorPath" type="hidden" name="recipe[recipeContents][anchor_path]" id="recipe_anchor_path">
+    <input class="anchorOffset" type="hidden" name="recipe[recipeContents][anchor_offset]" id="recipe_anchor_offset">
+    <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
+    <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
   <% end %>
   <div class="row">
     <% [ :rp_title, :rp_inglist, :rp_ingline, :rp_ingname, :rp_instructions ].each do |token| %>

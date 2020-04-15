@@ -71,11 +71,13 @@ end
 # If possible, apply the classes to an ancestor of the two text elements
 # "possible" means that all text of the ancestor before the first and after the last
 # text element is blank
-def tag_ancestor node, first_te, last_te, tag='span', classes=''
-  tag, classes = 'span', tag if tag&.match('rp_')
+def tag_ancestor node, first_te, last_te, options={}
+  tag= options[:tag] || 'span'
+  classes = options[:classes] || ''
   scan_ancestors node, first_te, last_te do |anc|
     if anc.name == tag&.to_s
       nknode_add_classes anc, "rp_elmt #{classes}"
+      nknode_add_value anc, options[:value] if options[:value]
       return anc
     end
   end
@@ -199,7 +201,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   end
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
   # If there's an ancestor with no preceding or succeeding text, mark that and return
-  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options[:tag], options[:classes])
+  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))
     return anc
   end
   return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
@@ -299,7 +301,8 @@ end
 def html_enclosure options={}
   tag = options[:tag] || 'div'
   classes = "rp_elmt #{options[:classes]}".strip
-  "<#{tag} class='#{classes}'></#{tag}>" # For constructing the new node
+  valuestr = "data-value='#{options[:value]}'" if options[:value]
+  "<#{tag} class='#{classes}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
 def seekline tokens, within, opos, obound

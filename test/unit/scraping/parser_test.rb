@@ -274,6 +274,9 @@ EOF
     assert_equal :rp_recipe, seeker.token
     assert_equal :rp_inglist, seeker.children[1].token
     assert_equal 9, seeker.children[1].children.count
+
+    annotated = seeker.enclose_all
+    x=2
   end
 
   test 'ingredient list with pine nuts' do

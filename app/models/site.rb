@@ -13,12 +13,12 @@ class Site < ApplicationRecord
 
   # TODO: this needs to persist in the database
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
-  attr_accessor :grammar_mods
+  serialize :grammar_mods, Hash
 
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers ]
+    super + %i[ description trimmers, grammar_mods ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
