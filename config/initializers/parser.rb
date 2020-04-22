@@ -115,7 +115,7 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: { match: :rp_ingline, optional: true },
+        match: { match: :rp_ingline, optional: true, enclose: true },
         repeating: true
     },
     rp_ingline: {

@@ -18,11 +18,18 @@ class Seeker
 
   # Return a Seeker for a failed parsing attempt
   # The head_stream and tail_stream will denote the range scanned
-  def self.failed head_stream, tail_stream=nil, options={}
-    tail_stream, options = head_stream.rest, tail_stream if tail_stream.is_a?(Hash)
-    skr = self.new head_stream, (tail_stream || head_stream.rest)
+  def self.failed head_stream, tail_stream=nil, token= nil, options={}
+    if tail_stream.is_a? Hash
+      tail_stream, token, options = nil, nil, tail_stream
+    elsif tail_stream.is_a? Symbol
+      tail_stream, token, options = nil, tail_stream, token
+    end
+    token, options = nil, token if token.is_a? Hash
+    skr = self.new head_stream, (tail_stream || head_stream.rest), token
     skr.instance_variable_set :@failed, true
     skr.instance_variable_set :@optional, options[:optional]
+    skr.instance_variable_set :@enclose, options[:enclose]
+    skr.children = options[:children]
     skr
   end
 
@@ -83,7 +90,7 @@ class Seeker
 
   def traverse &block
     block.call self
-    children.each do |child|
+    children && children.each do |child|
       child.traverse &block
     end
   end
@@ -125,6 +132,16 @@ class Seeker
     self unless @failed # if @token || @children.present?
   end
   alias_method :if_succeeded, :'success?'
+
+  def enclose? # Should the seeker be marked in an element, even without success?
+    self if @enclose
+  end
+  alias_method :if_enclose, :'enclose?'
+
+  def retain?
+    self if !@failed || @enclose
+  end
+  alias_method :if_retain, :'retain?'
 
   # What's the next token to try? Three possibilities:
   # * The match succeeded: the next token is just after the match, i.e. @tail_stream

@@ -55,6 +55,7 @@ class RecipeContentsController < ApplicationController
           @annotation = noko_elmt.ancestors.last.to_s
         end
       end
+      @parse_path = nil
     end
 =begin
     if @parse_path = params[:recipe][:recipeContents][:parse_path]
