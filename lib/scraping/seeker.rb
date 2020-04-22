@@ -13,7 +13,7 @@ class Seeker
     @head_stream = head_stream
     @tail_stream = tail_stream
     @token = token
-    @children = children
+    @children = children || []
   end
 
   # Return a Seeker for a failed parsing attempt
@@ -25,7 +25,7 @@ class Seeker
       tail_stream, token, options = nil, tail_stream, token
     end
     token, options = nil, token if token.is_a? Hash
-    skr = self.new head_stream, (tail_stream || head_stream.rest), token
+    skr = self.new head_stream, (tail_stream || head_stream), token
     skr.instance_variable_set :@failed, true
     skr.instance_variable_set :@optional, options[:optional]
     skr.instance_variable_set :@enclose, options[:enclose]

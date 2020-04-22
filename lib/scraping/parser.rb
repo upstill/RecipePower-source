@@ -5,10 +5,16 @@ class Parser
 
   @@TokenTitles = {
       :rp_title => 'Title',
-      :rp_ingname => 'Ingredient Name',
       :rp_ingline => 'Ingredient Line Item',
       :rp_inglist => 'Ingredient List',
-      :rp_instructions => 'Instructions'
+      :rp_amt => 'Amount',
+      :rp_num => '#',
+      :rp_unit => 'Unit',
+      :rp_presteps => 'Conditions',
+      :rp_condition => 'Condit. Name',
+      :rp_ingspec => 'Ingredients',
+      :rp_ingname => 'Ingred. Name',
+      :rp_instructions => 'Instructions',
   }
 
   # The default grammar is initialized by config/initializers/parser.rb
@@ -413,14 +419,18 @@ class Parser
           children << child
           end_stream = child.tail_stream
         when child.retain?
-          # Bail and return to the beginning if any spec fails
-          return Seeker.failed start_stream, token, context.merge(children: children.keep_if(&:'retain?')+[child])
-        else
+          return Seeker.failed start_stream, child.tail_stream, token, context.merge(children: children.keep_if(&:'retain?')+[child])
+        when child.hard_fail?
+          # Bail and return to the beginning if any non-optional spec fails
           return Seeker.failed(start_stream, token, context)
         end
       end
     end
-    Seeker.new start_stream, end_stream, token, children.compact
+    # If there's only a single child and no token, just return that child
+    children.compact!
+    (children.count == 1 && token.nil?) ?
+        children.first :
+        Seeker.new(start_stream, end_stream, token, children)
   end
 
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),

@@ -13,9 +13,32 @@
     <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
   <% end %>
   <div class="row">
-    <% [ :rp_title, :rp_inglist, :rp_ingline, :rp_ingname, :rp_instructions ].each do |token| %>
-      <%= annotation_button token, class: 'text-only tag-button' %>
-    <% end %>
+    <div class="col-md-1"><%= annotation_button :rp_title, class: 'text-only tag-button tag-button-top' %></div>
+    <div class="col-md-2"><%= annotation_button :rp_inglist, class: 'text-only tag-button tag-button-top' %></div>
+    <div class="col-md-8">
+      <table>
+        <tr><th colspan="4"><%= annotation_button :rp_ingline, class: 'text-only tag-button tag-button-top', style:'width: 100%' %></th></tr>
+        <tr>
+          <td style="padding:5px">
+            <%= annotation_button :rp_amt, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_num, class: 'text-only tag-button tag-button-btm' %>
+            <%= annotation_button :rp_unit, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px">
+            <%= annotation_button :rp_presteps, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_condition, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px">
+            <%= annotation_button :rp_ingspec, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_ingname, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px" valign="top">
+            <%= annotation_button :rp_instructions, class: 'text-only tag-button tag-button-mdl', style: 'vertical-align:top' %>
+            <br>
+          </td>
+        </tr>
+      </table>
+    </div>
   </div>
 <% end %>
 

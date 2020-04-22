@@ -39,7 +39,7 @@ class ParsingServices
       @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
       token = token.to_sym
       seeker = @parser.match token
-      if seeker.children.first
+      if seeker.children&.first
         seeker.enclose_all
         return nkdoc.to_s
       end
