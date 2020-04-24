@@ -23,6 +23,7 @@ class RecipeContentsController < ApplicationController
         @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path) do |tagtype, tagname|
           @tagtype, @tagname = tagtype, tagname
         end
+        @parse_path = nil unless @tagname # We'll need the parse path for identifying the tag
       else # There IS a tagname: use that as a tag
         noko_elmt = ParsingServices.extract_via_path @content, @parse_path
         @tagtype = rcparams[:tagtype]
@@ -37,7 +38,7 @@ class RecipeContentsController < ApplicationController
         # the questionable term will get added to the dictionary as a synonym for the replacement. If not, the alias
         # is accepted and added to the Seeker as such.
         # No tagname has been parsed out; proceed to parse the entity denoted by the parse path
-        if replacement = rcparams[:replacement]
+        if (replacement = rcparams[:replacement]).present?
           old_tag = Tag.find_by id: replacement
           if rcparams[:assert]
             new_tag = Tag.assert @tagname, @tagtype
@@ -50,12 +51,12 @@ class RecipeContentsController < ApplicationController
           Tag.assert @tagname, @tagtype
         end
         @tagname = nil # Go back to the annotation dialog
+        @parse_path = nil
         if noko_elmt
           noko_elmt[:'data-value'] = value
           @annotation = noko_elmt.ancestors.last.to_s
         end
       end
-      @parse_path = nil
     end
 =begin
     if @parse_path = params[:recipe][:recipeContents][:parse_path]

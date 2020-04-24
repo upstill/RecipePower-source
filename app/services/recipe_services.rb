@@ -30,11 +30,29 @@ class RecipeServices
   # Keep the recipe up to date wrt its content with tagging on the Inventory user
   def inventory
     # Open a Nokogiri document on the content and extract all the tags
-    ing_tag_names = if @recipe.content.present?
-      nkdoc = Nokogiri::HTML.fragment @recipe.content
-      nkdoc.css('.rp_ingname').map(&:text) if nkdoc.css('.rp_elmt').present? # This content has been tagged
+    ing_tag_names = []
+    tagnames = Hash.new
+    if @recipe.content.present? &&
+        (nkdoc = Nokogiri::HTML.fragment @recipe.content) &&
+        nkdoc.css('.rp_elmt').present? # This content has been tagged
+      tagnames[:Ingredient] = nkdoc.css('.rp_ingname').collect { |node|
+        node['data-value'].if_present || node.text
+      }.compact
+      #tagnames[:Genre] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Dish] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Process] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Unit] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Source] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Author] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Occasion] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Diet] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Tool] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Nutrient] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Course] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Time] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Condition] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
     end
-    TaggingServices.new(@recipe).set_tags User.inventory_user_id, :Ingredient => (ing_tag_names || [])
+    TaggingServices.new(@recipe).set_tags User.inventory_user_id, tagnames
   end
 
   def show_tags(file=STDOUT)

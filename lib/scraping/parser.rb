@@ -118,7 +118,7 @@ class Parser
     # Do 
     def merge_entries original, mod
       return original unless mod
-      return mod unless original
+      return mod unless original&.is_a?(Hash)
       mod.each do |key, value|
         if value.nil?
           original.delete key
@@ -261,7 +261,7 @@ class Parser
     found = nil
     # Grammar entries for simple tags are accepted without further inspection
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
-      return Seeker.new scanner, @stream.past(nokonode), token
+      return Seeker.new scanner, scanner.past(nokonode), token
     end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline])

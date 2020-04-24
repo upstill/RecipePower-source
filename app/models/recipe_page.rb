@@ -12,6 +12,13 @@ class RecipePage < ApplicationRecord
   accepts_nested_attributes_for :page_ref
   has_many :recipes, :through => :page_ref
 
+=begin
+  def content
+    adopt_gleaning if instance_variable_get(:@content).blank?
+    super
+  end
+=end
+
   # When a RecipePage is landing, once the page_ref is done gleaning content (etc.), it calls #adopt_gleaning
   def adopt_gleaning force=false
 =begin
@@ -24,7 +31,7 @@ class RecipePage < ApplicationRecord
     end
 =end
     # The first time content is adopted from our page_ref, parse it for recipe content
-    if force || content.blank?
+    if force || instance_variable_get(:@content).blank?
       content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
       if content.present?
         parser = ParsingServices.new self
@@ -37,7 +44,9 @@ class RecipePage < ApplicationRecord
         parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           title = sub_parser.value_for :rp_title
           xb = sub_parser.xbounds
-          recipe = rset.find { |r| r.anchor_path == xb.first && r.focus_path == xb.last } || rset.first
+          recipe = rset.find do |r|
+            (r.anchor_path == xb.first && r.focus_path == xb.last) || (r.title == title)
+          end
           if title.present? # There's an existing recipe
             if recipe&.persisted?
               recipe.update_column :title, title
@@ -52,7 +61,7 @@ class RecipePage < ApplicationRecord
             end
           end
           puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
-          puts sub_parser.report_for(:except => :rp_title) # All other token types
+            # puts sub_parser.report_for(:except => :rp_title) # All other token types
         end
         self.content = content # Copied directly from page_ref
 =begin

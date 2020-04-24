@@ -51,13 +51,13 @@ class Seeker
 
   # From a seeker tree, find those of the given token
   def find token=nil, &block
-    results = @children.map do |child|
+    results = @children&.map do |child|
       if block_given? ? block.call(child) : (child.token == token)
         child
       else
         child.find token, &block
       end
-    end
+    end || []
     results.flatten.compact
   end
 
