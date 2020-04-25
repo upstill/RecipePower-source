@@ -136,17 +136,17 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "calls initialize only once" do
-    mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
-    mp.kind = :recipe
-    mp.get_mercury_results
-    mp.description = ''
-    mp.save
-    assert_equal mp.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'
-    mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
-    mp2.kind = :recipe
-    mp2.save
-    assert_equal mp2, mp
-    assert_equal '', mp.description
+    pr = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
+    pr.kind = :recipe
+    pr.bkg_land
+    pr.description = ''
+    pr.save
+    assert_equal pr.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'
+    pr2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
+    pr2.kind = :recipe
+    pr2.save
+    assert_equal pr2, pr
+    assert_equal '', pr.description
   end
 
   test "page record findable by url" do

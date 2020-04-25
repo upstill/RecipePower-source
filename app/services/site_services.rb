@@ -79,13 +79,10 @@ class SiteServices
       end if site.trimmers.present?
       @nkdoc.traverse do |node|
         # Ensure that link tags have a global url
-        if node.element?
-          if node.name == 'a'
-            url = node.attribute('href').to_s
-            absolute = safe_uri_join( site.home, url ).to_s
-            puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
-            node.attribute('href').value = absolute if absolute != url
-          end
+        if node.element? && (node.name == 'a') && (url = node.attribute('href').to_s).present?
+          absolute = safe_uri_join(site.home, url).to_s
+          puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
+          node.attribute('href').value = absolute if absolute != url
         end
       end
       @nkdoc.to_html

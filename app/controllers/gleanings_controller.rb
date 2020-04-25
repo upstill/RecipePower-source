@@ -8,7 +8,7 @@ class GleaningsController < ApplicationController
   def set_gleaning
     @recipe = Recipe.find_by params.slice(:id)
     @page_ref = @recipe.page_ref
-    @page_ref.perform unless @page_ref.gleaning
+    @page_ref.perform unless @page_ref.gleaned?
     @gleaning = @page_ref.gleaning
   end
 end

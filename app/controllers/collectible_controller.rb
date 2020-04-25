@@ -180,6 +180,7 @@ class CollectibleController < ApplicationController
 
       if model.is_a? Pagerefable
         model.page_ref.adopt_extractions params[:extractions] if params[:extractions]
+        model.bkg_launch
         model.page_ref.bkg_land # After-creation followup
         model.page_ref.content = params[:extractions][:content] if params[:extractions] && params[:extractions][:content]
         update_options[:adopt_gleaning] = true

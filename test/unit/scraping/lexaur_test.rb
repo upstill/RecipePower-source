@@ -73,7 +73,7 @@ class LexaurTest < ActiveSupport::TestCase
     assert_not_nil lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       assert_includes data, 1
-      assert_equal 3, stream.pos
+      assert_equal 2, stream.pos
     }
   end
 

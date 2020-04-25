@@ -69,11 +69,11 @@ class Recipe < ApplicationRecord
 
   # The presented content for a recipe defaults to the page ref
   def presented_content
-    content.if_present || recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+    content.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   def content
-    super.if_present || recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+    super.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   # When the content is explicitly set for the first time, trim it according to the site
@@ -131,32 +131,40 @@ class Recipe < ApplicationRecord
     save
   end
 
-  # Having given the recipe page the chance to parse the page into recipes, parse our section of it
-  def get_recipe_page_results
-    page_ref.build_recipe_page if !recipe_page
-    if recipe_page
-      recipe_page.bkg_land recipe_page.bad? # Ensure the gleaning has happened
-      #if recipe_page.good?
-      #  adopt_recipe_page_results
-      if recipe_page.bad?
-        errors.add :url, "can\'t access recipe_page: #{recipe_page.errors[:base]}"
-      elsif recipe_page.good?
+  def bkg_launch force=true
+    # Possible prerequisites for a recipe launch:
+    if !content.present? && site&.finder_for('Content')
+      # Need to launch the recipe_page to collect content
+      page_ref.build_recipe_page if !recipe_page
+      recipe_page.bkg_launch
+      force = true
+    end
+    if title.blank? || picurl.blank? || description.blank?
+      page_ref&.bkg_launch
+      force = true
+    end
+    super(force) if defined?(super)
+  end
+
+  def perform
+    if content.blank? && site&.finder_for('Content')
+      page_ref.build_recipe_page if !recipe_page
+      recipe_page.bkg_land # The recipe_page will assert path markers
+      if recipe_page.good?
         self.content = ParsingServices.new(self).parse_and_annotate recipe_page.selected_content(anchor_path, focus_path)
+      else
+        errors.add :url, "can\'t crack recipe_page (##{recipe_page.id}): #{recipe_page.errors[:base]}"
+        raise err_msg if recipe_page.dj # RecipePage is ready to try again => so should we be, so restart via Delayed::Job
       end
     end
+    super if defined?(super)
   end
 
   # This is called when the page_ref finishes updating
-  def adopt_gleaning
+  def adopt_page_ref
     self.title = page_ref.title if page_ref.title.present? && title.blank?
     self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
     self.description = page_ref.description if page_ref.description.present? && description.blank?
-    # Ensure that the associated RecipePage has been parsed, then adopt its info
-    get_recipe_page_results # Get data from RecipePage parsing
-    
-    # We do NOT accept extracted content; instead, we defer to the PageRef until it's set directly
-    # self.content = SiteServices.new(page_ref.site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
-    super if defined?(super)
   end
 
 end
