@@ -92,8 +92,8 @@ class SeekerTest < ActiveSupport::TestCase
     lex = Lexaur.from_tags
     scanner = StrScanner.from_string('jalapeño peppers')
     ts = TagSeeker.match scanner, lexaur: lex
-    assert_not_empty ts.tag_ids
-    assert_equal 1, ts.tag_ids.first
+    assert_not_empty ts.tagdata
+    assert_equal 1, ts.tagdata[:id]
     refute ts.tail_stream.more?
   end
 
@@ -107,7 +107,7 @@ class SeekerTest < ActiveSupport::TestCase
 
     scanner = StrScanner.from_string('fourscore and cup ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
-    refute ts
+    assert_equal 'cup', ts.unit.to_s
 
     scanner = StrScanner.from_string('fourscore and 1/2 ago')
     ts = AmountSeeker.seek scanner, lexaur: lex

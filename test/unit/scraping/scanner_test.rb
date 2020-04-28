@@ -24,7 +24,7 @@ class ScannerTest < ActiveSupport::TestCase
     tokenoffsets = [2, 6, 7, 8, 10, 18, 19, 20, 21]
     assert_equal tokenlist, tokenize(str)
     remainder = tokenize(str) do |token, offset|
-      assert_equal token, tokenlist.shift
+      assert_equal token, tokenlist.shift, "wrong token at offset #{offset} in #{str}"
       assert_equal offset, tokenoffsets.shift
     end
     assert_equal 1, tokenlist.length
@@ -80,9 +80,9 @@ class ScannerTest < ActiveSupport::TestCase
     assert_nil line4
 
     line1 = scanner.toline true
-    assert_equal "first line", line1.to_s
+    assert_equal "first line \n", line1.to_s
     line2 = scanner.rest.toline true
-    assert_equal "second line", line2.to_s
+    assert_equal "second line \n", line2.to_s
 
     scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
     line1 = scanner.toline
@@ -95,17 +95,17 @@ class ScannerTest < ActiveSupport::TestCase
 
     scanner = StrScanner.from_string "\nend" # Should produce a blank, then 'end'
     line1 = scanner.toline true
-    assert_equal '', line1.to_s
+    assert_equal "\n", line1.to_s
     line2 = scanner.rest.toline true
     assert_equal 'end', line2.to_s
 
     scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
     line1 = scanner.toline true
-    assert_equal '', line1.to_s
+    assert_equal "\n", line1.to_s
     line2 = scanner.rest.toline true
-    assert_equal '', line2.to_s
+    assert_equal "\n", line2.to_s
     line3 = scanner.rest.rest.toline true
-    assert_equal '', line3.to_s
+    assert_equal "\n", line3.to_s
     assert_nil scanner.rest.rest.rest.toline true
   end
 
@@ -137,6 +137,8 @@ class ScannerTest < ActiveSupport::TestCase
   end
 
   test 'toline tag' do
+    # test_str takes an html string, and an array of strings that should be found in that html on a line-by-line basis.
+    # 'within' is a flag indicating whether the strings should be confined to individual lines, or just begin
     def test_str html, seeking, within=false
       nkdoc = Nokogiri::HTML.fragment html
       nokoscan = NokoScanner.new nkdoc
@@ -149,7 +151,7 @@ class ScannerTest < ActiveSupport::TestCase
       end
     end
     html = "top-level <br>afterbr <span class='rp_elmt rp_text'>within span</span> after\nspan"
-    test_str html, ["top-level afterbr within span after\nspan"]
+    # test_str html, ["top-level afterbr within span after\nspan"]
     test_str html, ['top-level', "afterbr within span after\n", 'span'], true
     # Should get the same result independent of spacing
     html = "top-level <br> afterbr<span class='rp_elmt rp_text'>within span</span>after\nspan"
@@ -399,20 +401,20 @@ EOF
     assert_equal 'then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(-19)
-    assert_equal 'and', ted.prior_text
-    assert_equal ' then a random text stream', ted.subsq_text
+    assert_equal '', ted.prior_text
+    assert_equal 'and then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(15)
     assert_equal '', ted.prior_text
     assert_equal 'and then a random text stream', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(-15)
-    assert_equal 'Beginning text', ted.prior_text
-    assert_equal ' ', ted.subsq_text
+    assert_equal 'Beginning ', ted.prior_text
+    assert_equal 'text ', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(-33)
-    assert_equal 'and then a random', ted.prior_text
-    assert_equal ' text stream', ted.subsq_text
+    assert_equal 'and then a ', ted.prior_text
+    assert_equal 'random text stream', ted.subsq_text
 
     html = "<span>Beginning text</span>and then a random text stream<span>followed by more text"
     nks = NokoScanner.from_string html
@@ -426,20 +428,20 @@ EOF
 
     # A terminating mark landing in the middle of a token should mark the END of the token
     ted = nks.text_elmt_data nks.token_index_for(-14)
-    assert_equal 'and', ted.prior_text
-    assert_equal ' then a random text stream', ted.subsq_text
+    assert_equal 'Beginning ', ted.prior_text
+    assert_equal 'text', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(43)
     assert_equal 'stream', ted.subsq_text
     assert_equal 'and then a random text ', ted.prior_text
 
     ted = nks.text_elmt_data nks.token_index_for(-43)
-    assert_equal 'followed', ted.prior_text
-    assert_equal ' by more text', ted.subsq_text
+    assert_equal 'and then a random text ', ted.prior_text
+    assert_equal 'stream', ted.subsq_text
 
     ted = nks.text_elmt_data nks.token_index_for(-64)
-    assert_equal 'followed by more text', ted.prior_text
-    assert_equal '', ted.subsq_text
+    assert_equal 'followed by more ', ted.prior_text
+    assert_equal 'text', ted.subsq_text
   end
 
   test 'pathfinding' do

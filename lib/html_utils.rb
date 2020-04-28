@@ -8,9 +8,13 @@ def process_dom html
     when node.cdata? # type == CDATA_SECTION_NODE
     when node.comment? # type == COMMENT_NODE
     when node.element? # type == ELEMENT_NODE alias node.elem?
+      previous_non_blank = node.previous
+      while previous_non_blank && previous_non_blank.text? && previous_non_blank.text.blank? do
+        previous_non_blank = previous_non_blank.previous
+      end
       case node.name
       when 'br', 'p'
-        node.previous.remove if node.previous&.element? && node.previous.name == 'br'
+        previous_non_blank.remove if previous_non_blank&.element? && previous_non_blank.name == 'br'
       end
     when node.fragment? # type == DOCUMENT_FRAG_NODE (Document fragment node Nokogiri::HTML::DocumentFragment/11)
     when node.html? # type == HTML_DOCUMENT_NODE

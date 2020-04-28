@@ -440,7 +440,7 @@ class NokoScanner # < Scanner
       @tokens = NokoTokens.new nkdoc_or_nktokens_or_html
     end
     @bound = bound || @tokens.length
-    @pos = pos
+    @pos = (pos <= @bound) ? pos : @bound
   end
 
   def self.from_string html
@@ -482,13 +482,14 @@ class NokoScanner # < Scanner
     s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
     s3 = on_css_match(:after_css_match => 'br')
     inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
-    result = inorder.first
-    return result unless result && within
+    return nil if !(result = inorder.first)
+    result = goto result # Restrict the next line to within our scanner
+    return result unless within
     # Need to find an end at the next line
     s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
-    s5 = seekline(@tokens, false, s1.pos+1, @bound) do |newpos, newbound|
+    s5 = seekline(@tokens, false, result.pos+1, @bound) do |newpos, newbound|
       NokoScanner.new @tokens, newpos, newbound
-    end if s1
+    end
     # Constrain the result to the beginning of the next node, if any
     result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
@@ -506,6 +507,11 @@ class NokoScanner # < Scanner
   def rest ntokens = 1
     newpos = (ntokens < 0) ? @bound : (@pos + ntokens)
     NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
+  end
+
+  # Return this scanner, exhausted
+  def end
+    NokoScanner.new tokens, @bound, @bound
   end
 
   def chunk data

@@ -74,7 +74,7 @@ class Seeker
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
-    (@head_stream == @tail_stream) && @children.empty?
+    (@head_stream == @tail_stream) && @children&.empty?
   end
 
   def consumed?

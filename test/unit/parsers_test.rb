@@ -98,10 +98,11 @@ EOF
 
   test 'grammar tester' do
     nokoscan = NokoScanner.from_string 'a b c'
-    Parser.new nokoscan,
-               @lex,
-               :rp_inglist => {in_css_match: 'li', at_css_match: 'ul', },
-               :rp_title => {in_css_match: nil, at_css_match: 'ul'}
+    # Should throw an error
+    assert_raises { Parser.new nokoscan,
+                             @lex,
+                             :rp_inglist => {in_css_match: 'li', at_css_match: 'ul', },
+                             :rp_title => {in_css_match: nil, at_css_match: 'ul'} }
   end
 
   test 'parse amount specs' do
@@ -128,7 +129,7 @@ EOF
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingname
-    assert_equal 1, seeker.tag_ids.count
+    assert_equal 'Dijon mustard', seeker.tagdata[:name]
     assert_equal :rp_ingname, seeker.token
   end
 
@@ -249,7 +250,7 @@ EOF
     end
     seeker = parser.match :rp_recipe
     assert seeker
-    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.children[2].head_stream.tokens.text_from(285,295)
+    assert_equal "½ tsp each finely grated lemon zest and juice\n", seeker.find(:rp_ingline)[14].to_s
     assert_equal :rp_recipe, seeker.token
     assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
     assert_equal :rp_inglist, seeker.children[1].token
@@ -290,15 +291,22 @@ EOF
 </div>
 EOF
     # This page has several recipes, each begun with an h2 header
-    ingreds = %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    ingreds = %w{ sourdough\ bread pine\ nuts anchovy\ fillets Flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
     add_tags :Ingredient, ingreds
-    parser = Parser.new(html, @lex)  do |grammar|
+    parser = Parser.new html, @lex, {
+        :rp_recipelist => { :match => { :match => :rp_recipe, :at_css_match => 'h2' } },
+        :rp_title => { :in_css_match => 'h2' }
+    }
       # We start by seeking to the next h2 (title) tag
+=begin
+do |grammar|
       grammar[:rp_recipelist][:start] = {match: //, in_css_match: 'h2' }
       grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
       grammar[:rp_inglist][:bound] = {match: //, in_css_match: 'h2' }
-    end
+      grammar[:rp_recipelist][:match][:in_css_match] = 'h2'
+end
+=end
     seeker = parser.match :rp_recipelist
     assert seeker
     assert_equal :rp_recipelist, seeker.token
@@ -313,7 +321,7 @@ EOF
     assert (cook_seeker = parser.seek :rp_cook_time)
     assert_equal 'Cook: 20 min', cook_seeker.to_s
     assert (servings_seeker = parser.seek :rp_serves)
-    assert_equal 'Serves 4', servings_seeker.to_s
+    assert_equal "Serves 4\n", servings_seeker.to_s
     ingred_seekers = rcp_seeker.find :rp_ingname
     ingreds_found = ingred_seekers.map &:to_s
     assert_equal ingreds, ingreds_found

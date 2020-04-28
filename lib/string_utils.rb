@@ -9,7 +9,7 @@ def tokenize str, terminates=false, &block
       spaces, token = $1, $2
       if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{},.?\n]/)) # This string really ends here (no continuation of non-delimiter)
         offset += spaces&.length || 0
-        block.call token, offset unless token.blank?
+        block.call token, offset unless token&.empty?
         offset += token&.length || 0
       else
         return ostr # Return the unprocessed remainder of the string (which may be blank)

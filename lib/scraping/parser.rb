@@ -117,7 +117,7 @@ class Parser
     end # cleanup_entry
     # Do 
     def merge_entries original, mod
-      return original unless mod
+      return original unless mod && mod != {}
       return mod unless original&.is_a?(Hash)
       mod.each do |key, value|
         if value.nil?
@@ -467,10 +467,13 @@ class Parser
     return match if match.success?
     token ||= match.token
     # If not successful, reconcile the spec that was just answered with the provided context
+    if (really_enclose = context[:enclose]) == :non_empty
+      really_enclose = match.children&.all?(:hard_fail?)
+    end
     return Seeker.failed(match.head_stream,
                          match.tail_stream,
                          token,
-                         enclose: ((context[:enclose] || match.enclose?) ? true : false),
+                         enclose: ((really_enclose || match.enclose?) ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
 end

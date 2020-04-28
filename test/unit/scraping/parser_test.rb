@@ -136,7 +136,7 @@ EOF
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingname
-    assert_equal 1, seeker.tag_ids.count
+    assert_equal 'Dijon mustard', seeker.tagdata[:name]
     assert_equal :rp_ingname, seeker.token
   end
 
@@ -249,7 +249,8 @@ EOF
                         :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
     assert seeker.success?
-    assert_equal 8, seeker.children.count
+    assert_equal 9, seeker.children.count
+    assert_equal 8, seeker.children.keep_if { |child| child.success? }.count
   end
 
   test 'parse single recipe' do
@@ -273,7 +274,7 @@ EOF
     assert seeker.success?
     assert_equal :rp_recipe, seeker.token
     assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 9, seeker.children[1].children.count
+    assert_equal 9, seeker.children[1].children.keep_if(&:'success?').count
 
     annotated = seeker.enclose_all
     x=2
