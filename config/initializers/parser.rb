@@ -70,9 +70,9 @@ Parser.init_grammar(
     rp_recipe: {
         match: [
             { optional: :rp_title },
-            :rp_inglist ,
-            :rp_instructions, # Everything after the ingredient list
+             # Everything after the ingredient list
             { checklist: [
+                [ :rp_inglist, :rp_instructions ],
                 { optional: :rp_author },
                 { optional: :rp_prep_time },
                 { optional: :rp_cook_time },
@@ -115,7 +115,6 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        # match: { match: :rp_ingline, enclose: :non_empty, repeating: true, :in_css_match => 'p' },
         match: :rp_ingline,
         repeating: true,
         enclose: :non_empty,
@@ -126,6 +125,7 @@ Parser.init_grammar(
             :rp_ingspec,
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
+        enclose: true,
         inline: true },
     rp_ing_comment: {
         match: nil,

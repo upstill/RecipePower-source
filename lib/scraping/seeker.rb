@@ -297,6 +297,7 @@ class AmountSeeker < Seeker
     super stream, next_stream
     @num = num
     @unit = unit
+    @token = :rp_amt
   end
 
   def self.match stream, opts={}

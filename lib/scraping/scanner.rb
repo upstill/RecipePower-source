@@ -583,6 +583,39 @@ class NokoScanner # < Scanner
     end
   end
 
+=begin
+# Possible function for scanning for a result
+  # Call a block with a scanner for each stop in self as controlled by the options:
+  # :atline moves the scanner to the first token that begins a line (possibly this one)
+  # :inline as with :atline, but foreshortens it to a single line
+  # :at_css_match goes to the next token within an element matching the provided selector
+  # :in_css_match as with :at_css_match, but foreshortens it to the contents of the matching element
+  # :after_css_match goes to the token after the matching element (typically a br tag)
+  # The block takes a scanner for the current location, and should return a scanner after consumption
+  # It may return nil, in which case the next iteration goes to the subsequent token
+  def for_each options={}
+    scanner = self
+    while scanner.peek do
+      flag, flagval = options.keys.first, options.values.first
+      case flag
+      when :atline, :inline
+        toline = scanner.toline options[:inline]
+        return unless toline # return Seeker.failed(scanner, context) unless toline
+        match = match_specification(toline, spec, token, context.except(:atline, :inline))
+        match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
+        return match.encompass(scanner)
+      when :at_css_match, :in_css_match, :after_css_match
+        subscanner = scanner.on_css_match(options)
+        return unless subscanner # return Seeker.failed(scanner, context) unless subscanner
+        match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+        match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
+        return match.encompass(scanner)
+      end
+      scanner = yield(scanner) || scanner.rest
+    end
+  end
+=end
+
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
   def within_css_match selector_or_node
     if range = @tokens.dom_range(selector_or_node)

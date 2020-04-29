@@ -41,6 +41,7 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
     @ingred_tags = %w{
+      pine\ nuts
       lemon\ zest
       lemon\ juice
       anchovy\ fillets
@@ -250,11 +251,11 @@ EOF
     end
     seeker = parser.match :rp_recipe
     assert seeker
-    assert_equal "½ tsp each finely grated lemon zest and juice\n", seeker.find(:rp_ingline)[14].to_s
+    assert_equal "10g basil leaves, finely shredded", seeker.find(:rp_ingline).last.to_s
     assert_equal :rp_recipe, seeker.token
     assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
-    assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 8, seeker.children[1].children.count
+    assert (inglist = seeker.find(:rp_inglist).first), "No ingredient list found"
+    assert_equal 9, inglist.children.count
   end
 
   test 'ingredient list with pine nuts' do

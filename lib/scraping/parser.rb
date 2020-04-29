@@ -425,7 +425,7 @@ class Parser
       list_of_specs.each do |spec|
         child = match_specification start_stream, spec, token, distributed_context
         if child.success?
-          return child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
+          return (child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child]))
         end
       end
       return Seeker.failed(start_stream, token, context) # TODO: not retaining children discarded along the way
