@@ -89,34 +89,37 @@ Parser.init_grammar(
     }, # Match all tokens within an <h1> tag
     # rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
     rp_author: {
-        match: [ 'Author', nil ],
+        match: [ /^Author:?$/, nil ],
         inline: true
     },
     rp_prep_time: {
-        match: [ 'Prep', { optional: ':' }, :rp_time ],
+        match: [ /^Prep:?$/, :rp_time ],
         inline: true
     },
     rp_cook_time: {
-        match: [ 'Cook', { optional: ':' }, :rp_time ],
+        match: [ /^Cook:?$/, :rp_time ],
         inline: true
     },
     rp_total_time: {
-        match: [ 'Total', { optional: ':' }, :rp_time ],
+        match: [ /^Total:?$/, :rp_time ],
         inline: true
     },
     rp_time: [ :rp_num, 'min' ],
     rp_yield: {
-        match: [ 'Makes', { optional: ':' }, :rp_amt ],
+        match: [ /^Makes:?$/, :rp_amt ],
         inline: true
     },
     rp_serves: {
-        match: [ 'Serves', { optional: ':' }, :rp_num ],
+        match: [ /^Serves:?$/, :rp_num ],
         inline: true
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: { match: :rp_ingline, optional: true, enclose: true },
-        repeating: true
+        # match: { match: :rp_ingline, enclose: :non_empty, repeating: true, :in_css_match => 'p' },
+        match: :rp_ingline,
+        repeating: true,
+        enclose: :non_empty,
+        :in_css_match => 'p',
     },
     rp_ingline: {
         match: [

@@ -612,7 +612,7 @@ class NokoScanner # < Scanner
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
     @tokens.dom_ranges(spec).each do |range|
       if range.begin >= @pos &&
-          range.end <= @bound &&
+          # range.end <= @bound &&
           newscanner = scanner_for_range(range, flag)
         return newscanner
       end

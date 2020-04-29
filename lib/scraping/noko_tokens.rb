@@ -69,7 +69,7 @@ class NokoTokens < Array
   def text_from first_token_index, limiting_token_index
     pos_begin = token_offset_at first_token_index
     pos_end = token_limit_at limiting_token_index
-    return '' if pos_begin == @processed_text_len # Boundary condition: no more text!
+    return '' if first_token_index >= limiting_token_index || pos_begin == @processed_text_len # Boundary condition: no more text!
 
     teleft, teright = TextElmtData.for_range self, pos_begin...pos_end
     return teleft.delimited_text(pos_end) if teleft.text_element == teright.text_element
