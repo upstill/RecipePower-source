@@ -132,8 +132,10 @@ class Recipe < ApplicationRecord
   end
 
   def bkg_launch force=true
+    # If we haven't persisted, then the page_ref has no connection back
+    page_ref.recipes << self unless page_ref.recipes.to_a.find { |r| r == self }
     # Possible prerequisites for a recipe launch:
-    if !content.present? && site&.finder_for('Content')
+    if !content.present? && site.finder_for('Content')
       # Need to launch the recipe_page to collect content
       page_ref.build_recipe_page if !recipe_page
       recipe_page.bkg_launch

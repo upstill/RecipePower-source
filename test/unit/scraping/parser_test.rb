@@ -273,8 +273,8 @@ EOF
     seeker = parser.match :rp_recipe
     assert seeker.success?
     assert_equal :rp_recipe, seeker.token
-    assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 9, seeker.children[1].children.keep_if(&:'success?').count
+    assert_equal 1, seeker.find(:rp_inglist).count
+    assert_equal 9, seeker.find(:rp_inglist).first.children.keep_if(&:'success?').count
 
     annotated = seeker.enclose_all
     x=2
@@ -291,6 +291,10 @@ EOF
     assert seeker.success?
     ingline_seeker = seeker.find(:rp_ingline)[2]
     assert_equal '2 anchovy fillets, drained and finely chopped', ingline_seeker.to_s
+
+    # Test that the results get enclosed properly
+    seeker.enclose_all
+    assert_not_nil seeker.head_stream.nkdoc.search('ul').first # Check that the ingredient list's <ul> is still enclosed in the original <p>
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
@@ -429,15 +433,5 @@ EOF
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text.to_s
     assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
-
-=begin
-    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
-    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal html.gsub("\n", ''), nkdoc.to_s.gsub("\n", '')
-=end
-
-    html = '<div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
-    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    seeker.children.each { |child| assert_equal :rp_ingline, child.token }
   end
 end

@@ -39,7 +39,7 @@ class RecipePage < ApplicationRecord
           xb = sub_parser.xbounds
           recipe = rset.find do |r|
             (r.anchor_path == xb.first && r.focus_path == xb.last) || (r.title == title)
-          end
+          end || rset.find { |r| r.anchor_path.nil? }
           if title.present? # There's an existing recipe
             if recipe&.persisted?
               recipe.update_column :title, title

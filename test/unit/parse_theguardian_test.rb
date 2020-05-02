@@ -33,7 +33,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     @lex = Lexaur.from_tags
     # These are the definitive grammar mods for the site
     @grammar_mods = {
-        rp_recipelist: { repeating: :rp_recipe },
+        rp_recipelist: { :repeating=>true, :match=>:rp_recipe },
         rp_recipe: { at_css_match: 'h2' },
         rp_title: { in_css_match: 'h2' }
     }
@@ -52,16 +52,18 @@ class ParseTheguardianTest < ActiveSupport::TestCase
   #   * drives the RecipePage to parse the page for recipes by title
   #   * checks that all is well (objects land properly)
   #   * returns the PageRef at the center of it all
-  def setup_page_ref url
+  def setup_recipe url
     # In practice, grammar mods will get bound to the site
     # The selector will get associated with the recipe's site (as a 'Content' finder)
     # The trimmers will kept on the site as well, to remove extraneous elements
     # The grammar_mods will get applied to the parser's grammar for site-specific modification
-    @page_ref = load_page_ref url, @selector, @trimmers, @grammar_mods
+    @recipe = load_recipe url, @selector, @trimmers, @grammar_mods
+    @page_ref = @recipe.page_ref
+    @recipe_page = @page_ref.recipe_page
   end
 
   test 'recipes parsed out correctly' do
-    setup_page_ref @page
+    setup_recipe @page
     assert_equal 3, @page_ref.recipes.to_a.count
     assert_equal [
                      "Asparagus with pine nut and sourdough crumbs (pictured above)",
@@ -72,7 +74,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
   end
 
   test 'parse single recipe' do
-    setup_page_ref @page
+    setup_recipe @page
     recipes = @page_ref.recipes.to_a
     assert_equal 3, recipes.count
     seeker = ParsingServices.new(recipes.first, lexaur: @lexaur).parse

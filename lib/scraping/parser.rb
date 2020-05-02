@@ -316,11 +316,17 @@ class Parser
           matches.pop
         end
       end
-      if matches.present?
-        return Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
-      else
-        return Seeker.failed start_scanner, scanner, token, context
-      end
+      return case matches.count
+             when 0
+               Seeker.failed start_scanner, scanner, token, context
+             when 1
+               match = matches.first
+               token.nil? || token == match.token ?
+                   match :
+                   Seeker.new(match.head_stream, match.tail_stream, token, matches)
+             else
+               Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+             end
     end
 =begin
     if context[:accumulate] # Collect matches as long as they're valid
@@ -425,7 +431,7 @@ class Parser
       list_of_specs.each do |spec|
         child = match_specification start_stream, spec, token, distributed_context
         if child.success?
-          return (child.token == token ? child : Seeker.new(start_stream, child.tail_stream, token, [child]))
+          return (token.nil? || child.token == token) ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
         end
       end
       return Seeker.failed(start_stream, token, context) # TODO: not retaining children discarded along the way

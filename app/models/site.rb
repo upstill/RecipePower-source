@@ -53,11 +53,14 @@ class Site < ApplicationRecord
 
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
+  # You might think you could do this with query methods, but those fail to find records that haven't been
+  # persisted. That extends to #finders UNLESS they are converted to an Array.
+  # So these methods work whether the members have been persisted or not--at the cost of a potential query
   def finder_for label
-    finders.find_by label: label
+    finders.find { |f| f.label == label }
   end
   def finders_for label
-    finders.where label: label
+    finders.to_a.keep_if { |f| f.label == label }
   end
 
   has_many :feeds, :dependent=>:restrict_with_error
@@ -161,7 +164,9 @@ public
   # When a result from one of the site's finders gets hit, vote it up
   def hit_on_finder label, selector, attribute_name
     attribs = { label: label, selector: selector, attribute_name: attribute_name }
-    finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
+    extant = finders_for(label).find { |f| f.selector == selector && f.attribute_name == attribute_name }
+    finder = extant || finders.create(attribs)
+    # finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
     finder.hits += 1
     finder.save
   end

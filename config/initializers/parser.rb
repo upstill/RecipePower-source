@@ -118,7 +118,7 @@ Parser.init_grammar(
         match: :rp_ingline,
         repeating: true,
         enclose: :non_empty,
-        :in_css_match => 'p',
+        :in_css_match => 'p, ul',
     },
     rp_ingline: {
         match: [
