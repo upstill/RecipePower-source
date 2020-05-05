@@ -137,7 +137,7 @@ private
 
   def parse_recipe content
     @parser = Parser.new content, @lexaur || Lexaur.from_tags, @entity.site.grammar_mods.clone
-    @seeker = parser.match :rp_recipe
+    @seeker = @parser.match :rp_recipe
   end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)

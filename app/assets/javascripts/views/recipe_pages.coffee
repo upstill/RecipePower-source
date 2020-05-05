@@ -131,4 +131,11 @@ RP.recipe_pages.onload = (dlog) ->
 		adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
 		event.preventDefault()
 		RP.notifications.post 'Selection copied to recipe', 'popup'
+	$(dlog).on "click", '.post-selection', (event) ->
+		fieldsNode = $(event.target).parents('div.recipe-fields')[0]
+		anchor_path = $('input.anchorPath', fieldsNode)[0].value
+		focus_path = $('input.focusPath', fieldsNode)[0].value
+		elem = $('a.post-selection', fieldsNode)[0]
+		url = RP.build_request $(elem).data('href'), { 'recipe[anchor_path]': anchor_path, 'recipe[focus_path]': focus_path, 'recipe[content]': '' }
+		$(elem).data 'href', url
 

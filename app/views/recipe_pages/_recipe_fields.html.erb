@@ -12,10 +12,12 @@
     <a href='#', class='glyphicon glyphicon-copy copy-selection'></a>
   </div>
   <div class="recipe-field editing-item icon hidden">
-    <%= link_to '',
+    <%= link_to_submit '',
                 f.object,
                 title: 'Open Recipe',
-                class: 'glyphicon glyphicon-new-window' %>
+                method: 'PATCH',
+                format: 'json',
+                class: 'glyphicon glyphicon-new-window post-selection' %>
   </div>
   <%#= f.input :_destroy, :as => :hidden, label: false %>
 </div>

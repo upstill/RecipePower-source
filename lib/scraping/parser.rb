@@ -438,15 +438,13 @@ class Parser
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
         child = match_specification end_stream, spec, distributed_context
-        case
-        when child.success?
-          children << child
-          end_stream = child.tail_stream
-        when child.retain?
-          return Seeker.failed child.head_stream, child.tail_stream, token, context.merge(children: children.keep_if(&:'retain?')+[child])
-        when child.hard_fail?
-          # Bail and return to the beginning if any non-optional spec fails
-          return Seeker.failed(child.head_stream, child.tail_stream, token, context)
+        children << child.if_retain
+        end_stream = child.tail_stream
+        if child.hard_fail?
+          return Seeker.failed((children.first || child).head_stream,
+                               end_stream,
+                               token,
+                               child.retain? ? context.merge(children: children.keep_if(&:'retain?')+[child]) : context)
         end
       end
     end

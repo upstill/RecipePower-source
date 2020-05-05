@@ -330,6 +330,7 @@ class FilteredPresenter
   # may define multiple results panels
   def presentation_partials &block
     presentation_partial :card, block if show_card?
+    presentation_partial :content, block if show_card?
     presentation_partial :comments, block if show_comments?
     presentation_partial header_partial, block if subtypes.count > 0
     presentation_partial body_partial, subtypes, block, :item_mode => item_mode, :org => org

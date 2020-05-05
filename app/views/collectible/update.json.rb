@@ -3,7 +3,7 @@
 jsondata = { done: true }.merge flash_notify
 unless response_service.injector?
   nukeit = (defined?(delete) && delete) || @decorator.destroyed?
-  items = [:table, :masonry, :slider, :card, :homelink] unless defined?(items) && items
+  items = [:table, :masonry, :slider, :card, :homelink, :content] unless defined?(items) && items
   jsondata[:replacements] = @replacements || []
   jsondata[:replacements] += nukeit ? item_deleters(@decorator, items) : item_replacements(@decorator, items)
   jsondata[:replacements].unshift collectible_buttons_panel_replacement(@decorator) unless nukeit

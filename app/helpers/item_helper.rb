@@ -32,7 +32,8 @@ module ItemHelper
             else
               'div'
           end
-    "#{tag}." + item_partial_class(item_mode).gsub(' ', '.')
+    # "#{tag}." + item_partial_class(item_mode).gsub(' ', '.')
+    "#{tag}.#{item_mode}-item" #  + item_partial_class(item_mode).gsub(' ', '.')
   end
 
   # container_selector and wrapper_selector are adopted from masonry_helper.rb and are currently only for masonry lists

@@ -4,7 +4,7 @@ module RecipePagesHelper
   end
 
   def recipe_page_replacement rp
-    [ 'div.results-enclosure', show_recipe_page(rp) ]
+    [ 'div.content-item', show_recipe_page(rp) ]
   end
 
   def do_recipe_pages_panel title, pane=:recipe_pages # do_panel

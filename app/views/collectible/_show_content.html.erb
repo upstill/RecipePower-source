@@ -1,5 +1,4 @@
-<% NestedBenchmark.measure '...content' do %>
-  <div class="card-content" style="width:100%">
+  <div class="content-item" style="width:100%">
     <% if decorator.object.is_a?(Recipe) %>
       <% if policy(decorator.object).update? %>
         <%= recipe_page_button decorator.object %>
@@ -13,8 +12,10 @@
         <%# collectible_edit_button decorator.object %>
       <% end %>
       <div id="rp-html-content">
-        <%= presenter.card_content&.html_safe %>
+        <%= present(decorator.object).card_content&.html_safe %>
       </div>
     <% end %>
   </div>
-<% end %>
+  <%= link_to_submit( 'Refresh',
+                         polymorphic_path(decorator.object), # gleaning_path(decorator.gleaning),
+                         class: 'trigger hide') if decorator.object.is_a?(Backgroundable) && decorator.object.dj && decorator.object.virgin? %>

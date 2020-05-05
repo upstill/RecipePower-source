@@ -43,12 +43,18 @@ class RecipePage < ApplicationRecord
           if title.present? # There's an existing recipe
             if recipe&.persisted?
               recipe.update_column :title, title
-              recipe.update_column :anchor_path, xb.first
-              recipe.update_column :focus_path, xb.last
+              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
+                recipe.update_column :anchor_path, xb.first
+                recipe.update_column :focus_path, xb.last
+                recipe.update_column :content, nil
+              end
             elsif recipe
               recipe.title = title
-              recipe.anchor_path = xb.first
-              recipe.focus_path = xb.last
+              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
+                recipe.anchor_path = xb.first
+                recipe.focus_path = xb.last
+                recipe.content = nil
+              end
             else
               rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
             end

@@ -21,6 +21,17 @@ class Recipe < ApplicationRecord
 
   delegate :recipe_page, :to => :page_ref
 
+  before_save do |recipe|
+    # Arm the recipe for launching
+    if recipe.anchor_path_changed? ||
+        recipe.focus_path_changed? ||
+        (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
+      recipe.content = nil
+      recipe.status = "virgin"
+    end
+  end
+  # after_save { |recipe| recipe.bkg_launch recipe.content.nil? }
+
   # after_create { |recipe| recipe.bkg_launch }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,
@@ -67,24 +78,9 @@ class Recipe < ApplicationRecord
     HtmlBeautifier.beautify nk.to_s
   end
 
-  # The presented content for a recipe defaults to the page ref
+  # The presented content for a recipe defers to the page ref
   def presented_content
     content.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
-  end
-
-  def content
-    super.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
-  end
-
-  # When the content is explicitly set for the first time, trim it according to the site
-  def content= html
-    if content.blank?
-      # Here's where we adapt the recipe's content to our needs
-      # Perform site-specific editing after standard editing
-      html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
-    end
-    super html # Set the attribute
-    RecipeServices.new(self).inventory
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -131,9 +127,9 @@ class Recipe < ApplicationRecord
     save
   end
 
-  def bkg_launch force=true
+  def bkg_launch force=false
     # If we haven't persisted, then the page_ref has no connection back
-    page_ref.recipes << self unless page_ref.recipes.to_a.find { |r| r == self }
+    page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     # Possible prerequisites for a recipe launch:
     if !content.present? && site.finder_for('Content')
       # Need to launch the recipe_page to collect content
@@ -149,17 +145,38 @@ class Recipe < ApplicationRecord
   end
 
   def perform
-    if content.blank? && site&.finder_for('Content')
+    if site&.finder_for 'Content'
+      page_ref.bkg_land
       page_ref.build_recipe_page if !recipe_page
-      recipe_page.bkg_land # The recipe_page will assert path markers
-      if recipe_page.good?
-        self.content = ParsingServices.new(self).parse_and_annotate recipe_page.selected_content(anchor_path, focus_path)
+      recipe_page&.bkg_land # The recipe_page will assert path markers and clear the content as nec.
+      if recipe_page&.good?
+        if content.blank?
+          self.content =
+              if (html = recipe_page.selected_content(anchor_path, focus_path)).present?
+                ParsingServices.new(self).parse_and_annotate(html).if_present || html
+              end ||
+              if page_ref.good? && (html = page_ref.content).present?
+                # Here's where we adapt the recipe's content to our needs
+                massage_content SiteServices.new(site).trim_recipe(html)
+              end
+          RecipeServices.new(self).inventory
+        end
       else
+        if page_ref.good? && (html = page_ref.content).present?
+          # Here's where we adapt the recipe's content to our needs
+          self.content = massage_content SiteServices.new(site).trim_recipe(html)
+        end
         errors.add :url, "can\'t crack recipe_page (##{recipe_page.id}): #{recipe_page.errors[:base]}"
         raise err_msg if recipe_page.dj # RecipePage is ready to try again => so should we be, so restart via Delayed::Job
       end
     end
     super if defined?(super)
+  end
+
+  def after
+    # After the job runs, this is our chance to set status
+    self.status = content.present? ? :good : :bad
+    super
   end
 
   # This is called when the page_ref finishes updating
