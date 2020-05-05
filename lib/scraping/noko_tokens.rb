@@ -253,6 +253,7 @@ class NokoTokens < Array
     ranges = nkdoc.search(selector)&.map do |found|
       range_from_subtree found
     end || []
+    ranges << range_from_subtree(nkdoc) if nkdoc.matches? selector
     # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
     ranges.each_index do |ix|
       ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)

@@ -39,7 +39,7 @@ class ParsingServices
       @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
       token = token.to_sym
       seeker = @parser.match token
-      if seeker.children&.first
+      if seeker.success? && !seeker.tail_stream.more? # Parsed the WHOLE entry
         seeker.enclose_all
         return nkdoc.to_s
       end
@@ -54,7 +54,7 @@ class ParsingServices
         # If 1), life goes on and the unparsed tag will be asserted when the page is finally accepted
         # If 2), upon choosing a tag, the submission specifies a value that's asserted as above
         # In any event, we let the calling controller handle it
-        yield Tag.typenum(tagtype), seeker.to_s if block_given?
+        yield Tag.typenum(tagtype), seeker.head_stream.to_s if block_given?
       end
     end
     nkdoc.to_s

@@ -1,7 +1,9 @@
 <%= form_for([:recipe_contents, @recipe ], url: annotate_recipe_contents_path(@recipe), html: { class: 'annotate-recipe' } ) do |f| %>
   <%= form_errors_helper f %>
   <%# render 'recipe_pages/recipe_fields', f: f %>
-  <div class="row"><p>Use the mouse to select a part of the recipe, then click a button to identify it.</p></div>
+  <div class="row"><div class="col col-md-12">
+    <p>Use the mouse to select a part of the recipe, then click a button to identify it.</p>
+  </div></div>
   <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
   <% if @parse_path %>
     <input class="content" type="hidden" name="recipe[recipeContents][parse_path]" id="recipe_parse_path" value="<%= @parse_path %>">

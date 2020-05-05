@@ -97,7 +97,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       margin-left: auto; // width/2)
       margin-right: auto; // width/2)
       &.modal-xl {
-        width: 100%; // responsive width
+        width: 95%; // responsive width
       }
       &.modal-lg {
         width: 60%; // responsive width
