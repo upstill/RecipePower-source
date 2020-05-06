@@ -49,6 +49,13 @@ class Parser
 
   end
 
+  # If the token has a grammar entry for a Tag, return said tag type
+  def self.tagtype token
+    if spec = @@DefaultGrammar[token.to_sym]
+      spec[:tag]
+    end
+  end
+
   def initialize noko_scanner_or_nkdoc_or_nktokens, lexaur = nil, grammar_mods={}
     lexaur, grammar_mods = nil, lexaur if lexaur.is_a?(Hash)
     @grammar = @@DefaultGrammar.clone

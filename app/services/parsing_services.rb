@@ -36,6 +36,16 @@ class ParsingServices
     if (class_attr = elmt.attribute('class')) &&
         (token = class_attr.to_s.split.find { |cl| cl.match(/^rp_/) && cl != 'rp_elmt' }) &&
         token.present?
+        # For direct Tag terminals, short-circuit the parsing process with a tag lookup
+      if tagtype = Parser.tagtype(token)
+        # Go directly to tag lookup in the database
+        typenum = Tag.typenum tagtype
+        tagstr = nokoscan.to_s
+        if Tag.strmatch(tagstr, tagtype: typenum, matchall: true).empty? # No such tag found
+          yield typenum, tagstr if block_given?
+        end
+        return nkdoc.to_s
+      end
       @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
       token = token.to_sym
       seeker = @parser.match token
