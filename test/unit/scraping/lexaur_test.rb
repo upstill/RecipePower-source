@@ -129,6 +129,11 @@ class LexaurTest < ActiveSupport::TestCase
       target = strings.shift
       assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
     end
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    lex.match_list(StrScanner.from_string('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
   end
 
   # Called after every test method runs. Can be used to tear
