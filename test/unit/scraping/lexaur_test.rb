@@ -4,7 +4,7 @@ require 'scraping/scanner.rb'
 
 class LexaurTest < ActiveSupport::TestCase
   def setup
-    @ingred_tags = %w{ lemon lemon\ juice garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
+    @ingred_tags = %w{ ground\ turmeric ground\ cinnamon ground\ cumin lemon lemon\ juice garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ tablespoon teaspoon cup pound lb small\ head clove }.
         each { |name| Tag.assert name, :Unit }
@@ -120,6 +120,15 @@ class LexaurTest < ActiveSupport::TestCase
     assert_finds_tag(lex, 'a silly god damned tag')
     assert_finds_tag(lex, 'another silly god-damned tag')
     assert_finds_tag(lex, 'another silly god damned tag')
+  end
+
+  test 'Lexaur parses lists of tags' do
+    lex = Lexaur.from_tags
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    lex.match_list(StrScanner.from_string('ground turmeric, cumin and cinnamon')) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
   end
 
   # Called after every test method runs. Can be used to tear

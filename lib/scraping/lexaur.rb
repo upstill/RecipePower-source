@@ -60,7 +60,28 @@ class Lexaur < Object
   #     for the remainder
   # -- #rest returns a stream for the stream minus the head.
   def chunk stream, &block
-    chunk1 stream, block
+    chunk1 stream, [], -> (terms, onward, lexpath) do 
+      block.call terms, onward
+    end
+  end
+
+  # Match a list of tags of the form 'tag1, tag2...and/or tag3'
+  def match_list stream, &block
+    chunk1 stream, [], -> (terms, onward, lexpath) do
+      block.call terms, onward
+      # chunk_path provides a path through the tree to the terminals
+      while %w{ , and or }.include? (delim = onward.peek) do
+        onward = onward.rest
+        lexpath.each do |lexnode|
+          lexnode.chunk(onward) { |terms, newstream|
+            block.call terms, newstream # Report found tokens back
+            onward = newstream
+            break
+          }
+        end
+        break if delim != ','
+      end
+    end
   end
 
 protected
@@ -71,7 +92,8 @@ protected
     strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
   end
 
-  def chunk1 stream, block
+  def chunk1 stream, lexpath = [], block
+    lexpath = lexpath + [self]
     # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
     if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       substrs = Tag.normalizeName(token).split '-'
@@ -85,10 +107,10 @@ protected
       # Peek ahead and consume any tokens which are empty in the normalized name
       onward = stream.rest
       onward = onward.rest if onward.peek == '.'
-      tracker.nexts[head]&.chunk1(onward, block) ||
+      tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
-            block.call terms, onward
+            block.call terms, onward, lexpath
           end
     end
   end
