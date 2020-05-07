@@ -98,7 +98,6 @@ class Parser
         :repeating, # The spec will be matched repeatedly until the end of input
         :atline, # match must start at the beginning of a line; scanner skips to the next line break
         :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
-        :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
         :optional # Failure to match is not a failure
       ].each do |flag|
@@ -189,7 +188,7 @@ class Parser
         if entry.slice( :in_css_match, :at_css_match, :after_css_match).count > 1
           raise 'Entry has more than one of :in_css_match, :at_css_match, and :after_css_match'
         end
-        if tagtype = entry[:tag]
+        if tagtype = entry[:tag] || entry[:tags]
           if !Tag.typenum(tagtype)
             raise "Tag specifier is of unknown type #{tagtype}"
           end
@@ -215,7 +214,7 @@ class Parser
       rescue Exception => e
         puts "Error in grammar [:#{key}]: " + e.to_s
       end
-      atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && grammar[key][:tag]) || [ :rp_title, :rp_ing_comment ].include?(key)
+      atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && (grammar[key][:tag] || grammar[key][:tags])) || [ :rp_title, :rp_ing_comment ].include?(key)
     end if grammar
     atomic_tokens
   end
@@ -337,49 +336,6 @@ class Parser
                Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
              end
     end
-=begin
-    if context[:accumulate] # Collect matches as long as they're valid
-      while child = match_specification(found&.tail_stream || scanner, spec, token) do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
-        if found
-          found.tail_stream = child.tail_stream
-        else
-          found = child
-        end
-      end
-      return found || (Seeker.new scanner, scanner, token if context[:optional]) # Leave an empty result for optional if not found
-    end
-=end
-    if context[:orlist]
-      # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
-      children = []
-      start_scanner = scanner
-      while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
-        child = match_specification scanner, spec
-        return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
-        children << child
-        scanner = child.next
-        case scanner.peek
-        when 'and', 'or'
-          # We expect a terminating entity
-          child = match_specification scanner.rest, spec
-          if child.success?
-            children << child
-            break
-          else
-            return Seeker.failed(start_scanner, child.head_stream, token, context.merge(children: (children + [child])))
-          end
-        when ','
-          scanner = scanner.rest
-        else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
-          break
-        end
-      end
-      if children.present?
-        return Seeker.new(start_scanner, children.last.next, token, children)
-      else
-        return Seeker.failed(start_scanner, token, context)
-      end
-    end
 
     # Finally, if no modifiers in the context, just match the spec
     found =
@@ -478,14 +434,15 @@ class Parser
                  :atline, # match must start at the beginning of a line; scanner skips to the next line break
                  :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
-                 :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
-                 # :accumulate, # Accumulate matches serially in a single child
                  :optional # Failure to match is not a failure
               ].find { |flag| spec.key?(flag) && spec[flag] != true }
             to_match, spec[flag] = spec[flag], true
-    elsif to_match = spec[:tag] # Special processing for :tag specifier
-      # Important: the :repeating, :accumulate and :orlist options will have been applied at a higher level
-      return TagSeeker.match(scanner, lexaur: @lexaur, token: token, types: to_match) ||
+    elsif to_match = spec[:tag] || spec[:tags] # Special processing for :tag specifier
+      # TagSeeker parses a single tag
+      # TagsSeeker parses a list of the form "tag1, tag2 and tag3" into a set of tags
+      klass = spec[:tag] ? TagSeeker : TagsSeeker
+      # Important: the :repeating option will have been applied at a higher level
+      return klass.match(scanner, lexaur: @lexaur, token: token, types: to_match) ||
           Seeker.failed(scanner, token, spec)
     elsif to_match = spec[:regexp]
       to_match = Regexp.new to_match

@@ -270,7 +270,7 @@ class NumberSeeker < Seeker
 end
 
 class TagSeeker < Seeker
-  attr_reader :tagdata
+  attr_reader :tagdata, :value
 
   def initialize(stream, next_stream, tagdata, token=nil)
     super stream, next_stream, token
@@ -285,7 +285,57 @@ class TagSeeker < Seeker
       tagdata = [:id, :name].zip(tagdata).to_h
       return self.new(stream, next_stream, tagdata, opts[:token])
     }
+    nil
   end
+end
+
+# Conditions are a list of { process, }*. Similarly for Ingredients
+class TagsSeeker < Seeker
+  attr_accessor :operand
+
+  def self.match start_stream, opts={}
+    children = []
+    stream = start_stream
+    operand = nil
+    onward = opts[:lexaur].match_list(stream) do |data, next_stream|
+      operand = next_stream.peek
+      # The Lexaur provides the data at sequence end, and the post-consumption stream
+      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
+      tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+      return nil unless tagdata
+      child = TagSeeker.new stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname
+      children << child
+      stream = next_stream.rest
+    end
+    result = self.new start_stream, onward, opts[:token], children
+    result.operand = operand
+    result
+  end
+
+=begin
+  def self.match stream, opts
+    # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
+    if ns = TagSeeker.match(stream, opts.slice( :lexaur, :types))
+      sk = self.new stream, ns.tail_stream, ns
+      case ns.tail_stream.peek
+      when 'and', 'or'
+        # We expect a terminating condition
+        if ns2 = TagSeeker.match(ns.tail_stream.rest, opts.slice(:lexaur, :types))
+          sk.tag_seekers << ns2
+          sk.tail_stream = ns2.tail_stream
+        else
+          return nil
+        end
+      when ','
+        if further = self.match(ns.tail_stream.rest, opts)
+          sk.tag_seekers += further.tag_seekers
+          sk.tail_stream = further.tail_stream
+        end
+      end
+      return sk
+    end
+  end
+=end
 end
 
 # An Amount is a number followed by an optional amount, optionally followed by an alternative amount in parentheses
@@ -324,39 +374,6 @@ class ParentheticalSeeker < Seeker
       if (found_inside = yield inner_stream)
       else
       end
-    end
-  end
-end
-
-# Conditions are a list of { process, }*. Similarly for Ingredients
-class TagsSeeker < Seeker
-  attr_accessor :tag_seekers
-
-  def initialize stream, tail_stream, tag_seeker
-    super stream, tail_stream
-    @tag_seekers = [ tag_seeker ]
-  end
-
-  def self.match stream, opts
-    # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
-    if ns = TagSeeker.match(stream, opts.slice( :lexaur, :types))
-      sk = self.new stream, ns.tail_stream, ns
-      case ns.tail_stream.peek
-      when 'and', 'or'
-        # We expect a terminating condition
-        if ns2 = TagSeeker.match(ns.tail_stream.rest, opts.slice(:lexaur, :types))
-          sk.tag_seekers << ns2
-          sk.tail_stream = ns2.tail_stream
-        else
-          return nil
-        end
-      when ','
-        if further = self.match(ns.tail_stream.rest, opts)
-          sk.tag_seekers += further.tag_seekers
-          sk.tail_stream = further.tail_stream
-        end
-      end
-      return sk
     end
   end
 end

@@ -79,7 +79,7 @@ class Lexaur < Object
             break
           }
         end
-        break if delim != ','
+        return onward if delim != ',' # Termination condition: hitting 'and' or 'or'
       end
     end
   end
@@ -114,5 +114,6 @@ protected
             block.call terms, onward, lexpath
           end
     end
+    onward
   end
 end

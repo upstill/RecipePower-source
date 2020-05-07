@@ -40,6 +40,9 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
     @ingred_tags = %w{
+      ground\ turmeric
+      ground\ cumin
+      ground\ cinnamon
       lemon\ zest
       lemon\ juice
       anchovy\ fillets
@@ -179,6 +182,31 @@ EOF
     assert_not_nil il
   end
 =end
+
+  test 'parse list of tags distributing first word' do
+    lex = Lexaur.from_tags
+    html = 'ground turmeric, cumin and cinnamon'
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingalts
+    assert seeker.success?
+    assert_equal :rp_ingalts, seeker.token
+    assert_equal 3, seeker.find(:rp_ingname).count
+    assert_equal strings, seeker.find(:rp_ingname).map(&:value)
+    seeker.enclose_all
+    seeker.head_stream.nkdoc.css('.rp_ingname').each { |ingnode|
+      assert_equal strings.shift, ingnode.attribute('data-value').to_s
+    }
+
+    html = 'ground turmeric, cumin or ground cinnamon'
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingalts
+    assert seeker.success?
+    assert_equal :rp_ingalts, seeker.token
+    assert_equal 3, seeker.find(:rp_ingname).count
+    assert_equal strings, seeker.find(:rp_ingname).map(&:value)
+  end
 
   test 'parse ingredient line' do
     # Test a failed ingredient line

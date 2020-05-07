@@ -87,7 +87,6 @@ Parser.init_grammar(
     rp_title: {
         in_css_match: 'h1'
     }, # Match all tokens within an <h1> tag
-    # rp_author: { match: [ Regexp.new('Author'), { accumulate: Regexp.new('^.*$') } ],  atline: true },
     rp_author: {
         match: [ /^Author:?$/, nil ],
         inline: true
@@ -154,9 +153,7 @@ Parser.init_grammar(
         ]
     },
     rp_ingname: { tag: 'Ingredient' },
-    rp_ingalts: {
-        match: :rp_ingname,
-        orlist: true },
+    rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_num: { match: 'NumberSeeker' },
     rp_unit: { tag: 'Unit' }
 )
