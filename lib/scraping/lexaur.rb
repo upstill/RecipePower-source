@@ -113,6 +113,7 @@ protected
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
             block.call terms, onward, lexpath
+            return true
           end
     end
   end
