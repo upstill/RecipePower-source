@@ -69,6 +69,7 @@ class Lexaur < Object
   def match_list stream, &block
     chunk1 stream, -> (terms, onward, lexpath) do
       block.call terms, onward
+      lexpath = lexpath.reverse
       # chunk_path provides a path through the tree to the terminals
       while %w{ , and or }.include? (delim = onward.peek) do
         onward = onward.rest
@@ -114,6 +115,5 @@ protected
             block.call terms, onward, lexpath
           end
     end
-    onward
   end
 end

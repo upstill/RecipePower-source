@@ -297,19 +297,20 @@ class TagsSeeker < Seeker
     children = []
     stream = start_stream
     operand = nil
-    onward = opts[:lexaur].match_list(stream) do |data, next_stream|
+    opts[:lexaur].match_list(stream) do |data, next_stream|
       operand = next_stream.peek
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-      return nil unless tagdata
-      child = TagSeeker.new stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname
-      children << child
+      break unless tagdata
+      children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname)
       stream = next_stream.rest
     end
-    result = self.new start_stream, onward, opts[:token], children
-    result.operand = operand
-    result
+    if children.present?
+      result = self.new start_stream, children.last.tail_stream, opts[:token], children
+      result.operand = operand
+      result
+    end
   end
 
 =begin
