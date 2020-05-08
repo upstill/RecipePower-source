@@ -141,15 +141,13 @@ Parser.init_grammar(
              or: true
     },
     rp_altamt: [ '(', :rp_amt, ')' ],
-    rp_presteps: {
-        match: :rp_condition,
-        list: true }, # There may be one or more presteps (instructions before measuring)
+    rp_presteps: { tags: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_ingspec: {
         match: [
             {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
             {optional: 'of'},
-            { or: [ { or: [:rp_ingalts, :rp_ingname] }, [:rp_presteps, { or: [:rp_ingalts, :rp_ingname] } ] ] }
+            { or: [ :rp_ingalts, [:rp_presteps, :rp_ingalts ] ] }
         ]
     },
     rp_ingname: { tag: 'Ingredient' },
