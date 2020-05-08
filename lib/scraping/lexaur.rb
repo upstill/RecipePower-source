@@ -79,9 +79,7 @@ class Lexaur < Object
         onward = onward.rest
         lexpath.each do |lexnode|
           lexnode.chunk(onward) { |terms, newstream|
-            block.call terms, newstream # Report found tokens back
-            onward = newstream
-            break
+            onward = newstream if block.call terms, newstream # Report found tokens back
           }
         end
         return onward if delim != ',' # Termination condition: hitting 'and' or 'or'
