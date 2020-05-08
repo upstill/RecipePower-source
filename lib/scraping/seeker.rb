@@ -290,7 +290,7 @@ class TagSeeker < Seeker
 end
 
 # Conditions are a list of { process, }*. Similarly for Ingredients
-class TagsSeeker < Seeker
+class  TagsSeeker < Seeker
   attr_accessor :operand
 
   def self.match start_stream, opts={}
@@ -298,13 +298,15 @@ class TagsSeeker < Seeker
     stream = start_stream
     operand = nil
     opts[:lexaur].match_list(stream) do |data, next_stream|
-      operand = next_stream.peek
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
-      tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-      break unless tagdata
-      children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname)
-      stream = next_stream.rest
+      if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+        children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname)
+        operand = next_stream.peek
+        stream = next_stream.rest
+      else
+        nil
+      end
     end
     if children.present?
       result = self.new start_stream, children.last.tail_stream, opts[:token], children

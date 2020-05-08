@@ -67,8 +67,12 @@ class Lexaur < Object
 
   # Match a list of tags of the form 'tag1, tag2...and/or tag3'
   def match_list stream, &block
-    chunk1 stream, -> (terms, onward, lexpath) do
-      block.call terms, onward
+    lexpath = onward = terms = nil
+    chunked = chunk1 stream, -> (trms, onwrd, lexpth) do
+      lexpath = lexpth
+      block.call (terms = trms), (onward = onwrd)
+    end
+    if chunked
       lexpath = lexpath.reverse
       # chunk_path provides a path through the tree to the terminals
       while %w{ , and or }.include? (delim = onward.peek) do
@@ -112,8 +116,7 @@ protected
       tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
-            block.call terms, onward, lexpath
-            return true
+            block.call terms, onward, lexpath # The block must check for acceptance and return true for the process to end
           end
     end
   end

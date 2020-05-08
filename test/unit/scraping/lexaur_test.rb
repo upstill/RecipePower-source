@@ -109,6 +109,30 @@ class LexaurTest < ActiveSupport::TestCase
     assert_finds_tag(lex, 'lb')
   end
 
+  test 'Lexaur correctly resolves long name on appropriate datatype' do
+    Tag.assert 'chopped', :Condition
+    Tag.assert 'chopped almonds', :Ingredient
+    Tag.assert 'chopped walnuts', :Ingredient
+    Tag.assert 'almonds', :Ingredient
+    Tag.assert 'walnuts', :Ingredient
+    lex = Lexaur.from_tags
+    scanner = StrScanner.from_string 'chopped almonds'
+    result = lex.chunk scanner do |terms, onward|
+      Tag.where(id: terms, tagtype: Tag.typenum(:Condition)).first
+    end
+    assert_equal result.class, Tag
+    assert_equal 'chopped', result.name
+
+    scanner = StrScanner.from_string 'chopped almonds or walnuts'
+    tags = []
+    lex.match_list scanner do |terms, onward|
+      tags << Tag.where(id: terms, tagtype: Tag.typenum(:Ingredient)).first
+      tags.last
+    end
+    assert_equal 2, tags.count
+    assert_equal ['chopped almonds', 'chopped walnuts'], tags.map(&:name)
+  end
+
   test 'Lexaur manages tokens with embedded dash correctly' do
     Tag.assert 'a silly god damned tag', :Unit
     assert_equal Tag.by_string('a silly god-damned tag'), Tag.by_string('a silly god damned tag')
