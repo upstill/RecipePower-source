@@ -301,7 +301,8 @@ class  TagsSeeker < Seeker
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, :rp_ingname)
+        rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[opts[:types]]
+        children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, rptype)
         operand = next_stream.peek
         stream = next_stream.rest
       else

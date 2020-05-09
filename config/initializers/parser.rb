@@ -122,6 +122,7 @@ Parser.init_grammar(
     rp_ingline: {
         match: [
             :rp_ingspec,
+            # {optional: :rp_unit},
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,

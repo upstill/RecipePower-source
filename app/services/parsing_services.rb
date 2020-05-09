@@ -54,11 +54,36 @@ class ParsingServices
       else
         @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
         token = token.to_sym
-        seeker = @parser.match token
-        seeker.enclose_all if seeker.success? && !seeker.tail_stream.more? # Parsed the WHOLE entry
+        enclose_results @parser.match(token)
       end
     end
     nkdoc.to_s
+  end
+
+  def self.enclose_results seeker
+    if seeker.success? && !seeker.tail_stream.more? # Parsed the WHOLE entry
+      seeker.enclose_all
+      nkdoc = seeker.head_stream.nkdoc
+      nodes = if nkdoc.parent && nkdoc.matches?('.rp_inglist')
+        [nkdoc]
+      else
+        nkdoc.css('.rp_inglist').to_a
+      end
+      # Remove all <br> tags inside the ingredient list
+      nodes.each do |listnode|
+        listnode.traverse do |node|
+          if node.name == 'br' ||
+              (node.name == 'p' && node.children.empty?) ||
+              (node.matches?('.rp_ingline') && node.children.empty?)
+            node.remove
+          elsif node.name == 'strong' ||
+              (node.matches?('.rp_ingline') && node.children.all? { |child| child.text? && child.blank? })
+            node.replace node.children
+          end
+        end
+      end
+      nkdoc.to_s
+    end
   end
 
   # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
@@ -71,7 +96,7 @@ class ParsingServices
           puts seeker.head_stream.to_s
         }
       end
-      seeker.enclose_all
+      ParsingServices.enclose_results seeker
       seeker.head_stream.nkdoc.to_s
     end
   end
