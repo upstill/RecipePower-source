@@ -10,7 +10,7 @@ class TagSelection < ApplicationRecord
 
   def tag_token= t
     token = TokenInput.parse_tokens(t).first # parse_tokens analyzes each token in the list as either integer or string
-    self.tag = token.is_a?(Fixnum) ?
+    self.tag = token.is_a?(Integer) ?
         Tag.find(token) :
         Tag.strmatch(token, { userid: user_id, assert: true }.compact )[0] # Match or assert the string
     @tag_token = tag.id

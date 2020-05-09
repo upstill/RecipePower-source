@@ -44,7 +44,7 @@ module CollectibleHelper
   ################## Standardized glyph buttons for collectibles ##########################
   def collectible_edit_button decorator_or_entity, size=nil, styling={}
     decorator = decorator_or_entity.is_a?(Draper::Decorator) ? decorator_or_entity : decorator_or_entity.decorate
-    if decorator.user_can? :update
+    if policy(decorator.object).update? 
       if size.is_a? Hash
         size, styling = nil, size
       end
@@ -59,7 +59,7 @@ module CollectibleHelper
 
   def collectible_lists_button decorator, size=nil, options={}
     entity = decorator.object
-    if decorator.user_can? :lists
+    if policy(entity).lists? 
       if size.is_a? Hash
         size, styling = nil, size
       end
@@ -147,7 +147,7 @@ module CollectibleHelper
   # Provide the button for uploading an image
   def collectible_editpic_button decorator, size=nil, styling={}
     entity = decorator.object
-    if decorator.user_can? :update
+    if policy(entity).update? 
       if size.is_a? Hash
         size, options = nil, size
       end

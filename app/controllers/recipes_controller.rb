@@ -11,11 +11,6 @@ class RecipesController < CollectibleController
     super
   end
 
-  def touch
-    can = permitted_to? :touch, :recipes
-    super
-  end
-
   def index
     redirect_to default_next_path
     # return if need_login true
@@ -35,7 +30,7 @@ class RecipesController < CollectibleController
     	if(params[:what] == 'Tags')
     	end
     end
-    render :text => params[:name]
+    render :plain => params[:name]
     return true
   end
 

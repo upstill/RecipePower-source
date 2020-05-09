@@ -22,7 +22,7 @@ class PageRefServices
 
   # Try to translate a PageRef kind into English
   def self.kind_to_name kind
-    kind.is_a?(Fixnum) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
+    kind.is_a?(Integer) ? self.kind_selections.find { |ts| kind == ts.last }.first : kind.gsub('_', ' ').capitalize
   end
 
   # Ensure the existence of a page_ref of a particular kind with the given url
@@ -33,7 +33,7 @@ class PageRefServices
     pr.persisted? || pr.valid?
     pr
   end
-
+  
   # Get a collectible, taggable entity for the PageRef. Five possibilities:
   # 1) If it has an accompanying site, return the site
   # 2) If it has an accompanying recipe, return that
@@ -46,8 +46,8 @@ class PageRefServices
     end
     (page_ref unless page_ref.recipe? || page_ref.site?) ||
         (called_for if called_for.is_a?(Recipe) || called_for.is_a?(Site)) ||
-        page_ref.sites.first ||
-        page_ref.recipes.first ||
+        Site.find_by(page_ref_id: page_ref.id) ||
+        Recipe.find_by(page_ref_id: page_ref.id) ||
     begin
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
       klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
@@ -58,7 +58,9 @@ class PageRefServices
           'href' => page_ref.url,
           'Image' => params[:page_ref][:picurl]
       }
-      defaults.merge! params[:extractions] if params[:extractions]
+      params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
+        defaults[key] = value
+      end
       # Produce a set of initializers for the target class
       CollectibleServices.find_or_create page_ref, defaults, klass
     end
@@ -73,7 +75,7 @@ class PageRefServices
   end
 
   # Eliminate redundancy in the PageRefs by folding two into one
-  def absorb other, force=false
+  def absorb other, options={}
     return if page_ref == other
 
     # Take on all the recipes of the other
@@ -97,7 +99,7 @@ class PageRefServices
     # The default is to keep the absorber's attributes unless the other is shown to be good. The 'force'
     # parameter allows this issue to be forced.
     # aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
-    if force || ((page_ref.http_status != 200) && (other.http_status == 200))
+    if options[:force] || ((page_ref.http_status != 200) && (other.http_status == 200))
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
       puts "...taking #{hard_attribs} from other"
       page_ref.assign_attributes hard_attribs
@@ -107,14 +109,20 @@ class PageRefServices
       soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
           puts "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
-          page_ref.write_attribute attrname, other.read_attribute(attrname)
+          page_ref.send "#{attrname}=", other.send(attrname)
         end
       }
     end
     # page_ref.aliases = aliases - [page_ref.url]
     other.aliases.each { |al| page_ref.aliases << al unless page_ref.aliases.exists? url: al.url }
 
-    other.destroy if other.id # May not have been saved
+    if other.id # May not have been saved
+      if options[:retain]
+        other.save
+      else
+        other.destroy
+      end
+    end
     page_ref.save
   end
 
@@ -163,42 +171,5 @@ class PageRefServices
       page_ref.good!
     end
     sentences.join "\n\t"
-  end
-
-=begin
-  # Make sure the page_ref has a site
-  def ensure_site
-    page_ref.site ||= Site.find_or_create_for(page_ref.url) unless (page_ref.site?) # class == SitePageRef)
-    page_ref.save
-  end
-=end
-
-  # Try to make a URL good by applying a pattern (string or regexp)
-  def try_substitute old_ptn, subst
-    if page_ref.url.match old_ptn
-      new_url = page_ref.url.sub old_ptn, subst
-      puts "Trying to substitute #{new_url} for #{page_ref.url} on PageRef ##{page_ref.id}"
-      klass = page_ref.class
-      new_page_ref = klass.fetch new_url
-      puts "...got PageRef ##{new_page_ref.id || '<nil>'} '#{new_page_ref.url}' http_status #{new_page_ref.http_status}"
-      unless new_page_ref.errors.any?
-        if new_page_ref.id # Existed prior =>
-          # Make the old page_ref represent the new URL
-          PageRefServices.new(new_page_ref).absorb page_ref
-          return new_page_ref
-        elsif extant = klass.find_by_url(new_page_ref.url) # new_page_ref.url already exists
-          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-          epr = PageRefServices.new extant
-          epr.absorb page_ref
-          epr.absorb new_page_ref
-          return extant
-        else
-          absorb new_page_ref, true
-          puts "...returning ##{page_ref.id || '<nil>'} '#{page_ref.url}' http_status #{page_ref.http_status}"
-          return page_ref
-        end
-      end
-    end
-    nil
   end
 end

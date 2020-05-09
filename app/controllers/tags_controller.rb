@@ -257,7 +257,7 @@ class TagsController < ApplicationController
         end
       end
       respond_to do |format|
-        if @tag.errors.any?
+        if @tag.errors.present?
           format.html { render :action => 'edit' }
           format.xml { render :xml => @tag.errors, :status => :unprocessable_entity }
         else

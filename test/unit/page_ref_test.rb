@@ -1,5 +1,5 @@
 require 'test_helper'
-require 'page_ref.rb'
+# require 'page_ref.rb'
 class PageRefTest < ActiveSupport::TestCase
 
   # Called before every test method runs. Can be used
@@ -48,33 +48,46 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal mp.aliases.last, al
     mp.elide_alias url2
     assert_not_equal mp.aliases.last, al
-    refute mp.alias_for( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
-  end
-
-  test "try substitute" do
-    url = 'http://www.saveur.com/article/Recipe/Classic-Indian-Samosa'
-    mp = PageRef.fetch url
-    assert_equal 200, mp.http_status
-    new_mp = PageRefServices.new(mp).try_substitute 'saveur.com/article/Recipe', 'saveur.com/article/Recipes'
-    assert_equal mp, new_mp
-    assert new_mp.alias_for(url)
-    assert_equal 'https://www.saveur.com/article/Recipes/Classic-Indian-Samosa', new_mp.url
+    refute mp.alias_for?( 'http://www.saveur.com/article/Recipe/Nouveau-Indian-Samosa')
   end
 
   test "try substitute on patijinich" do
-    url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
-    mp = PageRef.new url: url
+    # This URL is bad (400 error)
+    bad_url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
+    mp = PageRef.create url: bad_url
     mp.bkg_land
     assert mp.bad?
-    new_mp = PageRefServices.new(mp).try_substitute(url, 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo')
-    assert_equal mp, new_mp
-    assert new_mp.alias_for(url)
-    assert_equal 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/', new_mp.url
+    # This url is good, but redirects. We need to ensure that Mercury does its job:
+    # -- end up with the redirected URL as the primary one
+    # -- ensure that the previous url still has an alias redirecting to the good one
+    indirect_url = 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/'
+    mp.url = indirect_url
+    assert_nil mp.http_status
+    assert mp.virgin?
+    assert mp.mercury_result.virgin?
+    mp.save
+=begin
+    assert_nil mp.http_status
+    assert_equal 'virgin', mp.status
+    mp.reload
+    assert_nil mp.http_status
+    assert_equal 'virgin', mp.status
+=end
+    mp.bkg_land true
+    refute mp.errors.present?
+    assert_equal [], mp.errors.full_messages
+    assert_equal 200, mp.http_status
+    assert_match  /lamb_barbacoa_in_adobo/, mp.url
+    assert mp.alias_for?(bad_url)
+    assert mp.alias_for?(indirect_url)
+    assert_equal 'good', mp.status
+    assert_nil mp.dj
   end
 
   test "try substitute absorbs" do
     mpgood = PageRef.fetch 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
     mpgood.bkg_land
+    assert mpgood.gleaning
     assert mpgood.good?
 
     url = 'https://oaktownspiceshop.com/blogs/recipe/roasted-radicchio-and-squash-salad-with-burrata'
@@ -83,19 +96,20 @@ class PageRefTest < ActiveSupport::TestCase
     assert mpbad.bad?
     badid = mpbad.id
 
+=begin
     new_mp = PageRefServices.new(mpbad).try_substitute 'oaktownspiceshop.com/blogs/recipe', 'oaktownspiceshop.com/blogs/recipes'
     assert_equal mpgood, new_mp
-    assert new_mp.alias_for(url)
+    assert new_mp.alias_for?(url)
     assert_nil PageRef.find_by(id: badid)
     assert_equal 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata', new_mp.url
+=end
   end
 
   test "initializes simple page" do
     url = 'http://smittenkitchen.com/2016/11/brussels-sprouts-apple-and-pomegranate-salad/'
     mp = PageRef.fetch url
     assert_not_nil mp
-    assert !mp.errors.any?
-    assert_equal ActiveSupport::HashWithIndifferentAccess, mp.extraneity.class
+    assert !mp.errors.present?
     assert_equal url, mp.url
   end
 
@@ -104,6 +118,7 @@ class PageRefTest < ActiveSupport::TestCase
     mp0.save
     mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
+    mp.bkg_land
     assert (mp.aliases.present? && mp.aliases.first == mp.aliases.last), 'Should have only one alias'
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
   end
@@ -111,7 +126,8 @@ class PageRefTest < ActiveSupport::TestCase
   test "target in URL made irrelevant" do
     mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet#target'
     # URL extracted from page
-    assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
+    assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet', mp.url
+    mp.save
     # Original URL (minus target) is alias for "official" URL
     assert_equal 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet', mp.aliases.first.url
     # Original URL found both with and without target
@@ -122,15 +138,15 @@ class PageRefTest < ActiveSupport::TestCase
   test "calls initialize only once" do
     mp = PageRef.new url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     mp.kind = :recipe
-    mp.sync
-    mp.content = ''
+    mp.get_mercury_results
+    mp.description = ''
     mp.save
     assert_equal mp.aliases.first.url, 'www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet'
     mp2 = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/#target'
     mp2.kind = :recipe
     mp2.save
     assert_equal mp2, mp
-    assert_equal '', mp.content
+    assert_equal '', mp.description
   end
 
   test "page record findable by url" do
@@ -142,23 +158,26 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal mp, mp2
   end
 
+=begin
   test "creation fails with bogus URL" do
     mp = PageRef.fetch 'http://www.mibogus.com/bomb'
-    assert !mp.errors.any?
+    assert !mp.errors.present?
   end
+=end
 
   test "fetch simple page" do
     mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     assert_not_nil mp
+    mp.bkg_land
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
-    assert_equal "https://media.wired.com/photos/5926b676af95806129f50602/191:100/pass/Rosetta_impact-1.jpg", mp.lead_image_url
+    assert_equal "http://media.wired.com/photos/5926b676af95806129f50602/191:100/pass/Rosetta_impact-1.jpg", mp.picurl
     assert_equal 'www.wired.com', mp.domain
-    assert_equal 'Time to break out the tissues, space fans.', mp.excerpt
-    assert_equal 966, mp.word_count
-    assert_equal 'ltr', mp.direction
-    assert_equal 1, mp.total_pages
-    assert_equal 1, mp.rendered_pages
+    assert_equal 'Time to break out the tissues, space fans.', mp.mercury_results['excerpt']
+    assert_equal 966, mp.mercury_results['word_count']
+    assert_equal 'ltr', mp.mercury_results['direction']
+    assert_equal 1, mp.mercury_results['total_pages']
+    assert_equal 1, mp.mercury_results['rendered_pages']
   end
 
   test "catch null byte" do
@@ -171,21 +190,30 @@ class PageRefTest < ActiveSupport::TestCase
     assert_not_nil mp
   end
 
-  test "correctly handles HTTP 404 (missing URL)" do
+  test "correctly handles HTTP 404 missing URL" do
     url = "http://honest-food.net/vejjie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
     pr = PageRef.fetch url
     assert pr.virgin?
     assert_nil pr.id
-    # assert !pr.errors.any?
-
     pr.bkg_land true
     assert pr.bad?
-    assert_not_nil pr.id
+    assert_nil pr.id # Record shouldn't be persisted, because it wasn't re-launched
     assert_equal url, pr.url
+    refute pr.dj
+    # Now save, which shouldn't relaunch b/c previously bad
+    pr.save
+    refute pr.dj
+    pr.bkg_launch true
+    assert pr.dj
+    pr.bkg_land
+    # Now after failure, 404 reruns
+    assert [400, 404].include?(pr.http_status)
+    assert pr.error_message.present?
+    assert pr.dj # Shouldn't have given up
   end
 
   test "gets URL that can be opened, but not by Mercury" do
-    url = "http://abcnews.go.com/GMA/recipe/mario-batalis-marinated-olives-15088486"
+    url = "https://www.goodmorningamerica.com/food/story/smores-pie-recipe-ultimate-celebrate-national-smores-day-64876560"
     pr = PageRef.fetch url
     pr.bkg_land
     assert pr.good?
@@ -195,8 +223,10 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "follow redirects" do
-    url = "http://www.tastebook.com/recipes/1967585-Pork-and-Wild-Mushroom-Ragu-with-Potato-Gnocchi"
+    url = "https://patijinich.com/recipe/lamb_barbacoa_in_adobo"
     pr = PageRef.fetch url
+    assert_nil pr.http_status
+    pr.bkg_land true
     assert_equal 200, pr.http_status
     assert pr.alias_for("https://www.tastecooking.com", true)
   end

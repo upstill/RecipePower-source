@@ -217,7 +217,7 @@ module NavtabsHelper
           link_to_dialog('Invite', new_user_invitation_path, class: 'transient'),
           link_to_submit('Sign Out', destroy_user_session_path, :method => 'delete')
       ].compact
-      if permitted_to? :admin, :pages
+      if current_user&.is_admin?
         if response_service.admin_view?
           item_list += [
               '<hr class="menu">'.html_safe,

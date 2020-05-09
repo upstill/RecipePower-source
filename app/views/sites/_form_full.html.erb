@@ -10,10 +10,10 @@
             <%= f.label 'Description' %>
             <%= gleaning_field @decorator, :descriptions %>
             <%= f.input :description, :label => false %>
-            <%= gleaning_field @decorator, :feeds if permitted_to?(:admin, :feeds) %>
+            <%= gleaning_field @decorator, :feeds if policy(Feed).approve? %>
           </div>
         </div>
-        <% if response_service.admin_view? && permitted_to?(:admin, :pages) %>
+        <% if response_service.admin_view? && policy(@site).edit? %>
             <div class="row">
               <div class="col-md-12">
                 <%# f.input :site %>
@@ -32,7 +32,7 @@
               </div>
             </div>
         <% end %>
-        <%= render('finders', f: f) if permitted_to? :admin, :finders %>
+        <%= render('finders', f: f) if policy(Finder).edit? %>
 
     <% end %>
     <%= modal_footer do %>

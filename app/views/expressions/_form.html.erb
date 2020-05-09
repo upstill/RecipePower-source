@@ -1,5 +1,5 @@
 <%= form_for(@expression) do |f| %>
-  <% if @expression.errors.any? %>
+  <% if @expression.errors.present? %>
     <div id="error_explanation">
       <h2><%= pluralize(@expression.errors.count, "error") %> prohibited this expression from being saved:</h2>
 

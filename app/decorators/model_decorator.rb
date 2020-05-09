@@ -18,7 +18,7 @@ class ModelDecorator < Draper::Decorator
     # We memoize the map for each type
     @@AttrMaps ||= {}
     # By default, all accessible attributes map to themselves
-    @@AttrMaps[self.object_class.to_s] ||= self.object_class.mass_assignable_attributes.inject(HashWithIndifferentAccess.new) { |memo, attrname|
+    @@AttrMaps[self.object_class.to_s] ||= self.object_class.mass_assignable_attributes.inject(ActiveSupport::HashWithIndifferentAccess.new) { |memo, attrname|
       memo[attrname] = attrname
       memo
     }
@@ -27,7 +27,7 @@ class ModelDecorator < Draper::Decorator
 
   def self.attrmap_inverted
     @@AttrMapsInverted ||= {}
-    @@AttrMapsInverted[self.object_class.to_s] ||= HashWithIndifferentAccess.new self.attrmap.invert
+    @@AttrMapsInverted[self.object_class.to_s] ||= ActiveSupport::HashWithIndifferentAccess.new self.attrmap.invert
     @@AttrMapsInverted[self.object_class.to_s]
   end
 
@@ -38,14 +38,14 @@ class ModelDecorator < Draper::Decorator
     ed = entity.is_a?(Draper::Decorator) ? entity : entity.decorate
     return params if ed.class == self.class
     inmap = self.class.attrmap
-    outmap = ed.class.attrmap_inverted # HashWithIndifferentAccess.new ed.class.attrmap.invert
-    params.inject(HashWithIndifferentAccess.new) { |memo, item|
-      key, value = *item
-      next memo unless (common_name = inmap[key])
-      next memo unless (output_key = outmap[common_name])
-      memo[output_key] = value
-      memo
+    outmap = ed.class.attrmap_inverted # ActiveSupport::HashWithIndifferentAccess.new ed.class.attrmap.invert
+    result = ActiveSupport::HashWithIndifferentAccess.new
+    params.each {|key, value|
+      (common_name = inmap[key]) &&
+          (output_key = outmap[common_name]) &&
+          (result[output_key] = value)
     }
+    result
   end
 
   # Translation from label names to attribute names
@@ -103,11 +103,6 @@ class ModelDecorator < Draper::Decorator
   # FeedEntry => 'feed_entries'
   def collection_name
     model_name.collection
-  end
-
-  # Check permissions for current user to access controller method
-  def user_can? what
-    true # TODO XXX Restore authorization h.permitted_to? what.to_sym, collection_name.to_sym
   end
 
   # Present an STI subclass as the base class

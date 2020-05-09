@@ -10,7 +10,7 @@
 		<th>Similar</th>
 	    <th>Synonym(s)</th>
 	    <th>Meaning(s)</th>
-		<% if permitted_to? :edit, @taglist.first %>
+		<% if policy(@taglist.first).edit? %>
 	      <th></th>
 	      <th></th>
 		<% end %>

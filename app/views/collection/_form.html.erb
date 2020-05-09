@@ -1,6 +1,6 @@
 <%= form_for(@tag, :url => {:controller => "collection", :action => (@tag.id ? :update : :create), :id => @tag}) do |f| %>
     <%= modal_body do %>
-        <% if @tag.errors.any? %>
+        <% if @tag.errors.present? %>
             <div id="error_explanation">
               <h2><%= pluralize(@tag.errors.count, "error") %> prohibited this tag from being saved:</h2>
               <ul>

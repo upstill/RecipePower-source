@@ -13,7 +13,7 @@
                             :autofocus => true,
                             :data => {
                                     :pre => (resource.invitee_tokens || []).collect { |token|
-                                      token.kind_of?(Fixnum) ?
+                                      token.kind_of?(Integer) ?
                                               {"id" => token.to_s, "name" => User.find(token).handle} :
                                               {"id" => token, "name" => token}
                                     }.to_json,

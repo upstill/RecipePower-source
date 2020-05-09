@@ -45,7 +45,7 @@ class ExpressionServices
     refids = ExpressionServices.meaning_ids tag_ids
     # Return all the tags referred to by those
     result = ExpressionServices.expression_ids refids
-    unique ? result - ((tag_ids.is_a? Fixnum) ? [tag_ids] : tag_ids) : result
+    unique ? result - ((tag_ids.is_a? Integer) ? [tag_ids] : tag_ids) : result
   end
   
   # Return all the semantic children of the tag(s) as an array of arrays

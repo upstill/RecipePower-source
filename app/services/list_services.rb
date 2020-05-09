@@ -111,7 +111,7 @@ class ListServices
   def include? entity, user_or_id, with_pullins=true
     # Trivial accept if the entity is physically in among the list items
     return true if @list.stores? entity
-    user_id = user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id
+    user_id = user_or_id.is_a?(Integer) ? user_or_id : user_or_id.id
     ts = TaggingServices.new entity
     # It's included if the owner or this user has tagged it with the name tag
     return true if ts.exists? @list.name_tag_id, (user_id == @list.owner_id ? user_id : [user_id, @list.owner_id])
@@ -125,9 +125,10 @@ class ListServices
   # 2) tagging the entity with the list's tag as the given user
   # 3) adding the entity to the owner's collection
   def include entity, user_or_id
-    user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    user_id = (user_or_id.is_a?(Integer) ? user_or_id : user_or_id.id)
     @list.store entity if user_id==owner_id
-    TaggingServices.new(entity).assert @list.name_tag, user_id # Tag with the list's name tag anyway
+    # TaggingServices.new(entity).assert @list.name_tag, user_id # Tag with the list's name tag anyway
+    entity.assert_tagging @list.name_tag, user_id # Tag with the list's name tag anyway
     # owner.touch entity
   end
 
@@ -144,9 +145,10 @@ class ListServices
   end
 
   def exclude entity, user_or_id
-    user_id = (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    user_id = (user_or_id.is_a?(Integer) ? user_or_id : user_or_id.id)
     @list.remove entity if user_id == owner_id
-    TaggingServices.new(entity).refute @list.name_tag, user_id # Remove tagging (from this user's perspective)
+    # TaggingServices.new(entity).refute @list.name_tag, user_id # Remove tagging (from this user's perspective)
+    entity.refute_tagging @list.name_tag, user_id # Remove tagging (from this user's perspective)
   end
 
   # Remove an entity from the list based on parameters

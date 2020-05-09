@@ -176,6 +176,7 @@ class User < ApplicationRecord
     return true if entity == self || !entity.is_a?(Collectible) # We don't collect or touch ourself
     # entity.be_touched id, and_collect
     cached_tp(true, entity) do |cr|
+
       if and_collect.nil?
         cr.touch if cr.persisted? # Touch will effectively happen when it's saved
       else
@@ -310,6 +311,26 @@ private
 
   def role_symbols
       [@@Roles.sym(role_id)]
+  end
+
+  def serves_as? role_sym
+    role_id >= @@Roles.num(role_sym)
+  end
+
+  def is_user? # Guest does not count as user
+    id != User.guest_id
+  end
+
+  def is_moderator?
+    serves_as? :moderator
+  end
+
+  def is_editor?
+    serves_as? :editor
+  end
+
+  def is_admin?
+    serves_as? :admin
   end
 
   def qa

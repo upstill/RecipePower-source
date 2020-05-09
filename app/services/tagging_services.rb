@@ -42,7 +42,7 @@ class TaggingServices
   # The latter may also be nil, to find taggings by anyone
   def exists? tag_or_tags_or_id_or_ids, owners_or_ids=nil
     tag_ids = (tag_or_tags_or_id_or_ids.is_a?(Array) ? tag_or_tags_or_id_or_ids : [ tag_or_tags_or_id_or_ids ] ).collect { |tag_or_id|
-      tag_or_id.is_a?(Fixnum) ? tag_or_id : tag_or_id.id
+      tag_or_id.is_a?(Integer) ? tag_or_id : tag_or_id.id
     }
     return false if tag_ids.empty? # Empty in, empty out
     tag_ids = tag_ids.first if tag_ids.count == 1
@@ -52,13 +52,15 @@ class TaggingServices
 
     if owners_or_ids
       owner_ids = (owners_or_ids.is_a?(Array) ? owners_or_ids : [ owners_or_ids ] ).collect { |owner_or_id|
-        owner_or_id.is_a?(Fixnum) ? owner_or_id : owner_or_id.id
+        owner_or_id.is_a?(Integer) ? owner_or_id : owner_or_id.id
       }
       query[:user_id] = ((owner_ids.count == 1) ? owner_ids.first : owner_ids) unless owner_ids.empty?
     end
     Tagging.where(query).any?
   end
 
+=begin
+# !! #assert and #refute devolved to entity.assert_tagging and entity.refute_tagging
   def assert tag, owner_id=User.current_id
     return unless owner_id
     Tagging.find_or_create_by(
@@ -78,7 +80,8 @@ class TaggingServices
       tagging.destroy
     end
   end
-  
+=end
+
   # Eliminate all references to one tag in favor of another
   def self.change_tag(fromid, toid)
     Tagging.where(tag_id: fromid).each do |tochange| 
@@ -89,6 +92,7 @@ class TaggingServices
     end
   end
 
+=begin
   # Class method meant to be run from a console, to clean up redundant taggings before adding index to prevent them
   def self.qa
     Tagging.all.each { |tagging|
@@ -101,6 +105,7 @@ class TaggingServices
       tagging.destroy if matches.count > 1
     }
   end
+=end
 
   # Assert a tag associated with the given tagger. If a tag
   # given by name doesn't exist, make a new one

@@ -22,7 +22,7 @@ class PagesController < ApplicationController
   end
 
   def letsencrypt
-    render :text => params[:id] + '.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
+    render :plain => params[:id] + '.GtVR_lU6pWVrXyEuR0zbcl5uCyBrGfjBrwVOlZgtDPo'
   end
 
   def home

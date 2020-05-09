@@ -1,7 +1,16 @@
 class CollectibleController < ApplicationController
   before_action :login_required, :except => [:touch, :index, :show, :associated, :capture, :collect, :card ]
   before_action :allow_iframe, only: :capture
+  skip_before_action :verify_authenticity_token, only: [:capture, :tag]
+
 #  protect_from_forgery except: :capture
+
+  def check_credentials opts={}
+    # We perform a standard credentials check, but defer to #update_and_decorate for actions that use it
+    # NB This same exclusion will occur in superclasses (specifically, CollectibleController)
+    opts[:except] = (opts[:except] || []) + %w{ collect lists glean editpic tag touch absorb associated }
+    super opts
+  end
 
   def collect
     if current_user
@@ -60,20 +69,12 @@ class CollectibleController < ApplicationController
   def glean
     update_and_decorate
     @what = params[:what].to_sym
-    @gleaning =
-        if @pageurl = params[:url] # To glean images from another page
-          Gleaning.glean @pageurl, 'Image'
-        elsif @decorator.object.respond_to?(:gleaning)
-          do_force = params[:force] && params[:force] == 'true'
-          @decorator.object.page_ref.gleaning = nil if do_force
-          @decorator.bkg_land do_force # Wait for gleaning to complete
-          if (gl = @decorator.gleaning) && gl.bad?
-            @decorator.errors.add :gleaning, "encountered HTTP #{gl.http_status} error: #{gl.err_msg}"
-          end
-          @decorator.gleaning
-        end
-    if @gleaning
-      if @gleaning.errors.any?
+    @pageurl = params[:url] # To glean images from another page
+    if @gleaning = GleaningServices.completed_gleaning_for((@pageurl || @decorator.object), 'Image')
+      if @gleaning.bad?
+        @decorator.errors.add :gleaning, "encountered HTTP #{@gleaning.http_status} error: #{@gleaning.err_msg}"
+      end
+      if @gleaning.errors.present?
         flash.now[:error] = "Can't extract images from there: #{@gleaning.errors.messages}"
       elsif @gleaning.images.blank?
         flash.now[:error] = 'Sorry, we couldn\'t get any images from that page.'
@@ -88,15 +89,9 @@ class CollectibleController < ApplicationController
   def editpic
     update_and_decorate
     @fallback_img = params[:fallback_img]
-    gleaning =
-    if @pageurl = params[:url]
-      Gleaning.glean @pageurl, 'Image'
-    elsif @decorator.object.respond_to?(:gleaning) && @decorator.object.is_a?(Backgroundable) && @decorator.bkg_land
-      @decorator.gleaning
-    else
-      Gleaning.glean @decorator, 'Image'
-    end
-    @image_list = (gleaning && gleaning.images) ? gleaning.images : []
+    @pageurl = params[:url]
+    @gleaning = GleaningServices.completed_gleaning_for (@pageurl || @decorator.object), 'Images'
+    @image_list = @gleaning.images
     if @pageurl && @image_list.blank?
       flash.now[:error] = 'Sorry, we couldn\'t get any images from there.'
       render :errors
@@ -113,27 +108,30 @@ class CollectibleController < ApplicationController
   # incoming parameters for assigning to the target proxy object.
   #
   # Both of these needs can be satisfied by returning the proxy entity and an appropriate parameters hash,
-  # for use by #update_attributes.
-  def proxify nominal_entity=nil
+  # suitable for use by #update_attributes.
+  def edittable_proxy
+    # Get the paramset for the entity being addressed
     entity_params = params[response_service.controller_model_name]
+    # Get the entity being addressed by the controller
+    nominal_entity = response_service.controller_model_class.find_by_id params[:id]
     case nominal_entity
       when PageRef
         page_ref, prparams = nominal_entity, entity_params
       when Pagerefable
         page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
       when NilClass
-        prparams = params[:page_ref] || (entity_params.delete(:page_ref_attributes) if entity_params)
-        page_ref = PageRef.find_by(id: prparams[:id]) if prparams
+        prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
+        page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
       else
         return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
-    # Reconcile the page_ref with any url provided by :extractions parameters
-    url = page_ref ? page_ref.url : prparams[:url]
-    if params[:extractions]
-      url = valid_url(params[:extractions]['URI'], url) || valid_url(params[:extractions]['href'], url) || url
+
+    # The page_ref takes on incoming urls, as possible
+    if page_ref
+      page_ref.url = prparams[:url] if page_ref.acceptable_url?(prparams[:url])
+    else
+      page_ref = PageRef.fetch prparams[:url]
     end
-    # Now we compare the submitted page_ref, if any, to the requisite URL
-    page_ref = PageRef.fetch(url) unless page_ref && page_ref.answers_to?(url)
 
     # Take steps if the page_ref is changing kinds
     if prparams && prparams[:kind] && (prparams[:kind] != page_ref.kind)
@@ -162,7 +160,11 @@ class CollectibleController < ApplicationController
   def tag
     # NB: the PageRefsController handles a GET request to set up tagging, taking params[:extractions] into account
     if current_user
-      model, modelparams = proxify response_service.controller_model_class.find_by(id: params[:id])
+      # Collectibles include both PageRefs and other entities (Recipe, Site, etc.) that HAVE PageRefs
+      # Furthermore, when initially collecting a URL, we may be tagging the entity BY REFERENCE to its PageRef, in
+      # which case we need to tag the corresponding entity, either by picking one or making a new one.
+      # #edittable_proxify() sorts all that out, returning an editable model and (for a POST call) parameters for modification
+      model, modelparams = edittable_proxy # A page_ref may proxify into the associated Recipe or Site, or another PageRef
       modelname = model.model_name.param_key
       params[modelname] = modelparams
 
@@ -175,6 +177,13 @@ class CollectibleController < ApplicationController
                            { touch: :collect } :  # Ensure that it's collected before editing
                            # We have to provide update parameters, in case the model name doesn't match the controller
                            { update_attributes: true, attribute_params: strong_parameters(modelname) }
+
+      if model.is_a? Pagerefable
+        model.page_ref.adopt_extractions params[:extractions] if params[:extractions]
+        model.page_ref.bkg_land # After-creation followup
+        model.page_ref.content = params[:extractions][:content] if params[:extractions] && params[:extractions][:content]
+        update_options[:adopt_gleaning] = true
+      end
       update_and_decorate model, update_options
       # ...now we apply the misc tag tokens (if any) according to the constraints of the decorator
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
@@ -264,6 +273,7 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate touch: true
+    @decorator.bkg_land # Finish scraping, if required
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
@@ -294,7 +304,7 @@ class CollectibleController < ApplicationController
   def create # Take a URL, then either lookup or create the entity
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
-    entity, modelparams = proxify
+    entity, modelparams = edittable_proxy
     params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
     update_and_decorate entity, touch: :collect, update_attributes: true
     entity.bkg_land # Glean title, etc. as necessary
@@ -345,22 +355,29 @@ class CollectibleController < ApplicationController
           if host_forbidden url # Compare the host to the current domain (minus the port)
             render js: %Q{alert("Sorry, but RecipePower doesn't cookmark its own pages (does that even make sense?)") ; }
           else
-            page_ref = PageRef.find_by_url(url) || PageRef.build_by_url(url)
-            if page_ref.errors.any?
+            # By failing to find an existing PageRef on this url, we ensure that the new url is unique
+            # What we DON'T know is whether that url redirects to others that are NOT unique.
+            # Sorting this out (and possibly merging this new PageRef into an old one) is handled when getting Mercury results
+            page_ref = PageRef.fetch url # build_by_url(url)
+            # We use the initial title for now, until the extractions come in
+            page_ref.title = params[:recipe][:title] if (first_time = page_ref.title.blank?)  # PageRef that existed prior
+            page_ref.save # Persist the record, triggering analysis in background
+            if page_ref.errors.present?
               msg = page_ref.errors.messages.gsub /\"/, '\''
               render js: %Q{alert("Sorry, but RecipePower can't make sense of this URL (#{msg})") ; }
             else
-              # Building the PageRef may lead to a different url than what was passed in
+              # sourcehome is essential for communicating between the embedded Javascript and the editing iframe
               sourcehome = response_service.referer.if_present || url
               sourcehome = host_url(sourcehome).sub /^https?:/, sourcehome.match(/^https?:/)[0]
-              edit_params = response_service.redirect_params.merge sourcehome: sourcehome,
-                                                                   page_ref: {
-                                                                       url: page_ref.url,
-                                                                       kind: page_ref.kind,
-                                                                       title: params[:recipe][:title]
-                                                                   }.compact
-              @url = page_ref.id ? tag_page_ref_url(page_ref, edit_params) : tag_page_refs_url(edit_params)
-              @site = page_ref.site
+              # These are the parameters for the callback URL which constructs the iframe with an editor
+              edit_params = response_service.
+                  redirect_params.
+                  merge sourcehome: sourcehome,
+                        page_ref: page_ref.attributes.slice('url', 'kind', 'title')
+
+              @url = tag_page_ref_url page_ref, edit_params
+              # finders possible for ["URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"]
+              @finders = FinderServices.js_finders page_ref.site, (first_time ? {} : { only: ['Content'] })
               render
             end
           end

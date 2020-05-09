@@ -25,7 +25,7 @@ class RecipeTagTest < ActiveSupport::TestCase
       assert_equal 2, Tagging.count-tagging_count, "There should now be exactly two taggings"
       
       User.current = @user1
-      TaggingServices.new(@rcp).refute @jal, @user1.id
+      @rcp.refute_tagging @jal, @user1.id # TaggingServices.new(@rcp).refute @jal, @user1.id
 
       assert_equal @rcp.visible_tags.pluck(:id), [], "Recipe should have removed tag for thing1"
       User.current = @user2
@@ -50,7 +50,7 @@ class RecipeTagTest < ActiveSupport::TestCase
       assert_equal 2, Tagging.count-tagging_count, "There should now be exactly two taggings"
 
       User.current = @user1
-      TaggingServices.new(@rcp).refute @jal
+      @rcp.refute_tagging @jal # TaggingServices.new(@rcp).refute @jal
       assert_equal @rcp.visible_tags, [], "Recipe should have removed tag for thing1"
       User.current = @user2
       assert_equal @rcp.visible_tags, [@chilibean], "Recipe should still have tag for thing2"

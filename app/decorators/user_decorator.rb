@@ -19,11 +19,6 @@ class UserDecorator < CollectibleDecorator
     object.about
   end
 
-  # Check permissions for current user to access controller method
-  def user_can? what
-    (what.to_sym == :edit) && object.current? ? true : super
-  end
-
   def finderlabels
     super << 'Image'
   end
@@ -47,7 +42,7 @@ class UserDecorator < CollectibleDecorator
 
   # Is the object an alias for another user
   def aliases_to? user_or_id
-    object.alias_id == (user_or_id.is_a?(Fixnum) ? user_or_id : user_or_id.id)
+    object.alias_id == (user_or_id.is_a?(Integer) ? user_or_id : user_or_id.id)
   end
 
   # If a user is aliased to another, return the latter

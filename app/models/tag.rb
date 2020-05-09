@@ -57,7 +57,7 @@ class Tag < ApplicationRecord
   has_many :owners, :through => :tag_owners, :class_name => 'User', :foreign_key => 'user_id'
 
   scope :of_type, -> (type_or_types) {
-    type_or_types.present? ? where(tagtype: type_or_types) : unscoped
+    type_or_types.present? ? where(tagtype: Tag.typenum(type_or_types)) : unscoped
   }
 
   scope :meaningless, -> {
@@ -334,11 +334,11 @@ class Tag < ApplicationRecord
     tagtype = Tag.typenum tagtype if tagtype
     extant_only = opts.delete :extant_only
     tag =
-        case tag_or_id_or_name.class.to_s
-          when 'Fixnum'
+        case tag_or_id_or_name
+          when Integer
             # Fetch an existing tag
             Tag.find_by id: tag_or_id_or_name
-          when 'Tag'
+          when Tag
             tag_or_id_or_name
           else
             opts[:matchall] = true

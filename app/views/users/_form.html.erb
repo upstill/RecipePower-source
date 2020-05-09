@@ -45,7 +45,7 @@
         <div class="item-enclosure boolean-item">
           <%= f.input :private, :as => :boolean, :label => 'Cloak of Invisibility (don\'t suggest as Friend)' %>
         </div>
-        <% if response_service.admin_view? && permitted_to?(:manage, response_service.user) %>
+        <% if response_service.admin_view? && policy(response_service.user).manage? %>
             <div class="item-enclosure select-item">
               <%= f.input :role_id, label: 'Role', collection: response_service.user.role_select %>
             </div>

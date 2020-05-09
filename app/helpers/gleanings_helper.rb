@@ -1,8 +1,8 @@
 module GleaningsHelper
 
   # Declare an element that either provides gleaned choices, or waits for a replacement request to come in
-  def  gleaning_field decorator, what, gleaning=nil
-    return unless gleaning ||= decorator.glean
+  def gleaning_field decorator, what
+    return unless gleaning = decorator.glean
     if gleaning.good?
       gleaning_field_declaration decorator, what, gleaning
     elsif glean_path = polymorphic_path([:glean, decorator.as_base_class], what: what) rescue nil
@@ -21,7 +21,7 @@ module GleaningsHelper
     field =
         case label
           when 'Title', 'Description'
-            options = decorator.gleaning.options_for label
+            options = decorator.gleaning.results_for label
             target = "#{decorator.param_key}[#{decorator.attribute_for attr_descriptor}]"
             if label == 'Title' &&
                 decorator.respond_to?(:page_ref) &&
@@ -41,11 +41,13 @@ module GleaningsHelper
           when 'RSS Feed'
             # Declare a checkbox and an external link to each feed link
             return unless decorator.object.is_a? Site
-            gleaning = decorator.gleaning.extract_all 'RSS Feed' do |link, index|
+            rss_feeditems = ''
+            decorator.gleaning.rss_feeds do |link, index|
               link = normalize_url link
               if fz = Feed.preload(link)
                 entry_date = ", latest #{fz.entries.first.published.to_s.split.first}" if fz.entries.first
-                '<br>' +
+                rss_feeditems << 
+                    '<br>'.html_safe +
                     content_tag(:div,
                                 check_box_tag(attribute_name+"[#{index}]",
                                               link,
@@ -59,9 +61,10 @@ module GleaningsHelper
                                 "-- #{pluralize(fz.entries.count, 'entry')}#{entry_date}",
                                 style: 'display: inline-block; padding-left: 50px; font-size: 14px; margin-bottom: 9px;')
               end
+              index = index+1
             end
-            if gleaning.present?
-              label_tag('Gleaned Feeds') + gleaning.html_safe
+            if rss_feeditems.present?
+              (label_tag('Gleaned Feeds') + rss_feeditems.html_safe)
             end
           when 'Image'
             if gleaning.images.present?

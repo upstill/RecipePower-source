@@ -1,3 +1,260 @@
+require 'scraping/scanner.rb'
+require 'scraping/lexaur.rb'
+
+# A Seeker is an abstract class for a subclass which looks for a given item in the given stream
+class Seeker
+  attr_accessor :head_stream, :tail_stream, :token, :children
+
+  def initialize(head_stream, tail_stream, token = nil, children=[])
+    if token.is_a?(Array)
+      token, children = nil, token
+    end
+    @head_stream = head_stream
+    @tail_stream = tail_stream
+    @token = token
+    @children = children
+  end
+
+  # Find a place in the stream where we can match
+  def self.seek stream, opts={}
+    while stream.more?
+      if sk = block_given? ? yield(stream) : self.match(stream, opts)
+        return sk
+      end
+      stream = stream.rest
+    end
+  end
+
+  # Seek to satisfy myself with the contents of the stream AT THIS POSITION.
+  # Return: IFF there's a match, return an instance of the class, which denotes the original stream, and the
+  #   rest of that stream, after parsing.
+  def self.match stream, opts={}
+  end
+
+  # Apply the results of the parse to the Nokogiri scanner
+  def apply
+    @children.each { |child| child.apply }
+    head_stream.enclose_tokens(@head_stream, @tail_stream, @token) if @token
+  end
+
+  # Judge the success of a seeker by its consumption of tokens AND the presence of children
+  def empty?
+    (@head_stream == @tail_stream) && @children.empty?
+  end
+end
+
+# An Empty Seeker does nothing, and does not advance the stream
+class EmptySeeker < Seeker
+  def self.match stream, opts={}
+    self.new stream, stream
+  end
+end
+
+# A Null Seeker simply accepts the next string in the stream and advances past it
+class NullSeeker < Seeker
+  def self.match stream, opts={}
+    self.new stream, stream.rest
+  end
+end
+
+class StringSeeker < Seeker
+  def self.match stream, options={}
+    # TODO: the string should be tokenized according to tokenization rules and matched against a series of tokens
+    self.new stream, stream.rest, options[:token] if stream.peek == options[:string]
+  end
+end
+
+class RegexpSeeker < Seeker
+  def self.match stream, options={}
+    self.new stream, stream.rest, options[:token] if stream.peek&.match options[:regexp]
+  end
+end
+
+# Top-level Seeker: for a recipe
+# We seek individual elements of the recipe, and when found, enclose them in an Element of that class.
+# The following is the grammar implemented by this search.
+# The CSS class denoting such an element is given in parentheses. All such elements
+# are also marked with the rp_elmt class
+# TODO: Author, Yield
+# Ingredient list (rp_inglist): rp_ingspec*  An ingredient list is a sequence of ingredient specs
+# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingname | rp_ingalts]+ [rp_ingcomment]?
+# Ingredient amount (rp_amount): rp_num | rp_unit | (rp_num rp_unit) [rp_altamt]?
+# Alternate amount (rp_altamt): \(rp_amt\)
+# Steps before measurement (rp_presteps): rp_process [{,'or'} rp_process]*
+# Process (rp_process): <Tag type: :Process>
+# Ingredient name (rp_ingname): <Tag type: :Ingredient>
+# Alternate ingredients (rp_ingalts): rp_ingname [',|or' rp_inglist]+
+# List of ingredients (rp_inglist): rp_ingname [',|and' rp_ingname]+
+# Ingredient comment (rp_ingcomment): <content to end of line>
+# Amount number (rp_num): defined by NumberSeeker
+# Amount unit (rp_unit): <Tag type: :Unit>
+
+# Seek an ingredient list
+class IngredientListSeeker < Seeker
+
+  # Seek by probing for an ingredient spec at each newline
+  def self.seek stream, opts={}
+    ils = []
+    while stream.more?
+      if stream.peek == "\n" # Only seek at line boundaries
+        if is = IngredientSpecSeeker.match(stream.rest)
+          ils << is
+        end
+      end
+    end
+    if ils.present?
+      # Package the stream from the first spec to the last as the ingredient list
+    end
+  end
+
+end
+
+# Seek a number at the head of the stream
+class NumberSeeker < Seeker
+
+  # A number can be a non-negative integer, a fraction, or the two in sequence
+  def self.match stream, opts={}
+    return self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)
+    return self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek
+  end
+
+  # Is the string either an integer or a fraction?
+  def self.num1 str
+    str&.match /^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
+  end
+
+  # Does the string have an integer followed by a fraction?
+  def self.num2 str
+    str&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
+  end
+
+end
+
+class TagSeeker < Seeker
+  attr_reader :tag_ids
+
+  def initialize(stream, next_stream, tag_ids, token=nil)
+    super stream, next_stream, token
+    @tag_ids = tag_ids
+  end
+
+  def self.match stream, opts={}
+    opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
+      # The Lexaur provides the data at sequence end, and the post-consumption stream
+      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
+      tag_ids = scope.where(id: data).pluck :id
+      return (self.new(stream, next_stream, tag_ids, opts[:token]) if tag_ids.present?)
+    }
+  end
+end
+
+# An Amount is a number followed by an optional amount, optionally followed by an alternative amount in parentheses
+class AmountSeeker < Seeker
+
+  attr_reader :num, :unit, :alt_num, :alt_unit
+
+  def initialize stream, next_stream, num, unit
+    super stream, next_stream
+    @num = num
+    @unit = unit
+  end
+
+  def self.match stream, opts={}
+    if num = NumberSeeker.match(stream)
+      unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
+      self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
+      num = $1
+      unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
+      self.new(stream, stream.rest, num, unit)
+    end
+  end
+end
+
+# Check for a matched set of parentheses in the stream and call a block on the contents
+class ParentheticalSeeker < Seeker
+  def self.match stream, opts={}
+    if match = stream.peek.match(/^\(/)
+      # Consume the opening paren
+      # Look for the closing paren
+      stream.next while stream.peak && !(match = stream.peek.match /^([^)]*)\)$/)
+      # The last token may include the closing paren
+      # Now we have a stream to present to the block
+      if (found_inside = yield inner_stream)
+      else
+      end
+    end
+  end
+end
+
+# Conditions are a list of { process, }*. Similarly for Ingredients
+class TagsSeeker < Seeker
+  attr_accessor :tag_seekers
+
+  def initialize stream, tail_stream, tag_seeker
+    super stream, tail_stream
+    @tag_seekers = [ tag_seeker ]
+  end
+
+  def self.match stream, opts
+    # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
+    if ns = TagSeeker.match(stream, opts.slice( :lexaur, :types))
+      sk = self.new stream, ns.tail_stream, ns
+      case ns.tail_stream.peek
+      when 'and', 'or'
+        # We expect a terminating condition
+        if ns2 = TagSeeker.match(ns.tail_stream.rest, opts.slice(:lexaur, :types))
+          sk.tag_seekers << ns2
+          sk.tail_stream = ns2.tail_stream
+        else
+          return nil
+        end
+      when ','
+        if further = self.match(ns.tail_stream.rest, opts)
+          sk.tag_seekers += further.tag_seekers
+          sk.tail_stream = further.tail_stream
+        end
+      end
+      return sk
+    end
+  end
+end
+
+class ConditionsSeeker < TagsSeeker
+  def self.match stream, opts
+    super stream, opts.merge(types: 3)
+  end
+end
+
+class IngredientsSeeker < TagsSeeker
+  def self.match stream, opts
+    super stream, opts.merge(types: 4)
+  end
+end
+
+class IngredientSpecSeeker < Seeker
+  attr_reader :amount, :condits, :ingreds
+
+  def initialize stream, tail_stream, amount, condits, ingreds
+    super stream, tail_stream
+    @amount, @condits, @ingreds = amount, condits, ingreds
+  end
+
+  def self.match stream, opts={}
+    original_stream = stream
+    if amount = AmountSeeker.match(stream, opts)
+      puts "Found amount #{amount.num} #{amount.unit}" if Rails.env.test?
+      stream = amount.tail_stream
+    end
+    if condits = ConditionsSeeker.match(stream, opts)
+      stream = condits.tail_stream
+    end
+    if ingreds = IngredientsSeeker.seek(stream, opts)
+      self.new original_stream, ingreds.tail_stream, amount, condits, ingreds
+    end
+  end
+end
+
 =begin
 require "candihash.rb"
 

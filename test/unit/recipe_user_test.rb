@@ -144,7 +144,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       assert !@rcp.collectible_collected?(@thing2.id), "User shouldn't get cookmarked when touched without collecting"
 
       @thing2.collect @rcp
-      @thing2.save
+      @thing2.save # Should save the toucher_pointers in the user's cache, one of which points at @rcp
       @rcp.reload
       assert_equal 2, @rcp.num_cookmarks, "Recipe's cookmark count should advance when cookmarked for second user"
       User.current = @thing2

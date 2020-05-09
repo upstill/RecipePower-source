@@ -58,7 +58,7 @@ module NotifsHelper
 
     else # if no current user, but there's a pending invitation
       invitee_error =
-      if invitee && invitee.errors.any?
+      if invitee&.errors.present?
         # Sort out a pending invitation
         # Bad invitation token => nullify the invitation and incorporate into panel
         response_service.invitation_token = nil # Clear invitation token
@@ -148,7 +148,7 @@ module NotifsHelper
   # Deal with an invitation, rendering it to the given partial if there's action to be taken.
   # If no action is to be taken and advise is true, then provide an advisory alert
   def handle_invitation partial, advise=true
-    if (invitee = response_service.pending_invitee) && !invitee.errors.any?
+    if (invitee = response_service.pending_invitee) && invitee.errors.empty?
       # The pending invitation is valid
       it = response_service.invitation_token
       response_service.invitation_token = nil

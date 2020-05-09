@@ -15,7 +15,7 @@
       </div>
       <%= f.text_area :description, :label => false %>
     </div>
-    <% if permitted_to?(:approve, :feeds) %>
+    <% if policy(decorator.object).approve? %>
         <div class="item-enclosure">
           <div class='label-enclosure'>
             <%= gleaning_field decorator, :feeds %>
@@ -23,7 +23,7 @@
         </div>
     <% end %>
     <% if response_service.admin_view? %>
-        <% if permitted_to?(:admin, :sites) %>
+        <% if policy(decorator.object).edit? %>
             <div class='item-enclosure'>
               <div class='label-enclosure'>
                 <%= f.label :home, 'Site Home' -%>
@@ -43,7 +43,7 @@
               <%= f.text_field :ttlcut %>
             </div>
         <% end %>
-        <%= render('finders', f: f) if permitted_to? :admin, :finders %>
+        <%= render('finders', f: f) if policy(Finder).edit? %>
     <% end %>
     </div>
     </div>

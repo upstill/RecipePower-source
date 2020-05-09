@@ -5,18 +5,27 @@ require './lib/uri_utils.rb'
 class SiteTest < ActiveSupport::TestCase
   fixtures :sites
 
-  test "site initialized to home" do
-    site = Site.find_or_create 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
+  def land_without_persistence site
     site.bkg_land
+    refute site.persisted?
+    assert_not_nil site.page_ref
+    refute site.page_ref.persisted?
+    assert_not_nil site.page_ref.gleaning
+    refute site.page_ref.gleaning.persisted?
+  end
+
+  test "site initialized to home" do
+    site = Site.find_or_build 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
+    land_without_persistence site
     assert_equal 'mexicocooks.typepad.com/mexico_cooks', site.root
     assert_not_nil site.page_ref
   end
 
   test "site created with no home, then set" do
-    site = Site.find_or_create 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
-    site.bkg_land
+    site = Site.find_or_build 'http://mexicocooks.typepad.com/mexico_cooks', root: 'mexicocooks.typepad.com/mexico_cooks'
+    land_without_persistence site
     unless site.respond_to?(:reference)
-      assert_equal 'http://mexicocooks.typepad.com/mexico_cooks', site.home.sub(/\/$/, '')
+      assert_equal 'https://mexicocooks.typepad.com/mexico_cooks', site.home.sub(/\/$/, '')
     end
     assert_not_nil site.page_ref
   end
@@ -24,9 +33,9 @@ class SiteTest < ActiveSupport::TestCase
   test "Same sample maps to same site" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
 
-    site1 = Site.find_or_create_for alcasample
+    site1 = Site.find_or_build_for alcasample
     site1.bkg_land
-    site2 = Site.find_or_create_for alcasample
+    site2 = Site.find_or_build_for alcasample
     site2.bkg_land
     assert_equal site1, site2, "Same sample creates different sites"
   end
@@ -34,7 +43,7 @@ class SiteTest < ActiveSupport::TestCase
   test "root reassignment for site works" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
 
-    site1 = Site.find_or_create_for alcasample
+    site1 = Site.find_or_build_for alcasample
     site1.bkg_land
     assert_equal 'www.alcademics.com', site1.root
     site1.root = 'www.alcademics.com/2012'
@@ -75,13 +84,13 @@ class SiteTest < ActiveSupport::TestCase
     site.bkg_land
     assert_equal 'www.alcademics.com', site.root
     site.root = 'www.alcademics.com/2014'
-    assert site.errors.any?
+    assert site.errors.present?
     assert_equal 'www.alcademics.com', site.root
   end
 
   test "site handles multiple pageref types" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site = Site.find_or_create_for(alcasample)
+    site = Site.find_or_build_for(alcasample)
     site.bkg_land
     dpr = PageRef.fetch alcasample
     dpr.kind = 'about'
@@ -98,14 +107,19 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "with_subroot_of" do
+    sites(:nyt).save # Trigger DelayedJob
+    assert_not_nil sites(:nyt).dj, 'Existing site not marked for gleaning'
     nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
     nyt2 = "http://www.nytimes.com/2016/12/13/dining/restaurants-no-tipping-service.html?ref=dining"
     dpr = PageRef.fetch nyt1
     dpr.kind = 'about'
     dpr.save
+    assert_equal dpr.site, sites(:nyt)
     short = dpr.site
-    short.bkg_land
-    long = Site.create(root: "dinersjournal.blogs.nytimes.com/2012", sample: "http://www.alcademics.com/2012", home: "http://www.alcademics.com/2012")
+    short.reload
+    assert_equal dpr, short.page_refs.first, 'Created PageRef does not get included among its site\'s PageRefs'
+
+    long = Site.create sample: sites(:nyt).sample, root: "dinersjournal.blogs.nytimes.com/2012"
     long.bkg_land
     assert_equal "dinersjournal.blogs.nytimes.com/2012", long.root
     assert_equal short, Site.with_subroot_of(long.root)
@@ -138,26 +152,52 @@ class SiteTest < ActiveSupport::TestCase
 
   end
 
+  # Test that the relationship between a page_ref and its site is consistent
+  # Providing a site parameter asserts that the given site DOES belong to the page_ref
+  def assert_page_ref_correctness page_ref, site=page_ref.site
+    assert_equal site, page_ref.site, 'Site not associated with page_ref'
+    # The page_ref has a site
+    assert_not_nil site
+    # The site's page_refs includes the page_ref
+    assert site.page_refs.include?(page_ref), "Site misses a page_ref that refers to it"
+  end
+
+  def assert_site_correctness site
+    # Confirm site and its page_ref point to each other
+    sitepr = site.page_ref
+    assert_not_nil sitepr
+    assert_equal sitepr.site, site
+    # site appears on the list of sites for the sitepr
+    assert_equal sitepr.sites.first, site
+  end
+
   test "Lengthening path sorts pagerefs appropriately" do
     nyt1 = "http://www.nytimes.com/2015/08/24/business/economy/as-minimum-wage-rises-restaurants-say-no-to-tips-yes-to-higher-prices.html"
     dpr1 = PageRef.fetch nyt1
     dpr1.kind = 'about'
     dpr1.save
-    site1 = dpr1.site
-    site1.bkg_land
-    assert_equal "www.nytimes.com", site1.root
+    shorter = dpr1.site
+    shorter.reload
+    assert_page_ref_correctness dpr1
+    assert_site_correctness shorter
 
-    longer = Site.create(root: "www.nytimes.com/2015")
-    longer.bkg_land
+    shorter.bkg_land
+    assert_equal "www.nytimes.com", shorter.root
+
+    longer = Site.create(root: "www.nytimes.com/2015", home: nyt1)
+    # Creating a site with a longer path attaches extant matching page_ref to it
     dpr1.reload
-    assert_equal longer, dpr1.site
+    longer.reload
+    assert_page_ref_correctness dpr1, longer
+    assert_site_correctness longer
 
     nyt2 = "http://www.nytimes.com/2015/10/15/dining/danny-meyer-restaurants-no-tips.html"
     dpr2 = PageRef.fetch nyt2
-    dpr2.kind = 'about'
+    assert_nil dpr2.id
+    # New PageRef matching longer site gets the site
+    longer.reload
     dpr2.save
-    dpr2.site.bkg_land
-    assert_equal longer, dpr2.site
+    assert_page_ref_correctness dpr2, longer
 
     longer.root = "www.nytimes.com/2015/08"
     longer.save
@@ -167,16 +207,15 @@ class SiteTest < ActiveSupport::TestCase
     dpr1.reload
     assert_equal longer, dpr1.site
     dpr2.reload
-    assert_equal site1, dpr2.site
-
+    assert_equal shorter, dpr2.site
   end
 
   test "Different samples from one site map to same site" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site1 = Site.find_or_create_for(alcasample)
+    site1 = Site.find_or_build_for(alcasample)
     site1.bkg_land
     alcasample = "http://www.alcademics.com/2012/04/the-golden-gate-75-cocktail-.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
-    site2 = Site.find_or_create_for(alcasample)
+    site2 = Site.find_or_build_for(alcasample)
     site2.bkg_land
     assert_equal site1, site2, "Different samples from one site creates different sites"
   end
@@ -216,32 +255,16 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "Home page has correct sample and site" do
-    site = Site.find_or_create_for "http://bladebla.com/esme"
+    site = Site.find_or_build_for "http://bladebla.com/esme"
     site.bkg_land
     assert_equal "http://bladebla.com/esme", site.sample.sub(/\/$/, '')
     assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
   end
 
-  test "Home page established and maintained" do
-    site = Site.find_or_create_for "http://bladebla.com/food-and-drink/index.html"
-    site.bkg_land
-    # Should now have two references, the canonical one without the slash, and a second one with
-    assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
-    assert_equal "bladebla.com", site.root
-    site.home = "http://bladebla.com"
-    assert_equal "http://bladebla.com", site.home.sub(/\/$/, '')
-    assert_equal "bladebla.com", site.root
-    site.home = "http://bladebla.com/food-and-drink/index.html"
-    unless site.respond_to? :reference
-      assert_equal "http://bladebla.com/food-and-drink/index.html", site.home.sub(/\/$/, '')
-    end
-    assert_equal "bladebla.com", site.root
-  end
-
 =begin
 NB: I don't <think> the slash/no-slash distinction still pertains
   test "differentiate between different paths" do
-    short = Site.find_or_create_for "http://www.esquire.com/food-drink/index.html"
+    short = Site.find_or_build_for "http://www.esquire.com/food-drink/index.html"
     # Should now have two references, the canonical one without the slash, and a second one with
     assert_equal "http://www.esquire.com/", short.home
     assert short.page_ref
@@ -259,7 +282,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 =end
 
   test "reset the home path and root independently" do
-    site = Site.find_or_create_for "http://www.esquire.com/food-drink/index.html"
+    site = Site.find_or_build_for "http://www.esquire.com/food-drink/index.html"
     site.bkg_land
     # Should now have two references, the canonical one without the slash, and a second one with
     assert_equal "https://www.esquire.com", site.home.sub(/\/$/, '')
@@ -280,7 +303,8 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "associations" do
     site_count = Site.count
-    site = Site.find_or_create_for "http://www.esquire.com/food-drink/"
+    site = Site.find_or_build_for "http://www.esquire.com/food-drink/"
+    site.save # site.bkg_launch # ...which saves the site
     site.bkg_land
     assert_equal 0, site.dependent_page_refs.count
     pr = PageRef.fetch 'http://www.esquire.com/food-drink/'
@@ -291,10 +315,11 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "standalone gleaning" do
     pr = PageRef.fetch 'http://barbecuebible.com'
-    refute pr.gleaning
-    gl = pr.create_gleaning
+    assert pr.gleaning  # Gleaning gets initialized by assigning URL
+    gl = pr.gleaning
     assert_equal gl.page_ref, pr
-    gl.bkg_launch
+    gl.save
+    # gl.bkg_launch
     assert gl.dj
     gl.bkg_land
     refute gl.processing?
@@ -302,28 +327,28 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "site pageref" do
     pr = PageRef.fetch 'http://barbecuebible.com'
-    pr.bkg_launch
-    assert pr.dj
+    pr.save # pr.bkg_launch
+    assert pr.dj # Should launch on save
     pr.bkg_land
     refute pr.processing?
   end
 
   test "site gleaning" do
-    site = Site.find_or_create_for 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
+    site = Site.find_or_build_for 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
     # Should have extracted info
     site.bkg_land
-    assert_equal 'Barbecuebible.com', site.name
+    assert_match /Barbecue/, site.name
   end
 
   test "recipe gleaning" do
     url = 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
     recipe = CollectibleServices.find_or_create url: url, title: 'bbq venison loins'
-    refute recipe.errors.any?
+    refute recipe.errors.present?
     assert recipe.id
     assert (site = recipe.site)
     assert_nil site.name
     site.bkg_land
-    assert_equal 'Barbecuebible.com', site.name
+    assert_match /Barbecue/, site.name
   end
 
 end

@@ -23,7 +23,7 @@
         <%= presenter.card_homelink link_direct: false, class: 'title-link' %>
       <% end %>
       <% NestedBenchmark.measure '...Rendering edit button' do %>
-        <%= presenter.edit_button if decorator.user_can? :edit %>
+        <%= presenter.edit_button if policy(decorator.object).edit? %>
         <%# presenter.tag_button %>
       <% end %>
       <% NestedBenchmark.measure '...Rendering collect button' do %>
@@ -50,8 +50,10 @@
       <% end %>
     </div>
   </div>
-  <%# feed_update_button Feed.find(2555), force=true %>
   <% NestedBenchmark.measure '...content' do %>
-    <%= presenter.content %>
+    <div class="card-content" style="width:100%">
+      <%= presenter.card_content&.html_safe %>
+    </div>
   <% end %>
+  <%# feed_update_button Feed.find(2555), force=true %>
 <% end %>

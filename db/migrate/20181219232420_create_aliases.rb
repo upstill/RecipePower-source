@@ -19,7 +19,7 @@ class CreateAliases < ActiveRecord::Migration[5.0]
       # First, create an alias for each url of each PageRef. These are presumably canonical,
       # so it is most important to preserve those.
       id, kind, url, aliases = datum
-      if al = Alias.find_by(Alias.url_query url)
+      if al = Alias.find_by_url(url)
         # If there's a collision on url
         # logger.debug "Collision on #{url} with #{al.url}..."
         PageRefServices.new(al.page_ref).absorb PageRef.find(id)
@@ -36,11 +36,8 @@ class CreateAliases < ActiveRecord::Migration[5.0]
       # If any aliases from the PageRef collide with existing Aliases, let them go
       id, kind, url, aliases = datum
       aliases.each do |url|
-        unless al = Alias.find_by(Alias.url_query url)
-          reduced_url = Alias.reduced_url url
-          # logger.debug "Creating Alias on alias #{url} (reduced_url = '#{reduced_url}')..."
-          al = Alias.create page_ref_id: id, url: url
-          # logger.debug "...saved as #{al.url}"
+        unless Alias.find_by_url(url)
+          Alias.create page_ref_id: id, url: url
         end
       end
     end

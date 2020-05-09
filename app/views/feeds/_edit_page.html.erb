@@ -2,7 +2,7 @@
 
 <%= render 'edit_form' %>
 
-<% permitted_to?(:destroy, :feeds) do %>
+<% if policy(@feed).destroy? %>
   <%= link_to 'Destroy', @feed, :method => :delete, :class => "btn btn-default btn-xs btn-danger", data: { confirm: 'Are you sure?'} %>
 <% end %>
 

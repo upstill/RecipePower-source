@@ -38,6 +38,47 @@ function replaceImg(data) {
     }
 }
 
+// MESSAGE RESPONDER to record extracted content in the hidden :content field of the submit form
+function setAttribute(data) {
+    $(data.selector).attr(data.attribute, data.value);
+}
+
+// MESSAGE RESPONDER to record extracted content in the hidden fields of the submit form
+function declareExtractions(data) {
+    // data.label: the attribute being asserted
+    // data.value: the value thereof
+    for (var key in data) {
+        if(key != 'call') {
+            var name = "extractions[" +
+                key +
+                "]";
+            var selector = "input[name='" + name + "']";
+            var parent = $('form');
+            var elmt = $(selector, parent);
+            if(!elmt[0]) {
+                // No such elmt: construct the input elmt and append it to the parent
+                var html = "<input id='extracted_" +
+                    key +
+                    "' type='hidden' name='" +
+                    name +
+                    "'>";
+                elmt = $(html).appendTo(parent);
+            }
+            elmt.attr('value', data[key]);
+            if(key == 'Title') {
+                $('textarea#recipe_title').attr('value', data['Title'])
+            } else if((key == 'Image') && ($('div.pic_preview input').attr('value') == '')) {
+                replaceImg({url: data['Image']});
+            } else if ((key == 'Content') && $('input#recipe_content')[0]) {
+                elmt = $('input#recipe_content')[0];
+                if(elmt && !elmt.hasAttribute('value')) {
+                  elmt.setAttribute('value', data[key]);
+                }
+            }
+        }
+    }
+}
+
 // MESSAGE RESPONDER to take a URL and replace either the page or the current dialog
 function get_and_go(data) {
     // Parse a url to either replace a dialog or reload the page

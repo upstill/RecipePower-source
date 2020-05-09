@@ -39,7 +39,7 @@ module ControllerUtils
 
   # Stick ActiveRecord errors into the flash for presentation at the next action
   def resource_errors_to_flash resource, options={}
-    if resource.respond_to?(:errors) && resource.errors.any?
+    if resource.respond_to?(:errors) && resource.errors.present?
       flash[:error] = view_context.express_resource_errors(resource, options)
     end
   end

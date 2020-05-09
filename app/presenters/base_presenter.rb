@@ -32,7 +32,7 @@ class BasePresenter
         class: 'label-rotator rotate'
   end
 
-  def content
+  def card_content
     # Individual presenters may override to present content
   end
 

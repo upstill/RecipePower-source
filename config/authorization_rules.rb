@@ -1,3 +1,4 @@
+=begin
 authorization do
   role :guest do
     has_permission_on [:pages], :to => [:home, :contact, :about, :welcome, :FAQ, :root, :privacy, :letsencrypt ]
@@ -76,3 +77,4 @@ privileges do
 
 #   privilege :read, :pages, :includes => [:home, :contact, :about, :FAQ, :welcome]
 end
+=end

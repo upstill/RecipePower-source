@@ -68,6 +68,29 @@ class SiteServices
     end
   end
 
+  # For content derived from a recipe on the site, trim it to
+  def trim_recipe content
+    if content.present?
+      @nkdoc = Nokogiri::HTML.fragment content
+      # Remove nodes from the content according to the site's :trimmers collection
+      site.trimmers.each {|trimmer| @nkdoc.css(trimmer).map &:remove} if site.trimmers.present?
+      @nkdoc.traverse do |node|
+        # Ensure that link tags have a global url
+        if node.element?
+          if node.name == 'a'
+            url = node.attribute('href').to_s
+            absolute = safe_uri_join( site.home, url ).to_s
+            puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
+            node.attribute('href').value = absolute if absolute != url
+          end
+        end
+      end
+      @nkdoc.to_html
+    else
+      content
+    end
+  end
+
   def get_input(prompt='? ')
     print prompt
     gets.strip

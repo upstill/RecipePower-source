@@ -77,7 +77,7 @@ class Feed < ApplicationRecord
     if fetch
       self.title = (@fetched.title || '').truncate(255)
       self.description = (@fetched.description || '').truncate(255)
-      self.site ||= Site.find_or_create_for url
+      self.site ||= Site.find_or_build_for url
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
         self.url = @fetched.feed_url
@@ -157,7 +157,7 @@ class Feed < ApplicationRecord
                                          },
                                          :max_redirects => 5,
                                          :timeout => 4
-      f = nil if [Fixnum, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
+      f = nil if [Integer, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
     rescue Exception => e
       f = nil
     end
@@ -245,10 +245,10 @@ class Feed < ApplicationRecord
   end
 
   def after
-    # When the feed is updated successfully, re-queue it for one week hence
+    # When the feed is updated successfully, re-queue it for tomorrow
     super
     logger.debug "Successfully updated feed ##{id}"
-    bkg_launch true, run_at: (Time.now + 1.day)  # Launch the next update for one day hence
+    bkg_launch true, run_at: (Time.now + 1.day)  # Launch the next update for tomorrow
     logger.debug "Queued up feed ##{id}"
   end
 

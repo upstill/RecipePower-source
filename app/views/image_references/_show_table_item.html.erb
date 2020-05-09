@@ -6,7 +6,7 @@
 	</td><td>
 		<%= link_to_dialog 'Show', image_reference_path(item) %>
 	</td>
-	<% if permitted_to? :edit, item %>
+	<% if policy(item).edit? %>
 		<td><%= link_to_dialog 'Edit', edit_image_reference_path(item) %></td>
 		<td><%= link_to_submit 'Destroy', item, method: :delete, confirm: 'Are you sure?' %></td>
 	<% end %>

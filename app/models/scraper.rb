@@ -10,6 +10,8 @@ class Scraper < ApplicationRecord
   include Backgroundable
   backgroundable
 
+  after_create { |scraper| scraper.bkg_launch }
+
   # attr_accessible :url, :what, :run_at, :waittime, :errcode, :recur
   attr_accessor :immediate, :page
 
@@ -39,7 +41,6 @@ class Scraper < ApplicationRecord
 
       scraper = subclass.create_with(recur: recur).find_or_initialize_by(url: uri.to_s, what: what)
       Rails.logger.info "!!!#{scraper.persisted? ? 'Scraper Already' : 'New Scraper'} Defined for '#{scraper.what}' on #{uri} (status #{scraper.status})"
-      scraper.bkg_launch
     else
       scraper = Scraper.new()
       scraper.errors.add :type, "#{subclass} not defined for host #{uri.host}"
@@ -831,7 +832,7 @@ class Www_bbc_co_uk_Scraper < Scraper
     # e.g., http://www.bbc.co.uk/food/recipes/lemon_and_ricotta_tart_44080
     if uri
       # Glean title, description and image
-      extractions = HashWithIndifferentAccess.new(
+      extractions = ActiveSupport::HashWithIndifferentAccess.new(
           :Title => find_by_selector("meta[property='og:title']", :content),
           :Description => find_by_selector("meta[property='og:description']", :content),
           'Prep Time' => find_by_selector("p.recipe-metadata__prep-time"),

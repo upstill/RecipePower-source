@@ -167,7 +167,7 @@ module LinkHelper
       when User
         # homelink user, options.merge(:action => :collection, :class => "#{options[:class]} #{user_subclass user}")
         action = :collection
-        cssclass << ' ' + user_subclass(decorator.object) if defined?(user_subclass)
+        cssclass << (decorator.object.current? ? ' viewer' : ' friend')
       when Referent
         decorator.object = decorator.object.becomes(Referent)
       when Site, Tag

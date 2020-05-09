@@ -7,25 +7,21 @@ class RecipeTest < ActiveSupport::TestCase
     recipe = Recipe.new url: url, title: 'placeholder'
     assert_equal 'placeholder', recipe.title
     recipe.bkg_land
-    assert recipe.site
-    recipe.site.decorate
+    assert recipe.page_ref.site
+    recipe.page_ref.site.decorate
     assert recipe.good?
     assert_equal 'placeholder', recipe.title  # Immune to gleaning
     recipe.title = 'replacement'
     assert_equal 'replacement', recipe.title
-    recipe.bkg_land true
-    # Since we forced the gleaning, the title should be replaced
-    assert_not_equal 'replacement', recipe.title
   end
 
   test "url assigned" do
     url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
     recipe = Recipe.new url: url, title: 'placeholder'
     assert_nil recipe.reference if recipe.respond_to?(:reference)
-    assert !recipe.errors.any?
+    assert !recipe.errors.present?
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
-    recipe.bkg_launch # Set up the gleaning
     recipe.bkg_land # Ensure it's executed
     assert_equal url, recipe.url
     assert recipe.site.virgin?
@@ -37,11 +33,11 @@ class RecipeTest < ActiveSupport::TestCase
     url = 'http://patijinich.com/recipe/creamy-poblano-soup/'
     recipe = Recipe.new url: url
     assert_nil recipe.reference if recipe.respond_to?(:reference)
-    assert !recipe.errors.any?
+    assert !recipe.errors.present?
     assert_nil recipe.id # No persistence unless asked for
     assert_nil recipe.page_ref.id
     # assert recipe.page_ref.good?
-    assert recipe.page_ref.alias_for(url) || recipe.url == url
+    assert recipe.page_ref.alias_for?(url) || recipe.url == url
   end
 
   test "url assigned with unsuccessful redirect" do
@@ -78,7 +74,7 @@ class RecipeTest < ActiveSupport::TestCase
   test "bad--but well-formed--url assigned" do
     url = "http://www.tasteofbeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/"
     recipe = Recipe.new url: url
-    assert !recipe.errors.any?
+    assert !recipe.errors.present?
     assert_equal url, recipe.url
     assert recipe.page_ref.virgin?
     recipe.page_ref.bkg_land
@@ -88,7 +84,7 @@ class RecipeTest < ActiveSupport::TestCase
   end
 
   test "bad url reassigned over good url" do
-    good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
+    good_url = "https://patijinich.com/creamy-poblano-soup/"
     recipe = Recipe.new title: 'some damn thing', url: good_url
     assert recipe.errors.empty?
     assert recipe.page_ref.virgin?
@@ -97,21 +93,21 @@ class RecipeTest < ActiveSupport::TestCase
     assert_nil recipe.page_ref.id
     assert recipe.save
     assert recipe.errors.empty?
-    assert !recipe.page_ref.errors.any?
+    assert !recipe.page_ref.errors.present?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
 
     bad_url = "https://patijinich.com/2012/05/creamy-poblano-soup.html"
     recipe.url = bad_url
     assert_equal bad_url, recipe.url
-    assert recipe.errors.empty?
+    recipe.save # Should launch the page_ref
+    assert recipe.page_ref.virgin?
     recipe.page_ref.bkg_land
     assert recipe.page_ref.bad?
-
-    # Make sure the recipe wasn't saved
-    recipe.reload
-    assert_equal good_url, recipe.url
-
+    assert recipe.page_ref.error_message.present?
+    assert recipe.errors.empty?
+    recipe.bkg_land
+    assert recipe.bad?
   end
 
   test "url reassigned over bad url" do
@@ -124,19 +120,15 @@ class RecipeTest < ActiveSupport::TestCase
     assert_nil recipe.page_ref.id
     assert recipe.save
     assert recipe.errors.empty?
-    assert !recipe.page_ref.errors.any?
+    assert !recipe.page_ref.errors.present?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
 
-    good_url = "https://patijinich.com/recipe/creamy-poblano-soup/"
+    good_url = "https://patijinich.com/creamy-poblano-soup/"
     recipe.url = good_url
     assert_equal good_url, recipe.url
     assert recipe.errors.empty?
     recipe.page_ref.bkg_land
     assert recipe.page_ref.good?
-
-    # Make sure the recipe wasn't saved
-    recipe.reload
-    assert_equal bad_url, recipe.url
   end
 end

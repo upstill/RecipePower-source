@@ -105,3 +105,33 @@ list_test:
   id: 15
   name: Some kind of list
   tagtype: 16
+
+cup:
+  id: 16
+  name: cup
+  tagtype: 5
+
+cups:
+  id: 17
+  name: cups
+  tagtype: 5
+
+peeled:
+  id: 18
+  name: peeled
+  tagtype: 3
+
+seeded:
+  id: 19
+  name: seeded
+  tagtype: 3
+
+chopped:
+  id: 20
+  name: chopped
+  tagtype: 3
+
+cilantro:
+  id: 21
+  name: cilantro
+  tagtype: 4

@@ -2,8 +2,17 @@ class SessionsController < Devise::SessionsController
   # For some mysterious reason, accessing the current_user screws up the signin process.
   skip_before_action :set_current_user
   include Rails.application.routes.url_helpers
-  protect_from_forgery with: :null_session
-  
+  # protect_from_forgery with: :null_session
+  #
+  def check_credentials opts={}
+    # We perform a standard credentials check, but defer to #update_and_decorate for actions that use it
+    # NB This same exclusion will occur in superclasses (specifically, CollectibleController)
+    #
+    # We can't even check credentials when logging the user in, because warden preempts the session as when #current_user is called
+    opts[:except] = (opts[:except] || []) + %w{ create }
+    super opts
+  end
+
   before_action :allow_iframe, only: :new
   before_action :require_no_authentication, only: :create
   after_action :restore_tokens, only: :destroy
@@ -49,21 +58,25 @@ class SessionsController < Devise::SessionsController
   end
 
   def create
-    begin
-      resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new" ) # :failure)
-      result = sign_in_and_redirect(resource_name, resource)
-      return result
-    rescue Exception => e
-      # It's an error to get a login twice, but if there's already a user, we can just proceed as normal
-      if current_user
-        render nil
-      else
-        flash[:error] = 'Oops! Can\'t find those credentials in our records.' unless current_user
-        render :errors, locals: { with_popup: false } # Report error as flash
+    if current_user
+      redirect_to after_sign_in_path_for(current_user)
+    else
+      begin
+        resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new") # :failure)
+        result = sign_in_and_redirect(resource_name, resource)
+        return result
+      rescue Exception => e
+        # It's an error to get a login twice, but if there's already a user, we can just proceed as normal
+        if current_user
+          render nil
+        else
+          flash[:error] = 'Oops! Can\'t find those credentials in our records.' unless current_user
+          render :errors, locals: {with_popup: false} # Report error as flash
+        end
       end
     end
   end
-  
+
   def destroy
     handle = current_user.handle
     redirect_path = after_sign_out_path_for(resource_name)

@@ -21,7 +21,7 @@ RP::Application.routes.draw do
 
   get 'rp_events/destroy'
 
-  match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
+  # match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
 
   get 'scraper/new'
   post 'scraper/create'
@@ -247,6 +247,7 @@ RP::Application.routes.draw do
   resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
+      resource :gleaning
     end
     collection do
       get 'capture'

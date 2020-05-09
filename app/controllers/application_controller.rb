@@ -1,4 +1,3 @@
-# require './lib/seeker.rb'
 require './lib/templateer.rb'
 require './lib/nested_benchmark.rb'
 require 'rp_event'
@@ -7,16 +6,35 @@ require 'results_cache.rb'
 require 'filtered_presenter.rb'
 
 class ApplicationController < ActionController::Base
+  include Pundit
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
   protect_from_forgery with: :exception
 
-  def self.filter_access_to *args
-    # We have to declare a bogus before_action so filter_access_to can remove it without error
-    before_action :filter_access_filter
-    super *args
+  # All controller actions are preceded by a check for permissions
+  # This method may be subclassed to assert opt-ins and exclusions
+  def check_credentials opts = {}
+    return if opts[:only] && !opts[:only].include?(params[:action])
+    unless opts[:except]&.include?(params[:action])
+      target_model_name = controller_name.classify
+      model_class_or_name = begin
+        target_model_name.constantize
+      rescue
+        :"#{target_model_name.underscore}"
+      end
+      authorize model_class_or_name
+    end
   end
+
+  def self.filter_access_to *args
+    # TODO: remove this
+    # We have to declare a bogus before_action so filter_access_to can remove it without error
+    before_action { true }
+    # before_action :filter_access_filter
+    # super *args
+  end
+  before_action :check_credentials
   before_action :check_flash
   before_action :report_cookie_string
   before_action { report_session 'Before controller' }
@@ -41,7 +59,7 @@ class ApplicationController < ActionController::Base
   helper_method :resource_errors_to_flash
   helper_method :resource_errors_to_flash_now
   helper_method :with_format
-  helper_method :'permitted_to?'
+  # helper_method :'permitted_to?'
 
   include ApplicationHelper
 
@@ -69,7 +87,7 @@ class ApplicationController < ActionController::Base
   def destroy
     if update_and_decorate
       @decorator.destroy
-      if @decorator.errors.any? # resource_errors_to_flash(@decorator.object)
+      if @decorator.errors.present? # resource_errors_to_flash(@decorator.object)
         render :errors, locals: { entity: @decorator.object }
       else
         flash[:popup] ||= "#{@decorator.human_name} is no more."
@@ -106,6 +124,12 @@ class ApplicationController < ActionController::Base
   # If attribute_params are non-nil, they are used to initialize(update) the created(fetched) entity
   # We also setup an instance variable for the entity according to its class,
   #  and also set up a decorator (@decorator) on the entity
+  # options:
+  #    :update_attributes: if true, update the object's attributes
+  #    :attribute_params: parameters for updating the object (optional)
+  #    :action_authorized asserts that the user is authorized
+  #    :touch: if true, touch the object in question
+  #    :adopt_gleaning: refer to the accompanying PageRef (or whatever) for extracted attributes
   # Return value: true if all is well
   def update_and_decorate entity=nil, options={}
     if entity.is_a? Hash
@@ -126,6 +150,9 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
+    # The entity has been defined. Now to check that the user is authorized for the current action
+    # NB: Since this method may be called in any context, it's possible to assert authorization
+    options[:action_authorized] || authorize(entity) # Make sure that the user is authorized for this action
     if entity.errors.empty?  &&  # No probs. so far
         entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model
@@ -140,6 +167,7 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
+      entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
       if attribute_params.present? # There are parameters to update
         entity.update_attributes attribute_params
       elsif entity.persisted? # If not, look at saving the toucher_pointer
@@ -187,7 +215,12 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    current_user ? collection_user_path(current_user) : home_path
+    # current_user ? collection_user_path(current_user) : home_path
+    if Rails.env.development?
+      user_path(User.find 1)
+    else
+      current_user ? user_path(current_user) : home_path
+    end
   end
 
   # Get a presenter for the object from within a controller
@@ -477,9 +510,9 @@ class ApplicationController < ActionController::Base
         deferred_request specs
       elsif current_user.sign_in_count < 2
         flash = {success: "Welcome to RecipePower, #{current_user.handle}. This is your collection page, which you can always reach from the Collections menu above."}
-        deferred_request path: collection_user_path(current_user, flash: flash), :format => :html
+        deferred_request path: collection_user_path(current_user, result_type: 'cookmarks', flash: flash), :format => :html
       else
-        deferred_request path: collection_user_path(current_user), :format => :html
+        deferred_request path: collection_user_path(current_user, result_type: 'cookmarks'), :format => :html
       end
     end || super
   end
@@ -492,11 +525,6 @@ class ApplicationController < ActionController::Base
     # defer_request path: "/popup/starting_step3?context=signup", :mode => :modal, :format => :json
     # defer_request path: "/popup/starting_step2?context=signup", :mode => :modal, :format => :json
   end
-
-  # TODO XXX!!! This is a stub to eliminate the need for the authoreyes gem pending going to Ruby 2.3
-  # def permitted_to? (privilege, object_or_sym = nil, options = {})
-  #   true
-  # end
 
   protected
 

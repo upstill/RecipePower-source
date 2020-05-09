@@ -92,7 +92,7 @@ class InvitationsController < Devise::InvitationsController
     resource.invitee_tokens.each do |invitee|
       # Convert tokens to users
       category =
-      if u = invitee.is_a?(Fixnum) ? User.find(invitee) : User.find_by(email: invitee.downcase)
+      if u = invitee.is_a?(Integer) ? User.find(invitee) : User.find_by(email: invitee.downcase)
         # Existing user, whether signed up or not, friend or not
         u.invitation_message = user_params[:invitation_message]
         if current_user.followee_ids.include? u.id # Existing friend: redundant

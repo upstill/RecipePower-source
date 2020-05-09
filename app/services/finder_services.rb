@@ -2,9 +2,53 @@
 # require 'image_reference.rb'
 require 'site.rb'
 require './lib/results.rb'
+require './lib/html_utils.rb'
 
 class FinderServices
   attr_accessor :finder
+  
+  @@DefaultFinders =
+      if !Rails.env.test?
+        Finder.where(site_id: nil).to_a
+      else
+        [
+            {:label => 'URI', :selector => 'meta[property=\'og:url\']', :attribute_name => 'content'},
+            {:label => 'URI', :selector => 'link[rel=\'canonical\']', :attribute_name => 'href'},
+            {:label => 'URI', :selector => 'div.post a[rel=\'bookmark\']', :attribute_name => 'href'},
+            {:label => 'URI', :selector => '.title a', :attribute_name => 'href'},
+            {:label => 'URI', :selector => 'a.permalink', :attribute_name => 'href'},
+            {:label => 'Image', :selector => 'meta[itemprop=\'image\']', :attribute_name => 'content'},
+            {:label => 'Image', :selector => 'meta[property=\'og:image\']', :attribute_name => 'content'},
+            {:label => 'Image', :selector => 'img.recipe_image', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'img.mainIMG', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'div.entry-content img', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'div.post-body img', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'img[itemprop=\'image\']', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'link[itemprop=\'image\']', :attribute_name => 'href'},
+            {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
+            {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
+            {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
+            {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
+            {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
+            {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
+            {:label => 'Title', :selector => "meta[property='og:title']", :attribute_name => 'content'},
+            {:label => 'Title', :selector => "meta[property='dc:title']", :attribute_name => 'content'},
+            {:label => 'Title', :selector => 'title'},
+            {:label => 'Author', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
+            {:label => 'Author', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
+            {:label => 'Author', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
+            {:label => 'Author', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
+            {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
+            {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
+            {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},
+            {:label => 'Description', :selector => 'meta[property=\'description\']', :attribute_name => 'content'},
+            {:label => 'Description', :selector => 'meta[itemprop=\'description\']', :attribute_name => 'content'},
+            {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
+            {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
+            {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
+            {:label => 'RSS Feed', :selector => 'link[type="application/rss+xml"]', :attribute_name => 'href'}
+        ].collect { |attrs| Finder.new attrs }
+      end
 
   def initialize finder=nil
     @finder = finder
@@ -76,30 +120,38 @@ class FinderServices
       finders_or_labels.unshift site
       site = nil
     end
-    finders = finders_or_labels.first.is_a?(Finder) ? finders_or_labels : self.applicable_finders(site, *finders_or_labels)
+
+    # We get either a list of finders to apply, or a list of labels to look for
+    finders, labels =
+        finders_or_labels.first.is_a?(Finder) ?
+            [finders_or_labels, []] :
+            [self.finders_for(site), finders_or_labels]
 
     uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
-    nkdoc = self.open_noko url
+    nkdoc = NestedBenchmark.measure('making Nokogiri request') { self.open_noko url }
 
     # Initialize the results
     results = Results.new *finders.map(&:label)
-
-    finders.each do |finder|
+    NestedBenchmark.measure('filtering for results with Nokogiri') do
+      finders.each do |finder|
       label = finder.label
       next unless (selector = finder.selector) &&
+          (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
           (matches = nkdoc.css(selector)) &&
           (matches.count > 0)
-      attribute_name = (finder.attribute_name.to_s if finder.attribute_name)
+      # finder.attribute_name = finder.finder.attribute_name
       result = Result.new finder # For accumulating results
       matches.each do |ou|
         children = (ou.name == 'ul') ? ou.css('li') : [ou]
         children.each do |child|
           # If the content is enclosed in a link, emit the link too
-          if attribute_value = attribute_name && child.attributes[attribute_name].to_s.if_present
+          if attribute_value = finder.attribute_name && child.attributes[finder.attribute_name].to_s.if_present
             result.push attribute_value
-          elsif attribute_name == 'content'
+          elsif finder.attribute_name == 'content'
             result.push child.content.strip
+          elsif finder.attribute_name == 'html'
+            result.push child.to_html
           elsif child.name == 'a'
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'
@@ -130,6 +182,7 @@ class FinderServices
       if result.found
         result.report
         results[label] << result
+      end
       end
     end
     results
@@ -171,79 +224,73 @@ class FinderServices
     end
   end
 
+  def self.content_finder_for site_or_root, selector
+    site = nil
+    case site_or_root
+    when String
+      matching_sites = Site.where('root ILIKE ?', "%#{site_or_root}%")
+      case matching_sites.count
+      when 0 # No match found
+        puts "Can't find a site to match #{site_or_root}"
+      when 1
+        site = matching_sites.first
+      else
+        puts "More than one site matches #{site_or_root}"
+      end
+    when Site
+      site = site_or_root
+    else
+      puts "FinderServices.content_finder_for must take a site or a string that matches ONE site's root"
+    end
+    if site
+      # Create
+      self.new Finder.find_or_initialize_by(site: site, label: 'Content', selector: selector, attribute_name: 'html')
+    end
+  end
 
-  @@DefaultFinders = [
-      {:label => 'URI', :selector => 'meta[property=\'og:url\']', :attribute_name => 'content'},
-      {:label => 'URI', :selector => 'link[rel=\'canonical\']', :attribute_name => 'href'},
-      {:label => 'URI', :selector => 'div.post a[rel=\'bookmark\']', :attribute_name => 'href'},
-      {:label => 'URI', :selector => '.title a', :attribute_name => 'href'},
-      {:label => 'URI', :selector => 'a.permalink', :attribute_name => 'href'},
-      {:label => 'Image', :selector => 'meta[itemprop=\'image\']', :attribute_name => 'content'},
-      {:label => 'Image', :selector => 'meta[property=\'og:image\']', :attribute_name => 'content'},
-      {:label => 'Image', :selector => 'img.recipe_image', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'img.mainIMG', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'div.entry-content img', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'div.post-body img', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'img[itemprop=\'image\']', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'link[itemprop=\'image\']', :attribute_name => 'href'},
-      {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
-      {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
-      {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
-      {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
-      {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
-      {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
-      {:label => 'Title', :selector => "meta[property='og:title']", :attribute_name => 'content'},
-      {:label => 'Title', :selector => "meta[property='dc:title']", :attribute_name => 'content'},
-      {:label => 'Title', :selector => 'title'},
-  ]
-
-  @@CandidateFinders = [
-      {:label => 'Author', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
-      {:label => 'Author', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
-      {:label => 'Author', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
-      {:label => 'Author', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
-      {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
-      {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
-      {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},
-      {:label => 'Description', :selector => 'meta[property=\'description\']', :attribute_name => 'content'},
-      {:label => 'Description', :selector => 'meta[itemprop=\'description\']', :attribute_name => 'content'},
-      {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
-      {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
-      {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
-      {:label => 'RSS Feed', :selector => 'link[type="application/rss+xml"]', :attribute_name => 'href'}
-  ]
+  # Try extracting content from the finder to a recipe
+  def test_fly recipe=nil
+    # If no recipe provided, pick one from the site
+    recipe ||= @finder.site.recipes.first
+    result = FinderServices.glean recipe.url, @finder.site, @finder
+    if html = result&.content.if_present
+      puts "------------------ Raw HTML as gleaned:"
+      puts html
+      trimmed = SiteServices.new(@finder.site).trim_recipe(html)
+      puts "------------------ Trimmed:\n#{trimmed}" if trimmed != html
+      puts "------------------ Trimmed and Massaged:"
+      puts massage_content(SiteServices.new(@finder.site).trim_recipe(html))
+    else
+      puts "Nothing gleanable from selector #{@finder.selector}"
+    end
+  end
 
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
-  def self.applicable_finders site=nil, *labels
-    if site.is_a?(String)
-      labels.unshift site
-      site = nil
-    end
-    candidates = (site ? site.finders : []) +
-        # Give the DefaultFinders and CandidateFinders a unique, site-less finder from the database
-        (@@DefaultFinders + @@CandidateFinders).collect { |finderspec|
-          finderspec[:finder] ||= Finder.where(finderspec.slice(:label, :selector, :attribute_name).merge site_id: nil).first_or_create
-        }
-    if labels.present?
-      candidates.keep_if { |finder| labels.include? finder.label}
+  # Optionally filter them with :only and :except options (not both)
+  def self.finders_for site = nil, options = {}
+    finders = (site&.finders || []) + @@DefaultFinders
+    if options[:only].present?
+      finders.select {|f| options[:only].include? f.label}
+    elsif options[:except].present?
+      finders.select {|f| !(options[:except].include? f.label)}
     else
-      candidates
+      finders
     end
   end
 
   # Provide the finders in a form suitable for passing to a Javascript processor (see capture.js.erb)
-  def self.js_finders site=nil
-    self.applicable_finders(site).collect { |finder|
+  def self.js_finders site=nil, options={}
+    self.finders_for(site, options).collect { |finder|
       finder.attributes.slice 'label', 'selector', 'attribute_name'
     }
   end
 
   def self.label_choices
-    @@DataChoices ||= ((@@DefaultFinders+@@CandidateFinders).collect { |f| f[:label] } << 'Site Logo').uniq
+    @@DataChoices ||= (@@DefaultFinders.map(&:label) + ['Site Logo', 'Content']).uniq
   end
 
   def self.attribute_choices
-    @@AttributeChoices ||= (@@DefaultFinders+@@CandidateFinders).collect { |f| f[:attribute_name] }.uniq
+    @@AttributeChoices ||= (@@DefaultFinders.map(&:attribute_name) << 'html').uniq
   end
 
   def self.css_class label

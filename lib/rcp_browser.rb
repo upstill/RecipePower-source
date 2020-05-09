@@ -851,7 +851,7 @@ end
 class ContentBrowser < BrowserComposite
   
   def initialize(userid_or_argshash)
-    args = (userid_or_argshash.class.name == "Fixnum") ? { userid: userid_or_argshash } : userid_or_argshash
+    args = (userid_or_argshash.class.name == "Integer") ? { userid: userid_or_argshash } : userid_or_argshash
     @persisters = @persisters || []
     super(0, args)
     @handle = ""

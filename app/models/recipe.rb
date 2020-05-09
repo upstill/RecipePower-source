@@ -1,6 +1,7 @@
 require './lib/Domain.rb'
 require './lib/RPDOM.rb'
 require './lib/my_constants.rb'
+require './lib/html_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
@@ -15,6 +16,8 @@ class Recipe < ApplicationRecord
   pagerefable :url
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
+
+  # after_create { |recipe| recipe.bkg_launch }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,
                   # :prep_time, :prep_time_low, :prep_time_high,
@@ -49,7 +52,22 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, {:gleaning_attributes => %w{ Title Description }}]
+  end
+
+  # The presented content for a recipe defaults to the page ref
+  def presented_content
+    content.if_present || massage_content(page_ref&.content)
+  end
+
+  # When the content is explicitly set for the first time, trim it according to the site
+  def content= html
+    if content.blank?
+      # Here's where we adapt the recipe's content to our needs
+      # Perform site-specific editing after standard editing
+      html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
+    end
+    super html
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -98,9 +116,11 @@ class Recipe < ApplicationRecord
 
   # This is called when the page_ref finishes updating
   def adopt_gleaning
-    self.title = page_ref.title if page_ref.title.present? && !title.present?
-    self.picurl = page_ref.picurl if page_ref.picurl.present? && !picurl.present?
-    self.description = page_ref.description if page_ref.description.present? && !description.present?
+    self.title = page_ref.title if page_ref.title.present? && title.blank?
+    self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
+    self.description = page_ref.description if page_ref.description.present? && description.blank?
+    # We do NOT accept extracted content; instead, we defer to the PageRef until it's set directly
+    # self.content = SiteServices.new(page_ref.site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
     super if defined?(super)
   end
 
