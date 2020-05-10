@@ -245,7 +245,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   if right_collector
     while (right_collector.parent != common_ancestor)
       parent = right_collector.parent
-      while (right_sib = right_collector.next) do
+      while (right_sib = right_collector&.next) do
         right_collector = add_child newtree, right_sib # newtree.add_child right_sib
       end
       right_collector = parent

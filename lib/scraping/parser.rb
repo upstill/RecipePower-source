@@ -41,6 +41,10 @@ class Parser
     @grammar.keys
   end
 
+  def lexaur
+    @lexaur ||= Lexaur.from_tags
+  end
+
   def self.token_to_title token
     @@TokenTitles[token] || "Unnamed Token #{token.to_s}"
   end
@@ -56,8 +60,8 @@ class Parser
     end
   end
 
-  def initialize noko_scanner_or_nkdoc_or_nktokens, lexaur = nil, grammar_mods={}
-    lexaur, grammar_mods = nil, lexaur if lexaur.is_a?(Hash)
+  def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
+    lex, grammar_mods = nil, lex if lex.is_a?(Hash)
     @grammar = @@DefaultGrammar.clone
     modify_grammar grammar_mods
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
@@ -67,7 +71,7 @@ class Parser
       raise 'Provided grammar has errors: ', *gramerrs
     end
     @grammar.freeze
-    @lexaur = lexaur if lexaur
+    @lexaur = lex if lex
     @stream = case noko_scanner_or_nkdoc_or_nktokens
               when NokoScanner
                 noko_scanner_or_nkdoc_or_nktokens
@@ -353,7 +357,7 @@ class Parser
     when Hash
       match_hash scanner, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner, context.merge(token: token, lexaur: @lexaur)
+      spec.match scanner, context.merge(token: token, lexaur: lexaur)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
@@ -442,7 +446,7 @@ class Parser
       # TagsSeeker parses a list of the form "tag1, tag2 and tag3" into a set of tags
       klass = spec[:tag] ? TagSeeker : TagsSeeker
       # Important: the :repeating option will have been applied at a higher level
-      return klass.match(scanner, lexaur: @lexaur, token: token, types: to_match) ||
+      return klass.match(scanner, lexaur: lexaur, token: token, types: to_match) ||
           Seeker.failed(scanner, token, spec)
     elsif to_match = spec[:regexp]
       to_match = Regexp.new to_match

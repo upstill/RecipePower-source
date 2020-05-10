@@ -30,9 +30,8 @@ class Recipe < ApplicationRecord
       recipe.status = "virgin"
     end
   end
-  # after_save { |recipe| recipe.bkg_launch recipe.content.nil? }
 
-  # after_create { |recipe| recipe.bkg_launch }
+  after_save { |recipe| recipe.recipe_page&.save if recipe.recipe_page&.changed? }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,
                   # :prep_time, :prep_time_low, :prep_time_high,
@@ -148,9 +147,11 @@ class Recipe < ApplicationRecord
     if site&.finder_for 'Content'
       page_ref.bkg_land
       page_ref.build_recipe_page if !recipe_page
-      recipe_page&.bkg_land # The recipe_page will assert path markers and clear the content as nec.
+      recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
+      recipe_page.save if persisted? && recipe_page.changed?
       if recipe_page&.good?
         if content.blank?
+          reload if persisted?
           self.content =
               if (html = recipe_page.selected_content(anchor_path, focus_path)).present?
                 ParsingServices.new(self).parse_and_annotate(html).if_present || html

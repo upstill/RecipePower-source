@@ -52,7 +52,7 @@ class ParsingServices
           yield typenum, tagstr if block_given?
         end
       else
-        @parser = Parser.new nokoscan, @lexaur || Lexaur.from_tags
+        @parser = Parser.new nokoscan, @lexaur
         token = token.to_sym
         enclose_results @parser.match(token)
       end
@@ -157,12 +157,12 @@ private
 
   def parse_recipe_page content
     # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-    @parser = Parser.new content, @lexaur || Lexaur.from_tags, @entity.site.grammar_mods.clone
+    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods.clone
     @seeker = parser.match :rp_recipelist
   end
 
   def parse_recipe content
-    @parser = Parser.new content, @lexaur || Lexaur.from_tags, @entity.site.grammar_mods.clone
+    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods.clone
     @seeker = @parser.match :rp_recipe
   end
 

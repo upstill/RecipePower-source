@@ -62,7 +62,7 @@ Parser.init_grammar(
         match:
             {
                 match: [ { optional: :rp_title }, nil ],
-                at_css_match: 'h1',
+                at_css_match: 'h1,h2',
                 token: :rp_recipe
             },
         repeating: true
@@ -85,7 +85,7 @@ Parser.init_grammar(
     },
     # Hopefully sites will specify how to find the title in the extracted text
     rp_title: {
-        in_css_match: 'h1'
+        in_css_match: 'h1,h2'
     }, # Match all tokens within an <h1> tag
     rp_author: {
         match: [ /^Author:?$/, nil ],
