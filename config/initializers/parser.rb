@@ -148,7 +148,7 @@ Parser.init_grammar(
         match: [
             {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
             {optional: 'of'},
-            { or: [ :rp_ingalts, [:rp_presteps, :rp_ingalts ] ] }
+            { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
         ]
     },
     rp_ingname: { tag: 'Ingredient' },

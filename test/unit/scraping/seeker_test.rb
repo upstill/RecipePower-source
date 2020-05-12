@@ -262,4 +262,22 @@ class SeekerTest < ActiveSupport::TestCase
     assert_equal 8, ils.tail_stream.pos
   end
 
+  test 'parenthetical seeker' do
+    scanner = StrScanner.from_string "Here's ( a parenthetical thought) and the rest of it "
+    assert_nil ParentheticalSeeker.match(scanner)
+    scanner = scanner.rest
+    after = ParentheticalSeeker.match(scanner) do |inside|
+      assert_equal 'a parenthetical thought', inside.to_s
+    end
+    assert_equal 'and the rest of it', after.to_s
+
+    scanner = StrScanner.from_string "Here's ( a (doubly) parenthetical thought) and the rest of it "
+    assert_nil ParentheticalSeeker.match(scanner)
+    scanner = scanner.rest
+    after = ParentheticalSeeker.match(scanner) do |inside|
+      assert_equal 'a ( doubly ) parenthetical thought', inside.to_s
+    end
+    assert_equal 'and the rest of it', after.to_s
+  end
+
 end

@@ -70,7 +70,7 @@ class ParserTest < ActiveSupport::TestCase
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless }.
+    @condition_tags = %w{ chopped softened rinsed crustless sifted }.
         each { |name| Tag.assert name, :Condition }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF
@@ -215,7 +215,7 @@ EOF
     seeker = parser.match :rp_ingline
     assert seeker.hard_fail?
 
-    html = '1/2 tsp. baking soda'
+    html = '1/2 tsp. sifted baking soda'
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingline
     assert seeker.success?
@@ -223,6 +223,11 @@ EOF
     assert_equal 2, seeker.children.count
     assert_equal :rp_ingspec, seeker.children.first.token
     assert_equal :rp_ing_comment, seeker.children.last.token
+
+    html = '1/2 tsp. sifted (or lightly sifted) baking soda'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingline
+    assert seeker.success?
   end
 
   test 'parse ing list from modified grammar' do

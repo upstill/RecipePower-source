@@ -416,6 +416,12 @@ class StrScanner < Scanner
     end
   end
 
+  # return a version of self that ends where s2 begins
+  def except s2
+    return self if !s2 || s2.pos > @bound
+    s2 ? StrScanner.new( @strings, @pos, s2.pos) : self
+  end
+
 end
 
 class NokoScanner # < Scanner

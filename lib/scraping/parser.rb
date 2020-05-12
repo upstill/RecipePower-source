@@ -283,6 +283,12 @@ class Parser
       match.tail_stream = scanner.past(toline) if context[:inline] # Skip past the line
       return match.encompass(scanner)  # Release the line-end limitation
     end
+    if context[:parenthetical]
+      after = ParentheticalSeeker.match(scanner) do |inside|
+        match = match_specification(inside, spec, token, context.except(:parenthetical))
+      end
+      return match ? Seeker.new(scanner, after, token, [match]) : Seeker.failed(scanner, after, context)
+    end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
       return Seeker.failed(scanner, context) unless subscanner # There is no such match in prospect
@@ -438,6 +444,7 @@ class Parser
                  :atline, # match must start at the beginning of a line; scanner skips to the next line break
                  :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
+                 :parenthetical, # Match inside parentheses
                  :optional # Failure to match is not a failure
               ].find { |flag| spec.key?(flag) && spec[flag] != true }
             to_match, spec[flag] = spec[flag], true

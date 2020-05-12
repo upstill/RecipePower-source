@@ -368,15 +368,34 @@ end
 
 # Check for a matched set of parentheses in the stream and call a block on the contents
 class ParentheticalSeeker < Seeker
+  def self.matcher ch
+    case ch
+    when '('
+      ')'
+    when '['
+      ']'
+    end
+  end
+
   def self.match stream, opts={}
-    if match = stream.peek.match(/^\(/)
+    if match = ParentheticalSeeker.matcher(stream.peek)
+      stack = []
+      instart = stream
+      rest = stream.rest
       # Consume the opening paren
       # Look for the closing paren
-      stream.next while stream.peak && !(match = stream.peek.match /^([^)]*)\)$/)
-      # The last token may include the closing paren
-      # Now we have a stream to present to the block
-      if (found_inside = yield inner_stream)
-      else
+      while ch = rest.peek do
+        if newmatch = ParentheticalSeeker.matcher(ch)
+          stack.push match
+          match = newmatch
+        elsif ch == match
+          if (match = stack.pop).nil?
+            # Done!
+            yield(stream.rest.except rest) if block_given?
+            return rest.rest
+          end
+        end
+        rest.first
       end
     end
   end
