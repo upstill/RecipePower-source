@@ -139,7 +139,7 @@ EOF
     nokoscan = NokoScanner.from_string ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
-    assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
+    assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec
@@ -342,14 +342,8 @@ end
     html = '1 ounce of bourbon, gently warmed'
     nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice }
     assert_equal %q{<li class="rp_elmt rp_ingline">
-<span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt_with_alt rp_amt"> <span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit" data-value="ounce">ounce</span></span> of <span class="rp_elmt rp_ingname" data-value="bourbon">bourbon</span></span> <span class="rp_elmt rp_ing_comment">, gently warmed</span>
+<span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit" data-value="ounce">ounce</span></span> of <span class="rp_elmt rp_ingalts rp_ingname" data-value="bourbon">bourbon</span></span><span class="rp_elmt rp_ing_comment">, gently warmed</span>
 </li>},
-                 nkdoc.to_s
-
-    # Should have exactly the same result with content priorly enclosed in span
-    html = '<span class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</span>'
-    nkdoc, seeker = parse html, :rp_ingline
-    assert_equal %q{<li class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit">ounce</span></span> of <span class="rp_elmt rp_ingspec rp_ingname">bourbon</span><span class="rp_elmt rp_ing_comment">, gently warmed</span></li>},
                  nkdoc.to_s
 
     # Parsing a fully marked-up ingline shouldn't change it

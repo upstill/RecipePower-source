@@ -113,6 +113,7 @@ class NokoTokens < Array
           !teright.subsq_text.present? &&
           teleft.parent.children.count == 1
         teleft.parent[:class] = "#{teleft.parent[:class]} #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes].to_s)
+        teleft.parent[:'data-value'] = options[:value] if options[:value]
       else
         teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
         update

@@ -182,7 +182,7 @@ module Backgroundable
           end
           puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
         end
-        self.status = 'virgin'
+        self.virgin! unless virgin?
       end
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       if persisted? # Just in case (so DJ gets a retrievable record)
@@ -190,10 +190,8 @@ module Backgroundable
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
         puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
-      else
-        # Can't launch until the record is saved, so we'll mark it as virgin for now
-        self.status = :virgin
       end
+      self.virgin! unless virgin?
     end
     pending?
   end

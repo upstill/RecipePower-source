@@ -176,7 +176,11 @@ class Recipe < ApplicationRecord
 
   def after
     # After the job runs, this is our chance to set status
-    self.status = content.present? ? :good : :bad
+    self.status = if site.finder_for('Content')
+                    content.present? ? :good : :bad
+                  else
+                    page_ref.status
+                  end
     super
   end
 

@@ -122,17 +122,17 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 1, cs.tag_seekers.count
+    assert_equal 1, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 1, cs.tail_stream.pos
     scanner = StrScanner.from_string('1/2 cup peeled tomatoes')
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
-    assert_equal 1, cs.tag_seekers.count
+    ts = cs.children.first
+    assert_equal 1, cs.children.count
     assert_instance_of TagSeeker, ts
     assert_equal 2, cs.head_stream.pos
     assert_equal 3, cs.tail_stream.pos
@@ -144,9 +144,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 3, cs.tail_stream.pos
 
@@ -154,9 +154,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 2, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
   end
@@ -167,9 +167,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
 
@@ -177,9 +177,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 2, cs.head_stream.pos
     assert_equal 7, cs.tail_stream.pos
   end
@@ -190,9 +190,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
   end
@@ -203,9 +203,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 7, cs.tail_stream.pos
   end
@@ -216,9 +216,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 3, cs.head_stream.pos
     assert_equal 10, cs.tail_stream.pos
   end
