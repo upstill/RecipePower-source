@@ -100,8 +100,7 @@ class Parser
         :checklist, # All elements must be matched, but the order is unimportant
         :or, # The list is taken as an ordered set of alternatives, any of which will match the list
         :repeating, # The spec will be matched repeatedly until the end of input
-        :atline, # match must start at the beginning of a line; scanner skips to the next line break
-        :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
+        :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
         :optional # Failure to match is not a failure
       ].each do |flag|
@@ -276,7 +275,7 @@ class Parser
     end
 =end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
-      toline = scanner.toline(context[:inline]) # Go to the next line, possibly limiting the scanner to that line
+      toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
       return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
       return Seeker.failed(toline, toline.end, context) unless toline.more? # Trivial reject for an empty line
       match = match_specification(toline, spec, token, context.except(:atline, :inline))
@@ -345,6 +344,56 @@ class Parser
              else
                Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
              end
+    end
+    if context[:orlist]
+      # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
+      children = []
+      start_scanner = scanner
+      probe = scanner
+      while probe.more? do
+        case probe.peek
+        when ',', 'and', 'or'
+          child = match_specification scanner.except(probe), spec
+          return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
+          children << child
+          break if probe.peek != ','
+          scanner = probe.rest
+        when '(' # Seek matching parenthesis
+          if pr = ParentheticalSeeker.match(probe)  # Skip past the parenthetical
+            probe = pr
+            next
+          end
+        end
+        probe = probe.rest
+      end
+=begin
+      while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        child = match_specification scanner, spec
+        return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
+        children << child
+        scanner = child.next
+        case scanner.peek
+        when 'and', 'or'
+          # We expect a terminating entity
+          child = match_specification scanner.rest, spec
+          if child.success?
+            children << child
+            break
+          else
+            return Seeker.failed(start_scanner, child.head_stream, token, context.merge(children: (children + [child])))
+          end
+        when ','
+          scanner = scanner.rest
+        else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
+          break
+        end
+      end
+=end
+      if children.present?
+        return Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
+      else
+        return Seeker.failed(start_scanner, token, context)
+      end
     end
 
     # Finally, if no modifiers in the context, just match the spec
@@ -441,9 +490,8 @@ class Parser
     # Check for an array to match
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
-                 :atline, # match must start at the beginning of a line; scanner skips to the next line break
-                 :inline, # match must occur within the next full line (like :atline, except limits scan to line length)
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
+                 :orlist, # The item will be repeatedly matched in the form of
                  :parenthetical, # Match inside parentheses
                  :optional # Failure to match is not a failure
               ].find { |flag| spec.key?(flag) && spec[flag] != true }

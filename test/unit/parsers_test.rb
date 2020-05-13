@@ -331,7 +331,7 @@ end
   def parse html, token, options={}
     add_tags :Ingredient, options[:ingredients]
     nokoscan = NokoScanner.from_string html
-    parser = Parser.new(nokoscan, @lex)
+    parser = Parser.new(nokoscan, @lex, options[:grammar_mods] || {})
     if seeker = parser.match(token)
       seeker.enclose_all
     end
@@ -359,13 +359,21 @@ end
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
     assert_equal html.gsub("\n", ''), nkdoc.to_s.gsub("\n", '')
 
-    html = '<div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
-    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
+    html = '<p>1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</p>'
+    nkdoc, seeker = parse html,
+                          :rp_inglist,
+                          ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup },
+                          grammar_mods: {
+                              rp_inglist: {
+                                  :repeating => nil,
+                                  :in_css_match => nil,
+                                  :orlist => true},
+                              rp_ingline: { :inline => nil }
+                          } # Use a comma for the line delimiter
     seeker.children.each { |child| assert_equal :rp_ingline, child.token }
 
     html = '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>'
     nkdoc, seeker = parse html, :rp_recipe
-    assert_equal html, nkdoc.to_s
-    x=2
+    assert_equal 4, seeker.find(:rp_ingline).count
   end
 end

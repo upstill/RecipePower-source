@@ -305,9 +305,10 @@ def html_enclosure options={}
   "<#{tag} class='#{classes}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
-def seekline tokens, within, opos, obound
-  if (newpos = opos) > 0 && tokens[newpos] != "\n"
-    while (newpos < obound) && (tokens[newpos-1] != "\n") do
+def seekline tokens, within, opos, obound, delimiter = nil
+  delimiter = "\n" unless delimiter.is_a?(String)
+  if (newpos = opos) > 0 && tokens[newpos] != delimiter
+    while (newpos < obound) && (tokens[newpos-1] != delimiter) do
       newpos += 1
     end
   end
@@ -316,7 +317,7 @@ def seekline tokens, within, opos, obound
       newbound = newpos
       while newbound < obound do
         newbound += 1
-        break if tokens[newbound-1] == "\n"
+        break if tokens[newbound-1] == delimiter
       end
     else
       newbound = obound
@@ -404,14 +405,9 @@ class StrScanner < Scanner
     @pos < @bound # @length
   end
 
-  # Is the scanner at a newline: either the first token, or a token preceded by "\n"
-  def atline?
-    (@pos >= 0) && (@strings[@pos-1] == "\n")
-  end
-
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
-  def toline within=false
-    seekline @strings, within, @pos, @bound do |newpos, newbound|
+  def toline within=false, delimiter = "\n"
+    seekline @strings, within, @pos, @bound, delimiter do |newpos, newbound|
       StrScanner.new @strings, newpos, newbound
     end
   end
@@ -480,9 +476,9 @@ class NokoScanner # < Scanner
   end
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
-  def toline within = false
+  def toline within = false, delimiter = "\n"
     # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
-    s1 = seekline(@tokens, within, @pos, @bound) do |newpos, newbound|
+    s1 = seekline(@tokens, within, @pos, @bound, delimiter) do |newpos, newbound|
       NokoScanner.new @tokens, newpos, newbound
     end
     s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
@@ -493,7 +489,7 @@ class NokoScanner # < Scanner
     return result unless within
     # Need to find an end at the next line
     s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
-    s5 = seekline(@tokens, false, result.pos+1, @bound) do |newpos, newbound|
+    s5 = seekline(@tokens, false, result.pos+1, @bound, delimiter) do |newpos, newbound|
       NokoScanner.new @tokens, newpos, newbound
     end
     # Constrain the result to the beginning of the next node, if any
