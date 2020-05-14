@@ -31,7 +31,10 @@ class Recipe < ApplicationRecord
     end
   end
 
-  after_save { |recipe| recipe.recipe_page&.save if recipe.recipe_page&.changed? }
+  # This is kind of smelly, but, given that 1) there is no association that maps between one RecipePage
+  # and many Recipes through a single PageRef, and 2) a recipe doesn't necessarily have either a PageRef
+  # or a RecipePage, this is the only way to do it
+  # after_save { |recipe| recipe.page_ref&.recipe_page&.save if recipe.page_ref&.recipe_page&.changed? }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,
                   # :prep_time, :prep_time_low, :prep_time_high,
@@ -130,7 +133,7 @@ class Recipe < ApplicationRecord
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     # Possible prerequisites for a recipe launch:
-    if !content.present? && site.finder_for('Content')
+    if !content.present? && site&.finder_for('Content')
       # Need to launch the recipe_page to collect content
       page_ref.build_recipe_page if !recipe_page
       recipe_page.bkg_launch
@@ -176,10 +179,10 @@ class Recipe < ApplicationRecord
 
   def after
     # After the job runs, this is our chance to set status
-    self.status = if site.finder_for('Content')
+    self.status = if site&.finder_for('Content')
                     content.present? ? :good : :bad
                   else
-                    page_ref.status
+                    page_ref&.status || :good
                   end
     super
   end

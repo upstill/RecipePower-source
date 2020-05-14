@@ -44,24 +44,6 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
   end
 
-  # Do what it takes to setup a recipe for parsing
-  # #load_page_ref
-  #   * loads the page at the given URL
-  #   * builds a Site initialized with the @selector, @trimmers and @grammar_mods
-  #   * sets up associated Gleaning, MercuryResult and RecipePage objects
-  #   * drives the RecipePage to parse the page for recipes by title
-  #   * checks that all is well (objects land properly)
-  #   * returns the PageRef at the center of it all
-  def setup_recipe url
-    # In practice, grammar mods will get bound to the site
-    # The selector will get associated with the recipe's site (as a 'Content' finder)
-    # The trimmers will kept on the site as well, to remove extraneous elements
-    # The grammar_mods will get applied to the parser's grammar for site-specific modification
-    @recipe = load_recipe url, @selector, @trimmers, @grammar_mods
-    @page_ref = @recipe.page_ref
-    @recipe_page = @page_ref.recipe_page
-  end
-
   test 'recipes parsed out correctly' do
     setup_recipe @page
     assert_equal 3, @page_ref.recipes.to_a.count
@@ -75,9 +57,13 @@ class ParseTheguardianTest < ActiveSupport::TestCase
 
   test 'parse single recipe' do
     setup_recipe @page
+    # Setting up the recipe at that page will produce a RecipePage with three recipes
     recipes = @page_ref.recipes.to_a
     assert_equal 3, recipes.count
-    seeker = ParsingServices.new(recipes.first, lexaur: @lexaur).parse
+    # The recipe now gets parsed based on its selection within the RecipePage
+    recipe = recipes.first
+    assert_not_nil? recipe.anchor_path
+    seeker = ParsingServices.new(recipe, lexaur: @lexaur).parse
     assert seeker.success?
   end
 

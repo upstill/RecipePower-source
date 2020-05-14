@@ -148,7 +148,7 @@ EOF
     nokoscan = NokoScanner.from_string ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
-    assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
+    assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec

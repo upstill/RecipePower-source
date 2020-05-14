@@ -29,10 +29,11 @@ def load_recipe url_or_recipe, selector, trimmers, grammar_mods={}
   recipe.bkg_launch
   recipe.bkg_land # Perform all due diligence
   assert_equal grammar_mods, recipe.site.grammar_mods
-  refute recipe.errors.any?
+  refute recipe.errors.any?, recipe.errors.full_messages
   assert recipe.good? # Should have loaded and settled down
 
   assert recipe.recipe_page
+  refute recipe.recipe_page.errors.any?, recipe.recipe_page.errors.full_messages
   assert recipe.recipe_page.good?
   content = SiteServices.new(recipe.site).trim_recipe recipe.page_ref.content
   assert_equal content, recipe.recipe_page.content
@@ -60,3 +61,22 @@ def load_page_ref url_or_page_ref, selector, trimmers, grammar_mods={}
   assert_equal content, page_ref.recipe_page.content
   page_ref
 end
+
+# Do what it takes to setup a recipe for parsing
+# #load_page_ref
+#   * loads the page at the given URL
+#   * builds a Site initialized with the @selector, @trimmers and @grammar_mods
+#   * sets up associated Gleaning, MercuryResult and RecipePage objects
+#   * drives the RecipePage to parse the page for recipes by title
+#   * checks that all is well (objects land properly)
+#   * returns the PageRef at the center of it all
+def setup_recipe url
+  # In practice, grammar mods will get bound to the site
+  # The selector will get associated with the recipe's site (as a 'Content' finder)
+  # The trimmers will kept on the site as well, to remove extraneous elements
+  # The grammar_mods will get applied to the parser's grammar for site-specific modification
+  @recipe = load_recipe url, @selector, @trimmers, @grammar_mods
+  @page_ref = @recipe.page_ref
+  @recipe_page = @page_ref.recipe_page
+end
+

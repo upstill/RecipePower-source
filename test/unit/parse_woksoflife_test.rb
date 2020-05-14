@@ -227,10 +227,10 @@ EOF
     add_tags :Ingredient, ingreds
     parser = Parser.new(html, @lex)  do |grammar|
       # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = {match: //, in_css_match: 'h2' }
-      grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
+      # grammar[:rp_recipelist][:start] = {match: //, in_css_match: 'h2' }
+      # grammar[:rp_title][:in_css_match] = 'h2' # Match all tokens within an <h2> tag
       # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = {match: //, in_css_match: 'h2' }
+      # grammar[:rp_inglist][:bound] = {match: //, in_css_match: 'h2' }
     end
     seeker = parser.match :rp_recipelist
     assert seeker
@@ -246,7 +246,7 @@ EOF
     assert (cook_seeker = parser.seek :rp_cook_time)
     assert_equal 'Cook: 20 min', cook_seeker.to_s
     assert (servings_seeker = parser.seek :rp_serves)
-    assert_equal 'Serves 4', servings_seeker.to_s
+    assert_equal 'Serves 4', servings_seeker.to_s.strip
     ingred_seekers = rcp_seeker.find :rp_ingname
     ingreds_found = ingred_seekers.map &:to_s
     assert_equal ingreds, ingreds_found
