@@ -162,27 +162,6 @@ EOF
     assert_equal 3, ingnames.count
   end
 
-=begin
-  test 'parse individual ingredient specs' do
-    @ingred_specs.each do |ingspec|
-      puts "Parsing '#{ingspec}'"
-      nokoscan = NokoScanner.from_string ingspec
-      is = IngredientSpecSeeker.match nokoscan, lexaur: @lex
-      assert_not_nil is, "#{ingspec} doesn't parse"
-    end
-  end
-
-  test 'parse a whole ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
-  end
-
-  test 'find the ingredient list embedded in a recipe' do
-    nokoscan = NokoScanner.from_string @recipe
-    il = IngredientListSeeker nokoscan
-    assert_not_nil il
-  end
-=end
-
   test 'parse list of tags distributing first word' do
     lex = Lexaur.from_tags
     html = 'ground turmeric, cumin and cinnamon'
@@ -286,6 +265,7 @@ EOF
     assert_equal 8, seeker.children.keep_if { |child| child.success? }.count
   end
 
+=begin
   test 'parse single recipe' do
     html = <<EOF
 <div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
@@ -312,6 +292,7 @@ EOF
     annotated = seeker.enclose_all
     x=2
   end
+=end
 
   test 'ingredient list with pine nuts' do
     html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
@@ -467,4 +448,5 @@ EOF
     assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text.to_s
     assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
   end
+
 end
