@@ -18,3 +18,5 @@ eventmachine/
 /log/trimmed_pl
 /log/heroku
 /log/logout
+
+/shared
