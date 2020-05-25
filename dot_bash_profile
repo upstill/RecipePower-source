@@ -8,6 +8,18 @@ PG_HOME="/etc/postgresql/10/main"
 PG_BIN="/usr/lib/postgresql/10/bin"
 PATH="${PG_BIN}:${PATH}"
 
+function nustop()
+{
+    sudo service nginx stop
+    sudo pkill unicorn
+}
+function nugo()
+    sudo rm /var/log/nginx/*.log shared/log/*.log
+    sudo unicorn -c config/unicorn.rb -E production -D
+    sudo service nginx start
+    sudo vi /var/log/nginx/*.log shared/log/*.log
+}
+
 function clearlog()
 {
    cat /dev/null >${APP_HOME}/log/development.log
@@ -18,7 +30,7 @@ function ack_all()
    ack $@ . --ignore-dir=log --ignore-dir=tmp --ignore-dir=doc
 }
 
-alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l ${LOG_HOME}/server.log start"
+alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l ${LOG_HOME}/server.log"
 alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
 alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
 
