@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.6.3'
 ## gem 'bundler', '~> 1.4'
-gem 'rails', '~> 5.2.3' # 5.0.7.2' #
+gem 'rails', '~> 5.2.4', '>= 5.2.4.3' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -74,7 +74,7 @@ gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-openid'
-gem 'pundit'
+gem 'pundit', '>= 2.1.0'
 # gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
 
 ###### Essential Ruby libs
