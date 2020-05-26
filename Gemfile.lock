@@ -240,7 +240,7 @@ GEM
     mime-types-data (3.2019.1009)
     mimemagic (0.3.3)
     mini_mime (1.0.2)
-    mini_portile2 (2.1.0)
+    mini_portile2 (2.4.0)
     minitest (5.13.0)
     mocha (1.9.0)
       metaclass (~> 0.0.1)
@@ -255,8 +255,8 @@ GEM
     net-ssh (5.2.0)
     nifty-generators (0.4.6)
     nio4r (2.5.2)
-    nokogiri (1.6.8.1)
-      mini_portile2 (~> 2.1.0)
+    nokogiri (1.10.9)
+      mini_portile2 (~> 2.4.0)
     ntlm-http (0.1.1)
     oauth (0.5.4)
     oauth2 (1.4.2)
@@ -413,9 +413,9 @@ GEM
     thor (0.20.3)
     thread_safe (0.3.6)
     tilt (2.0.10)
-    truncato (0.7.8)
+    truncato (0.7.11)
       htmlentities (~> 4.3.1)
-      nokogiri (~> 1.6.1)
+      nokogiri (>= 1.7.0, <= 2.0)
     turn (0.9.6)
       ansi
     tzinfo (1.2.5)
@@ -490,7 +490,7 @@ DEPENDENCIES
   mocha
   net-ssh
   nifty-generators
-  nokogiri (~> 1.6)
+  nokogiri (~> 1.10)
   omniauth-facebook (~> 4.0.0)
   omniauth-google-oauth2
   omniauth-openid
@@ -517,7 +517,7 @@ DEPENDENCIES
   sshkit
   stackprof
   thin
-  truncato (= 0.7.8)
+  truncato (= 0.7.11)
   turn
   uglifier (>= 1.3.0)
   unicorn
