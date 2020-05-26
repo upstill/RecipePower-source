@@ -167,7 +167,8 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
-      entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
+      entity.bkg_land true if options[:adopt_gleaning] && entity.respond_to?(:bkg_land) # Collect attributes from page_ref, etc.
+      # entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
       if attribute_params.present? # There are parameters to update
         entity.update_attributes attribute_params
       elsif entity.persisted? # If not, look at saving the toucher_pointer

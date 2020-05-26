@@ -1,0 +1,57 @@
+<%= form_for([:recipe_contents, @recipe ], url: annotate_recipe_contents_path(@recipe), html: { class: 'annotate-recipe' } ) do |f| %>
+  <%= form_errors_helper f %>
+  <%# render 'recipe_pages/recipe_fields', f: f %>
+  <div class="row"><div class="col col-md-12">
+    <p>Use the mouse to select a part of the recipe, then click a button to identify it.</p>
+  </div></div>
+  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
+  <% if @parse_path %>
+    <input class="content" type="hidden" name="recipe[recipeContents][parse_path]" id="recipe_parse_path" value="<%= @parse_path %>">
+    <%= dialog_submit_button 'parse it!', class: 'trigger hide' %>
+  <% else %>
+    <input class="anchorPath" type="hidden" name="recipe[recipeContents][anchor_path]" id="recipe_anchor_path">
+    <input class="anchorOffset" type="hidden" name="recipe[recipeContents][anchor_offset]" id="recipe_anchor_offset">
+    <input class="focusPath" type="hidden" name="recipe[recipeContents][focus_path]" id="recipe_focus_path">
+    <input class="focusOffset" type="hidden" name="recipe[recipeContents][focus_offset]" id="recipe_focus_offset">
+  <% end %>
+  <div class="row">
+    <div class="col-md-1"><%= annotation_button :rp_title, class: 'text-only tag-button tag-button-top' %></div>
+    <div class="col-md-2"><%= annotation_button :rp_inglist, class: 'text-only tag-button tag-button-top' %></div>
+    <div class="col-md-8">
+      <table>
+        <tr><th colspan="4"><%= annotation_button :rp_ingline, class: 'text-only tag-button tag-button-top', style:'width: 100%' %></th></tr>
+        <tr>
+          <td style="padding:5px">
+            <%= annotation_button :rp_amt, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_num, class: 'text-only tag-button tag-button-btm' %>
+            <%= annotation_button :rp_unit, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px">
+            <%= annotation_button :rp_presteps, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_condition, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px">
+            <%= annotation_button :rp_ingspec, class: 'text-only tag-button tag-button-mdl', style:'width: 100%' %>
+            <br><%= annotation_button :rp_ingname, class: 'text-only tag-button tag-button-btm' %>
+          </td>
+          <td style="padding:5px" valign="top">
+            <%= annotation_button :rp_instructions, class: 'text-only tag-button tag-button-mdl', style: 'vertical-align:top' %>
+            <br>
+          </td>
+        </tr>
+      </table>
+    </div>
+  </div>
+<% end %>
+
+<!--Submitting the modified content for final saving-->
+<%= simple_form_for(@recipe) do |f| %>
+
+  <%# f.hidden_field :content %>
+  <input type='hidden' name='recipe[content]' id='recipe_content'>
+
+  <div class="modal-footer form-actions">
+    <%= dialog_submit_button 'Save', disabled: true %>
+    <%= dialog_cancel_button 'Cancel', data: { :'oncancel' => recipe_contents_path(@recipe) } %>
+  </div>
+<% end %>

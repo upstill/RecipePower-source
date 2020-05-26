@@ -1,0 +1,8 @@
+<% title = @recipe_page.recipes.count > 1 ? "#{@recipe_page.recipes.count} recipes" : "'#{@recipe_page.recipes.first.title.truncate(50)}'" %></h2>
+<%= do_recipe_pages_panel "Source page for #{title}" %>
+
+<%# render 'form', recipe_page: @recipe_page %>
+<%= render 'show_content', recipe_page: @recipe_page %>
+
+<%= link_to 'Show', @recipe_page %>
+<%# link_to 'Back', recipe_pages_path %>

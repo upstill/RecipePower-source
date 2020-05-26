@@ -11,10 +11,14 @@ class Site < ApplicationRecord
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
 
+  # TODO: this needs to persist in the database
+  # :grammar_mods: a hash of modifications to the parsing grammar for the site
+  serialize :grammar_mods, Hash
+
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers ]
+    super + %i[ description trimmers, grammar_mods ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -49,7 +53,16 @@ class Site < ApplicationRecord
 
   has_many :finders, :dependent=>:destroy
   accepts_nested_attributes_for :finders, :allow_destroy => true
-  
+  # You might think you could do this with query methods, but those fail to find records that haven't been
+  # persisted. That extends to #finders UNLESS they are converted to an Array.
+  # So these methods work whether the members have been persisted or not--at the cost of a potential query
+  def finder_for label
+    finders.find { |f| f.label == label }
+  end
+  def finders_for label
+    finders.to_a.keep_if { |f| f.label == label }
+  end
+
   has_many :feeds, :dependent=>:restrict_with_error
   has_many :approved_feeds, -> { where(approved: true) }, :class_name => 'Feed'
 
@@ -99,13 +112,23 @@ class Site < ApplicationRecord
     end
   end
 
+  # When saved, we check the need to get data from entities we depend on
+  def bkg_launch force=false
+    unless logo.present? && name.present? && description.present?
+      # Launch the page_ref to extract them as necessary
+      page_ref&.bkg_launch
+      force = true
+    end
+    super(force) if defined?(super)
+  end
+
   # This is called when the page_ref finishes updating
-  def adopt_gleaning
+  def adopt_page_ref
     # Extract elements from the page_ref
     self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
     self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
     self.description = page_ref.description unless description.present? || page_ref.description.blank?
-    page_ref.gleaning.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaning
+    page_ref.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaned?
     save if persisted? && changed?
   end
 
@@ -141,7 +164,9 @@ public
   # When a result from one of the site's finders gets hit, vote it up
   def hit_on_finder label, selector, attribute_name
     attribs = { label: label, selector: selector, attribute_name: attribute_name }
-    finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
+    extant = finders_for(label).find { |f| f.selector == selector && f.attribute_name == attribute_name }
+    finder = extant || finders.create(attribs)
+    # finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
     finder.hits += 1
     finder.save
   end

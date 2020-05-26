@@ -1,0 +1,23 @@
+<%= simple_form_for(@recipe_page) do |f| %>
+  <%= form_errors_helper f %>
+
+  <!-- Must get content first in order to trigger page_ref build -->
+  <%= f.hidden_field :content %>
+
+  <%= f.simple_fields_for :page_ref do |builder| %>
+    <%= builder.simple_fields_for :recipes do |rbuilder| %>
+      <% render 'recipe_fields', f: rbuilder %>
+    <% end %>
+    <div class="row">
+      <div class='add-fields'>
+        <%= link_to_add_fields '', builder, :recipes %>
+      </div>
+    </div>
+  <% end %>
+
+  <div class="modal-footer form-actions">
+    <%= dialog_submit_button 'Save' %>
+    <%= dialog_cancel_button 'Cancel' %>
+    <%#= f.button :submit %>
+  </div>
+<% end %>

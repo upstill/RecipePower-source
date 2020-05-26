@@ -1,10 +1,329 @@
 require 'string_utils.rb'
 require 'binsearch.rb'
+require 'scraping/text_elmt_data.rb'
+require 'scraping/noko_tokens.rb'
 
 # Is the node ready to delete?
 def node_empty? nokonode
   return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)
   nokonode.children.blank? || nokonode.children.all? { |child| node_empty? child }
+end
+
+# Return all the siblings BEFORE this node
+def prev_siblings nokonode
+  found = false
+  nokonode.parent.children.collect { |child| child unless (found ||= child == nokonode) }.compact
+end
+
+# Return all the siblings AFTER this node
+def next_siblings nokonode
+  found = false
+  nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode ; nil) }.compact
+end
+
+# Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
+def enclosable? subtree, anchor_elmt, focus_elmt, options
+  options[:classes].blank? || !nknode_has_class?(subtree, options[:classes])
+end
+
+def first_text_element node, blanks_okay=false
+  node.traverse do |child|
+    return child if child.text? && (blanks_okay || child.text.present?)
+  end
+end
+
+def last_text_element node, blanks_okay=false
+  last = nil
+  node.traverse do |child|
+    last = child if child.text? && (blanks_okay || child.text.present?)
+  end
+  last
+end
+
+def predecessor_text tree, text_elmt
+  prev = nil
+  tree.traverse do |node|
+    return prev if node == text_elmt # NB: will return nil if no predecessor
+    if node.text?
+      prev = node
+    end
+  end
+end
+
+def successor_text tree, text_elmt
+  passed = false
+  tree.traverse do |node|
+    return node if passed && node.text?
+    passed = true if node == text_elmt
+  end
+end
+
+# An ancestor of a node is markable if the first text elmt and the last text element are the entirety of non-blank text
+def scan_ancestors node, first_text_elmt, last_text_elmt
+  while !node.fragment? &&
+      first_text_element(node) == first_text_elmt &&
+      last_text_element(node) == last_text_elmt do
+    yield node
+    node = node.parent
+  end
+end
+
+# If possible, apply the classes to an ancestor of the two text elements
+# "possible" means that all text of the ancestor before the first and after the last
+# text element is blank
+def tag_ancestor node, first_te, last_te, options={}
+  tag= options[:tag] || 'span'
+  classes = options[:classes] || ''
+  scan_ancestors node, first_te, last_te do |anc|
+    if anc.name == tag&.to_s
+      nknode_add_classes anc, "rp_elmt #{classes}"
+      nknode_add_value anc, options[:value] if options[:value]
+      return anc
+    end
+  end
+  nil
+end
+
+# Test that the nodes have a parent and appropriate siblings
+def confirm_integrity *nodes
+  nodes.each do |node|
+
+  end
+end
+
+# Add a child to a node while ensuring that the child's old environment is maintained
+def add_child node, newchild
+  if (node == newchild) || (newchild.parent == node)
+    return newchild.next
+  end
+  rtnval = newchild.next
+  if newchild == node.next
+    node.add_child newchild
+    return node.next
+  else
+    node.add_child newchild
+    return rtnval
+  end
+  begin
+    orig_prev, orig_next = newchild.previous, newchild.next
+    node_prev, node_next = node.previous, node.next
+    newchild.remove # node.add_child newchild
+    if orig_prev
+      raise '1: Previous node lost its parent after removing' unless orig_prev.parent
+      raise '2: Previous node not linked to next node after removing' unless orig_prev.next == orig_next
+    end
+    if orig_next
+      raise '3: Next node lost its parent after removing' unless orig_next.parent
+      raise '4: Next node not linked back to previous node after removing' unless orig_next.previous == orig_prev
+    end
+    node.add_child newchild
+    if node == orig_prev && node.next != orig_next
+      # Somehow the original next node has gotten unlinked from the DOM.
+      return
+    end
+    if node == orig_next && node.prev != orig_prev
+      return
+    end
+    if orig_prev
+      raise '5: Previous node lost its parent after adding' unless orig_prev.parent
+      raise '6: Previous node not linked to next node after adding' unless orig_prev.next == orig_next
+    end
+    if orig_next
+      raise '7: Next node lost its parent after adding' unless orig_next.parent
+      raise '8: Next node not linked back to previous node after adding' unless orig_next.previous == orig_prev
+    end
+    raise '9: New child not linked in with parent' unless newchild.parent == node
+  rescue Exception => e
+    x=2
+  end
+
+end
+
+# Insert a node before the given node and return the former
+def insert_before node_or_html, node
+  begin
+    old_prev = node.previous
+    parent = node.parent
+    node.previous = node_or_html
+    newtree = node.previous
+    if old_prev
+      raise 'Prior node not relinked properly' unless old_prev.next == newtree
+      raise 'Old previous lost its parent' unless old_prev.parent == parent
+    end
+    if node_or_html.is_a? String
+      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
+    else
+      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
+    end
+  rescue Exception => e
+    x=2
+  end
+  newtree
+end
+
+
+# Insert a node before the given node and return the former
+def insert_after node, node_or_html
+  begin
+    old_next = node.next
+    parent = node.parent
+    node.next = node_or_html
+    newtree = node.next
+    if old_next
+      raise 'Subsequent node not relinked properly' unless old_next.previous == newtree
+      raise 'Old next lost its parent' unless old_next.parent == parent
+    end
+    if node_or_html.is_a? String
+      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
+    else
+      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
+    end
+  rescue Exception => e
+    x=2
+  end
+  newtree
+end
+
+# Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
+# the common ancestor of the two.
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
+  html = html_enclosure(options) # insert=true
+
+  # Back the focus_elmt up as long as it's blank
+  common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+  
+  # We can just apply the class to the parent element if the two text elements are the first and last text elements in the subtree
+  while anchor_elmt.to_s.blank? do
+    anchor_elmt = successor_text common_ancestor, anchor_elmt
+  end
+  while focus_elmt.to_s.blank? do
+    focus_elmt = predecessor_text common_ancestor, focus_elmt
+  end
+  common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
+  # If there's an ancestor with no preceding or succeeding text, mark that and return
+  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))
+    return anc
+  end
+  return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
+
+  # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
+  left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
+      anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
+  newtree = nil
+  left_collector = if options[:insert] != false
+                     if anchor_elmt.parent == common_ancestor
+                       newtree = insert_before html, left_ancestor
+                       # left_ancestor.previous = html
+                       # newtree = left_ancestor.previous
+                       left_ancestor.next
+                     else
+                       newtree = insert_after left_ancestor, html
+                       # left_ancestor.next = html
+                       # newtree = left_ancestor.next
+                       newtree.next
+                     end
+                   else
+                     newtree = Nokogiri::HTML.fragment(html).children[0]
+                     left_ancestor.next
+                   end
+
+  highest_whole_left = anchor_elmt
+  while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
+    highest_whole_left = highest_whole_left.parent
+  end
+  # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
+  if highest_whole_left == focus_elmt
+    add_child newtree, highest_whole_left
+    return newtree
+  end
+  if (newtree.next == focus_elmt) # (newtree.next == highest_whole_left) && (highest_whole_left.next == focus_elmt)
+    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+    focus_elmt = newtree.next
+  else
+    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+  end
+  if right_collector
+    while (right_collector.parent != common_ancestor)
+      parent = right_collector.parent
+      while (right_sib = right_collector&.next) do
+        right_collector = add_child newtree, right_sib # newtree.add_child right_sib
+      end
+      right_collector = parent
+    end
+  end
+  ## Now do the same with the right side, adding preceding elements
+  # Find the highest node that can be moved whole
+  highest_whole_right = focus_elmt
+  while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
+    highest_whole_right = highest_whole_right.parent
+  end
+  # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
+  stack = [highest_whole_right]
+  while stack.last.parent != common_ancestor
+    stack.push stack.last.parent
+  end
+  # Go down the tree, collecting all the siblings before and including each ancestor
+  while ancestor = stack.pop
+    while left_collector && left_collector != ancestor do
+      left_collector = add_child newtree, left_collector # newtree.add_child left_collector
+    end
+    left_collector = ancestor.children[0] unless stack.empty?
+  end
+  add_child newtree, highest_whole_right # newtree.add_child highest_whole_right
+  validate_embedding newtree
+end
+
+# Special case: You can't put a <div> inside a <p>, so we may have to split the common ancestor to accommodate
+def validate_embedding newtree
+  if %w{ div ul li }.include? newtree.name
+    # We have to split ancestors up to and including any <p>
+    while newtree.ancestors.find { |node| node.name == 'p' } do
+      parent = newtree.parent
+      # If the interfering element has no successor or predecessor in the paragraph, simply hoist it up to be a sibling
+      if !newtree.next
+        parent.next = newtree
+      elsif !newtree.previous
+        parent.previous = newtree
+      else
+        # We have to split the paragraph, leaving the new tree between parts
+        ix = parent.children.find_index { |child| child == newtree }
+        parent.next = newtree
+        # break if ix == parent.children.count # No more work to do if this is the last child of the parent
+        newtree.next = newtree.document.create_element parent.name, parent.attributes
+        # Move the paragraph content following the new tree into the new paragraph
+        newtree.next.children = parent.children[ix..-1]
+      end
+    end
+  end
+  newtree
+end
+
+def html_enclosure options={}
+  tag = options[:tag] || 'div'
+  classes = "rp_elmt #{options[:classes]}".strip
+  valuestr = "data-value='#{options[:value]}'" if options[:value]
+  "<#{tag} class='#{classes}' #{valuestr}></#{tag}>" # For constructing the new node
+end
+
+def seekline tokens, within, opos, obound, delimiter = nil
+  delimiter = "\n" unless delimiter.is_a?(String)
+  if (newpos = opos) > 0 && tokens[newpos] != delimiter
+    while (newpos < obound) && (tokens[newpos-1] != delimiter) do
+      newpos += 1
+    end
+  end
+  if newpos < obound # Should we really be returning an empty scanner once we hit the end?
+    if within
+      newbound = newpos
+      while newbound < obound do
+        newbound += 1
+        break if tokens[newbound-1] == delimiter
+      end
+    else
+      newbound = obound
+    end
+    yield newpos, newbound
+  end
 end
 
 # A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
@@ -13,7 +332,7 @@ class Scanner < Object
   attr_reader :pos
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
-  def peek nchars = 1
+  def peek ntokens = 1
 
   end
 
@@ -31,6 +350,11 @@ class Scanner < Object
     if (data || (ptr == (head + 1)))
       head = ptr
     end
+  end
+
+  # Provide a string representing the content of the stream from its current position, terminating at the bound
+  def to_s limit=@bound
+    peek (limit - @pos)
   end
 
 end
@@ -55,6 +379,8 @@ class StrScanner < Scanner
   def peek nchars = 1
     if @pos < @bound # @length
       (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos + nchars)].join(' ')
+    else
+      ''
     end
   end
 
@@ -79,231 +405,44 @@ class StrScanner < Scanner
     @pos < @bound # @length
   end
 
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within=false, delimiter = "\n"
+    seekline @strings, within, @pos, @bound, delimiter do |newpos, newbound|
+      StrScanner.new @strings, newpos, newbound
+    end
+  end
+
+  # return a version of self that ends where s2 begins
+  def except s2
+    return self if !s2 || s2.pos > @bound
+    s2 ? StrScanner.new( @strings, @pos, s2.pos) : self
+  end
+
 end
 
-# This class analyzes and represents tokens within a Nokogiri doc.
-# Once defined, it (but not the doc) is immutable
-class NokoTokens < Array
-  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
-  delegate :pp, to: :nkdoc
-  def initialize nkdoc
-    def to_tokens newtext = nil
-      # Prepend the string to the priorly held text, if any
-      if newtext
-        newtext = @held_text + newtext if @held_text && (@held_text.length > 0)
-      else
-        held_len = @held_text.length
-      end
-      @held_text = tokenize((newtext || @held_text), newtext == nil) { |token, offset|
-        push token
-        @token_starts.push @processed_text_len + offset
-      }
-      @processed_text_len += newtext&.length || held_len
-      @processed_text_len -= @held_text.length
-    end
-
-    def do_child child
-      case
-      when child.text?
-        # Save this element and its starting point
-        @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
-        to_tokens child.text
-      when child.attributes['class']&.value&.match(/\brp_elmt\b/)
-        to_tokens
-        self << NokoScanner.new(child)
-      when child.element?
-        to_tokens "\n" if child.name.match(/^(p|br|li)$/)
-        child.children.each { |j| do_child j }
-      end
-    end
-
-    # Take the parameters as instance variables, creating @tokens if nec.
-    @nkdoc = nkdoc
-    @elmt_bounds = []
-    @token_starts = []
-    @processed_text_len = 0
-    @held_text = ''
-    @nkdoc.children.each { |j| do_child j }
-    to_tokens # Finally flush the last text
-
-    # Make this data immutable! No transforms to the tree should affect any token
-    @token_starts.freeze
-    self.map &:freeze
-    @bound = count
-    self.freeze
-  end
-
-  def token_offset_at index
-    @token_starts[index] || @processed_text_len
-  end
-
-  def elmt_offset_at index
-    @elmt_bounds[index]&.last || @processed_text_len
-  end
-
-  # Convenience method to specify requisite text in terms of tokens
-  def enclose_tokens first_token, limiting_token, classes=''
-    enclose token_offset_at(first_token), token_offset_at(limiting_token), classes
-  end
-
-  # Modify the Nokogiri document to enclose the strings designated by pos_begin and pos_end in a <div> of the given classes
-  def enclose pos_begin, pos_end, classes = ''
-    def replace_elmt elmt, replacement
-      # We enclose all the material in a <span> node, then collapse it
-      replacement = "<span>#{replacement}</span>"
-      puts "Replacing '#{elmt.text}' with '#{replacement}'."
-      parent = elmt.parent
-      nodeset = elmt.replace replacement
-      newnode = parent.children.find { |child|
-        child == nodeset[0]
-      }
-      newnode.replace newnode.children
-    end
-
-    def seek_upwards elmt, limiting_elmt, &block
-      while (elmt != limiting_elmt) && block.call(elmt)
-        elmt = elmt.parent
-      end
-      elmt
-    end
-
-    # Provide a hash of data about the text node that has the token at 'pos_begin'
-    teleft = text_elmt_data pos_begin
-    classes = "rp_elmt #{classes}".strip
-    html = "<div class='#{classes}'></div>" # For constructing the new node
-    #  newbounds = []
-    if teleft.encompasses_offset pos_end
-      # We're in luck! Both beginning and end are on the same text node
-      teleft.split_left
-      teleft.mark_at pos_end
-      teleft.split_right
-      elmt = teleft.text_element
-      elmt.next = html
-      elmt.next.add_child elmt
-    else
-      teright = text_elmt_data -(pos_end)
-      # Find the common ancestor of the two text nodes
-      common_ancestor = (teleft.ancestors & teright.ancestors).first
-      left_ancestor = (teleft.text_element if teleft.text_element.parent == common_ancestor) ||
-          teleft.ancestors.find { |elmt| elmt.parent == common_ancestor }
-      left_ancestor.next = html
-      newtree = left_ancestor.next
-      # Remove unselected text from the two text elements and leave remaining text, if any, next door
-      teleft.split_left ; teright.split_right
-      # On each side, find the highest parent (up to the common_ancestor) that has no leftward children
-      highest_whole_left = teleft.text_element
-      while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
-        highest_whole_left = highest_whole_left.parent
-      end
-      # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
-      elmt = highest_whole_left.next
-      newtree.add_child highest_whole_left
-      while (elmt.parent != common_ancestor)
-        parent = elmt.parent
-        while (right_sib = elmt.next) do
-          elmt = right_sib.next
-          newtree.add_child right_sib
-        end
-        elmt = parent
-      end
-
-      # Now do the same with the right side, adding preceding elements
-      highest_whole_right = teright.text_element
-      while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
-        highest_whole_right = highest_whole_right.parent
-      end
-      # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
-      stack = [ highest_whole_right ]
-      while stack.last.parent != common_ancestor
-        stack.push stack.last.parent
-      end
-      left_sib = newtree.next_sibling
-      while ancestor = stack.pop
-        while left_sib != ancestor do
-          next_sib = left_sib.next_sibling
-          newtree.add_child left_sib
-          left_sib = next_sib
-        end
-        left_sib = ancestor.children[0] unless stack.empty?
-      end
-      newtree.add_child highest_whole_right
-    end
-    # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
-    ix = 0
-    nkdoc.traverse do |node|
-      if node.text?
-        @elmt_bounds[ix][0] = node
-        ix += 1
-      end
-    end
-  end
-
-  def text_elmt_data char_offset
-    TextElmtData.new self, char_offset
-  end
-
-  # Provide the token range enclosed by the CSS selector
-  # RETURNS: if found, a Range value denoting the first token offset and token limit in the DOM.
-  # If not found, nil
-  def dom_range selector
-    return unless found = nkdoc.search(selector).first
-    range_from_subtree found
-  end
-
-  # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
-  def dom_ranges selector
-    nkdoc.search(selector)&.map { |found| range_from_subtree found } || []
-  end
-
-  def range_from_subtree found
-    first_text_element = nil
-    last_text_element = nil
-    found.traverse do |child|
-      if child.text?
-        last_text_element = child
-        first_text_element ||= child
-      end
-    end
-    first_pos = last_pos = last_limit = nil
-    @elmt_bounds.each_with_index do |pair, index|
-      if !first_pos && pair.first == first_text_element
-        first_pos = pair.last
-      end
-      if !last_pos && pair.first == last_text_element
-        last_pos = pair.last
-        last_limit = elmt_offset_at(index+1)
-        break
-      end
-    end
-    # Now we have an index in the elmts array, but we need a range in the tokens array.
-    # Fortunately, that is sorted by index, so: binsearch!
-    first_token_index = binsearch(@token_starts, first_pos) || 0 # Find the token at this position
-    first_token_index += 1 if token_offset_at(first_token_index) < first_pos # Round up if the token overlaps the boundary
-    last_token_index = binsearch @token_starts, last_limit # The last token is a limit
-    last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
-    return first_token_index...last_token_index
-  end
-end
-
-class NokoScanner
+class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_offset_at, :enclose_tokens, :enclose, :text_elmt_data, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
   # - a second array of elmt_bounds, each a pair consisting of a text element and an offset in the tokens array
-  def initialize nkdoc_or_nktokens, pos = 0, bound=nil # length=nil
+  def initialize nkdoc_or_nktokens_or_html, pos = 0, bound=nil # length=nil
     # Take the parameters as instance variables, creating @tokens if nec.
-    if nkdoc_or_nktokens.class == NokoTokens
-      @tokens = nkdoc_or_nktokens
-      @nkdoc = nkdoc_or_nktokens.nkdoc
-    else
-      @nkdoc = nkdoc_or_nktokens
-      @tokens = NokoTokens.new nkdoc_or_nktokens
+    case nkdoc_or_nktokens_or_html
+    when NokoTokens
+      @tokens = nkdoc_or_nktokens_or_html
+      @nkdoc = nkdoc_or_nktokens_or_html.nkdoc
+    when String
+      @nkdoc = Nokogiri::HTML.fragment nkdoc_or_nktokens_or_html
+      @tokens = NokoTokens.new @nkdoc
+    else # It's a Nokogiri doc!
+      @nkdoc = nkdoc_or_nktokens_or_html
+      @tokens = NokoTokens.new nkdoc_or_nktokens_or_html
     end
     @bound = bound || @tokens.length
-    @pos = pos
+    @pos = (pos <= @bound) ? pos : @bound
   end
 
   def self.from_string html
@@ -315,14 +454,20 @@ class NokoScanner
     tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
   end
 
-  def peek nchars = 1
+  def peek ntokens = 1
     if @pos < @bound # @length
-      if nchars == 1
+      if ntokens == 1
         tokens[@pos]
-      elsif tokens[@pos...(@pos + nchars)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
-        tokens[@pos...(@pos + nchars)].join(' ')
+      elsif tokens[@pos...(@pos + ntokens)].all? { |token| token.is_a? String } # ONLY IF NO TOKENS
+        tokens[@pos...(@pos + ntokens)].join(' ')
       end
     end
+  end
+
+  # Output version of #peek: the original text, rather than a joined set of tokens
+  def to_s limit=@bound
+    # peek limit-@pos      Gives tokens joined by a space: not quite the same thing
+    tokens.text_from @pos, limit
   end
 
   # Report the token no matter if the position is beyond the bound
@@ -330,24 +475,45 @@ class NokoScanner
     tokens[@pos]
   end
 
-  # Is the scanner at a newline: either the first token, or a token preceded by "\n"
-  def atline?
-    (@pos >= 0) && (tokens[@pos-1] == "\n")
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within = false, delimiter = "\n"
+    # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
+    s1 = seekline(@tokens, within, @pos, @bound, delimiter) do |newpos, newbound|
+      NokoScanner.new @tokens, newpos, newbound
+    end
+    s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
+    s3 = on_css_match(:after_css_match => 'br')
+    inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
+    return nil if !(result = inorder.first)
+    result = goto result # Restrict the next line to within our scanner
+    return result unless within
+    # Need to find an end at the next line
+    s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
+    s5 = seekline(@tokens, false, result.pos+1, @bound, delimiter) do |newpos, newbound|
+      NokoScanner.new @tokens, newpos, newbound
+    end
+    # Constrain the result to the beginning of the next node, if any
+    result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position
-  def first nchars = 1
-    if str = peek(nchars)
-      @pos += nchars
+  def first ntokens = 1
+    if str = peek(ntokens)
+      @pos += ntokens
       @pos = @bound if @pos > @bound # @length if @pos > @length
     end
     str
   end
 
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars = 1
-    newpos = @pos + nchars
+  def rest ntokens = 1
+    newpos = (ntokens < 0) ? @bound : (@pos + ntokens)
     NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
+  end
+
+  # Return this scanner, exhausted
+  def end
+    NokoScanner.new tokens, @bound, @bound
   end
 
   def chunk data
@@ -367,109 +533,187 @@ class NokoScanner
 
   # Create a scanner that ends at the given scanner
   def except s2
-    NokoScanner.new tokens, @pos, s2.pos # (newpos > @length ? @length : newpos), @length
+    return self if !s2 || s2.pos > @bound
+    s2 ? NokoScanner.new( tokens, @pos, s2.pos) : self
   end
 
   # Make the end of the stream coincident with another stream
   def encompass s2
     # @length = s2.length
     @bound = s2.bound if s2.bound > @bound
+    self
   end
 
+  # Get the text_elmt_data info for the current position
+  def current_ted
+    TextElmtData.new @tokens, @tokens.token_offset_at(@pos) # Locate the text element that we're in
+  end
+
+  # Test certain conditions about the current token. According to key on h, test
+  #   after_elmt: token is immediately preceded by a tag that matches(nominally <br>)
+  #   within_elmt: token is the first non-blank content within the element
+  #   newline: the token is preceded by a newline
+  def is_at? h
+    tedata = current_ted
+    if tedata.prior_text.blank? # Only counts at beginning of a text element
+      start = tedata.text_element
+      if selector = h[:after_elmt]
+        previous = start.previous
+        while previous do
+          return self if previous.matches?(selector)
+          return if previous.inner_text.present?
+          previous = previous.previous
+        end
+      elsif selector = h[:within_elmt]
+        # We must be the first non-blank element within an element
+        start.ancestors.each do |ancestor|
+          return if ancestor.is_a? Nokogiri::HTML::DocumentFragment
+          if ancestor.matches? selector
+            ancestor.traverse do |node|
+              return within_css_match(ancestor) if node == start
+              return if node.text? && node.inner_text.present?
+            end
+          end
+        end
+        parent = start.parent
+        previous = start.previous
+        while previous do
+          return false if previous.inner_text.present?
+        end
+      elsif selector = h[:newline]
+      end
+    end
+  end
+
+=begin
+# Possible function for scanning for a result
+  # Call a block with a scanner for each stop in self as controlled by the options:
+  # :atline moves the scanner to the first token that begins a line (possibly this one)
+  # :inline as with :atline, but foreshortens it to a single line
+  # :at_css_match goes to the next token within an element matching the provided selector
+  # :in_css_match as with :at_css_match, but foreshortens it to the contents of the matching element
+  # :after_css_match goes to the token after the matching element (typically a br tag)
+  # The block takes a scanner for the current location, and should return a scanner after consumption
+  # It may return nil, in which case the next iteration goes to the subsequent token
+  def for_each options={}
+    scanner = self
+    while scanner.peek do
+      flag, flagval = options.keys.first, options.values.first
+      case flag
+      when :atline, :inline
+        toline = scanner.toline options[:inline]
+        return unless toline # return Seeker.failed(scanner, context) unless toline
+        match = match_specification(toline, spec, token, context.except(:atline, :inline))
+        match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
+        return match.encompass(scanner)
+      when :at_css_match, :in_css_match, :after_css_match
+        subscanner = scanner.on_css_match(options)
+        return unless subscanner # return Seeker.failed(scanner, context) unless subscanner
+        match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+        match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
+        return match.encompass(scanner)
+      end
+      scanner = yield(scanner) || scanner.rest
+    end
+  end
+=end
+
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
-  def within_css_match str
-    if range = @tokens.dom_range(str)
+  def within_css_match selector_or_node
+    if range = @tokens.dom_range(selector_or_node)
       return NokoScanner.new @tokens, range.begin, range.end
     end
   end
 
+  def scanner_for_range range, how
+    if range.begin >= @pos
+      case how
+      when :in_css_match
+        NokoScanner.new @tokens, range.begin, range.end if range.end > range.begin
+      when :at_css_match
+        range == @pos..@bound ? self : NokoScanner.new(@tokens, range.begin, range.end)
+      when :after_css_match
+        NokoScanner.new @tokens, range.end
+      end
+    end
+  end
+
+  # Return a scanner that matches the spec.
+  # spec: a Hash with one key-value pair. In all cases, the value is a CSS selector
+  # -- if the key is :in_css_match, find the first node that matches the css and return a scanner for all and only that node's contents
+  # -- if the key is :at_css_match, find the first node that matches the css and return a scanner that starts with that node's contents
+  # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
+  def on_css_match spec
+    flag, selector = spec.to_a.first # Fetch the key and value from the spec
+    @tokens.dom_ranges(spec).each do |range|
+      if range.begin >= @pos &&
+          # range.end <= @bound &&
+          newscanner = scanner_for_range(range, flag)
+        return newscanner
+      end
+    end
+    nil
+  end
+
   # Return an ARRAY of scanners, as above
-  def within_css_matches str
-    @tokens.dom_ranges(str).map { |range|
-      next if range.begin < @pos
-      NokoScanner.new @tokens, range.begin, range.end
-    }.compact
+  def on_css_matches spec
+    flag, selector = spec.to_a.first # Fetch the key and value from the spec
+    ranges = @tokens.dom_ranges spec
+    ranges.map { |range| scanner_for_range range, flag }.compact
   end
 
-end
-
-class TextElmtData < Object
-  delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  delegate :elmt_bounds, to: :noko_tokens
-  attr_accessor :elmt_bounds_index, :text_element, :parent
-  attr_reader :noko_tokens, :local_char_offset, :global_start_offset
-
-  def initialize nkt, global_char_offset # character offset (global)
-    global_char_offset = (terminating = global_char_offset < 0) ? (-global_char_offset) : global_char_offset
-    @noko_tokens = nkt
-    @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
-    # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if terminating && (@elmt_bounds_index > 0) && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
-    @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
-    mark_at global_char_offset
-    @parent = @text_element.parent
+  # Provide xpath and offset for locating the current position in the document
+  def xpath terminating=false
+    @nkdoc.children.first
+    ted = TextElmtData.new @tokens, @tokens.token_offset_at(@pos)*(terminating ? -1 : 1)
+    ted.xpath
   end
 
-  # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
-  def mark_at offset
-    @local_char_offset = offset - @global_start_offset
+  def enclose_to limit, options={}
+    return unless limit > pos
+    @tokens.enclose_by_token_indices @pos, limit, options
   end
 
-  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_left
-    return if prior_text.length == 0 # No need to split
-    text_element.next = subsq_text
-    text_element.content = prior_text
-    @global_start_offset += @local_char_offset
-    elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
-    @local_char_offset = 0
+  # Provide the text element data for the current character position
+  def text_elmt_data pos=@pos
+    @tokens.text_elmt_data(@tokens.token_offset_at pos) if pos < @bound
   end
 
-  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_right
-    return if subsq_text.length == 0 # No need to split
-    text_element.previous = prior_text
-    text_element.content = subsq_text
-    elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
-    elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
-    @local_char_offset = text.length # Goes to the end of this node
+  def parent_tagged_with token
+    text_elmt_data&.parent_tagged_with token
   end
 
-  # Does the text element include the text at the end offset
-  def encompasses_offset end_offset
-    text_element.text[end_offset - @global_start_offset - 1] != nil
+  def descends_from? tag, token
+    text_elmt_data&.descends_from? tag, token
   end
 
-  # Return the text of the text element prior to the selection point
-  def prior_text
-    text[0...@local_char_offset]
-  end
-
-  # Return the text from the mark to the end of the text element
-  def subsq_text mark = @local_char_offset
-    text[mark..-1]
-  end
-
-  def delimited_text mark = nil
-    text[mark ? @local_char_offset...mark : @local_char_offset..-1]
-  end
-
-  def replace_bound newbounds, text_shrinkage = 0
-    elmt_bounds[@elmt_bounds_index..-1].each { |pair| pair[1] -= text_shrinkage } if text_shrinkage != 0
-    if newbounds.empty?
-      elmt_bounds.delete_at @elmt_bounds_index
+  # Get a scanner whose position is past the end of the given nokonode or nokoscanner,
+  # aka the end of the nokonode's last text element
+  def past nokonode_or_nokoscanner
+    if nokonode_or_nokoscanner.is_a?(NokoScanner)
+      return NokoScanner.new tokens, nokonode_or_nokoscanner.bound, @bound
     else
-      elmt_bounds[@elmt_bounds_index..@elmt_bounds_index] = newbounds
+      nokonode = nokonode_or_nokoscanner
     end
-  end
-
-  def remove
-    child = text_element
-    while (parent = child.parent)
-      child.remove
-      break if parent.children.count != 0
-      child = parent
+    last_text_element = nil
+    nokonode.traverse do |related|
+      last_text_element = related if related.text?
     end
+    # Advance the position marker until we reach the end of the last text element in the parent
+    new_pos = @pos
+    global_token_offset = @tokens.token_offset_at new_pos
+    ted = TextElmtData.new @tokens, global_token_offset # Locate the text element that we're in
+    # NB: we assume that a newly-allocated text element encompasses the requisite token offset
+    while true do
+      new_pos += 1
+      break if new_pos == @bound
+      global_token_offset = @tokens.token_offset_at new_pos
+      next if ted.encompasses_offset global_token_offset  # Continue with the the current text element
+      # Now that we've passed up one text element, we check if there's more
+      break if ted.text_element == last_text_element # If this is the last text element in the nokonode, we're done
+      # Advance to the NEXT text element
+      ted = TextElmtData.new tokens, global_token_offset
+    end
+    NokoScanner.new tokens, new_pos, @bound
   end
-
 end

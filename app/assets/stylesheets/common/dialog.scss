@@ -11,6 +11,15 @@ div.dialog {
   font: 16px arial, sans-serif;
   line-height: 130%;
   font-weight: normal;
+  &.modeless{
+    top:10%;
+    // left:10%;
+    width: 100%;
+    position: fixed;
+    // bottom:auto;
+    // right:auto;
+    // margin-left:-300px;
+  }
   &.modal {
     div.modal-dialog {
       z-index: $dialog-depth; // Need to be closer than the backdrop, but bootstrap no longer sets this depth
@@ -23,10 +32,10 @@ div.dialog {
     }
     padding-left: 1%;
     padding-right: 1%;
-    .form-button {
-	float: right;
-  	margin: 10px;
-    }
+  }
+  .form-button {
+    float: right;
+    margin: 10px;
   }
   div.form-group {
     &.user_remember_me {
@@ -88,7 +97,7 @@ div.new-style {  // Intended for dialogs, but other divs (i.e., notifications) c
       margin-left: auto; // width/2)
       margin-right: auto; // width/2)
       &.modal-xl {
-        width: 100%; // responsive width
+        width: 95%; // responsive width
       }
       &.modal-lg {
         width: 60%; // responsive width

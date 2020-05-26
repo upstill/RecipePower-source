@@ -5,6 +5,8 @@ require './lib/html_utils.rb'
 require 'open-uri'
 require 'nokogiri'
 require 'htmlentities'
+require 'htmlbeautifier'
+require 'site_services.rb'
 
 class Recipe < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
@@ -17,7 +19,22 @@ class Recipe < ApplicationRecord
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
 
-  # after_create { |recipe| recipe.bkg_launch }
+  delegate :recipe_page, :to => :page_ref
+
+  before_save do |recipe|
+    # Arm the recipe for launching
+    if recipe.anchor_path_changed? ||
+        recipe.focus_path_changed? ||
+        (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
+      recipe.content = nil
+      recipe.status = "virgin"
+    end
+  end
+
+  # This is kind of smelly, but, given that 1) there is no association that maps between one RecipePage
+  # and many Recipes through a single PageRef, and 2) a recipe doesn't necessarily have either a PageRef
+  # or a RecipePage, this is the only way to do it
+  # after_save { |recipe| recipe.page_ref&.recipe_page&.save if recipe.page_ref&.recipe_page&.changed? }
 
   # attr_accessible :title, :ratings_attributes, :description, :url,
                   # :prep_time, :prep_time_low, :prep_time_high,
@@ -52,22 +69,20 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
   end
 
-  # The presented content for a recipe defaults to the page ref
+  # This is the SOP for turning a random grab of HTML into something presentable on a recipe card
+  def massage_content html
+    return nil if html.blank? # Protect against bad input
+    nk = process_dom html
+    # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
+    HtmlBeautifier.beautify nk.to_s
+  end
+
+  # The presented content for a recipe defers to the page ref
   def presented_content
-    content.if_present || massage_content(page_ref&.content)
-  end
-
-  # When the content is explicitly set for the first time, trim it according to the site
-  def content= html
-    if content.blank?
-      # Here's where we adapt the recipe's content to our needs
-      # Perform site-specific editing after standard editing
-      html = massage_content SiteServices.new(page_ref.site).trim_recipe(html)
-    end
-    super html
+    content.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -114,14 +129,69 @@ class Recipe < ApplicationRecord
     save
   end
 
+  def bkg_launch force=false
+    # If we haven't persisted, then the page_ref has no connection back
+    page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    # Possible prerequisites for a recipe launch:
+    if !content.present? && site&.finder_for('Content')
+      # Need to launch the recipe_page to collect content
+      page_ref.build_recipe_page if !recipe_page
+      recipe_page.bkg_launch
+      force = true
+    end
+    if title.blank? || picurl.blank? || description.blank?
+      page_ref&.bkg_launch
+      force = true
+    end
+    super(force) if defined?(super)
+  end
+
+  def perform
+    if site&.finder_for 'Content'
+      page_ref.bkg_land
+      page_ref.build_recipe_page if !recipe_page
+      recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
+      recipe_page.save if persisted? && recipe_page.changed?
+      if recipe_page&.good?
+        if content.blank?
+          reload if persisted?
+          self.content =
+              if (html = recipe_page.selected_content(anchor_path, focus_path)).present?
+                ParsingServices.new(self).parse_and_annotate(html).if_present || html
+              end ||
+              if page_ref.good? && (html = page_ref.content).present?
+                # Here's where we adapt the recipe's content to our needs
+                massage_content SiteServices.new(site).trim_recipe(html)
+              end
+          RecipeServices.new(self).inventory
+        end
+      else
+        if page_ref.good? && (html = page_ref.content).present?
+          # Here's where we adapt the recipe's content to our needs
+          self.content = massage_content SiteServices.new(site).trim_recipe(html)
+        end
+        errors.add :url, "can\'t crack recipe_page (##{recipe_page.id}): #{recipe_page.errors[:base]}"
+        raise err_msg if recipe_page.dj # RecipePage is ready to try again => so should we be, so restart via Delayed::Job
+      end
+    end
+    super if defined?(super)
+  end
+
+  def after
+    # After the job runs, this is our chance to set status
+    self.status = if site&.finder_for('Content')
+                    content.present? ? :good : :bad
+                  else
+                    page_ref&.status || :good
+                  end
+    super
+  end
+
   # This is called when the page_ref finishes updating
-  def adopt_gleaning
+  def adopt_page_ref
     self.title = page_ref.title if page_ref.title.present? && title.blank?
     self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
     self.description = page_ref.description if page_ref.description.present? && description.blank?
-    # We do NOT accept extracted content; instead, we defer to the PageRef until it's set directly
-    # self.content = SiteServices.new(page_ref.site).trim_recipe(page_ref.content.gsub(/\n(?!(p|br))/, "\n<br>")) if page_ref.content.present? && content.blank?
-    super if defined?(super)
   end
 
 end

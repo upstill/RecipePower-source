@@ -22,7 +22,7 @@ RP.parsing.pathFromTo = (ancestor, descendant, collection = []) ->
 RP.parsing.clearAroundSelection = () ->
 	selection = document.getSelection()
 	# ancestor = selection.commonAncestorContainer()
-	ancestor = $('div.card-content')[0]
+	ancestor = $('div.content-item')[0]
 	anchor = selection.anchorNode
 	focus = selection.focusNode
 	to_preserve = RP.parsing.pathFromTo ancestor, anchor

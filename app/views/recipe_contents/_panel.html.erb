@@ -1,0 +1,15 @@
+<%= content_tag :div,
+                {
+                    class: "dialog modeless notifs-holder #{pane_for.to_s.gsub '_', '-'} new-style green",
+                    data: (data if defined?(data))
+                }.compact do %>
+  <div class="modal-dialog modal-xl">
+    <div class="modal-content">
+      <%= modal_header title, style: "border-bottom: 1px solid #c0f3c2b5" %>
+      <!--Define the pane displayed in the panel-->
+      <div class="modal-body">
+        <%= render "#{pane_for}/#{form_variant}" %>
+      </div>
+    </div>
+  </div>
+<% end %>

@@ -4,6 +4,7 @@ require 'scraping/lexaur.rb'
 # A Seeker is an abstract class for a subclass which looks for a given item in the given stream
 class Seeker
   attr_accessor :head_stream, :tail_stream, :token, :children
+  attr_reader :value
 
   def initialize(head_stream, tail_stream, token = nil, children=[])
     if token.is_a?(Array)
@@ -12,7 +13,24 @@ class Seeker
     @head_stream = head_stream
     @tail_stream = tail_stream
     @token = token
-    @children = children
+    @children = children || []
+  end
+
+  # Return a Seeker for a failed parsing attempt
+  # The head_stream and tail_stream will denote the range scanned
+  def self.failed head_stream, tail_stream=nil, token= nil, options={}
+    if tail_stream.is_a? Hash
+      tail_stream, token, options = nil, nil, tail_stream
+    elsif tail_stream.is_a? Symbol
+      tail_stream, token, options = nil, tail_stream, token
+    end
+    token, options = nil, token if token.is_a? Hash
+    skr = self.new head_stream, (tail_stream || head_stream), token
+    skr.instance_variable_set :@failed, true
+    skr.instance_variable_set :@optional, options[:optional]
+    skr.instance_variable_set :@enclose, options[:enclose]
+    skr.children = options[:children]
+    skr
   end
 
   # Find a place in the stream where we can match
@@ -31,15 +49,115 @@ class Seeker
   def self.match stream, opts={}
   end
 
+  # From a seeker tree, find those of the given token
+  def find token=nil, &block
+    results = @children&.map do |child|
+      if block_given? ? block.call(child) : (child.token == token)
+        child
+      else
+        child.find token, &block
+      end
+    end || []
+    results.flatten.compact
+  end
+
+  # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
+  def to_s
+    head_stream.to_s tail_stream.pos
+  end
+
   # Apply the results of the parse to the Nokogiri scanner
   def apply
     @children.each { |child| child.apply }
-    head_stream.enclose_tokens(@head_stream, @tail_stream, @token) if @token
+    head_stream.enclose_by_token_indices(@head_stream, @tail_stream, tag: @token) if @token
   end
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
-    (@head_stream == @tail_stream) && @children.empty?
+    (@head_stream == @tail_stream) && @children&.empty?
+  end
+
+  def consumed?
+    # Did the result consume any tokens?
+    @tail_stream.pos > @head_stream.pos
+  end
+
+  def encompass scanner
+    @head_stream.encompass scanner
+    @tail_stream.encompass scanner
+    self
+  end
+
+  def traverse &block
+    block.call self
+    children && children.each do |child|
+      child.traverse &block
+    end
+  end
+
+  # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
+  def enclose tagname='span'
+    # Check that some ancestor doesn't already have the tag
+    if @token && !head_stream.descends_from?(tagname, @token)
+      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname, value: @value
+    end
+  end
+
+  # Recursively modify the Nokogiri tree to reflect seekers
+  def enclose_all
+    # The seeker reflects a successful parsing of the (subtree) scanner against the token.
+    # Now we should modify the Nokogiri DOM to reflect the elements found
+    traverse do |inner|
+      if inner.token
+        inner.enclose Parser.tag_for_token(inner.token)
+      end
+    end
+  end
+
+  # Match failed altogether
+  def failed?
+    @failed
+  end
+
+  def hard_fail?
+    @failed && !@optional
+  end
+
+  def soft_fail?
+    @failed && @optional
+  end
+
+  # Match succeeded; returns self for chaining purposes
+  def success?
+    self unless @failed # if @token || @children.present?
+  end
+  alias_method :if_succeeded, :'success?'
+
+  def enclose? # Should the seeker be marked in an element, even without success?
+    self if @enclose
+  end
+  alias_method :if_enclose, :'enclose?'
+
+  def retain?
+    self if !@failed || @enclose
+  end
+  alias_method :if_retain, :'retain?'
+
+  # What's the next token to try? Three possibilities:
+  # * The match succeeded: the next token is just after the match, i.e. @tail_stream
+  # * the match failed: the next token is the successor of the present token, i.e. @head_stream.rest
+  # * the match was optional: the tokens are consumed anyway: @head_stream.rest at a minimum, possibly @tail_stream
+  def next context=nil
+    subsq = if @failed
+              if @optional
+                @tail_stream.pos > @head_stream.pos ? @tail_stream : @head_stream.rest
+              else
+                @head_stream.rest
+              end
+            else # Success!
+              @tail_stream
+            end
+    context ? subsq.encompass(context) : subsq
   end
 end
 
@@ -114,13 +232,23 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
+    return self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)
     return self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)
     return self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek
   end
 
   # Is the string either an integer or a fraction?
   def self.num1 str
-    str&.match /^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/
+    str&.match(/^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/) ||
+        (str && self.num_word(str))
+  end
+
+  def self.fraction str
+    str&.match(/^\d*\/{1}\d*$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/)
+  end
+
+  def self.whole_num str
+    str&.match(/^\d*$/) || (str && self.num_word(str))
   end
 
   # Does the string have an integer followed by a fraction?
@@ -128,74 +256,67 @@ class NumberSeeker < Seeker
     str&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
   end
 
+  # Does the string have an integer followed by a fraction?
+  def self.num3 str
+    return if str.blank?
+    strs = str.split (/\ /)
+    self.whole_num(strs.first) && strs[1] && %q{ and plus }.include?(strs[1]) && self.fraction(strs.last)
+  end
+
+  def self.num_word str
+    (@NumWords ||= Hash[%w{ a an one two three four five six seven eight nine ten }.product([true])])[str.downcase]
+  end
+
 end
 
 class TagSeeker < Seeker
-  attr_reader :tag_ids
+  attr_reader :tagdata, :value
 
-  def initialize(stream, next_stream, tag_ids, token=nil)
+  def initialize(stream, next_stream, tagdata, token=nil)
     super stream, next_stream, token
-    @tag_ids = tag_ids
+    @value = tagdata[:name] if (@tagdata = tagdata).present?
   end
 
   def self.match stream, opts={}
     opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
-      tag_ids = scope.where(id: data).pluck :id
-      return (self.new(stream, next_stream, tag_ids, opts[:token]) if tag_ids.present?)
+      return unless tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+      tagdata = [:id, :name].zip(tagdata).to_h
+      return self.new(stream, next_stream, tagdata, opts[:token])
     }
-  end
-end
-
-# An Amount is a number followed by an optional amount, optionally followed by an alternative amount in parentheses
-class AmountSeeker < Seeker
-
-  attr_reader :num, :unit, :alt_num, :alt_unit
-
-  def initialize stream, next_stream, num, unit
-    super stream, next_stream
-    @num = num
-    @unit = unit
-  end
-
-  def self.match stream, opts={}
-    if num = NumberSeeker.match(stream)
-      unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
-      self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
-    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
-      num = $1
-      unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
-      self.new(stream, stream.rest, num, unit)
-    end
-  end
-end
-
-# Check for a matched set of parentheses in the stream and call a block on the contents
-class ParentheticalSeeker < Seeker
-  def self.match stream, opts={}
-    if match = stream.peek.match(/^\(/)
-      # Consume the opening paren
-      # Look for the closing paren
-      stream.next while stream.peak && !(match = stream.peek.match /^([^)]*)\)$/)
-      # The last token may include the closing paren
-      # Now we have a stream to present to the block
-      if (found_inside = yield inner_stream)
-      else
-      end
-    end
+    nil
   end
 end
 
 # Conditions are a list of { process, }*. Similarly for Ingredients
-class TagsSeeker < Seeker
-  attr_accessor :tag_seekers
+class  TagsSeeker < Seeker
+  attr_accessor :operand
 
-  def initialize stream, tail_stream, tag_seeker
-    super stream, tail_stream
-    @tag_seekers = [ tag_seeker ]
+  def self.match start_stream, opts={}
+    children = []
+    stream = start_stream
+    operand = nil
+    opts[:lexaur].match_list(stream) do |data, next_stream|
+      # The Lexaur provides the data at sequence end, and the post-consumption stream
+      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
+      if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+        rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[opts[:types]]
+        children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, rptype)
+        operand = next_stream.peek
+        stream = next_stream.rest
+      else
+        nil
+      end
+    end
+    if children.present?
+      result = self.new start_stream, children.last.tail_stream, opts[:token], children
+      result.operand = operand
+      result
+    end
   end
 
+=begin
   def self.match stream, opts
     # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
     if ns = TagSeeker.match(stream, opts.slice( :lexaur, :types))
@@ -216,6 +337,66 @@ class TagsSeeker < Seeker
         end
       end
       return sk
+    end
+  end
+=end
+end
+
+# An Amount is a number followed by an optional amount, optionally followed by an alternative amount in parentheses
+class AmountSeeker < Seeker
+
+  attr_reader :num, :unit, :alt_num, :alt_unit
+
+  def initialize stream, next_stream, num, unit
+    super stream, next_stream
+    @num = num
+    @unit = unit
+    @token = :rp_amt
+  end
+
+  def self.match stream, opts={}
+    if num = NumberSeeker.match(stream)
+      unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
+      self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)(.*)/)
+      num = $1
+      unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
+      self.new(stream, stream.rest, num, unit) if unit
+    end
+  end
+end
+
+# Check for a matched set of parentheses in the stream and call a block on the contents
+class ParentheticalSeeker < Seeker
+  def self.matcher ch
+    case ch
+    when '('
+      ')'
+    when '['
+      ']'
+    end
+  end
+
+  def self.match stream, opts={}
+    if match = ParentheticalSeeker.matcher(stream.peek)
+      stack = []
+      instart = stream
+      rest = stream.rest
+      # Consume the opening paren
+      # Look for the closing paren
+      while ch = rest.peek do
+        if newmatch = ParentheticalSeeker.matcher(ch)
+          stack.push match
+          match = newmatch
+        elsif ch == match
+          if (match = stack.pop).nil?
+            # Done!
+            yield(stream.rest.except rest) if block_given?
+            return rest.rest
+          end
+        end
+        rest.first
+      end
     end
   end
 end

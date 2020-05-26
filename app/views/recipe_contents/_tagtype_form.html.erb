@@ -1,0 +1,31 @@
+<%= form_for([:recipe_contents, @recipe ], url: annotate_recipe_contents_path(@recipe), html: { class: 'annotate-recipe' } ) do |f| %>
+  <%= form_errors_helper f %>
+  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @annotation.if_present || @recipe.content %>">
+  <input class="tagname" type="hidden" name="recipe[recipeContents][tagname]" id="recipe_annotation_tagname" value="<%= @tagname %>">
+  <input class="tagtype" type="hidden" name="recipe[recipeContents][tagtype]" id="recipe_annotation_tagtype" value="<%= @tagtype %>">
+  <input class="parse_path" type="hidden" name="recipe[recipeContents][parse_path]" id="recipe_annotation_content" value="<%= @parse_path %>">
+  <div class="row"><div class="col col-md-7">
+    <p>Is '<%= @tagname %>' a new <%= Tag.typename(@tagtype) %>, or does it stand for something we already
+    know about--and what would that be?</p>
+  </div></div>
+  <div class="row"><div class="col col-md-12">
+      <%= tag_usage_button @tagtype, @tagname, class: 'text-only tag-button' %>
+  </div></div>
+  <div class="row" style="position: relative"><div class="col col-md-12">
+    <div style="display: inline-block; vertical-align: top; font-size: 1.1em; margin-top: 0.4em; margin-left: 1em">No, it really refers to:</div>
+    <div style="display: inline-block">
+      <%= token_input_tag "recipe[recipeContents][replacement]",
+                          :tagtype => @tagtype,
+                          :placeholder => "Find existing #{Tag.typename(@tagtype)}",
+                          :hint => '',
+                          :onAdd => 'RP.recipe_contents.onAdd',
+                          :onDelete => 'RP.recipe_contents.onDelete',
+                          :tokenLimit => 1,
+                          :allowFreeTagging => false,
+                          :allowCustomEntry => false
+      %>
+      <br><%= check_box_tag 'recipe[recipeContents][assert]', true %>&nbsp;Add to dictionary as a synonym
+    </div>
+    <%= dialog_submit_button 'Submit', disabled: true, style: 'position: absolute; right: 30px; bottom: 12px;' %>
+  </div></div>
+<% end %>

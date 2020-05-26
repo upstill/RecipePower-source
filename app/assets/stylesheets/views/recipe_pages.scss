@@ -1,0 +1,60 @@
+// Place all the styles related to the RecipePages controller here.
+// They will automatically be included in application.css.
+// You can use Sass (SCSS) here: http://sass-lang.com/
+
+.rp_elmt {
+  .rp_ingname {
+    color: #6B7794;
+  }
+}
+
+div.dialog.recipe-pages.new-style.green {
+  z-index: 1500;
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  div.modal-dialog div.modal-content {
+    div.modal-header {
+      padding: 0;
+      button.dialog-x-box {
+        // top: 0;
+      }
+    }
+
+    div.modal-body {
+      padding-top: 20px;
+      div.add-fields {
+        position: relative;
+        top: 30px;
+        left: 30px;
+        // padding: 10px 30px 0px 30px;
+      }
+    }
+    div.modal-footer {
+      padding: 0;
+    }
+  }
+
+  div.recipe-fields {
+    padding: 5px;
+    border-bottom: 1px solid #91aa6a;
+    a.glyphicon {
+      font-size: 24px;
+      color: #D9E3CA;
+    }
+  }
+
+  div.recipe-field {
+    display: inline-block;
+
+    &.title {
+      width: 85%;
+    }
+
+    &.icon {
+      padding-left: 10px;
+    }
+  }
+
+}

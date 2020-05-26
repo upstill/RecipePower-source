@@ -115,7 +115,7 @@ module DialogsHelper
         ''
     response_service.injector? ?
         injector_cancel_button('X') :
-        content_tag(:div, contents, class: 'modal-header')
+        content_tag(:div, contents, options.slice(:style).merge(class: "modal-header #{options[:class]}"))
   end
 
   def modal_body options={}, &block
@@ -229,12 +229,10 @@ module DialogsHelper
                                            button_style: (options[:button_style] || 'success'),
                                            class: "#{options[:class]} #{options[:style] || 'form-button'}"
                                        )
-    tag :input,
-        class: "#{options[:class]} dialog-submit-button",
-        name: 'commit',
-        type: 'submit',
-        value: label||'Save',
-        data: { method: options[:method] || 'post' }
+    options[:class] << ' dialog-submit-button'
+    options[:data] ||= {}
+    options[:data][:method] = options[:method] || 'post'
+    tag :input, { name: 'commit', type: 'submit', value: label||'Save' }.merge(options)
   end
 
   def dialog_answer_button label = nil, options={}
@@ -271,7 +269,7 @@ module DialogsHelper
                                        )
     tag :input,
         class: "#{options[:class]} cancel dialog-cancel-button",
-        data: {dismiss: 'modal'},
+        data: {dismiss: 'modal'}.merge(options[:data] || {}),
         name: 'commit',
         type: 'submit',
         value: label||'Cancel'

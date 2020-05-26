@@ -94,27 +94,34 @@ module Pagerefable
   public
 
   def site
-    page_ref.site if page_ref
+    page_ref&.site
   end
 
   def bkg_launch refresh=false
-    page_ref.bkg_launch if page_ref&.virgin?
+    page_ref&.bkg_launch if page_ref&.virgin?
     super if defined?(super)
   end
 
+  # "abstract" method, to be overridden by any given Backgroundable,
+  # specifying what to do with the page_ref once it's good.
+  def adopt_page_ref
+
+  end
+
   # The backgroundable performs its delayed job by forcing the associated page_ref to do its job (synchronously)
-  #    then calling #adopt_gleaning to extract values for the object involved
+  #    then calling #adopt_page_ref to extract values for the object involved
   def perform
     if page_ref # Finish doing any necessary gleaning of the page_ref
       page_ref.bkg_land
       if page_ref.good?
-        adopt_gleaning # "Abstract" method to be implemented by each pagerefable to adopt extracted values
+        adopt_page_ref # "Abstract" method to be implemented by each pagerefable to adopt extracted values
       else
-        err_msg = "Page at '#{url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
+        err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
         errors.add :url, err_msg
         raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
       end
     end
+    super if defined?(super)
   end
 
   def ensure_site
@@ -148,7 +155,7 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    page_ref.gleaning.hit_on_attributes attrhash, site if page_ref.gleaning && attrhash
+    page_ref&.gleaning.hit_on_attributes attrhash, site if page_ref&.gleaned? && attrhash
   end
 
 end

@@ -4,9 +4,9 @@ require 'scraping/scanner.rb'
 
 class LexaurTest < ActiveSupport::TestCase
   def setup
-    @ingred_tags = ['garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'].
+    @ingred_tags = %w{ ground\ turmeric ground\ cinnamon ground\ cumin lemon lemon\ juice garlic\ clove sea\ salt butter Dijon\ mustard capers marjoram black\ pepper Brussels\ sprouts white\ cauliflower Romanesco\ (green)\ cauliflower'}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ 'tablespoon teaspoon cup pound small\ head clove }.
+    @unit_tags = %w{ tablespoon teaspoon cup pound lb small\ head clove }.
         each { |name| Tag.assert name, :Unit }
     @process_tags = %w{ chopped softened rinsed }.
         each { |name| Tag.assert name, :Unit }
@@ -50,6 +50,12 @@ class LexaurTest < ActiveSupport::TestCase
     assert_not_empty lex.find('jalapeño peppers')
   end
 
+  test 'lexaur finds longer tag' do
+    lex = Lexaur.from_tags
+    result = lex.find('lemon juice')
+    assert_not_empty result
+  end
+
   test 'lexaur chunks simple stream' do
     lex = Lexaur.from_tags
     scanner = StrScanner.from_string'jalapeño' # Fail gracefully
@@ -71,17 +77,93 @@ class LexaurTest < ActiveSupport::TestCase
     }
   end
 
+  # Test whether the lex finds the given string, and consumes the entire string
+  def assert_finds_tag lex, string
+    scanner = StrScanner.from_string string
+    tag_id = nil
+    lex.chunk(scanner) { |data, stream|
+      assert_not_nil data
+      tag_id = data
+      assert_empty stream.to_s
+    }
+    tag = Tag.by_string(string).first
+    assert_not_nil tag_id, "Lexaur didn't find any tag by searching for '#{string}'; should have found '#{tag.name}'/'#{tag.normalized_name}'"
+    assert_equal tag.id, tag_id.first, "Found tag '#{tag.name}'/'#{tag.normalized_name}' doesn't match search on '#{string}'"
+  end
+
+  test 'Lexaur handles two tags with the same normalized name' do
+    Tag.assert 'tsp.', :Unit
+    assert_equal Tag.by_string('tsp'), Tag.by_string('Tsp.')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'Tsp.')
+    assert_finds_tag(lex, 'tsp')
+  end
+
+  test 'Lexaur elides punctuation not seen in normalized_name' do
+    Tag.assert 'lb', :Unit
+    assert_equal Tag.by_string('lb'), Tag.by_string('lb.')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'lb.')
+    assert_finds_tag(lex, 'lb')
+  end
+
+  test 'Lexaur correctly resolves long name on appropriate datatype' do
+    Tag.assert 'chopped', :Condition
+    Tag.assert 'chopped almonds', :Ingredient
+    Tag.assert 'chopped walnuts', :Ingredient
+    Tag.assert 'almonds', :Ingredient
+    Tag.assert 'walnuts', :Ingredient
+    lex = Lexaur.from_tags
+    scanner = StrScanner.from_string 'chopped almonds'
+    result = lex.chunk scanner do |terms, onward|
+      Tag.where(id: terms, tagtype: Tag.typenum(:Condition)).first
+    end
+    assert_equal result.class, Tag
+    assert_equal 'chopped', result.name
+
+    scanner = StrScanner.from_string 'chopped almonds or walnuts'
+    tags = []
+    lex.match_list scanner do |terms, onward|
+      tags << Tag.where(id: terms, tagtype: Tag.typenum(:Ingredient)).first
+      tags.last
+    end
+    assert_equal 2, tags.count
+    assert_equal ['chopped almonds', 'chopped walnuts'], tags.map(&:name)
+  end
+
+  test 'Lexaur manages tokens with embedded dash correctly' do
+    Tag.assert 'a silly god damned tag', :Unit
+    assert_equal Tag.by_string('a silly god-damned tag'), Tag.by_string('a silly god damned tag')
+    Tag.assert 'another silly god damned tag', :Unit
+    assert_equal Tag.by_string('another silly god-damned tag'), Tag.by_string('another silly god damned tag')
+
+    lex = Lexaur.from_tags
+    assert_finds_tag(lex, 'a silly god-damned tag')
+    assert_finds_tag(lex, 'a silly god damned tag')
+    assert_finds_tag(lex, 'another silly god-damned tag')
+    assert_finds_tag(lex, 'another silly god damned tag')
+  end
+
+  test 'Lexaur parses lists of tags' do
+    lex = Lexaur.from_tags
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    lex.match_list(StrScanner.from_string('ground turmeric, cumin and cinnamon')) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    lex.match_list(StrScanner.from_string('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
+  end
+
   # Called after every test method runs. Can be used to tear
   # down fixture information.
 
   def teardown
     # Do nothing
   end
-
-  # Fake test
-=begin
-  def test_fail
-    fail('Not implemented')
-  end
-=end
 end

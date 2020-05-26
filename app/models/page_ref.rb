@@ -14,6 +14,9 @@ class PageRef < ApplicationRecord
 
   has_many :aliases, :dependent => :destroy
 
+  # The associated recipe page maintains the page's content in a parsed form
+  belongs_to :recipe_page
+
   # Specify what values from the gleaning correspond to one of our attributes
   @@gleaning_correspondents = {
       # domain: nil,
@@ -82,6 +85,11 @@ class PageRef < ApplicationRecord
     belongs_to :gleaning, optional: true, dependent: :destroy
     belongs_to :mercury_result, optional: true, dependent: :destroy
   end
+  delegate :results_for, :to => :gleaning
+  
+  def gleaned?
+    gleaning&.good?
+  end
 
   # attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
                   # :error_message, :http_status, :errcode,
@@ -102,6 +110,7 @@ class PageRef < ApplicationRecord
   }
 
   has_many :recipes, :dependent => :nullify # , foreign_key: 'page_ref_id'
+  accepts_nested_attributes_for :recipes
   has_many :sites, :dependent => :nullify # , foreign_key: 'page_ref_id'
 
   # alias_method :host, :domain
@@ -145,47 +154,43 @@ class PageRef < ApplicationRecord
     self
   end
 
-  def bkg_launch force=false
-    build_gleaning if !gleaning
-    gleaning.bkg_launch if gleaning.virgin?
-    build_mercury_result unless mercury_result
-    mercury_result.bkg_launch if mercury_result.virgin?
-    super
-  end
-
-  def get_mercury_results
-    build_mercury_result if !mercury_result
-    if mercury_result
-      mercury_result.bkg_land mercury_result.bad? # Ensure the mercury_result has happened
-      if !adopt_mercury_result
-        errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
-      end
-      mercury_result.good?
-    end
-  end
-
-  def get_gleaning_results
-    build_gleaning if !gleaning
-    if gleaning
-      gleaning.bkg_land gleaning.bad? # Ensure the gleaning has happened
-      if gleaning.good?
-        adopt_gleaning_results
-      elsif gleaning.bad?
-        errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
-      end
-      gleaning.good?
-    end
-  end
-
   def mercury_results
     mercury_result&.results
+  end
+
+  def bkg_launch force=false
+    build_gleaning if !gleaning
+    gleaning.bkg_launch # if gleaning.virgin?
+
+    build_mercury_result unless mercury_result
+    mercury_result.bkg_launch # if mercury_result.virgin?
+    super if defined?(super)
   end
 
   # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly
   def perform
 
-    NestedBenchmark.measure('getting Mercury results') { get_mercury_results }
-    NestedBenchmark.measure('getting Gleaning results') { get_gleaning_results }
+    NestedBenchmark.measure('getting Mercury results') do
+      build_mercury_result unless mercury_result
+      if mercury_result
+        mercury_result.bkg_land # mercury_result.bad? # Ensure the mercury_result has happened
+        if !adopt_mercury_result
+          errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
+        end
+      end
+    end
+
+    NestedBenchmark.measure('getting Gleaning results') do
+      build_gleaning if !gleaning
+      if gleaning
+        gleaning.bkg_land # gleaning.bad? # Ensure the gleaning has happened
+        if gleaning.good?
+          adopt_gleaning
+        elsif gleaning.bad?
+          errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
+        end
+      end
+    end
 
     if errors[:url].present?
       url_errors = errors[:url].join "\n"
@@ -367,7 +372,7 @@ class PageRef < ApplicationRecord
   end
 
   # Accept attribute values internally extracted from a page
-  def adopt_gleaning_results
+  def adopt_gleaning
     open_attributes.each do |name|
       # The conditional protects against asking the gleaning for an unknown value
       if @@gleaning_correspondents[name].present? &&

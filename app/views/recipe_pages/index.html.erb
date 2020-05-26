@@ -1,0 +1,27 @@
+<p id="notice"><%= notice %></p>
+
+<h1>Recipe Pages</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Text</th>
+      <th colspan="3"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @recipe_pages.each do |recipe_page| %>
+      <tr>
+        <td><%= recipe_page.text %></td>
+        <td><%= link_to 'Show', recipe_page %></td>
+        <td><%= link_to 'Edit', edit_recipe_page_path(recipe_page) %></td>
+        <td><%= link_to 'Destroy', recipe_page, method: :delete, data: { confirm: 'Are you sure?' } %></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<%= link_to 'New Recipe Page', new_recipe_page_path %>

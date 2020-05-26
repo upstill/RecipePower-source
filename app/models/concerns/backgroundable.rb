@@ -119,35 +119,23 @@ module Backgroundable
 
     # These overrides provide for setting status before a backgroundable has been saved
     def virgin!
-      if persisted?
-        super
-      else
-        self.status = :virgin
-      end
+      write_attribute :status, 'virgin' if persisted?
+      self.status = :virgin
     end
 
     def processing!
-      if persisted?
-        super
-      else
-        self.status = :processing
-      end
+      write_attribute :status, 'processing' if persisted?
+      self.status = :processing
     end
 
     def good!
-      if persisted?
-        super
-      else
-        self.status = :good
-      end
+      write_attribute :status, 'good' if persisted?
+      self.status = :good
     end
 
     def bad!
-      if persisted?
-        super
-      else
-        self.status = :bad
-      end
+      write_attribute :status, 'bad' if persisted?
+      self.status = :bad
     end
   end
 
@@ -194,6 +182,7 @@ module Backgroundable
           end
           puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
         end
+        self.virgin! unless virgin?
       end
     elsif virgin? || refresh # If never been run, or forcing to run again, enqueue normally
       if persisted? # Just in case (so DJ gets a retrievable record)
@@ -201,10 +190,8 @@ module Backgroundable
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
         puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
-      else
-        # Can't launch until the record is saved, so we'll mark it as virgin for now
-        self.status = :virgin
       end
+      self.virgin! unless virgin?
     end
     pending?
   end

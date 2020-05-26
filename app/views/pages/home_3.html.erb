@@ -1,13 +1,34 @@
 <%= render partial: (current_user ? "shared/bookmarklet_sidebar" : "shared/signup_at_right") %>
 <div class="text_block">
-	<h2 class="med">RecipePower:<br>The Cook's Memory for the Web</h2>
-<p class="airy">
-	When you find a great recipe on the Web, do you squirrel it away someplace safe? Or does it just slip back into the ocean?
-	</p><p class="airy">
-Unless you have a no-friction way to save those jewels, <strong>and you use it</strong>, then you need RecipePower. See a great recipe and the Cookmark button <strong>instantly</strong> stashes it away for later. No import hassles, no confusing website, just cream. 
-	</p><p class="airy">
-	As your collection grows, you can tag recipes to make them easier to find, so when opportunity knocks, inspiration answers! Add friends on RecipePower and get tipped off to their findings as well. Pick up on our Channels and Feeds, and new possibilities come to you.
-	</p><p class="airy">
-Why not check it out? Sign up (use your Facebook, etc. login if that makes it easier), and we'll get you set up in a jiffy. Or, <%= link_to("have a look around", collection_user_path(User.guest)) %> first. Either way, the Web is about to get a lot friendlier to you as a cook.
-	</p>
+  <h2 class="med">RecipePower:<br>The Cook's Memory for the Web</h2>
+  <p class="airy">
+    When you find a great recipe on the Web, do you squirrel it away someplace safe? Or does it just slip back into the
+    ocean?
+  </p>
+  <p class="airy">
+    Unless you have a no-friction way to save those jewels, <strong>and you use it</strong>, then you need RecipePower.
+    See a great recipe and the Cookmark button <strong>instantly</strong> stashes it away for later. No import hassles,
+    no confusing website, just cream.
+  </p>
+  <p class="airy">
+    As your collection grows, you can tag recipes to make them easier to find, so when opportunity knocks, inspiration
+    answers! Add friends on RecipePower and get tipped off to their findings as well. Pick up on our Channels and Feeds,
+    and new possibilities come to you.
+  </p>
+  <p class="airy">
+    Why not check it out? Sign up (use your Facebook, etc. login if that makes it easier), and we'll get you set up in a
+    jiffy. Or, <%= link_to("have a look around", collection_user_path(User.guest)) %> first. Either way, the Web is
+    about to get a lot friendlier to you as a cook.
+  </p>
+</div>
+<div class="rp_elmt rp_recipe">
+  <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
+  <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
+  <p>Put a small frying pan on a medium-high heat with the butter and, once it starts to foam, fry the crumbs for two to three minutes, stirring constantly, until golden brown and crisp. Tip the crumbs on to a plate and leave to cool.</p>
+  <p>In a medium bowl, mix the asparagus with two teaspoons of oil, the garlic, a quarter-teaspoon of flaked sea salt and a good grind of pepper. Spread out the spears on an oven tray lined with baking paper and roast for eight to 10 minutes, until soft and starting to brown. Remove from the oven and leave somewhere warm.</p>
+  <p>In a small bowl, mix the basil with a teaspoon of oil, the lemon zest and juice, and a pinch of flaked sea salt.</p>
+  <p>Sprinkle all but a tablespoon of the crumb mix on a large platter or between four individual plates. Top with the asparagus, then spoon over the basil and lemon salsa, and finish with a final sprinkling of crumbs.</p>
 </div>

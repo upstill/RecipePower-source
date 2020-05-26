@@ -24,7 +24,8 @@ class Tag < ApplicationRecord
            Course: ['Course', 18],
            Time: ['Time', 19],
            Hidden: ['Hidden', 20],
-           Dual: ['Dual', 21]
+           Dual: ['Dual', 21],
+           Condition: [ 'Condition', 22 ]
   )
 
   has_many :taggings, :dependent => :destroy
@@ -198,26 +199,25 @@ class Tag < ApplicationRecord
     str.sub(/^[\s,]*/,'').sub(/[,\s]*$/, '').gsub(/\s+/, ' ')
   end
 
-  @@wordmap = {
-      "chili" => "chile",
-      "chilli" => "chile",
-      "chille" => "chile",
-      "chilly" => "chile",
-      "chilie" => "chile",
-      "chillie" => "chile",
-      "chilis" => "chiles",
-      "chillis" => "chiles",
-      "chiles" => "chiles",
-      "chilles" => "chiles",
-      "chillys" => "chiles",
-      "chilies" => "chiles",
-      "chillies" => "chiles",
-  }
-
   # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
   def self.normalizeName(str)
-    str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect { |word| @@wordmap[word] || word }.join('-')
+    str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize # .split('-').join('-')
   end
+
+=begin
+  def renormalize
+    new_normal = name.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize.split('-').collect { |word| Stemmer.stem_word word }.join('-')
+    if new_normal != normalized_name
+      collisions = Tag.where(normalized_name: new_normal).to_a.keep_if { |t| t.id != id }
+      if collisions.present?
+        puts "Tag ##{id} (#{name}) changes normalized_name '#{normalized_name}' to '#{new_normal}'"
+        reports = collisions.map { |coll| "'#{coll.name}' (#{coll.id})"}
+        puts "...and it collides with: #{reports.join ', '}"
+        return self
+      end
+    end
+  end
+=end
 
   # Use this tag instead of 'other', i.e., absorb its taggings, referents, etc.
   # Either delete the other, or make it a synonym, according to 'delete'

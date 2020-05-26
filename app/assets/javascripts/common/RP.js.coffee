@@ -137,6 +137,8 @@ RP.findEnclosingByClass = (classname, elmt) ->
 # Automatically open dialogs or click links that have 'trigger' class
 RP.fire_triggers = (context) ->
 	context ||= window.document
+	$('input.trigger', context).each (ix, elmt) ->
+		$(elmt).submit()
 	$('a.trigger', context).each (ix, elmt) ->
 		# Links with class 'trigger' get fired, either by submitting or by clicking
 		if $(elmt).hasClass 'submit'

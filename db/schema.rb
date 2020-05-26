@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20191114023821) do
+ActiveRecord::Schema.define(version: 2020_04_13_021915) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -399,6 +399,7 @@ ActiveRecord::Schema.define(version: 20191114023821) do
     t.text "description"
     t.integer "kind", default: 1
     t.integer "mercury_result_id"
+    t.integer "recipe_page_id"
     t.index ["url"], name: "page_refs_index_by_url", unique: true
   end
 
@@ -444,6 +445,14 @@ ActiveRecord::Schema.define(version: 20191114023821) do
     t.index ["user_id", "entity_type", "entity_id"], name: "index_rcprefs_on_user_id_and_entity_type_and_entity_id", unique: true
   end
 
+  create_table "recipe_pages", force: :cascade do |t|
+    t.text "content", default: ""
+    t.integer "status", default: 0
+    t.integer "dj_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "recipes", id: :serial, force: :cascade do |t|
     t.string "title", limit: 255
     t.datetime "created_at"
@@ -464,6 +473,8 @@ ActiveRecord::Schema.define(version: 20191114023821) do
     t.integer "dj_id"
     t.integer "status", default: 0
     t.text "content"
+    t.string "anchor_path"
+    t.string "focus_path"
     t.index ["id"], name: "recipes_index_by_id", unique: true
     t.index ["title"], name: "recipes_index_by_title"
   end
@@ -564,6 +575,7 @@ ActiveRecord::Schema.define(version: 20191114023821) do
     t.integer "dj_id"
     t.integer "status", default: 0
     t.text "trimmers", default: "--- []\n"
+    t.text "grammar_mods"
     t.index ["id"], name: "sites_index_by_id", unique: true
   end
 

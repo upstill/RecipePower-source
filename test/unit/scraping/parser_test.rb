@@ -3,7 +3,19 @@ require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
+# These are tests for the default configuration of the Parser grammar
 class ParserTest < ActiveSupport::TestCase
+
+  def add_tags type, names
+    return unless names.present?
+    typenum = Tag.typenum(type)
+    names.each { |name|
+      next if Tag.strmatch(name, tagtype: typenum).present?
+      tag = Tag.assert name, typenum
+      @lex.take tag.name, tag.id
+    }
+  end
+
   def setup
     @amounts = [
         '1 head',
@@ -28,6 +40,9 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
     @ingred_tags = %w{
+      ground\ turmeric
+      ground\ cumin
+      ground\ cinnamon
       lemon\ zest
       lemon\ juice
       anchovy\ fillets
@@ -53,10 +68,10 @@ class ParserTest < ActiveSupport::TestCase
       white\ cauliflower
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove }.
+    @unit_tags = %w{ ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
-    @process_tags = %w{ chopped softened rinsed crustless }.
-        each { |name| Tag.assert name, :Process }
+    @condition_tags = %w{ chopped softened rinsed crustless sifted }.
+        each { |name| Tag.assert name, :Condition }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF
   <p>#{@ingred_specs.join "<br>\n"}</p>
@@ -79,6 +94,27 @@ EOF
 EOF
   end
 
+  test 'grammar mods' do
+    nonsense = 'No Intention To Parse This String'
+
+    # Check that the grammar doesn't get changed gratuitously
+    grammar = Parser.new(nonsense, @lex, { :rp_bogus1 => :rp_bogus2 }).grammar.except(:rp_bogus1)
+    assert_equal Array, grammar[:rp_amt][:match].class
+
+                                             # Check for grammar violations
+    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :inline => true, :atline => true}}) }
+    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :bound => true, :terminus => true}}) }
+    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { at_css_match: true, after_css_match: true}}) }
+
+    grammar_mods = {
+        :rp_ingname => { terminus: ',' }, # Test value gets added
+        :rp_ing_comment => { terminus: ',' } # Make sure value gets replaced
+    }
+    parser = Parser.new NokoScanner.from_string(nonsense), grammar_mods
+    assert_equal ',', parser.grammar[:rp_ingname][:terminus]
+    assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
+  end
+
   test 'parse amount specs' do
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
@@ -87,7 +123,7 @@ EOF
       assert_not_nil is, "#{amtstr} doesn't parse"
       parser = Parser.new nokoscan, @lex
       seeker = parser.match :rp_amt
-      assert seeker
+      assert seeker.success?
       assert_equal 2, seeker.children.count
       assert_equal :rp_amt, seeker.token
       assert_equal :rp_num, seeker.children.first.token
@@ -103,7 +139,7 @@ EOF
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingname
-    assert_equal 1, seeker.tag_ids.count
+    assert_equal 'Dijon mustard', seeker.tagdata[:name]
     assert_equal :rp_ingname, seeker.token
   end
 
@@ -112,45 +148,66 @@ EOF
     nokoscan = NokoScanner.from_string ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
-    assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
+    assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec
     refute seeker.empty?
-    assert_equal 1, seeker.children.count
     assert_equal :rp_ingspec, seeker.token
+    alts = seeker.find(:rp_ingalts)
+    assert_equal 1, alts.count
+    assert_equal 3, alts.first.children.count
 
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 3, seeker.children.count
+    ingnames = alts.first.find :rp_ingname
+    assert_equal 3, ingnames.count
+  end
+
+  test 'parse list of tags distributing first word' do
+    lex = Lexaur.from_tags
+    html = 'ground turmeric, cumin and cinnamon'
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingalts
+    assert seeker.success?
     assert_equal :rp_ingalts, seeker.token
+    assert_equal 3, seeker.find(:rp_ingname).count
+    assert_equal strings, seeker.find(:rp_ingname).map(&:value)
+    seeker.enclose_all
+    seeker.head_stream.nkdoc.css('.rp_ingname').each { |ingnode|
+      assert_equal strings.shift, ingnode.attribute('data-value').to_s
+    }
 
-    seeker = seeker.children.first
-    refute seeker.empty?
-    assert_equal 0, seeker.children.count
-    assert_equal :rp_ingname, seeker.token
+    html = 'ground turmeric, cumin or ground cinnamon'
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingalts
+    assert seeker.success?
+    assert_equal :rp_ingalts, seeker.token
+    assert_equal 3, seeker.find(:rp_ingname).count
+    assert_equal strings, seeker.find(:rp_ingname).map(&:value)
   end
 
-=begin
-  test 'parse individual ingredient specs' do
-    @ingred_specs.each do |ingspec|
-      puts "Parsing '#{ingspec}'"
-      nokoscan = NokoScanner.from_string ingspec
-      is = IngredientSpecSeeker.match nokoscan, lexaur: @lex
-      assert_not_nil is, "#{ingspec} doesn't parse"
-    end
-  end
+  test 'parse ingredient line' do
+    # Test a failed ingredient line
+    html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingline
+    assert seeker.hard_fail?
 
-  test 'parse a whole ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
-  end
+    html = '1/2 tsp. sifted baking soda'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingline
+    assert seeker.success?
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 2, seeker.children.count
+    assert_equal :rp_ingspec, seeker.children.first.token
+    assert_equal :rp_ing_comment, seeker.children.last.token
 
-  test 'find the ingredient list embedded in a recipe' do
-    nokoscan = NokoScanner.from_string @recipe
-    il = IngredientListSeeker nokoscan
-    assert_not_nil il
+    html = '1/2 tsp. sifted (or lightly sifted) baking soda'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingline
+    assert seeker.success?
   end
-=end
 
   test 'parse ing list from modified grammar' do
     html = <<EOF
@@ -161,14 +218,13 @@ EOF
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex) do |grammar|
-      # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :within_css_match => 'li' }
-      grammar[:rp_inglist][:within_css_match] = 'ul'
-    end
+    parser = Parser.new html, @lex,
+                        # Here's our chance to modify the grammar
+                        :rp_inglist => { :in_css_match => 'ul' },
+                        :rp_ingline => { :inline => nil, :in_css_match => 'li' }
+
     seeker = parser.match :rp_inglist
-    assert_not_nil seeker
+    assert seeker.success?
     assert_equal :rp_inglist, seeker.token
     assert_equal 3, seeker.children.count
 
@@ -178,8 +234,7 @@ EOF
 
   test 'finds title in h1 tag' do
     html = "irrelevant noise <h1>Title Goes Here</h1> followed by more noise"
-    nks = NokoScanner.from_string html
-    parser = Parser.new nks, @lex
+    parser = Parser.new html, @lex
     seeker = parser.match :rp_title
     assert_equal "Title", seeker.head_stream.token_at
     assert_equal "followed", seeker.tail_stream.token_at
@@ -188,29 +243,29 @@ EOF
   test 'parse Ottolenghi ingredient list' do
     html = <<EOF
   <p><strong>30g each crustless sourdough bread</strong><br>
+    <strong>½ tsp each finely grated lemon zest and juice</strong><br>
     <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
     <strong>Flaked sea salt and black pepper</strong><br>
     <strong>25g unsalted butter</strong><br>
     <strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br>
     <strong>1 tbsp olive oil</strong><br>
     <strong>1 garlic clove</strong>, peeled and crushed<br>
-    <strong>10g basil leaves</strong>, finely shredded<br>
-    <strong>½ tsp each finely grated lemon zest and juice</strong>
+    <strong>10g basil leaves</strong>, finely shredded
   </p>
 EOF
     #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
     html = html.gsub /\n+\s*/, ''
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex) do |grammar|
-      #grammar[:rp_ingline][:match]  = [
-      #:rp_ingname,
-      #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
-      #]
-    end
+    # add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new html,
+                        @lex,
+                        :rp_inglist => { in_css_match: 'p' }
     seeker = parser.match :rp_inglist
-    assert seeker
+    assert seeker.success?
+    assert_equal 9, seeker.children.count
+    assert_equal 8, seeker.children.keep_if { |child| child.success? }.count
   end
 
+=begin
   test 'parse single recipe' do
     html = <<EOF
 <div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
@@ -218,20 +273,42 @@ EOF
   <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
   <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
   <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
-  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p class="inglist"><strong>30g crustless sourdough bread</strong><br><strong>½ tsp each finely grated lemon zest and juice</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded</p>
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex)  do |grammar|
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
-    end
+    add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new html,
+                        @lex,
+                        :rp_title => { :in_css_match => 'h2' }, # Match everything within an <h2> tag
+                        :rp_ingspec => { :in_css_match => 'strong' },
+                        :rp_inglist => { :in_css_match => 'p.inglist' }
     seeker = parser.match :rp_recipe
-    assert seeker
+    assert seeker.success?
     assert_equal :rp_recipe, seeker.token
-    assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
-    assert_equal :rp_inglist, seeker.children[1].token
-    assert_equal 8, seeker.children[1].children.count
+    assert_equal 1, seeker.find(:rp_inglist).count
+    assert_equal 9, seeker.find(:rp_inglist).first.children.keep_if(&:'success?').count
+
+    annotated = seeker.enclose_all
+    x=2
+  end
+=end
+
+  test 'ingredient list with pine nuts' do
+    html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
+    add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
+    parser = Parser.new html,
+                        @lex,
+                        :rp_ingline => { inline: true },
+                        :rp_inglist => { in_css_match: 'p' }
+    seeker = parser.match :rp_inglist
+    assert seeker.success?
+    ingline_seeker = seeker.find(:rp_ingline)[2]
+    assert_equal '2 anchovy fillets, drained and finely chopped', ingline_seeker.to_s
+
+    # Test that the results get enclosed properly
+    seeker.enclose_all
+    assert_not_nil seeker.head_stream.nkdoc.search('ul').first # Check that the ingredient list's <ul> is still enclosed in the original <p>
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
@@ -240,7 +317,7 @@ EOF
   <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
   <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
   <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
-  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p>Prep <strong>5 min</strong><br>Cook: <strong>20 min</strong><br>Serves <strong>4</strong></p>
   <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
   <h2>Soft-boiled egg with avocado, chorizo and asparagus</h2>
@@ -258,19 +335,118 @@ EOF
 </div>
 EOF
     # This page has several recipes, each begun with an h2 header
-    nks = NokoScanner.from_string html
-    parser = Parser.new(nks, @lex)  do |grammar|
-      # We start by seeking to the next h2 (title) tag
-      grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-      grammar[:rp_title][:within_css_match] = 'h2' # Match all tokens within an <h2> tag
-      # Stop seeking ingredients at the next h2 tag
-      grammar[:rp_inglist][:bound] = { match: //, within_css_match: 'h2'}
-    end
+    parser = Parser.new html,
+                        rp_recipelist: {
+                            match: { at_css_match: 'h2' }
+                        },
+                        rp_title: { in_css_match: 'h2' }
     seeker = parser.match :rp_recipelist
-    assert seeker
+    assert seeker.success?
     assert_equal :rp_recipelist, seeker.token
-    assert_equal 4, seeker.children.count
+    assert_equal 3, seeker.children.count
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }
+    assert (rcp_seeker = seeker.find(:rp_recipe).first)
+    assert (ttl_seeker = rcp_seeker.find(:rp_title).first)
+    puts rcp_seeker.to_s
+    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
+  end
+
+  test 'parses multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
+    html = <<EOF
+<div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
+  <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
+  <h2>Asparagus with pine nut and sourdough crumbs (pictured above)</h2>
+  <p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>20 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
+  <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
+  <h2>Kale and grilled asparagus salad</h2>
+
+  <p>There’s a little bit of massaging and marinating involved here, but you can do that well ahead of time, if need be. Just don’t mix everything together until the last minute.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>35 min</strong><br>Serves <strong>4-6</strong></p>
+  <p><strong>30g sunflower seeds</strong><br><strong>30g pumpkin seeds</strong><br><strong>1½ tsp maple syrup</strong><br><strong>Salt and black pepper</strong><br><strong>250g kale</strong>, stems discarded, leaves torn into roughly 4-5cm pieces<br><strong>3 tbsp olive oil</strong><br><strong>1½ tbsp white-wine vinegar</strong><br><strong>2 tsp wholegrain mustard</strong><br><strong>500g asparagus</strong>, woody ends trimmed<br><strong>120g frozen shelled edamame</strong>, defrosted<br><strong>10g tarragon leaves</strong>, roughly chopped<br><strong>5g dill</strong>, roughly chopped</p>
+  <p>To serve, toss the edamame and herbs into the kale, then spread out on a large platter. Top with the asparagus and candied seeds, and serve at once.</p>
+
+  <h2>Soft-boiled egg with avocado, chorizo and asparagus</h2>
+
+  <p>Play around with this egg-in-a-cup dish, depending on what you have around: sliced cherry tomatoes are a good addition, for example, as is grated cheese or a drizzle of truffle oil. Omit the chorizo, if you like, to make it vegetarian. Serve with toasted bread.</p>
+  <p>Prep <strong>5 min</strong><br>Cook <strong>15 min</strong><br>Serves <strong>4</strong></p>
+  <p><strong>70g cooking chorizo</strong>, skinned and broken into 2cm chunks<br><strong>4 large eggs</strong>, at room temperature<br><strong>8 asparagus spears,</strong> woody ends trimmed and cut into 6cm-long pieces<br><strong>2 ripe avocados</strong>, stoned and flesh scooped out<br><strong>1 tbsp olive oil</strong><br><strong>2 tsp lemon juice</strong><br><strong>flaked sea salt and black pepper</strong><br><strong>80g Greek-style yoghurt</strong><br><strong>5g parsley leaves</strong>, finely chopped</p>
+</div>
+EOF
+    # This page has several recipes, each begun with an h2 header
+    ingreds = %w{ lemon\ zest salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves
+    cooking\ chorizo eggs asparagus\ spears ripe\ avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves
+    sunflower\ seeds pumpkin\ seeds maple\ syrup Salt kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill
+}.uniq.sort
+    add_tags :Ingredient, ingreds
+    parser = Parser.new html, @lex,
+                        rp_recipelist: { repeating: :rp_recipe },
+                        rp_recipe: { at_css_match: 'h2' },
+                        rp_title: { in_css_match: 'h2' }
+    seeker = parser.match :rp_recipelist
+    assert seeker.success?
+    assert_equal :rp_recipelist, seeker.token
+    assert_equal 3, seeker.children.count
+    seeker.children.each { |child| assert_equal :rp_recipe, child.token }
+    ingred_seekers = seeker.find :rp_ingname
+    ingreds_found = ingred_seekers.map(&:to_s).map(&:downcase).uniq
+    assert_empty (ingreds_found - ingreds.map(&:downcase)), "Ingredients found but not included"
+    assert_equal ["lemon zest"], (ingreds.map(&:downcase) - ingreds_found), "Ingredients included but not found"
+
+    assert (rcp_seeker = seeker.find(:rp_recipe).first)
+    assert (ttl_seeker = rcp_seeker.find(:rp_title).first)
+    puts rcp_seeker.to_s
+    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
+    assert (prep_seeker = parser.seek :rp_prep_time)
+    assert_equal 'Prep 5 min', prep_seeker.to_s
+    assert (cook_seeker = parser.seek :rp_cook_time)
+    assert_equal 'Cook 20 min', cook_seeker.to_s
+    assert (servings_seeker = parser.seek :rp_serves)
+    assert_equal "Serves 4\n", servings_seeker.to_s
+  end
+
+  def parse html, token, options={}
+    add_tags :Ingredient, options[:ingredients]
+    nokoscan = NokoScanner.from_string html
+    parser = Parser.new(nokoscan, @lex)
+    if seeker = parser.match(token)
+      seeker.enclose_all
+    end
+    [ nokoscan.nkdoc, seeker ]
+  end
+
+  test 'parses ingredient list properly' do
+    html = '1 ounce of bourbon, gently warmed'
+    nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice }
+    assert_equal 'bourbon', nkdoc.css('.rp_ingname').text.to_s
+    assert_equal '1', nkdoc.css('.rp_num').text.to_s
+    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
+    assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text.to_s
+    assert_equal html, nkdoc.text.to_s
+
+    # Should have exactly the same result with content priorly enclosed in span
+    html = '<li class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</li>'
+    nkdoc, seeker = parse html, :rp_ingline
+    assert_equal '1', nkdoc.css('.rp_num').text.to_s
+    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
+    assert_equal 'bourbon', nkdoc.css('.rp_ingname').text.to_s
+    assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text.to_s
+
+    # Parsing a fully marked-up ingline shouldn't change it
+    html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
+    nkdoc, seeker = parse html, :rp_ingline
+    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
+    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
+    assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text.to_s
+    assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
+
+    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingname rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
+    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
+    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
+    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
+    assert_equal 'simple syrup', nkdoc.css('.rp_ingname').text.to_s
+    assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
   end
 
 end

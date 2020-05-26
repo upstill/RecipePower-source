@@ -1,0 +1,10 @@
+<div class="content-item" style="width:100%">
+  <div class="results-enclosure">
+    <p id="notice"><%= notice %></p>
+    <%= collectible_edit_button recipe_page %>
+    <div id="rp-html-content">
+      <%= recipe_page.content.html_safe %>
+    </div>
+    <%= link_to 'Edit', edit_recipe_page_path(recipe_page) %>
+  </div>
+</div>

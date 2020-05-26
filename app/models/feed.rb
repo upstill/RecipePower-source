@@ -151,12 +151,21 @@ class Feed < ApplicationRecord
 
   def self.preload url
     begin
+=begin
+      NB: may be able to replace this by using Faraday (per https://github.com/feedjira/feedjira/issues/294)
+        conn = Faraday.new do |conn|
+          conn.request.options.timeout = 20
+        end
+        response = conn.get(url)
+        xml = response.body
+        feed = Feedjira::Feed.parse xml
+=end
       f = Feedjira::Feed.fetch_and_parse url,
-                                         :on_failure => Proc.new {
+                                         :on_failure => Proc.new { |a, b|
                                            raise 'Feedjira error: Can\'t open feed'
                                          },
-                                         :max_redirects => 5,
-                                         :timeout => 4
+                                         :max_redirects => 5
+      # :timeout => 8.0
       f = nil if [Integer, Hash].include?(f.class) # || !@fetched.is_a?(Feedjira::Feed)
     rescue Exception => e
       f = nil

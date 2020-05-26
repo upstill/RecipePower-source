@@ -5,6 +5,7 @@ require 'results_cache'
 class CollectibleTest < ActiveSupport::TestCase
   test "Collecting proceeds" do
     recipe = recipes(:rcp)
+    recipe.url = 'http://www.recipepower.com/rcp' # Generate PageRef and Site
     user = users(:thing1)
     # Before preparing the params with a user id, privacy should be off
     refute recipe.collectible_private
@@ -28,6 +29,7 @@ class CollectibleTest < ActiveSupport::TestCase
 
   test "Recipe cookmarking" do
     recipe = recipes(:rcp)
+    recipe.url = 'http://www.recipepower.com/rcp' # Generate PageRef and Site
     user = users(:thing1)
     User.current = user
     refute recipe.collectible_collected?(user.id)

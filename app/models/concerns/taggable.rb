@@ -54,15 +54,15 @@ module Taggable
   end
 
   # We can't get here if we're not Pagerefable
-  def adopt_gleaning
-    if page_ref.gleaning
+  def adopt_page_ref
+    if page_ref.gleaned?
       ts = TaggingServices.new self
-      if tagstrings = page_ref.gleaning.results_for('Tags')
+      if tagstrings = page_ref.results_for('Tags')
         tagstrings.each { |tagstring|
           tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
         }
       end
-      if authorstrings = page_ref.gleaning.results_for('Author')
+      if authorstrings = page_ref.results_for('Author')
         authorstrings.each { |authorstring|
           authorstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Author' }
         }
@@ -172,16 +172,15 @@ module Taggable
     tagscope.joins(:taggings).where(taggings: tagging_constraints).distinct
   end
 
-  # Set the tag ids associated with the given user
-  def set_tag_ids nids
-    # Ensure that the user's tags are all and only those in nids
-    oids = editable_tags.pluck :id
+  # Ensure that the user's tags are all and only those in new_tag_ids
+  def set_tag_ids user_id, new_tag_ids
+    old_tag_ids = taggings.where(user_id: user_id).pluck :tag_id
 
     # Add new tags as necessary
-    (nids - oids).each { |tagid| assert_tagging tagid }
+    (new_tag_ids - old_tag_ids).each { |tagid| assert_tagging tagid, user_id }
 
     # Remove tags as nec.
-    (oids - nids).each { |tagid| refute_tagging tagid }
+    (old_tag_ids - new_tag_ids).each { |tagid| refute_tagging tagid, user_id }
   end
 
   # Manage taggings of a given user

@@ -245,7 +245,7 @@ class Www_theguardian_com_Scraper < Scraper
                                            }.compact
       end
     end
-    return unless body = page.search('div.content__article-body').first
+    return unless body = page.search('div.content__main').first
     pending_pic = nil
     # Format within body:
     # --possibly a picture, by default attached to the first recipe

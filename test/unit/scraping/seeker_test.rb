@@ -24,7 +24,10 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'find a number in a stream' do
     scanner = StrScanner.from_string "Fourscore and seven years ago "
-    assert_nil NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek(scanner)
+    assert_not_nil ns
+    assert_equal 2, ns.head_stream.pos
+    assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.from_string "Fourscore and 7 years ago "
     ns = NumberSeeker.seek(scanner)
     assert_not_nil ns
@@ -89,8 +92,8 @@ class SeekerTest < ActiveSupport::TestCase
     lex = Lexaur.from_tags
     scanner = StrScanner.from_string('jalapeño peppers')
     ts = TagSeeker.match scanner, lexaur: lex
-    assert_not_empty ts.tag_ids
-    assert_equal 1, ts.tag_ids.first
+    assert_not_empty ts.tagdata
+    assert_equal 1, ts.tagdata[:id]
     refute ts.tail_stream.more?
   end
 
@@ -104,7 +107,7 @@ class SeekerTest < ActiveSupport::TestCase
 
     scanner = StrScanner.from_string('fourscore and cup ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
-    refute ts
+    assert_equal 'cup', ts.unit.to_s
 
     scanner = StrScanner.from_string('fourscore and 1/2 ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
@@ -119,17 +122,17 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 1, cs.tag_seekers.count
+    assert_equal 1, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 1, cs.tail_stream.pos
     scanner = StrScanner.from_string('1/2 cup peeled tomatoes')
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
-    assert_equal 1, cs.tag_seekers.count
+    ts = cs.children.first
+    assert_equal 1, cs.children.count
     assert_instance_of TagSeeker, ts
     assert_equal 2, cs.head_stream.pos
     assert_equal 3, cs.tail_stream.pos
@@ -141,9 +144,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 3, cs.tail_stream.pos
 
@@ -151,9 +154,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 2, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
   end
@@ -164,9 +167,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.match scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
 
@@ -174,9 +177,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of ConditionsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 2, cs.head_stream.pos
     assert_equal 7, cs.tail_stream.pos
   end
@@ -187,9 +190,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.tag_seekers.count
+    assert_equal 2, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 5, cs.tail_stream.pos
   end
@@ -200,9 +203,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 0, cs.head_stream.pos
     assert_equal 7, cs.tail_stream.pos
   end
@@ -213,9 +216,9 @@ class SeekerTest < ActiveSupport::TestCase
     cs = IngredientsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
     assert_instance_of IngredientsSeeker, cs
-    ts = cs.tag_seekers.first
+    ts = cs.children.first
     assert_instance_of TagSeeker, ts
-    assert_equal 3, cs.tag_seekers.count
+    assert_equal 3, cs.children.count
     assert_equal 3, cs.head_stream.pos
     assert_equal 10, cs.tail_stream.pos
   end
@@ -257,6 +260,24 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of ConditionsSeeker, ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
     assert_equal 8, ils.tail_stream.pos
+  end
+
+  test 'parenthetical seeker' do
+    scanner = StrScanner.from_string "Here's ( a parenthetical thought) and the rest of it "
+    assert_nil ParentheticalSeeker.match(scanner)
+    scanner = scanner.rest
+    after = ParentheticalSeeker.match(scanner) do |inside|
+      assert_equal 'a parenthetical thought', inside.to_s
+    end
+    assert_equal 'and the rest of it', after.to_s
+
+    scanner = StrScanner.from_string "Here's ( a (doubly) parenthetical thought) and the rest of it "
+    assert_nil ParentheticalSeeker.match(scanner)
+    scanner = scanner.rest
+    after = ParentheticalSeeker.match(scanner) do |inside|
+      assert_equal 'a ( doubly ) parenthetical thought', inside.to_s
+    end
+    assert_equal 'and the rest of it', after.to_s
   end
 
 end
