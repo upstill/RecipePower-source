@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, prepend: true
 
   # All controller actions are preceded by a check for permissions
   # This method may be subclassed to assert opt-ins and exclusions
