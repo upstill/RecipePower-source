@@ -1,7 +1,7 @@
 source 'http://rubygems.org'
 
 ruby '2.6.3'
-## gem 'bundler', '~> 1.4'
+gem 'bundler', '~> 2.1.4'
 gem 'rails', '~> 5.2.3' # 5.0.7.2' #
 gem 'rdoc'
 

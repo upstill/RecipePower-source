@@ -1,6 +1,7 @@
 class SessionsController < Devise::SessionsController
   # For some mysterious reason, accessing the current_user screws up the signin process.
   skip_before_action :set_current_user
+  skip_before_action :verify_authenticity_token, only: [:create]
   include Rails.application.routes.url_helpers
   # protect_from_forgery with: :null_session
   #

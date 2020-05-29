@@ -141,7 +141,7 @@ class Recipe < ApplicationRecord
     end
     if title.blank? || picurl.blank? || description.blank?
       page_ref&.bkg_launch
-      force = true
+      force = true  if page_ref.virgin?
     end
     super(force) if defined?(super)
   end
@@ -150,7 +150,7 @@ class Recipe < ApplicationRecord
     if site&.finder_for 'Content'
       page_ref.bkg_land
       page_ref.build_recipe_page if !recipe_page
-      recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
+      recipe_page.becomes(RecipePage).bkg_land # The recipe_page will assert path markers and clear the content as nec.
       recipe_page.save if persisted? && recipe_page.changed?
       if recipe_page&.good?
         if content.blank?

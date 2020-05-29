@@ -457,6 +457,7 @@ DEPENDENCIES
   bootstrap-sass (~> 3.3.4)
   bourbon
   builder (~> 3.1.0)
+  bundler (~> 2.1.4)
   closure_tree (~> 7.0)
   coffee-rails
   content_for_in_controllers
