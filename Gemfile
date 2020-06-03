@@ -152,7 +152,7 @@ group :test do
   ### gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
   gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
-  gem 'poltergeist'
+  gem 'poltergeist', '>= 1.18.1'
   gem 'rspec-rails', '3.8.1'
   # gem 'rspec-html-matchers', '0.9.1'
 end
