@@ -48,4 +48,12 @@ module ControllerUtils
   def resource_errors_to_flash_now resource, options={}
     flash.now[:error] = view_context.express_resource_errors resource, options
   end
+
+  def base_errors_to_flash_now resource
+    errs = resource.errors[:base].collect { |errstr|
+      errstr.split('"').collect { |substr| substr.capitalize unless substr.match(/^[\[\],]$/) }
+    }.flatten.uniq.compact
+    return if errs.blank?
+    flash.now[:error] = (errs.length == 1) ? errs[0] : (errs[0...-1].join(",\n") + " and\n" + errs[-1])
+  end
 end

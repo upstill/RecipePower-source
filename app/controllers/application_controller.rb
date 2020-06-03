@@ -150,12 +150,24 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
-    # The entity has been defined. Now to check that the user is authorized for the current action
+    # The entity has been defined, but not necessarily persisted/saved.
+    # Now to check that the user is authorized for the current action.
     # NB: Since this method may be called in any context, it's possible to assert authorization
     options[:action_authorized] || authorize(entity) # Make sure that the user is authorized for this action
+    # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
     if entity.errors.empty?  &&  # No probs. so far
         entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model
+      if options[:adopt_gleaning]
+        if entity.respond_to? :adopt_page_ref
+          entity.page_ref.bkg_land
+          entity.adopt_gleaning # Get attributes from the page ref
+        elsif entity.respond_to? :bkg_land
+          entity.bkg_land true  # Collect attributes from page_ref, etc.
+        end
+      end
+      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
+      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch]))
       case options[:touch]
       when true
         entity.be_touched
@@ -167,14 +179,7 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
-      entity.bkg_land true if options[:adopt_gleaning] && entity.respond_to?(:bkg_land) # Collect attributes from page_ref, etc.
-      # entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
-      if attribute_params.present? # There are parameters to update
-        entity.update_attributes attribute_params
-      elsif entity.persisted? # If not, look at saving the toucher_pointer
-        entity.save
-      end
-    end
+     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{entity.model_name.singular}", entity
     # We build a decorator if necessary and possible

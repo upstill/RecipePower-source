@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_04_13_021915) do
+ActiveRecord::Schema.define(version: 2020_06_02_102304) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -432,7 +432,7 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
   end
 
   create_table "rcprefs", id: :serial, force: :cascade do |t|
-    t.integer "entity_id"
+    t.integer "entity_id", null: false
     t.integer "user_id"
     t.text "comment", default: ""
     t.datetime "created_at"

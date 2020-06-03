@@ -8,13 +8,16 @@ class CollectibleServices
     self.entity = entity
   end
 
-  # Either fetch an existing object or make a new one #    -- of the given klass, #    -- using the page_ref for its external reference #    -- parametrized by the params.
+  # Either fetch an existing object or make a new one
+  #    -- of the given klass,
+  #    -- using the page_ref for its external reference
+  #    -- parametrized by the params.
   # If the params have an :id, we find on that, otherwise we look
   # for a record matching the :url. If there are no params, just return a new recipe
   # If a new recipe record needs to be created, we also do QA on the provided URL
   # and dig around for a title, description, etc.
   # Either way, we also make sure that the recipe is associated with the given user
-  def self.find_or_create params_or_page_ref, extractions = nil, klass=Recipe
+  def self.find_or_build params_or_page_ref, extractions = nil, klass=Recipe
     extractions, klass = nil, extractions if extractions.is_a?(Class)
     if params_or_page_ref.is_a?(PageRef)
       params, page_ref = { url: params_or_page_ref.url }, params_or_page_ref
@@ -66,9 +69,14 @@ class CollectibleServices
         end
         entity.decorate.findings = findings # Now set the title, description, etc.
       end
-      entity.save # after_save callback is invoked for new record, queueing background processing
     end
     entity
   end
 
-end
+  def self.find_or_create params_or_page_ref, extractions = nil, klass=Recipe
+    entity = self.find_or_build params_or_page_ref, extractions, klass
+    entity.save unless entity.persisted?
+    entity
+  end
+
+  end
