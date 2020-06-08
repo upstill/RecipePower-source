@@ -1,4 +1,5 @@
 require 'scraping/seeker.rb'
+require 'enumerable_utils.rb'
 
 class Parser
   attr_reader :grammar
@@ -42,7 +43,8 @@ class Parser
   end
 
   def lexaur
-    @lexaur ||= Lexaur.from_tags
+    types = deep_collect(@grammar, :tag) | deep_collect(@grammar, :tags)
+    @lexaur ||= Lexaur.from_tags *types
   end
 
   def self.token_to_title token
@@ -290,7 +292,7 @@ class Parser
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, context) unless subscanner # There is no such match in prospect
+      return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
       match.tail_stream = scanner.past(subscanner) if context[:in_css_match]  # Skip past the element
       return match.encompass(scanner)  # Release the limitation to element bounds
@@ -321,7 +323,7 @@ class Parser
       while scanner.peek do # No token except what the spec dictates
         match = match_specification scanner, spec, context.except(:repeating, :keep_if)
         matches << match.if_retain
-        scanner = match.tail_stream # next
+        scanner = (scanner == match.tail_stream) ? match.tail_stream.rest : match.tail_stream # next
       end
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
@@ -517,10 +519,11 @@ class Parser
     if (really_enclose = context[:enclose]) == :non_empty
       really_enclose = match.children&.all?(:hard_fail?)
     end
+    really_enclose ||= match.enclose? && (match.tail_stream != match.head_stream)
     return Seeker.failed(match.head_stream,
                          match.tail_stream,
                          token,
-                         enclose: ((really_enclose || match.enclose?) ? true : false),
+                         enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
 end

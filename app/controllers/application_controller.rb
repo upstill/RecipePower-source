@@ -140,7 +140,6 @@ class ApplicationController < ActionController::Base
       entity = entity.object
     end
     # Finish whatever background task is associated with the entity
-    entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params =
     if entity
       # If the entity is provided, ignore parameters
@@ -158,16 +157,26 @@ class ApplicationController < ActionController::Base
     if entity.errors.empty?  &&  # No probs. so far
         entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model
-      if options[:adopt_gleaning]
+        if entity&.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
+        entity.bkg_land
+      elsif options[:adopt_gleaning]
         if entity.respond_to? :adopt_page_ref
           entity.page_ref.bkg_land
-          entity.adopt_gleaning # Get attributes from the page ref
-        elsif entity.respond_to? :bkg_land
-          entity.bkg_land true  # Collect attributes from page_ref, etc.
+          if !entity.adopt_page_ref # Get attributes from the page ref
+            entity.errors.add :url, 'Can\'t access that page for analysis'
+          end
+        # elsif entity.respond_to? :bkg_land
+          # entity.bkg_land true  # Collect attributes from page_ref, etc.
         end
       end
+      return if entity.errors.any?
+      if options[:touch] == :collect # Ensure that 
+        (attribute_params ||= {})[:collectible_in_collection] = true
+      end
       entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
-      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch]))
+      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
+      return if entity.errors.any?
+      rr =
       case options[:touch]
       when true
         entity.be_touched
@@ -179,7 +188,8 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
-     end
+      rr.save if rr&.changed?
+    end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{entity.model_name.singular}", entity
     # We build a decorator if necessary and possible

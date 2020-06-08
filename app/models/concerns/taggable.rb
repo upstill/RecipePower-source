@@ -68,7 +68,7 @@ module Taggable
         }
       end
     end
-    super if defined?(super)
+    defined?(super) ? super : true
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)

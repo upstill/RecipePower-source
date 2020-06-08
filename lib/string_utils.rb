@@ -5,8 +5,8 @@ def tokenize str, terminates=false, &block
     offset = 0
     while str.length > 0 do
       ostr = str
-      str = ostr.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, '' # Pluck the next token
-      spaces, token = $1, $2
+      str = ostr.sub /(^([ \t\r\f\v]|&nbsp;)*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/i, '' # Pluck the next token
+      spaces, token = $1, $3
       if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{},.?\n]/)) # This string really ends here (no continuation of non-delimiter)
         offset += spaces&.length || 0
         block.call token, offset unless token&.empty?

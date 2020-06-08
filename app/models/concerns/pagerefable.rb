@@ -105,7 +105,7 @@ module Pagerefable
   # "abstract" method, to be overridden by any given Backgroundable,
   # specifying what to do with the page_ref once it's good.
   def adopt_page_ref
-
+    true
   end
 
   # The backgroundable performs its delayed job by forcing the associated page_ref to do its job (synchronously)

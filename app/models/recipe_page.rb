@@ -21,11 +21,11 @@ class RecipePage < ApplicationRecord
     super(force) if defined?(super)
   end
 
-  # As a Pagerefable, this is called by #perform once the page_ref has landed successfully
-  def adopt_page_ref
+  def perform
     if content.blank?
       # The first time content is adopted from our page_ref, parse it for recipe content
-      content = SiteServices.new(page_ref.site).trim_recipe page_ref.content
+      page_ref.bkg_land
+      content = page_ref.trimmed_content
       if content.present?
         parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
@@ -85,7 +85,7 @@ class RecipePage < ApplicationRecord
   # Return the content within the selection. Presumably this is the actual content of a recipe. There may also be
   # multiple selections on a page, each for a different recipe.
   def selected_content anchor_path, focus_path
-    return unless anchor_path.present? && focus_path.present?
+    return content unless anchor_path.present? && focus_path.present?
     nk = Nokogiri::HTML.fragment content
     anchor_node = nk.xpath(anchor_path.downcase)&.first   # Presumably there's only one match!
     focus_node = nk.xpath(focus_path.downcase)&.last

@@ -256,10 +256,10 @@ class FinderServices
     if html = result&.content.if_present
       puts "------------------ Raw HTML as gleaned:"
       puts html
-      trimmed = SiteServices.new(@finder.site).trim_recipe(html)
+      trimmed = recipe.trimmed_content
       puts "------------------ Trimmed:\n#{trimmed}" if trimmed != html
       puts "------------------ Trimmed and Massaged:"
-      puts recipe.massage_content(SiteServices.new(@finder.site).trim_recipe(html))
+      puts recipe.massaged_content
     else
       puts "Nothing gleanable from selector #{@finder.selector}"
     end
