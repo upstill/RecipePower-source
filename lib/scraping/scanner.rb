@@ -77,7 +77,7 @@ def tag_ancestor node, first_te, last_te, options={}
   scan_ancestors node, first_te, last_te do |anc|
     if anc.name == tag&.to_s
       nknode_add_classes anc, "rp_elmt #{classes}"
-      nknode_add_value anc, options[:value] if options[:value]
+      anc['value'] = options[:value] if options[:value]
       return anc
     end
   end

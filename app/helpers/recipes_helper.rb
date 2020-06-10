@@ -122,7 +122,8 @@ end
   def recipe_page_button recipe
     return unless recipe.is_a?(Recipe) && recipe.recipe_page&.id
     #         <%= link_to_submit '^', recipe_page_path(decorator.object.recipe_page), mode: :partial, title: 'Full Page' %>
-    link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'annotate-content glyphicon glyphicon-chevron-up'
+    # glyphicon-chevron-up glyphicon-screenshot glyphicon-import glyphicon-open
+    link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'open-recipe-page glyphicon glyphicon-import'
   end
 
 def tagjoin tags, enquote = false, before = '', after = '', joiner = ','

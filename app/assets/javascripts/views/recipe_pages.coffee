@@ -136,6 +136,9 @@ RP.recipe_pages.onload = (dlog) ->
 		anchor_path = $('input.anchorPath', fieldsNode)[0].value
 		focus_path = $('input.focusPath', fieldsNode)[0].value
 		elem = $('a.post-selection', fieldsNode)[0]
-		url = RP.build_request $(elem).data('href'), { 'recipe[anchor_path]': anchor_path, 'recipe[focus_path]': focus_path } # Don't reset content to nil. Let the recipe notice a change and do that back on the server, 'recipe[content]': '' }
+		params = { 'recipe[anchor_path]': anchor_path, 'recipe[focus_path]': focus_path }
+		if event.altKey
+			params['recipe[content]'] = ''
+		url = RP.build_request $(elem).data('href'), params
 		$(elem).data 'href', url
 

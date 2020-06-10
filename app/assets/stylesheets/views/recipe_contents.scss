@@ -7,6 +7,13 @@ div.content-item {
     float: right;
     margin-left: 10px;
     color:  darkgray;
+    font-size: 1.2em;
+  }
+  a.open-recipe-page {
+    float: right;
+    margin-left: 10px;
+    font-size: 2em;
+    color: #81ae8b;
   }
 }
 div.dialog.recipe-contents.new-style.green {
@@ -30,13 +37,13 @@ div.dialog.recipe-contents.new-style.green {
       div.row input.tag-button {
         float: left;
         &.tag-button-top {
-          font-size: 1.2em;
-        }
-        &.tag-button-mdl {
           font-size: 1.0em;
         }
+        &.tag-button-mdl {
+          font-size: 0.8em;
+        }
         &.tag-button-btm {
-          font-size: 0.7em;
+          font-size: 0.65em;
         }
       }
     }

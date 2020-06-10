@@ -5,11 +5,11 @@ def tokenize str, terminates=false, &block
     offset = 0
     while str.length > 0 do
       ostr = str
-      str = ostr.sub /(^([ \t\r\f\v]|&nbsp;)*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/i, '' # Pluck the next token
-      spaces, token = $1, $3
+      str = ostr.sub /(^[ \t\r\f\v\u00a0]*)([^\]\[)(}{,.?\s\u00a0]+|[()\[\]{},.?\n])/i, '' # Pluck the next token
+      spaces, token = $1, $2
       if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{},.?\n]/)) # This string really ends here (no continuation of non-delimiter)
         offset += spaces&.length || 0
-        block.call token, offset unless token&.empty?
+        block.call token, offset unless token.empty?
         offset += token&.length || 0
       else
         return ostr # Return the unprocessed remainder of the string (which may be blank)
@@ -19,7 +19,7 @@ def tokenize str, terminates=false, &block
   else
     tokens = []
     while str.length > 0
-      str = str.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, ''
+      str = str.sub /(^[ \t\r\f\v\u00a0]*)([^\]\[)(}{,.?\s\u00a0]+|[()\[\]{},.?\n])/i, ''
       if $2
         tokens << $2
       else
