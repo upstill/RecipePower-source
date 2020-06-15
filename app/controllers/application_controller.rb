@@ -36,11 +36,11 @@ class ApplicationController < ActionController::Base
   end
   before_action :check_credentials
   before_action :check_flash
-  before_action :report_cookie_string
-  before_action { report_session 'Before controller' }
+  # before_action :report_cookie_string
+  before_action { report_request }
   before_action :set_current_user
   # after_action :log_serve
-  after_action { report_session 'After controller'  }
+  after_action { report_response  }
   before_action :setup_response_service
 
   helper :all
@@ -255,26 +255,61 @@ class ApplicationController < ActionController::Base
     flash.each { |type, message| logger.debug "   #{type}: #{message}" }
   end
 
-  def report_cookie_string
-    logger.info "COOKIE_STRING in request:"
-    if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| logger.info "\t"+str }
-    end
+  def report_cookie_string cs=request.env["rack.request.cookie_string"]
+    cs.split('; ').each { |str| logger.info "\t\t"+str }
   end
 
-  def report_session context
-    logger.info "XXXXXXXXXXXXXXXX #{context} at #{Time.now}: XXXXXXXXXXXXXXXX"
-    logger.info ">>>>>>>> request SESSION: "
+  def report_headers what
+    case what
+    when :request
+      h, label = request.headers, 'Request'
+    when :response
+      h, label = response.headers, 'Response'
+    else
+      return
+    end
+    logger.info "    >>>>>>>>>>>> #{label} headers:"
+    h.each do |k, v|
+      logger.info "\t#{k} (#{what}): ----------------"
+      case k
+      when 'HTTP_COOKIE'
+        report_cookie_string v
+      else
+        logger.info "\t\t#{v}"
+      end
+    end
+    logger.info "    <<<<<<<<<<<< #{label} headers"
+  end
+
+  def report_request
+    report_headers :request
+
+    logger.info "    >>>>>>>> Request SESSION: "
     if sess = request.env['rack.session']
       sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
     else
       logger.info "NO env['rack.session']!!!"
     end
-    logger.info "<<<<<<<< request SESSION"
+    logger.info "    <<<<<<<< Request SESSION"
+  end
 
-    logger.info ">>>>>>>> Response COOKIES:"
+  def report_response
+    report_headers :response
+    logger.info "    >>>>>>>> Response COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "<<<<<<<< Response COOKIES"
+    logger.info "    <<<<<<<< Response COOKIES"
+  end
+
+  def report_session context
+    report = case context
+             when :on_entry
+               "Before controller"
+             when :on_exit
+               "After controller"
+             else
+               context
+             end
+    logger.info "vvvvvvvvvvvvvvvv #{report} at #{Time.now}: vvvvvvvvvvvvvvvv"
 
     begin
       sessid = if session
@@ -288,6 +323,8 @@ class ApplicationController < ActionController::Base
     end
 
     logger.info "UUID in response_service: '#{response_service.uuid || '<nil>'}'"
+    logger.info "^^^^^^^^^^^^^^^^ #{report} ^^^^^^^^^^^^^^^^"
+    x=2
   end
 
   # Monkey-patch to adjudicate between streaming and render_to_stream per
@@ -338,7 +375,7 @@ class ApplicationController < ActionController::Base
             end
           }
           format.js {
-            # XXX??? Must have set @partial in preparation
+            # vvv??? Must have set @partial in preparation
             render renderopts.merge(action: 'capture')
           }
         end
@@ -502,8 +539,10 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
+        report_headers :request
+        logger.info "    >>>>>>>>>>>> HTTP_COOKIE in request:"
         report_cookie_string
-        report_session "Unauthorized Login:"
+        logger.info "    <<<<<<<<<<<< HTTP_COOKIE in request"
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end
