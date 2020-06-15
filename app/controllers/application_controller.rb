@@ -282,7 +282,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_request
-    report_headers :request
+    # report_headers :request
 
     logger.info "    >>>>>>>> Request SESSION: "
     if sess = request.env['rack.session']

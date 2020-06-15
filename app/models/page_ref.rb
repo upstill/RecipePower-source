@@ -50,7 +50,7 @@ class PageRef < ApplicationRecord
   @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
 
   def content
-    gleaning&.content.if_present || mercury_results['content'].if_present
+    gleaning&.content.if_present || (mercury_results && mercury_results['content'].if_present)
   end
 
   def content= val
