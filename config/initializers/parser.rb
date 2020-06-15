@@ -121,6 +121,7 @@ Parser.init_grammar(
     },
     rp_ingline: {
         match: [
+            { match: /.*:/, optional: true }, # Discard a colon-terminated label at beginning
             :rp_ingspec,
             # {optional: :rp_unit},
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line

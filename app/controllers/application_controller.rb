@@ -18,12 +18,12 @@ class ApplicationController < ActionController::Base
     return if opts[:only] && !opts[:only].include?(params[:action])
     unless opts[:except]&.include?(params[:action])
       target_model_name = controller_name.classify
-      model_class_or_name = begin
-        target_model_name.constantize
+      begin
+        model_class = target_model_name.constantize
       rescue
-        :"#{target_model_name.underscore}"
+        return # Not an error if the controller doesn't refer to an ActiveRecord model
       end
-      authorize model_class_or_name
+      authorize model_class if model_class <= ApplicationRecord
     end
   end
 
@@ -256,7 +256,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_cookie_string
-    logger.info "COOKIE_STRING:"
+    logger.info "COOKIE_STRING in request:"
     if cs = request.env["rack.request.cookie_string"]
       cs.split('; ').each { |str| logger.info "\t"+str }
     end
@@ -264,9 +264,18 @@ class ApplicationController < ActionController::Base
 
   def report_session context
     logger.info "XXXXXXXXXXXXXXXX #{context} at #{Time.now}: XXXXXXXXXXXXXXXX"
-    logger.info "COOKIES: >>>>>>>>"
+    logger.info ">>>>>>>> request SESSION: "
+    if sess = request.env['rack.session']
+      sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
+    else
+      logger.info "NO env['rack.session']!!!"
+    end
+    logger.info "<<<<<<<< request SESSION"
+
+    logger.info ">>>>>>>> Response COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "<<<<<<<< COOKIES"
+    logger.info "<<<<<<<< Response COOKIES"
+
     begin
       sessid = if session
         (session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))) || '<SESSION with no id>'
@@ -277,14 +286,8 @@ class ApplicationController < ActionController::Base
     rescue Exception => e
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
-    logger.info "SESSION Contents: >>>>>>>>"
-    if sess = request.env['rack.session']
-                  sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
-    else
-      logger.info "NO env['rack.session']!!!"
-    end
-    logger.info "<<<<<<<< SESSION"
-    logger.info "UUID: #{response_service.uuid}"
+
+    logger.info "UUID in response_service: '#{response_service.uuid || '<nil>'}'"
   end
 
   # Monkey-patch to adjudicate between streaming and render_to_stream per
@@ -475,11 +478,13 @@ class ApplicationController < ActionController::Base
     unless current_user # User.current has not yet been set at this point
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
+      logger.info alert
       unless session.id
+        logger.info "Resetting Session"
         reset_session
         response_service.uuid = session.id
       end
-      if session.id || true
+      if session.id
         request_options = { path: request.fullpath,
             format: (response_service.mode == :injector ? :json : request.format.symbol)
         }.merge(options.slice :path, :format)

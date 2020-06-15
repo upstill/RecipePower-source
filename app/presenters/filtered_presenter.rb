@@ -225,7 +225,7 @@ class FilteredPresenter
     @viewparams = ViewParams.new self
     # Initialize a stream using ResultsCache(s), if any
     if subtypes.present?
-      init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid, subtypes, User.current_or_guest, params_hash).first)
+      init_stream (@results_cache = ResultsCache.retrieve_or_build( response_service.uuid.if_present? || User.current_or_guest.id.to_s, subtypes, User.current_or_guest, params_hash).first)
     else
       @results_cache = NullResults.new params_hash
     end

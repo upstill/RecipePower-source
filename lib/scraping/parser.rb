@@ -270,6 +270,7 @@ class Parser
       context = context.except :token
     end
     found = nil
+    # puts "Match #{token} (#{spec}) starting at '#{scanner.peek(6)}'." if token
     # Intercept a section that has already been parsed (or previously declared)
 =begin
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)

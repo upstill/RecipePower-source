@@ -4,15 +4,6 @@ class SessionsController < Devise::SessionsController
   skip_before_action :verify_authenticity_token, only: [:create]
   include Rails.application.routes.url_helpers
   # protect_from_forgery with: :null_session
-  #
-  def check_credentials opts={}
-    # We perform a standard credentials check, but defer to #update_and_decorate for actions that use it
-    # NB This same exclusion will occur in superclasses (specifically, CollectibleController)
-    #
-    # We can't even check credentials when logging the user in, because warden preempts the session as when #current_user is called
-    opts[:except] = (opts[:except] || []) + %w{ create }
-    super opts
-  end
 
   before_action :allow_iframe, only: :new
   before_action :require_no_authentication, only: :create
@@ -86,7 +77,11 @@ class SessionsController < Devise::SessionsController
       set_flash_message :notice, :signed_out
       flash[:notice] = flash[:notice].sub( 'uhandle', handle) if handle.present?
     end
-    reset_session if signed_out
+
+    if signed_out
+      logger.info "Resetting Session"
+      reset_session
+    end
 
     # We actually need to hardcode this as Rails default responder doesn't
     # support returning empty response on GET request

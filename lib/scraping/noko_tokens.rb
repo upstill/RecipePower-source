@@ -15,8 +15,10 @@ class NokoTokens < Array
         held_len = @held_text.length
       end
       @held_text = tokenize((newtext || @held_text), newtext == nil) { |token, offset|
-        push token
-        @token_starts.push @processed_text_len + offset
+        unless (token == "\n") && (last == token) # No repetitive EOLs, please
+          push token
+          @token_starts.push @processed_text_len + offset
+        end
       }
       @processed_text_len += newtext&.length || held_len
       @processed_text_len -= @held_text.length
@@ -99,28 +101,30 @@ class NokoTokens < Array
 
   # Convenience method to specify requisite text in terms of tokens
   def enclose_by_token_indices first_token_index, limiting_token_index, options={}
+    stripped_text = text_from(first_token_index, limiting_token_index).strip
+    return if stripped_text.blank?
+    tagname = options[:tag].if_present&.to_s || 'span'
     global_character_position_start = token_offset_at first_token_index
     global_character_position_end = token_limit_at limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range self, global_character_position_start...global_character_position_end
-    if teleft.text_element == teright.text_element
+    common_ancestor = (teleft.text_element.ancestors & teright.text_element.ancestors).first
+    # If the common ancestor of the relevant text elements encompasses all and only the text to be enclosed,
+    # just add appropriate class(es) and value to the element
+    if common_ancestor.name == tagname &&
+        stripped_text == common_ancestor.inner_text.strip
+      common_ancestor[:class] = "#{common_ancestor[:class]} #{options[:classes]}" unless common_ancestor[:class].split.include?(options[:classes].to_s)
+      common_ancestor[:'data-value'] = options[:value] if options[:value]
+    elsif teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
-      # Either add the specified class to the parent, or enclose the selected text in a new span element
+      # Enclose the selected text in a new span element
       # If the enclosed text is all alone in a span, just add to the classes of the span
-      if teleft.parent.name == (options[:tag].to_s || 'span') &&
-          options[:classes] &&
-          !teleft.prior_text.present? &&
-          !teright.subsq_text.present? &&
-          teleft.parent.children.count == 1
-        teleft.parent[:class] = "#{teleft.parent[:class]} #{options[:classes]}" unless teleft.parent[:class].split.include?(options[:classes].to_s)
-        teleft.parent[:'data-value'] = options[:value] if options[:value]
-      else
-        teleft.enclose_to global_character_position_end, html_enclosure({tag: 'span'}.merge options )
-        update
-      end
+      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options )
+      update
     else
       enclose_by_text_elmt_data teleft, teright, options
     end
+    x=2
   end
 
   # Return the Nokogiri node that was built
@@ -156,7 +160,9 @@ class NokoTokens < Array
   def enclose_by_text_elmt_data teleft, teright, options={}
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
     teleft.split_left
+    update
     teright.split_right
+    update
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options
     update
     newnode

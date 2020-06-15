@@ -631,7 +631,7 @@ class NokoScanner # < Scanner
       when :in_css_match
         NokoScanner.new @tokens, range.begin, range.end if range.end > range.begin
       when :at_css_match
-        range == @pos..@bound ? self : NokoScanner.new(@tokens, range.begin, range.end)
+        range == (@pos..@bound) ? self : NokoScanner.new(@tokens, range.begin, range.end)
       when :after_css_match
         NokoScanner.new @tokens, range.end
       end
