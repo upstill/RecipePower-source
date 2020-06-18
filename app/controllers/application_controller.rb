@@ -257,57 +257,49 @@ class ApplicationController < ActionController::Base
 
   def report_cookie_string source='rack.request.cookie_string', cs=request.env["rack.request.cookie_string"]
     if cs.present?
-      cs.split('; ').each { |str| logger.info "\t\t"+str }
+      cs.split('; ').each { |str| logger.info source+': '+str }
     else
-      logger.info "\t\t...nothing in request's #{source}"
+      logger.info source+': ...nothing here!'
     end
   end
 
   def report_headers h, label, which=nil
-    which ||= (label == 'request') ? %w{ HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
+    which ||= (label == 'Request header') ? %w{ HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
     which -= [ 'async.callback' ] # Don't dump the callback object, no matter what
-    logger.info "    >>>>>>>>>>>> #{label.capitalize} headers:"
     which.each do |k|
-      logger.info "\t#{k} (#{label}): ----------------"
+      logger.info "#{label}: #{k}: ----------------"
       v = h[k]
       case k
       when 'HTTP_COOKIE'
-        report_cookie_string 'HTTP_COOKIE', v
+        report_cookie_string "#{label}: HTTP_COOKIE", v
       when 'rack.request.cookie_hash'
-        v.each { |key, value| logger.info "\t\t#{key}: #{value}" }
+        v.each { |key, value| logger.info "#{label}: #{k}: #{key}: #{value}" }
       else
-        logger.info "\t\t#{v}"
+        logger.info "#{label}: #{k}: #{v}"
       end
     end
-    logger.info "    <<<<<<<<<<<< #{label.capitalize} headers"
   end
 
   def report_request
-    report_headers request.headers, 'request'
+    report_headers request.headers, 'Request header'
     if cj = request.env['action_dispatch.cookies']
-      logger.info "    >>>>>>>> Request COOKIE JAR: "
       cj.each do |k, v|
-        logger.info "\t#{k}: '#{v}'"
+        logger.info "Request COOKIE JAR: #{k}: '#{v}'"
       end
-      logger.info "    <<<<<<<< Request COOKIE JAR"
     else
-      logger.info "...no cookies in 'action_dispatch.cookies' (CookieJar)"
+      logger.info "Request COOKIE JAR: no cookies in 'action_dispatch.cookies' (CookieJar)"
     end
 
-    logger.info "    >>>>>>>> Request SESSION: "
     if sess = request.env['rack.session']
-      sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
+      sess.keys.each { |key| logger.info "Request SESSION: #{key}: '#{sess[key]}'"}
     else
-      logger.info "NO env['rack.session']!!!"
+      logger.info "Request SESSION: no env['rack.session']!!!"
     end
-    logger.info "    <<<<<<<< Request SESSION"
   end
 
   def report_response
-    report_headers response.headers, 'response'
-    logger.info "    >>>>>>>> Response COOKIES:"
-    response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "    <<<<<<<< Response COOKIES"
+    report_headers response.headers, 'Response Header '
+    response.cookies.each { |k, v| logger.info "Response COOKIE: #{k}: #{v}" }
   end
 
   def report_session context
@@ -549,10 +541,8 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
-        report_headers request.headers, 'request'
-        logger.info "    >>>>>>>>>>>> HTTP_COOKIE in request:"
+        report_headers request.headers, 'Request header'
         report_cookie_string
-        logger.info "    <<<<<<<<<<<< HTTP_COOKIE in request"
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end
