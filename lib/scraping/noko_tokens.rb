@@ -159,10 +159,12 @@ class NokoTokens < Array
 
   def enclose_by_text_elmt_data teleft, teright, options={}
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
+    # We may need to adjust the right elmt_bounds_index if the left's split introduced new elmts
+    bounds_prior = teleft.elmt_bounds_index
     teleft.split_left
-    update
+    nshifted = teleft.elmt_bounds_index - bounds_prior
+    teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
     teright.split_right
-    update
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options
     update
     newnode
@@ -225,6 +227,10 @@ class NokoTokens < Array
     ix = 0
     nkdoc.traverse do |node|
       if node.text?
+        # Remove subsequent duplicates, b/c text nodes can be merged by Nokogiri
+        while @elmt_bounds[ix+1]&.first == @elmt_bounds[ix].first do
+          @elmt_bounds.delete_at ix+1
+        end
         @elmt_bounds[ix][0] = node
         ix += 1
       end
