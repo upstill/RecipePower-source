@@ -284,6 +284,15 @@ class ApplicationController < ActionController::Base
 
   def report_request
     report_headers request.headers, 'request'
+    if cj = request.env['action_dispatch.cookies']
+      logger.info "    >>>>>>>> Request COOKIE JAR: "
+      cj.each do |k, v|
+        logger.info "\t#{k}: '#{v}'"
+      end
+      logger.info "    <<<<<<<< Request COOKIE JAR"
+    else
+      logger.info "...no cookies in 'action_dispatch.cookies' (CookieJar)"
+    end
 
     logger.info "    >>>>>>>> Request SESSION: "
     if sess = request.env['rack.session']
