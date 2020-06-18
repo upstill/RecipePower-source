@@ -259,30 +259,27 @@ class ApplicationController < ActionController::Base
     cs.split('; ').each { |str| logger.info "\t\t"+str }
   end
 
-  def report_headers what
-    case what
-    when :request
-      h, label = request.headers, 'Request'
-    when :response
-      h, label = response.headers, 'Response'
-    else
-      return
-    end
-    logger.info "    >>>>>>>>>>>> #{label} headers:"
-    h.each do |k, v|
-      logger.info "\t#{k} (#{what}): ----------------"
+  def report_headers h, label, which=nil
+    which ||= (label == 'request') ? %w{ HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
+    which -= [ 'async.callback' ] # Don't dump the callback object, no matter what
+    logger.info "    >>>>>>>>>>>> #{label.capitalize} headers:"
+    which.each do |k|
+      logger.info "\t#{k} (#{label}): ----------------"
+      v = h[k]
       case k
       when 'HTTP_COOKIE'
         report_cookie_string v
+      when 'rack.request.cookie_hash'
+        v.each { |key, value| logger.info "\t\t#{key}: #{value}" }
       else
         logger.info "\t\t#{v}"
       end
     end
-    logger.info "    <<<<<<<<<<<< #{label} headers"
+    logger.info "    <<<<<<<<<<<< #{label.capitalize} headers"
   end
 
   def report_request
-    # report_headers :request
+    report_headers request.headers, 'request'
 
     logger.info "    >>>>>>>> Request SESSION: "
     if sess = request.env['rack.session']
@@ -294,7 +291,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_response
-    report_headers :response
+    report_headers response.headers, 'response'
     logger.info "    >>>>>>>> Response COOKIES:"
     response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
     logger.info "    <<<<<<<< Response COOKIES"
@@ -539,7 +536,7 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
-        report_headers :request
+        report_headers request.headers, 'request'
         logger.info "    >>>>>>>>>>>> HTTP_COOKIE in request:"
         report_cookie_string
         logger.info "    <<<<<<<<<<<< HTTP_COOKIE in request"
