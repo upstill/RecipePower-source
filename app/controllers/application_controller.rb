@@ -255,8 +255,12 @@ class ApplicationController < ActionController::Base
     flash.each { |type, message| logger.debug "   #{type}: #{message}" }
   end
 
-  def report_cookie_string cs=request.env["rack.request.cookie_string"]
-    cs.split('; ').each { |str| logger.info "\t\t"+str }
+  def report_cookie_string source='rack.request.cookie_string', cs=request.env["rack.request.cookie_string"]
+    if cs.present?
+      cs.split('; ').each { |str| logger.info "\t\t"+str }
+    else
+      logger.info "\t\t...nothing in request's #{source}"
+    end
   end
 
   def report_headers h, label, which=nil
@@ -268,7 +272,7 @@ class ApplicationController < ActionController::Base
       v = h[k]
       case k
       when 'HTTP_COOKIE'
-        report_cookie_string v
+        report_cookie_string 'HTTP_COOKIE', v
       when 'rack.request.cookie_hash'
         v.each { |key, value| logger.info "\t\t#{key}: #{value}" }
       else
