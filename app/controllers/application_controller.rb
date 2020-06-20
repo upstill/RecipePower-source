@@ -264,7 +264,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_headers h, label, which=nil
-    which ||= h.to_h.keys # (label == 'Request header') ? %w{ HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
+    which ||= (label == 'Request header') ? %w{ HTTP_X_CSRF_TOKEN HTTP_X_REQUESTED_WITH HTTP_REFERER HTTP_X_FORWARDED_PROTO rack.url_scheme HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
     which -= [ 'async.callback' ] # Don't dump the callback object, no matter what
     which.each do |k|
       logger.info "#{label}: #{k}: ----------------"
