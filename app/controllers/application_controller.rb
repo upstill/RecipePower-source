@@ -267,7 +267,7 @@ class ApplicationController < ActionController::Base
     which ||= (label == 'Request header') ? %w{ HTTP_X_CSRF_TOKEN HTTP_X_REQUESTED_WITH HTTP_REFERER HTTP_HOST HTTP_X_FORWARDED_PROTO rack.url_scheme HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
     which -= [ 'async.callback' ] # Don't dump the callback object, no matter what
     which.each do |k|
-      logger.info "#{label}: #{k}: ----------------"
+      # logger.info "#{label}: #{k}: ----------------"
       v = h[k]
       case k
       when 'HTTP_COOKIE'
@@ -281,6 +281,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_request
+    logger.info "Full Request URL: #{request.original_url}"
     report_headers request.headers, 'Request header'
     if cj = request.env['action_dispatch.cookies']
       cj.each do |k, v|
