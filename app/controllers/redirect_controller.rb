@@ -1,5 +1,5 @@
 class RedirectController < ApplicationController
-  skip_before_filter :verify_authenticity_token, only: :go
+  skip_before_action :verify_authenticity_token, only: [ :go ]
 
   # The redirect controller has the sole purpose of turning a JSON or JS request
   # into an HTML request by sending a response that redirects to a page
