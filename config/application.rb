@@ -79,5 +79,12 @@ module RP
     config.use_jquery2 = true
 
     config.active_job.queue_adapter = :delayed_job
+
+    # Make sure all requests to recipepower.com go to www.recipepower.com
+    config.middleware.insert_before(Rack::Runtime, Rack::Rewrite) do
+      r301 %r{.*}, 'http://www.recipepower.com$&', :if => Proc.new {|rack_env|
+        rack_env['SERVER_NAME'] == 'recipepower.com'
+      }
+    end
   end
 end

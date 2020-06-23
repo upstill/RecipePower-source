@@ -193,3 +193,6 @@ gem 'htmlentities'  # https://rubygems.org/gems/htmlentities/versions/4.3.4
 gem 'will_paginate', '~> 3.0'  # https://github.com/mislav/will_paginate
 ## gem 'actionpack-page_caching'
 ## gem 'actionpack-action_caching'
+
+# For redirecting recipepower.com to www.recipepower.com https://github.com/jtrupiano/rack-rewrite
+gem 'rack-rewrite', '~> 1.5.0'
