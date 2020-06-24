@@ -127,10 +127,12 @@ class CollectibleController < ApplicationController
     end
 
     # The page_ref takes on incoming urls, as possible
-    if @page_ref
-      @page_ref.url = prparams[:url] if @page_ref.acceptable_url?(prparams[:url])
-    else
-      @page_ref = PageRef.fetch prparams[:url]
+    if prparams&[:url].present?
+      if @page_ref
+        @page_ref.url = prparams[:url] if @page_ref.acceptable_url?(prparams[:url])
+      else
+        @page_ref = PageRef.fetch prparams[:url]
+      end
     end
 
     # Take steps if the page_ref is changing kinds
