@@ -1,5 +1,6 @@
 class NestedBenchmark
   @indent = 0
+  @@DOLOG=false # No benchmarking unless set
 
   def self.do_log
     @@DOLOG

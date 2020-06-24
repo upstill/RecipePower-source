@@ -83,6 +83,12 @@ class SiteServices
           absolute = safe_uri_join(site.home, url).to_s
           puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
           node.attribute('href').value = absolute if absolute != url
+        elsif node.text?
+          # Reduce all sequences of whitespace in text strings to either
+          # 1) a single newline, if one appears in the string
+          # 2) a single non-breaking space character, if one appears in the string
+          # 3) a single blank
+          node.content = node.content.deflate
         end
       end
       @nkdoc.to_html

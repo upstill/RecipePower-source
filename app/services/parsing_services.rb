@@ -61,7 +61,7 @@ class ParsingServices
   end
 
   def self.enclose_results seeker
-    if seeker.success? && !seeker.tail_stream.more? # Parsed the WHOLE entry
+    if seeker.success?
       seeker.enclose_all
       nkdoc = seeker.head_stream.nkdoc
       nodes = if nkdoc.parent && nkdoc.matches?('.rp_inglist')
@@ -89,7 +89,7 @@ class ParsingServices
   # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
   def parse_and_annotate content
     if seeker = parse(content)
-      [ :ingline ].each do |token|
+      [ :rp_ingline ].each do |token|
         puts "-------------- #{token} ---------------"
         seekers = seeker.find(token)
         seekers.each { |seeker|

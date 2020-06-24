@@ -177,11 +177,11 @@ class PageRef < ApplicationRecord
 
   def bkg_launch force=false
     build_gleaning if !gleaning
-    gleaning.bkg_launch # if gleaning.virgin?
+    force = gleaning.bkg_launch || force # if gleaning.virgin?
 
     build_mercury_result unless mercury_result
     mercury_result.bkg_launch # if mercury_result.virgin?
-    super if defined?(super)
+    super(force) if defined?(super)
   end
 
   # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly

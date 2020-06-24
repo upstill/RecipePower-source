@@ -4,6 +4,7 @@ class MercuryResult < ApplicationRecord
   backgroundable :status
 
   has_one :page_ref, :dependent => :nullify
+  has_one :site, :through => :page_ref
 
   serialize :results, Hash
 
