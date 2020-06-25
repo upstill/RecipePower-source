@@ -66,6 +66,18 @@ class NokoTokens < Array
     @elmt_bounds[token_index]&.last || @processed_text_len
   end
 
+  def find_elmt_index elmt
+    @elmt_bounds.find_index { |rcd| rcd.first.object_id.equal? elmt.object_id } if elmt
+  end
+
+  def nth_elmt ix
+    @elmt_bounds[ix]&.first
+  end
+
+  def delete_nth_elmt ix
+    @elmt_bounds.delete_at ix
+  end
+
   # Return the string representing all the text given by the two token positions
   # NB This is NOT the space-separated join of all tokens in the range, b/c any intervening whitespace is not collapsed
   def text_from first_token_index, limiting_token_index
@@ -162,10 +174,14 @@ class NokoTokens < Array
     # We may need to adjust the right elmt_bounds_index if the left's split introduced new elmts
     bounds_prior = teleft.elmt_bounds_index
     teleft.split_left
+    update
     nshifted = teleft.elmt_bounds_index - bounds_prior
     teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
     teright.split_right
-    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options
+    if Rails.env.development?
+      puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
+    end
+    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
     update
     newnode
   end
@@ -225,16 +241,34 @@ class NokoTokens < Array
   def update
     # Because Nokogiri can replace nodes willy-nilly, let's make sure that the elmt_bounds are up to date
     ix = 0
+    failed = false
+    newbounds = []
     nkdoc.traverse do |node|
       if node.text?
-        # Remove subsequent duplicates, b/c text nodes can be merged by Nokogiri
-        while @elmt_bounds[ix+1]&.first == @elmt_bounds[ix].first do
-          @elmt_bounds.delete_at ix+1
+        # We're assuming here that there's an exact match between the sequence of nodes traversed
+        # and the nodes in the @elmt_bounds array. Thus, a simple match on character strings
+        if node.to_s.present? && (@elmt_bounds[ix].first.to_s != node.to_s) && Rails.env.development?
+          failed = true
+=begin
+          puts "NokoTokens update failed at @elmt_bounds ##{ix}: "
+          puts "\tnew node '#{escape_newlines node}' doesn't match extant node '#{escape_newlines @elmt_bounds[ix].first}'"
+          low = [ix-2, 0].max
+          high = [@elmt_bounds.count-1, ix+2].min
+          (low..high).each { |i| puts "\t@elmt_bounds[#{i}]: '#{escape_newlines @elmt_bounds[i].first}'"}
+=end
         end
-        @elmt_bounds[ix][0] = node
+        newbounds[ix] = node
         ix += 1
       end
     end
+    # Finally, copy the nodes over
+    newbounds.each_with_index do |node, ix|
+      Rails.logger.debug "%3d: %50s => %50s" % [ix,
+                                                escape_newlines(@elmt_bounds[ix].first.to_s.truncate(49)),
+                                                escape_newlines(node.to_s.truncate(49))] if failed
+      @elmt_bounds[ix][0] = node
+    end
+    x=2
   end
 
   # Extract the text element data for the character "at" the given global position.

@@ -92,18 +92,27 @@ def confirm_integrity *nodes
 end
 
 # Add a child to a node while ensuring that the child's old environment is maintained
-def add_child node, newchild
-  if (node == newchild) || (newchild.parent == node)
+def add_child parent, newchild, nkt=nil
+  if (parent == newchild) || (newchild.parent == parent)
     return newchild.next
   end
+  # If the new node gets merged into an existing child, that's worth knowing
+  child_count = parent.children.count
   rtnval = newchild.next
-  if newchild == node.next
-    node.add_child newchild
-    return node.next
+  if newchild == parent.next
+    parent.add_child newchild
+    rtnval = parent.next
   else
-    node.add_child newchild
-    return rtnval
+    parent.add_child newchild
   end
+  # In the event that the text from the newchild just gets appended to existing text in the parent,
+  # we have to remove that child from the node bounds array.
+  if (child_count == parent.children.count) && # No child added (i.e, newchild was merged in)
+      (ebix = nkt&.find_elmt_index newchild) &&
+      (nkt.nth_elmt(ebix-1) == nkt.nth_elmt(ebix))
+    nkt.delete_nth_elmt ebix
+  end
+  return rtnval
   begin
     orig_prev, orig_next = newchild.previous, newchild.next
     node_prev, node_next = node.previous, node.next
@@ -161,7 +170,6 @@ def insert_before node_or_html, node
   newtree
 end
 
-
 # Insert a node before the given node and return the former
 def insert_after node, node_or_html
   begin
@@ -191,7 +199,9 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
 
   # Back the focus_elmt up as long as it's blank
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
-  
+  if Rails.env.development?
+    report_tree 'Before: ', common_ancestor, anchor_elmt, focus_elmt
+  end
   # We can just apply the class to the parent element if the two text elements are the first and last text elements in the subtree
   while anchor_elmt.to_s.blank? do
     anchor_elmt = successor_text common_ancestor, anchor_elmt
@@ -202,11 +212,13 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
   # If there's an ancestor with no preceding or succeeding text, mark that and return
   if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))
-    return anc
+    return report_tree('After: ', anc)
   end
-  return common_ancestor unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
+  unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
+    return report_tree('After: ', common_ancestor)
+  end
 
-  # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
+    # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
   left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
       anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
   newtree = nil
@@ -233,20 +245,20 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   end
   # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
   if highest_whole_left == focus_elmt
-    add_child newtree, highest_whole_left
-    return newtree
+    add_child newtree, highest_whole_left, options[:nkt]
+    return report_tree('After: ', newtree)
   end
   if (newtree.next == focus_elmt) # (newtree.next == highest_whole_left) && (highest_whole_left.next == focus_elmt)
-    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+    right_collector = add_child newtree, highest_whole_left, options[:nkt] # newtree.add_child highest_whole_left
     focus_elmt = newtree.next
   else
-    right_collector = add_child newtree, highest_whole_left # newtree.add_child highest_whole_left
+    right_collector = add_child newtree, highest_whole_left, options[:nkt] # newtree.add_child highest_whole_left
   end
   if right_collector
     while (right_collector.parent != common_ancestor)
       parent = right_collector.parent
       while (right_sib = right_collector&.next) do
-        right_collector = add_child newtree, right_sib # newtree.add_child right_sib
+        right_collector = add_child newtree, right_sib, options[:nkt] # newtree.add_child right_sib
       end
       right_collector = parent
     end
@@ -265,12 +277,34 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   # Go down the tree, collecting all the siblings before and including each ancestor
   while ancestor = stack.pop
     while left_collector && left_collector != ancestor do
-      left_collector = add_child newtree, left_collector # newtree.add_child left_collector
+      left_collector = add_child newtree, left_collector, options[:nkt] # newtree.add_child left_collector
     end
     left_collector = ancestor.children[0] unless stack.empty?
   end
-  add_child newtree, highest_whole_right # newtree.add_child highest_whole_right
-  validate_embedding newtree
+  add_child newtree, highest_whole_right, options[:nkt] # newtree.add_child highest_whole_right
+  validate_embedding report_tree('After: ', newtree)
+end
+
+def report_tree label, nokonode, first_te=nil, last_te=nil
+  if Rails.env.development?
+    puts label
+    preface = (inside = first_te.nil?) ? '>>>>>' : 'vvvvv'
+    past_it = false
+    nokonode.traverse do |node|
+      if node.text?
+        if node == first_te
+          inside = true
+          preface = '>>>>> '
+        end
+        puts "\t#{preface} #{escape_newlines node.to_s}" if inside
+        if node == last_te
+          inside == false  ; past_it = true ; preface = '^^^^^'
+        end
+      end
+    end
+    # puts "#{label}#{escape_newlines nokonode.inner_text}"
+  end
+  nokonode
 end
 
 # Special case: You can't put a <div> inside a <p>, so we may have to split the common ancestor to accommodate
@@ -423,7 +457,9 @@ end
 class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at, :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at,
+           :find_elmt_index, :nth_elmt, :delete_nth_elmt,
+           :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
