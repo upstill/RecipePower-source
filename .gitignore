@@ -20,3 +20,13 @@ eventmachine/
 /log/logout
 
 /shared
+localhost.crt
+localhost.key
+myCA.key
+myCA.pem
+trial/
+local.recipepower.com.crt
+local.recipepower.com.csr
+local.recipepower.com.ext
+local.recipepower.com.key
+myCA.srl
