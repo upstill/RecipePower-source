@@ -132,8 +132,7 @@ open_modal = (dlog, omit_button) ->
 		$('body')[0].appendChild dlog
 	if $(dlog).hasClass 'modeless'
 		$(dlog).removeClass('hide').removeClass 'modal-pending'
-		$(dlog).draggable ->
-			handle: ".modal-header"
+		$(dlog).draggable handle: "div.modal-header"
 	else
 		$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
 		# Unhide it, as needed
