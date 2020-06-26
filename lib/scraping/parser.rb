@@ -352,6 +352,7 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
+=begin
       probe = scanner
       while probe.more? do
         case probe.peek
@@ -369,7 +370,7 @@ class Parser
         end
         probe = probe.rest
       end
-=begin
+=end
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
         return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
@@ -379,19 +380,14 @@ class Parser
         when 'and', 'or'
           # We expect a terminating entity
           child = match_specification scanner.rest, spec
-          if child.success?
-            children << child
-            break
-          else
-            return Seeker.failed(start_scanner, child.head_stream, token, context.merge(children: (children + [child])))
-          end
+          children << child if child.success?
+          break
         when ','
           scanner = scanner.rest
         else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
           break
         end
       end
-=end
       if children.present?
         return Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
       else

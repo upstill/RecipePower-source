@@ -30,3 +30,7 @@ local.recipepower.com.csr
 local.recipepower.com.ext
 local.recipepower.com.key
 myCA.srl
+server.crt
+server.csr
+server.key
+
