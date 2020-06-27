@@ -57,13 +57,12 @@ class TagServices
     # entity_class = entity_class_name.constantize
     # id_or_ids = with_synonyms ? synonym_ids : id
     synids = synonym_ids true
-    if synids.present?
-      assoc = PageRef.of_kind(kind).joins(:taggings).where("taggings.tag_id in (#{(synids << id).join(',')})")
-    else
-      assoc = PageRef.of_kind(kind).joins(:taggings).where("taggings.tag_id = #{id}")
-    end
-    referred_page_refs = tag.meanings(true).collect { |referent| referent.page_refs.of_kind kind }.flatten
-    (assoc.to_a + referred_page_refs).compact.uniq
+    query = synids.present? ?
+      "taggings.tag_id in (#{(synids << id).join(',')})" :
+      "taggings.tag_id = #{id}"
+    prs = PageRef.of_kind(kind).joins(:taggings).where(query).to_a
+    tag.meanings.each { |referent| prs |= referent.page_refs.of_kind(kind).to_a }
+    prs
   end
 # -----------------------------------------------
   def synonym_ids unique=false
