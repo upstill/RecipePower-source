@@ -147,7 +147,7 @@ class Recipe < ApplicationRecord
   end
 
   def perform
-    if site&.finder_for('Content')
+    if site&.finder_for('Content') && Rails.env.development?
       page_ref.bkg_land
       page_ref.create_recipe_page if !recipe_page
       recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
