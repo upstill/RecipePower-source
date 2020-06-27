@@ -178,7 +178,7 @@ close_modal = (dlog, action, next) ->
 		if action != 'cancel' && parent = $(dlog).data 'parent'
 			next = assert_modal parent, dlog
 		RP.dialog.notify action, dlog
-		if $(dlog).hasClass 'modal'
+		if $(dlog).modal
 			$(dlog).modal('hide').on 'hidden.bs.modal', ->
 				$(dlog).remove()
 				if next

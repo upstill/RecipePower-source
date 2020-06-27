@@ -127,27 +127,28 @@ class CollectibleController < ApplicationController
     end
 
     # The page_ref takes on incoming urls, as possible
-    if prparams&[:url].present?
-      if @page_ref
-        @page_ref.url = prparams[:url] if @page_ref.acceptable_url?(prparams[:url])
-      else
-        @page_ref = PageRef.fetch prparams[:url]
+    if prparams
+      if prparams[:url].present?
+        if @page_ref
+          @page_ref.url = prparams[:url] if @page_ref.acceptable_url?(prparams[:url])
+        else
+          @page_ref = PageRef.fetch prparams[:url]
+        end
       end
-    end
-
-    # Take steps if the page_ref is changing kinds
-    if prparams && prparams[:kind] && (prparams[:kind] != @page_ref.kind)
-      # When changing a :recipe page_ref to another type, the associated
-      # recipe may have been created gratuitously.
-      if @page_ref.recipe?
-        # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
-        # and this user is the only one who's collected it, then we destroy it.
-        @page_ref.recipes.to_a.each { |recipe|
-          # Remove any uncollected recipes
-          @page_ref.recipes.destroy recipe unless (recipe.collector_ids - [User.current_or_guest.id]).present?
-        }
+      # Take steps if the page_ref is changing kinds
+      if prparams[:kind] && (prparams[:kind] != @page_ref.kind)
+        # When changing a :recipe page_ref to another type, the associated
+        # recipe may have been created gratuitously.
+        if @page_ref.recipe?
+          # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
+          # and this user is the only one who's collected it, then we destroy it.
+          @page_ref.recipes.to_a.each { |recipe|
+            # Remove any uncollected recipes
+            @page_ref.recipes.destroy recipe unless (recipe.collector_ids - [User.current_or_guest.id]).present?
+          }
+        end
+        @page_ref.kind = prparams[:kind]
       end
-      @page_ref.kind = prparams[:kind]
     end
 
     # We get an entity--associated with the PageRef--that reflects the possibly new PageRef
