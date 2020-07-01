@@ -171,4 +171,8 @@ class UserDecorator < CollectibleDecorator
     @results.compact.sort { |h1, h2| h1[:sortval] <=> h2[:sortval] }
   end
 
+  def homelink
+    h.url_for "/users/#{id}/collection?result_type=cookmarks"
+  end
+
 end

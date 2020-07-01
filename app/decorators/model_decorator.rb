@@ -109,4 +109,10 @@ class ModelDecorator < Draper::Decorator
   def base_object
     object.class == object.class.base_class ? object : object.becomes(object.class.base_class)
   end
+
+  # Provide the path or object suitable for passing to link_to, going to the object's primary page.
+  # In most cases, this will be the object's #show page
+  def homelink
+    object
+  end
 end

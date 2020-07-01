@@ -49,7 +49,7 @@ module Pagerefable
 
         # Find entities whose url matches the given path (which includes the host)
         define_singleton_method :query_on_path do |urpath|
-          self.joins(:page_ref => :aliases).where(Alias.url_path_query urpath)
+          self.joins(:page_ref => :aliases).where(Alias.url_path_query urpath).distinct
         end
 
       end
