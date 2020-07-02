@@ -1,7 +1,6 @@
 <% list = decorator.object %>
 <%= present decorator do |presenter| %>
     <td class="avatar-column">
-      <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
       <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
     </td>
     <td class="description-column">

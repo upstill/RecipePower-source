@@ -35,7 +35,8 @@ module ImagesHelper
       options[:data] ||= {}
       # The :fill_mode option requests the image be resized to fit its container
       if fill_mode = options.delete(:fill_mode)
-        options[:class] = "#{options[:class]} #{fill_mode}" # Add fill-mode indicator to class
+        style = fill_mode == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
+        options[:style] = "#{options[:style]} #{style}"
         # options[:onload] = 'doFitImage(event);'  # Fit the image on load
       end
 
@@ -59,6 +60,8 @@ module ImagesHelper
     end
   end
 
+=begin
+Unused helpers, with functionality now subsumed by Presenter#avatar
   # Define a div or other content tag for enclosing an image.
   # options :fill_mode, :explain and :fallback_img are passed to image_with_error_recovery
   # Others are passed to content_tag
@@ -95,6 +98,7 @@ module ImagesHelper
                 class: 'owner-pic pic-box') +
         content_tag(:span, homelink(decorator), class: 'owner-name')
   end
+=end
 
   def video_embed vidlink
     iframe = content_tag :iframe,

@@ -1,15 +1,9 @@
 <%= present decorator do |presenter| %>
-    <%# presenter.ribbon %>
     <div class='slider-left'>
-      <div class='slider-pic onlinks'>
-        <%= image_enclosure decorator,
-                            class: 'pic-box',
-                            fill_mode: 'fixed-height',
-                            fallback_img: decorator.object.is_a?(User),
-                            nolink: true
-        %>
-        <%= homelink decorator %>
-      </div>
+      <%= presenter.avatar divclass: 'slider-pic',
+                           fill_mode: 'fixed-height',
+                           label: false, # We'll take care of that below
+                           fallback_img: decorator.object.is_a?(User) %>
       <% presenter.ribbon do |content| %>
           <%= content_tag(:div, '', class: 'flowtri') unless decorator.imgdata.present? %>
           <%= content %>

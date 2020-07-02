@@ -41,12 +41,6 @@ module RecipesHelper
     content_tag :div, (label+link).html_safe, class: 'rcp_grid_element_source'
   end
 
-  def collectible_show_thumbnail decorator
-    image_div = image_enclosure decorator, class: 'pic-box', fill_mode: 'fixed-width', fallback_img: false
-    title = link_to_submit decorator.title, decorator.object
-    content_tag :div, "#{image_div}#{title}".html_safe, class: "cardlet-item #{decorator.dom_id}"
-  end
-
   def collectible_masonry_datablock decorator
     title_link = collectible_title_link decorator, 'rcp_grid_element_title'
     source_element = collectible_source_link decorator

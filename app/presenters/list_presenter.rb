@@ -13,10 +13,10 @@ class ListPresenter < CollectiblePresenter
   end
 
   def card_avatar_accompaniment
-    if owner = @object.owner
-      card_aspect_enclosure :created_by,
-                            h.labelled_avatar(owner.decorate),
-                            'Compiled By'
+    if up = h.present(@object.owner&.decorate)
+      if av = up.avatar
+        card_aspect_enclosure :created_by, av, 'Compiled By'
+      end
     end
   end
 

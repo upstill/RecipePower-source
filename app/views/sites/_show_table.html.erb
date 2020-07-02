@@ -3,7 +3,6 @@
     <% NestedBenchmark.measure 'sites/show_table' do %>
         <% NestedBenchmark.measure '...avatar:' do %>
             <td class="avatar-column">
-              <%# image_enclosure decorator, :fallback_img => image_path('Upload_Icon.jpg') %>
               <%= presenter.card_avatar :fallback_img => image_path('Upload_Icon.jpg') %>
             </td>
         <% end %>
