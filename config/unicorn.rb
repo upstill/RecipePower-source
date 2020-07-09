@@ -5,7 +5,7 @@
 
 # listen "/tmp/unicorn.RP.sock"
 
-worker_processes 1
+# worker_processes 1
 timeout ((ENV['RAILS_ENV'] == 'development') ? 3000 : 200)
 
 # set path to the application
@@ -14,12 +14,12 @@ shared_dir = "#{app_dir}/shared"
 working_directory app_dir
 
 # Set unicorn options
-worker_processes 2
+# worker_processes 2
 preload_app true
 timeout 30
 
 # Path for the Unicorn socket
-listen "#{shared_dir}/sockets/unicorn.sock", :backlog => 64
+listen "/var/sockets/unicorn.RP.sock", :backlog => 64
 
 # Set path for logging
 stderr_path "#{shared_dir}/log/unicorn.stderr.log"

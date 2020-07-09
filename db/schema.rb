@@ -15,46 +15,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
 
-  create_table "activ_notifications", id: :serial, force: :cascade do |t|
-    t.integer "target_id", null: false
-    t.string "target_type", null: false
-    t.integer "notifiable_id", null: false
-    t.string "notifiable_type", null: false
-    t.string "key", null: false
-    t.integer "group_id"
-    t.string "group_type"
-    t.integer "group_owner_id"
-    t.integer "notifier_id"
-    t.string "notifier_type"
-    t.text "parameters"
-    t.datetime "opened_at"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["group_owner_id"], name: "index_activ_notifications_on_group_owner_id"
-    t.index ["group_type", "group_id"], name: "index_activ_notifications_on_group_type_and_group_id"
-    t.index ["notifiable_type", "notifiable_id"], name: "index_activ_notifications_on_notifiable_type_and_notifiable_id"
-    t.index ["notifier_type", "notifier_id"], name: "index_activ_notifications_on_notifier_type_and_notifier_id"
-    t.index ["target_type", "target_id"], name: "index_activ_notifications_on_target_type_and_target_id"
-  end
-
-  create_table "activ_subscriptions", id: :serial, force: :cascade do |t|
-    t.integer "target_id", null: false
-    t.string "target_type", null: false
-    t.string "key", null: false
-    t.boolean "subscribing", default: true, null: false
-    t.boolean "subscribing_to_email", default: true, null: false
-    t.datetime "subscribed_at"
-    t.datetime "unsubscribed_at"
-    t.datetime "subscribed_to_email_at"
-    t.datetime "unsubscribed_to_email_at"
-    t.text "optional_targets"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-    t.index ["key"], name: "index_activ_subscriptions_on_key"
-    t.index ["target_type", "target_id", "key"], name: "index_activ_subscriptions_on_target_type_and_target_id_and_key", unique: true
-    t.index ["target_type", "target_id"], name: "index_activ_subscriptions_on_target_type_and_target_id"
-  end
-
   create_table "aliases", id: :serial, force: :cascade do |t|
     t.integer "page_ref_id"
     t.text "url", null: false
@@ -85,11 +45,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.index ["normalized_name"], name: "index_banned_tags_on_normalized_name", unique: true
-  end
-
-  create_table "channels_referents", id: false, force: :cascade do |t|
-    t.integer "channel_id"
-    t.integer "referent_id"
   end
 
   create_table "deferred_requests", id: false, force: :cascade do |t|
@@ -253,29 +208,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "list_items", id: :integer, default: nil, force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "list_id"
-    t.text "title"
-    t.text "description"
-    t.boolean "onHold"
-    t.date "doneDate"
-    t.text "link"
-    t.boolean "suggested"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["list_id"], name: "index_list_items_on_list_id"
-    t.index ["user_id"], name: "index_list_items_on_user_id"
-  end
-
-  create_table "list_types", id: :integer, default: nil, force: :cascade do |t|
-    t.text "title"
-    t.string "noun_spec"
-    t.string "verb_spec"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "lists", id: :serial, force: :cascade do |t|
     t.integer "owner_id"
     t.integer "name_tag_id"
@@ -327,48 +259,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
     t.index ["target_type", "target_id"], name: "index_notifications_on_target_type_and_target_id"
   end
 
-  create_table "oauth_access_grants", id: :integer, default: nil, force: :cascade do |t|
-    t.integer "resource_owner_id", null: false
-    t.integer "application_id", null: false
-    t.string "token", null: false
-    t.integer "expires_in", null: false
-    t.text "redirect_uri", null: false
-    t.datetime "created_at", null: false
-    t.datetime "revoked_at"
-    t.string "scopes"
-    t.index ["application_id"], name: "index_oauth_access_grants_on_application_id"
-    t.index ["resource_owner_id"], name: "index_oauth_access_grants_on_resource_owner_id"
-    t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
-  end
-
-  create_table "oauth_access_tokens", id: :integer, default: nil, force: :cascade do |t|
-    t.integer "resource_owner_id"
-    t.integer "application_id"
-    t.string "token", null: false
-    t.string "refresh_token"
-    t.integer "expires_in"
-    t.datetime "revoked_at"
-    t.datetime "created_at", null: false
-    t.string "scopes"
-    t.string "previous_refresh_token", default: "", null: false
-    t.index ["application_id"], name: "index_oauth_access_tokens_on_application_id"
-    t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
-    t.index ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
-    t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
-  end
-
-  create_table "oauth_applications", id: :integer, default: nil, force: :cascade do |t|
-    t.string "name", null: false
-    t.string "uid", null: false
-    t.string "secret", null: false
-    t.text "redirect_uri", null: false
-    t.string "scopes", default: "", null: false
-    t.boolean "confidential", default: true, null: false
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-    t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
-  end
-
   create_table "offerings", id: :serial, force: :cascade do |t|
     t.integer "product_id"
     t.integer "page_ref_id"
@@ -401,14 +291,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
     t.integer "mercury_result_id"
     t.integer "recipe_page_id"
     t.index ["url"], name: "page_refs_index_by_url", unique: true
-  end
-
-  create_table "private_subscriptions", id: :serial, force: :cascade do |t|
-    t.integer "user_id"
-    t.integer "tag_id"
-    t.integer "priority", default: 10
-    t.datetime "created_at"
-    t.datetime "updated_at"
   end
 
   create_table "products", id: :serial, force: :cascade do |t|
@@ -737,8 +619,6 @@ ActiveRecord::Schema.define(version: 2020_04_13_021915) do
   end
 
   add_foreign_key "answers", "users"
-  add_foreign_key "oauth_access_grants", "oauth_applications", column: "application_id"
-  add_foreign_key "oauth_access_tokens", "oauth_applications", column: "application_id"
   add_foreign_key "tag_selections", "tags"
   add_foreign_key "tag_selections", "tagsets"
   add_foreign_key "tag_selections", "users"

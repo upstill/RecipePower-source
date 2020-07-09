@@ -3,8 +3,6 @@ common: &common
   encoding: unicode
   pool: 5
   timeout: 5000
-  username: <%= ENV['POSTGRESQL_USER'] %>
-  password: <%= ENV['POSTGRESQL_PASSWORD'] %>
 
 development:
   adapter: postgresql
@@ -14,6 +12,9 @@ development:
 staging:
   adapter: postgresql
   database: cookmarks_production
+  host: localhost
+  username: <%= ENV['POSTGRESQL_USER'] %>
+  password: <%= ENV['POSTGRESQL_PASSWORD'] %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
@@ -26,4 +27,6 @@ test:
 production:
   adapter: postgresql
   database: cookmarks_production
-
+  host: localhost
+  username: <%= ENV['POSTGRESQL_USER'] %>
+  password: <%= ENV['POSTGRESQL_PASSWORD'] %>
