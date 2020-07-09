@@ -1,23 +1,36 @@
-# Install and 'source' me at ~/.bash_profile
-
-APP_HOME="/home/upstill/RecipePower-source"
-LOG_HOME="${APP_HOME}/log"
+source ~/.bashrc
+export APP_HOME="/home/upstill/RecipePower-source"
+export LOG_HOME="${APP_HOME}/log"
 # PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
-PG_HOME="/etc/postgresql/10/main"
+export PG_HOME="/etc/postgresql/10/main"
 # PG_BIN is the bin directory for postgres commands
-PG_BIN="/usr/lib/postgresql/10/bin"
-PATH="${PG_BIN}:${PATH}"
+export PG_BIN="/usr/lib/postgresql/10/bin"
+export PATH="${PG_BIN}:${PATH}"
 
 function nustop()
 {
     sudo service nginx stop
     sudo pkill unicorn
 }
+
 function nugo()
-    sudo rm /var/log/nginx/*.log shared/log/*.log
-    sudo unicorn -c config/unicorn.rb -E production -D
-    sudo service nginx start
-    sudo vi /var/log/nginx/*.log shared/log/*.log
+{
+    # cd /home/upstill/RecipePower-source
+    if [[ -f Gemfile ]]
+    then
+			sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
+	    		sudo unicorn -c config/unicorn.rb -E production -D
+	    		sudo service nginx start
+	    		nulogs
+	    		echo "To recheck logs, do 'nulogs'"
+    else
+	    echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
+    fi
+}
+
+function nulogs()
+{
+    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
 }
 
 function clearlog()
