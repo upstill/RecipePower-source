@@ -38,19 +38,19 @@ class RecipeServices
       tagnames[:Ingredient] = nkdoc.css('.rp_ingname').collect { |node|
         node['data-value'].if_present || node.text
       }.compact
-      #tagnames[:Genre] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Dish] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Process] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Unit] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Source] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Author] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Occasion] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Diet] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Tool] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Nutrient] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Course] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Time] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
-      #tagnames[:Condition] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present? || node.text }.compact
+      #tagnames[:Genre] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Dish] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Process] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Unit] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Source] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Author] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Occasion] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Diet] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Tool] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Nutrient] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Course] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Time] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
+      #tagnames[:Condition] = nkdoc.css('.rp_ingname').collect { |node| node['data-value'].if_present || node.text }.compact
     end
     TaggingServices.new(@recipe).set_tags User.inventory_user_id, tagnames
   end

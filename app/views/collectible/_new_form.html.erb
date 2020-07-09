@@ -16,6 +16,7 @@
       <%= f.select :kind, PageRefServices.kind_selections, class: 'contents' %>
       <div class="contents" >
         <%= f.check_box :collectible_private, class: 'contents' %>
+        <%= f.hidden_field :collectible_in_collection, value: true %>
         <%= f.label :collectible_private, 'Private', class: 'checkbox contents' %>
       </div>
     </div>

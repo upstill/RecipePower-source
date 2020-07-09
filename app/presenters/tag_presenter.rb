@@ -195,10 +195,14 @@ class TagPresenter < BasePresenter
     tagserv.images.present?
   end
 
-  def card_avatar options = {}
+  def avatar options = {}
     if image_ref = tagserv.images.first
       image_with_error_recovery image_ref.imgdata || image_ref.url
     end
+  end
+
+  def card_avatar options = {}
+    avatar options
   end
 
   def show_or_edit which, val

@@ -6,8 +6,6 @@ class Gleaning < ApplicationRecord
 
   backgroundable :status
 
-  # after_create { |gl| gl.bkg_launch }
-
   require 'finder_services.rb'
 
   has_one :page_ref, :dependent => :nullify
@@ -42,6 +40,12 @@ class Gleaning < ApplicationRecord
 
   def labels
     results&.labels || []
+  end
+
+  def bkg_launch force=false
+    ffc = site.finder_for 'Content'
+    force ||= ffc && (updated_at < ffc.updated_at)  # Launch if we're older than the :content finder
+    super(force) if defined?(super)
   end
 
   # Execute a gleaning on the page_ref's url

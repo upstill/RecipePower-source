@@ -139,7 +139,7 @@ class TextElmtData < Object
 
   # Return the text from the beginning to the mark (expressed globally)
   def delimited_text mark = nil
-    text[mark ? @local_char_offset...(mark-@global_start_offset) : @local_char_offset..-1].strip
+    text[mark ? @local_char_offset...(mark-@global_start_offset) : @local_char_offset..-1]&.strip || ''
   end
 
   def replace_bound newbounds, text_shrinkage = 0

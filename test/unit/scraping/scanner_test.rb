@@ -313,6 +313,19 @@ EOF
     assert_equal expected, nks.nkdoc.to_s.gsub(/\n+\s*/, '')
   end
 
+  test 'enclose by token indices' do
+    html = "\n<li class=\"simple-list__item js-checkbox-trigger ingredient\">\nGarnish: 1 <a href=\"https://www.thespruceeats.com/cut-citrus-garnishes-for-cocktails-759982\" data-component=\"link\" data-source=\"inlineLink\" data-type=\"internalLink\" data-ordinal=\"1\">orange slice</a>\n</li>\n<li class=\"simple-list__item js-checkbox-trigger ingredient\">\nGarnish: 1 <a href=\"https://www.thespruceeats.com/the-truth-about-maraschino-cherries-759977\" data-component=\"link\" data-source=\"inlineLink\" data-type=\"internalLink\" data-ordinal=\"1\">cherry</a>\n</li>"
+    nkdoc = Nokogiri::HTML.fragment html
+    nokoscan = NokoScanner.new nkdoc
+    nkt = nokoscan.tokens
+    check_integrity nokoscan
+    assert_equal '1 orange slice', nkt.text_from(2,5)
+    nkt.enclose_by_token_indices 3, 5, :classes => :rp_ingspec, :tag => 'span'
+    assert_equal '1 orange slice', nkt.text_from(2,5)
+    nkt.enclose_by_token_indices 4, 5, :classes => :rp_ingname, :tag => 'span'
+    assert_equal '1 orange slice', nkt.text_from(2,5)
+  end
+
   test "Find token positions by DOM selector" do
     html = <<EOF
 <div class="upper div">

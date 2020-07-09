@@ -1,10 +1,10 @@
 class TagPolicy < ApplicationPolicy
   def create?
-    @user.is_user?
+    @user&.is_user?
   end
 
   def new?
-    @user.is_user?
+    @user&.is_user?
   end
 
   def edit?
@@ -16,11 +16,11 @@ class TagPolicy < ApplicationPolicy
   end
 
   def update?
-    @user.is_editor?
+    @user&.is_editor?
   end
 
   def destroy?
-    @user.is_editor?
+    @user&.is_editor?
   end
 
   def index?
@@ -28,11 +28,11 @@ class TagPolicy < ApplicationPolicy
   end
 
   def associate?
-    @user.is_editor?
+    @user&.is_editor?
   end
 
   def owned?
-    @user.is_user?
+    @user&.is_user?
   end
 
   def associated?

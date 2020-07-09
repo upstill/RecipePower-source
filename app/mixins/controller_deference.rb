@@ -30,7 +30,9 @@ module ControllerDeference
           page_with_trigger speced_path
         when :json
           # Need JSON but not JSON
-          goto_url to: %Q{"#{speced_path}"} # the redirect#go JSON response will get the client to request page
+          url = goto_url to: %Q{"#{speced_path}"} # the redirect#go JSON response will get the client to request page
+          puts "GOTO_URL = #{url}"
+          url
         else
           x=2
       end

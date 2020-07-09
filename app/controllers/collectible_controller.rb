@@ -116,43 +116,46 @@ class CollectibleController < ApplicationController
     nominal_entity = response_service.controller_model_class.find_by_id params[:id]
     case nominal_entity
       when PageRef
-        page_ref, prparams = nominal_entity, entity_params
+        @page_ref, prparams = nominal_entity, entity_params
       when Pagerefable
-        page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
+        @page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
       when NilClass
         prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
-        page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
+        @page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
       else
         return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
 
     # The page_ref takes on incoming urls, as possible
-    if page_ref
-      page_ref.url = prparams[:url] if page_ref.acceptable_url?(prparams[:url])
-    else
-      page_ref = PageRef.fetch prparams[:url]
-    end
-
-    # Take steps if the page_ref is changing kinds
-    if prparams && prparams[:kind] && (prparams[:kind] != page_ref.kind)
-      # When changing a :recipe page_ref to another type, the associated
-      # recipe may have been created gratuitously.
-      if page_ref.recipe?
-        # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
-        # and this user is the only one who's collected it, then we destroy it.
-        page_ref.recipes.to_a.each { |recipe|
-          # Remove any uncollected recipes
-          page_ref.recipes.destroy recipe unless (recipe.collector_ids - [User.current_or_guest.id]).present?
-        }
+    if prparams
+      if prparams[:url].present?
+        if @page_ref
+          @page_ref.url = prparams[:url] if @page_ref.acceptable_url?(prparams[:url])
+        else
+          @page_ref = PageRef.fetch prparams[:url]
+        end
       end
-      page_ref.kind = prparams[:kind]
+      # Take steps if the page_ref is changing kinds
+      if prparams[:kind] && (prparams[:kind] != @page_ref.kind)
+        # When changing a :recipe page_ref to another type, the associated
+        # recipe may have been created gratuitously.
+        if @page_ref.recipe?
+          # Just for the sake of tidiness, when we retype the page_ref from :recipe to something else,
+          # and this user is the only one who's collected it, then we destroy it.
+          @page_ref.recipes.to_a.each { |recipe|
+            # Remove any uncollected recipes
+            @page_ref.recipes.destroy recipe unless (recipe.collector_ids - [User.current_or_guest.id]).present?
+          }
+        end
+        @page_ref.kind = prparams[:kind]
+      end
     end
 
     # We get an entity--associated with the PageRef--that reflects the possibly new PageRef
-    proxy = PageRefServices.new(page_ref).editable_entity nominal_entity, params
+    proxy = PageRefServices.new(@page_ref).editable_entity nominal_entity, params
     # We're really going to tag the accompanying entity (Site or Recipe)
     # We need to rejigger the parameters so they find their way to the proxy entity.
-    return proxy, (nominal_entity || page_ref).decorate.translate_params_for(entity_params || prparams, proxy)
+    return proxy, (nominal_entity || @page_ref).decorate.translate_params_for(entity_params || prparams, proxy)
   end
 
   # GET tag
@@ -160,11 +163,17 @@ class CollectibleController < ApplicationController
   def tag
     # NB: the PageRefsController handles a GET request to set up tagging, taking params[:extractions] into account
     if current_user
+      update_options = { :skip_landing => true } # We're not going to wait for the entity to process
       # Collectibles include both PageRefs and other entities (Recipe, Site, etc.) that HAVE PageRefs
       # Furthermore, when initially collecting a URL, we may be tagging the entity BY REFERENCE to its PageRef, in
       # which case we need to tag the corresponding entity, either by picking one or making a new one.
       # #edittable_proxify() sorts all that out, returning an editable model and (for a POST call) parameters for modification
       model, modelparams = edittable_proxy # A page_ref may proxify into the associated Recipe or Site, or another PageRef
+      if @page_ref
+        @page_ref.adopt_extractions params[:extractions] if params[:extractions]
+        @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
+        update_options[:adopt_gleaning] = true
+      end
       modelname = model.model_name.param_key
       params[modelname] = modelparams
 
@@ -173,18 +182,11 @@ class CollectibleController < ApplicationController
       # So, first we pull the misc_tag_tokens from the params...
       misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
       # Now the parameters should reflect the target type, and we can proceed as usual
-      update_options = (request.method == 'GET') ?
+      update_options.merge! (request.method == 'GET') ?
                            { touch: :collect } :  # Ensure that it's collected before editing
                            # We have to provide update parameters, in case the model name doesn't match the controller
                            { update_attributes: true, attribute_params: strong_parameters(modelname) }
 
-      if model.is_a? Pagerefable
-        model.page_ref.adopt_extractions params[:extractions] if params[:extractions]
-        model.bkg_launch
-        model.page_ref.bkg_land # After-creation followup
-        model.page_ref.content = params[:extractions][:content] if params[:extractions] && params[:extractions][:content]
-        update_options[:adopt_gleaning] = true
-      end
       update_and_decorate model, update_options
       # ...now we apply the misc tag tokens (if any) according to the constraints of the decorator
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
@@ -274,7 +276,6 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate touch: true
-    @decorator.bkg_land # Finish scraping, if required
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
@@ -306,9 +307,17 @@ class CollectibleController < ApplicationController
     # return if need_login true
     # Find the recipe by URI (possibly correcting same), and bind it to the current user
     entity, modelparams = edittable_proxy
-    params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
-    update_and_decorate entity, touch: :collect, update_attributes: true
-    entity.bkg_land # Glean title, etc. as necessary
+    @page_ref.save if (@page_ref != entity) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
+    if @page_ref&.errors&.any?
+      entity = @page_ref
+    else
+      params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
+      update_and_decorate entity,
+                          touch: :collect, # Add to user's collection
+                          adopt_gleaning: true,  # Get title from page_ref
+                          update_attributes: true,
+                          skip_landing: true  # Don't wait for background processing (i.e., parsing) to complete
+    end
     if entity.errors.empty? # Success (valid recipe, either created or fetched)
       respond_to do |format|
         format.html { # This is for capturing a new recipe and tagging it using a new page.
@@ -329,10 +338,15 @@ class CollectibleController < ApplicationController
           entity.errors.add :base, "#{key} #{error}"
         }
       }
+      base_errors_to_flash_now entity
       response_service.title = 'Cookmark a ' + entity.class.to_s
       @nav_current = :addcookmark
-      linkparam = (params[response_service.controller_model_name] || params[:page_ref]).extract!(:kind, :url).permit(:kind, :url)
-      @decorator = (@page_ref = PageRef.new linkparam).decorate
+      pp = params[:page_ref]&.slice(:kind, :url) || {}
+      pp[:kind] ||= response_service.controller_model_name
+      @decorator = (@page_ref = PageRef.new pp.permit(:kind, :url)).decorate
+      (entity.errors.keys - [:base]).each do |errkey|
+        @page_ref.errors.add errkey, entity.errors[errkey]
+      end
       smartrender :action => 'new', mode: :modal
     end
   end

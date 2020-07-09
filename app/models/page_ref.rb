@@ -1,4 +1,7 @@
+require './lib/html_utils.rb'
 require 'net/http'
+require 'htmlbeautifier'
+
 # A PageRef is a record for storing the Mercury (nee Readability) summary of a Web page.
 # Besides storing the result of the query (which, after all, could be re-instantiated at any time)
 # the class deals with multiple URLs leading to the same page. That is, since Mercury extracts a
@@ -15,7 +18,7 @@ class PageRef < ApplicationRecord
   has_many :aliases, :dependent => :destroy
 
   # The associated recipe page maintains the page's content in a parsed form
-  belongs_to :recipe_page
+  belongs_to :recipe_page, :dependent => :destroy
 
   # Specify what values from the gleaning correspond to one of our attributes
   @@gleaning_correspondents = {
@@ -47,11 +50,25 @@ class PageRef < ApplicationRecord
   @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
 
   def content
-    gleaning&.content.if_present || mercury_results['content'].if_present
+    gleaning&.content.if_present || (mercury_results && mercury_results['content'].if_present)
   end
 
   def content= val
     gleaning&.content = val
+  end
+
+  # The site specifies material to be removed from the content
+  def trimmed_content
+    return nil if content.blank? # Protect against bad input
+    SiteServices.new(site).trim_recipe content
+  end
+
+  # This is the SOP for turning a random grab of HTML into something presentable on a recipe card
+  def massaged_content
+    return nil if (tc = trimmed_content).blank? # Protect against bad input
+    nk = process_dom tc
+    # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
+    HtmlBeautifier.beautify nk.to_s
   end
 
 =begin
@@ -160,11 +177,11 @@ class PageRef < ApplicationRecord
 
   def bkg_launch force=false
     build_gleaning if !gleaning
-    gleaning.bkg_launch # if gleaning.virgin?
+    force = gleaning.bkg_launch || force # if gleaning.virgin?
 
     build_mercury_result unless mercury_result
     mercury_result.bkg_launch # if mercury_result.virgin?
-    super if defined?(super)
+    super(force) if defined?(super)
   end
 
   # We get potential attribute values (as needed) from Mercury, and from gleaning the page directly
@@ -360,6 +377,7 @@ class PageRef < ApplicationRecord
 
   # Accept attribute values extracted from a page
   def adopt_extractions extraction_params
+    return unless extraction_params.present?
     # Extractions are only provided in the context of the injector, by analysis of the page in situ
     # Since THAT only occurs when an entity is first captured, we let the extracted title prevail
     open_attributes+['title', 'content'].each do |name|

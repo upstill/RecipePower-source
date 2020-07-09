@@ -313,9 +313,9 @@ module Backgroundable
 
   # The #after hook is called after #success and #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
-  def after job=nil
+  def after job=dj
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
-    dj_status = job.destroyed? ? "(destroyed)" : '(not destroyed)' if dj
+    dj_status = (job.destroyed? ? "(destroyed)" : '(not destroyed)') if job
     puts ">>> After #{status} job '#{job}'#{dj_status} on #{self.class.to_s}##{id} -> dj##{dj_id}"
     self.dj = nil if good?
     save if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record

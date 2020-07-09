@@ -10,7 +10,7 @@ class ApplicationController < ActionController::Base
   include ControllerUtils
   include Querytags # Grab the query tags from params for filtering a list
   include ActionController::Live   # For streaming
-  protect_from_forgery with: :exception
+  protect_from_forgery with: :exception, prepend: true
 
   # All controller actions are preceded by a check for permissions
   # This method may be subclassed to assert opt-ins and exclusions
@@ -18,12 +18,12 @@ class ApplicationController < ActionController::Base
     return if opts[:only] && !opts[:only].include?(params[:action])
     unless opts[:except]&.include?(params[:action])
       target_model_name = controller_name.classify
-      model_class_or_name = begin
-        target_model_name.constantize
+      begin
+        model_class = target_model_name.constantize
       rescue
-        :"#{target_model_name.underscore}"
+        return # Not an error if the controller doesn't refer to an ActiveRecord model
       end
-      authorize model_class_or_name
+      authorize model_class if model_class <= ApplicationRecord
     end
   end
 
@@ -36,11 +36,11 @@ class ApplicationController < ActionController::Base
   end
   before_action :check_credentials
   before_action :check_flash
-  before_action :report_cookie_string
-  before_action { report_session 'Before controller' }
+  # before_action :report_cookie_string
+  before_action { report_request }
   before_action :set_current_user
   # after_action :log_serve
-  after_action { report_session 'After controller'  }
+  after_action { report_response  }
   before_action :setup_response_service
 
   helper :all
@@ -140,7 +140,6 @@ class ApplicationController < ActionController::Base
       entity = entity.object
     end
     # Finish whatever background task is associated with the entity
-    entity.bkg_land if entity.is_a?(Backgroundable) && entity.dj
     attribute_params =
     if entity
       # If the entity is provided, ignore parameters
@@ -150,12 +149,34 @@ class ApplicationController < ActionController::Base
       entity = params[:id] ? objclass.find(params[:id]) : objclass.new
       (options[:attribute_params] || strong_parameters)
     end
-    # The entity has been defined. Now to check that the user is authorized for the current action
+    # The entity has been defined, but not necessarily persisted/saved.
+    # Now to check that the user is authorized for the current action.
     # NB: Since this method may be called in any context, it's possible to assert authorization
     options[:action_authorized] || authorize(entity) # Make sure that the user is authorized for this action
+    # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
     if entity.errors.empty?  &&  # No probs. so far
         entity.is_a?(Collectible) &&
         current_user # Only the current user gets to touch/modify a model
+        if entity&.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
+        entity.bkg_land
+      elsif options[:adopt_gleaning]
+        if entity.respond_to? :adopt_page_ref
+          entity.page_ref.bkg_land
+          if !entity.adopt_page_ref # Get attributes from the page ref
+            entity.errors.add :url, 'Can\'t access that page for analysis'
+          end
+        # elsif entity.respond_to? :bkg_land
+          # entity.bkg_land true  # Collect attributes from page_ref, etc.
+        end
+      end
+      return if entity.errors.any?
+      if options[:touch] == :collect # Ensure that 
+        (attribute_params ||= {})[:collectible_in_collection] = true
+      end
+      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
+      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
+      return if entity.errors.any?
+      rr =
       case options[:touch]
       when true
         entity.be_touched
@@ -167,13 +188,7 @@ class ApplicationController < ActionController::Base
         # Touch iff previously persisted (i.e., don't add record)
         entity.be_touched if entity.persisted?
       end
-      entity.bkg_land true if options[:adopt_gleaning] && entity.respond_to?(:bkg_land) # Collect attributes from page_ref, etc.
-      # entity.adopt_gleaning if options[:adopt_gleaning] && entity.respond_to?(:adopt_gleaning)
-      if attribute_params.present? # There are parameters to update
-        entity.update_attributes attribute_params
-      elsif entity.persisted? # If not, look at saving the toucher_pointer
-        entity.save
-      end
+      rr.save if rr&.changed?
     end
     # Having prep'ed the entity, set instance variables for the entity and decorator
     instance_variable_set :"@#{entity.model_name.singular}", entity
@@ -240,18 +255,65 @@ class ApplicationController < ActionController::Base
     flash.each { |type, message| logger.debug "   #{type}: #{message}" }
   end
 
-  def report_cookie_string
-    logger.info "COOKIE_STRING:"
-    if cs = request.env["rack.request.cookie_string"]
-      cs.split('; ').each { |str| logger.info "\t"+str }
+  def report_cookie_string source='rack.request.cookie_string', cs=request.env["rack.request.cookie_string"]
+    if cs.present?
+      cs.split('; ').each { |str| logger.info source+': '+str }
+    else
+      logger.info source+': ...nothing here!'
     end
   end
 
+  def report_headers h, label, which=nil
+    which ||= (label == 'Request header') ? %w{ HTTP_X_CSRF_TOKEN HTTP_X_REQUESTED_WITH HTTP_REFERER HTTP_HOST HTTP_X_FORWARDED_PROTO rack.url_scheme HTTP_COOKIE rack.request.cookie_hash warden } : h.to_h.keys
+    which -= [ 'async.callback' ] # Don't dump the callback object, no matter what
+    which.each do |k|
+      # logger.info "#{label}: #{k}: ----------------"
+      v = h[k]
+      case k
+      when 'HTTP_COOKIE'
+        report_cookie_string "#{label}: HTTP_COOKIE", v
+      when 'rack.request.cookie_hash'
+        v.each { |key, value| logger.info "#{label}: #{k}: #{key}: #{value}" }
+      else
+        logger.info "#{label}: #{k}: #{v}"
+      end
+    end
+  end
+
+  def report_request
+    logger.info "Full Request URL: #{request.original_url}"
+    report_headers request.headers, 'Request header'
+    if cj = request.env['action_dispatch.cookies']
+      cj.each do |k, v|
+        logger.info "Request COOKIE JAR: #{k}: '#{v}'"
+      end
+    else
+      logger.info "Request COOKIE JAR: no cookies in 'action_dispatch.cookies' (CookieJar)"
+    end
+
+    if sess = request.env['rack.session']
+      sess.keys.each { |key| logger.info "Request SESSION: #{key}: '#{sess[key]}'"}
+    else
+      logger.info "Request SESSION: no env['rack.session']!!!"
+    end
+  end
+
+  def report_response
+    report_headers response.headers, 'Response Header '
+    response.cookies.each { |k, v| logger.info "Response COOKIE: #{k}: #{v}" }
+  end
+
   def report_session context
-    logger.info "XXXXXXXXXXXXXXXX #{context} at #{Time.now}: XXXXXXXXXXXXXXXX"
-    logger.info "COOKIES: >>>>>>>>"
-    response.cookies.each { |k, v| logger.info "#{k}: #{v}" }
-    logger.info "<<<<<<<< COOKIES"
+    report = case context
+             when :on_entry
+               "Before controller"
+             when :on_exit
+               "After controller"
+             else
+               context
+             end
+    logger.info "vvvvvvvvvvvvvvvv #{report} at #{Time.now}: vvvvvvvvvvvvvvvv"
+
     begin
       sessid = if session
         (session.is_a?(Hash) ? session[:id] : (session.id if session.respond_to?(:id))) || '<SESSION with no id>'
@@ -262,14 +324,10 @@ class ApplicationController < ActionController::Base
     rescue Exception => e
       logger.debug "DANGER! Accessing session caused error '#{e}'"
     end
-    logger.info "SESSION Contents: >>>>>>>>"
-    if sess = request.env['rack.session']
-                  sess.keys.each { |key| logger.info "\t#{key}: '#{sess[key]}'"}
-    else
-      logger.info "NO env['rack.session']!!!"
-    end
-    logger.info "<<<<<<<< SESSION"
-    logger.info "UUID: #{response_service.uuid}"
+
+    logger.info "UUID in response_service: '#{response_service.uuid || '<nil>'}'"
+    logger.info "^^^^^^^^^^^^^^^^ #{report} ^^^^^^^^^^^^^^^^"
+    x=2
   end
 
   # Monkey-patch to adjudicate between streaming and render_to_stream per
@@ -320,7 +378,7 @@ class ApplicationController < ActionController::Base
             end
           }
           format.js {
-            # XXX??? Must have set @partial in preparation
+            # vvv??? Must have set @partial in preparation
             render renderopts.merge(action: 'capture')
           }
         end
@@ -460,11 +518,13 @@ class ApplicationController < ActionController::Base
     unless current_user # User.current has not yet been set at this point
       summary = action_summary params[:controller], params[:action]
       alert = "You need to be logged in to an account on RecipePower to #{summary}."
+      logger.info alert
       unless session.id
+        logger.info "Resetting Session"
         reset_session
         response_service.uuid = session.id
       end
-      if session.id || true
+      if session.id
         request_options = { path: request.fullpath,
             format: (response_service.mode == :injector ? :json : request.format.symbol)
         }.merge(options.slice :path, :format)
@@ -482,8 +542,8 @@ class ApplicationController < ActionController::Base
                     end
         )
       else
+        report_headers request.headers, 'Request header'
         report_cookie_string
-        report_session "Unauthorized Login:"
         raise alert
         render :file => "public/401.html", :layout => false, :status => :unauthorized
       end

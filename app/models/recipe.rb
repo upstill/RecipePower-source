@@ -72,17 +72,17 @@ class Recipe < ApplicationRecord
     super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
   end
 
-  # This is the SOP for turning a random grab of HTML into something presentable on a recipe card
-  def massage_content html
-    return nil if html.blank? # Protect against bad input
-    nk = process_dom html
-    # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
-    HtmlBeautifier.beautify nk.to_s
+  # Content to parse: either the recipe_page's content, or the
+  def content_to_parse
+    return nil unless page_ref
+    page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
   end
 
-  # The presented content for a recipe defers to the page ref
+  # The presented content for a recipe defers to the page ref if we haven't parsed the recipe yet
   def presented_content
-    content.if_present || page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || massage_content(page_ref&.content)
+    content.if_present ||
+        page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || # Presumably this is pre-trimmed
+        page_ref&.massaged_content
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -141,37 +141,21 @@ class Recipe < ApplicationRecord
     end
     if title.blank? || picurl.blank? || description.blank?
       page_ref&.bkg_launch
-      force = true
+      force = true  if page_ref.virgin?
     end
     super(force) if defined?(super)
   end
 
   def perform
-    if site&.finder_for 'Content'
+    if site&.finder_for('Content') && Rails.env.development?
       page_ref.bkg_land
-      page_ref.build_recipe_page if !recipe_page
+      page_ref.create_recipe_page if !recipe_page
       recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
-      recipe_page.save if persisted? && recipe_page.changed?
-      if recipe_page&.good?
-        if content.blank?
-          reload if persisted?
-          self.content =
-              if (html = recipe_page.selected_content(anchor_path, focus_path)).present?
-                ParsingServices.new(self).parse_and_annotate(html).if_present || html
-              end ||
-              if page_ref.good? && (html = page_ref.content).present?
-                # Here's where we adapt the recipe's content to our needs
-                massage_content SiteServices.new(site).trim_recipe(html)
-              end
-          RecipeServices.new(self).inventory
-        end
-      else
-        if page_ref.good? && (html = page_ref.content).present?
-          # Here's where we adapt the recipe's content to our needs
-          self.content = massage_content SiteServices.new(site).trim_recipe(html)
-        end
-        errors.add :url, "can\'t crack recipe_page (##{recipe_page.id}): #{recipe_page.errors[:base]}"
-        raise err_msg if recipe_page.dj # RecipePage is ready to try again => so should we be, so restart via Delayed::Job
+      # recipe_page.save if persisted? && recipe_page.changed?
+      if content.blank?
+        reload if persisted?
+        self.content = ParsingServices.new(self).parse_and_annotate(content_to_parse).if_present || presented_content
+        RecipeServices.new(self).inventory # Set tags according to annotations
       end
     end
     super if defined?(super)
@@ -192,6 +176,7 @@ class Recipe < ApplicationRecord
     self.title = page_ref.title if page_ref.title.present? && title.blank?
     self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
     self.description = page_ref.description if page_ref.description.present? && description.blank?
+    title.present?
   end
 
 end

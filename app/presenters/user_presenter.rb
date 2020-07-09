@@ -25,13 +25,17 @@ class UserPresenter < CollectiblePresenter
 
   def card_avatar_accompaniment
     contents =
-        if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], viewer).order(created_at: :desc).first
-          latest = latestrr.entity
-          collectible_show_thumbnail latest.decorate
-        elsif current_user && user == current_user
-          "No recipes yet—so install the #{link_to_dialog 'Cookmark Button', '/cookmark.json'} and go get some!".html_safe
-        end
-    card_aspect_enclosure :latest_recipe, contents, 'Latest Cookmark'
+    if latestrr = @decorator.collection_pointers([Recipe, Site, FeedEntry], viewer).order(created_at: :desc).first
+      decorator = latestrr.entity.decorate
+      presenter = h.present decorator
+      presenter.avatar fill_mode: 'fixed_width',
+                        divclass: "cardlet-item #{decorator.dom_id}",
+                        fallback_img: false,
+                        label: link_to_submit(decorator.title, decorator.object)
+    elsif current_user && user == current_user
+      "No recipes yet—so install the #{link_to_dialog 'Cookmark Button', '/cookmark.json'} and go get some!".html_safe
+    end
+    card_aspect_enclosure(:latest_recipe, contents, 'Latest Cookmark') if contents
   end
 
   def card_homelink options={}

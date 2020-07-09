@@ -1,10 +1,6 @@
 <%= present decorator do |presenter| %>
     <div class="card-item cardlet-item <%= "#{card_type}-card " if defined?(card_type) %>recipe-card">
-      <% if decorator.imgdata.present? %>
-          <div class='pic-box' >
-            <%= image_with_error_recovery(decorator, class: 'pic-box', fill_mode: 'fixed-width') %>
-          </div>
-      <% end %>
+      <%= presenter.avatar divclass: 'pic-box', fill_mode: 'fixed-width', label: false %>
       <div style="width:100%">
         <div class="title-glyph top-right">
           <%= collectible_collect_button decorator %>

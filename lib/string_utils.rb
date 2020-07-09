@@ -5,11 +5,11 @@ def tokenize str, terminates=false, &block
     offset = 0
     while str.length > 0 do
       ostr = str
-      str = ostr.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, '' # Pluck the next token
+      str = ostr.sub /(^[ \t\r\f\v\u00a0]*)([^\]\[)(}{,.?\s\u00a0]+|[()\[\]{},.?\n])/i, '' # Pluck the next token
       spaces, token = $1, $2
       if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{},.?\n]/)) # This string really ends here (no continuation of non-delimiter)
         offset += spaces&.length || 0
-        block.call token, offset unless token&.empty?
+        block.call token, offset unless token.empty?
         offset += token&.length || 0
       else
         return ostr # Return the unprocessed remainder of the string (which may be blank)
@@ -19,7 +19,7 @@ def tokenize str, terminates=false, &block
   else
     tokens = []
     while str.length > 0
-      str = str.sub /(^[ \t\r\f\v]*)([^\]\[)(}{,.?\s]+|[()\[\]{},.?\n])/, ''
+      str = str.sub /(^[ \t\r\f\v\u00a0]*)([^\]\[)(}{,.?\s\u00a0]+|[()\[\]{},.?\n])/i, ''
       if $2
         tokens << $2
       else
@@ -107,6 +107,23 @@ rescue NameError
 end
 
 def active_record_class_from_association_method_name methstr
-  methstr = methstr.to_s.sub( /[<=]*$/, '').sub(/_ids$/, '')
+  methstr = methstr.to_s.gsub( /[<=]*$/, '').sub(/_ids$/, '')
   methstr.singularize.camelize.constantize
+end
+
+def escape_newlines str
+  str.to_s.gsub(/\n/, '\n')
+end
+
+class String
+  # Replace runs of whitespace with a single whitespace character as follows:
+  # 1) if the run contains a newline character, replace the run with that
+  # 2) if the run contains an &nbsp; character, replace the run with that
+  # 3) otherwise, replace it with a space character
+  def deflate
+    # gsub( /[ \t\n\r\f\v\u00a0]*\n[ \t\n\r\f\v\u00a0]*/, "\n"). # Gaps including a newline convert to newline
+    gsub( /\s*\n\s*/, "\n"). # Gaps including a newline reduce to a single newline
+    gsub( /[ \t\r\f\v\u00a0]*\u00a0[ \t\r\f\v]*/, "\u00a0"). # Gaps including a nonbreaking space reduce to one
+    gsub( /[ \t\r\f\v]+/, ' ')  # Gaps including arbitrary whitespace reduce to single space character
+  end
 end

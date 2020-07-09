@@ -5,6 +5,21 @@ class SiteServices
     @site = site
   end
 
+  def report_extractors *what
+    # Provide a string suitable for giving to #assign_extractors to pass the site's :trimmers, :grammar_mods and :finders
+    content_selector = (f = site.finder_for('Content')) ? f.selector : 'nil'
+    puts "SiteServices.new(Site.find #{site.id}).adopt_extractors #{site.trimmers || '[]'}, '#{content_selector}', #{site.grammar_mods || '{}'}"
+  end
+
+  def adopt_extractors trimmers, content_selector=nil, grammar_mods
+    site.trimmers = trimmers
+    if content_selector
+      f = site.finders.create_with(attribute_name: 'html', selector: content_selector).find_or_create_by label: 'Content'
+      f.selector = content_selector
+      f.save if f.content_selector_changed?
+    end
+  end
+
   # Evaluate the site's suitability for deletion
   def nuke_message button
     if site.recipes.exists? || site.feeds.exists?
@@ -83,6 +98,12 @@ class SiteServices
           absolute = safe_uri_join(site.home, url).to_s
           puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
           node.attribute('href').value = absolute if absolute != url
+        elsif node.text?
+          # Reduce all sequences of whitespace in text strings to either
+          # 1) a single newline, if one appears in the string
+          # 2) a single non-breaking space character, if one appears in the string
+          # 3) a single blank
+          node.content = node.content.deflate
         end
       end
       @nkdoc.to_html

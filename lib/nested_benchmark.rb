@@ -1,7 +1,17 @@
 class NestedBenchmark
   @indent = 0
+  @@DOLOG=false # No benchmarking unless set
+
+  def self.do_log
+    @@DOLOG
+  end
+
+  def self.do_log=on
+    @@DOLOG = on
+  end
 
   def self.log msg
+    return unless @@DOLOG
     if Rails.env.development? # Write to console when in development
       puts msg
     else
@@ -10,6 +20,7 @@ class NestedBenchmark
   end
 
   def self.measure msg
+    return yield unless @@DOLOG
     open = '('
     close = ')'
     bracket_len = 6

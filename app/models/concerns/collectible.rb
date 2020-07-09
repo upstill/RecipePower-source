@@ -6,7 +6,7 @@ module Collectible
   module ClassMethods
 
     def mass_assignable_attributes keys=[]
-      [ :collectible_comment, :collectible_private ] +
+      [ :collectible_comment, :collectible_private, :collectible_in_collection ] +
           (defined?(super) ? super : [])
     end
   end
@@ -111,6 +111,16 @@ module Collectible
     cached_ref(false, user_id).try(&:in_collection) || false
   end
   alias_method :'collectible_collected?', :collected
+  alias_method :'collectible_in_collection', :collected
+
+  def set_collected_for newval, user_id=User.current_id
+    # Boolean may be coming in as string or integer
+    unless newval==true || newval==false
+      newval = newval.respond_to?(:to_boolean) ? newval.to_boolean : (newval != nil)
+    end
+    cached_ref( true, user_id) { |ref| ref.in_collection = newval }
+  end
+  alias_method :'collectible_in_collection=', :'set_collected_for'
 
   # Ensure that the collectible is in the collection of [current user]
   def collect user_id=User.current_id
@@ -134,6 +144,7 @@ module Collectible
       else
         cr.in_collection = collect
       end
+      cr
     end
   end
 

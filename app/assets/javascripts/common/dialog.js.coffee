@@ -132,8 +132,7 @@ open_modal = (dlog, omit_button) ->
 		$('body')[0].appendChild dlog
 	if $(dlog).hasClass 'modeless'
 		$(dlog).removeClass('hide').removeClass 'modal-pending'
-		$(dlog).draggable ->
-			handle: ".modal-header"
+		$(dlog).draggable handle: "div.modal-header"
 	else
 		$(dlog).removeClass('hide').addClass('modal').removeClass 'modal-pending'
 		# Unhide it, as needed
@@ -179,7 +178,7 @@ close_modal = (dlog, action, next) ->
 		if action != 'cancel' && parent = $(dlog).data 'parent'
 			next = assert_modal parent, dlog
 		RP.dialog.notify action, dlog
-		if $(dlog).hasClass 'modal'
+		if $(dlog).modal
 			$(dlog).modal('hide').on 'hidden.bs.modal', ->
 				$(dlog).remove()
 				if next

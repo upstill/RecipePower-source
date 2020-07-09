@@ -1,2 +1,2 @@
-web: bundle exec thin start -p $PORT --ssl --ssl-key-file server.key --ssl-cert-file server.crt
+web: bundle exec thin start -p $PORT --ssl --ssl-key-file local.recipepower.com.key --ssl-cert-file local.recipepower.com.crt
 # worker: bundle exec rake jobs:work

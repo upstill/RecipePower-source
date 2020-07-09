@@ -18,7 +18,8 @@ class PageRefsController < CollectibleController
 
   # GET /page_refs/new
   def new
-    @page_ref = PageRef.new kind: 'recipe', url: 'http://www.example.com'
+    @page_ref = PageRef.new url: 'http://www.example.com'
+    @page_ref.kind = 'recipe'
     smartrender
   end
 

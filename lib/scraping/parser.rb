@@ -1,4 +1,5 @@
 require 'scraping/seeker.rb'
+require 'enumerable_utils.rb'
 
 class Parser
   attr_reader :grammar
@@ -25,7 +26,7 @@ class Parser
   # How should the token be enclosed?
   def self.tag_for_token token
     case token.to_sym
-    when :rp_recipelist, :rp_recipe
+    when :rp_recipelist, :rp_recipe, :rp_instructions
       'div'
     when :rp_inglist
       'ul'
@@ -42,7 +43,8 @@ class Parser
   end
 
   def lexaur
-    @lexaur ||= Lexaur.from_tags
+    types = deep_collect(@grammar, :tag) | deep_collect(@grammar, :tags)
+    @lexaur ||= Lexaur.from_tags *types
   end
 
   def self.token_to_title token
@@ -268,6 +270,7 @@ class Parser
       context = context.except :token
     end
     found = nil
+    # puts "Match #{token} (#{spec}) starting at '#{scanner.peek(6)}'." if token
     # Intercept a section that has already been parsed (or previously declared)
 =begin
     if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
@@ -290,7 +293,7 @@ class Parser
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, context) unless subscanner # There is no such match in prospect
+      return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
       match.tail_stream = scanner.past(subscanner) if context[:in_css_match]  # Skip past the element
       return match.encompass(scanner)  # Release the limitation to element bounds
@@ -321,7 +324,7 @@ class Parser
       while scanner.peek do # No token except what the spec dictates
         match = match_specification scanner, spec, context.except(:repeating, :keep_if)
         matches << match.if_retain
-        scanner = match.tail_stream # next
+        scanner = (scanner == match.tail_stream) ? match.tail_stream.rest : match.tail_stream # next
       end
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
@@ -349,6 +352,7 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
+=begin
       probe = scanner
       while probe.more? do
         case probe.peek
@@ -366,7 +370,7 @@ class Parser
         end
         probe = probe.rest
       end
-=begin
+=end
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
         return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
@@ -376,19 +380,14 @@ class Parser
         when 'and', 'or'
           # We expect a terminating entity
           child = match_specification scanner.rest, spec
-          if child.success?
-            children << child
-            break
-          else
-            return Seeker.failed(start_scanner, child.head_stream, token, context.merge(children: (children + [child])))
-          end
+          children << child if child.success?
+          break
         when ','
           scanner = scanner.rest
         else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
           break
         end
       end
-=end
       if children.present?
         return Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
       else
@@ -517,10 +516,11 @@ class Parser
     if (really_enclose = context[:enclose]) == :non_empty
       really_enclose = match.children&.all?(:hard_fail?)
     end
+    really_enclose ||= match.enclose? && (match.tail_stream != match.head_stream)
     return Seeker.failed(match.head_stream,
                          match.tail_stream,
                          token,
-                         enclose: ((really_enclose || match.enclose?) ? true : false),
+                         enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
 end

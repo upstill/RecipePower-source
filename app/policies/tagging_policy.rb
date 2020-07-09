@@ -1,0 +1,3 @@
+class TaggingPolicy < ApplicationPolicy
+
+end

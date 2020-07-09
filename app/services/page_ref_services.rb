@@ -46,8 +46,7 @@ class PageRefServices
     end
     (page_ref unless page_ref.recipe? || page_ref.site?) ||
         (called_for if called_for.is_a?(Recipe) || called_for.is_a?(Site)) ||
-        Site.find_by(page_ref_id: page_ref.id) ||
-        Recipe.find_by(page_ref_id: page_ref.id) ||
+        (page_ref.id && (Site.find_by(page_ref_id: page_ref.id) || Recipe.find_by(page_ref_id: page_ref.id))) ||
     begin
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
       klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
@@ -62,7 +61,7 @@ class PageRefServices
         defaults[key] = value
       end
       # Produce a set of initializers for the target class
-      CollectibleServices.find_or_create page_ref, defaults, klass
+      CollectibleServices.find_or_build page_ref, defaults, klass
     end
   end
 

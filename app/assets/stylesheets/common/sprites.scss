@@ -4,16 +4,16 @@ div.sprite-glyph {
   display: inline-block;
   // vertical-align: baseline;
   &.sprite-glyph-xs {
-    height: 0.5em;
+    height: 0.7em;
   }
   &.sprite-glyph-sm {
-    height: 0.6em;
+    height: 0.9em;
   }
   &.sprite-glyph-lg {
-    height: 1em;
+    height: 1.2em;
   }
   &.sprite-glyph-xl {
-    height: 1.2em;
+    height: 1.8em;
     vertical-align: sub;
   }
 }

@@ -18,7 +18,7 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers, grammar_mods ]
+    super + %i[ description trimmers grammar_mods ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -129,7 +129,7 @@ class Site < ApplicationRecord
     self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
     self.description = page_ref.description unless description.present? || page_ref.description.blank?
     page_ref.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaned?
-    save if persisted? && changed?
+    (persisted? && changed?) ? save : true
   end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here

@@ -71,14 +71,24 @@ class CollectiblePresenter < BasePresenter
     [ label, contents ]
   end
 
-  def card_avatar options={}
-    # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
-    if img = image_from_decorator(decorator)
-      divclass = 'pic_box'
-      if options[:onlinks]
+  def avatar options = {}
+    # Options hash for #image_with_error_recovery
+    img_options = options.slice :fallback_img, :data, :fill_mode, :class, :bogusurlfallback, :handle_empty, :onError, :alt
+    style = (options[:fill_mode] || '') == 'fixed-height' ? 'width: auto; height: 100%;' : 'width: 100%; height: auto;'
+    contents =
+        image_with_error_recovery decorator,
+                        { # Default image options
+                          class: "#{decorator.image_class}",
+                          fallback_img: decorator.object.is_a?(User),
+                          fill_mode: 'fixed-width'
+                        }.merge(img_options)
+    if contents
+      divclass = options[:divclass]
+      if options[:onlinks] && false
+        # TODO: revive and make :onlinks functional
         divclass << ' onlinks'
         # Include invisible links to open the entity on click and edit the picture on double-click
-        img <<
+        contents <<
             link_to('',
                     decorator.external_link,
                     {
@@ -87,13 +97,30 @@ class CollectiblePresenter < BasePresenter
                         title: 'Open Original',
                         class: 'clicker'
                     }.compact) if decorator.respond_to?(:external_link)
-        img <<
+        contents <<
             link_to_dialog('',
                            polymorphic_path([:editpic, decorator.as_base_class]),
                            class: 'dblclicker') if policy(decorator.object).editpic?
       end
-      content_tag :div, img, class: 'onlinks pic-box'
+      contents = content_tag :div, contents, style: style
+      contents = link_to_submit contents, decorator.homelink, title: 'Open Locally'
+      if options[:label] != false
+        contents = contents +
+          case options[:label]
+          when true, nil
+            content_tag(:span, homelink(decorator), class: 'owner-name')
+          when ActiveSupport::SafeBuffer
+            # Append the given label to the image
+            options[:label]
+          end
+      end
+      return content_tag(:div, contents, class: divclass)
     end
+  end
+
+  # The card avatar is an image that goes either to the original entity (single click) or to edit the image (dbl-click)
+  def card_avatar options={}
+    avatar options.merge label: false
   end
 
   # By default, show the card if there's an avatar OR a backup avatar
@@ -102,10 +129,10 @@ class CollectiblePresenter < BasePresenter
   end
 
   def card_avatar_accompaniment
-    if collector = decorator.first_collector
-      card_aspect_enclosure :found_by,
-                            h.labelled_avatar(collector.decorate),
-                            'Found By'
+    if presenter = h.present(decorator.first_collector&.decorate)
+      if av = presenter.avatar
+        card_aspect_enclosure :found_by, av, 'Found By'
+      end
     end
   end
 

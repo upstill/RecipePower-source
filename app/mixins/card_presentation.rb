@@ -195,8 +195,12 @@ module CardPresentation
     nil
   end
 
-  def card_avatar options={}
+  def avatar options={}
     nil
+  end
+
+  def card_avatar options={}
+    avatar options
   end
 
   # Entities are editable, sharable, votable and collectible from the card by default
