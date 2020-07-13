@@ -11,6 +11,7 @@ tmp/
 */*/*/.DS_Store
 eventmachine/
 /public/assets
+/backups
 
 /db_timings
 /config/database.yml
@@ -20,7 +21,6 @@ eventmachine/
 /log/logout
 
 /shared
-/vendor/bundle
 localhost.crt
 localhost.key
 myCA.key
@@ -34,3 +34,4 @@ myCA.srl
 server.crt
 server.csr
 server.key
+

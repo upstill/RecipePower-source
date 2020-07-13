@@ -4,12 +4,12 @@
 upstream RP {
     # Path to Unicorn SOCK file, as defined previously
     # server unix:/home/upstill/example/shared/sockets/unicorn.sock fail_timeout=0;
-    server unix:/var/sockets/unicorn.RP.sock fail_timeout=0;
+    server unix:/var/sockets/unicorn.sock fail_timeout=0;
 }
 
 server {
     listen 80;
-    server_name recipepower1;
+    server_name localhost;
 
     root /home/upstill/RecipePower-source/public;
 
@@ -32,11 +32,11 @@ server {
 
 server {
 	listen 443 ssl;
-	server_name staging.recipepower.com;
+	server_name deploy.recipepower.com;
 
 	ssl on;
-	ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem; # managed by Certbot
-	ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem; # managed by Certbot
+	ssl_certificate /etc/letsencrypt/live/deploy.recipepower.com/fullchain.pem; # managed by Certbot
+	ssl_certificate_key /etc/letsencrypt/live/deploy.recipepower.com/privkey.pem; # managed by Certbot
 
         ssl_session_timeout 10m;
 

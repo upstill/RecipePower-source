@@ -1,36 +1,108 @@
-source ~/.bashrc
-export APP_HOME="/home/upstill/RecipePower-source"
-export LOG_HOME="${APP_HOME}/log"
-# PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
-export PG_HOME="/etc/postgresql/10/main"
-# PG_BIN is the bin directory for postgres commands
-export PG_BIN="/usr/lib/postgresql/10/bin"
-export PATH="${PG_BIN}:${PATH}"
+# Clear this for establishing default in .bashrc
+source ~/.bashrc  # Standard Bash startup
+source ~/.bashvars  # Get secret credentials
+
+#### Standard path and script inits:
+# export PATH="/usr/local/bin:/usr/local/sbin:${HOME}/bin:$PATH"
+
+PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
+[[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
+
+export LC_CTYPE=en_US.UTF-8
+
+# OS-dependent variables and aliases
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	# Where the current project is located 
+	export APP_HOME=/home/upstill/RecipePower-source
+
+	# Add the bin directory for postgres commands
+	export PG_BIN="/usr/lib/postgresql/12/bin"
+	export PATH="${PG_BIN}:$PATH"
+
+	# PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
+	export PG_HOME=/etc/postgresql/12/main
+
+	# Socket-declaration line for config/database.yml
+	export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
+
+	# We need APP_HOME to be defined
+	export LOG_HOME="${APP_HOME}/log"
+
+	# Postgres control differs on Linux for some reason
+	alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l ${LOG_HOME}/server.log"
+	alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
+	alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
+
+	### Added by the Heroku Toolbelt
+	export PATH="/snap/bin:$PATH"
+
+elif  [[ "$OSTYPE" == "darwin"* ]]; then
+	# Where the current project is located 
+	export APP_HOME=/Users/upstill/Dev/RP
+	# Add the bin directory for postgres commands
+	export PATH="/usr/local/opt/postgresql@9.6/bin:$PATH"
+
+	# PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
+	export PG_HOME="/usr/local/var/postgres"
+
+	# The Postgres socket configuration (not needed on MacOS)
+	# export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
+
+	# We need APP_HOME to be defined
+	export LOG_HOME="${APP_HOME}/log"
+
+	# Postgres control on MacOS
+	alias pg_start="pg_ctl -D ${PG_HOME} -l ${LOG_HOME}/server.log start"
+	alias pg_stop="pg_ctl -D ${PG_HOME} stop -s -m fast"
+	alias pg_status="pg_ctl -D ${PG_HOME} status"
+
+	# If Flutter is installed:
+	# FLUTTER_BINS is the bin directory for the Flutter installation
+	export PATH="${HOME}/Dev/Flutter/bin:$PATH"
+
+	# ANDROID_BINS is the bin directory for the Android installation
+	export PATH="${HOME}/Library/Android/sdk/tools/bin:$PATH"
+
+	# If imagemagick is installed:
+	export PATH="/usr/local/Cellar/imagemagick/7.0.8-56/bin:${PATH}"
+
+	# Setting PATH for Python 3.6
+	# The original version is saved in .bash_profile.pysave
+	# export PYTHON_BINS=
+	export PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
+fi
 
 function nustop()
 {
     sudo service nginx stop
     sudo pkill unicorn
+    echo "To edit config files, do 'nuconfig'"
 }
 
 function nugo()
 {
     # cd /home/upstill/RecipePower-source
-    if [[ -f Gemfile ]]
-    then
-			sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
-	    		sudo unicorn -c config/unicorn.rb -E production -D
-	    		sudo service nginx start
-	    		nulogs
-	    		echo "To recheck logs, do 'nulogs'"
+    if [[ -f Gemfile ]];  then
+        sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
+        if [ ! -f log/null.log ]; then
+                cat /dev/null >log/null.log
+        fi
+        sudo cp log/null.log log/development.log
+        sudo cp log/null.log log/production.log
+        sudo cp log/null.log log/staging.log
+        sudo unicorn -c config/unicorn.rb -E production -D
+        sudo service nginx start
+        echo "To check logs, do 'nulogs'"
     else
-	    echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
+            echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
     fi
 }
 
+alias nuconfig="sudo vi /etc/nginx/nginx.conf /etc/nginx/sites-enabled/* config/unicorn.rb"
+
 function nulogs()
 {
-    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
+    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/development.log log/production.log
 }
 
 function clearlog()
@@ -43,75 +115,111 @@ function ack_all()
    ack $@ . --ignore-dir=log --ignore-dir=tmp --ignore-dir=doc
 }
 
-alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l ${LOG_HOME}/server.log"
-alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
-alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
-
-function ackall()
-{
-   ack $1 . --ignore-dir=log --ignore-dir=tmp --ignore-dir=doc
-}
-
 function vig()
 {
    export FLIST=`ack $1 ${2:-"app"} -l` 
    vi +/$1/ $FLIST 
 }
 
-function hkl()
+export alias HEROKU_STAGING="strong-galaxy-5765-74"
+function hks()
 {
-  echo "heroku $@ --app strong-galaxy-5765"
-  heroku $@ --app strong-galaxy-5765
+  echo "heroku $@ --app ${HEROKU_STAGING}"
+  heroku $@ --app ${HEROKU_STAGING}
 }
 
-alias hkl_capture="hkl pg:backups capture DATABASE_URL"
+export alias HEROKU_PRODUCTION="strong-galaxy-5765"
+function hkl()
+{
+  echo "heroku $@ --app ${HEROKU_PRODUCTION}"
+  heroku $@ --app ${HEROKU_PRODUCTION}
+}
 
 alias hkl_web="hkl logs --tail | grep 'web.1'"
 alias hkl_worker="hkl logs --tail | grep 'worker.1'"
 
-function hkl_curl()
-{
-   export DUMPNAME="${APP_HOME}/../db_backup_live/`date \"+%Y-%m-%d\"`.dump"
-   echo "curl -o $DUMPNAME `heroku pg:backups public-url --app strong-galaxy-5765`"
-   curl -o $DUMPNAME `heroku pg:backups public-url --app strong-galaxy-5765`
-}
-
 function hkl_mirror()
 {
-   hkl pg:backups capture DATABASE_URL
-   export DUMPNAME="${APP_HOME}/../db_backup_live/`date \"+%Y-%m-%d\"`.dump"
-   echo "curl -o $DUMPNAME `heroku pg:backups public-url --app strong-galaxy-5765`"
-   curl -o $DUMPNAME `heroku pg:backups public-url --app strong-galaxy-5765`
-   pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $DUMPNAME
+    db_backup production
+    db_restore production
 }
 
-function pg_dump_dev()
+alias pg_dump_dev="db_backup development"
+alias pg_dump_live="db_backup production"
+alias pg_dump_staging="db_backup staging"
+
+# Return the full path for a new dump file of the given type
+# Call with either 'development', 'staging' or 'production'
+export BACKUPS_ROOT=${APP_HOME}/backups
+new_dump_file()
 {
-  export NAME=${1:-"`date \"+%Y-%m-%d\"`.dump"}
-  export DUMPPATH="${APP_HOME}/../db_backup_dev/$NAME"
-  echo "pg_dump --verbose -h localhost --clean --format=custom --file="$DUMPPATH" dabpmrobtjc0ei"
-  pg_dump --verbose -h localhost --clean --format=custom --file="$DUMPPATH" dabpmrobtjc0ei
+export BACKUP_DIR_NAME="${BACKUPS_ROOT}/db_backup_$1"
+echo "Testing '$BACKUP_DIR_NAME'"
+if [ -d $BACKUP_DIR_NAME ]; then
+  export DUMP_FILE_NAME="${BACKUP_DIR_NAME}/`date \"+%Y-%m-%d\"`.dump"
+  echo "New dump file name: '$DUMP_FILE_NAME'"
+else
+  echo "new_dump_file: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
+  export DUMP_FILE_NAME=''
+fi
 }
-alias pg_dump_live="hkl_capture ; hkl_curl"
-alias pg_dump_staging="hks_capture ; hks_curl"
-
-pg_restore_dev()
+# Restore the database from the named backup
+# Call with either 'development', 'staging' or 'production'
+db_backup()
 {
-  export NAME=${1:-"`ls -1 ../db_backup_dev | grep 2019 | tail -1`"}
-  export DUMPPATH="${APP_HOME}/../db_backup_dev/$NAME"
-  echo "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $DUMPPATH"
-  pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $DUMPPATH
+new_dump_file $1
+if [ -z $DUMP_FILE_NAME ]; then
+    echo "db_backup: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
+else
+    if [ $1 == 'development' ]; then
+	echo "Insert development procedure here..."
+	echo "db_backup: pg_dump --verbose -h localhost --clean --format=custom --file="$DUMP_FILE_NAME" dabpmrobtjc0ei"
+	pg_dump --verbose -h localhost --clean --format=custom --file="$DUMP_FILE_NAME" dabpmrobtjc0ei
+    elif [ $1 == 'staging' ]; then
+	hks pg:backups capture DATABASE_URL
+        echo "db_backup: curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app ${HEROKU_STAGING}`"
+        curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app ${HEROKU_STAGING}`
+    elif [ $1 == 'production' ]; then
+	hkl pg:backups capture DATABASE_URL
+        echo "db_backup: curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app ${HEROKU_PRODUCTION}`"
+        curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app ${HEROKU_PRODUCTION}`
+    fi
+fi
+
 }
 
-pg_restore_live()
+# Restore the database from the named backup
+# Call with either 'development', 'staging' or 'production'
+db_restore()
 {
-  export NAME=${1:-"`ls -1 ../db_backup_live | grep 2019 | tail -1`"}
-  export DUMPPATH="${APP_HOME}/../db_backup_live/$NAME"
-  echo "pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $DUMPPATH"
-  pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $DUMPPATH
-}
-# alias db_restore_live="pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei `ls -1 ${APP_HOME}/../db_backup_live/20*.dump | tail -1`"
-# alias db_restore_dev="pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei `ls -1 ${APP_HOME}/../db_backup_dev/20*.dump | tail -1`"
-# alias db_restore_staging="pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei ${APP_HOME}/../db_backup_staging/\$*"
+if [ -d ${BACKUPS_ROOT}/db_backup_$1 ]; then
+    export FNAME=`latest_backup_for $1`
+    echo "db_restore: Backup file found: '$FNAME'"
+    if [ -z $FNAME ]; then
+	echo "db_restore: No current backup for '$FNAME'"
+    else
+        db_restore_from $FNAME
+    fi
+else
+    echo "db_restore: Nope! Need to specify database with current backup, viz: 'db_restore production|staging|development'"
+fi
 
-export LC_CTYPE=en_US.UTF-8
+}
+
+# Restore the database from the given backup file
+db_restore_from()
+{
+  if [ -z $1 ]; then
+	echo "db_restore_from: Need to specify file to restore from: '$1' just won't do!"
+  else
+	echo "db_restore_from: Restoring from live backup '$1'"
+	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1'"
+	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1
+  fi
+}
+# Locate the latest backup file as date-stamped
+# Call with either 'development', 'staging' or 'production'
+latest_backup_for()
+{
+	ls -d -1 ${BACKUPS_ROOT}/db_backup_$1/20*.dump | tail -1
+}

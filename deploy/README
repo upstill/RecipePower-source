@@ -1,0 +1,10 @@
+TO DEPLOY TO A LINUX SYSTEM:
+*** Secret credentials must be copied into ~/.bashvars (from home machine)
+
+This files are to be installed in other locations when deploying to Linux systems:
+  -- dot_bash_profile to ~/.bash_profile
+  -- nginx.conf to /etc/nginx
+  -- RP to /etc/nginx/sites-available
+  ** ...and then symlinked to sites-enabled:
+  % sudo ln -s /etc/nginx/sites-available/RP /etc/nginx/sites-enabled
+  *** The IP address of the server must be correct in /etc/nginx/sites-available/RP
