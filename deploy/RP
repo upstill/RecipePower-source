@@ -1,3 +1,5 @@
+# Install on Ubuntu machine as /etc/nginx/sites-available/RP (per config/unicorn.rb file)
+# Symlink from sites-enabled: % sudo ln -s /etc/nginx/sites-available/RP /etc/nginx/sites-enabled
 
 upstream RP {
     # Path to Unicorn SOCK file, as defined previously
