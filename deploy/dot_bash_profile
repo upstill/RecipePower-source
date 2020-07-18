@@ -3,7 +3,7 @@ source ~/.bashrc  # Standard Bash startup
 source ~/.bashvars  # Get secret credentials
 
 #### Standard path and script inits:
-# export PATH="/usr/local/bin:/usr/local/sbin:${HOME}/bin:$PATH"
+export PATH="/usr/local/bin:/usr/local/sbin:${HOME}/bin:$PATH"
 
 PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
