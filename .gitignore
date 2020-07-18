@@ -26,6 +26,7 @@ localhost.key
 myCA.key
 myCA.pem
 trial/
+vendor/bundle
 local.recipepower.com.crt
 local.recipepower.com.csr
 local.recipepower.com.ext
