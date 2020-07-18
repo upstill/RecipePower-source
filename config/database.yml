@@ -5,6 +5,7 @@ common: &common
   timeout: 5000
   username: <%= ENV['POSTGRESQL_USER'] %>
   password: <%= ENV['POSTGRESQL_PASSWORD'] %>
+  # socket: /var/run/postgresql/.s.PGSQL.5432 # <%= ENV['PG_SOCKET'] %>
   <%= ENV['PG_SOCKET'] && "socket: ${ENV['PG_SOCKET']}" %>
 
 development:
