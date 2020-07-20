@@ -1,6 +1,11 @@
 # Clear this for establishing default in .bashrc
-source ~/.bashrc  # Standard Bash startup
+if [ -z $HISTSIZE ]; then
+	source ~/.bashrc  # Standard Bash startup
+fi
 source ~/.bashvars  # Get secret credentials
+
+export HOSTNAME=`cat /etc/hostname`
+export IPADDR=`curl ifconfig.me`
 
 #### Standard path and script inits:
 export PATH="/usr/local/bin:/usr/local/sbin:${HOME}/bin:$PATH"
@@ -10,17 +15,56 @@ PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
 
 export LC_CTYPE=en_US.UTF-8
 
+if [ -z $RAILS_ENV ]; then
+	export RAILS_ENV=development
+	echo "RAILS_ENV set to 'development'. Set it to 'staging' or 'public' for release"
+fi
 # OS-dependent variables and aliases
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	# Where the current project is located 
 	export APP_HOME=/home/upstill/RecipePower-source
+	export GIT_BRANCH=staging
+	alias git_clone="git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git"
+
+	export RUBYVER=2.6.6
+	export RUBYMAJOR=2.6
+
+# Run this from home directory on Linux host
+function install_ruby()
+{
+	pushd ~
+        sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev software-properties-common libffi-dev nodejs
+        (Check for ruby version $RUBYVER--e.g., 2.6.3--in the Gemfile with $RUBYMAJOR the major release--e.g., 2.6:)
+        wget https://cache.ruby-lang.org/pub/ruby/$RUBYMAJOR/ruby-$RUBYVER.tar.gz
+        tar -xzvf ruby-$RUBYVER.tar.gz
+        cd ruby-$RUBYVER
+        ./configure
+        make
+        sudo make install
+}
+export APP=example
+export RAILS_VER=5.2.3
+function install_rails()
+{
+        sudo gem install rails -v $RAILS_VER
+        cd 
+        rails new $APP  # Installation will stop at bundle installation. Ctrl-Z out and:
+        cd $APP
+	bundle install --path vendor/bundle
+}
 
 	# Add the bin directory for postgres commands
 	export PG_BIN="/usr/lib/postgresql/12/bin"
 	export PATH="${PG_BIN}:$PATH"
 
+	# Make rvm commands available
+	export PATH="$HOME/.rbenv/bin:$PATH"
+	eval "$(rbenv init -)"
+
 	# PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
-	export PG_HOME=/etc/postgresql/12/main
+	# export PG_HOME=/etc/postgresql/12/main # On Staging machine?
+	export PG_HOME=/var/lib/postgresql/12/main
+	echo "PG_HOME: ${PG_HOME}"
 
 	# Socket-declaration line for config/database.yml
 	export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
@@ -28,10 +72,19 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
 
-	# Postgres control differs on Linux for some reason
-	alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l ${LOG_HOME}/server.log"
-	alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
-	alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
+	if [[ $PG_HOME =~ /12/ ]]; then
+		export PG_LOG=/var/log/postgresql/postgresql-12-main.log
+		alias pg_start="sudo -u postgres pg_ctlcluster 12 main start"
+		alias pg_stop="sudo -u postgres pg_ctlcluster 12 main stop"
+		alias pg_status="sudo -u postgres pg_ctlcluster 12 main status"
+	else
+		export PG_LOG="${LOG_HOME}/server.log"
+		# Postgres control differs on Linux for some reason
+		alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l $PG_LOG"
+		alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
+		alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
+	fi
+	alias pg_log="cat ${PG_LOG}"
 
 	### Added by the Heroku Toolbelt
 	export PATH="/snap/bin:$PATH"
@@ -50,6 +103,7 @@ elif  [[ "$OSTYPE" == "darwin"* ]]; then
 
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
+	export PG_LOG="${LOG_HOME}/server.log"
 
 	# Postgres control on MacOS
 	alias pg_start="pg_ctl -D ${PG_HOME} -l ${LOG_HOME}/server.log start"
@@ -71,15 +125,16 @@ elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	# export PYTHON_BINS=
 	export PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
 fi
+alias pg_log="cat ${PG_LOG}"
 
 function nustop()
 {
-    sudo service nginx stop
+    sudo systemctl stop nginx
     sudo pkill unicorn
     echo "To edit config files, do 'nuconfig'"
 }
 
-function nugo()
+function nustart()
 {
     # cd /home/upstill/RecipePower-source
     if [[ -f Gemfile ]];  then
@@ -87,22 +142,68 @@ function nugo()
         if [ ! -f log/null.log ]; then
                 cat /dev/null >log/null.log
         fi
-        sudo cp log/null.log log/development.log
-        sudo cp log/null.log log/production.log
-        sudo cp log/null.log log/staging.log
-        sudo unicorn -c config/unicorn.rb -E production -D
-        sudo service nginx start
+        sudo cp log/null.log log/${RAILS_ENV}.log
+        echo "sudo -u postgres unicorn -c config/unicorn.rb -E $RAILS_ENV -D"
+        sudo unicorn -c config/unicorn.rb -E $RAILS_ENV -D
+        sudo "systemctl start nginx"
+        sudo systemctl start nginx
         echo "To check logs, do 'nulogs'"
     else
             echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
     fi
 }
 
+alias nurestart="nustop && nustart"
+function nustatus()
+{ 
+	systemctl status nginx 
+	ps -ax | grep unicorn
+}
+
+# Link the given nginx config file in /etc/nginx/sites-available to /etc/nginx/sites-enabled
+function nu_enable()
+{
+	echo "Currently enabled: '`ls /etc/nginx/sites-enabled/*`'."
+	if [[ -f /etc/nginx/sites-enabled/$1 ]]; then
+		echo "Nothing is being changed. As you were."
+	elif [[ -f /etc/nginx/sites-available/$1 ]]; then
+		echo "$1 is available in /etc/nginx/sites-available"
+		sudo rm /etc/nginx/sites-enabled/*
+		sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled
+		echo "/etc/nginx/sites-enabled now has `ls /etc/nginx/sites-enabled`"
+		echo "Run 'nurestart' for changes to take effect."
+	elif [ -z $1 ]; then
+		echo "USAGE: 'nu_enable <file>' where <file> is one of"
+		ls /etc/nginx/sites-available
+	else
+		echo "$1 is NOT available in /etc/nginx/sites-available. Choices are:"
+		ls /etc/nginx/sites-available
+	fi
+}
+
 alias nuconfig="sudo vi /etc/nginx/nginx.conf /etc/nginx/sites-enabled/* config/unicorn.rb"
 
 function nulogs()
 {
-    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/development.log log/production.log
+    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/${RAILS_ENV}.log
+}
+
+function nuhelp()
+{
+	echo "Manage and control nginx and unicorn FROM RAILS APP DIRECTORY with:"
+	echo "'nustart' to start both processes, emptying the log files."
+	echo "'nustop' to stop both processes."
+	echo "'nurestart' to stop and start."
+	echo "'nu_enable <sitefile>' to switch to another file in /etc/nginx/sites-available"
+	echo "'nustatus' to get process status."
+	echo "'nuconfig' to edit config files."
+	echo "'nulogs' to view current log files."
+}
+
+function ss()
+{
+  echo "sudo systemctl $@"
+  sudo systemctl $@
 }
 
 function clearlog()

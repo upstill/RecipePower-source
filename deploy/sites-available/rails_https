@@ -1,0 +1,36 @@
+upstream rails {
+        # Path to Unicorn socket file
+        server unix:/var/sockets/unicorn.sock fail_timeout=0;
+}
+
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /var/www/recipepower.com/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name deploy.recipepower.com;
+
+        # location / {
+                # try_files $uri $uri/ =404;
+        # }
+        location @rails {
+                proxy_pass http://rails;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+        }
+
+        try_files $uri/index.html $uri @rails;
+
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/deploy.recipepower.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/deploy.recipepower.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
