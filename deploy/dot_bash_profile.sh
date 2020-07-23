@@ -4,7 +4,6 @@ if [ -z $HISTSIZE ]; then
 fi
 source ~/.bashvars  # Get secret credentials
 
-export HOSTNAME=`cat /etc/hostname`
 export IPADDR=`curl ifconfig.me`
 
 #### Standard path and script inits:
@@ -14,17 +13,75 @@ PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
 [[ -s "$HOME/.rvm/scripts/rvm" ]] && source "$HOME/.rvm/scripts/rvm" # Load RVM into a shell session *as a function*
 
 export LC_CTYPE=en_US.UTF-8
-
 if [ -z $RAILS_ENV ]; then
 	export RAILS_ENV=development
 	echo "RAILS_ENV set to 'development'. Set it to 'staging' or 'public' for release"
 fi
 # OS-dependent variables and aliases
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	export HOSTNAME=`cat /etc/hostname`
 	# Where the current project is located 
 	export APP_HOME=/home/upstill/RecipePower-source
-	export GIT_BRANCH=staging
-	alias git_clone="git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git"
+function extract_rubyver()
+{
+        if [ ! -f .ruby-version ]; then
+                cat Gemfile.lock | grep ^\\s*ruby\\W | sed 's/\s*ruby\s*//' | sed 's/p.*$//' > .ruby-version
+        fi
+	cat .ruby-version
+}
+
+# Copy the current state of scripts and system files into the deploy directory
+function git_pack()
+{
+	if [ -d deploy ]; then
+		cp /etc/init.d/unicorn deploy
+		cp ~/.bash_profile deploy/dot_bash_profile.sh
+		cp /etc/nginx/sites-available/{ngin*,rails*} deploy/sites-available
+		cp /etc/nginx/nginx.conf deploy
+		cp /var/www/recipepower.com/html/* deploy/html
+	else
+		echo "Need to be in a Rails directory to git_pack!"
+	fi
+}
+
+# After cloning the distribution, copy out various config files that have to live somewhere else
+function git_unpack()
+{
+	if [ -d deploy ]; then
+		sudo cp deploy/unicorn /etc/init.d/unicorn
+		sudo chmod +x /etc/init.d/unicorn
+		sudo update-rc.d unicorn defaults
+
+		cp deploy/dot_bash_profile.sh ~/.bash_profile
+		sudo cp deploy/sites-available/* /etc/nginx/sites-available
+
+		sudo cp deploy/nginx.conf /etc/nginx
+		cp deploy/html/* /var/www/recipepower.com/html
+
+		echo "Environment is deployed. Exit and log back in for .bash_profile."
+		echo "Restart unicorn and nginx for changes to take effect"
+	else
+		echo "Need to be in a Rails directory to git_pack!"
+	fi
+}
+function git_clone()
+{
+	echo "git_clone $1"
+	if [ ! -z $1 ]; then
+		echo "Setting \$GIT_BRANCH to $1"
+		export GIT_BRANCH="$1"
+	fi
+	if [ -z $GIT_BRANCH ]; then
+		echo "git_clone needs to know what branch to clone."
+		echo "Either set \$GIT_BRANCH to 'staging' or 'master', or invoke 'git_clone <branchname>'"
+	elif [[ $GIT_BRANCH =~ 'staging' || $GIT_BRANCH =~ 'master' ]]; then
+		echo "git_clone cloning $GIT_BRANCH."
+		git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git
+		echo "Done! Don't forget to run git_unpack to distribute configuration, etc., files."
+	else
+		echo "git_clone: must clone EITHER 'staging' or 'master'"
+	fi
+}
 
 	export RUBYVER=2.6.6
 	export RUBYMAJOR=2.6
@@ -34,7 +91,7 @@ function install_ruby()
 {
 	pushd ~
         sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev software-properties-common libffi-dev nodejs
-        (Check for ruby version $RUBYVER--e.g., 2.6.3--in the Gemfile with $RUBYMAJOR the major release--e.g., 2.6:)
+        # (Check for ruby version $RUBYVER--e.g., 2.6.3--in the Gemfile with $RUBYMAJOR the major release--e.g., 2.6:)
         wget https://cache.ruby-lang.org/pub/ruby/$RUBYMAJOR/ruby-$RUBYVER.tar.gz
         tar -xzvf ruby-$RUBYVER.tar.gz
         cd ruby-$RUBYVER
@@ -44,6 +101,7 @@ function install_ruby()
 }
 export APP=example
 export RAILS_VER=5.2.3
+# gem: --no-document
 function install_rails()
 {
         sudo gem install rails -v $RAILS_VER
@@ -58,8 +116,11 @@ function install_rails()
 	export PATH="${PG_BIN}:$PATH"
 
 	# Make rvm commands available
-	export PATH="$HOME/.rbenv/bin:$PATH"
-	eval "$(rbenv init -)"
+	if [[ -d $HOME/.rbenv ]]; then
+		export PATH="$HOME/.rbenv/bin:$PATH"
+		eval "$(rbenv init -)"
+		export PATH="$HOME/.rbenv/plugins/ruby-build/bin:$PATH"
+	fi
 
 	# PG_HOME is where postgres is installed and the directory where 'locate postgresql.conf' indicates
 	# export PG_HOME=/etc/postgresql/12/main # On Staging machine?
@@ -68,6 +129,7 @@ function install_rails()
 
 	# Socket-declaration line for config/database.yml
 	export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
+	export PG_LOGS=/var/log/postgresql/postgresql-12-main.log
 
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
@@ -90,6 +152,8 @@ function install_rails()
 	export PATH="/snap/bin:$PATH"
 
 elif  [[ "$OSTYPE" == "darwin"* ]]; then
+	# .bashvars sets the Postgres password for Linux 
+	export POSTGRES_PASSWORD='wRsQ&Pdh#X^rdc/S|9'
 	# Where the current project is located 
 	export APP_HOME=/Users/upstill/Dev/RP
 	# Add the bin directory for postgres commands
@@ -130,6 +194,7 @@ alias pg_log="cat ${PG_LOG}"
 function nustop()
 {
     sudo systemctl stop nginx
+    sudo systemctl stop unicorn_RP
     sudo pkill unicorn
     echo "To edit config files, do 'nuconfig'"
 }
@@ -138,15 +203,17 @@ function nustart()
 {
     # cd /home/upstill/RecipePower-source
     if [[ -f Gemfile ]];  then
-        sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log
+        sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.*.log 
         if [ ! -f log/null.log ]; then
                 cat /dev/null >log/null.log
         fi
         sudo cp log/null.log log/${RAILS_ENV}.log
-        echo "sudo -u postgres unicorn -c config/unicorn.rb -E $RAILS_ENV -D"
-        sudo unicorn -c config/unicorn.rb -E $RAILS_ENV -D
-        sudo "systemctl start nginx"
-        sudo systemctl start nginx
+        # echo "sudo -u postgres unicorn -c config/unicorn.rb -E $RAILS_ENV -D"
+        # sudo /usr/sbin/unicorn -c config/unicorn.rb -E $RAILS_ENV -D
+        echo "sudo systemctl start unicorn_RP"
+	sudo sudo systemctl start unicorn_RP
+        echo "sudo systemctl start nginx"
+        sudo sudo systemctl start nginx
         echo "To check logs, do 'nulogs'"
     else
             echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
@@ -173,7 +240,7 @@ function nu_enable()
 		echo "/etc/nginx/sites-enabled now has `ls /etc/nginx/sites-enabled`"
 		echo "Run 'nurestart' for changes to take effect."
 	elif [ -z $1 ]; then
-		echo "USAGE: 'nu_enable <file>' where <file> is one of"
+		echo "USAGE: 'nu_enable <file>' where <file> is one of:"
 		ls /etc/nginx/sites-available
 	else
 		echo "$1 is NOT available in /etc/nginx/sites-available. Choices are:"
@@ -185,7 +252,7 @@ alias nuconfig="sudo vi /etc/nginx/nginx.conf /etc/nginx/sites-enabled/* config/
 
 function nulogs()
 {
-    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/${RAILS_ENV}.log
+    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/${RAILS_ENV}.log $PG_LOG
 }
 
 function nuhelp()
