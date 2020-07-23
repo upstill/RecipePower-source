@@ -1,3 +1,5 @@
+# Basic nginx file that will serve static assets from /var/www/recipepower.com/html UNDER SSL
+# Test by hitting https://deploy.recipepower.com/{index,other}.html in a browser
 server {
         listen 80;
         listen [::]:80;
@@ -11,12 +13,11 @@ server {
                 try_files $uri $uri/ =404;
         }
 
+
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
     ssl_certificate /etc/letsencrypt/live/deploy.recipepower.com/fullchain.pem; # managed by Certbot
     ssl_certificate_key /etc/letsencrypt/live/deploy.recipepower.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-
 }
-

@@ -1,0 +1,18 @@
+# Basic nginx file that will serve static assets from /var/www/recipepower.com/html
+# Change the server_name to deploy.recipepower.com if that domain points to this host (see ping to confirm)
+# Test with 'curl http://localhost/{index,other}.html' 
+# ...or hit http://$IPADDR:3000/{index,other}.html in a browser
+server {
+        listen 80;
+        listen [::]:80;
+
+        root /var/www/recipepower.com/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name localhost; # deploy.recipepower.com;
+
+        location / {
+                try_files $uri $uri/ =404;
+        }
+
+}

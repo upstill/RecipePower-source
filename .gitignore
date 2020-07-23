@@ -3,6 +3,7 @@
 .idea/
 db/*.sqlite3
 log/*.log
+shared/*/*
 tmp/
 .sass-cache/
 .DS_Store

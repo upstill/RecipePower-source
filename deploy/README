@@ -1,10 +1,15 @@
 TO DEPLOY TO A LINUX SYSTEM:
-*** Secret credentials must be copied into ~/.bashvars (from home machine)
+*** Secret credentials must be copied into ~/.rbenv-vars (from home machine)
 
-This files are to be installed in other locations when deploying to Linux systems:
-  -- dot_bash_profile to ~/.bash_profile
+These files are to be installed in other locations when deploying to Linux systems.
+See git_unpack in dot_bash_profile.sh
+  -- dot_bash_profile.sh to ~/.bash_profile
   -- nginx.conf to /etc/nginx
-  -- RP to /etc/nginx/sites-available
-  ** ...and then symlinked to sites-enabled:
-  % sudo ln -s /etc/nginx/sites-available/RP /etc/nginx/sites-enabled
-  *** The IP address of the server must be correct in /etc/nginx/sites-available/RP
+  -- sites-available/* to /etc/nginx/sites-available
+  -- unicorn to /etc/init.d
+
+Afterwards, need to embed any changes:
+  -- log out and log in to adopt dot_bash_profile
+  -- symlink (use 'nu_enable') choice of nginx config from sites-available
+  -- run 'sudo update-rc.d unicorn defaults'
+  -- restart nginx and unicorn daemons
