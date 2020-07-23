@@ -14,8 +14,8 @@ PATH=$HOME/.rvm/bin:$PATH # Add RVM to PATH for scripting
 
 export LC_CTYPE=en_US.UTF-8
 if [ -z $RAILS_ENV ]; then
-	export RAILS_ENV=development
-	echo "RAILS_ENV set to 'development'. Set it to 'staging' or 'public' for release"
+	export RAILS_ENV=production
+	echo "RAILS_ENV set to '$RAILS_ENV'. Set it to 'staging' or 'production' for release"
 fi
 # OS-dependent variables and aliases
 if [[ "$OSTYPE" == "linux-gnu"* ]]; then
@@ -194,8 +194,10 @@ alias pg_log="cat ${PG_LOG}"
 function nustop()
 {
     sudo systemctl stop nginx
-    sudo systemctl stop unicorn_RP
+    sudo systemctl stop unicorn
     sudo pkill unicorn
+    sudo rm /home/upstill/RecipePower-source/shared/pids/unicorn.pid
+    sudo rm /var/sockets/unicorn.sock
     echo "To edit config files, do 'nuconfig'"
 }
 
@@ -203,15 +205,16 @@ function nustart()
 {
     # cd /home/upstill/RecipePower-source
     if [[ -f Gemfile ]];  then
-        sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.*.log 
+        # sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.*.log log/${RAILS_ENV}.log
+        sudo rm shared/log/unicorn.*.log log/${RAILS_ENV}.log
         if [ ! -f log/null.log ]; then
                 cat /dev/null >log/null.log
         fi
         sudo cp log/null.log log/${RAILS_ENV}.log
         # echo "sudo -u postgres unicorn -c config/unicorn.rb -E $RAILS_ENV -D"
         # sudo /usr/sbin/unicorn -c config/unicorn.rb -E $RAILS_ENV -D
-        echo "sudo systemctl start unicorn_RP"
-	sudo sudo systemctl start unicorn_RP
+        echo "sudo systemctl start unicorn"
+	sudo sudo systemctl start unicorn
         echo "sudo systemctl start nginx"
         sudo sudo systemctl start nginx
         echo "To check logs, do 'nulogs'"
@@ -255,6 +258,38 @@ function nulogs()
     sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/${RAILS_ENV}.log $PG_LOG
 }
 
+function nu_errscan()
+{
+	echo "---------------------"
+	echo "journalctl -xe | tail:"
+	journalctl -xe | tail
+	echo "---------------------"
+	echo "systemctl status unicorn.service:"
+	systemctl status unicorn.service
+	echo ""
+	echo "---------------------"
+	echo "/var/log/nginx/access.log:"
+	tail /var/log/nginx/access.log
+	echo ""
+	echo "---------------------"
+	echo "/var/log/nginx/error.log:"
+	tail /var/log/nginx/error.log
+	echo ""
+	echo "---------------------"
+	echo "shared/log/unicorn.stderr.log:"
+	tail shared/log/unicorn.stderr.log
+	echo ""
+	echo "---------------------"
+	echo "shared/log/unicorn.stdout.log:"
+	tail shared/log/unicorn.stdout.log
+	echo ""
+	echo "---------------------"
+	echo "$PG_LOG:"
+	sudo tail $PG_LOG
+	echo ""
+	echo "---------------------"
+}
+
 function nuhelp()
 {
 	echo "Manage and control nginx and unicorn FROM RAILS APP DIRECTORY with:"
@@ -265,6 +300,7 @@ function nuhelp()
 	echo "'nustatus' to get process status."
 	echo "'nuconfig' to edit config files."
 	echo "'nulogs' to view current log files."
+	echo "'nu_errscan' to briefly review current logs."
 }
 
 function ss()
@@ -366,7 +402,7 @@ if [ -d ${BACKUPS_ROOT}/db_backup_$1 ]; then
     if [ -z $FNAME ]; then
 	echo "db_restore: No current backup for '$FNAME'"
     else
-        db_restore_from $FNAME
+        db_restore_from $FNAME $1
     fi
 else
     echo "db_restore: Nope! Need to specify database with current backup, viz: 'db_restore production|staging|development'"
@@ -380,9 +416,9 @@ db_restore_from()
   if [ -z $1 ]; then
 	echo "db_restore_from: Need to specify file to restore from: '$1' just won't do!"
   else
-	echo "db_restore_from: Restoring from live backup '$1'"
-	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1'"
-	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1
+	echo "db_restore_from: Restoring from live backup '$1' to '$2'"
+	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1'"
+	# pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1
   fi
 }
 # Locate the latest backup file as date-stamped

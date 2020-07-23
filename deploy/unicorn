@@ -1,5 +1,8 @@
 #!/bin/sh
 
+# This is a unicorn file for a system daemon run under systemctl. After making any changes do:
+# sudo update-rc.d unicorn defaults
+
 # File: /etc/init.d/unicorn
 
 ### BEGIN INIT INFO
@@ -21,10 +24,10 @@ USER=upstill
 # however, is dedicated to variable data that changes rapidly, such as logs.
 # Reference https://help.ubuntu.com/community/LinuxFilesystemTreeOverview for
 # more information.
-APP_ROOT=/home/upstill/example
+APP_ROOT=/home/upstill/RecipePower-source
 # Set the environment. This can be changed to staging or development for staging
 # servers.
-RAILS_ENV=development
+RAILS_ENV=production
 # This should match the pid setting in $APP_ROOT/config/unicorn.rb.
 PID=$APP_ROOT/pids/unicorn.pid
 # A simple description for service output.
@@ -36,7 +39,7 @@ RBENV_ROOT="/home/$USER/.rbenv"
 PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
 SET_PATH="cd $APP_ROOT && rbenv rehash && rbenv local $RBENV_RUBY_VERSION"
 # Unicorn can be run using `bundle exec unicorn` or `bin/unicorn`.
-UNICORN="unicorn"
+UNICORN="bundle exec unicorn"
 # Execute the unicorn executable as a daemon, with the appropriate configuration
 # and in the appropriate environment.
 UNICORN_OPTS="-c $APP_ROOT/config/unicorn.rb -E $RAILS_ENV -D"
