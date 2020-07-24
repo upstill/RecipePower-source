@@ -1,18 +1,19 @@
-# Basic nginx file that will serve static assets from /var/www/recipepower.com/html UNDER SSL
-# Test by hitting https://deploy.recipepower.com/{index,other}.html in a browser
+# nginx configuration that will serve Rails app under SSL
+# Test with 'curl http://localhost/{index.html,other.html,tasks}' with example app
+# ...or hit http://$IPADDR:3000/{index.html,other.html} in a browser
 server {
-        listen 80;
-        listen [::]:80;
 
         root /var/www/recipepower.com/html;
+
+        server_name deploy.recipepower.com; # localhost; # deploy.recipepower.com;
+
         index index.html index.htm index.nginx-debian.html;
 
-        server_name deploy.recipepower.com;
+        try_files $uri/index.html $uri @rails;
 
-        location / {
-                try_files $uri $uri/ =404;
-        }
-
+        error_page 500 502 503 504 /500.html;
+        client_max_body_size 4G;
+        keepalive_timeout 10;
 
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
@@ -20,4 +21,20 @@ server {
     ssl_certificate_key /etc/letsencrypt/live/deploy.recipepower.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = deploy.recipepower.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        listen 80;
+        listen [::]:80;
+
+        server_name deploy.recipepower.com;
+    return 404; # managed by Certbot
+
+
 }

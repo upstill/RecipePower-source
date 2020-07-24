@@ -56,6 +56,11 @@ function git_unpack()
 		sudo cp deploy/sites-available/* /etc/nginx/sites-available
 
 		sudo cp deploy/nginx.conf /etc/nginx
+
+		if [ ! -d  /var/www/recipepower.com/html ]; then
+			sudo mkdir -p /var/www/recipepower.com/html
+			sudo chown upstill /var/www/recipepower.com/html
+		fi
 		cp deploy/html/* /var/www/recipepower.com/html
 
 		echo "Environment is deployed. Exit and log back in for .bash_profile."
@@ -102,14 +107,6 @@ function install_ruby()
 export APP=example
 export RAILS_VER=5.2.3
 # gem: --no-document
-function install_rails()
-{
-        sudo gem install rails -v $RAILS_VER
-        cd 
-        rails new $APP  # Installation will stop at bundle installation. Ctrl-Z out and:
-        cd $APP
-	bundle install --path vendor/bundle
-}
 
 	# Add the bin directory for postgres commands
 	export PG_BIN="/usr/lib/postgresql/12/bin"
@@ -129,10 +126,6 @@ function install_rails()
 
 	# Socket-declaration line for config/database.yml
 	export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
-	export PG_LOGS=/var/log/postgresql/postgresql-12-main.log
-
-	# We need APP_HOME to be defined
-	export LOG_HOME="${APP_HOME}/log"
 
 	if [[ $PG_HOME =~ /12/ ]]; then
 		export PG_LOG=/var/log/postgresql/postgresql-12-main.log
@@ -140,6 +133,9 @@ function install_rails()
 		alias pg_stop="sudo -u postgres pg_ctlcluster 12 main stop"
 		alias pg_status="sudo -u postgres pg_ctlcluster 12 main status"
 	else
+
+	# We need APP_HOME to be defined
+	export LOG_HOME="${APP_HOME}/log"
 		export PG_LOG="${LOG_HOME}/server.log"
 		# Postgres control differs on Linux for some reason
 		alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l $PG_LOG"
@@ -168,6 +164,7 @@ elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
 	export PG_LOG="${LOG_HOME}/server.log"
+/var/log/postgresql/postgresql-12-main.log
 
 	# Postgres control on MacOS
 	alias pg_start="pg_ctl -D ${PG_HOME} -l ${LOG_HOME}/server.log start"
@@ -235,12 +232,14 @@ function nu_enable()
 {
 	echo "Currently enabled: '`ls /etc/nginx/sites-enabled/*`'."
 	if [[ -f /etc/nginx/sites-enabled/$1 ]]; then
-		echo "Nothing is being changed. As you were."
+		sudo echo "$1 is already enabled, but run 'nurestart' if the config file has changed."
+		sudo nginx -t
 	elif [[ -f /etc/nginx/sites-available/$1 ]]; then
 		echo "$1 is available in /etc/nginx/sites-available"
 		sudo rm /etc/nginx/sites-enabled/*
 		sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled
 		echo "/etc/nginx/sites-enabled now has `ls /etc/nginx/sites-enabled`"
+		sudo nginx -t
 		echo "Run 'nurestart' for changes to take effect."
 	elif [ -z $1 ]; then
 		echo "USAGE: 'nu_enable <file>' where <file> is one of:"
@@ -362,9 +361,11 @@ echo "Testing '$BACKUP_DIR_NAME'"
 if [ -d $BACKUP_DIR_NAME ]; then
   export DUMP_FILE_NAME="${BACKUP_DIR_NAME}/`date \"+%Y-%m-%d\"`.dump"
   echo "New dump file name: '$DUMP_FILE_NAME'"
-else
+elif [ -d $BACKUPS_ROOT ]; then
   echo "new_dump_file: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
   export DUMP_FILE_NAME=''
+else
+  echo "No '$BACKUPS_ROOT' directory!"
 fi
 }
 # Restore the database from the named backup
@@ -372,9 +373,7 @@ fi
 db_backup()
 {
 new_dump_file $1
-if [ -z $DUMP_FILE_NAME ]; then
-    echo "db_backup: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
-else
+if [ ! -z $DUMP_FILE_NAME ]; then
     if [ $1 == 'development' ]; then
 	echo "Insert development procedure here..."
 	echo "db_backup: pg_dump --verbose -h localhost --clean --format=custom --file="$DUMP_FILE_NAME" dabpmrobtjc0ei"
@@ -418,7 +417,7 @@ db_restore_from()
   else
 	echo "db_restore_from: Restoring from live backup '$1' to '$2'"
 	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1'"
-	# pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1
+	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1
   fi
 }
 # Locate the latest backup file as date-stamped
