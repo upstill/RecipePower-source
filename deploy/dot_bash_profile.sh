@@ -48,21 +48,13 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	# Socket-declaration line for config/database.yml
 	export PG_SOCKET=/var/run/postgresql/.s.PGSQL.5432
 
-	if [[ $PG_HOME =~ /12/ ]]; then
-		export PG_LOG=/var/log/postgresql/postgresql-12-main.log
-		alias pg_start="sudo -u postgres pg_ctlcluster 12 main start"
-		alias pg_stop="sudo -u postgres pg_ctlcluster 12 main stop"
-		alias pg_status="sudo -u postgres pg_ctlcluster 12 main status"
-	else
+  export PG_LOG=/var/log/postgresql/postgresql-12-main.log
+  alias pg_start="sudo -u postgres pg_ctlcluster 12 main start"
+  alias pg_stop="sudo -u postgres pg_ctlcluster 12 main stop"
+  alias pg_status="sudo -u postgres pg_ctlcluster 12 main status"
 
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
-		export PG_LOG="${LOG_HOME}/server.log"
-		# Postgres control differs on Linux for some reason
-		alias pg_start="sudo -u postgres ${PG_BIN}/pg_ctl start -D ${PG_HOME} -l $PG_LOG"
-		alias pg_stop="sudo -u postgres ${PG_BIN}/pg_ctl stop -D ${PG_HOME} -s -m fast"
-		alias pg_status="sudo -u postgres ${PG_BIN}/pg_ctl status -D ${PG_HOME}"
-	fi
 	alias pg_log="cat ${PG_LOG}"
 
 	### Added by the Heroku Toolbelt
@@ -76,7 +68,7 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 
 elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	# .bashvars sets the Postgres password for Linux 
-	# Where the current project is located 
+	# Where the current project is located
 	export APP_HOME=/Users/upstill/Dev/RP
 	# Add the bin directory for postgres commands
 	export PATH="/usr/local/opt/postgresql@9.6/bin:$PATH"
@@ -90,7 +82,6 @@ elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	# We need APP_HOME to be defined
 	export LOG_HOME="${APP_HOME}/log"
 	export PG_LOG="${LOG_HOME}/server.log"
-/var/log/postgresql/postgresql-12-main.log
 
 	# Postgres control on MacOS
 	alias pg_start="pg_ctl -D ${PG_HOME} -l ${LOG_HOME}/server.log start"

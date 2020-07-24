@@ -4,7 +4,6 @@ ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
 gem 'rails', '~> 5.2.4' # 5.0.7.2' #
-# gem "activesupport", ">= 5.2.4.3"
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -82,8 +81,7 @@ gem 'pundit'
 ###### Essential Ruby libs
 gem "rmagick", "~> 2.16.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
-# gem 'nokogiri', "~> 1.6" # "~> 1.5.3"
-gem "nokogiri", ">= 1.10.8"
+gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
 gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 # Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
 gem 'redcarpet' # https://github.com/vmg/redcarpet
