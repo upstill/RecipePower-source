@@ -27,5 +27,6 @@ test:
 
 production:
   <<: *common
+  host: localhost
   database: cookmarks_production
 

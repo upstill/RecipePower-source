@@ -9,20 +9,19 @@ upstream rails {
 server {
 
         root /var/www/recipepower.com/html;
-
-        server_name deploy.recipepower.com; # localhost; # deploy.recipepower.com;
-
         index index.html index.htm index.nginx-debian.html;
+
+        server_name staging.recipepower.com;
 
         location @rails {
                 proxy_pass http://rails;
                 proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
-		proxy_set_header X-Forwarded-Proto https;
+                proxy_set_header X-Forwarded-Proto https;
                 proxy_set_header Host $http_host;
                 proxy_redirect off;
         }
 
-        try_files $uri/index.html $uri @rails;
+        try_files $uri @rails; # $uri/index.html $uri @rails;
 
         error_page 500 502 503 504 /500.html;
         client_max_body_size 4G;
@@ -30,15 +29,15 @@ server {
 
     listen [::]:443 ssl ipv6only=on; # managed by Certbot
     listen 443 ssl; # managed by Certbot
-    ssl_certificate /etc/letsencrypt/live/deploy.recipepower.com/fullchain.pem; # managed by Certbot
-    ssl_certificate_key /etc/letsencrypt/live/deploy.recipepower.com/privkey.pem; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem; # managed by Certbot
     include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
 
 }
 
 server {
-    if ($host = deploy.recipepower.com) {
+    if ($host = staging.recipepower.com) {
         return 301 https://$host$request_uri;
     } # managed by Certbot
 
@@ -46,7 +45,7 @@ server {
         listen 80;
         listen [::]:80;
 
-        server_name deploy.recipepower.com;
+        server_name staging.recipepower.com;
     return 404; # managed by Certbot
 
 

@@ -5,6 +5,7 @@ fi
 source ~/.bashvars  # Get secret credentials
 
 export IPADDR=`curl ifconfig.me`
+export DOMAIN=recipepower.com
 
 #### Standard path and script inits:
 export PATH="/usr/local/bin:/usr/local/sbin:${HOME}/bin:$PATH"
@@ -22,97 +23,17 @@ if [[ "$OSTYPE" == "linux-gnu"* ]]; then
 	export HOSTNAME=`cat /etc/hostname`
 	# Where the current project is located 
 	export APP_HOME=/home/upstill/RecipePower-source
-function extract_rubyver()
-{
-        if [ ! -f .ruby-version ]; then
-                cat Gemfile.lock | grep ^\\s*ruby\\W | sed 's/\s*ruby\s*//' | sed 's/p.*$//' > .ruby-version
-        fi
-	cat .ruby-version
-}
-
-# Copy the current state of scripts and system files into the deploy directory
-function git_pack()
-{
-	if [ -d deploy ]; then
-		cp /etc/init.d/unicorn deploy
-		cp ~/.bash_profile deploy/dot_bash_profile.sh
-		cp /etc/nginx/sites-available/{ngin*,rails*} deploy/sites-available
-		cp /etc/nginx/nginx.conf deploy
-		cp /var/www/recipepower.com/html/* deploy/html
-	else
-		echo "Need to be in a Rails directory to git_pack!"
-	fi
-}
-
-# After cloning the distribution, copy out various config files that have to live somewhere else
-function git_unpack()
-{
-	if [ -d deploy ]; then
-		sudo cp deploy/unicorn /etc/init.d/unicorn
-		sudo chmod +x /etc/init.d/unicorn
-		sudo update-rc.d unicorn defaults
-
-		cp deploy/dot_bash_profile.sh ~/.bash_profile
-		sudo cp deploy/sites-available/* /etc/nginx/sites-available
-
-		sudo cp deploy/nginx.conf /etc/nginx
-
-		if [ ! -d  /var/www/recipepower.com/html ]; then
-			sudo mkdir -p /var/www/recipepower.com/html
-			sudo chown upstill /var/www/recipepower.com/html
-		fi
-		cp deploy/html/* /var/www/recipepower.com/html
-
-		echo "Environment is deployed. Exit and log back in for .bash_profile."
-		echo "Restart unicorn and nginx for changes to take effect"
-	else
-		echo "Need to be in a Rails directory to git_pack!"
-	fi
-}
-function git_clone()
-{
-	echo "git_clone $1"
-	if [ ! -z $1 ]; then
-		echo "Setting \$GIT_BRANCH to $1"
-		export GIT_BRANCH="$1"
-	fi
-	if [ -z $GIT_BRANCH ]; then
-		echo "git_clone needs to know what branch to clone."
-		echo "Either set \$GIT_BRANCH to 'staging' or 'master', or invoke 'git_clone <branchname>'"
-	elif [[ $GIT_BRANCH =~ 'staging' || $GIT_BRANCH =~ 'master' ]]; then
-		echo "git_clone cloning $GIT_BRANCH."
-		git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git
-		echo "Done! Don't forget to run git_unpack to distribute configuration, etc., files."
-	else
-		echo "git_clone: must clone EITHER 'staging' or 'master'"
-	fi
-}
-
 	export RUBYVER=2.6.6
 	export RUBYMAJOR=2.6
 
-# Run this from home directory on Linux host
-function install_ruby()
-{
-	pushd ~
-        sudo apt-get install git-core curl zlib1g-dev build-essential libssl-dev libreadline-dev libyaml-dev libsqlite3-dev sqlite3 libxml2-dev libxslt1-dev libcurl4-openssl-dev software-properties-common libffi-dev nodejs
-        # (Check for ruby version $RUBYVER--e.g., 2.6.3--in the Gemfile with $RUBYMAJOR the major release--e.g., 2.6:)
-        wget https://cache.ruby-lang.org/pub/ruby/$RUBYMAJOR/ruby-$RUBYVER.tar.gz
-        tar -xzvf ruby-$RUBYVER.tar.gz
-        cd ruby-$RUBYVER
-        ./configure
-        make
-        sudo make install
-}
-export APP=example
-export RAILS_VER=5.2.3
-# gem: --no-document
+	export APP=example
+	export RAILS_VER=5.2.6
 
 	# Add the bin directory for postgres commands
 	export PG_BIN="/usr/lib/postgresql/12/bin"
 	export PATH="${PG_BIN}:$PATH"
 
-	# Make rvm commands available
+	# Make rbenv commands available
 	if [[ -d $HOME/.rbenv ]]; then
 		export PATH="$HOME/.rbenv/bin:$PATH"
 		eval "$(rbenv init -)"
@@ -146,10 +67,15 @@ export RAILS_VER=5.2.3
 
 	### Added by the Heroku Toolbelt
 	export PATH="/snap/bin:$PATH"
+	
+	# Get Linux-only shell commands
+	if [[ $- == *i* ]]; then
+		echo 'Getting Interactive commands' 
+		source ~/.bash_ubuntu
+	fi
 
 elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	# .bashvars sets the Postgres password for Linux 
-	export POSTGRES_PASSWORD='wRsQ&Pdh#X^rdc/S|9'
 	# Where the current project is located 
 	export APP_HOME=/Users/upstill/Dev/RP
 	# Add the bin directory for postgres commands
@@ -187,126 +113,6 @@ elif  [[ "$OSTYPE" == "darwin"* ]]; then
 	export PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
 fi
 alias pg_log="cat ${PG_LOG}"
-
-function nustop()
-{
-    sudo systemctl stop nginx
-    sudo systemctl stop unicorn
-    sudo pkill unicorn
-    sudo rm /home/upstill/RecipePower-source/shared/pids/unicorn.pid
-    sudo rm /var/sockets/unicorn.sock
-    echo "To edit config files, do 'nuconfig'"
-}
-
-function nustart()
-{
-    # cd /home/upstill/RecipePower-source
-    if [[ -f Gemfile ]];  then
-        # sudo rm /var/log/nginx/access.log /var/log/nginx/error.log shared/log/unicorn.*.log log/${RAILS_ENV}.log
-        sudo rm shared/log/unicorn.*.log log/${RAILS_ENV}.log
-        if [ ! -f log/null.log ]; then
-                cat /dev/null >log/null.log
-        fi
-        sudo cp log/null.log log/${RAILS_ENV}.log
-        # echo "sudo -u postgres unicorn -c config/unicorn.rb -E $RAILS_ENV -D"
-        # sudo /usr/sbin/unicorn -c config/unicorn.rb -E $RAILS_ENV -D
-        echo "sudo systemctl start unicorn"
-	sudo sudo systemctl start unicorn
-        echo "sudo systemctl start nginx"
-        sudo sudo systemctl start nginx
-        echo "To check logs, do 'nulogs'"
-    else
-            echo "No Gemfile => Not running from a Rails directory. 'cd' to one and try again."
-    fi
-}
-
-alias nurestart="nustop && nustart"
-function nustatus()
-{ 
-	systemctl status nginx 
-	ps -ax | grep unicorn
-}
-
-# Link the given nginx config file in /etc/nginx/sites-available to /etc/nginx/sites-enabled
-function nu_enable()
-{
-	echo "Currently enabled: '`ls /etc/nginx/sites-enabled/*`'."
-	if [[ -f /etc/nginx/sites-enabled/$1 ]]; then
-		sudo echo "$1 is already enabled, but run 'nurestart' if the config file has changed."
-		sudo nginx -t
-	elif [[ -f /etc/nginx/sites-available/$1 ]]; then
-		echo "$1 is available in /etc/nginx/sites-available"
-		sudo rm /etc/nginx/sites-enabled/*
-		sudo ln -s /etc/nginx/sites-available/$1 /etc/nginx/sites-enabled
-		echo "/etc/nginx/sites-enabled now has `ls /etc/nginx/sites-enabled`"
-		sudo nginx -t
-		echo "Run 'nurestart' for changes to take effect."
-	elif [ -z $1 ]; then
-		echo "USAGE: 'nu_enable <file>' where <file> is one of:"
-		ls /etc/nginx/sites-available
-	else
-		echo "$1 is NOT available in /etc/nginx/sites-available. Choices are:"
-		ls /etc/nginx/sites-available
-	fi
-}
-
-alias nuconfig="sudo vi /etc/nginx/nginx.conf /etc/nginx/sites-enabled/* config/unicorn.rb"
-
-function nulogs()
-{
-    sudo vi /var/log/nginx/access.log /var/log/nginx/error.log  shared/log/unicorn.stderr.log shared/log/unicorn.stdout.log log/${RAILS_ENV}.log $PG_LOG
-}
-
-function nu_errscan()
-{
-	echo "---------------------"
-	echo "journalctl -xe | tail:"
-	journalctl -xe | tail
-	echo "---------------------"
-	echo "systemctl status unicorn.service:"
-	systemctl status unicorn.service
-	echo ""
-	echo "---------------------"
-	echo "/var/log/nginx/access.log:"
-	tail /var/log/nginx/access.log
-	echo ""
-	echo "---------------------"
-	echo "/var/log/nginx/error.log:"
-	tail /var/log/nginx/error.log
-	echo ""
-	echo "---------------------"
-	echo "shared/log/unicorn.stderr.log:"
-	tail shared/log/unicorn.stderr.log
-	echo ""
-	echo "---------------------"
-	echo "shared/log/unicorn.stdout.log:"
-	tail shared/log/unicorn.stdout.log
-	echo ""
-	echo "---------------------"
-	echo "$PG_LOG:"
-	sudo tail $PG_LOG
-	echo ""
-	echo "---------------------"
-}
-
-function nuhelp()
-{
-	echo "Manage and control nginx and unicorn FROM RAILS APP DIRECTORY with:"
-	echo "'nustart' to start both processes, emptying the log files."
-	echo "'nustop' to stop both processes."
-	echo "'nurestart' to stop and start."
-	echo "'nu_enable <sitefile>' to switch to another file in /etc/nginx/sites-available"
-	echo "'nustatus' to get process status."
-	echo "'nuconfig' to edit config files."
-	echo "'nulogs' to view current log files."
-	echo "'nu_errscan' to briefly review current logs."
-}
-
-function ss()
-{
-  echo "sudo systemctl $@"
-  sudo systemctl $@
-}
 
 function clearlog()
 {
@@ -416,10 +222,11 @@ db_restore_from()
 	echo "db_restore_from: Need to specify file to restore from: '$1' just won't do!"
   else
 	echo "db_restore_from: Restoring from live backup '$1' to '$2'"
-	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1'"
-	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d cookmarks_$2 $1
+	echo "db_restore_from: Doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d cookmarks_$2 $1'"
+	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U postgres -d cookmarks_$2 $1
   fi
 }
+
 # Locate the latest backup file as date-stamped
 # Call with either 'development', 'staging' or 'production'
 latest_backup_for()
