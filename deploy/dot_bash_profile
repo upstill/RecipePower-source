@@ -1,0 +1,140 @@
+
+# Setting PATH for Python 3.6
+# The original version is saved in .bash_profile.pysave
+PATH="/Library/Frameworks/Python.framework/Versions/3.6/bin:${PATH}"
+export PATH
+
+export PATH="/usr/local/Cellar/imagemagick/7.0.8-7/bin:$HOME/Dev/Flutter/bin:/Library/Frameworks/Python.framework/Versions/3.6/bin:/usr/local/bin:/usr/local/sbin:~/bin:$PATH"
+export PATH=$PATH:/Users/upstill/Dev/Flutter/bin:/Users/upstill/Library/Android/sdk/tools/bin
+
+function clearlog()
+{
+   cat /dev/null >log/development.log
+}
+
+function ack_all()
+{
+   ack $@ . --ignore-dir=log --ignore-dir=tmp --ignore-dir=doc
+}
+
+alias pg_start="pg_ctl -D /usr/local/var/postgres -l /usr/local/var/postgres/server.log start"
+alias pg_stop="pg_ctl -D /usr/local/var/postgres stop -s -m fast"
+alias pg_status="pg_ctl -D /usr/local/var/postgres status"
+
+function ackall()
+{
+   ack $1 . --ignore-dir=log --ignore-dir=tmp --ignore-dir=doc
+}
+
+function vig()
+{
+   export FLIST=`ack $1 ${2:-"app"} -l` 
+   vi +/$1/ $FLIST 
+}
+
+function hks()
+{
+  echo "heroku $@ --app strong-galaxy-5765-74"
+  heroku $@ --app strong-galaxy-5765-74
+}
+function hkl()
+{
+  echo "heroku $@ --app strong-galaxy-5765"
+  heroku $@ --app strong-galaxy-5765
+}
+
+alias hkl_web="hkl logs --tail | grep 'web.1'"
+alias hkl_worker="hkl logs --tail | grep 'worker.1'"
+
+if [[ "$OSTYPE" == "linux-gnu"* ]]; then
+	export BACKUPS_ROOT="/home/upstill/backups"
+elif  [[ "$OSTYPE" == "darwin"* ]]; then
+	export BACKUPS_ROOT="/Users/upstill/Dev"
+fi
+
+function hkl_mirror()
+{
+    db_backup production
+    db_restore production
+}
+
+alias pg_dump_dev="db_backup development"
+alias pg_dump_live="db_backup production"
+alias pg_dump_staging="db_backup staging"
+
+# Return the full path for a new dump file of the given type
+# Call with either 'development', 'staging' or 'production'
+new_dump_file()
+{
+export BACKUP_DIR_NAME="${BACKUPS_ROOT}/db_backup_$1"
+echo "Testing '$BACKUP_DIR_NAME'"
+if [ -d $BACKUP_DIR_NAME ]; then
+  export DUMP_FILE_NAME="${BACKUP_DIR_NAME}/`date \"+%Y-%m-%d\"`.dump"
+  echo "New dump file name: '$DUMP_FILE_NAME'"
+else
+  echo "new_dump_file: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
+  export DUMP_FILE_NAME=''
+fi
+}
+# Restore the database from the named backup
+# Call with either 'development', 'staging' or 'production'
+db_backup()
+{
+new_dump_file $1
+if [ -z $DUMP_FILE_NAME ]; then
+    echo "db_backup: Nope! Need to specify database with current backup, viz: 'db_backup production|staging|development'"
+else
+    if [ $1 == 'development' ]; then
+	echo "Insert development procedure here..."
+	echo "db_backup: pg_dump --verbose -h localhost --clean --format=custom --file="$DUMP_FILE_NAME" dabpmrobtjc0ei"
+	pg_dump --verbose -h localhost --clean --format=custom --file="$DUMP_FILE_NAME" dabpmrobtjc0ei
+    elif [ $1 == 'staging' ]; then
+	hks pg:backups capture DATABASE_URL
+        echo "db_backup: curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app strong-galaxy-5765-74`"
+        curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app strong-galaxy-5765-74`
+    elif [ $1 == 'production' ]; then
+	hkl pg:backups capture DATABASE_URL
+        echo "db_backup: curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app strong-galaxy-5765`"
+        curl -o $DUMP_FILE_NAME `heroku pg:backups public-url --app strong-galaxy-5765`
+    fi
+fi
+
+}
+
+# Restore the database from the named backup
+# Call with either 'development', 'staging' or 'production'
+db_restore()
+{
+if [ -d ${BACKUPS_ROOT}/db_backup_$1 ]; then
+    export FNAME=`latest_backup_for $1`
+    echo "db_restore: Backup file found: '$FNAME'"
+    if [ -z $FNAME ]; then
+	echo "db_restore: No current backup for '$FNAME'"
+    else
+        db_restore_from $FNAME
+    fi
+else
+    echo "db_restore: Nope! Need to specify database with current backup, viz: 'db_restore production|staging|development'"
+fi
+
+}
+
+# Restore the database from the given backup file
+db_restore_from()
+{
+  if [ -z $1 ]; then
+	echo "db_restore_from: Need to specify file to restore from: '$1' just won't do!"
+  else
+	echo "db_restore_from: Restoring from live backup '$1'"
+	echo "db_restore_from doing 'pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1'"
+	pg_restore --verbose --clean --no-acl --no-owner -h localhost -U upstill -d dabpmrobtjc0ei $1
+  fi
+}
+# Locate the latest backup file as date-stamped
+# Call with either 'development', 'staging' or 'production'
+latest_backup_for()
+{
+	ls -d -1 ${BACKUPS_ROOT}/db_backup_$1/20*.dump | tail -1
+}
+
+export LC_CTYPE=en_US.UTF-8
