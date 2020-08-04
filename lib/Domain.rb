@@ -18,7 +18,7 @@ def rp_url path=''
     when Rails.env.development?, Rails.env.test?
       'https://local.recipepower.com:3000'
     when Rails.env.staging?
-      'http://staging.herokuapp.com'
+      'https://staging.recipepower.com'
   end + path.to_s
 end
 

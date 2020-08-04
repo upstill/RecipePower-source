@@ -388,10 +388,13 @@ class Parser
           break
         end
       end
-      if children.present?
-        return Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
+      return case children.count
+      when 0
+        Seeker.failed(start_scanner, token, context)
+      when 1 # Don't create a new node with just one child
+        children.first
       else
-        return Seeker.failed(start_scanner, token, context)
+        Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
       end
     end
 

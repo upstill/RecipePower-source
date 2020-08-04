@@ -11,7 +11,7 @@ common: &common
 
 development:
   <<: *common
-  database: dabpmrobtjc0ei
+  database: cookmarks_production
 
 staging:
   <<: *common
