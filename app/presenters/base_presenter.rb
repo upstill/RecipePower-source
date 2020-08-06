@@ -32,7 +32,8 @@ class BasePresenter
         class: 'label-rotator rotate'
   end
 
-  def card_content
+  # Provide the HTML presentation for the object, if any
+  def html_content
     # Individual presenters may override to present content
   end
 

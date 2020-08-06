@@ -125,6 +125,6 @@ class String
     gsub(/\r\n/, "\n"). # Collapse '\r\n' pairs to '\n'
     gsub( /\s*\n\s*/, "\n"). # Gaps including a newline reduce to a single newline
     gsub( /[ \t\r\f\v\u00a0]*\u00a0[ \t\r\f\v]*/, "\u00a0"). # Gaps including a nonbreaking space reduce to one
-    gsub( /[ \t\r\f\v\u8203]+/, ' ')  # Gaps including arbitrary whitespace--including the zero-width space character--reduce to single space character
+    gsub( /[ \t\r\f\v\u200D]+/, ' ')  # Gaps including arbitrary whitespace--including the zero-width space character--reduce to single space character
   end
 end

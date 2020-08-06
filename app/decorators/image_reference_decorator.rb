@@ -14,8 +14,4 @@ class ImageReferenceDecorator < ModelDecorator
     end
   end
   alias_method :title, :name
-
-  def dom_id
-    "#{object.model_name.singular}_#{object.id}"
-  end
 end
