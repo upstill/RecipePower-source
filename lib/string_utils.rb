@@ -124,7 +124,8 @@ class String
     # gsub( /[ \t\n\r\f\v\u00a0]*\n[ \t\n\r\f\v\u00a0]*/, "\n"). # Gaps including a newline convert to newline
     gsub(/\r\n/, "\n"). # Collapse '\r\n' pairs to '\n'
     gsub( /\s*\n\s*/, "\n"). # Gaps including a newline reduce to a single newline
+    gsub(/[\u200B\u200C\u200D\uFEFF]/, ' '). # Replace zero-width space characters with space
     gsub( /[ \t\r\f\v\u00a0]*\u00a0[ \t\r\f\v]*/, "\u00a0"). # Gaps including a nonbreaking space reduce to one
-    gsub( /[ \t\r\f\v\u200D]+/, ' ')  # Gaps including arbitrary whitespace--including the zero-width space character--reduce to single space character
+    gsub( /[ \t\r\f\v]+/, ' ')  # Gaps including arbitrary whitespace--including the zero-width space character--reduce to single space character
   end
 end

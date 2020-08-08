@@ -1,6 +1,6 @@
   <div class="content-item" style="width:100%">
     <%= recipe_content_buttons decorator.object %>
-    <% if card_content = present(decorator.object).html_content %>
+    <% if card_content = present(decorator.object).html_content(@html_state) %>
       <div id="rp-html-content">
         <%= card_content.html_safe %>
       </div>

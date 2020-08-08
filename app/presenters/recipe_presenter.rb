@@ -52,10 +52,10 @@ class RecipePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
-  def html_content
+  def html_content variant=nil
     # The presented content for a recipe defers to the page ref if we haven't parsed the recipe yet
     @object.content.if_present ||
-        @object.page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || # Presumably this is pre-trimmed
+        @object.page_ref&.recipe_page&.selected_content(@object.anchor_path, @object.focus_path) || # Presumably this is pre-trimmed
         @object.page_ref&.massaged_content
   end
 

@@ -33,7 +33,7 @@ class BasePresenter
   end
 
   # Provide the HTML presentation for the object, if any
-  def html_content
+  def html_content variant=nil
     # Individual presenters may override to present content
   end
 

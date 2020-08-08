@@ -10,4 +10,13 @@ class RecipePageDecorator < ModelDecorator
   #     end
   #   end
 
+  def title
+    'Recipe Page'
+  end
+
+  def refresh_content variant=nil
+    @object.content = nil
+    @object.bkg_launch
+    @object.bkg_land
+  end
 end

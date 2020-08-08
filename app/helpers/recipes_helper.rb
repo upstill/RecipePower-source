@@ -120,12 +120,17 @@ module RecipesHelper
     link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'open-recipe-page glyphicon glyphicon-import'
   end
 
-  def button_or_label object, shown_object
-    if object == shown_object
-      content_tag :div, object.model_name.human.html_safe, style: 'display: inline-block; margin: 0.5em'
-    else
-      button_to_submit object.model_name, object, mode: :partial
+  def content_button object, shown_object, html_state=nil
+    return ''.html_safe if object.nil?
+    params = { mode: :partial }
+
+    label = "#{object.model_name} #{html_state}".html_safe
+    params[:html_state] = html_state if object.is_a? PageRef
+    if (object == shown_object) && (html_state == @html_state)
+      params[:refresh] = true
+      label = 'Refresh '.html_safe+label
     end
+    button_to_submit label, polymorphic_path(object, params)
   end
 
   def recipe_content_buttons object
@@ -133,10 +138,13 @@ module RecipesHelper
       page_ref = object.page_ref
       recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
       buttons =
-          button_or_label(page_ref, object) +
-              button_or_label(recipe, object) +
-              button_or_label(page_ref.mercury_result, object) +
-              button_or_label(page_ref.gleaning, object) +
+          content_button(page_ref, object, 'raw') +
+              content_button(page_ref, object, 'trimmed') +
+              content_button(page_ref, object, 'massaged') +
+              content_button(recipe, object) +
+              content_button(page_ref.mercury_result, object) +
+              content_button(page_ref.gleaning, object) +
+              content_button(page_ref.recipe_page, object) +
               recipe_page_button(recipe)
       buttons +=
           button_to_submit('',
@@ -146,6 +154,16 @@ module RecipesHelper
                            mode: :modal,
                            class: 'annotate-content',
                            title: 'Annotate Content') if object == recipe
+      if object.is_a?(RecipePage)
+        # Provide editing button if Recipe or RecipePage
+        buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+      end
+      if !page_ref.recipe_page
+        msg = page_ref.site.finder_for('Content') ?
+          'Refresh Recipe to create Recipe Page' :
+          'Give this site a Content finder to enable parsing'
+        buttons += content_tag :p, "**#{msg}."
+      end
       content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
     end
   end
