@@ -93,24 +93,24 @@ Parser.init_grammar(
     },
     rp_prep_time: {
         match: [ /^Prep:?$/, :rp_time ],
-        inline: true
+        atline: true
     },
     rp_cook_time: {
         match: [ /^Cook:?$/, :rp_time ],
-        inline: true
+        atline: true
     },
     rp_total_time: {
         match: [ /^Total:?$/, :rp_time ],
-        inline: true
+        atline: true
     },
-    rp_time: [ :rp_num, 'min' ],
+    rp_time: [ :rp_num, /^mins?$/ ],
     rp_yield: {
-        match: [ /^Makes:?$/, :rp_amt ],
-        inline: true
+        match: [ /^(Makes|Yield):?$/i, :rp_amt ],
+        atline: true
     },
     rp_serves: {
         match: [ /^Serves:?$/, :rp_num ],
-        inline: true
+        atline: true
     },
     rp_instructions: nil,
     rp_inglist: {
