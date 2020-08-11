@@ -15,6 +15,7 @@ development:
 
 staging:
   <<: *common
+  host: localhost
   database: cookmarks_production
 
 # Warning: The database defined as "test" will be erased and

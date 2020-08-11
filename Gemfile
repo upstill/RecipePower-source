@@ -113,7 +113,7 @@ gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
 ## gem 'letsencrypt_plugin'
 
 group :production do
-  gem 'dalli'
+  # gem 'dalli' No longer needed/used
 end
 
 group :development do

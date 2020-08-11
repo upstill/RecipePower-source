@@ -40,6 +40,7 @@ PATH="$RBENV_ROOT/bin:$RBENV_ROOT/shims:$PATH"
 SET_PATH="cd $APP_ROOT && rbenv rehash && rbenv local $RBENV_RUBY_VERSION"
 # Unicorn can be run using `bundle exec unicorn` or `bin/unicorn`.
 UNICORN="bundle exec unicorn"
+Type=forking
 # Execute the unicorn executable as a daemon, with the appropriate configuration
 # and in the appropriate environment.
 UNICORN_OPTS="-c $APP_ROOT/config/unicorn.rb -E $RAILS_ENV -D"

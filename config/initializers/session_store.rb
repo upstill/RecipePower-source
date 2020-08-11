@@ -12,6 +12,7 @@ domain =
 RP::Application.config.session_store :cookie_store,
                                      key: '_rp_session',
                                      :domain => domain,
+                                     :secure => true,
                                      :expire_after => 7.days
 
 # Use the database for sessions instead of the cookie-based default,
