@@ -54,6 +54,15 @@ class CollectibleDecorator < ModelDecorator
     end
   end
 
+  # Force the regeneration of the entity's content attribute.
+  # By default, the Collectible has a :content attribute that can be cleared and a
+  # #perform method that can regenerate it.
+  def refresh_content
+    @object.content = nil
+    @object.bkg_launch
+    @object.bkg_land true
+  end
+
   # Here's where we incorporate findings from a page into the corresponding entity
   def findings= findings
     self.title = findings.result_for('Title') if findings.result_for('Title').present?

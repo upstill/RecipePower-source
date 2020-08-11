@@ -1,54 +1,56 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator do |presenter| %>
-  <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
-       style="min-height: 200px"
-       onload="RP.card.onload(event)"
-       data-masonry-options='{
+  <% if presenter.is_a? CardPresentation %>
+    <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+         style="min-height: 200px"
+         onload="RP.card.onload(event)"
+         data-masonry-options='{
             "gutter": 10,
             "itemSelector": ".grid-item",
             "stamp": ".stamp" }'>
-    <!--"columnWidth": 200,-->
-    <!--onload="RP.masonry.onload(event)"-->
-    <% NestedBenchmark.measure '...Rendering card label' do %>
-      <%= presenter.card_label %>
-    <% end %>
-    <% NestedBenchmark.measure '...Rendering avatar column' do %>
-      <%= presenter.card_avatar_column %>
-    <% end %>
-    <div class="stamp title">
-      <% NestedBenchmark.measure '...Rendering vote buttons' do %>
-        <%= presenter.vote_buttons %>
+      <!--"columnWidth": 200,-->
+      <!--onload="RP.masonry.onload(event)"-->
+      <% NestedBenchmark.measure '...Rendering card label' do %>
+        <%= presenter.card_label %>
       <% end %>
-      <% NestedBenchmark.measure '...Rendering homelink' do %>
-        <%= presenter.card_homelink link_direct: false, class: 'title-link' %>
+      <% NestedBenchmark.measure '...Rendering avatar column' do %>
+        <%= presenter.card_avatar_column %>
       <% end %>
-      <% NestedBenchmark.measure '...Rendering edit button' do %>
-        <%= presenter.edit_button if policy(decorator.object).edit? %>
-        <%# presenter.tag_button %>
+      <div class="stamp title">
+        <% NestedBenchmark.measure '...Rendering vote buttons' do %>
+          <%= presenter.vote_buttons %>
+        <% end %>
+        <% NestedBenchmark.measure '...Rendering homelink' do %>
+          <%= presenter.card_homelink link_direct: false, class: 'title-link' %>
+        <% end %>
+        <% NestedBenchmark.measure '...Rendering edit button' do %>
+          <%= presenter.edit_button if policy(decorator.object).edit? %>
+          <%# presenter.tag_button %>
+        <% end %>
+        <% NestedBenchmark.measure '...Rendering collect button' do %>
+          <%= presenter.collect_button %>
+        <% end %>
+        <% NestedBenchmark.measure '...Rendering description' do %>
+          <%= presenter.card_aspect_rendered :description %>
+        <% end %>
+        <% NestedBenchmark.measure '...Rendering notes' do %>
+          <%= presenter.card_aspect_rendered :notes %>
+        <% end %>
+      </div>
+      <% presenter.rendered_aspects(except: [:title, :description, :notes, :found_by]) do |aspect, content| %>
+        <% NestedBenchmark.measure "...Rendering #{aspect}" do %>
+          <div class="grid-item card-column <%= aspect %>">
+            <%= content %>
+          </div>
+        <% end %>
       <% end %>
-      <% NestedBenchmark.measure '...Rendering collect button' do %>
-        <%= presenter.collect_button %>
-      <% end %>
-      <% NestedBenchmark.measure '...Rendering description' do %>
-        <%= presenter.card_aspect_rendered :description %>
-      <% end %>
-      <% NestedBenchmark.measure '...Rendering notes' do %>
-        <%= presenter.card_aspect_rendered :notes %>
-      <% end %>
+      <div class="lower-content">
+        <%# presenter.tools_menu %>
+        <% NestedBenchmark.measure '...share_button' do %>
+          <%= presenter.share_button %>
+        <% end %>
+      </div>
     </div>
-    <% presenter.rendered_aspects(except: [:title, :description, :notes, :found_by]) do |aspect, content| %>
-      <% NestedBenchmark.measure "...Rendering #{aspect}" do %>
-        <div class="grid-item card-column <%= aspect %>">
-          <%= content %>
-        </div>
-      <% end %>
-    <% end %>
-    <div class="lower-content">
-      <%# presenter.tools_menu %>
-      <% NestedBenchmark.measure '...share_button' do %>
-        <%= presenter.share_button %>
-      <% end %>
-    </div>
-  </div>
-  <%# feed_update_button Feed.find(2555), force=true %>
+    <%# feed_update_button Feed.find(2555), force=true %>
+  <% end %>
 <% end %>

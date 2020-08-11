@@ -78,13 +78,6 @@ class Recipe < ApplicationRecord
     page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
   end
 
-  # The presented content for a recipe defers to the page ref if we haven't parsed the recipe yet
-  def presented_content
-    content.if_present ||
-        page_ref&.recipe_page&.selected_content(anchor_path, focus_path) || # Presumably this is pre-trimmed
-        page_ref&.massaged_content
-  end
-
   # These HTTP response codes lead us to conclude that the URL is not valid
   @@BadResponseCodes = [400, 404, 410]
 

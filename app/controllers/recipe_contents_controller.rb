@@ -12,7 +12,7 @@ class RecipeContentsController < ApplicationController
     @content = rcparams[:content]
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse
-    # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of an findable tag, a dialog is presented
+    # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of a findable tag, a dialog is presented
     #    for the user to decide how to handle the tag;
     # 3) the user says to enter the problematic tag directly into the dictionary, or specifies an existing tag for what
     #    was meant by the problematic tag. The latter can be optionally entered as a synonym of the intended name.

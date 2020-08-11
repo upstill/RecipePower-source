@@ -90,10 +90,29 @@ class MercuryResult < ApplicationRecord
       self.http_status = 400
     end
   end
-
+  # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
+    data = false && Rails.env.development? ?
+               mercury_via_api(url) :
+               mercury_via_node(url)
+
+    # Do QA on the reported URL
+    # Report a URL as extracted by Mercury (if any), or the original URL (if not)
+    uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
+    data['url'] = uri.to_s
+    data['domain'] ||= uri.host
+    # Merge different error states into a mercury_error
+    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
+    data.delete :errorMessage
+    data.delete :error
+    data
+  end
+  
+  private
+
+  def mercury_via_api url
     previous_probe = nil
-    api = 'http://173.255.255.234:8888/myapp?url='
+    api = 'http://173.255.245.80:8888/mercury?url='
     current_probe = api + url
     data = response = nil
     while(previous_probe != current_probe) do
@@ -102,11 +121,11 @@ class MercuryResult < ApplicationRecord
       http = Net::HTTP.new uri.host, uri.port
       # http.use_ssl = true
       response =
-      NestedBenchmark.measure('making Mercury request') do
-        req = Net::HTTP::Get.new uri.to_s
-        req['x-api-key'] = ENV['MERCURY_API_KEY']
-        http.request req
-      end
+          NestedBenchmark.measure('making Mercury request') do
+            req = Net::HTTP::Get.new uri.to_s
+            req['x-api-key'] = ENV['MERCURY_API_KEY']
+            http.request req
+          end
       data =
           case response.code
           when '401'
@@ -119,17 +138,16 @@ class MercuryResult < ApplicationRecord
             JSON.parse(response.body) rescue ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
           end
     end
-
-    # Do QA on the reported URL
-    # Report a URL as extracted by Mercury (if any), or the original URL (if not)
-    uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
-    data['url'] = uri.to_s
-    data['domain'] ||= uri.host
     data['response_code'] = response.code
-    # Merge different error states into a mercury_error
-    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
-    data.delete :errorMessage
-    data.delete :error
+    data
+  end
+
+  # Get the Mercury-ized page by hitting node.js directly (in production)
+  def mercury_via_node url
+    apphome = Rails.env.development? ? (ENV['HOME']+'/Dev') : ENV['HOME']
+    content = `node #{apphome}/mercury/index.js #{url}`
+    data = JSON.parse content
+    data['url'] = url
     data
   end
 

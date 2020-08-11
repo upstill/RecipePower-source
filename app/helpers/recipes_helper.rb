@@ -3,30 +3,30 @@ require 'json'
 require 'string_utils'
 
 module RecipesHelper
-  
+
   def recipe_title_div recipe
     "<div><h3>#{recipe.title}</h3></div>".html_safe
   end
 
-  def collectible_title_link decorator, pclass='title'
+  def collectible_title_link decorator, pclass = 'title'
     entity = decorator.object
     case entity
-      when Recipe, Site
-        label = ''
-        itemlink = link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
-      else # Other internal entities get opened up in a new partial
-        label = "#{entity.class.to_s}: "
-        itemlink = link_to_submit decorator.title, decorator.url, class: 'tablink'
+    when Recipe, Site
+      label = ''
+      itemlink = link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
+    else # Other internal entities get opened up in a new partial
+      label = "#{entity.class.to_s}: "
+      itemlink = link_to_submit decorator.title, decorator.url, class: 'tablink'
     end
     content_tag :p, label.html_safe + itemlink, class: pclass
   end
 
   def collectible_tablink decorator
     case decorator.object
-      when Recipe, Site
-        link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
-      else # Internal entities get opened up in a new partial
-        link_to_submit decorator.title, decorator.object # , class: 'tablink'
+    when Recipe, Site
+      link_to decorator.title, decorator.url, class: 'tablink', data: {report: touchpath(decorator)} # ...to open up a new tab
+    else # Internal entities get opened up in a new partial
+      link_to_submit decorator.title, decorator.object # , class: 'tablink'
     end
   end
 
@@ -38,13 +38,13 @@ module RecipesHelper
       label = 'from '
       link = link_to decorator.sourcename, decorator.sourcehome, class: 'tablink'
     end
-    content_tag :div, (label+link).html_safe, class: 'rcp_grid_element_source'
+    content_tag :div, (label + link).html_safe, class: 'rcp_grid_element_source'
   end
 
   def collectible_masonry_datablock decorator
     title_link = collectible_title_link decorator, 'rcp_grid_element_title'
     source_element = collectible_source_link decorator
-    content_tag :div, (title_link+source_element).html_safe, class: 'rcp_grid_datablock'
+    content_tag :div, (title_link + source_element).html_safe, class: 'rcp_grid_datablock'
   end
 
   def collectible_info_icon decorator
@@ -52,56 +52,56 @@ module RecipesHelper
     alltags = summarize_alltags(entity) || ''
     tags = CGI::escapeHTML alltags
     span = content_tag :span,
-                '',
-                class: 'recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open',
-                data: { title: decorator.title, tags: tags, description: decorator.description || '' }
+                       '',
+                       class: 'recipe-info-button btn btn-default btn-xs glyphicon glyphicon-open',
+                       data: {title: decorator.title, tags: tags, description: decorator.description || ''}
     link_to_dialog span, polymorphic_path(decorator.as_base_class)
   end
 
   def recipe_tags_div recipe
-    content_tag :div, 
-      summarize_alltags(recipe) || 
-      %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{tag_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
+    content_tag :div,
+                summarize_alltags(recipe) ||
+                    %Q{<p>...a dish with no tags or ratings in RecipePower!?! Why not #{tag_recipe_link(%q{add some}, recipe)}?</p>}.html_safe
   end
 
   def recipe_comments_div recipe, whose
     user = User.current_or_guest
     comments =
-    case whose
-    when :mine
-      header_text = 'My Comments'
-      (commstr = recipe.collectible_comment) ? [ { body: commstr } ] : [] 
-    when :friends
-      header_text = 'Comments of Friends'
-      user.followee_ids.collect { |fid| 
-        commstr = recipe.comment fid 
-        { source: User.find(fid).handle, body: commstr } unless commstr.blank? || recipe.private(fid)
-      }.compact
-    when :others
-      header_text = 'Comments of Others'
-      Rcpref.where(entity: recipe).
-        where('comment <> \'\' AND private <> TRUE').
-        where('user_id not in (?)', user.followee_ids<<user.id).collect { |rref|
-          { source: rref.user.handle, body: rref.comment }
-        }
-    end
+        case whose
+        when :mine
+          header_text = 'My Comments'
+          (commstr = recipe.collectible_comment) ? [{body: commstr}] : []
+        when :friends
+          header_text = 'Comments of Friends'
+          user.followee_ids.collect { |fid|
+            commstr = recipe.comment fid
+            {source: User.find(fid).handle, body: commstr} unless commstr.blank? || recipe.private(fid)
+          }.compact
+        when :others
+          header_text = 'Comments of Others'
+          Rcpref.where(entity: recipe).
+              where('comment <> \'\' AND private <> TRUE').
+              where('user_id not in (?)', user.followee_ids << user.id).collect { |rref|
+            {source: rref.user.handle, body: rref.comment}
+          }
+        end
     return if comments.empty?
-    commentstr = comments.collect { |comment| 
+    commentstr = comments.collect { |comment|
       srcstr = comment[:source] ? %Q{<strong>#{comment[:source]}</strong>: } : ''
       %Q{<li>#{srcstr}#{comment[:body]}</li>} unless comment[:body].blank?
     }.compact.join('')
     content_tag :div, "<h3>#{header_text}</h3><ul>#{commentstr}</ul>".html_safe
   end
-  
+
   def grab_recipe_link label, recipe
   end
 
 # If the recipe doesn't belong to the current user's collection,
 #   provide a link to add it
-def ownership_status(rcp)
-	# Summarize ownership as a list of owners, each linked to their collection
-	(rcp.collectors.map { |u| link_to u.handle, default_next_path( :owner=>u.id.to_s) }.join(', ') || '').html_safe
-end
+  def ownership_status(rcp)
+    # Summarize ownership as a list of owners, each linked to their collection
+    (rcp.collectors.map { |u| link_to u.handle, default_next_path(:owner => u.id.to_s) }.join(', ') || '').html_safe
+  end
 
   def recipe_uncollect_button recipe, browser_item
     return unless recipe && browser_item.respond_to?(:tag) && (tag = browser_item.tag)
@@ -120,17 +120,65 @@ end
     link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'open-recipe-page glyphicon glyphicon-import'
   end
 
-def tagjoin tags, enquote = false, before = '', after = '', joiner = ','
-    strjoin tags.collect{ |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: 'rcp_list_element_tag' }, before, after, joiner
-end
+  def content_button object, shown_object, html_state=nil
+    return ''.html_safe if object.nil?
+    params = { mode: :partial }
+
+    label = "#{object.model_name} #{html_state}".html_safe
+    params[:html_state] = html_state if object.is_a? PageRef
+    if (object == shown_object) && (html_state == @html_state)
+      params[:refresh] = true
+      label = 'Refresh '.html_safe+label
+    end
+    button_to_submit label, polymorphic_path(object, params)
+  end
+
+  def recipe_content_buttons object
+    if policy(object).update?
+      page_ref = object.page_ref
+      recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
+      buttons =
+          content_button(page_ref, object, 'raw') +
+              content_button(page_ref, object, 'trimmed') +
+              content_button(page_ref, object, 'massaged') +
+              content_button(recipe, object) +
+              content_button(page_ref.mercury_result, object) +
+              content_button(page_ref.gleaning, object) +
+              content_button(page_ref.recipe_page, object) +
+              recipe_page_button(recipe)
+      buttons +=
+          button_to_submit('',
+                           edit_recipe_contents_path(recipe),
+                           'glyph-edit-red',
+                           'xl',
+                           mode: :modal,
+                           class: 'annotate-content',
+                           title: 'Annotate Content') if object == recipe
+      if object.is_a?(RecipePage)
+        # Provide editing button if Recipe or RecipePage
+        buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+      end
+      if !page_ref.recipe_page
+        msg = page_ref.site.finder_for('Content') ?
+          'Refresh Recipe to create Recipe Page' :
+          'Give this site a Content finder to enable parsing'
+        buttons += content_tag :p, "**#{msg}."
+      end
+      content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
+    end
+  end
+
+  def tagjoin tags, enquote = false, before = '', after = '', joiner = ','
+    strjoin tags.collect { |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: 'rcp_list_element_tag' }, before, after, joiner
+  end
 
 # Provide an English-language summary of the tags for a recipe.
-def summarize_alltags(taggable_entity)
+  def summarize_alltags(taggable_entity)
 
-    tags = [[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[],[]]
+    tags = [[], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], [], []]
     taggable_entity.tags.each { |tag| tags[tag.tagtype] << tag }
     return if tags.flatten.compact.empty?
-    
+
     genrestr = tagjoin tags[1], false, '', ' '
     rolestr = tagjoin tags[2], false, ' for '
 
@@ -143,43 +191,43 @@ def summarize_alltags(taggable_entity)
     occasionstr = tagjoin tags[8], false, ' good for'
     intereststr = tagjoin tags[11], true, ' tagged by Interest for '
 
-    otherstr = tagjoin (tags[0]+tags[13]+tags[14]), true, ' Miscellaneous tags: ', '.'
-    
-    strlist = [sourcestr, authorstr, foodstr, procstr, toolstr].keep_if{ |str| !str.empty? }
-    
+    otherstr = tagjoin (tags[0] + tags[13] + tags[14]), true, ' Miscellaneous tags: ', '.'
+
+    strlist = [sourcestr, authorstr, foodstr, procstr, toolstr].keep_if { |str| !str.empty? }
+
     genrestr = '<span>untagged</span>' if strlist.empty? && genrestr.blank? && occasionstr.blank? && intereststr.blank? && otherstr.blank?
     if genrestr.blank?
-        article = 'A'
+      article = 'A'
     else
-        article = (genrestr =~ />[aeiouAEIOU]/i) ? 'An ' : 'A '
+      article = (genrestr =~ />[aeiouAEIOU]/i) ? 'An ' : 'A '
     end
-    
-    ((article+genrestr+' recipe'+(strlist.shift || '')+
-      strjoin(strlist, '', '', '; ')+'.').sub(/A\s*recipe\./,'')+
-    strjoin([occasionstr, intereststr], ' ', '.', ',').capitalize+
-    otherstr).html_safe
-end
+
+    ((article + genrestr + ' recipe' + (strlist.shift || '') +
+        strjoin(strlist, '', '', '; ') + '.').sub(/A\s*recipe\./, '') +
+        strjoin([occasionstr, intereststr], ' ', '.', ',').capitalize +
+        otherstr).html_safe
+  end
 
 # Present the comments to this user. Now, all comments starting with his/hers, but ultimately those of his friends
-def present_comments recipe
+  def present_comments recipe
     out = (recipe.collectible_comment) || ''
     out = "My two cents: '#{out}'<br>" unless out.empty?
     out.html_safe
-end
+  end
 
-  # Provide the cookmark-count line
+# Provide the cookmark-count line
   def cookmark_count(collectible_entity, user)
-     count = collectible_entity.num_cookmarks
-     result = count.to_s+' Cookmark'+((count>1)?'s':'')
-     if collectible_entity.collectible_collected? user.id
-        result << ' (including mine)'
-     else
-        result << ': ' + 
-		  link_to('Update with Javascript Helper',
-		  		 :url => {:action => 'cmcount'},
-				 :update => 'response5')
-     end
-     "<span class=\"cmcount\" id=\"cmcount#{collectible_entity.id}\">#{result}</span>".html_safe
+    count = collectible_entity.num_cookmarks
+    result = count.to_s + ' Cookmark' + ((count > 1) ? 's' : '')
+    if collectible_entity.collectible_collected? user.id
+      result << ' (including mine)'
+    else
+      result << ': ' +
+          link_to('Update with Javascript Helper',
+                  :url => {:action => 'cmcount'},
+                  :update => 'response5')
+    end
+    "<span class=\"cmcount\" id=\"cmcount#{collectible_entity.id}\">#{result}</span>".html_safe
   end
 
 end

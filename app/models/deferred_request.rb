@@ -8,7 +8,7 @@ class DeferredRequest < ApplicationRecord
   # overridden--or other data stored--by passing them in the elements hash
   def self.push sessid, dr
     if sessid
-      defreq = self.find_or_create_by session_id: sessid
+      defreq = self.find_or_create_by session_id: sessid.to_s
       (defreq.requests << YAML::dump(dr)).uniq!
       defreq.save
       dr

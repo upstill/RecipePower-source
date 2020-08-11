@@ -276,6 +276,7 @@ class CollectibleController < ApplicationController
 
   def show
     update_and_decorate touch: true
+    @decorator.refresh_content if params[:refresh]
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender

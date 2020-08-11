@@ -43,7 +43,7 @@ class Gleaning < ApplicationRecord
   end
 
   def bkg_launch force=false
-    ffc = site.finder_for 'Content'
+    ffc = site&.finder_for 'Content'
     force ||= ffc && (updated_at < ffc.updated_at)  # Launch if we're older than the :content finder
     super(force) if defined?(super)
   end

@@ -37,6 +37,12 @@ class PageRefDecorator < CollectibleDecorator
     object.picurl = img
   end
 
+  def refresh_content
+    gleaning&.bkg_launch
+    mercury_result&.bkg_launch
+    bkg_land true
+  end
+
   def external_link
     url
   end

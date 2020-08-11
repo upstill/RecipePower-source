@@ -1,0 +1,56 @@
+--- Finder#2366
+label: Content
+selector: div.content__main, div.article-body-commercial-selector
+attribute_name: html
+site_id: 3667
+--- Finder#2367
+label: Content
+selector: article.article div.l-container
+attribute_name: html
+site_id: 4072
+--- Finder#2368
+label: Content
+selector: article.article div.l-container
+attribute_name: html
+site_id: 4072
+--- Finder#2369
+label: Content
+selector: section.recipe_instructions
+attribute_name: html
+site_id: 3643
+--- Site#3643
+:trimmers:
+- div.social
+- div#recipetoolbar
+:grammar_mods: {}
+--- Site#3667
+:trimmers:
+- div.meta__extras
+- div.js-ad-slot
+- figure[itemprop="associatedMedia image"]
+- div.submeta
+:grammar_mods: {}
+--- Site#4072
+:trimmers:
+- ul.tag-nav__list
+- ul.social-nav__list
+- div.figure__media
+- div.aggregate-star-rating
+- li.mntl-sc-block figure
+- div.section-header
+- div.nutrition-info
+- div.decision-block__feedback
+- div.article-header__media
+- div.mntl-bio-tooltip__bottom
+- div.mntl-bio-tooltip__top
+- div.article-updated-date
+- div.feedback-block
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h1
+  :rp_ingline:
+    :inline:
+    :in_css_match: li.ingredient
+  :rp_inglist:
+    :in_css_match: ul.ingredient-list

@@ -12,8 +12,8 @@ class PageRefsController < CollectibleController
 
   # GET /page_refs/1
   def show
-    update_and_decorate
-    smartrender
+    @html_state = params[:html_state]
+    super
   end
 
   # GET /page_refs/new

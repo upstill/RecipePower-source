@@ -23,4 +23,13 @@ class GleaningDecorator < ModelDecorator
     nil
   end
 
+  def title
+    result_for 'Title'
+  end
+
+  def refresh_content
+    bkg_launch true
+    bkg_land
+  end
+
 end

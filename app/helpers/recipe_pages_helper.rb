@@ -1,6 +1,6 @@
 module RecipePagesHelper
   def show_recipe_page recipe_page
-    with_format('html') { render 'recipe_pages/show_content', recipe_page: recipe_page }
+    with_format('html') { render 'collectible/show_content', recipe_page: recipe_page }
   end
 
   def recipe_page_replacement rp

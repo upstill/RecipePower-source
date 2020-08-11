@@ -146,15 +146,15 @@ class NokoTokens < Array
       anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
       first_te = TextElmtData.new self, anchor_path, anchor_offset
       # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
-      unless first_te.text[0...anchor_offset].blank? &&
-          first_te.text[focus_offset...-1].blank? &&
+      unless first_te.prior_text.blank? &&
+          first_te.text[correct_selection_offset(focus_offset, first_te.text)...-1].blank? &&
         newnode = tag_ancestor(first_te.parent,
                                first_te.text_element,
                                first_te.text_element,
                                options.slice(:tag, :classes, :value))
         newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
         update
-      end
+      end     # 1/2 ounce​ Green Chartreuse #
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
       last_te = TextElmtData.new self, focus_path, -focus_offset
@@ -263,10 +263,14 @@ class NokoTokens < Array
     end
     # Finally, copy the nodes over
     newbounds.each_with_index do |node, ix|
-      Rails.logger.debug "%3d: %50s => %50s" % [ix,
-                                                escape_newlines(@elmt_bounds[ix].first.to_s.truncate(49)),
-                                                escape_newlines(node.to_s.truncate(49))] if failed
-      @elmt_bounds[ix][0] = node
+      if ix < @elmt_bounds.count
+        Rails.logger.debug "%3d: %50s => %50s" % [ix,
+                                                  escape_newlines(@elmt_bounds[ix].first.to_s.truncate(49)),
+                                                  escape_newlines(node.to_s.truncate(49))] if failed
+        @elmt_bounds[ix][0] = node
+      else  # TODO This really shouldn't be happening (the number of TextElmt elements shouldn't change)
+        @elmt_bounds[ix] = [node, @elmt_bounds[-1][0].to_s.length+@elmt_bounds[-1][1]]
+      end
     end
     x=2
   end
