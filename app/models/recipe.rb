@@ -72,12 +72,6 @@ class Recipe < ApplicationRecord
     super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
   end
 
-  # Content to parse: either the recipe_page's content, or the
-  def content_to_parse
-    return nil unless page_ref
-    page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
-  end
-
   # These HTTP response codes lead us to conclude that the URL is not valid
   @@BadResponseCodes = [400, 404, 410]
 
@@ -140,15 +134,20 @@ class Recipe < ApplicationRecord
   end
 
   def perform
-    if site&.finder_for('Content') && Rails.env.development?
+    if site&.finder_for('Content')
       page_ref.bkg_land
       page_ref.create_recipe_page if !recipe_page
-      recipe_page.bkg_land # The recipe_page will assert path markers and clear the content as nec.
-      # recipe_page.save if persisted? && recipe_page.changed?
+      # The recipe_page will assert path markers and clear our content
+      # if changes during page parsing were significant
+      recipe_page.bkg_land
       if content.blank?
         reload if persisted?
-        self.content = ParsingServices.new(self).parse_and_annotate(content_to_parse).if_present || presented_content
-        RecipeServices.new(self).inventory # Set tags according to annotations
+        content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) if anchor_path
+        new_content = ParsingServices.new(self).parse_and_annotate(content_to_parse || page_ref.trimmed_content)
+        if new_content.present?
+          self.content = new_content # Retain prior value in case parsing fails
+          RecipeServices.new(self).inventory # Set tags according to annotations
+        end
       end
     end
     super if defined?(super)

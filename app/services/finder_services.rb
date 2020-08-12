@@ -248,23 +248,6 @@ class FinderServices
     end
   end
 
-  # Try extracting content from the finder to a recipe
-  def test_fly recipe=nil
-    # If no recipe provided, pick one from the site
-    recipe ||= @finder.site.recipes.first
-    result = FinderServices.glean recipe.url, @finder.site, @finder
-    if html = result&.content.if_present
-      puts "------------------ Raw HTML as gleaned:"
-      puts html
-      trimmed = recipe.trimmed_content
-      puts "------------------ Trimmed:\n#{trimmed}" if trimmed != html
-      puts "------------------ Trimmed and Massaged:"
-      puts recipe.massaged_content
-    else
-      puts "Nothing gleanable from selector #{@finder.selector}"
-    end
-  end
-
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   # Optionally filter them with :only and :except options (not both)
   def self.finders_for site = nil, options = {}

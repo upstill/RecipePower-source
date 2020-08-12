@@ -1,6 +1,4 @@
-require './lib/html_utils.rb'
 require 'net/http'
-require 'htmlbeautifier'
 
 # A PageRef is a record for storing the Mercury (nee Readability) summary of a Web page.
 # Besides storing the result of the query (which, after all, could be re-instantiated at any time)
@@ -49,6 +47,7 @@ class PageRef < ApplicationRecord
 
   @@extractable_attributes = @@gleaning_correspondents.keys | @@mercury_correspondents.keys
 
+  # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
     gleaning&.content.if_present || (mercury_results && mercury_results['content'].if_present)
   end
@@ -59,25 +58,8 @@ class PageRef < ApplicationRecord
 
   # The site specifies material to be removed from the content
   def trimmed_content
-    return nil if content.blank? # Protect against bad input
-    SiteServices.new(site).trim_recipe content
+    SiteServices.new(site).trim_recipe(content) if content.present?
   end
-
-  # This is the SOP for turning a random grab of HTML into something presentable on a recipe card
-  def massaged_content
-    return nil if (tc = trimmed_content).blank? # Protect against bad input
-    nk = process_dom tc
-    # massaged = html.gsub /\n(?!(p|br))/, "\n<br>"
-    HtmlBeautifier.beautify nk.to_s
-  end
-
-=begin
-  # We define accessors for all the mercury results and gleanings that aren't attributes of a page_ref
-  def method_missing meth, *args
-    (mercury_results[@@mercury_correspondents[meth.to_s]] if mercury_results) ||
-        ((gleaning_meth = @@gleaning_correspondents[meth.to_s]) && gleaning&.send(gleaning_meth))
-  end
-=end
 
   def self.mass_assignable_attributes
     super + %i[ kind title lead_image_url description ]
