@@ -46,9 +46,9 @@ namespace :parsing do
           else
             puts "Setting #{attribute} from '#{oldval}' to '#{val}'"
           end
-          # object.instance_variable_set attribute, val
+          object.write_attribute attribute, val
         }
-        # object.save
+        object.save
       else # Object doesn't exist; need to create
         puts "----------------------------- Creating new #{klass}: ----------------------------------"
         keyvals.each { |attribute, val| puts "#{attribute}: #{val}" }

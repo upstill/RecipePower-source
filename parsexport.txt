@@ -50,7 +50,7 @@ site_id: 3643
     :match:
       :at_css_match: h1
   :rp_ingline:
-    :inline:
+    :inline: 
     :in_css_match: li.ingredient
   :rp_inglist:
     :in_css_match: ul.ingredient-list

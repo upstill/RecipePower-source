@@ -1,6 +1,8 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
+<% Rails.logger.debug "Viewparams: #{viewparams}" %>
 <div class="results-enclosure querify querify-supe " data-href="<%= viewparams.results_path %>">
   <% viewparams.presentation_partials do |name, viewparams| %>
+      <% Rails.logger.debug "Rendering partial #{name} from _presentation.html.erb" %>
       <%= name.is_a?(Symbol) ?
                   render_item(name, viewparams: viewparams) :
                   render("filtered_presenter/present/#{name}", viewparams: viewparams) %>
