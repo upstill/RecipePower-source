@@ -1,6 +1,6 @@
   <div class="content-item" style="width:100%">
     <% entity = decorator.object %>
-    <%= recipe_content_buttons entity if entity || entity.is_a?(PageRef) %>
+    <%= recipe_content_buttons entity if policy(entity).update? %>
     <% if card_content = present(entity).html_content(@html_state) %>
       <div id="rp-html-content">
         <%= card_content.html_safe %>

@@ -134,36 +134,38 @@ module RecipesHelper
   end
 
   def recipe_content_buttons object
-    if policy(object).update?
+    return unless policy(object).update?
+    if [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
       page_ref = object.page_ref
-      recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
-      buttons =
-          content_button(page_ref, object, 'raw') +
-              content_button(page_ref, object, 'trimmed') +
-              content_button(page_ref, object, 'massaged') +
-              content_button(recipe, object) +
-              content_button(page_ref.mercury_result, object) +
-              content_button(page_ref.gleaning, object) +
-              content_button(page_ref.recipe_page, object) +
-              recipe_page_button(recipe)
-      buttons +=
-          button_to_submit('',
-                           edit_recipe_contents_path(recipe),
-                           'glyph-edit-red',
-                           'xl',
-                           mode: :modal,
-                           class: 'annotate-content',
-                           title: 'Annotate Content') if object == recipe
-      if object.is_a?(RecipePage)
-        # Provide editing button if Recipe or RecipePage
-        buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+      buttons = ActiveSupport::SafeBuffer.new
+      if page_ref.site.finder_for 'Content'
+        recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
+        buttons +=
+            (content_button(page_ref, object, 'raw') +
+                content_button(page_ref, object, 'trimmed') +
+                content_button(page_ref, object, 'massaged') +
+                content_button(recipe, object) +
+                content_button(page_ref.mercury_result, object) +
+                content_button(page_ref.gleaning, object) +
+                content_button(page_ref.recipe_page, object)) if response_service.admin_view?
+        buttons +=
+            recipe_page_button(recipe) +
+            button_to_submit('',
+                             edit_recipe_contents_path(recipe),
+                             'glyph-edit-red',
+                             'xl',
+                             mode: :modal,
+                             class: 'annotate-content',
+                             title: 'Annotate Content') if object == recipe
+        if object.is_a?(RecipePage)
+          # Provide editing button if Recipe or RecipePage
+          buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+        end
+        msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
+      elsif response_service.admin_view?
+        msg = 'Give this site a Content finder to enable parsing'
       end
-      if !page_ref.recipe_page
-        msg = page_ref.site.finder_for('Content') ?
-          'Refresh Recipe to create Recipe Page' :
-          'Give this site a Content finder to enable parsing'
-        buttons += content_tag :p, "**#{msg}."
-      end
+      buttons += content_tag(:p, "**#{msg}.") if msg.present?
       content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
     end
   end
