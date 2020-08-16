@@ -15,13 +15,6 @@ class Gleaning < ApplicationRecord
 
   serialize :results, Results
 
-  attr_accessor :needs # A list of labels to satisfy when gleaning
-
-  # Keeps a non-persistent list of labels to satisfy for the gleaning
-  def needs
-    @needs ||= []
-  end
-
   # ------------- safe delegation to (potentially non-existent) results
   def result_for label
     val = results&.result_for label

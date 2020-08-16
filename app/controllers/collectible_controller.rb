@@ -172,7 +172,7 @@ class CollectibleController < ApplicationController
       if @page_ref
         @page_ref.adopt_extractions params[:extractions] if params[:extractions]
         @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
-        update_options[:adopt_gleaning] = true
+        update_options[:adopt_gleaning] = true  # !@page_ref.picture_id || !@page_ref.title
       end
       modelname = model.model_name.param_key
       params[modelname] = modelparams

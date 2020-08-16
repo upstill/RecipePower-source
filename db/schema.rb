@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_06_02_102304) do
+ActiveRecord::Schema.define(version: 2020_08_13_181139) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,6 +184,7 @@ ActiveRecord::Schema.define(version: 2020_06_02_102304) do
     t.integer "http_status"
     t.text "err_msg"
     t.text "results"
+    t.text "needs", default: [], array: true
   end
 
   create_table "image_references", id: :serial, force: :cascade do |t|

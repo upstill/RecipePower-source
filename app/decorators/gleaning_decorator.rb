@@ -28,6 +28,7 @@ class GleaningDecorator < ModelDecorator
   end
 
   def refresh_content
+    needs << 'Content'
     bkg_launch true
     bkg_land
   end

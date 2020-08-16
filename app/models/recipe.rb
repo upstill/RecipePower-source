@@ -142,8 +142,8 @@ class Recipe < ApplicationRecord
       recipe_page.bkg_land
       if content.blank?
         reload if persisted?
-        content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) if anchor_path
-        new_content = ParsingServices.new(self).parse_and_annotate(content_to_parse || page_ref.trimmed_content)
+        content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
+        new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
         if new_content.present?
           self.content = new_content # Retain prior value in case parsing fails
           RecipeServices.new(self).inventory # Set tags according to annotations
@@ -151,6 +151,11 @@ class Recipe < ApplicationRecord
       end
     end
     super if defined?(super)
+  end
+
+  # alias_method :oce, :content=
+  def content= ct
+    super
   end
 
   def after

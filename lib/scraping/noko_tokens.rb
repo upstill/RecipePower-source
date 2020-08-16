@@ -247,15 +247,13 @@ class NokoTokens < Array
       if node.text?
         # We're assuming here that there's an exact match between the sequence of nodes traversed
         # and the nodes in the @elmt_bounds array. Thus, a simple match on character strings
-        if node.to_s.present? && (@elmt_bounds[ix].first.to_s != node.to_s) && Rails.env.development?
+        if node.to_s.present? && (!@elmt_bounds[ix] || (@elmt_bounds[ix].first.to_s != node.to_s))
           failed = true
-=begin
           puts "NokoTokens update failed at @elmt_bounds ##{ix}: "
-          puts "\tnew node '#{escape_newlines node}' doesn't match extant node '#{escape_newlines @elmt_bounds[ix].first}'"
+          puts "\tnew node '#{escape_newlines node}' doesn't match extant node '#{escape_newlines @elmt_bounds[ix]&.first}'"
           low = [ix-2, 0].max
           high = [@elmt_bounds.count-1, ix+2].min
-          (low..high).each { |i| puts "\t@elmt_bounds[#{i}]: '#{escape_newlines @elmt_bounds[i].first}'"}
-=end
+          (low..high).each { |i| puts "\t@elmt_bounds[#{i}]: '#{escape_newlines @elmt_bounds[i]&.first}'"}
         end
         newbounds[ix] = node
         ix += 1
