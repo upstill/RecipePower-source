@@ -682,11 +682,8 @@ class NokoScanner # < Scanner
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
     @tokens.dom_ranges(spec).each do |range|
-      if range.begin >= @pos &&
-          # range.end <= @bound &&
-          newscanner = scanner_for_range(range, flag)
-        return newscanner
-      end
+      # Look at the first range that starts after this scanner, and return the part of the match within the scanner's bounds
+      return (scanner_for_range(range, flag) if range.begin <= @bound) if range.begin >= @pos
     end
     nil
   end

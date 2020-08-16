@@ -373,7 +373,7 @@ class Parser
 =end
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
-        return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
+        break if !child.success?
         children << child
         scanner = child.next
         case scanner.peek
