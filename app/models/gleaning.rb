@@ -36,6 +36,7 @@ class Gleaning < ApplicationRecord
   end
 
   def bkg_launch force=false
+    # We ensure launch for gleaning if there's a Content finder that is newer than the Gleaning
     ffc = site&.finder_for 'Content'
     force ||= ffc && (updated_at < ffc.updated_at)  # Launch if we're older than the :content finder
     super(force) if defined?(super)

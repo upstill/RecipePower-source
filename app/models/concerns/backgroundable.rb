@@ -176,6 +176,7 @@ module Backgroundable
     if dj # Job is already queued
       if refresh # Forces changes to the pending job
         if dj.locked_by.blank? # If necessary and possible, modify parameters
+          dj.update_columns(dj.changed_attributes) if dj.changed? # Before locking, save any changed attributes
           dj.with_lock do
             dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now, payload_object: self) # Need to undo the failed_at lock, if any
             dj.save if dj.changed?

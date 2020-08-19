@@ -120,9 +120,9 @@ class Recipe < ApplicationRecord
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     # Possible prerequisites for a recipe launch:
-    if !content.present? && site&.finder_for('Content')
+    if content.blank?
       # Need to launch the recipe_page to collect content
-      page_ref.build_recipe_page if !recipe_page
+      page_ref.create_recipe_page if !recipe_page
       recipe_page.bkg_launch
       force = true
     end
@@ -134,20 +134,18 @@ class Recipe < ApplicationRecord
   end
 
   def perform
-    if site&.finder_for('Content')
-      page_ref.bkg_land
-      page_ref.create_recipe_page if !recipe_page
-      # The recipe_page will assert path markers and clear our content
-      # if changes during page parsing were significant
-      recipe_page.bkg_land
-      if content.blank?
-        reload if persisted?
-        content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
-        new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
-        if new_content.present?
-          self.content = new_content # Retain prior value in case parsing fails
-          RecipeServices.new(self).inventory # Set tags according to annotations
-        end
+    page_ref.bkg_land
+    page_ref.create_recipe_page if !recipe_page
+    # The recipe_page will assert path markers and clear our content
+    # if changes during page parsing were significant
+    recipe_page.bkg_land
+    if content.blank?
+      reload if persisted?
+      content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
+      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      if new_content.present?
+        self.content = new_content # Retain prior value in case parsing fails
+        RecipeServices.new(self).inventory # Set tags according to annotations
       end
     end
     super if defined?(super)
@@ -160,11 +158,7 @@ class Recipe < ApplicationRecord
 
   def after
     # After the job runs, this is our chance to set status
-    self.status = if site&.finder_for('Content')
-                    content.present? ? :good : :bad
-                  else
-                    page_ref&.status || :good
-                  end
+    self.status = content.present? ? :good : :bad
     super
   end
 

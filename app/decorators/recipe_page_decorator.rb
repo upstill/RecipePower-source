@@ -18,5 +18,6 @@ class RecipePageDecorator < ModelDecorator
     @object.content = nil
     @object.bkg_launch
     @object.bkg_land
+    @object.save
   end
 end

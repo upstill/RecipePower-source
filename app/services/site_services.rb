@@ -7,7 +7,7 @@ class SiteServices
 
   def report_extractors *what
     # Provide a string suitable for giving to #assign_extractors to pass the site's :trimmers, :grammar_mods and :finders
-    content_selector = (f = site.finder_for('Content')) ? f.selector : 'nil'
+    content_selector = site.finder_for('Content')&.selector || 'nil'
     puts "SiteServices.new(Site.find #{site.id}).adopt_extractors #{site.trimmers || '[]'}, '#{content_selector}', #{site.grammar_mods || '{}'}"
   end
 

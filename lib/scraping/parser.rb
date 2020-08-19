@@ -352,25 +352,6 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
-=begin
-      probe = scanner
-      while probe.more? do
-        case probe.peek
-        when ',', 'and', 'or'
-          child = match_specification scanner.except(probe), spec
-          return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
-          children << child
-          break if probe.peek != ','
-          scanner = probe.rest
-        when '(' # Seek matching parenthesis
-          if pr = ParentheticalSeeker.match(probe)  # Skip past the parenthetical
-            probe = pr
-            next
-          end
-        end
-        probe = probe.rest
-      end
-=end
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
         break if !child.success?
