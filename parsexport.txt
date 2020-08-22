@@ -22,19 +22,25 @@ site_id: 3643
 :trimmers:
 - div.social
 - div#recipetoolbar
-:grammar_mods: {}
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul.ingredients
+  :rp_ingline:
+    :inline:
+    :in_css_match: li.ingredient-item
 --- Site#3667
 :trimmers:
 - div.meta__extras
 - div.js-ad-slot
 - figure[itemprop="associatedMedia image"]
 - div.submeta
-:grammar_mods: {}
+:grammar_mods:
+  :rp_ingline:
+    :in_css_match: strong
 --- Site#4072
 :trimmers:
 - ul.tag-nav__list
 - ul.social-nav__list
-- div.figure__media
 - div.aggregate-star-rating
 - li.mntl-sc-block figure
 - div.section-header
@@ -45,12 +51,14 @@ site_id: 3643
 - div.mntl-bio-tooltip__top
 - div.article-updated-date
 - div.feedback-block
+- div.featured-link-image
+- div.inline-video
 :grammar_mods:
   :rp_recipelist:
     :match:
       :at_css_match: h1
   :rp_ingline:
-    :inline: 
+    :inline:
     :in_css_match: li.ingredient
   :rp_inglist:
     :in_css_match: ul.ingredient-list
