@@ -8,6 +8,10 @@ class MercuryResult < ApplicationRecord
 
   serialize :results, Hash
 
+  def bkg_launch force=false
+    super(force || !results['content']) if defined?(super)
+  end
+
   def perform
     self.error_message = nil
     get_mercury_results if results.blank? || (http_status != 200)
@@ -145,7 +149,10 @@ class MercuryResult < ApplicationRecord
   # Get the Mercury-ized page by hitting node.js directly (in production)
   def mercury_via_node url
     apphome = Rails.env.development? ? (ENV['HOME']+'/Dev') : ENV['HOME']
-    content = `node #{apphome}/mercury/index.js #{url}`
+    cmd = "node #{apphome}/mercury/fetch.js #{url}"
+    logger.debug "Invoking '#{cmd}'"
+    content = `#{cmd}`
+    logger.debug "...got #{content.length} bytes from Mercury, starting with '#{content.truncate 100}'."
     data = JSON.parse content
     data['url'] = url
     data
