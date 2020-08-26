@@ -6,7 +6,7 @@ working_directory app_dir
 # Set unicorn options
 worker_processes 1
 preload_app true
-timeout ((ENV['RAILS_ENV'] == 'development') ? 3000 : 200)
+timeout 3000 # ((ENV['RAILS_ENV'] == 'development') ? 3000 : 200)
 
 # Path for the Unicorn socket
 listen "/var/sockets/unicorn.sock", :backlog => 64

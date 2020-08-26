@@ -14,7 +14,7 @@ class MercuryResult < ApplicationRecord
 
   def perform
     self.error_message = nil
-    get_mercury_results if results.blank? || (http_status != 200)
+    get_mercury_results if results.blank? || results['content'].blank? || (http_status != 200)
   end
 
   def url
