@@ -181,6 +181,7 @@ GEM
       loofah (~> 2.0)
       sax-machine (~> 1.0)
     ffi (1.13.1)
+    flag_shih_tzu (0.3.23)
     flamegraph (0.9.5)
     get_process_mem (0.2.5)
       ffi (~> 1.0)
@@ -482,6 +483,7 @@ DEPENDENCIES
   factory_bot_rails
   fast-stemmer (~> 1.0.2)
   feedjira (~> 1.6)
+  flag_shih_tzu
   flamegraph
   heapy (= 0.1.1)
   hirefire-resource

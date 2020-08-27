@@ -23,6 +23,8 @@ gem 'with_advisory_lock', '~> 4.0'
 # TODO Cache bit in each tag, for each taggable entity class, indicating that the tag is used.
 ## gem 'attr_bitwise' # https://github.com/wittydeveloper/attr_bitwise/
 gem 'barkick' # Handle UPC codes, etc.
+## gem 'flag_shi_tsu': https://github.com/pboling/flag_shih_tzu
+gem 'flag_shih_tzu'
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 # gem 'arel', '~> 8.0' # https://github.com/rails/arel NB Now comes with Rails by default

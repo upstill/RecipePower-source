@@ -18,6 +18,8 @@ class Recipe < ApplicationRecord
   pagerefable :url
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
+  include Trackable
+  attr_trackable :picurl, :title, :description, :content
 
   delegate :recipe_page, :to => :page_ref
 

@@ -47,7 +47,7 @@ class Gleaning < ApplicationRecord
     self.err_msg = ''
     self.http_status = 200
     begin
-      self.results = FinderServices.glean page_ref.url, page_ref.site, *needs
+      self.results = FinderServices.glean page_ref.url, page_ref.site
     rescue Exception => msg
       breakdown = FinderServices.err_breakdown page_ref.url, msg
       self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")

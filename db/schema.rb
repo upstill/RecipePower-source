@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_13_181139) do
+ActiveRecord::Schema.define(version: 2020_08_27_055417) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -184,7 +184,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_181139) do
     t.integer "http_status"
     t.text "err_msg"
     t.text "results"
-    t.text "needs", default: [], array: true
+    t.integer "attr_tracking", default: 0
   end
 
   create_table "image_references", id: :serial, force: :cascade do |t|
@@ -235,6 +235,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_181139) do
     t.integer "dj_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "attr_tracking", default: 0
   end
 
   create_table "notifications", id: :serial, force: :cascade do |t|
@@ -291,6 +292,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_181139) do
     t.integer "kind", default: 1
     t.integer "mercury_result_id"
     t.integer "recipe_page_id"
+    t.integer "attr_tracking", default: 0
     t.index ["url"], name: "page_refs_index_by_url", unique: true
   end
 
@@ -334,6 +336,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_181139) do
     t.integer "dj_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "attr_tracking", default: 0
   end
 
   create_table "recipes", id: :serial, force: :cascade do |t|
@@ -358,6 +361,7 @@ ActiveRecord::Schema.define(version: 2020_08_13_181139) do
     t.text "content"
     t.string "anchor_path"
     t.string "focus_path"
+    t.integer "attr_tracking", default: 0
     t.index ["id"], name: "recipes_index_by_id", unique: true
     t.index ["title"], name: "recipes_index_by_title"
   end
