@@ -3,23 +3,35 @@ class MercuryResult < ApplicationRecord
 
   backgroundable :status
 
+  include Trackable
+  @@MERCURY_ATTRIBUTES = [:url, :domain, :title, :date_published, :author, :content, :lead_image_url, :excerpt, :mercury_error]
+  attr_trackable *@@MERCURY_ATTRIBUTES
+
+  attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages, :new_aliases
+
   has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
 
   serialize :results, Hash
 
   def bkg_launch force=false
-    super(force || !results['content']) if defined?(super)
+    super(force || attrib_needed?) if defined?(super)
   end
 
   def perform
     self.error_message = nil
-    get_mercury_results if results.blank? || results['content'].blank? || (http_status != 200)
+    # If any attribute is needed, get and integrate the results
+    if attrib_needed? && (mercury_data = get_mercury_results)
+      # Use the data from Mercury to set all needed keys, filling in other needed attributes with nil
+      (needed_attributes | mercury_data.keys).each { |attr| accept_attribute attr, mercury_data[attr] }
+    end
   end
 
   def url
-    page_ref&.url
+    super || page_ref&.url
   end
+
+  private
 
   # Consult Mercury on a url and report the results in the model
   # status: :good iff Mercury could get through to the resource, :bad otherwise
@@ -86,19 +98,19 @@ class MercuryResult < ApplicationRecord
             end
             hr.is_a?(String) ? 666 : hr
           end
-      self.results = mercury_data
-      results['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
-      results['new_aliases'] = new_aliases
+      mercury_data['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
+      mercury_data['new_aliases'] = new_aliases
+      return mercury_data
     rescue Exception => e
       errors.add :url, "'#{url}' is bad: #{e}"
       self.http_status = 400
     end
   end
+
   # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
-    data = false && Rails.env.development? ?
-               mercury_via_api(url) :
-               mercury_via_node(url)
+    data = mercury_via_node url
+    # data = Rails.env.development? ? mercury_via_api(url) : mercury_via_node(url)
 
     # Do QA on the reported URL
     # Report a URL as extracted by Mercury (if any), or the original URL (if not)
@@ -111,9 +123,9 @@ class MercuryResult < ApplicationRecord
     data.delete :error
     data
   end
-  
-  private
 
+=begin
+  # Archaic: get the mercury data from our server
   def mercury_via_api url
     previous_probe = nil
     api = 'http://173.255.245.80:8888/mercury?url='
@@ -145,10 +157,11 @@ class MercuryResult < ApplicationRecord
     data['response_code'] = response.code
     data
   end
+=end
 
   # Get the Mercury-ized page by hitting node.js directly (in production)
   def mercury_via_node url
-    apphome = Rails.env.development? ? (ENV['HOME']+'/Dev') : ENV['HOME']
+    apphome = Rails.env.production? ? ENV['HOME'] : (ENV['HOME']+'/Dev')
     cmd = "node #{apphome}/mercury/fetch.js #{url}"
     logger.debug "Invoking '#{cmd}'"
     content = `#{cmd}`
