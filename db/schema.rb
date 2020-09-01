@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_27_055417) do
+ActiveRecord::Schema.define(version: 2020_08_31_150449) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -230,6 +230,16 @@ ActiveRecord::Schema.define(version: 2020_08_27_055417) do
     t.text "err_msg"
     t.text "results"
     t.integer "attr_trackers", default: 0
+    t.text "url"
+    t.text "picurl"
+    t.text "title"
+    t.text "author"
+    t.text "author_link"
+    t.text "description"
+    t.text "tags"
+    t.string "site_name"
+    t.text "rss_feed"
+    t.text "content"
   end
 
   create_table "image_references", id: :serial, force: :cascade do |t|
@@ -305,6 +315,15 @@ ActiveRecord::Schema.define(version: 2020_08_27_055417) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "attr_trackers", default: 0
+    t.text "title"
+    t.text "author"
+    t.datetime "date_published"
+    t.text "lead_image_url"
+    t.text "content"
+    t.text "url"
+    t.text "domain"
+    t.text "excerpt"
+    t.text "mercury_error"
   end
 
   create_table "notifications", id: :serial, force: :cascade do |t|

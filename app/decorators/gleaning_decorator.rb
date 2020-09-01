@@ -28,9 +28,10 @@ class GleaningDecorator < ModelDecorator
   end
 
   def refresh_content
-    needs << 'Content'
-    bkg_launch true
-    bkg_land
+    @object.content_needed = true
+    @object.content_ready = false
+    @object.ensure_values :content
+    @object.save
   end
 
 end

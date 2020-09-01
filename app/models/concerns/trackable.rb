@@ -42,6 +42,11 @@ module Trackable
     end
   end
 
+  # Call accept_attribute for each key-value pair in the hash
+  def accept_attributes attribs={}
+    attribs.each { |value, attrib| accept_attribute attrib, value}
+  end
+
   # Handle tracking-related calls. The form is 'attrname_verb', where
   # * attrname is the name of an attribute, possibly but not necessarily tracked
   # * verb indicates what to do with the attribute, i.e.
@@ -65,11 +70,16 @@ module Trackable
     super(namesym, *args) if defined(super)
   end
 
+  # Force launching if any attribute is needed
+  def bkg_launch force=false
+    super(force || attrib_needed?) if defined?(super)
+  end
+
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes, &block
     newly_needed = assert_needed_attributes(*list_of_attributes)
     return if newly_needed.empty?
-    block.call newly_needed if block_given?
+    block.call *newly_needed if block_given?
     bkg_launch true
   end
 
@@ -124,12 +134,16 @@ module Trackable
 
   # What attributes are now good?
   def ready_attributes
-    selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_ready$/ ; $1 }.compact
+    selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_ready$/ ; $1&.to_sym }.compact
+  end
+
+  def ready_attribute_values
+    Hash[ *ready_attributes.collect{ |attrname| [ attrname, send(attrname) ]}.flatten ]
   end
 
   # What attributes are now needed?
   def needed_attributes
-    selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_needed$/ ; $1 }.compact
+    selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_needed$/ ; $1&.to_sym }.compact
   end
 end
 
