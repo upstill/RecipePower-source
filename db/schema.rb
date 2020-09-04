@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2020_08_31_150449) do
+ActiveRecord::Schema.define(version: 2020_09_01_012418) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -318,12 +318,13 @@ ActiveRecord::Schema.define(version: 2020_08_31_150449) do
     t.text "title"
     t.text "author"
     t.datetime "date_published"
-    t.text "lead_image_url"
+    t.text "picurl"
     t.text "content"
     t.text "url"
     t.text "domain"
-    t.text "excerpt"
+    t.text "description"
     t.text "mercury_error"
+    t.text "new_aliases", default: [], array: true
   end
 
   create_table "notifications", id: :serial, force: :cascade do |t|

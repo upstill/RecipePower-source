@@ -4,31 +4,40 @@ class MercuryResult < ApplicationRecord
   backgroundable :status
 
   include Trackable
-  @@MERCURY_ATTRIBUTES = [:url, :domain, :title, :date_published, :author, :content, :lead_image_url, :excerpt, :mercury_error]
-  attr_trackable *@@MERCURY_ATTRIBUTES
-
-  attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages, :new_aliases
+  attr_trackable :url, :domain, :title, :date_published, :author, :content, :picurl, :description, :mercury_error, :new_aliases
+  # Provide access methods for unpersisted results
+  attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
 
   has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
 
   serialize :results, Hash
 
-  def bkg_launch force=false
-    super(force || attrib_needed?) if defined?(super)
+  # Provide the attribute that will receive the value for the given Mercury result name
+  def self.attribute_for_result result_name
+    case result_name
+    when :lead_image_url
+      :picurl
+    when :excerpt
+      :description
+    else
+      result_name
+    end
+  end
+
+  def ensure_attributes *list_of_attributes
+    super
+    # Use the data from Mercury to set all needed keys, filling in other needed attributes with nil
+    (needed_attributes | results.keys.map(&:to_sym)).each { |attr| accept_attribute MercuryResult.attribute_for_result(attr), results[attr.to_s] } if good?
   end
 
   def perform
     self.error_message = nil
-    # If any attribute is needed, get and integrate the results
-    if attrib_needed? && (mercury_data = get_mercury_results)
-      # Use the data from Mercury to set all needed keys, filling in other needed attributes with nil
-      (needed_attributes | mercury_data.keys).each { |attr| accept_attribute attr, mercury_data[attr] }
-    end
+    self.results = get_mercury_results
   end
 
   def url
-    super || page_ref&.url
+    super.if_present || page_ref&.url
   end
 
   private

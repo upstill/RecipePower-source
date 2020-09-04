@@ -2,13 +2,13 @@ class MercuryResultDecorator < ModelDecorator
   delegate_all
 
   def title
-    (results.present? && results['title'].if_present) || 'Untitled MercuryResult'
+    @object.title_if_ready || 'Untitled MercuryResult'
   end
 
   def refresh_content
-    @object.results['content'] = nil
-    @object.bkg_launch
-    @object.bkg_land
+    @object.content_needed = true
+    @object.content_ready = false
+    @object.ensure_attributes :content
     @object.save
   end
 
