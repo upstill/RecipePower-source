@@ -37,11 +37,6 @@ class PageRefDecorator < CollectibleDecorator
     object.picurl = img
   end
 
-  def refresh_content
-    @object.ensure_attributes :content
-  end
-
-
   def external_link
     url
   end

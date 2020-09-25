@@ -27,9 +27,4 @@ class GleaningDecorator < ModelDecorator
     result_for 'Title'
   end
 
-  def refresh_content
-    @object.ensure_attributes :content
-    @object.save
-  end
-
 end

@@ -13,9 +13,4 @@ class RecipePageDecorator < ModelDecorator
   def title
     'Recipe Page'
   end
-
-  def refresh_content variant=nil
-    @object.ensure_attributes :content
-    @object.save
-  end
 end
