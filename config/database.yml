@@ -23,7 +23,7 @@ staging:
 # Do not set this db to the same as development or production.
 test:
   <<: *common
-  database: cookmarks_test
+  database: dabpmrobtjc0ei
   host: /tmp
 
 production:

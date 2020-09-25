@@ -90,10 +90,12 @@ module Backgroundable
 
   included do
 
+=begin
     # If an object is virgin, fire it off for background processing
     after_save { |obj|
       obj.bkg_launch
     }
+=end
 
 =begin  TODO: Ensure we have some way of clearing dead jobs
     # Clear the status attribute of all entities that may have been interrupted

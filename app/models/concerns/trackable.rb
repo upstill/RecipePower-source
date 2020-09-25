@@ -7,7 +7,6 @@ module Trackable
   extend ActiveSupport::Concern
 
   module ClassMethods
-
     # Declare a set of attributes that will be tracked
     def attr_trackable *list
       flags = {}
@@ -16,14 +15,19 @@ module Trackable
           map(&:to_sym).
           each_with_index { |val, ix| flags[ix+1] = val }
       has_flags flags.merge(:column => 'attr_trackers')
-      @@TRACKED_ATTRIBUTES = list
+      tracked_attributes = list
+      self.tracked_attributes = list
       # Now FlagShihTzu will provide a _needed and a _ready bit for each tracked attribute
       # By default, an attribute is neither needed nor ready
     end
 
     # List out the tracked attributes by examining the tracking bits
     def tracked_attributes
-      @@TRACKED_ATTRIBUTES
+      @tracked_attributes || []
+    end
+
+    def tracked_attributes= list
+      @tracked_attributes = list
     end
 
   end
@@ -32,25 +36,45 @@ module Trackable
     base.extend(ClassMethods)
   end
 
-  def accept_attribute attrname, value
+  # Set and accept the attribute. Action depends on the 'ready' and 'needed' bits
+  # !ready, !needed => set
+  # !ready, needed => set
+  # ready, !needed => ignore
+  # ready, needed => set
+  # In other words, if a value has been accepted and not previously invalidated, leave it alone.
+  # ** the 'force' flag sets the attribute whether or not it's needed or accepted
+  def accept_attribute attrname, value, force=false
     attrname = attrname.to_s
-    self.send (attrname+'=').to_sym, value
+    return if attrib_ready?(attrname) && !(attrib_needed?(attrname) || force)
+    if block_given?
+      # For any side-effects as a result of changing the attribute, call the block
+      previous = self.send attrname.to_sym
+      self.send (attrname+'=').to_sym, value
+      # NB: it's possible that the accepted value is NOT the same as the provided value, so we compare
+      # changes on the attribute.
+      yield value if self.send(attrname.to_sym) != previous
+    else  # No block? Just set the value
+      self.send (attrname+'=').to_sym, value
+    end
     if all_attr_trackers.include?((attrname+'_needed').to_sym)
-      # This attribute is tracked => clear 'needs' bit and set the 'ready' bit
+      # This attribute is tracked => clear 'needed' bit and set the 'ready' bit
       self.send (attrname+'_needed=').to_sym, false
       self.send (attrname+'_ready=').to_sym, true
     end
   end
 
-  # Call accept_attribute for each key-value pair in the hash
+  # Call attribute setter or accept_attribute for each key-value pair in the hash
   def accept_attributes attribs={}
-    attribs.each { |value, attrib| accept_attribute attrib, value}
+    attribs.slice(*self.class.tracked_attributes).each do |attrib, value|
+      setter = :"accept_#{attrib}"
+      respond_to?(setter) ? self.send(setter, value) : accept_attribute(attrib, value)
+    end
   end
 
   # Handle tracking-related calls. The form is 'attrname_verb', where
   # * attrname is the name of an attribute, possibly but not necessarily tracked
   # * verb indicates what to do with the attribute, i.e.
-  #   -- 'accept' means to assign the attribute, clear the associated 'needs' bit and set the 'ready' bit
+  #   -- 'accept' means to assign the attribute, clear the associated 'needed' bit and set the 'ready' bit
   #   -- 'if_ready' is for reporting a value. If the corresponding 'ready' bit is true, invoke the passed block with the attribute value
   def method_missing namesym, *args
     if match = namesym.to_s.match(/(.*)_(accept|if_ready)$/)
@@ -75,22 +99,48 @@ module Trackable
     super(force || attrib_needed?) if defined?(super)
   end
 
+  # Invalidate the attributes, triggering the request process.
+  # In the absence of attribute arguments, defaults to ALL tracked attributes.
+  # The syntax is a (possibly empty) list of attributes to refresh, possibly followed by a hash of flags:
+  # :except provides a list of attributes NOT to refresh
+  # :immediate if true, forces the attribute(s) to update before returning
+  # An empty list before the argument hash causes ALL tracked attributes to be refreshed
+  def refresh_attributes *args
+    flags = args.last.is_a?(Hash) ? args.pop : {}
+    # No args => update all tracked attributes
+    attrs = args.present? ? args.map(&:to_sym) : self.class.tracked_attributes
+    attrs -= ([flags[:except]].flatten).map(&:to_sym) if flags[:except]
+    attribs_ready! attrs, false
+    if flags[:immediate]
+      ensure_attributes *attrs
+    else
+      request_attributes *attrs
+    end
+  end
+
+  def ensure_attributes *list_of_attributes
+    request_attributes *list_of_attributes
+    bkg_land
+    adopt_dependencies
+  end
+
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
-  def request_attributes *list_of_attributes, &block
+  def request_attributes *list_of_attributes
     newly_needed = assert_needed_attributes(*list_of_attributes)
     return if newly_needed.empty?
-    block.call *newly_needed if block_given?
+    request_dependencies *newly_needed
     bkg_launch true
   end
 
-  # Do your best to ensure that the given values are present
-  def ensure_attributes *list_of_attributes, &block
-    if block_given?
-      request_attributes *list_of_attributes, block
-    else
-      request_attributes *list_of_attributes
-    end
-    bkg_land
+  # Stub to be overridden for an object to respond to a request for an attribute
+  # by requesting it of another
+  def request_dependencies *newly_needed
+    super *newly_needed if defined? super
+  end
+
+  # Once the entities we depend on have settled, we take on their values
+  def adopt_dependencies
+    super if defined? super
   end
 
   # Report on the 'needed' bit for the named attribute. If no attribute specified, report whether ANY attribute is needed
@@ -100,9 +150,9 @@ module Trackable
   end
 
   # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
-  def attrib_needed! attrib_sym
-    unless attrib_needed?(attrib_sym)
-      send :"#{attrib_sym}_needed=", true
+  def attrib_needed! attrib_sym, needed_now=true
+    unless attrib_needed?(attrib_sym) == needed_now
+      send :"#{attrib_sym}_needed=", needed_now
       attrib_sym
     end
   end
@@ -113,9 +163,9 @@ module Trackable
   end
 
   # Set the 'ready' bit for the attribute and return the attribute_sym iff wasn't ready before
-  def attrib_ready! attrib_sym
-    unless attrib_ready?(attrib_sym)
-      send :"#{attrib_sym}_ready=", true
+  def attrib_ready! attrib_sym, ready_now=true
+    unless attrib_ready?(attrib_sym) == ready_now
+      send :"#{attrib_sym}_ready=", ready_now
       attrib_sym
     end
   end
@@ -127,23 +177,31 @@ module Trackable
     }.compact
   end
 
-  # Which of the specified attributes haven't been declared as needed before now?
-  def newly_needed *list_of_attributes
-    (list_of_attributes - ready_attributes) - needed_attributes
-  end
-
   # What attributes are now good?
   def ready_attributes
     selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_ready$/ ; $1&.to_sym }.compact
   end
 
   def ready_attribute_values
-    Hash[ *ready_attributes.collect{ |attrname| [ attrname, send(attrname) ]}.flatten ]
+    Hash[ *ready_attributes.collect{ |attrname| [ attrname, send(attrname) ]}.flatten(1) ]
   end
 
-  # What attributes are now needed?
+  # What attributes are currently needed?
   def needed_attributes
     selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_needed$/ ; $1&.to_sym }.compact
   end
+
+  private
+
+  # Convenience methods, for internal use only
+
+  def attribs_needed! attrib_syms, needed_now=true
+    attrib_syms.each { |attrib_sym| attrib_needed! attrib_sym, needed_now }
+  end
+
+  def attribs_ready! attrib_syms, ready_now=true
+    attrib_syms.each { |attrib_sym| attrib_ready! attrib_sym, ready_now }
+  end
+
 end
 

@@ -15,9 +15,7 @@ class RecipePageDecorator < ModelDecorator
   end
 
   def refresh_content variant=nil
-    @object.content = nil
-    @object.bkg_launch
-    @object.bkg_land
+    @object.ensure_attributes :content
     @object.save
   end
 end

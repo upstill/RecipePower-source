@@ -17,6 +17,30 @@ class PageRefTest < ActiveSupport::TestCase
     # Do nothing
   end
 
+  # Confirm that PageRef performs appropriately under tracking
+  test 'ensure attributes in page ref' do
+    url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
+    pr = PageRef.fetch url
+    assert pr.url_ready
+    # The url is needed because it must be confirmed by Gleaning and MercuryResult
+    assert pr.url_needed
+    refute pr.title_ready
+    refute pr.title_needed
+    # Gleaning and MercuryResult should have launched to confirm the url
+    assert pr.gleaning
+    assert pr.mercury_result
+    # The Gleaning and MercuryResult should be primed to fetch
+    pr.request_attributes :title
+    assert pr.title_needed
+    assert pr.gleaning.title_needed
+    assert pr.mercury_result.title_needed
+    pr.ensure_attributes :title
+    # Should have extracted the title
+    assert pr.title_ready
+    # Should have extracted the description as a side effect
+    assert pr.description_ready
+  end
+
   # Fake test
 =begin
   def test_fail
@@ -173,11 +197,11 @@ class PageRefTest < ActiveSupport::TestCase
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
     assert_equal "http://media.wired.com/photos/5926b676af95806129f50602/191:100/pass/Rosetta_impact-1.jpg", mp.picurl
     assert_equal 'www.wired.com', mp.domain
-    assert_equal 'Time to break out the tissues, space fans.', mp.mercury_results['excerpt']
-    assert_equal 966, mp.mercury_results['word_count']
-    assert_equal 'ltr', mp.mercury_results['direction']
-    assert_equal 1, mp.mercury_results['total_pages']
-    assert_equal 1, mp.mercury_results['rendered_pages']
+    assert_equal 'Time to break out the tissues, space fans.', mp.mercury_result.description
+    assert_equal 966, mp.mercury_result.word_count
+    assert_equal 'ltr', mp.mercury_result.direction
+    assert_equal 1, mp.mercury_result.total_pages
+    assert_equal 1, mp.mercury_result.rendered_pages
   end
 
   test "catch null byte" do

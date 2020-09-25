@@ -104,7 +104,7 @@ class PageRefServices
       page_ref.assign_attributes hard_attribs
 
       # Soft attributes are copied only if not already set
-      soft_attribs = page_ref.class.mercury_attributes + %w{ link_text }
+      soft_attribs = other.ready_attributes + %w{ link_text }
       soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
           puts "...absorbing #{attrname} = #{other.read_attribute(attrname)}"

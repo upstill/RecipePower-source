@@ -25,10 +25,15 @@ class MercuryResult < ApplicationRecord
     end
   end
 
-  def ensure_attributes *list_of_attributes
-    super
-    # Use the data from Mercury to set all needed keys, filling in other needed attributes with nil
-    (needed_attributes | results.keys.map(&:to_sym)).each { |attr| accept_attribute MercuryResult.attribute_for_result(attr), results[attr.to_s] } if good?
+  def adopt_dependencies
+    return unless good?
+    # Use the data from Mercury to set all needed keys
+    results.keys.map(&:to_sym).each do |result_name|
+      attr = MercuryResult.attribute_for_result result_name
+      accept_attribute attr, results[result_name.to_s] if MercuryResult.tracked_attributes.include?(attr)
+    end
+    # Should we really be declaring that no more attributes are needed?
+    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
   end
 
   def perform

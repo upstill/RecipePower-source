@@ -291,7 +291,7 @@ GEM
       omniauth-oauth (~> 1.1)
       rack
     orm_adapter (0.5.0)
-    pg (0.21.0)
+    pg (1.2.3)
     poltergeist (1.18.1)
       capybara (>= 2.1, < 4)
       cliver (~> 0.3.1)
@@ -505,7 +505,7 @@ DEPENDENCIES
   omniauth-google-oauth2
   omniauth-openid
   omniauth-twitter
-  pg (= 0.21.0)
+  pg (~> 1.0)
   poltergeist
   premailer-rails
   pundit

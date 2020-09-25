@@ -38,10 +38,9 @@ class PageRefDecorator < CollectibleDecorator
   end
 
   def refresh_content
-    gleaning&.bkg_launch
-    mercury_result&.bkg_launch
-    bkg_land true
+    @object.ensure_attributes :content
   end
+
 
   def external_link
     url

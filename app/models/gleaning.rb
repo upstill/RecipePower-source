@@ -17,7 +17,7 @@ class Gleaning < ApplicationRecord
   
   include Trackable
   # "URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"
-  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feed, :content
+  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content
 
   # Define a mapping from Result label to the attribute that reflects it
   def self.attribute_for_label label
@@ -32,7 +32,6 @@ class Gleaning < ApplicationRecord
       label.downcase.sub(' ', '_').to_sym
     end
   end
-
 
   # ------------- safe delegation to (potentially non-existent) results
   def result_for label
@@ -54,9 +53,20 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  def ensure_attributes *list_of_attributes
-    super
-    results.labels.each { |label| accept_attribute Gleaning.attribute_for_label(label), result_for(label) } if good?
+  def adopt_dependencies
+    return unless good?
+    results.labels.each do |label|
+      case label
+      when 'RSS Feed'
+        accept_attribute :rss_feeds, results&.results_for('RSS Feed')
+      when 'Tags', 'Author'
+        accept_attribute Gleaning.attribute_for_label(label), results&.results_for(label).uniq.join(', ')
+      else
+        accept_attribute Gleaning.attribute_for_label(label), results&.result_for(label)
+      end
+    end
+    # Clear the needed bit for all unfound attributes, to forestall more gleaning
+    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
   end
 
   # Execute a gleaning on the page_ref's url

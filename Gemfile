@@ -29,8 +29,8 @@ gem 'flag_shih_tzu'
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 # gem 'arel', '~> 8.0' # https://github.com/rails/arel NB Now comes with Rails by default
 
-####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
-gem 'pg', '0.21.0' # TODO: 1.0.0 for Rails 5
+####### Ruby interface to PostgreSQL https://github.com/ged/ruby-pg
+gem 'pg', '~> 1.0' # , '0.21.0' TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 # gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
 # TODO: use pg_search

@@ -97,29 +97,14 @@ module Pagerefable
     page_ref&.site
   end
 
-  def bkg_launch refresh=false
-    page_ref&.bkg_launch if page_ref&.virgin?
-    super if defined?(super)
-  end
-
-  # "abstract" method, to be overridden by any given Backgroundable,
-  # specifying what to do with the page_ref once it's good.
-  def adopt_page_ref
-    true
-  end
-
-  # The backgroundable performs its delayed job by forcing the associated page_ref to do its job (synchronously)
-  #    then calling #adopt_page_ref to extract values for the object involved
+  # The backgroundable performs its delayed job by forcing the associated page_ref to do its job
+  # (synchronously if necessary)
   def perform
-    if page_ref # Finish doing any necessary gleaning of the page_ref
-      page_ref.bkg_land
-      if page_ref.good?
-        adopt_page_ref # "Abstract" method to be implemented by each pagerefable to adopt extracted values
-      else
-        err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
-        errors.add :url, err_msg
-        raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
-      end
+    page_ref.bkg_land
+    if page_ref.bad?
+      err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
+      errors.add :url, err_msg
+      raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
     end
     super if defined?(super)
   end
