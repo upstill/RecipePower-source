@@ -11,6 +11,22 @@ class Site < ApplicationRecord
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
 
+  # We track attributes from Gleanings and MercuryResult except URL
+  include Trackable
+  attr_trackable :name, :logo, :description, :rss_feed
+
+  # Provide the attribute that will receive the value for the given PageRef attribute
+  def self.attribute_for_result pr_attribute
+    case pr_attribute
+    when :name
+      :title
+    when :picurl
+      :logo
+    else
+      pr_attribute
+    end
+  end
+
   # TODO: this needs to persist in the database
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
   serialize :grammar_mods, Hash
@@ -87,7 +103,7 @@ class Site < ApplicationRecord
   # after_initialize :post_init
   validates_uniqueness_of :root
 
-  # after_create { |site| site.bkg_launch } # Start a job going to extract title, etc. from the home page
+  after_create { |site| site.request_attributes :name } # Start a job going to extract title, etc. from the home page
 
   after_save do |site|
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
@@ -122,6 +138,16 @@ class Site < ApplicationRecord
     super(force) if defined?(super)
   end
 
+  # Get the available attributes from the PageRef
+  def adopt_dependencies
+    # Translate what the PageRef is offering into our attributes
+    accept_attribute :logo, page_ref.picurl if page_ref.picurl_ready?
+    accept_attribute :name, page_ref.title if page_ref.title_ready?
+    accept_attribute :description, page_ref.description if page_ref.description_ready?
+    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+  end
+
+=begin
   # This is called when the page_ref finishes updating
   def adopt_page_ref
     # Extract elements from the page_ref
@@ -131,6 +157,7 @@ class Site < ApplicationRecord
     page_ref.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaned?
     (persisted? && changed?) ? save : true
   end
+=end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here
   def site
@@ -393,6 +420,12 @@ public
     else
       self.referent = Referent.express(str, :Source, :form => :generic)
     end
+  end
+
+  # Request attributes of other objects
+  def request_dependencies *newly_needed
+    page_ref.build unless page_ref
+    page_ref.request_attributes *(newly_needed.collect { |my_attrib| Site.attribute_for_result my_attrib })
   end
 
 end

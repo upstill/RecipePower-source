@@ -118,58 +118,44 @@ class Recipe < ApplicationRecord
     save
   end
 
-  def bkg_launch force=false
+  ##### Trackable matters #########k
+  # Override to request values from page_ref
+  def request_dependencies *newly_needed
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    # Possible prerequisites for a recipe launch:
-    if content.blank?
-      # Need to launch the recipe_page to collect content
-      page_ref.create_recipe_page if !recipe_page
-      recipe_page.bkg_launch
-      force = true
-    end
-    if title.blank? || picurl.blank? || description.blank?
-      page_ref&.bkg_launch
-      force = true  if page_ref.virgin?
-    end
-    super(force) if defined?(super)
+    page_ref.request_attributes *(newly_needed & [ :picurl, :title, :description ]) # Those to be got from PageRef
+    page_ref.request_attributes :recipe_page if newly_needed.include?(:content)
+    super *newly_needed if defined? super
   end
 
+  # Override to acccept values from page_ref
+  def adopt_dependencies
+    super if defined? super
+    # Get the available attributes from the PageRef
+    # Translate what the PageRef is offering into our attributes
+    accept_attribute :picurl, page_ref.picurl if page_ref.picurl_ready?
+    accept_attribute :title, page_ref.title if page_ref.title_ready?
+    accept_attribute :description, page_ref.description if page_ref.description_ready?
+  end
+
+  ##### Backgroundable matters #########
+
+  # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.bkg_land
-    page_ref.create_recipe_page if !recipe_page
+    page_ref.ensure_attributes :recipe_page
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
-    recipe_page.bkg_land
-    if content.blank?
+    if content_needed? && page_ref.recipe_page_ready?  # Ready to build
       reload if persisted?
-      content_to_parse = page_ref.recipe_page&.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
+      recipe_page.ensure_attributes :content # Parse the page into one or more recipes
+      content_to_parse = recipe_page.selected_content(anchor_path, focus_path) || page_ref.trimmed_content
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
-      if new_content.present?
-        self.content = new_content # Retain prior value in case parsing fails
+      if new_content.present? # Parsing was a success
+        accept_attribute :content, new_content # Retain prior value in case parsing fails
         RecipeServices.new(self).inventory # Set tags according to annotations
       end
     end
     super if defined?(super)
-  end
-
-  # alias_method :oce, :content=
-  def content= ct
-    super
-  end
-
-  def after
-    # After the job runs, this is our chance to set status
-    self.status = content.present? ? :good : :bad
-    super
-  end
-
-  # This is called when the page_ref finishes updating
-  def adopt_page_ref
-    self.title = page_ref.title if page_ref.title.present? && title.blank?
-    self.picurl = page_ref.picurl if page_ref.picurl.present? && picurl.blank?
-    self.description = page_ref.description if page_ref.description.present? && description.blank?
-    title.present?
   end
 
 end

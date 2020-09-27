@@ -1,6 +1,42 @@
 require 'test_helper'
 class TrackingTest < ActiveSupport::TestCase
 
+  test "recipe page tracks correctly via page ref" do
+    url = "https://www.theguardian.com/lifeandstyle/2016/mar/12/merguez-recipes-kebab-potato-bake-scotch-egg-yotam-ottolenghi"
+    pr = PageRef.fetch url
+    # We create a RecipePage by asking the PageRef for it
+    pr.ensure_attributes :recipe_page
+    rp = pr.recipe_page
+    assert_not_nil rp
+    assert pr.content_ready?
+
+    # We parse out the page by asking the RecipePage for its content
+    rp.ensure_attributes :content
+    assert_equal 3, pr.recipes.to_a.count
+  end
+
+  test "recipe gets parsed correctly" do
+    url = "https://www.theguardian.com/lifeandstyle/2016/mar/12/merguez-recipes-kebab-potato-bake-scotch-egg-yotam-ottolenghi"
+    recipe = Recipe.new url: url
+    pr = recipe.page_ref
+    # We create a RecipePage by asking the PageRef for it
+    recipe.ensure_attributes :content
+    rp = pr.recipe_page
+    assert_not_nil rp
+    assert pr.content_ready?
+
+    assert_equal 3, pr.recipes.to_a.count
+    assert recipe.content_ready? # Parsed successfully
+    assert_not_empty recipe.description
+
+    recipe.refresh_attributes :content
+    assert recipe.content_needed?
+    refute recipe.content_ready?
+    recipe.refresh_attributes :content, immediate: true # Initiate a re-parse and complete it RIGHT NOW
+    assert recipe.content_ready? # Parsed successfully
+    refute recipe.content_needed? # Parsed successfully
+  end
+
   test "refresh attributes" do
     url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
     recipe = Recipe.new url: url
@@ -21,7 +57,7 @@ class TrackingTest < ActiveSupport::TestCase
     # Invalidate all the attributes EXCEPT title
     recipe.refresh_attributes except: :title
     assert_equal recipe.needed_attributes, Recipe.tracked_attributes - [:title]
-    assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.needed_attributes.sort
+    assert_equal [:url, :title, :picurl, :recipe_page, :description].sort, recipe.page_ref.needed_attributes.sort
     assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.mercury_result.needed_attributes.sort
     assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.gleaning.needed_attributes.sort
 
@@ -57,7 +93,7 @@ class TrackingTest < ActiveSupport::TestCase
     refute recipe.title_needed
     assert_equal 'placeholder', recipe.title
 
-    recipe.ensure_attributes :title, :url # Extract from page_ref
+    recipe.ensure_attributes :title # Extract from page_ref
     assert recipe.title_ready
     refute recipe.title_needed
 

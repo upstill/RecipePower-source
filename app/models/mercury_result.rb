@@ -33,7 +33,7 @@ class MercuryResult < ApplicationRecord
       accept_attribute attr, results[result_name.to_s] if MercuryResult.tracked_attributes.include?(attr)
     end
     # Should we really be declaring that no more attributes are needed?
-    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
+    clear_needed_attributes
   end
 
   def perform

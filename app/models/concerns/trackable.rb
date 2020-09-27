@@ -71,6 +71,10 @@ module Trackable
     end
   end
 
+  def clear_needed_attributes
+    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
+  end
+
   # Handle tracking-related calls. The form is 'attrname_verb', where
   # * attrname is the name of an attribute, possibly but not necessarily tracked
   # * verb indicates what to do with the attribute, i.e.
@@ -82,12 +86,9 @@ module Trackable
       case verb
       when 'accept'
         accept_attribute attrname, args.first
-        return
       when 'if_ready'
-        # Call the provided block with the named attribute value iff the corresponding 'ready' bit is on
-        if self.send((attrname+'_ready').to_sym)
-          args[0].call(self.send attrname.to_sym)
-        end
+        # Provide
+        return attrib_ready?(attrname) ? self.send(attrname.to_sym) : args.first
       end
       return
     end
@@ -149,14 +150,6 @@ module Trackable
     selected_attr_trackers.any? { |attrib_sym| attrib_sym.to_s.match(/_needed/) && send(attrib_sym) }
   end
 
-  # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
-  def attrib_needed! attrib_sym, needed_now=true
-    unless attrib_needed?(attrib_sym) == needed_now
-      send :"#{attrib_sym}_needed=", needed_now
-      attrib_sym
-    end
-  end
-
   # Report on the 'ready' bit for the named attribute
   def attrib_ready? attrib_sym
     send :"#{attrib_sym}_ready"
@@ -168,13 +161,6 @@ module Trackable
       send :"#{attrib_sym}_ready=", ready_now
       attrib_sym
     end
-  end
-
-  # Ensure that all of the given attributes are marked as needed UNLESS they're already ready or needed
-  def assert_needed_attributes *list_of_attributes
-    list_of_attributes.collect { |attrib|
-      attrib_needed!(attrib) unless attrib_ready?(attrib) || attrib_needed?(attrib)
-    }.compact
   end
 
   # What attributes are now good?
@@ -201,6 +187,21 @@ module Trackable
 
   def attribs_ready! attrib_syms, ready_now=true
     attrib_syms.each { |attrib_sym| attrib_ready! attrib_sym, ready_now }
+  end
+
+  # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
+  def attrib_needed! attrib_sym, needed_now=true
+    unless attrib_needed?(attrib_sym) == needed_now
+      send :"#{attrib_sym}_needed=", needed_now
+      attrib_sym
+    end
+  end
+
+  # Ensure that all of the given attributes are marked as needed UNLESS they're already ready or needed
+  def assert_needed_attributes *list_of_attributes
+    list_of_attributes.collect { |attrib|
+      attrib_needed!(attrib) unless attrib_ready?(attrib) || attrib_needed?(attrib)
+    }.compact
   end
 
 end

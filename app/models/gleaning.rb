@@ -66,7 +66,7 @@ class Gleaning < ApplicationRecord
       end
     end
     # Clear the needed bit for all unfound attributes, to forestall more gleaning
-    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
+    clear_needed_attributes
   end
 
   # Execute a gleaning on the page_ref's url

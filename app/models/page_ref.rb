@@ -20,15 +20,16 @@ class PageRef < ApplicationRecord
 
   # We track attributes from Gleanings and MercuryResult except URL
   include Trackable
-  attr_trackable :url, :domain, :title, :date_published, :author, :description, :rss_feeds, :recipe_page
+  attr_trackable :url, :domain, :title, :content, :picurl, :date_published, :author, :description, :rss_feeds, :recipe_page
 
   # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
-    gleaning&.content_if_ready || mercury_result.content_if_ready
+    (gleaning.content_ready? && gleaning.content) ||
+    (mercury_result.content_ready? && mercury_result.content)
   end
 
   def content= val
-    gleaning&.content = val
+    gleaning&.accept_attribute :content, val
   end
 
   # The site specifies material to be removed from the content
@@ -129,6 +130,24 @@ class PageRef < ApplicationRecord
     self
   end
 
+  ######### Trackable overrides ############
+  ############## Trackable ############
+  # In the course of taking a request for newly-needed attributes, fire
+  # off dependencies from gleaning and mercury_result
+  def request_dependencies *newly_needed
+    from_gleaning = Gleaning.tracked_attributes & newly_needed
+    if from_gleaning.present?
+      build_gleaning if !gleaning
+      gleaning.request_attributes *from_gleaning
+    end
+    from_mercury = MercuryResult.tracked_attributes & newly_needed
+    if from_mercury.present?
+      # Translate from our needed attributes to those provided by mercury_result
+      build_mercury_result if !mercury_result
+      mercury_result.request_attributes *from_mercury
+    end
+  end
+
   # Ask gleaning and mercury_result for attributes
   def adopt_dependencies
     super if defined? super
@@ -136,8 +155,15 @@ class PageRef < ApplicationRecord
     accept_attributes gleaning.ready_attribute_values
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
     accept_attributes mercury_result.ready_attribute_values
+    if recipe_page_needed?
+      recipe_page || build_recipe_page
+      accept_attribute :recipe_page, recipe_page
+      # Could do this to get the RecipePage parsing done sooner
+      # recipe_page.request_attributes :content
+    end
   end
 
+  ############ Backgroundable ###############
   # We attempt to drive MercuryResult and Gleaning to completion, then adopt the URLs derived therefrom,
   # in the expectation that other attributes will be extracted from the two separately.
   def perform
@@ -170,11 +196,6 @@ class PageRef < ApplicationRecord
       end
     end
 
-    if !errors.any? && recipe_page_needed?
-      build_recipe_page unless recipe_page
-      accept_attribute :recipe_page, recipe_page
-      recipe_page.request_attributes :content
-    end
   end
 
   def after job=nil
@@ -267,7 +288,7 @@ class PageRef < ApplicationRecord
     self.http_status = nil # Reset the http_status
     self.site = Site.find_or_build_for self
     self.kind = :site if site&.page_ref == self # Site may have failed to build
-    request_attributes :url # Trigger gleaning and mercury_result
+    request_attributes :url # Trigger gleaning and mercury_result to validate/modify url
     attrib_ready! :url # Has been requested but is currently ready
   end
 
@@ -342,14 +363,5 @@ class PageRef < ApplicationRecord
   
   private
 
-  # In the course of taking a request for newly-needed attributes, fire
-  # off dependencies from gleaning and mercury_result
-  def request_dependencies *newly_needed
-    build_gleaning if !gleaning
-    gleaning.request_attributes *(Gleaning.tracked_attributes & newly_needed)
-    # Translate from our needed attributes to those provided by mercury_result
-    build_mercury_result if !mercury_result
-    mercury_result.request_attributes *(MercuryResult.tracked_attributes & newly_needed)
-  end
 
   end
