@@ -107,19 +107,20 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   test "with_subroot_of" do
-    sites(:nyt).save # Trigger DelayedJob
-    assert_not_nil sites(:nyt).dj, 'Existing site not marked for gleaning'
+    nyt = Site.find_or_build_for "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/" # sites(:nyt).save # Trigger DelayedJob
+    nyt.save
+    assert_not_nil nyt.dj, 'Existing site not marked for gleaning'
     nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
     nyt2 = "http://www.nytimes.com/2016/12/13/dining/restaurants-no-tipping-service.html?ref=dining"
     dpr = PageRef.fetch nyt1
     dpr.kind = 'about'
     dpr.save
-    assert_equal dpr.site, sites(:nyt)
+    assert_equal dpr.site, nyt
     short = dpr.site
     short.reload
     assert_equal dpr, short.page_refs.first, 'Created PageRef does not get included among its site\'s PageRefs'
 
-    long = Site.create sample: sites(:nyt).sample, root: "dinersjournal.blogs.nytimes.com/2012"
+    long = Site.create sample: nyt.sample, root: "dinersjournal.blogs.nytimes.com/2012"
     long.bkg_land
     assert_equal "dinersjournal.blogs.nytimes.com/2012", long.root
     assert_equal short, Site.with_subroot_of(long.root)
@@ -127,13 +128,26 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal dpr, long.page_refs.first
   end
 
-  test "root lengthening moves entities" do
-    nyt1 = "http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss"
+  test "aliases traced and established for defunct site" do
+    # dinersjournal redirects through www.nytimes.com/section/food to www.nytimes.com/pages/dining/index.html
+    nyt1 = "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/"
     dpr1 = PageRef.fetch nyt1
     dpr1.kind = 'about'
     dpr1.save
     site1 = dpr1.site
-    site1.bkg_land
+    site1.ensure_attributes :name
+    assert_equal "dinersjournal.blogs.nytimes.com", site1.root
+    assert_equal "https://www.nytimes.com/section/food", site1.home
+    assert_includes site1.page_ref.aliases.map(&:url), "www.nytimes.com/pages/dining/index.html"
+  end
+
+  test "root lengthening moves entities" do
+    nyt1 = "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/"
+    dpr1 = PageRef.fetch nyt1
+    dpr1.kind = 'about'
+    dpr1.save
+    site1 = dpr1.site
+    site1.ensure_attributes :name
     assert_equal "dinersjournal.blogs.nytimes.com", site1.root
 
     site1.root = "www.nytimes.com/2016"

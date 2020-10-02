@@ -50,6 +50,7 @@ def header_result(link, resource=nil)
     req = Net::HTTP.new(url.host, url.port)
     req.use_ssl = (url.scheme == "https")
     partial = url.path + ((query = url.query) ? "?#{query}" : "")
+    partial = '/' if partial.blank?
     head = req.request_head(partial)
     code = head.code.to_i rescue 400
     # Redirection codes

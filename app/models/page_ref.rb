@@ -167,11 +167,42 @@ class PageRef < ApplicationRecord
   # We attempt to drive MercuryResult and Gleaning to completion, then adopt the URLs derived therefrom,
   # in the expectation that other attributes will be extracted from the two separately.
   def perform
+    if url_needed?
+      # We need to follow any redirects from the current url.
+      # The final (non-redirected) location will become our URL, and any
+      # URLs that redirected along the way (including the first) become our aliases
+      # NB Only the original URL is guaranteed not to be redundant, either in another page_ref
+      # or an alias. If it's the latter, we capture the alias. If we can't adopt the URL without
+      # clashing with another page_ref, we assign it to MercuryResult and Gleaning and give up.
+      # Check the header for the url from the server.
+      # If it's a string, the header returned a redirect
+      # otherwise, it's an HTTP code
+      puts "Checking direct access of PageRef ##{id} at '#{url}'"
+      subject_url = url
+      # Loop over the redirects from the link, adding each to the record.
+      # Stop when we get to the final page or an error occurs
+      while (hr = header_result(subject_url)).is_a?(String)  # ...because redirect
+        # header_result returns a string for a redirect
+        next_url = hr.match(/^http/) ? hr : safe_uri_join(subject_url, hr).to_s # The redirect URL may only be a path
+        if !Alias.urleq(subject_url, next_url) && alias_for?(next_url) # Time to give up when the url has been tried (it already appears among the aliases)
+          # Report the error arising from direct access
+          hr = header_result next_url
+          break
+        end
+        puts "Redirecting from #{subject_url} to #{next_url}"
+        alias_for subject_url, true
+        subject_url = next_url
+      end
+      accept_attribute :url, subject_url
+      hr # Return the last error code
+    end
+
+    # Now that we have a url, move on to the mercury_result and the gleaning
     mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
     if mercury_result.good? # All is well
       accept_url mercury_result.url if mercury_result.url_ready?
       if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
-        new_aliases = mercury_result.new_aliases.collect {|url| Alias.indexing_url url }
+        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
         # Create a new alias on this page_ref for every derived alias that isn't already in use
         (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
       end
@@ -256,7 +287,7 @@ class PageRef < ApplicationRecord
 
   # This is the key maintainer of URL consistency and uniqueness
   # PageRef.fetch: provide THE ONE PageRef corresponding to the given url,
-  #   whether an existing one, or a newly-built one. Its URL will be in the
+  #   whether an existing page_ref, or a newly-built one. Its URL will be in the
   #   canonical form (eliding the target)
   # String, PageRef => PageRef; nil => nil
   # Return a (possibly newly-created) PageRef on the given URL

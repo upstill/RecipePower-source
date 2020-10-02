@@ -41,10 +41,6 @@ class MercuryResult < ApplicationRecord
     self.results = get_mercury_results
   end
 
-  def url
-    super.if_present || page_ref&.url
-  end
-
   private
 
   # Consult Mercury on a url and report the results in the model
@@ -58,7 +54,7 @@ class MercuryResult < ApplicationRecord
   def get_mercury_results
     new_aliases = [] # We accumulate URLs that got redirected on the way from the nominal URL to the final one (whether successful or not)
     begin
-      mercury_data = try_mercury url
+      mercury_data = try_mercury(url.if_present || page_ref.url)
       if mercury_data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
         mercury_data['url'] = url

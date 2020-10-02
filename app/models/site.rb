@@ -128,14 +128,10 @@ class Site < ApplicationRecord
     end
   end
 
-  # When saved, we check the need to get data from entities we depend on
-  def bkg_launch force=false
-    unless logo.present? && name.present? && description.present?
-      # Launch the page_ref to extract them as necessary
-      page_ref&.bkg_launch
-      force = true
-    end
-    super(force) if defined?(super)
+  # Request attributes of other objects
+  def request_dependencies *newly_needed
+    page_ref || build_page_ref
+    page_ref.request_attributes *(newly_needed.collect { |my_attrib| Site.attribute_for_result my_attrib })
   end
 
   # Get the available attributes from the PageRef
@@ -146,18 +142,6 @@ class Site < ApplicationRecord
     accept_attribute :description, page_ref.description if page_ref.description_ready?
     page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
   end
-
-=begin
-  # This is called when the page_ref finishes updating
-  def adopt_page_ref
-    # Extract elements from the page_ref
-    self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
-    self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
-    self.description = page_ref.description unless description.present? || page_ref.description.blank?
-    page_ref.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaned?
-    (persisted? && changed?) ? save : true
-  end
-=end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here
   def site
@@ -389,9 +373,10 @@ public
   alias_method :ohome_eq, :'home='
   # We need to point the page_ref back to us so that it doesn't create a redundant site.
   def home=(url)
-    revised = ohome_eq(url)
-    page_ref.site = self
-    page_ref.kind = :site
+    if revised = ohome_eq(url)
+      page_ref.site = self
+      page_ref.kind = :site unless page_ref.persisted? # Don't change the kind of an existing page_ref
+    end
     revised
   end
 
@@ -420,12 +405,6 @@ public
     else
       self.referent = Referent.express(str, :Source, :form => :generic)
     end
-  end
-
-  # Request attributes of other objects
-  def request_dependencies *newly_needed
-    page_ref.build unless page_ref
-    page_ref.request_attributes *(newly_needed.collect { |my_attrib| Site.attribute_for_result my_attrib })
   end
 
 end

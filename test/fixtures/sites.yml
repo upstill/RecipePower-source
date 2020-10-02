@@ -1,7 +1,7 @@
-nyt:
-    sample: http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss
-    root: dinersjournal.blogs.nytimes.com
-    # site: http://dinersjournal.blogs.nytimes.com
+#nyt:
+#    sample: http://dinersjournal.blogs.nytimes.com/2012/03/23/yeasted-dough-for-a-rustic-tart/?partner=rss&emc=rss
+#    root: dinersjournal.blogs.nytimes.com
+#    # site: http://dinersjournal.blogs.nytimes.com
 
 alca:
     sample: http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29
