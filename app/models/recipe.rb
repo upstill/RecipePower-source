@@ -90,7 +90,7 @@ class Recipe < ApplicationRecord
 
   # Write the title attribute only after trimming and resolving HTML entities
   def title= ttl
-    ttl = site_service.trim_title(ttl) if site
+    ttl = site_service.trim_title(ttl) if site_service
     write_attribute :title, @@coder.decode(ttl)
   end
 
