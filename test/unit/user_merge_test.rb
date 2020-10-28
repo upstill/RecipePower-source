@@ -13,7 +13,6 @@ class UserMergeTest < ActiveSupport::TestCase
     user2.save ; user2.reload
     assert_equal 0, user1.followees.count
     assert_equal 1, user2.followees.count
-    assert_equal 1, user1.touchers.count
     assert_equal 0, user2.touchers.count
   end
 

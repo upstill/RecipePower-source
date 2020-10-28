@@ -54,8 +54,12 @@ def header_result(link, resource=nil)
     head = req.request_head(partial)
     code = head.code.to_i rescue 400
     # Redirection codes
-    redirect = head.header["location"] if [301, 302, 303].include?(code)
-    redirect.present? ? redirect : code
+    if [301, 302, 303].include?(code) && (redirect = head.header['location']).present?
+      # Got a location to redirect to
+      URI(redirect)&.to_s || redirect # Run it through URI to make it nice (i.e., remove port 443 spec for https references)
+    else
+      code
+    end
   rescue Exception => e
     # If the server doesn't want to talk, we assume that the URL is okay, at least
     return 401 if e.kind_of?(Errno::ECONNRESET) || url
@@ -80,7 +84,6 @@ def safe_parse(url)
       end
     end
   end
-  uri.scheme = 'http' if uri && uri.scheme.present?
   uri
 end
 

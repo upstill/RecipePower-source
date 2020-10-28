@@ -33,7 +33,7 @@ module Picable
           # Get the existing reference
           #          if options[:as]
           # The reference is to another entity type: we just index by URL and assign the reference association
-          ref = pu.blank? ? nil : ImageReference.find_or_initialize(pu)
+          ref = pu.blank? ? nil : ImageReferenceServices.find_or_initialize(pu)
           self.method(:"#{reference_name}=").call ref
           if self.has_attribute? picable_attribute
             # Set the old url attribute--if it still exists

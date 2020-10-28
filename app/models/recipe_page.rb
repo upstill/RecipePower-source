@@ -15,17 +15,6 @@ class RecipePage < ApplicationRecord
   accepts_nested_attributes_for :page_ref
   has_many :recipes, :through => :page_ref
 
-=begin
-  # Trigger the page_ref and the associated gleaning as necessary
-  def bkg_launch force=false
-    if content.blank?
-      page_ref.bkg_launch
-      force = true
-    end
-    super(force) if defined?(super)
-  end
-=end
-
   ############# Backgroundable #############
 
   def perform

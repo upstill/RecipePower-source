@@ -16,7 +16,7 @@ class RecipeTest < ActiveSupport::TestCase
   end
 
   test "url assigned" do
-    url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
+    url = "https://www.tasteofbeirut.com/persian-cheese-panir/"
     recipe = Recipe.new url: url, title: 'placeholder'
     assert_nil recipe.reference if recipe.respond_to?(:reference)
     assert !recipe.errors.present?
@@ -72,15 +72,37 @@ class RecipeTest < ActiveSupport::TestCase
   end
 
   test "bad--but well-formed--url assigned" do
+    url = "http://www.tastenobeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/"
+    recipe = Recipe.new url: url
+    assert !recipe.errors.present?
+    assert_equal url, recipe.url
+    assert recipe.page_ref.virgin?
+    recipe.ensure_attributes :title, :description
+    refute recipe.attrib_ready?(:description)
+    refute recipe.attrib_ready?(:title)
+    assert recipe.page_ref.bad?
+    refute recipe.save
+    assert_nil recipe.id
+  end
+  test "recipe with redirect responds to all aliases" do
     url = "http://www.tasteofbeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/"
     recipe = Recipe.new url: url
     assert !recipe.errors.present?
     assert_equal url, recipe.url
     assert recipe.page_ref.virgin?
-    recipe.page_ref.bkg_land
-    assert recipe.page_ref.bad?
-    refute recipe.save
-    assert_nil recipe.id
+    recipe.ensure_attributes :title, :description
+    assert recipe.attrib_ready?(:description)
+    assert recipe.attrib_ready?(:title)
+    assert recipe.page_ref.good?
+    assert_equal 'https://www.tasteofbeirut.com/eggplant-in-yogurt-sauce-batenjane-be-laban/', recipe.url
+    assert_equal recipe.picture, recipe.page_ref.picture # Identical unpersisted ImageReferences
+    assert recipe.save
+    assert_not_nil recipe.id
+    recipe.save
+    recipe.reload
+    assert_equal recipe, Recipe.find_by_url('https://www.tasteofbeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/')
+    assert_equal recipe, Recipe.find_by_url('http://www.tasteofbeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/')
+    assert_equal 'https://www.tasteofbeirut.com/wp-content/uploads/2013/05/eggplant-in-yogurt-sauce1.jpg', recipe.picurl
   end
 
   test "bad url reassigned over good url" do
@@ -93,7 +115,7 @@ class RecipeTest < ActiveSupport::TestCase
     assert_nil recipe.page_ref.id
     assert recipe.save
     assert recipe.errors.empty?
-    assert !recipe.page_ref.errors.present?
+    assert recipe.page_ref.errors.empty?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
 

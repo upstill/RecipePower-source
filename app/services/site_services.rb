@@ -5,6 +5,65 @@ class SiteServices
     @site = site
   end
 
+  # Return a site (if any) that serves for the given link
+  def self.find_for link
+    return nil unless links = subpaths(link) # URL doesn't parse
+    scope = Site.where root: links # Scope for all sites whose root matches a subpath of the url...
+    # ...scan for the one with the longest root
+    set = scope.to_a + SiteServices.unpersisted.values.find_all { |s| links.include? s.root }
+    out = set.inject(set.first) do |result, site|
+      site.root.length > result.root.length ? site : result
+    end
+    out
+  end
+
+  # Produce a Site that maps to a given url(s) whether one already exists or not
+  def self.find_or_build_for url_or_page_ref
+    link = url_or_page_ref.is_a?(PageRef) ? url_or_page_ref.url : url_or_page_ref
+    # Look first for existing sites on any of the links
+    if site = SiteServices.find_for(link)
+      return site
+    end
+
+    if inlinks = subpaths(link)
+      return SiteServices.find_or_build url_or_page_ref, root: inlinks.first, sample: link
+    end
+    SiteServices.find_or_build url_or_page_ref, sample: link
+  end
+
+  # Produce a Site for a given url(s) whether one already exists or not
+  def self.find_or_build url_or_page_ref, options={}
+    # If a PageRef is provided, and it bears the homelink, use that for our PageRef
+    # to avoid an infinite regress of Site deriving PageRef deriving Site...
+    if url_or_page_ref.is_a?(PageRef)
+      homelink = host_url (options[:sample] ||= url_or_page_ref.url)
+      if homelink == url_or_page_ref.url
+        options[:page_ref] = url_or_page_ref
+      else
+        options[:home] = homelink
+      end
+      # options[:home] = (homelink == url_or_page_ref.url) ? url_or_page_ref : homelink
+    else
+      homelink = host_url (options[:sample] ||= url_or_page_ref)
+      options[:home] = homelink
+    end
+    if options[:root] ||= cleanpath(homelink) # URL parses
+      # Find a site, if any, based on the longest subpath of the URL
+      if site = SiteServices.find_by_root(options[:root])
+        return site # Can be found? Great!
+      end
+      # The home link needs to take heed of the root, since the latter may have a longer path
+      if options[:home] && options[:root]&.match('/') # The root includes a path, so add it to :home
+        options[:home] = safe_uri_join(options[:home], options[:root].sub(/[^\/]*\//, '')).to_s
+      end
+      # Need to make a new one. We'll leave this up to PageRef, which will do the actual work
+      # of creating the site while managing indirects
+      site = self.build_site options
+      site.request_attributes :home
+      return site
+    end
+  end
+
   def report_extractors *what
     # Provide a string suitable for giving to #assign_extractors to pass the site's :trimmers, :grammar_mods and :finders
     content_selector = site.finder_for('Content')&.selector || 'nil'
@@ -399,129 +458,30 @@ class SiteServices
         to_a
   end
 
+  private
+
+  # In #find_or_build sometimes we need to find a site that has been priorly built but not yet persisted.
+  # To make these as yet unpersisted sites findable, we keep a cache of unpersisted sites (the
+  # hash @@UNPERSISTED, keyed on the root attribute).
+
+  # Get the Site of the given root, including a search among unpersisted records
+  def self.find_by_root root
+    #SiteServices.unpersisted.find { |up| up.root == root } || Site.find_by(root: root)
+    self.unpersisted[root] || Site.find_by(root: root)
+  end
+
+  def self.unpersisted
+    (@@UNPERSISTED ||= {}).keep_if { |root, site| !site.persisted? }
+      # @@UNPERSISTED.each { |root, site| @@UNPERSISTED.delete root if !site.persisted? }
+  end
+
+  # Build a new Site and add it to the unpersisted set
+  def self.build_site options = {}
+    # We need to get the site into the unpersisted table immediately, because
+    # setting :home may create a page_ref, which may create another site
+    self.unpersisted[options[:root]] = (site = Site.new root: options[:root])
+    options.except(:root).each { |attr, val| site.send :"#{attr}=", val }
+    site
+  end
+
 end
-
-# Accumulates the results of a finder set
-=begin
-class FinderResults
-
-  def initialize(site, finders, only=nil)
-    @finders = finders
-    @site = site
-    finders.each do |finder|
-      finder[:label] = finder[:label].to_s # Basic QA
-      finder[:count] = 0 unless finder[:count]
-      finder[:foundlings] = [] unless finder[:foundlings]
-    end
-    # Restrict the tags to the requested set, if any
-    if only
-      only.each_index { |ix| only[ix] = only[ix].to_s }
-      @finders = @finders.select { |finder| only.include? finder[:label] }
-    end
-  end
-
-  def collect_results(url, labelset=nil, verbose=true, site=nil)
-    @site = site if site
-    labelset ||= @site.finders.collect { |finder| finder[:label].to_s }.uniq
-    begin
-      # Collect all results from the page
-      pagetags = PageTags.new url, SiteServices.new(@site).all_finders, true, verbose
-    rescue
-      puts "Error: couldn't open page '#{url}' for analysis."
-      return nil
-    end
-    labelset.each do |label|
-      pagetags.results_for(label = label.to_s).each do |result|
-        foundset = '['+result.out.join("\n\t\t ")+'] (from '+url+')'
-        finder = result.finder
-        finder[:count] = finder[:count] + 1
-        finder[:foundlings] << foundset
-      end
-    end
-    return pagetags
-  end
-
-  # Interact via the terminal on the fate of the finders
-  def revise_interactively
-    @finders.each do |finder|
-      puts "#{finder[:label]}: #{finder[:selector]}"
-      finder.each { |key, value| puts "\t(#{key}: #{value})" unless [:label, :selector, :count, :foundlings].include?(key) }
-      # Trim any found title using the 'ttlcut' attribute of the site
-      if finder[:label] == 'Title' && @site.ttlcut
-        finder[:foundlings].each_index do |ix|
-          ttl, url = finder[:foundlings][ix].match(/^\[([^\]]*)\] \(from (.*)\)$/)[1, 2]
-          finder[:foundlings][ix] = "[#{trim_title ttl}] (from #{url})"
-        end
-      end
-      puts "\t["+finder[:foundlings].join("\n\t ")+"\t]"
-      puts 'Action? ([dD]=Delete [qQ]=quit [C cutstring])'
-      answer = gets.strip
-      if m = answer.match(/^([Cc])\s*(\S.*$)/)
-        answer, cutstring = m[1, 2]
-      end
-      case answer
-        when 'd', 'D'
-          @finders.delete_if { |f| f == finder }
-          done = false
-        when 'q', 'Q'
-          exit
-        when 'c', 'C'
-          if finder[:label] == 'Title'
-            puts "Really cut titles from this site using '#{cutstring}'?"
-            if gets.strip == 'y'
-              puts '...okay...'
-              @site.ttlcut = cutstring
-              done = false
-            end
-          end
-        when ''
-        else
-          # Replace the path with input text
-          puts "Really replace path '#{finder[:selector]}' with '#{answer}'?"
-          next unless gets.strip == 'y'
-          puts '...okay...'
-          finder[:selector] = answer
-          @finders.each do |tag|
-            if tag == finder
-              tag[:selector] = answer
-            end
-          end
-          done = false
-      end
-    end
-    @finders.each do |finder|
-      finder.delete(:count)
-      finder.delete(:foundlings)
-    end
-    @finders
-  end
-
-  def report
-    # finderset = self.collect_tags(which)+@@TitleTags
-    foundlist = {}
-    @finders.each do |finder|
-      path = finder[:selector]
-      label = finder[:label]
-      foundlist[label] ||= {}
-      foundlist[label][path] ||= []
-      foundlist[label][path] << finder
-    end
-    foundlist.each do |label, labelset|
-      puts label.to_s+':'
-      labelset.each do |path, pathset|
-        puts "\t"+path+':'
-        pathset.each do |tags|
-          tags.each do |name, value|
-            next if name == :label || name == :selector || name == :foundlings
-            nq =  name.class == Symbol ? '\'' + name.to_s + '\'' : '"' + name + '"'
-            vq = value.class == Symbol ? '\'' + value.to_s+ '\'' : '"' + value.to_s+'"'
-            puts "\t\t"+nq+': '+vq
-          end
-          puts "\t\t"+tags[:foundlings].join("\n\t\t") if tags[:foundlings]
-          puts "\t\t--------------------------------------"
-        end
-      end
-    end
-  end
-end
-=end

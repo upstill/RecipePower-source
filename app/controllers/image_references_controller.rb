@@ -29,7 +29,7 @@ class ImageReferencesController < ApplicationController
   # POST /image_references
   # POST /image_references.json
   def create
-    @image_reference = ImageReference.find_or_initialize params[:image_reference][:url]
+    @image_reference = ImageReferenceServices.find_or_initialize params[:image_reference][:url]
     notice = "Image was successfully #{@image_reference.persisted? ? 'fetched' : 'created'}."
     respond_to do |format|
       if @image_reference.save

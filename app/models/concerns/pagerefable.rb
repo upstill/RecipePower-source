@@ -100,7 +100,7 @@ module Pagerefable
   # The backgroundable performs its delayed job by forcing the associated page_ref to do its job
   # (synchronously if necessary)
   def perform
-    page_ref.bkg_land
+    page_ref.ensure_attributes
     if page_ref.bad?
       err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
       errors.add :url, err_msg
@@ -110,7 +110,7 @@ module Pagerefable
   end
 
   def ensure_site
-    (page_ref.site ||= Site.find_or_build_for(page_ref)) if page_ref
+    (page_ref.site ||= SiteServices.find_or_build_for(page_ref)) if page_ref
   end
 
   def url_attribute

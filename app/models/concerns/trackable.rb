@@ -92,7 +92,7 @@ module Trackable
       end
       return
     end
-    super(namesym, *args) if defined(super)
+    super(namesym, *args) if defined?(super)
   end
 
   # Force launching if any attribute is needed
@@ -144,7 +144,8 @@ module Trackable
     super if defined? super
   end
 
-  # Report on the 'needed' bit for the named attribute. If no attribute specified, report whether ANY attribute is needed
+  # Report on the 'needed' bit for the named attribute.
+  # If no attribute specified, report whether ANY attribute is needed
   def attrib_needed? attrib_sym=nil
     return send(:"#{attrib_sym}_needed") if attrib_sym
     selected_attr_trackers.any? { |attrib_sym| attrib_sym.to_s.match(/_needed/) && send(attrib_sym) }

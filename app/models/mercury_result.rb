@@ -6,7 +6,7 @@ class MercuryResult < ApplicationRecord
   include Trackable
   attr_trackable :url, :domain, :title, :date_published, :author, :content, :picurl, :description, :mercury_error, :new_aliases
   # Provide access methods for unpersisted results
-  attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
+  # attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
 
   has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
@@ -21,16 +21,22 @@ class MercuryResult < ApplicationRecord
     when :excerpt
       :description
     else
-      result_name
+      result_name if self.attribute_names.include?(result_name.to_s)
     end
   end
 
   def adopt_dependencies
     return unless good?
     # Use the data from Mercury to set all needed keys
-    results.keys.map(&:to_sym).each do |result_name|
-      attr = MercuryResult.attribute_for_result result_name
-      accept_attribute attr, results[result_name.to_s] if MercuryResult.tracked_attributes.include?(attr)
+    results.each do |result_name, result_val|
+      if attr = MercuryResult.attribute_for_result(result_name.to_sym)
+        if MercuryResult.tracked_attributes.include?(attr)
+          accept_attribute attr, result_val
+        else
+          write_attribute attr, value
+          # self.send (attr.to_s + '=').to_sym, value
+        end
+      end
     end
     # Should we really be declaring that no more attributes are needed?
     clear_needed_attributes
@@ -39,6 +45,14 @@ class MercuryResult < ApplicationRecord
   def perform
     self.error_message = nil
     self.results = get_mercury_results
+  end
+
+  def method_missing namesym, *args
+    if results&.keys&.include? namesym.to_s
+      results[namesym.to_s]
+    else
+      super if defined?(super)
+    end
   end
 
   private

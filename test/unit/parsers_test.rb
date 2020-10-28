@@ -322,7 +322,7 @@ end
     assert (cook_seeker = parser.seek :rp_cook_time)
     assert_equal 'Cook: 20 min', cook_seeker.to_s
     assert (servings_seeker = parser.seek :rp_serves)
-    assert_equal "Serves 4\n", servings_seeker.to_s
+    assert_equal "Serves 4", servings_seeker.to_s
     ingred_seekers = rcp_seeker.find :rp_ingname
     ingreds_found = ingred_seekers.map &:to_s
     assert_equal ingreds, ingreds_found

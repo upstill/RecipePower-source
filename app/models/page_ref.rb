@@ -100,30 +100,12 @@ class PageRef < ApplicationRecord
   has_many :referents, :through => :referments, inverse_of: :page_refs
 
   before_save do |pr|
-    if pr.url_changed?
-      alias_for pr.url, true      # Create a new gleaning or relaunch the old one
-    end
+    alias_for(pr.url, true) if pr.url_changed? # Ensure that a page_ref's url is an alias, too
   end
 
   after_create { |pr| pr.request_attributes :url } # Need to launch after creation because, somehow, a new url doesn't count as changed
 
-=begin
-  after_save do |pr|
-    if pr.url.present? && !(pr.site_id || pr.site)
-      puts "Find/Creating Site for PageRef ##{pr.id} w. url '#{pr.url}'"
-      unless pr.site = Site.find_by(page_ref_id: id)
-        pr.site = Site.find_or_create_for pr.url
-        pr.site.page_refs << self
-        pr.update_attribute :site_id, pr.site.id
-      end
-    end
-    # pr.bkg_launch true if pr.saved_change_to_url?
-  end
-
-  def site
-    super || (self.site = Site.find_or_build_for url)
-  end
-=end
+  after_save { |pr| pr.bkg_launch if pr.needed_attributes.present? } # ...because no launching occurred before saving
 
   # All other PageRefables refer to a separate PageRef, but we're our own page_ref
   def page_ref
@@ -260,7 +242,10 @@ class PageRef < ApplicationRecord
   # Find the alias associated with the given url, optionally building one
   def alias_for url, assert=false
     iu = Alias.indexing_url(url)
-    aliases.find { |al| al.url == iu } || (assert && self.aliases.build(url: iu))
+    aliases.find { |al| al.url == iu } ||
+        (assert &&
+            aliases.build(url: iu)
+        )
   end
 
   # Test whether there's an existing alias
@@ -317,8 +302,13 @@ class PageRef < ApplicationRecord
     super new_url # Heading for trouble if url wasn't unique
     @indexing_url = nil # Clear the memoized indexing_url
     self.http_status = nil # Reset the http_status
-    self.site = Site.find_or_build_for self
+    # We do NOT build the associated site here, because we may be BUILDING the page_ref for a site, in
+    # which case that site will assign itself to us. Instead, the site attribute is memoized, and if it
+    # hasn't been built by the time that it is accessed, THEN we find or build an appropriate site
+    self.site = SiteServices.find_or_build_for self
     self.kind = :site if site&.page_ref == self # Site may have failed to build
+    # We trigger the site-adoption process if the existing site doesn't serve the new url
+    # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
     request_attributes :url # Trigger gleaning and mercury_result to validate/modify url
     attrib_ready! :url # Has been requested but is currently ready
   end

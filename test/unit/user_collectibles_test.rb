@@ -28,7 +28,7 @@ class UserCollectiblesTest < ActiveSupport::TestCase
     assert_equal 0, rcp.collector_pointers.count
     assert_equal 1, rcp.toucher_pointers.count
 
-    site = Site.find_or_build_for "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/" # sites(:nyt)
+    site = SiteServices.find_or_build_for "https://dinersjournal.blogs.nytimes.com/author/melissa-clark/" # sites(:nyt)
     assert user.sites.empty?
     user.sites<<site
     assert_equal 1, user.sites.size

@@ -24,7 +24,7 @@ staging:
 test:
   <<: *common
   database: dabpmrobtjc0ei
-  host: /tmp
+  # host: /tmp
 
 production:
   <<: *common

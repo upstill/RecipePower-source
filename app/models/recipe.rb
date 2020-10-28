@@ -96,12 +96,12 @@ class Recipe < ApplicationRecord
 
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
-    pu = site_service.resolve(pu) if site_service
-    self.picture = ImageReference.find_or_initialize pu
+    self.picture = ImageReferenceServices.find_or_initialize site_service&.resolve(pu)
   end
 
+  # Memoized SiteServices
   def site_service
-    @ss ||= (SiteServices.new(ensure_site) if ensure_site)
+    @ss ||= site && SiteServices.new(site)
   end
 
   # Absorb another recipe
