@@ -113,24 +113,20 @@ module RecipesHelper
             class: 'btn btn-default btn-xs'
   end
 
-  def recipe_page_button recipe
-    return ''.html_safe unless recipe.is_a?(Recipe) && recipe.recipe_page&.id
-    #         <%= link_to_submit '^', recipe_page_path(decorator.object.recipe_page), mode: :partial, title: 'Full Page' %>
-    # glyphicon-chevron-up glyphicon-screenshot glyphicon-import glyphicon-open
-    link_to_submit '', recipe_page_path(recipe.recipe_page), mode: :partial, class: 'open-recipe-page glyphicon glyphicon-import'
+  def refresh_button object
+    object ?
+        link_to_submit('',
+                       polymorphic_path(object, refresh: true),
+                       mode: :partial,
+                       class: 'refresh-content glyphicon glyphicon-refresh',
+                       title: 'Refresh Content') :
+        ''.html_safe
   end
 
-  def content_button object, shown_object, html_state=nil
-    return ''.html_safe if object.nil?
-    params = { mode: :partial }
-
-    label = "#{object.model_name} #{html_state}".html_safe
-    params[:html_state] = html_state if object.is_a? PageRef
-    if (object == shown_object) && (html_state == @html_state)
-      params[:refresh] = true
-      label = 'Refresh '.html_safe+label
-    end
-    button_to_submit label, polymorphic_path(object, params)
+  def content_button object
+    object ?
+        button_to_submit("#{object.model_name}".html_safe, polymorphic_path(object, mode: :partial)) :
+        ''.html_safe
   end
 
   def recipe_content_buttons object
@@ -139,24 +135,26 @@ module RecipesHelper
       page_ref = object.page_ref
       buttons = ActiveSupport::SafeBuffer.new
       recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
-      buttons +=
-          (content_button(page_ref, object, 'raw') +
-              content_button(page_ref, object, 'trimmed') +
-              content_button(page_ref, object, 'massaged') +
-              content_button(recipe, object) +
-              content_button(page_ref.mercury_result, object) +
-              content_button(page_ref.gleaning, object) +
-              content_button(page_ref.recipe_page, object)) if response_service.admin_view?
-      buttons +=
-          recipe_page_button(recipe) +
-          button_to_submit('',
-                           edit_recipe_contents_path(recipe),
-                           'glyph-edit-red',
-                           'xl',
-                           mode: :modal,
-                           class: 'annotate-content',
-                           title: 'Annotate Content') if object == recipe
-      if object.is_a?(RecipePage)
+      if response_service.admin_view?
+        buttons += "#{object.class.to_s}<strong></strong>&nbsp;".html_safe
+        buttons += content_button(page_ref) if object != page_ref
+        buttons += content_button(recipe) if object != recipe
+        buttons += content_button(page_ref.mercury_result) if object != page_ref.mercury_result
+        buttons += content_button(page_ref.gleaning) if object != page_ref.gleaning
+        buttons += content_button(page_ref.recipe_page) if object != page_ref.recipe_page
+        buttons += refresh_button object
+      end
+      case object
+      when Recipe
+        buttons +=
+            button_to_submit('',
+                             edit_recipe_contents_path(recipe),
+                             'glyph-edit-red',
+                             'xl',
+                             mode: :modal,
+                             class: 'annotate-content',
+                             title: 'Annotate Content')
+      when RecipePage
         # Provide editing button if Recipe or RecipePage
         buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
       end

@@ -1,5 +1,5 @@
 class GleaningPresenter < BasePresenter
-  def html_content variant=nil
-    @object.result_for('Content').if_present || '[No content gleaned]'
+  def html_content 
+    super.if_present || '[No content gleaned]'.html_safe
   end
 end

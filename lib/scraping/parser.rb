@@ -424,6 +424,7 @@ class Parser
           scanner = child.next # Skip past what the child consumed
         end
         return best_guess if best_guess&.hard_fail?
+        next unless child
         children << child.if_succeeded
         end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
       end

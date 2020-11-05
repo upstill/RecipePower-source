@@ -1,8 +1,13 @@
 require './lib/html_utils.rb'
 require 'htmlbeautifier'
 class PageRefPresenter < CollectiblePresenter
+
   def content
-    @object.content.html_safe
+    (@object.content || '').html_safe
+  end
+
+  def trimmed_content
+    @object.trimmed_content
   end
 
   def massaged_content
@@ -13,14 +18,12 @@ class PageRefPresenter < CollectiblePresenter
     HtmlBeautifier.beautify nk.to_s
   end
 
-  def html_content variant=nil
-    case variant
-    when 'trimmed'
-      @object.trimmed_content
-    when 'massaged'
-      massaged_content
-    else
-      @object.content
-    end
+  # PageRef html content depends on whether we're in admin mode.
+  # By default, html content is massaged for beauty
+  # In admin mode, we also present the PageRef's raw and trimmed content
+  def html_content
+    response_service.admin_view? ?
+      with_format('html') { render 'content_variants', presenter: self } :
+      massaged_content.html_safe
   end
 end
