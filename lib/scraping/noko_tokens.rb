@@ -178,9 +178,9 @@ class NokoTokens < Array
     nshifted = teleft.elmt_bounds_index - bounds_prior
     teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
     teright.split_right
-    if Rails.env.development?
-      puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
-    end
+    #if Rails.env.development?
+    #  puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
+    #end
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
     update
     newnode

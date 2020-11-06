@@ -183,9 +183,9 @@ class TextElmtData < Object
   end
 
   # Does this text element have an ancestor of the given tag, with a class that includes the token?
-  def descends_from? tag, token
+  def descends_from? tag, token=nil
     text_element.ancestors.find do |ancestor|
-      ancestor.name == tag && nknode_has_class?(ancestor, token)
+      ancestor.name == tag && (token.nil? || nknode_has_class?(ancestor, token))
     end
   end
 

@@ -101,11 +101,14 @@ module Pagerefable
   # (synchronously if necessary)
   def perform
     page_ref.ensure_attributes
+    # Do we really want to fail/relaunch if the PageRef fails? Shouldn't that depend on the results?
+=begin
     if page_ref.bad?
       err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
       errors.add :url, err_msg
       raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
     end
+=end
     super if defined?(super)
   end
 

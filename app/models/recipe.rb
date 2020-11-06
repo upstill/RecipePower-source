@@ -146,16 +146,16 @@ class Recipe < ApplicationRecord
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed? && page_ref.recipe_page_ready?  # Ready to build
-      reload if persisted?
+      reload if persisted? # Possibly the recipe_page changed us
       recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
       if new_content.present? # Parsing was a success
-        accept_attribute :content, new_content # Retain prior value in case parsing fails
+        accept_attribute :content, new_content, true  # Force the new content
         RecipeServices.new(self).inventory # Set tags according to annotations
       end
     end
-    super if defined?(super)
+    # super if defined?(super)
   end
 
 end

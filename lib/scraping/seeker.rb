@@ -97,8 +97,9 @@ class Seeker
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
   def enclose tagname='span'
+    return unless @token
     # Check that some ancestor doesn't already have the tag
-    if @token && !head_stream.descends_from?(tagname, @token)
+    if !head_stream.descends_from?(tagname, @token)
       @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname, value: @value
     end
   end

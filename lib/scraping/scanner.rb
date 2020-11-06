@@ -716,7 +716,7 @@ class NokoScanner # < Scanner
     text_elmt_data&.parent_tagged_with token
   end
 
-  def descends_from? tag, token
+  def descends_from? tag, token=nil
     text_elmt_data&.descends_from? tag, token
   end
 
