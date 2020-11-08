@@ -80,7 +80,7 @@ function git_pull()
 		echo "Either set \$GIT_BRANCH to 'staging' or 'master', or invoke 'git_pull <branchname>'"
 	elif [[ $GIT_BRANCH =~ 'staging' || $GIT_BRANCH =~ 'master' ]]; then
 		echo "git_pull pulling $GIT_BRANCH."
-		git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git
+		git pull git@github.com:upstill/RecipePower-source.git
 		echo "Done! Don't forget to run git_unpack to distribute configuration, etc., files."
 	else
 		echo "git_pull: must clone EITHER 'staging' or 'master'"

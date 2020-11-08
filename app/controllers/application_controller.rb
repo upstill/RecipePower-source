@@ -489,7 +489,7 @@ class ApplicationController < ActionController::Base
     @response_service ||= ResponseServices.new params, session, request
     @response_service.controller_instance = self
     # This is a unique identifier for a computer, stored as a cookie to persist across sessions
-    @response_service.uuid = cookies[:rp_uuid] || (cookies[:rp_uuid] = session.id)
+    @response_service.uuid = session.id # cookies[:rp_uuid] || (cookies[:rp_uuid] = session.id)
     @response_service
   end
 
