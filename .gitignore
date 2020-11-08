@@ -3,6 +3,7 @@
 .idea/
 db/*.sqlite3
 log/*.log
+shared/*/*
 tmp/
 .sass-cache/
 .DS_Store
@@ -11,6 +12,7 @@ tmp/
 */*/*/.DS_Store
 eventmachine/
 /public/assets
+/backups
 
 /db_timings
 /config/database.yml
@@ -25,6 +27,7 @@ localhost.key
 myCA.key
 myCA.pem
 trial/
+vendor/bundle
 local.recipepower.com.crt
 local.recipepower.com.csr
 local.recipepower.com.ext

@@ -22,8 +22,6 @@ RP::Application.routes.draw do
 
   get 'rp_events/destroy'
 
-  # match "*path" => redirect("https://www.recipepower.com/%{path}"), :constraints => { :subdomain => '' }, via: [:get, :post]
-
   get 'scraper/new'
   post 'scraper/create'
   post 'scraper/init'
@@ -185,6 +183,8 @@ RP::Application.routes.draw do
   # post '/image_reference' => 'image_references#create', :as => 'create_image_reference'
   resources :image_references #, :except => [:index, :create]
   # match 'image_references', :controller => 'image_references', :action => 'index', :via => [:get, :post]
+  resources :gleanings
+  resources :mercury_results
 
   post '/feed' => 'feeds#create', :as => 'create_feed'
   # get 'feeds/:id/owned' => 'feeds#owned', :as => "owned_feed"
@@ -248,7 +248,7 @@ RP::Application.routes.draw do
   resources :recipes, :concerns => [:picable, :collectible, :taggable] do
     member do
       get 'piclist'
-      resource :gleaning
+      get :recipe_page
       resource :recipe_contents do
         patch 'annotate'
       end

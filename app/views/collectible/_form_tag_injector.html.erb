@@ -60,8 +60,5 @@
       <%= f.label :collectible_private, 'Private', class: 'checkbox' %>
       <%= hidden_field_tag 'layout', 'injector' %>
     </div>
-    <% if @decorator.object.has_attribute? 'content' %>
-      <%= f.hidden_field :content  %>
-    <% end %>
     <%= f.submit 'Save', class: 'btn btn-success' %>
 <% end %>

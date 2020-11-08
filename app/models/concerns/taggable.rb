@@ -53,22 +53,14 @@ module Taggable
     filtered_tags tagtype: type_or_types
   end
 
-  # We can't get here if we're not Pagerefable
-  def adopt_page_ref
-    if page_ref.gleaned?
-      ts = TaggingServices.new self
-      if tagstrings = page_ref.results_for('Tags')
-        tagstrings.each { |tagstring|
-          tagstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id }
-        }
-      end
-      if authorstrings = page_ref.results_for('Author')
-        authorstrings.each { |authorstring|
-          authorstring.split(',').map(&:strip).each { |tagname| ts.tag_with tagname, User.super_id, type: 'Author' }
-        }
-      end
-    end
-    defined?(super) ? super : true
+  # Accept the standardized form of the url only, but only if it's valid
+  def accept_tags tagstring
+    accept_attribute :tags, tagstring { |newstring| accept_tagstring newstring }
+  end
+
+  # Accept the standardized form of the url only, but only if it's valid
+  def accept_author authorstring
+    accept_attribute(:author, authorstring) { |newstring| accept_tagstring newstring, 'Author' }
   end
 
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
@@ -209,4 +201,17 @@ module Taggable
                  taggings.keep_if { |tagging| tagging.tag_id == tag_id && tagging.user_id == user_id }
     taggings.destroy *extant
   end
+
+  private
+
+  # Called in the course of accepting (virtual) tag attributes
+  def accept_tagstring tagstring, tagtype=nil
+    if tagstring.present?
+      ts = TaggingServices.new self
+      tagstring.split(',').map(&:strip).each do |tagname|
+        tagtype ? ts.tag_with(tagname, User.super_id, type: tagtype) : ts.tag_with(tagname, User.super_id)
+      end
+    end
+  end
+
 end

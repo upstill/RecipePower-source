@@ -14,12 +14,23 @@ class Gleaning < ApplicationRecord
   # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
   serialize :results, Results
+  
+  include Trackable
+  # "URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"
+  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content
 
-  attr_accessor :needs # A list of labels to satisfy when gleaning
-
-  # Keeps a non-persistent list of labels to satisfy for the gleaning
-  def needs
-    @needs ||= []
+  # Define a mapping from Result label to the attribute that reflects it
+  def self.attribute_for_label label
+    case label
+    when "URI"
+      :url
+    when "Image"
+      :picurl
+    when "Author Name"
+      :author
+    else
+      label.downcase.sub(' ', '_').to_sym
+    end
   end
 
   # ------------- safe delegation to (potentially non-existent) results
@@ -42,10 +53,20 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  def bkg_launch force=false
-    ffc = site.finder_for 'Content'
-    force ||= ffc && (updated_at < ffc.updated_at)  # Launch if we're older than the :content finder
-    super(force) if defined?(super)
+  def adopt_dependencies
+    return unless good?
+    results.labels.each do |label|
+      case label
+      when 'RSS Feed'
+        accept_attribute :rss_feeds, results&.results_for('RSS Feed')
+      when 'Tags', 'Author'
+        accept_attribute Gleaning.attribute_for_label(label), results&.results_for(label).uniq.join(', ')
+      else
+        accept_attribute Gleaning.attribute_for_label(label), results&.result_for(label)
+      end
+    end
+    # Clear the needed bit for all unfound attributes, to forestall more gleaning
+    clear_needed_attributes
   end
 
   # Execute a gleaning on the page_ref's url
@@ -53,7 +74,7 @@ class Gleaning < ApplicationRecord
     self.err_msg = ''
     self.http_status = 200
     begin
-      self.results = FinderServices.glean page_ref.url, page_ref.site, *needs
+      self.results = FinderServices.glean page_ref.url, page_ref.site
     rescue Exception => msg
       breakdown = FinderServices.err_breakdown page_ref.url, msg
       self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
@@ -72,7 +93,7 @@ class Gleaning < ApplicationRecord
     results&.send namesym, *args
   end
 
-  # Add results (presumably from a new finder) to the results in a gleaning
+  # Add results (presumably from a new finder) to the results in a Gleaning
   def assimilate_finder_results results_hash
     do_save = false
     self.results ||= Results.new *results_hash.keys
@@ -92,20 +113,7 @@ class Gleaning < ApplicationRecord
     do_save || true # Return a boolean indicating whether the finder made a difference
   end
 
-=begin
-  def extract_all *labels
-    result = ''
-    labels.each do |label|
-      index = 0
-      (results[label] || []).map(&:out).flatten.uniq.each do |str|
-        result += yield(str, index) || ''
-        index += 1
-      end
-    end if results
-    result
-  end
-=end
-
+  # Record the fact that a Finder found content on a page
   def hit_on_attributes attrhash, site
     return unless results.present? && site
     attrhash.each do |label, value_or_set|

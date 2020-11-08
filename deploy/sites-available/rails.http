@@ -1,0 +1,29 @@
+# nginx configuration that will serve from a Rails app (ASSUMING THAT UNICORN IS RUNNING)
+# Change the server_name to deploy.recipepower.com if that domain points to this host (see ping to confirm)
+# Test with 'curl http://localhost/{index.html,other.html,tasks}' in example
+# ...or hit http://$IPADDR:3000/{index.html,other.html,tasks} in a browser
+upstream rails {
+        # Path to Unicorn socket file
+        server unix:/var/sockets/unicorn.sock fail_timeout=0;
+}
+
+server {
+        listen 80;
+        server_name deploy.recipepower.com; # localhost;
+
+        root /var/www/recipepower.com/html; # For static html files
+
+        location @rails {
+                proxy_pass http://rails;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+        }
+
+        try_files $uri @rails;
+
+        error_page 500 502 503 504 /500.html;
+        client_max_body_size 4G;
+        keepalive_timeout 10;
+
+}

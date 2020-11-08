@@ -23,4 +23,8 @@ class GleaningDecorator < ModelDecorator
     nil
   end
 
+  def title
+    result_for 'Title'
+  end
+
 end

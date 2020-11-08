@@ -15,6 +15,12 @@ div.content-item {
     font-size: 2em;
     color: #81ae8b;
   }
+  a.refresh-content {
+    float: right;
+    margin-left: 10px;
+    font-size: 2em;
+    color: #81ae8b;
+  }
 }
 div.dialog.recipe-contents.new-style.green {
   z-index: 1500;

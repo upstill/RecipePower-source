@@ -12,14 +12,17 @@ class RecipeContentsController < ApplicationController
     @content = rcparams[:content]
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse
-    # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of an findable tag, a dialog is presented
+    # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of a findable tag, a dialog is presented
     #    for the user to decide how to handle the tag;
     # 3) the user says to enter the problematic tag directly into the dictionary, or specifies an existing tag for what
     #    was meant by the problematic tag. The latter can be optionally entered as a synonym of the intended name.
     if rcparams[:anchor_path] # Initial annotation on browser selection
+      logger.debug "Annotating with anchor_path = '#{rcparams[:anchor_path]}'"
       @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
     elsif @parse_path = rcparams[:parse_path] # Specifying an element of the DOM
-      if !(@tagname = rcparams[:tagname])
+      @tagname = rcparams[:tagname]
+      if !@tagname
+        logger.debug "Looking for tag at '#{rcparams[:parse_path]}'"
         @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path) do |tagtype, tagname|
           @tagtype, @tagname = tagtype, tagname
         end
@@ -29,6 +32,7 @@ class RecipeContentsController < ApplicationController
         @tagtype = rcparams[:tagtype]
         @annotation = rcparams[:content]
         # @tagname of type @tagtype is a mystery tag previously identified by a failed parse.
+        logger.debug "Use tag '#{@tagname}' of type '#{@tagtype}' at path '#{@parse_path}'"
         # The logic here is as follows, for sorting out words.
         # -- '@tagname' is the questionable tag
         # -- 'rcparams[:replacement]' is the id of a tag selected by the user to serve in its place
@@ -58,17 +62,6 @@ class RecipeContentsController < ApplicationController
         end
       end
     end
-=begin
-    if @parse_path = params[:recipe][:recipeContents][:parse_path]
-      # We simply report the prior annotation back
-      @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path, :tagname) do |tagtype, tagname|
-        @tagtype, @tagname = tagtype, tagname # By setting @tagtype,
-      end
-      @parse_path = nil if !@tagtype # No parse_path => standard annotation dialog
-    elsif params[:recipe][:recipeContents]
-      @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
-    end
-=end
   end
 
   def patch

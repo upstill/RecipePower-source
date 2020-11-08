@@ -4,7 +4,7 @@ class BackgroundableTest < ActiveSupport::TestCase
 
   test 'Can run backgroundable tasks without saving records' do
     r = Recipe.new url: "https://patijinich.com/creamy-poblano-soup/"
-    r.bkg_land # No saving beforehand
+    r.ensure_attributes :title # No saving beforehand
     refute r.persisted?
     assert r.title.present?
 

@@ -115,4 +115,8 @@ class ModelDecorator < Draper::Decorator
   def homelink
     object
   end
+
+  def dom_id
+    "#{object.model_name.singular}_#{object.id}"
+  end
 end

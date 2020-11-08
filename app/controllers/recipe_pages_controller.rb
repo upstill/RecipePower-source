@@ -1,4 +1,4 @@
-class RecipePagesController < ApplicationController
+class RecipePagesController < CollectibleController
   before_action :set_recipe_page, only: [:show, :edit, :update, :destroy]
   before_action :login_required
 
@@ -8,10 +8,14 @@ class RecipePagesController < ApplicationController
   end
 
   # GET /recipe_pages/1
+  # Now in the hands of CollectibleController
+=begin
   def show
-    @recipe_page.bkg_land(true) unless @recipe_page.content.present?
+    update_and_decorate
+    @decorator.refresh_content unless @recipe_page.content.present?
     # smartrender
   end
+=end
 
   # GET /recipe_pages/new
   def new

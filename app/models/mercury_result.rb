@@ -3,19 +3,59 @@ class MercuryResult < ApplicationRecord
 
   backgroundable :status
 
+  include Trackable
+  attr_trackable :url, :domain, :title, :date_published, :author, :content, :picurl, :description, :mercury_error, :new_aliases
+  # Provide access methods for unpersisted results
+  # attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
+
   has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
 
   serialize :results, Hash
 
-  def perform
-    self.error_message = nil
-    get_mercury_results if results.blank? || (http_status != 200)
+  # Provide the attribute that will receive the value for the given Mercury result name
+  def self.attribute_for_result result_name
+    case result_name
+    when :lead_image_url
+      :picurl
+    when :excerpt
+      :description
+    else
+      result_name if self.attribute_names.include?(result_name.to_s)
+    end
   end
 
-  def url
-    page_ref&.url
+  def adopt_dependencies
+    return unless good?
+    # Use the data from Mercury to set all needed keys
+    results.each do |result_name, result_val|
+      if attr = MercuryResult.attribute_for_result(result_name.to_sym)
+        if MercuryResult.tracked_attributes.include?(attr)
+          accept_attribute attr, result_val
+        else
+          write_attribute attr, value
+          # self.send (attr.to_s + '=').to_sym, value
+        end
+      end
+    end
+    # Should we really be declaring that no more attributes are needed?
+    clear_needed_attributes
   end
+
+  def perform
+    self.error_message = nil
+    self.results = get_mercury_results
+  end
+
+  def method_missing namesym, *args
+    if results&.keys&.include? namesym.to_s
+      results[namesym.to_s]
+    else
+      super if defined?(super)
+    end
+  end
+
+  private
 
   # Consult Mercury on a url and report the results in the model
   # status: :good iff Mercury could get through to the resource, :bad otherwise
@@ -28,7 +68,7 @@ class MercuryResult < ApplicationRecord
   def get_mercury_results
     new_aliases = [] # We accumulate URLs that got redirected on the way from the nominal URL to the final one (whether successful or not)
     begin
-      mercury_data = try_mercury url
+      mercury_data = try_mercury(url.if_present || page_ref.url)
       if mercury_data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
         mercury_data['url'] = url
@@ -82,18 +122,37 @@ class MercuryResult < ApplicationRecord
             end
             hr.is_a?(String) ? 666 : hr
           end
-      self.results = mercury_data
-      results['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
-      results['new_aliases'] = new_aliases
+      mercury_data['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
+      mercury_data['new_aliases'] = new_aliases
+      return mercury_data
     rescue Exception => e
       errors.add :url, "'#{url}' is bad: #{e}"
       self.http_status = 400
     end
   end
 
+  # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
+    data = mercury_via_node url
+    # data = Rails.env.development? ? mercury_via_api(url) : mercury_via_node(url)
+
+    # Do QA on the reported URL
+    # Report a URL as extracted by Mercury (if any), or the original URL (if not)
+    uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
+    data['url'] = uri.to_s
+    data['domain'] ||= uri.host
+    # Merge different error states into a mercury_error
+    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
+    data.delete :errorMessage
+    data.delete :error
+    data
+  end
+
+=begin
+  # Archaic: get the mercury data from our server
+  def mercury_via_api url
     previous_probe = nil
-    api = 'http://173.255.255.234:8888/myapp?url='
+    api = 'http://173.255.245.80:8888/mercury?url='
     current_probe = api + url
     data = response = nil
     while(previous_probe != current_probe) do
@@ -102,11 +161,11 @@ class MercuryResult < ApplicationRecord
       http = Net::HTTP.new uri.host, uri.port
       # http.use_ssl = true
       response =
-      NestedBenchmark.measure('making Mercury request') do
-        req = Net::HTTP::Get.new uri.to_s
-        req['x-api-key'] = ENV['MERCURY_API_KEY']
-        http.request req
-      end
+          NestedBenchmark.measure('making Mercury request') do
+            req = Net::HTTP::Get.new uri.to_s
+            req['x-api-key'] = ENV['MERCURY_API_KEY']
+            http.request req
+          end
       data =
           case response.code
           when '401'
@@ -119,17 +178,20 @@ class MercuryResult < ApplicationRecord
             JSON.parse(response.body) rescue ActiveSupport::HashWithIndifferentAccess.new(url: url, content: '', errorMessage: 'Empty Page')
           end
     end
-
-    # Do QA on the reported URL
-    # Report a URL as extracted by Mercury (if any), or the original URL (if not)
-    uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
-    data['url'] = uri.to_s
-    data['domain'] ||= uri.host
     data['response_code'] = response.code
-    # Merge different error states into a mercury_error
-    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
-    data.delete :errorMessage
-    data.delete :error
+    data
+  end
+=end
+
+  # Get the Mercury-ized page by hitting node.js directly (in production)
+  def mercury_via_node url
+    apphome = Rails.env.production? ? ENV['HOME'] : (ENV['HOME']+'/Dev')
+    cmd = "node #{apphome}/mercury/fetch.js #{url}"
+    logger.debug "Invoking '#{cmd}'"
+    content = `#{cmd}`
+    logger.debug "...got #{content.length} bytes from Mercury, starting with '#{content.truncate 100}'."
+    data = JSON.parse content
+    data['url'] = url
     data
   end
 

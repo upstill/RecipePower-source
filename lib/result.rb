@@ -4,7 +4,7 @@ class Result
   attr_accessor :finderdata, :out
 
   def initialize(f=nil)
-    @finderdata = f && f.attributes_hash
+    @finderdata = f&.attributes_hash
     @out = []
   end
 
@@ -55,19 +55,23 @@ class Result
 
   # Dump self into a YAML string for the Finder's id and the results array
   def self.dump result
-    finder_id = result.finderdata[:id]
-    unless Finder.exists?(id: finder_id)
-      site = result.finderdata[:site] || Site.find_by(id: result.finderdata[:site_id])
-      finder = Finder.create result.finderdata.slice(:label, :selector, :attribute_name).merge(site: site)
-      finder_id = finder.id
+    dumped = { out: result.out }
+    if fd = result.finderdata
+      finder_id = fd[:id]
+      unless Finder.exists?(id: finder_id)
+        site = fd[:site] || Site.find_by(id: fd[:site_id])
+        finder = Finder.create fd.slice(:label, :selector, :attribute_name).merge(site: site)
+        finder_id = finder.id
+      end
+      dumped[:finder_id] = finder_id
     end
-    {:finder_id => finder_id, :out => result.out}.to_yaml
+    dumped.to_yaml
   end
 
   # Un-serialize a string
   def self.load str
     hashvals = YAML.load str
-    result = self.new Finder.find(hashvals[:finder_id])
+    result = self.new Finder.find_by(id: hashvals[:finder_id])
     result.out = hashvals[:out]
     result
   end

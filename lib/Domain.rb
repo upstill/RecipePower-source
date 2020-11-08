@@ -18,7 +18,7 @@ def rp_url path=''
     when Rails.env.development?, Rails.env.test?
       'https://local.recipepower.com:3000'
     when Rails.env.staging?
-      'http://staging.herokuapp.com'
+      'https://staging.recipepower.com'
   end + path.to_s
 end
 
@@ -28,19 +28,6 @@ def host_forbidden url
   ["recipepower.com",
    "www.recipepower.com",
    "local.recipepower.com",
-   "staging.herokuapp.com"].include? uri.host
+   "staging.recipepower.com"].include? uri.host
 end
-
-=begin
-def current_domain
-  case
-    when Rails.env.production?
-      "www.recipepower.com"
-    when Rails.env.development?, Rails.env.test?
-      "local.recipepower.com:3000"
-    when Rails.env.staging?
-      "staging.herokuapp.com"
-  end
-end
-=end
 

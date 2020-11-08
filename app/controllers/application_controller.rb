@@ -153,49 +153,48 @@ class ApplicationController < ActionController::Base
     # Now to check that the user is authorized for the current action.
     # NB: Since this method may be called in any context, it's possible to assert authorization
     options[:action_authorized] || authorize(entity) # Make sure that the user is authorized for this action
-    # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
-    if entity.errors.empty?  &&  # No probs. so far
-        entity.is_a?(Collectible) &&
-        current_user # Only the current user gets to touch/modify a model
-        if entity&.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
-        entity.bkg_land
-      elsif options[:adopt_gleaning]
-        if entity.respond_to? :adopt_page_ref
-          entity.page_ref.bkg_land
-          if !entity.adopt_page_ref # Get attributes from the page ref
-            entity.errors.add :url, 'Can\'t access that page for analysis'
-          end
-        # elsif entity.respond_to? :bkg_land
-          # entity.bkg_land true  # Collect attributes from page_ref, etc.
-        end
-      end
-      return if entity.errors.any?
-      if options[:touch] == :collect # Ensure that 
-        (attribute_params ||= {})[:collectible_in_collection] = true
-      end
-      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
-      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
-      return if entity.errors.any?
-      rr =
-      case options[:touch]
-      when true
-        entity.be_touched
-      when false
-        # Do not touch
-      when :collect # Add it to the collection
-        entity.be_collected
-      when nil
-        # Touch iff previously persisted (i.e., don't add record)
-        entity.be_touched if entity.persisted?
-      end
-      rr.save if rr&.changed?
-    end
-    # Having prep'ed the entity, set instance variables for the entity and decorator
-    instance_variable_set :"@#{entity.model_name.singular}", entity
     # We build a decorator if necessary and possible
     unless (@decorator && entity == @decorator.object) # Leave the current decorator alone if it will do
       @decorator = (entity.decorate if entity.respond_to? :decorate)
     end
+    # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
+    if entity.errors.empty? && # No probs. so far
+        current_user # Only the current user gets to touch/modify a model
+      if entity.is_a?(Trackable) # Entity has a specific idea what it needs
+        # We'll refresh the content by invalidating the attributes...
+        entity.refresh_attributes *options[:refresh] if options[:refresh].present?
+        entity.request_attributes *options[:needed] if options[:needed].present?
+        entity.ensure_attributes # Now go get 'em (as needed)!
+      elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
+        entity.bkg_land
+      end
+      return if entity.errors.any?
+      if entity.is_a?(Collectible)
+        if options[:touch] == :collect # Ensure that
+          (attribute_params ||= {})[:collectible_in_collection] = true
+        end
+      end
+      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
+      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
+      return if entity.errors.any?
+      if entity.is_a?(Collectible)
+        rr =
+          case options[:touch]
+          when true
+            entity.be_touched
+          when false
+            # Do not touch
+          when :collect # Add it to the collection
+            entity.be_collected
+          when nil
+            # Touch iff previously persisted (i.e., don't add record)
+            entity.be_touched if entity.persisted?
+          end
+        rr.save if rr&.changed?
+      end
+    end
+    # Having prep'ed the entity, set instance variables for the entity and decorator
+    instance_variable_set :"@#{entity.model_name.singular}", entity
     if entity.respond_to? :title
       response_service.title = (entity.title || '').truncate(20)
     elsif @decorator && @decorator.respond_to?(:title)
@@ -281,6 +280,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_request
+    # report_session :on_entry
     logger.info "Full Request URL: #{request.original_url}"
     report_headers request.headers, 'Request header'
     if cj = request.env['action_dispatch.cookies']
@@ -299,6 +299,7 @@ class ApplicationController < ActionController::Base
   end
 
   def report_response
+    # report_session :on_exit
     report_headers response.headers, 'Response Header '
     response.cookies.each { |k, v| logger.info "Response COOKIE: #{k}: #{v}" }
   end

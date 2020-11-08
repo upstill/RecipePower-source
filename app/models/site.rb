@@ -11,6 +11,10 @@ class Site < ApplicationRecord
   picable :logo, :thumbnail, 'MissingLogo.png'
   pagerefable :home
 
+  # We track attributes from Gleanings and MercuryResult except URL
+  include Trackable
+  attr_trackable :home, :name, :logo, :description, :rss_feed
+
   # TODO: this needs to persist in the database
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
   serialize :grammar_mods, Hash
@@ -77,24 +81,26 @@ class Site < ApplicationRecord
   has_many :recipes, :through => :page_refs, :dependent=>:restrict_with_error
 
   before_validation do |site|
-    if site.root.blank? && site.page_ref
-      site.root =
-          (subpaths(site.home).last if site.home.present? && subpaths(site.home)) ||
-              (subpaths(site.sample).first if site.sample.present? && subpaths(site.sample))
+    # If either the root or the home haven't been set, derive one from the other
+    if site.attribute_present? :root
+      site.home = site.home
+    elsif site.attribute_present? :home
+      site.root = site.root
     end
   end
 
   # after_initialize :post_init
   validates_uniqueness_of :root
 
-  # after_create { |site| site.bkg_launch } # Start a job going to extract title, etc. from the home page
+  after_create { |site| site.request_attributes :name, :logo } # Start a job going to extract title, etc. from the home page
 
   after_save do |site|
+    bkg_launch if site.needed_attributes.present?
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
     # Reassign all of our pagerefs as necessary
     if saved_change_to_root? # Root has changed
       page_refs.each do |pr|
-        if (newsite = Site.find_for pr.url) != pr.site
+        if (newsite = SiteServices.find_for pr.url) != pr.site
           page_refs.delete pr
           newsite.page_refs << pr
         end
@@ -112,24 +118,44 @@ class Site < ApplicationRecord
     end
   end
 
-  # When saved, we check the need to get data from entities we depend on
-  def bkg_launch force=false
-    unless logo.present? && name.present? && description.present?
-      # Launch the page_ref to extract them as necessary
-      page_ref&.bkg_launch
-      force = true
-    end
-    super(force) if defined?(super)
+  ######### Trackable overrides ############
+  ############## Trackable ############
+  # Request attributes of other objects
+  def request_dependencies *newly_needed
+    page_ref_attribs = newly_needed.collect { |my_attrib|
+      # Provide the attribute that will receive the value for the given PageRef attribute
+        case my_attrib
+        when :name
+          :title
+        when :logo
+          :picurl
+        when :home
+          :url
+        else
+          my_attrib
+        end
+    }
+    page_ref || build_page_ref
+    page_ref.request_attributes *page_ref_attribs
   end
 
-  # This is called when the page_ref finishes updating
-  def adopt_page_ref
-    # Extract elements from the page_ref
-    self.logo = page_ref.picurl unless logo.present? || page_ref.picurl.blank?
-    self.name = page_ref.title.if_present || URI(page_ref.url).host if name.blank?
-    self.description = page_ref.description unless description.present? || page_ref.description.blank?
-    page_ref.results_for('RSS Feed').map { |feedstr| assert_feed feedstr } if page_ref.gleaned?
-    (persisted? && changed?) ? save : true
+  # Get the available attributes from the PageRef
+  def adopt_dependencies
+    # Translate what the PageRef is offering into our attributes
+    accept_attribute :logo, page_ref.picurl if page_ref.picurl_ready?
+    accept_attribute :name, page_ref.title if page_ref.title_ready?
+    accept_attribute :description, page_ref.description if page_ref.description_ready?
+    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+  end
+
+  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
+  def gleaning_attributes= attrhash
+    super
+    return unless attrhash
+    if value_hash = attrhash['RSS Feed']
+      # The 'value(s)' are a hash of feeds
+      value_hash.values.map { |url| assert_feed url, true }
+    end
   end
 
   # Most collectibles refer back to their host site via its page_ref; not necessary here
@@ -149,7 +175,7 @@ public
 
   def assert_feed url, approved=false
     url = normalize_url url
-    feed = (extant = feeds.find_by(url: url)) || Feed.create_with(approved: approved).find_or_create_by(url: url)
+    feed = (extant = feeds.find_by(url: url)) || Feed.create_with(approved: approved, site: self).find_or_create_by(url: url)
     if feed&.errors.empty? && !extant
       if feed.approved != approved
         feed.approved = approved
@@ -169,16 +195,6 @@ public
     # finder = finders.exists?(attribs) ? finders.where(attribs).first : finders.create(attribs)
     finder.hits += 1
     finder.save
-  end
-
-  # When attributes are selected directly and returned as gleaning attributes, assert them into the model
-  def gleaning_attributes= attrhash
-    super
-    return unless attrhash
-    if value_hash = attrhash['RSS Feed']
-      # The 'value(s)' are a hash of feeds
-      value_hash.values.map { |url| assert_feed url, true }
-    end
   end
 
   def self.strscopes matcher
@@ -238,7 +254,8 @@ public
   # do qa when reassigning root
   def root= new_root
     new_root.sub!(/\/$/, '')
-    return if new_root == root
+    old_root = attributes[:root]
+    return if new_root == old_root
 
     # Find all the existing sites that match this path
     if Site.where(root: new_root).exists?
@@ -251,12 +268,12 @@ public
 
     # Find a site to which we can reassign associated pagerefs
     # i.e., the one with the longest root that is a substring of the current root
-    if root
+    if old_root
       # All page refs will still be valid if the new root is a substring of the current one
       # ...but the shorter version may still attract others
-      unless Site.with_subroot_of(root) # A site that <could> take all pagerefs as needed
+      unless Site.with_subroot_of(old_root) # A site that <could> take all pagerefs as needed
         orphans = dependent_page_refs.joins(:aliases).where.not(Alias.url_path_query new_root).pluck :url
-        unless orphans.keep_if { |url| !(s = Site.find_for(url)) || (s.id == id) }.empty?
+        unless orphans.keep_if { |url| !(s = SiteServices.find_for(url)) || (s.id == id) }.empty?
           # The new root is neither a substring nor a superstring of the existing root.
           # Since we've already established that there's no Site to catch the existing entities, we fail
           errors.add(:root, "would abandon #{orphans.count} out of #{dependent_page_refs.count} existing entities")
@@ -264,6 +281,7 @@ public
         end
       end
 =begin
+  ## This is now part of after_save procedure so corrected page_refs have a
     else
       if osite = Site.with_subroot_of(new_root)
         osite.page_refs.where('url ILIKE ?', "%#{new_root}").not(id: page_ref_id).each do |newref|
@@ -276,96 +294,17 @@ public
     super
   end
 
-  # Return a scope for sites that could apply to the given link
-  def self.applies_to_url link
-    return nil unless links = subpaths(link) # URL doesn't parse
-    # Find a site, if any, based on the longest subpath of the URL
-    Site.where root: links # Scope for all sites whose root matches a subpath of the url...
-  end
-
-  def self.find_for link
-    # Find a site, if any, based on the longest subpath of the URL
-    matches = applies_to_url link
-    if matches.present? # Of all sites whose root matches a subpath of the url...
-      # ...return the one with the longest root
-      matches.inject(matches.first) { |result, site|
-        site.root.length > result.root.length ? site : result
-      }
+  # Provide fallback for root in case it hasn't been set
+  def root
+    super ||
+    if page_ref
+      (subpaths(home).last if home.present? && subpaths(home)) ||
+          (subpaths(sample).first if sample.present? && subpaths(sample))
     end
   end
 
-=begin
-  # Produce a Site that maps to a given url(s) whether one already exists or not
-  def self.find_or_create_for link
-
-    # Look first for existing sites on any of the links
-    if site = self.find_for(link)
-      return site
-    end
-
-    if inlinks = subpaths(link)
-      # return self.create(home: host_url(link), root: inlinks.first, sample: link)
-      return self.find_or_create host_url(link), root: inlinks.first, sample: link
-    end
-    self.find_or_create host_url(link), sample: link
-  end
-=end
-
-  # Produce a Site that maps to a given url(s) whether one already exists or not
-  def self.find_or_build_for url_or_page_ref
-
-    link = url_or_page_ref.is_a?(PageRef) ? url_or_page_ref.url : url_or_page_ref
-    # Look first for existing sites on any of the links
-    if site = self.find_for(link)
-      return site
-    end
-
-    if inlinks = subpaths(link)
-      # return self.create(home: host_url(link), root: inlinks.first, sample: link)
-      return self.find_or_build url_or_page_ref, root: inlinks.first, sample: link
-    end
-    self.find_or_build url_or_page_ref, sample: link
-  end
-
-  # Produce a Site for a given url(s) whether one already exists or not
-  def self.find_or_build url_or_page_ref, do_glean = true, options={}
-    do_glean, options = true, do_glean if do_glean.is_a?(Hash)
-    # If a PageRef is provided, and it bears the homelink, use that for our PageRef
-    # to avoid an infinite regress of Site deriving PageRef deriving Site...
-    if url_or_page_ref.is_a?(PageRef)
-      homelink = host_url url_or_page_ref.url
-      options[:sample] ||= homelink
-      options[:home] = (homelink == url_or_page_ref.url) ? url_or_page_ref : homelink
-    else
-      homelink = host_url url_or_page_ref
-      options[:home] = homelink
-      options[:sample] ||= homelink
-    end
-    if options[:root] ||= cleanpath(homelink) # URL parses
-      # Find a site, if any, based on the longest subpath of the URL
-      Site.find_by(options.slice :root) || Site.new(options)
-          # Site.new({sample: homelink}.merge(options).merge(root: root, home: homelink))
-    end
-  end
-
-=begin
-  # Produce a Site for a given url(s) whether one already exists or not
-  def self.find_or_create homelink, do_glean = true, options={}
-    do_glean, options = true, do_glean if do_glean.is_a?(Hash)
-    if uri = options[:root] || cleanpath(homelink) # URL parses
-      # Find a site, if any, based on the longest subpath of the URL
-      Site.find_by(root: uri) || Site.create({sample: homelink}.merge(options).merge(root: uri, home: homelink))
-    end
-  end
-=end
-
-  alias_method :ohome_eq, :'home='
-  # We need to point the page_ref back to us so that it doesn't create a redundant site.
-  def home=(url)
-    revised = ohome_eq(url)
-    page_ref.site = self
-    page_ref.kind = :site
-    revised
+  def home
+    page_ref&.url || "http://#{root}"
   end
 
   # Produce a Site for a given url(s) whether one already exists or not,
@@ -391,7 +330,7 @@ public
     if referent
       referent.express(str, :tagtype => :Source, :form => :generic )
     else
-      self.referent = Referent.express(str, :Source, :form => :generic)
+      self.referent = Referent.express(str, :Source, :form => :generic).becomes SourceReferent
     end
   end
 

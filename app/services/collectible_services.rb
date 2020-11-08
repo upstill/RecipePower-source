@@ -58,7 +58,7 @@ class CollectibleServices
       # No id: create based on url
       params.delete :rcpref
       # Assigning title and picurl must wait until the url (and hence the page_ref) is set
-      entity = (klass==Site) ? Site.find_or_build(page_ref.try(:url) || url) : klass.new
+      entity = (klass==Site) ? SiteServices.find_or_build(page_ref.try(:url) || url) : klass.new
       if uri.to_s.match %r{^#{rp_url}} # Check we're not trying to link to a RecipePower page
         entity.errors.add :base, 'Sorry, can\'t cookmark pages from RecipePower. (Does that even make sense?)'
       else

@@ -52,8 +52,4 @@ class RecipePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
-  def card_content
-    decorator.presented_content
-  end
-
 end

@@ -1,0 +1,52 @@
+# nginx configuration that will serve Rails app under SSL
+# Test with 'curl http://localhost/{index.html,other.html,tasks}' with example app
+# ...or hit http://$IPADDR:3000/{index.html,other.html} in a browser
+upstream rails {
+        # Path to Unicorn socket file
+        server unix:/var/sockets/unicorn.sock fail_timeout=0;
+}
+
+server {
+
+        root /var/www/recipepower.com/html;
+        index index.html index.htm index.nginx-debian.html;
+
+        server_name staging.recipepower.com;
+
+        location @rails {
+                proxy_pass http://rails;
+                proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+                proxy_set_header X-Forwarded-Proto https;
+                proxy_set_header Host $http_host;
+                proxy_redirect off;
+        }
+
+        try_files $uri/index.html $uri @rails;
+
+        error_page 500 502 503 504 /500.html;
+        client_max_body_size 4G;
+        keepalive_timeout 10;
+
+    listen [::]:443 ssl ipv6only=on; # managed by Certbot
+    listen 443 ssl; # managed by Certbot
+    ssl_certificate /etc/letsencrypt/live/staging.recipepower.com/fullchain.pem; # managed by Certbot
+    ssl_certificate_key /etc/letsencrypt/live/staging.recipepower.com/privkey.pem; # managed by Certbot
+    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
+
+}
+
+server {
+    if ($host = staging.recipepower.com) {
+        return 301 https://$host$request_uri;
+    } # managed by Certbot
+
+
+        listen 80;
+        listen [::]:80;
+
+        server_name staging.recipepower.com;
+    return 404; # managed by Certbot
+
+
+}

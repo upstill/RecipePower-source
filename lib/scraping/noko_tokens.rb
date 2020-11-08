@@ -146,15 +146,15 @@ class NokoTokens < Array
       anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
       first_te = TextElmtData.new self, anchor_path, anchor_offset
       # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
-      unless first_te.text[0...anchor_offset].blank? &&
-          first_te.text[focus_offset...-1].blank? &&
+      unless first_te.prior_text.blank? &&
+          first_te.text[correct_selection_offset(focus_offset, first_te.text)...-1].blank? &&
         newnode = tag_ancestor(first_te.parent,
                                first_te.text_element,
                                first_te.text_element,
                                options.slice(:tag, :classes, :value))
         newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
         update
-      end
+      end     # 1/2 ounce​ Green Chartreuse #
     else
       first_te = TextElmtData.new self, anchor_path, anchor_offset
       last_te = TextElmtData.new self, focus_path, -focus_offset
@@ -178,9 +178,9 @@ class NokoTokens < Array
     nshifted = teleft.elmt_bounds_index - bounds_prior
     teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
     teright.split_right
-    if Rails.env.development?
-      puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
-    end
+    #if Rails.env.development?
+    #  puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
+    #end
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
     update
     newnode
@@ -247,15 +247,13 @@ class NokoTokens < Array
       if node.text?
         # We're assuming here that there's an exact match between the sequence of nodes traversed
         # and the nodes in the @elmt_bounds array. Thus, a simple match on character strings
-        if node.to_s.present? && (@elmt_bounds[ix].first.to_s != node.to_s) && Rails.env.development?
+        if node.to_s.present? && (!@elmt_bounds[ix] || (@elmt_bounds[ix].first.to_s != node.to_s))
           failed = true
-=begin
           puts "NokoTokens update failed at @elmt_bounds ##{ix}: "
-          puts "\tnew node '#{escape_newlines node}' doesn't match extant node '#{escape_newlines @elmt_bounds[ix].first}'"
+          puts "\tnew node '#{escape_newlines node}' doesn't match extant node '#{escape_newlines @elmt_bounds[ix]&.first}'"
           low = [ix-2, 0].max
           high = [@elmt_bounds.count-1, ix+2].min
-          (low..high).each { |i| puts "\t@elmt_bounds[#{i}]: '#{escape_newlines @elmt_bounds[i].first}'"}
-=end
+          (low..high).each { |i| puts "\t@elmt_bounds[#{i}]: '#{escape_newlines @elmt_bounds[i]&.first}'"}
         end
         newbounds[ix] = node
         ix += 1
@@ -263,10 +261,14 @@ class NokoTokens < Array
     end
     # Finally, copy the nodes over
     newbounds.each_with_index do |node, ix|
-      Rails.logger.debug "%3d: %50s => %50s" % [ix,
-                                                escape_newlines(@elmt_bounds[ix].first.to_s.truncate(49)),
-                                                escape_newlines(node.to_s.truncate(49))] if failed
-      @elmt_bounds[ix][0] = node
+      if ix < @elmt_bounds.count
+        Rails.logger.debug "%3d: %50s => %50s" % [ix,
+                                                  escape_newlines(@elmt_bounds[ix].first.to_s.truncate(49)),
+                                                  escape_newlines(node.to_s.truncate(49))] if failed
+        @elmt_bounds[ix][0] = node
+      else  # TODO This really shouldn't be happening (the number of TextElmt elements shouldn't change)
+        @elmt_bounds[ix] = [node, @elmt_bounds[-1][0].to_s.length+@elmt_bounds[-1][1]]
+      end
     end
     x=2
   end

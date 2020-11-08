@@ -1,4 +1,14 @@
 // Stylings for recipe content panel, starting with ingredient list
+.rp_total_time, .rp_prep_time, .rp_cook_time, .rp_yield {
+  font-size: 1.2em;
+  color: #5aab7a;
+  .rp_time {
+    color: #1c94c4;
+  }
+  .rp_num {
+    color: #5aab7a;
+  }
+}
 
 li.rp_ingline {
   font-size: 1.2em;

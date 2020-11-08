@@ -11,8 +11,8 @@ class GleaningServicesTest < ActiveSupport::TestCase
     refute gleaning.page_ref.persisted?
     assert gleaning.good?
     assert_not_empty gleaning.images
-    assert_empty gleaning.titles
-    assert_empty gleaning.descriptions
+    assert_not_empty gleaning.titles
+    assert_not_empty gleaning.descriptions
   end
 
   test 'completed gleaning for page_ref' do
@@ -24,8 +24,6 @@ class GleaningServicesTest < ActiveSupport::TestCase
     assert gleaning.page_ref
     refute gleaning.page_ref.persisted?
     assert_not_empty gleaning.images
-    assert_empty gleaning.titles
-    assert_empty gleaning.descriptions
   end
 
   test 'completed gleaning for recipe' do
@@ -38,7 +36,7 @@ class GleaningServicesTest < ActiveSupport::TestCase
     refute gleaning.page_ref.persisted?
     assert gleaning.good?
     assert_not_empty gleaning.images
-    assert_empty gleaning.titles
-    assert_empty gleaning.descriptions
+    assert_not_empty gleaning.titles
+    assert_not_empty gleaning.descriptions
   end
 end

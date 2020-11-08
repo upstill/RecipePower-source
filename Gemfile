@@ -1,9 +1,9 @@
 source 'http://rubygems.org'
 
-ruby '2.6.3'
+ruby '2.6.6'
+gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.3' # 5.0.7.2' #
-gem 'rack', '~> 2.2.3'
+gem 'rails', '~> 5.2.4' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -23,12 +23,14 @@ gem 'with_advisory_lock', '~> 4.0'
 # TODO Cache bit in each tag, for each taggable entity class, indicating that the tag is used.
 ## gem 'attr_bitwise' # https://github.com/wittydeveloper/attr_bitwise/
 gem 'barkick' # Handle UPC codes, etc.
+## gem 'flag_shi_tsu': https://github.com/pboling/flag_shih_tzu
+gem 'flag_shih_tzu'
 
 # Query interface https://robots.thoughtbot.com/using-arel-to-compose-sql-queries http://www.rubydoc.info/github/rails/arel
 # gem 'arel', '~> 8.0' # https://github.com/rails/arel NB Now comes with Rails by default
 
-####### Ruby interface to PostgreSQL https://bitbucket.org/ged/ruby-pg/wiki/Home
-gem 'pg', '0.21.0' # TODO: 1.0.0 for Rails 5
+####### Ruby interface to PostgreSQL https://github.com/ged/ruby-pg
+gem 'pg', '~> 1.0' # , '0.21.0' TODO: 1.0.0 for Rails 5
 # Adds support for missing PostgreSQL data types to ActiveRecord.
 # gem 'postgres_ext' # https://github.com/jagregory/postgres_ext
 # TODO: use pg_search
@@ -81,8 +83,8 @@ gem 'pundit'
 ###### Essential Ruby libs
 gem "rmagick", "~> 2.16.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
-gem 'nokogiri', "~> 1.6" # "~> 1.5.3"
-gem 'truncato',  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
+gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
+gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 # Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
 gem 'redcarpet' # https://github.com/vmg/redcarpet
 
@@ -113,7 +115,7 @@ gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
 ## gem 'letsencrypt_plugin'
 
 group :production do
-  gem 'dalli'
+  # gem 'dalli' No longer needed/used
 end
 
 group :development do

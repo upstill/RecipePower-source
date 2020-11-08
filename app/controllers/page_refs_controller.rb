@@ -10,12 +10,6 @@ class PageRefsController < CollectibleController
     page_refs = PageRef.all
   end
 
-  # GET /page_refs/1
-  def show
-    update_and_decorate
-    smartrender
-  end
-
   # GET /page_refs/new
   def new
     @page_ref = PageRef.new url: 'http://www.example.com'

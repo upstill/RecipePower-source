@@ -5,12 +5,11 @@ require 'fileutils'
 require 'array_utils'
 
 class ImageReference < ApplicationRecord
-
   include Referrable # Can be linked to a Referent
-
   include Backgroundable
-
   backgroundable :status
+  include Trackable
+  attr_trackable :thumbdata
 
   # attr_accessible :type, :url, :filename, :link_text
 
@@ -28,6 +27,10 @@ class ImageReference < ApplicationRecord
   has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :referments, :as => :referee, :dependent => :destroy
   # has_many :referents, :through => :referments
+
+  after_save do |ir|
+    ir.bkg_launch if ir.needed_attributes.present?
+  end # ...because no launching occurred before saving
 
   public
 
@@ -96,86 +99,35 @@ class ImageReference < ApplicationRecord
     errors.present? && (errcode != 404)
   end
 
-  # Index an ImageReference by URL or URLs, assuming it exists (i.e., no initialization or creation)
-  def self.lookup url
-    begin
-      url = normalize_url url
-    rescue
-      # If we can't normalize the url, then use the un-normalized version and hope for the best
-      return self.where( '"references"."url" ILIKE ?', "#{url}%" )
-    end
-    url.sub! /^https?:\/\//, ''  # Elide the protocol, if any
-    self.find_by url: [ 'http://'+url, 'https://'+url ]
-  end
-
-  # Since the URL is never written once established, this method uniquely handles both
-  # data URLs (for images with data only and no URL) and fake URLS (which are left in place for the latter)
-  # NB: Implicit in here is the strategy for maintainng the data: since we only fetch reference
-  # records by URL when assigning a URL to an entity, we only go off to update the data when
-  # the URL is assigned
-  def self.find_or_initialize url
-    case url
-    when /^\d\d\d\d-/
-      self.find_by url: url # Fake url previously defined
-    when /^data:/
-      # Data URL for imagery is acceptable, but it's stored in #thumbdata, with a fake but unique nonsense URL
-      self.find_by(thumbdata: url) ||
-          begin
-            ref = self.new(url: self.fake_url)
-            ref.write_attribute :thumbdata, url
-            ref.status = :good
-            ref
-          end
-    when nil
-    when ''
-    else # Presumably this is a valid URL
-      # Normalize for lookup
-      normalized = normalize_url url
-      if normalized.blank? # Check for non-empty URL
-        ref = self.new # Initialize a record just to report the error
-        ref.errors.add :url, "can't be blank"
-        ref
-      elsif ref = self.lookup(normalized) # Success on the normalized URL => Success!
-        ref
-      elsif !(redirected = test_url normalized) # Purports to be a url, but doesn't work
-        ref = self.new # Initialize a record just to report the error
-        ref.errors.add :url, "\'#{url}\' doesn't seem to be a working URL. Can you use it as an address in your browser?"
-        ref
-      else
-        ref = self.lookup(redirected) || self.new(url: redirected)
-        ref
-      end
-    end
+  def url= new_url
+    super
+    request_attributes :thumbdata if url_changed? && !fake_url?
   end
 
   # Provide a url that's valid anywhere. It may come direct from the IR or, if there's only thumbdata,
   # it gets stored on AWS and returned as a link to there
   def imgurl
-    if url.match /^\d\d\d\d-/
-      # The more complicated case: we have an IR with image data, but no URL.
-      # So we lookup the corresponding URL on AWS. If it exists, we return that;
-      # Otherwise, we CREATE it on AWS first, then return it.
-      #
-      # Does the resource exist? If so, we just return the link
-      path = "uploads/reference/#{id}.png"
-      obj = S3_BUCKET.objects[path]
-      unless obj.exists?
-        puts 'Creating AWS file ' + path
-        # The nut of the problem: take the image in the thumbdata, upload it to aws, and return the link
-        b64 = thumbdata.sub 'data:image/png;base64,', ''
-        img = Magick::Image.read_inline(b64).first
-        S3_BUCKET.objects[path].write img.to_blob, {:acl=>:public_read}
-      end
-      obj.public_url.to_s
-    else
-      return url
+    return url unless fake_url?
+    # The more complicated case: we have an IR with image data, but no URL.
+    # So we lookup the corresponding URL on AWS. If it exists, we return that;
+    # Otherwise, we CREATE it on AWS first, then return it.
+    #
+    # Does the resource exist? If so, we just return the link
+    path = "uploads/reference/#{id}.png"
+    obj = S3_BUCKET.objects[path]
+    unless obj.exists?
+      puts 'Creating AWS file ' + path
+      # The nut of the problem: take the image in the thumbdata, upload it to aws, and return the link
+      b64 = thumbdata.sub 'data:image/png;base64,', ''
+      img = Magick::Image.read_inline(b64).first
+      S3_BUCKET.objects[path].write img.to_blob, {:acl => :public_read}
     end
+    obj.public_url.to_s
   end
 
   # Provide suitable content for an <img> element: preferably data, but possibly a url or even (if the data fetch fails) nil
-  def imgdata force=false
-    # Provide good thumbdata if possible
-    bkg_land if force # Doesn't return until the job is done
+  def imgdata
+    # If the image capture hasn't completed, return the url
     thumbdata.present? ? thumbdata : url
   end
 
@@ -183,28 +135,32 @@ class ImageReference < ApplicationRecord
   def perform
     logger.info ">>>>>>>>>>>>>>>>>>>>>>>>>>>>> Acquiring Thumbnail data on url '#{url}' >>>>>>>>>>>>>>>>>>>>>>>>>"
     # A url which is a date string denotes an ImageReference which came in as data, and is therefore good
-    (url =~ /^\d\d\d\d-/) ||
-    begin
-      self.errcode = 0 if self.errcode == -2
-      if response_body = fetch # Attempt to get data at the other end of the URL
-        begin
-          img = Magick::Image::from_blob(response_body).first
-          if img.columns > 200
-            scalefactor = 200.0/img.columns
-            thumb = img.scale(scalefactor)
-          else
-            thumb = img
-          end
-          thumb.format = 'PNG'
-          quality = 80
-          self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
-        rescue Exception => e
-          self.errcode = -2 # Bad data
-          err_msg = "couldn't parse to image data: ImageReference #{id}: #{url} (#{e})"
-          errors.add :url, err_msg
-          raise err_msg
+    if fake_url?
+      attrib_needed! :thumbdata, false
+      return
+    end
+    self.errcode = 0 if errcode == -2
+    if response_body = fetch # Attempt to get data at the other end of the URL
+      begin
+        img = Magick::Image::from_blob(response_body).first
+        if img.columns > 200
+          scalefactor = 200.0 / img.columns
+          thumb = img.scale(scalefactor)
+        else
+          thumb = img
         end
+        thumb.format = 'PNG'
+        quality = 80
+        accept_attribute :thumbdata, 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
+      rescue Exception => e
+        self.errcode = -2 # Bad data
+        err_msg = "couldn't parse to image data: ImageReference #{id}: #{url} (#{e})"
+        errors.add :url, err_msg
+        raise err_msg
       end
+    else
+      attrib_needed! :thumbdata, false
+      errors.add :url, "couldn't be read (errcode = #{errcode})" if errcode != 0
     end
   end
 
@@ -214,29 +170,9 @@ class ImageReference < ApplicationRecord
     Time.new.to_s + randstr
   end
 
-  # Is the reference un-gleanable? No further attention need be paid
-  def definitive?
-    if url =~ /^\d\d\d\d-/
-      (good! && save) unless good?
-      true
-    elsif url.blank?
-      (bad! && save) unless bad?
-      true
-    end
-  end
-
-  # Ensure the thumbdata is up to date, optionally forcing an update even if previously processed
-  def bkg_launch force=false
-    super unless definitive?
-  end
-
-  def bkg_land force=false
-    super unless definitive?
-  end
-
-  def after
-    self.status = (url =~ /^\d\d\d\d-/) || (errcode == 200) ? :good : :bad
-    super
+  # Is this a data-only reference?
+  def fake_url?
+    url =~ /^\d\d\d\d-/
   end
 
   def thumbdata

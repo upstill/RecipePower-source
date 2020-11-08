@@ -10,4 +10,7 @@ class RecipePageDecorator < ModelDecorator
   #     end
   #   end
 
+  def title
+    'Recipe Page'
+  end
 end

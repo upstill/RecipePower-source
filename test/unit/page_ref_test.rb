@@ -17,6 +17,30 @@ class PageRefTest < ActiveSupport::TestCase
     # Do nothing
   end
 
+  # Confirm that PageRef performs appropriately under tracking
+  test 'ensure attributes in page ref' do
+    url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
+    pr = PageRef.fetch url
+    assert pr.url_ready
+    # The url is needed because it must be confirmed by Gleaning and MercuryResult
+    assert pr.url_needed
+    refute pr.title_ready
+    refute pr.title_needed
+    # Gleaning and MercuryResult should have launched to confirm the url
+    assert pr.gleaning
+    assert pr.mercury_result
+    # The Gleaning and MercuryResult should be primed to fetch
+    pr.request_attributes :title
+    assert pr.title_needed
+    assert pr.gleaning.title_needed
+    assert pr.mercury_result.title_needed
+    pr.ensure_attributes :title
+    # Should have extracted the title
+    assert pr.title_ready
+    # Should have extracted the description as a side effect
+    assert pr.description_ready
+  end
+
   # Fake test
 =begin
   def test_fail
@@ -55,7 +79,7 @@ class PageRefTest < ActiveSupport::TestCase
     # This URL is bad (400 error)
     bad_url = 'http://patismexicantable.com/2012/02/lamb-barbacoa-in-adobo.html'
     mp = PageRef.create url: bad_url
-    mp.bkg_land
+    mp.ensure_attributes
     assert mp.bad?
     # This url is good, but redirects. We need to ensure that Mercury does its job:
     # -- end up with the redirected URL as the primary one
@@ -63,8 +87,8 @@ class PageRefTest < ActiveSupport::TestCase
     indirect_url = 'https://patijinich.com/recipe/lamb_barbacoa_in_adobo/'
     mp.url = indirect_url
     assert_nil mp.http_status
-    assert mp.virgin?
-    assert mp.mercury_result.virgin?
+    assert mp.bad?
+    assert mp.mercury_result.good?
     mp.save
 =begin
     assert_nil mp.http_status
@@ -118,7 +142,7 @@ class PageRefTest < ActiveSupport::TestCase
     mp0.save
     mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
-    mp.bkg_land
+    mp.ensure_attributes :title
     assert (mp.aliases.present? && mp.aliases.first == mp.aliases.last), 'Should have only one alias'
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
   end
@@ -168,16 +192,16 @@ class PageRefTest < ActiveSupport::TestCase
   test "fetch simple page" do
     mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     assert_not_nil mp
-    mp.bkg_land
+    mp.ensure_attributes :title
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
-    assert_equal "http://media.wired.com/photos/5926b676af95806129f50602/191:100/pass/Rosetta_impact-1.jpg", mp.picurl
+    assert_equal "https://media.wired.com/photos/5926b676af95806129f50602/191:100/w_1280,c_limit/Rosetta_impact-1.jpg", mp.picurl
     assert_equal 'www.wired.com', mp.domain
-    assert_equal 'Time to break out the tissues, space fans.', mp.mercury_results['excerpt']
-    assert_equal 966, mp.mercury_results['word_count']
-    assert_equal 'ltr', mp.mercury_results['direction']
-    assert_equal 1, mp.mercury_results['total_pages']
-    assert_equal 1, mp.mercury_results['rendered_pages']
+    assert_equal 'Time to break out the tissues, space fans.', mp.mercury_result.description
+    assert_equal 967, mp.mercury_result.word_count
+    assert_equal 'ltr', mp.mercury_result.direction
+    assert_equal 1, mp.mercury_result.total_pages
+    assert_equal 1, mp.mercury_result.rendered_pages
   end
 
   test "catch null byte" do
@@ -191,7 +215,7 @@ class PageRefTest < ActiveSupport::TestCase
   end
 
   test "correctly handles HTTP 404 missing URL" do
-    url = "http://honest-food.net/vejjie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
+    url = "https://honest-food.net/vejjie-recipes/unusual-garden-veggies/cicerchia-bean-salad/"
     pr = PageRef.fetch url
     assert pr.virgin?
     assert_nil pr.id

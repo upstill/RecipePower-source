@@ -11,6 +11,19 @@ def nknode_add_classes node, css_classes
   node['class'] = "#{node['class']} #{absent}"
 end
 
+# We have to correct character offsets b/c Javascript counts "\r\n" as a single character
+# Therefore, every '\r\n' pair prior to an offset should increment the offset.
+def correct_selection_offset nominal_offset, text_element
+  text_element.to_s.scan(/(?=\r\n)/) do |c|
+    if $~.offset(0)[0] < nominal_offset
+      nominal_offset += 1
+    else
+      break
+    end
+  end
+  nominal_offset
+end
+
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
@@ -27,9 +40,12 @@ class TextElmtData < Object
       path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
       # Linear search: SAD!
       global_char_offset = elmt_bounds.find { |elmt| path_end == elmt.first }.last
-      signed_global_char_offset = local_offset_mark < 0 ?
-                                      -(global_char_offset - local_offset_mark) :
-                                      (global_char_offset + local_offset_mark)
+      # Split the offset into a positive value and a negative indicator
+      local_offset_mark = local_offset_mark.abs if (negatory = local_offset_mark < 0)
+      # We have to correct character offsets b/c Javascript counts "\r\n" as a single character
+      local_offset_mark = correct_selection_offset local_offset_mark, path_end
+      signed_global_char_offset = global_char_offset + local_offset_mark
+      signed_global_char_offset = -signed_global_char_offset if negatory
     else
       signed_global_char_offset = global_char_offset_or_path # Could be signed
     end
@@ -167,9 +183,9 @@ class TextElmtData < Object
   end
 
   # Does this text element have an ancestor of the given tag, with a class that includes the token?
-  def descends_from? tag, token
+  def descends_from? tag, token=nil
     text_element.ancestors.find do |ancestor|
-      ancestor.name == tag && nknode_has_class?(ancestor, token)
+      ancestor.name == tag && (token.nil? || nknode_has_class?(ancestor, token))
     end
   end
 

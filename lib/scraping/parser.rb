@@ -352,28 +352,9 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
-=begin
-      probe = scanner
-      while probe.more? do
-        case probe.peek
-        when ',', 'and', 'or'
-          child = match_specification scanner.except(probe), spec
-          return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
-          children << child
-          break if probe.peek != ','
-          scanner = probe.rest
-        when '(' # Seek matching parenthesis
-          if pr = ParentheticalSeeker.match(probe)  # Skip past the parenthetical
-            probe = pr
-            next
-          end
-        end
-        probe = probe.rest
-      end
-=end
       while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
         child = match_specification scanner, spec
-        return Seeker.failed(start_scanner, child.tail_stream, token, context.merge(children: [child])) if !child.success?
+        break if !child.success?
         children << child
         scanner = child.next
         case scanner.peek
@@ -388,10 +369,13 @@ class Parser
           break
         end
       end
-      if children.present?
-        return Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
+      return case children.count
+      when 0
+        Seeker.failed(start_scanner, token, context)
+      when 1 # Don't create a new node with just one child
+        children.first
       else
-        return Seeker.failed(start_scanner, token, context)
+        Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
       end
     end
 
@@ -440,6 +424,7 @@ class Parser
           scanner = child.next # Skip past what the child consumed
         end
         return best_guess if best_guess&.hard_fail?
+        next unless child
         children << child.if_succeeded
         end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
       end

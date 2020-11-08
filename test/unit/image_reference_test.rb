@@ -5,7 +5,7 @@ class ImageReferenceTest < ActiveSupport::TestCase
   fixtures :tags
 
   test 'image reference gets joined properly' do
-    site = Site.find_or_build_for 'http://www.dailybitesblog.com/'
+    site = SiteServices.find_or_build_for 'http://www.dailybitesblog.com/'
     refute site.dj
     site.bkg_land
     assert site.good?
@@ -20,8 +20,8 @@ class ImageReferenceTest < ActiveSupport::TestCase
     url = "http://img.rasset.ie/000675cb-1600.jpg"
     ir = ImageReference.create url: url
     assert_equal url, ir.imgurl, "doesn't duplicate URL in imgurl"
-    assert ir.dj
-    ir.bkg_land
+    assert ir.dj # Should launch when saved
+    ir.ensure_attributes
     assert ir.good?
   end
 
@@ -29,7 +29,7 @@ class ImageReferenceTest < ActiveSupport::TestCase
     url = "http://img.rasset.ie/00067.jpg"
     ir = ImageReference.create url: url
     assert ir.dj
-    ir.bkg_land
+    ir.ensure_attributes
     assert ir.bad?
     refute ir.dj
   end

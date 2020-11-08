@@ -172,7 +172,7 @@ class CollectibleController < ApplicationController
       if @page_ref
         @page_ref.adopt_extractions params[:extractions] if params[:extractions]
         @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
-        update_options[:adopt_gleaning] = true
+        update_options[:needs] = [ :picurl, :title ]
       end
       modelname = model.model_name.param_key
       params[modelname] = modelparams
@@ -275,7 +275,9 @@ class CollectibleController < ApplicationController
   end
 
   def show
-    update_and_decorate touch: true
+    update_options = { touch: true }
+    update_options[:refresh] = [ :content ] if params[:refresh]
+    update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
     smartrender
@@ -314,7 +316,7 @@ class CollectibleController < ApplicationController
       params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
       update_and_decorate entity,
                           touch: :collect, # Add to user's collection
-                          adopt_gleaning: true,  # Get title from page_ref
+                          needs: [ :title ],  # Get title from page_ref
                           update_attributes: true,
                           skip_landing: true  # Don't wait for background processing (i.e., parsing) to complete
     end
