@@ -48,6 +48,7 @@ function git_unpack()
 		echo "Need to be in a Rails directory to git_pack!"
 	fi
 }
+
 function git_clone()
 {
 	echo "git_clone $1"
@@ -64,6 +65,25 @@ function git_clone()
 		echo "Done! Don't forget to run git_unpack to distribute configuration, etc., files."
 	else
 		echo "git_clone: must clone EITHER 'staging' or 'master'"
+	fi
+}
+
+function git_pull()
+{
+	echo "git_pull $1"
+	if [ ! -z $1 ]; then
+		echo "Setting \$GIT_BRANCH to $1"
+		export GIT_BRANCH="$1"
+	fi
+	if [ -z $GIT_BRANCH ]; then
+		echo "git_pull needs to know what branch to clone."
+		echo "Either set \$GIT_BRANCH to 'staging' or 'master', or invoke 'git_pull <branchname>'"
+	elif [[ $GIT_BRANCH =~ 'staging' || $GIT_BRANCH =~ 'master' ]]; then
+		echo "git_pull pulling $GIT_BRANCH."
+		git clone -b $GIT_BRANCH --single-branch git@github.com:upstill/RecipePower-source.git
+		echo "Done! Don't forget to run git_unpack to distribute configuration, etc., files."
+	else
+		echo "git_pull: must clone EITHER 'staging' or 'master'"
 	fi
 }
 

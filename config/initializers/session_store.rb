@@ -1,5 +1,4 @@
 # Be sure to restart your server when you modify this file.
-
 domain =
     case
       when Rails.env.production?
@@ -12,6 +11,8 @@ domain =
 RP::Application.config.session_store :cookie_store,
                                      key: '_rp_session',
                                      :domain => domain,
+                                     :httponly => true,
+                                     :same_site => :none,
                                      :secure => true,
                                      :expire_after => 7.days
 

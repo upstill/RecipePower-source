@@ -16,7 +16,7 @@ class DeferredRequest < ApplicationRecord
   end
 
   def self.pop sessid
-    if sessid && (defreq = self.find_by(session_id: sessid))
+    if sessid && (defreq = self.find_by(session_id: sessid.to_s))
       popped = defreq.requests.pop
       if defreq.requests.count > 0
         defreq.save
@@ -32,7 +32,7 @@ class DeferredRequest < ApplicationRecord
     if specs.blank?
       self.pop sessid
     elsif sessid &&
-        (defreqs = self.find_by(session_id: sessid)) &&
+        (defreqs = self.find_by(session_id: sessid.to_s)) &&
         (ix = defreqs.requests.rindex { |req|
           req = YAML::load(req)
           specs.slice(:format, :mode).all? { |key, spec_val| req[key] == spec_val }
@@ -45,7 +45,7 @@ class DeferredRequest < ApplicationRecord
 
   # What's the next deferred request for this session?
   def self.pending sessid
-    if defreq = self.find_by(session_id: sessid)
+    if defreq = self.find_by(session_id: sessid.to_s)
       if dr = defreq.requests[-1]
         return YAML::load(dr)
       else

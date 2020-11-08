@@ -230,12 +230,11 @@ class ApplicationController < ActionController::Base
 
   # This replaces the old collections path, providing a path to either the current user's collection or home
   def default_next_path
-    # current_user ? collection_user_path(current_user) : home_path
-    if Rails.env.development?
-      user_path(User.find 1)
-    else
-      current_user ? user_path(current_user) : home_path
-    end
+    current_user ? user_path(current_user) : home_path
+  end
+
+  def user_root_path
+    default_next_path
   end
 
   # Get a presenter for the object from within a controller

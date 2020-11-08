@@ -120,8 +120,5 @@ class RegistrationsController < Devise::RegistrationsController
       # Process any pending notifications
       after_sign_in_path_for resource
     end
-    
-    def user_root_path
-      default_next_path
-    end
+
 end
