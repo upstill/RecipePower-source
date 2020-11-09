@@ -149,11 +149,11 @@ class Recipe < ApplicationRecord
       reload if persisted? # Possibly the recipe_page changed us
       recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
+      return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
-      if new_content.present? # Parsing was a success
-        accept_attribute :content, new_content, true  # Force the new content
-        RecipeServices.new(self).inventory # Set tags according to annotations
-      end
+      return unless new_content.present? # Parsing was a success
+      accept_attribute :content, new_content, true  # Force the new content
+      RecipeServices.new(self).inventory # Set tags according to annotations
     end
     # super if defined?(super)
   end
