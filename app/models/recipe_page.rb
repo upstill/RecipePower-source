@@ -19,6 +19,7 @@ class RecipePage < ApplicationRecord
 
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
+    # page_ref.ensure_attributes :content
     if content_needed? && page_ref.content_ready?
       content = page_ref.trimmed_content
       if content.present?

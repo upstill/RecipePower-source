@@ -52,4 +52,13 @@ class RecipePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
+  def html_content
+    super.if_present ||
+        if @object.page_ref&.trimmed_content.blank?
+          "No Recipe content (PageRef content is empty)".html_safe
+        elsif @object.recipe_page&.selected_content(@object.anchor_path, @object.focus_path).blank?
+          "No Recipe content (PageRef has content but RecipePage content is empty)".html_safe
+        end
+  end
+
 end

@@ -57,8 +57,8 @@ class PageRef < ApplicationRecord
   if Rails::VERSION::STRING[0].to_i < 5
     belongs_to :gleaning, dependent: :destroy
   else
-    belongs_to :gleaning, optional: true, dependent: :destroy
-    belongs_to :mercury_result, optional: true, dependent: :destroy
+    belongs_to :gleaning, autosave: true, optional: true, dependent: :destroy
+    belongs_to :mercury_result, autosave: true, optional: true, dependent: :destroy
   end
   delegate :results_for, :to => :gleaning
   
@@ -117,6 +117,9 @@ class PageRef < ApplicationRecord
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result
   def request_dependencies *newly_needed
+    if newly_needed.include? :recipe_page
+      request_attributes :content, true
+    end
     from_gleaning = Gleaning.tracked_attributes & newly_needed
     if from_gleaning.present?
       build_gleaning if !gleaning

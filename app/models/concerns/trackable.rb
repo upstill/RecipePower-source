@@ -113,9 +113,9 @@ module Trackable
     attrs -= ([flags[:except]].flatten).map(&:to_sym) if flags[:except]
     attribs_ready! attrs, false
     if flags[:immediate]
-      ensure_attributes *attrs
+      ensure_attributes *attrs, true
     else
-      request_attributes *attrs
+      request_attributes *attrs, true
     end
   end
 
@@ -127,9 +127,14 @@ module Trackable
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes
-    newly_needed = assert_needed_attributes(*list_of_attributes)
-    return if newly_needed.empty?
-    request_dependencies *newly_needed
+    to_request = list_of_attributes.clone
+    if force = (to_request.last.is_a?(Symbol) ? false : to_request.pop)
+      assert_needed_attributes *to_request
+    else # We don't renew a request unless forced to
+      to_request = assert_needed_attributes *to_request
+      return if to_request.empty?
+    end
+    request_dependencies *to_request
     bkg_launch true
   end
 
