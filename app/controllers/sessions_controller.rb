@@ -51,7 +51,10 @@ class SessionsController < Devise::SessionsController
 
   def create
     if current_user
-      redirect_to after_sign_in_path_for(current_user)
+      logger.info "Creating Session for User ##{current_user.id}..."
+      to = after_sign_in_path_for(current_user)
+      logger.info "...and redirecting to '#{to}'"
+      redirect_to to
     else
       begin
         resource = warden.authenticate!(:scope => resource_name, :recall => "#{controller_path}#new") # :failure)
