@@ -228,6 +228,22 @@ class IngredientListSeeker < Seeker
 
 end
 
+class RangeSeeker < Seeker
+  def self.match stream, opts={}
+    if match1 = NumberSeeker.match(stream, opts)
+      ts = match1.tail_stream
+      # Check for the token 'to' followed by a second number
+      return match1 unless ts.peek.match /to/i
+      match2 = NumberSeeker.match ts.rest, opts
+      if match2
+        self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
+      else
+        match1
+      end
+    end
+  end
+end
+
 # Seek a number at the head of the stream
 class NumberSeeker < Seeker
 

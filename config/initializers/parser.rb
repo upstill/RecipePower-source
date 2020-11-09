@@ -109,7 +109,7 @@ Parser.init_grammar(
         atline: true
     },
     rp_serves: {
-        match: [ /^Serves:?$/, :rp_num ],
+        match: [ /^Serv(ing|e)s?:?$/, :rp_num ],
         atline: true
     },
     rp_instructions: nil,
@@ -154,6 +154,6 @@ Parser.init_grammar(
     },
     rp_ingname: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
-    rp_num: { match: 'NumberSeeker' },
+    rp_num: { match: 'RangeSeeker' },
     rp_unit: { tag: 'Unit' }
 )
