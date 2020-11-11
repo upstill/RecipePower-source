@@ -44,8 +44,10 @@ class Recipe < ApplicationRecord
                   # :total_time, :total_time_low, :total_time_high,
                   # :yield, :page_ref_attributes
 
-  # For reassigning the kind of the page_ref
+  # For reassigning the kind of the page_ref and/or modifying site's parsing info
   accepts_nested_attributes_for :page_ref
+  has_one :site, :through => :page_ref
+  accepts_nested_attributes_for :site
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
@@ -71,7 +73,7 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchor_path, :focus_path, {:site_attributes => [ :trimmers_str ] }, {:gleaning_attributes => %w{ Title Description }}]
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid

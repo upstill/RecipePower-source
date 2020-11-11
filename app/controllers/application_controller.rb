@@ -175,7 +175,12 @@ class ApplicationController < ActionController::Base
         end
       end
       entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
-      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
+      # We save the entity IFF
+      # -- it's previously persisted (except of the :save option is false), or
+      # -- either the :save or the :touch option is truthy
+      entity.save if (entity.persisted? ?
+                          (entity.changed_for_autosave? && (options[:save] != false)) :
+                          (options[:save] || options[:touch])) # If assign_attributes didn't save
       return if entity.errors.any?
       if entity.is_a?(Collectible)
         rr =

@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token
+  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token, :topics
   attr_writer :user
 
   def self.has_worker?
@@ -27,6 +27,7 @@ class ResponseServices
     @active_menu = params[:am]
     @action = params[:action]
     @nopush = params[:nopush]
+    @topics = params[:topics]
     # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action

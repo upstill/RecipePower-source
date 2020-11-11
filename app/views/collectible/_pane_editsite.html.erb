@@ -1,0 +1,15 @@
+<%= dialog_pane decorator.dialog_pane_spec(:site) do %>
+  <div class='item-enclosure'>
+    <div class='label-enclosure'>
+      <%= f.label :trimmers, 'Trimmers' -%>
+    </div>
+    <%# f.fields_for :site, include_id: false do |g| %>
+    <%= f.fields_for :site do |g| %>
+      <%= g.text_area :trimmers_str,
+                      :class => 'trimmers',
+                      :id => @decorator.element_id(:trimmers_str),
+                      :label => false,
+                      :placeholder => "CSS Selectors for elements to remove from pages" %>
+    <% end %>
+  </div>
+<% end %>

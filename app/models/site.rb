@@ -22,12 +22,22 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers grammar_mods ]
+    super + %i[ description trimmers trimmers_str grammar_mods ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
   serialize :trimmers, Array # An array of CSS selectors used to remove extraneous content
+
+  ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
+  def trimmers_str
+    trimmers.join "\n"
+  end
+
+  def trimmers_str= str
+    # We don't care what kind of whitespace or how long a sequence separates the selectors
+    self.trimmers = str.split /\s+/
+  end
 
   def dependent_page_refs
     page_refs.where.not id: page_ref_id
@@ -304,7 +314,7 @@ public
   end
 
   def home
-    page_ref&.url || "http://#{root}"
+    page_ref&.url || "http://#{self[:root]}"
   end
 
   # Produce a Site for a given url(s) whether one already exists or not,

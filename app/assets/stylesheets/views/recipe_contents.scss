@@ -3,23 +3,15 @@
 // You can use Sass (SCSS) here: http://sass-lang.com/
 
 div.content-item {
-  a.annotate-content {
-    float: right;
-    margin-left: 10px;
-    color:  darkgray;
-    font-size: 1.2em;
-  }
-  a.open-recipe-page {
+  a.action-button {
     float: right;
     margin-left: 10px;
     font-size: 2em;
     color: #81ae8b;
-  }
-  a.refresh-content {
-    float: right;
-    margin-left: 10px;
-    font-size: 2em;
-    color: #81ae8b;
+    &.annotate-content {
+      color:  darkgray;
+      font-size: 1.2em;
+    }
   }
 }
 div.dialog.recipe-contents.new-style.green {

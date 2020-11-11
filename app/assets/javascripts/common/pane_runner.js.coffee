@@ -35,6 +35,9 @@ RP.pane_runner.open = (dlog) ->
 			$(newshown).each RP.pane_runner.activate_pane
 		$('#paneButtons label.active input').each ->
 			$(pane_selector this).each RP.pane_runner.activate_pane
+	else
+		# No buttons => activate the (presumably lone) pane
+		$('div.pane', dlog).each RP.pane_runner.activate_pane
 	false
 
 # Take the message here and percolate it down to the panes

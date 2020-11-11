@@ -38,7 +38,7 @@ class PageRef < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + %i[ kind title lead_image_url description ]
+    super + %i[ kind title lead_image_url description ] + [ { :site_attributes => [ :id, :trimmers_str ] } ]
   end
 
   validates_uniqueness_of :url
@@ -95,6 +95,8 @@ class PageRef < ApplicationRecord
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site, autosave: true
+  # For modifying site parsing info (grammar, trimmers, etc.)
+  accepts_nested_attributes_for :site
 
   has_many :referments, :as => :referee, :dependent => :destroy
   has_many :referents, :through => :referments, inverse_of: :page_refs

@@ -139,9 +139,9 @@ module DialogsHelper
     colorscheme = options[:colorscheme] || 'green'
     bc = content_tag(:div, flash_notifications_div, class: 'notifications-panel')+
         render('form', decorator: decorator, in_panes: true)
-
+    topics = strjoin(response_service.topics.split(',').map(&:capitalize)) if response_service.topics
     modal_dialog "pane_runner #{options[:dialog_class]} new-style #{colorscheme}",
-                 "Edit #{decorator.object.class}",
+                 "Edit #{decorator.object.class.to_s} #{topics}",
                  header_contents: dialog_pane_buttons(decorator),
                  dialog_class: 'modal-lg',
                  body_contents: bc

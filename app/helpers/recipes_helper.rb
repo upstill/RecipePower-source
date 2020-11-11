@@ -118,8 +118,18 @@ module RecipesHelper
         link_to_submit('',
                        polymorphic_path(object, refresh: true),
                        mode: :partial,
-                       class: 'refresh-content glyphicon glyphicon-refresh',
+                       class: 'action-button glyphicon glyphicon-refresh',
                        title: 'Refresh Content') :
+        ''.html_safe
+  end
+
+  def edit_trimmers_button object
+    object ?
+        link_to_submit('',
+                       polymorphic_path([:edit, object], topics: :site),
+                       mode: :modal,
+                       class: 'action-button glyphicon glyphicon-remove-sign',
+                       title: 'Edit Trimmers') :
         ''.html_safe
   end
 
@@ -152,11 +162,15 @@ module RecipesHelper
                              'glyph-edit-red',
                              'xl',
                              mode: :modal,
-                             class: 'annotate-content',
+                             class: 'action-button annotate-content',
                              title: 'Annotate Content')
+        buttons += edit_trimmers_button object
       when RecipePage
         # Provide editing button if Recipe or RecipePage
-        buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+        buttons += collectible_edit_button object, 'xl', class: 'action-button annotate-content'
+        buttons += edit_trimmers_button object
+      when PageRef
+        buttons += edit_trimmers_button object
       end
       msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
       buttons += content_tag(:p, "**#{msg}.") if msg.present?
