@@ -128,7 +128,7 @@ module RecipesHelper
         link_to_submit('',
                        polymorphic_path([:edit, object], topics: :site),
                        mode: :modal,
-                       class: 'action-button glyphicon glyphicon-remove-sign',
+                       class: 'action-button glyphicon glyphicon-filter',
                        title: 'Edit Trimmers') :
         ''.html_safe
   end

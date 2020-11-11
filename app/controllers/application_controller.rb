@@ -139,10 +139,13 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
+    # We apply parameters to the entity if we're going to save it or preview changes
+    do_update_attributes = options[:update_option] != :restore
+    do_save = options[:update_option] != :preview
     # Finish whatever background task is associated with the entity
     attribute_params =
     if entity
-      # If the entity is provided, ignore parameters
+      # If the entity is provided, ignore parameters unless forced to by :update_attributes
       (options[:attribute_params] || strong_parameters) if options[:update_attributes]
     else # If entity not provided, find/build it and update attributes
       objclass = params[:controller].singularize.camelize.constantize
@@ -174,13 +177,13 @@ class ApplicationController < ActionController::Base
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
       end
-      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
+      entity.assign_attributes attribute_params if do_update_attributes && attribute_params.present? # There are parameters to update
       # We save the entity IFF
       # -- it's previously persisted (except of the :save option is false), or
       # -- either the :save or the :touch option is truthy
       entity.save if (entity.persisted? ?
-                          (entity.changed_for_autosave? && (options[:save] != false)) :
-                          (options[:save] || options[:touch])) # If assign_attributes didn't save
+                          (entity.changed_for_autosave? && do_save) :
+                          (do_save || options[:touch])) # If assign_attributes didn't save
       return if entity.errors.any?
       if entity.is_a?(Collectible)
         rr =

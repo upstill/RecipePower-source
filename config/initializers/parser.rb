@@ -20,7 +20,7 @@ require 'scraping/parser.rb'
 # -- An Array gives a sequence of specifications to match. This is the basis of recursion.
 # -- A Hash is a set of symbol/value pairs specifying instructions and constraints on what matches
 #     Generally speaking, a hash will include a :match key labeling a further specification, and other options for processing
-#     the set. Alternatively, a :tag may be specified
+#     the set. Alternatively, a :tag or multiple :tags may be specified
 #    match: denotes the token or tokens to match. For matching an array, this option is redundant if nothing else is
 #       being specified, i.e. token: { match: [a, b, c] } is no different from token: [a, b, c]. It's only
 #       needed if other elements of the hash (key/value pairs) are needed to assert constraints.
@@ -127,7 +127,8 @@ Parser.init_grammar(
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        inline: true },
+        inline: true
+    },
     rp_ing_comment: {
         match: nil,
         terminus: "\n"

@@ -6,6 +6,11 @@ class PageRefDecorator < CollectibleDecorator
     super.merge(picurl: :image).except :page_ref_kind, :type
   end
 
+  # Ensure that the entity has its displayable data updated
+  def preview
+    
+  end
+
 =begin
   def name
     # The name by which the reference is referred to is either

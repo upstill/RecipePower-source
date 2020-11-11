@@ -218,7 +218,9 @@ class CollectibleController < ApplicationController
   end
 
   def update
-    update_and_decorate
+    # The :preview parameter stipulates that the
+    update_and_decorate update_option: response_service.update_option
+    @decorator.preview if @decorator.respond_to?(:preview) # Set the entity up for previewing
     if resource_errors_to_flash @decorator.object
       render :edit
     else
@@ -227,7 +229,15 @@ class CollectibleController < ApplicationController
           @decorator.object.respond_to?(:'gleaning_attributes=')
         @decorator.gleaning_attributes = model_params[:gleaning_attributes]
       end
-      flash[:popup] = "#{@decorator.human_name} is saved"
+      flash[:popup] = @decorator.object.class.to_s +
+          case response_service.update_option
+          when :preview
+            ' Preview is ready'
+          when :restore
+            ' is restored'
+          else
+            ' is saved'
+          end
       render :update
     end
   end
