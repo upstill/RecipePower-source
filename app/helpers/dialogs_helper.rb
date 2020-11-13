@@ -212,6 +212,20 @@ module DialogsHelper
     "</div><br class='clear'>".html_safe
   end
 
+  def dialog_action_buttons decorator
+    dialog_submit_button +
+        if decorator.respond_to?(:preview)
+          # The Cancel button will have to restore prior state if we're previewing
+          (response_service.update_option == :preview ?
+               dialog_submit_button('Cancel', button_style: 'info', data: {update_option: :restore}) :
+               dialog_cancel_button) +
+              # Preview the results of the changes
+              dialog_submit_button('Preview', button_style: 'primary', data: {update_option: :preview})
+        else
+          dialog_cancel_button
+        end
+  end
+
   def injector_cancel_button name, options={}
     xlink = link_to '&nbsp;X&nbsp;'.html_safe,
                     '#',
