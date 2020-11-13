@@ -1,0 +1,20 @@
+<%= pr_builder.fields_for :site do |site_builder| %>
+  <div class='label-enclosure'>
+    <%= site_builder.label :trimmers, 'Trimmers' -%>
+  </div>
+  <%= site_builder.text_area :trimmers_str,
+                  :class => 'trimmers',
+                  :id => @decorator.element_id(:trimmers_str),
+                  :label => false,
+                  :placeholder => "CSS Selectors for elements to remove from pages" %>
+  <div class='label-enclosure' style="margin-top:.5em">
+    <%= site_builder.label :ingline_selector, 'Ingredient List Selector' -%>
+  </div>
+  <%# tag :input, type: 'text', class: 'grammar_selector', id: 'rp_inglist' %>
+  <%= site_builder.text_field :inglist_selector %>
+  <div class='label-enclosure' style="margin-top:.5em">
+    <%= site_builder.label :ingline_selector, 'Ingredient Line Selector' -%>
+  </div>
+  <%# tag :input, type: 'text', class: 'grammar_selector', id: 'rp_ingline' %>
+  <%= site_builder.text_field :ingline_selector %>
+<% end %>

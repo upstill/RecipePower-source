@@ -15,14 +15,13 @@ class Site < ApplicationRecord
   include Trackable
   attr_trackable :home, :name, :logo, :description, :rss_feed
 
-  # TODO: this needs to persist in the database
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
   serialize :grammar_mods, Hash
 
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers trimmers_str grammar_mods ]
+    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -37,6 +36,19 @@ class Site < ApplicationRecord
   def trimmers_str= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
     self.trimmers = str.split /\s+/
+  end
+
+  def method_missing name, *args
+    if name.to_s.match /(\w*)_selector(=)?$/
+      token = ('rp_'+$1).to_sym
+      if $2 == '='
+        set_selector_for token, args.first
+      else
+        get_selector_for token
+      end
+    else
+      super if defined?(super)
+    end
   end
 
   def dependent_page_refs
@@ -341,6 +353,24 @@ public
       referent.express(str, :tagtype => :Source, :form => :generic )
     else
       self.referent = Referent.express(str, :Source, :form => :generic).becomes SourceReferent
+    end
+  end
+
+  private
+
+  def get_selector_for token
+    if grammar_mods[token]
+      grammar_mods[token][:in_css_match]
+    end
+  end
+
+  def set_selector_for token, str
+    if str.present?
+      grammar_mods[token] ||= {}
+      grammar_mods[token][:in_css_match] = str
+      grammar_mods[token][:inline] = nil
+    else
+      grammar_mods.delete token
     end
   end
 

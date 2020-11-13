@@ -73,7 +73,7 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, :anchor_path, :focus_path, {:site_attributes => [ :trimmers_str ] }, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchor_path, :focus_path, { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }, {:gleaning_attributes => %w{ Title Description }}]
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid

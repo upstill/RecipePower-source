@@ -38,7 +38,7 @@ class PageRef < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + %i[ kind title lead_image_url description ] + [ { :site_attributes => [ :id, :trimmers_str ] } ]
+    super + [ :kind, :title, :lead_image_url, :description, { :site_attributes => (Site.mass_assignable_attributes << :id) } ]
   end
 
   validates_uniqueness_of :url

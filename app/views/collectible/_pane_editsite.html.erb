@@ -1,15 +1,12 @@
 <%= dialog_pane decorator.dialog_pane_spec(:site) do %>
   <div class='item-enclosure'>
-    <div class='label-enclosure'>
-      <%= f.label :trimmers, 'Trimmers' -%>
-    </div>
-    <%# f.fields_for :site, include_id: false do |g| %>
-    <%= f.fields_for :site do |g| %>
-      <%= g.text_area :trimmers_str,
-                      :class => 'trimmers',
-                      :id => @decorator.element_id(:trimmers_str),
-                      :label => false,
-                      :placeholder => "CSS Selectors for elements to remove from pages" %>
+    <% if decorator.object.is_a? PageRef %>
+      <%= render 'page_refs/site_fields', pr_builder: f, for_object: decorator.object  %>
+    <% else %>
+      <%# Otherwise we must go through the pageref %>
+      <%= f.fields_for :page_ref do |pr_builder| %>
+        <%= render 'page_refs/site_fields', pr_builder: pr_builder, for_object: decorator.object  %>
+      <% end %>
     <% end %>
   </div>
 <% end %>

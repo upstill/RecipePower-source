@@ -141,7 +141,8 @@ class ApplicationController < ActionController::Base
     end
     # We apply parameters to the entity if we're going to save it or preview changes
     do_update_attributes = options[:update_option] != :restore
-    do_save = options[:update_option] != :preview
+    # We save if we're not previewing or restoring the entity
+    do_save = ![:preview, :restore].include?(options[:update_option])
     # Finish whatever background task is associated with the entity
     attribute_params =
     if entity
@@ -167,7 +168,7 @@ class ApplicationController < ActionController::Base
         # We'll refresh the content by invalidating the attributes...
         entity.refresh_attributes *options[:refresh] if options[:refresh].present?
         entity.request_attributes *options[:needed] if options[:needed].present?
-        entity.ensure_attributes # Now go get 'em (as needed)!
+        entity.ensure_attributes if entity.needed_attributes.present? # Now go get 'em (as needed)!
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
