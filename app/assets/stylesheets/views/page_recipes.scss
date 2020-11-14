@@ -8,6 +8,30 @@
   }
 }
 
+div.pane.page_recipes {
+
+  div.recipe-fields {
+    padding: 5px;
+    border-bottom: 1px solid #91aa6a;
+    a.glyphicon {
+      font-size: 24px;
+      color: #D9E3CA;
+    }
+  }
+
+  div.recipe-field {
+    display: inline-block;
+
+    &.title {
+      width: 85%;
+    }
+
+    &.icon {
+      padding-left: 10px;
+    }
+  }
+}
+
 div.dialog.recipe-pages.new-style.green {
   z-index: 1500;
   position: fixed;

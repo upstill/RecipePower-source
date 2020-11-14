@@ -133,6 +133,18 @@ module RecipesHelper
         ''.html_safe
   end
 
+  def edit_recipes_button recipe_page
+    recipe_page ?
+        button_to_submit('',
+                       edit_recipe_page_path(recipe_page, topics: :page_recipes),
+                       'glyph-edit-red',
+                       'lg',
+                       mode: :modal,
+                       class: 'action-button annotate-content', # 'action-button glyphicon glyphicon-filter',
+                       title: 'Edit Trimmers') :
+        ''.html_safe
+  end
+
   def content_button object
     object ?
         button_to_submit("#{object.model_name}".html_safe, polymorphic_path(object, mode: :partial)) :
@@ -167,7 +179,8 @@ module RecipesHelper
         buttons += edit_trimmers_button object
       when RecipePage
         # Provide editing button if Recipe or RecipePage
-        buttons += collectible_edit_button object, 'xl', class: 'action-button annotate-content'
+        # buttons += collectible_edit_button object, 'xl', class: 'action-button annotate-content'
+        buttons += edit_recipes_button object
         buttons += edit_trimmers_button object
       when PageRef
         buttons += edit_trimmers_button object

@@ -2,17 +2,17 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 
-RP.recipe_pages = RP.recipe_pages || {}
+RP.page_recipes = RP.page_recipes || {}
 
 # Code adapted from https://stackoverflow.com/questions/7312730/using-xpath-to-restore-a-dom-range-in-javascript
-RP.recipe_pages.serialize = (node) ->
+RP.page_recipes.serialize = (node) ->
 	if (typeof XMLSerializer != "undefined")
 		# Firefox, etc.
 		(new XMLSerializer()).serializeToString node
 	else if (node.xml)
 		node.xml
 
-RP.recipe_pages.parseXMLString = (xml) ->
+RP.page_recipes.parseXMLString = (xml) ->
 	if (typeof DOMParser != "undefined")
 		# Firefox, etc.
 		dp = new DOMParser();
@@ -23,10 +23,10 @@ RP.recipe_pages.parseXMLString = (xml) ->
 		doc.loadXML xml
 		doc
 
-RP.recipe_pages.submit_selection = () ->
+RP.page_recipes.submit_selection = () ->
 	contentNode = document.getElementById 'rp-html-content'
-	xmlString = RP.recipe_pages.serialize contentNode
-	doc = RP.recipe_pages.parseXMLString xmlString
+	xmlString = RP.page_recipes.serialize contentNode
+	doc = RP.page_recipes.parseXMLString xmlString
 
 	# Get elements from document using XPath
 	xpathResult = document.evaluate '//.', doc.firstChild, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null
@@ -34,7 +34,7 @@ RP.recipe_pages.submit_selection = () ->
 	# Insert elements back into document (I used replace in order to show that the document is actually changed)
 	contentNode.parentNode.replaceChild xpathResult.singleNodeValue.firstChild, contentNode
 
-RP.recipe_pages.getPathTo = (element, relative_to) ->
+RP.page_recipes.getPathTo = (element, relative_to) ->
 	if element == relative_to
 		return '' # element.tagName;
 	if element.id
@@ -43,7 +43,7 @@ RP.recipe_pages.getPathTo = (element, relative_to) ->
 	ix= 0;
 	for sibling in element.parentNode.childNodes
 		if sibling == element
-			toParent = RP.recipe_pages.getPathTo element.parentNode, relative_to
+			toParent = RP.page_recipes.getPathTo element.parentNode, relative_to
 			if toParent != ''
 				toParent += '/'
 			if element.nodeType == 3
@@ -110,8 +110,8 @@ set_selection = (anchorPath, focusPath) ->
 		selection.removeAllRanges()
 		selection.addRange range
 
-RP.recipe_pages.onload = (dlog) ->
-	$(dlog).on 'click', '.add_fields', (event) ->
+RP.page_recipes.onactivate = (pane) ->
+	$(pane).on 'click', '.add_fields', (event) ->
 		# Initialize a recipe by giving it a bogus, but unique, ID
 		time = new Date().getTime()
 		regexp = new RegExp($(this).data('id'), 'g')
@@ -124,14 +124,14 @@ RP.recipe_pages.onload = (dlog) ->
 			$('.editing-item.title input', new_field).val ttl
 		edit_field new_field # Edit the newly-created fields
 		event.preventDefault()
-	$(dlog).on "click", '.edit-recipe', (event) ->
+	$(pane).on "click", '.edit-recipe', (event) ->
 		edit_field $(event.target).parents('div.recipe-fields')[0]  # The enclosing fields set
 		event.preventDefault()
-	$(dlog).on "click", '.copy-selection', (event) ->
+	$(pane).on "click", '.copy-selection', (event) ->
 		adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
 		event.preventDefault()
 		RP.notifications.post 'Selection copied to recipe', 'popup'
-	$(dlog).on "click", '.post-selection', (event) ->
+	$(pane).on "click", '.post-selection', (event) ->
 		fieldsNode = $(event.target).parents('div.recipe-fields')[0]
 		anchor_path = $('input.anchorPath', fieldsNode)[0].value
 		focus_path = $('input.focusPath', fieldsNode)[0].value

@@ -12,6 +12,7 @@ module DialogPanes
       (dialog_pane_spec(:tags) if Pundit.policy(User.current, object).tag?),
       (dialog_pane_spec(:lists) if Pundit.policy(User.current, object).lists?),
       (dialog_pane_spec(:pic) if Pundit.policy(User.current, object).editpic?),
+      (dialog_pane_spec(:page_recipes) if object.is_a?(RecipePage) && Pundit.policy(User.current, object).edit?),
       (dialog_pane_spec( :site) if object.respond_to?(:site) && Pundit.policy(User.current, object.site).edit?)
     ].compact
     if topics
@@ -57,7 +58,13 @@ module DialogPanes
             css_class: :site_trimmers,
             label: 'Site',
             partial: 'pane_editsite'
+        },
+        page_recipes: {
+            css_class: :page_recipes,
+            label: 'Recipe Selections',
+            partial: 'pane_editpage_recipes'
         }
+
     }.each { |topic, value| value[:topic] = topic }
     @pane_specs[topic]
   end

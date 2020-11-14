@@ -22,10 +22,6 @@ class RecipePagesController < CollectibleController
     @recipe_page = RecipePage.new
   end
 
-  # GET /recipe_pages/1/edit
-  def edit
-  end
-
   # POST /recipe_pages
   def create
     @recipe_page = RecipePage.new(recipe_page_params)

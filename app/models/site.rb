@@ -21,7 +21,7 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector ]
+    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector selector_string title_selector ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -77,7 +77,7 @@ class Site < ApplicationRecord
     belongs_to :referent, class_name: 'SourceReferent', optional: true # See before_destroy method, :dependent=>:destroy
   end
 
-  has_many :finders, :dependent=>:destroy
+  has_many :finders, :dependent=>:destroy, autosave: true
   accepts_nested_attributes_for :finders, :allow_destroy => true
   # You might think you could do this with query methods, but those fail to find records that haven't been
   # persisted. That extends to #finders UNLESS they are converted to an Array.
@@ -85,8 +85,23 @@ class Site < ApplicationRecord
   def finder_for label
     finders.find { |f| f.label == label }
   end
+
   def finders_for label
     finders.to_a.keep_if { |f| f.label == label }
+  end
+
+  ## Define the virtual attribute :selector_str for fetching and assigning Content selector as a string
+  def selector_string
+    finder_for('Content')&.selector.if_present || ''
+  end
+
+  def selector_string= str
+    if extant = finder_for('Content')
+      extant.selector = str
+    else
+      finders.build label: 'Content', attribute_name: 'html', selector: str
+    end
+    x=2
   end
 
   has_many :feeds, :dependent=>:restrict_with_error

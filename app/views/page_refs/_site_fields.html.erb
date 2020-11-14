@@ -7,14 +7,24 @@
                   :id => @decorator.element_id(:trimmers_str),
                   :label => false,
                   :placeholder => "CSS Selectors for elements to remove from pages" %>
+
   <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :ingline_selector, 'Ingredient List Selector' -%>
+    <%= site_builder.label :selector_string, 'Selector(s) for Content' -%>
   </div>
-  <%# tag :input, type: 'text', class: 'grammar_selector', id: 'rp_inglist' %>
+  <%= site_builder.text_field :selector_string %>
+
+  <div class='label-enclosure' style="margin-top:.5em">
+    <%= site_builder.label :title_selector, 'Title Selector' -%>
+  </div>
+  <%= site_builder.text_field :title_selector %>
+
+  <div class='label-enclosure' style="margin-top:.5em">
+    <%= site_builder.label :inglist_selector, 'Ingredient List Selector' -%>
+  </div>
   <%= site_builder.text_field :inglist_selector %>
+
   <div class='label-enclosure' style="margin-top:.5em">
     <%= site_builder.label :ingline_selector, 'Ingredient Line Selector' -%>
   </div>
-  <%# tag :input, type: 'text', class: 'grammar_selector', id: 'rp_ingline' %>
   <%= site_builder.text_field :ingline_selector %>
 <% end %>

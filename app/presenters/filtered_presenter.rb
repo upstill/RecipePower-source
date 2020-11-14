@@ -169,7 +169,7 @@ class FilteredPresenter
   # Build an instance of the appropriate subclass, given the entity, controller and action
   def self.build view_context, response_service, params_hash, decorator=nil
     # If we have a FilteredPresenter subclass available
-    classname = "#{response_service.controller.capitalize}#{response_service.action.capitalize}Presenter"
+    classname = "#{response_service.controller.camelize}#{response_service.action.capitalize}Presenter"
     return if classname.match(/\W/)
     if (Object.const_defined? classname) ||
         (classname = 'EntityShowPresenter' if %w{ show associated}.include?(response_service.action))
