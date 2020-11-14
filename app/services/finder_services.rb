@@ -151,7 +151,7 @@ class FinderServices
           elsif finder.attribute_name == 'content'
             result.push child.content.strip
           elsif finder.attribute_name == 'html'
-            result.push child.to_html
+            result.push child.to_html, true
           elsif child.name == 'a'
             result.glean_atag finder[:linkpath], child, pagehome
           elsif child.name == 'img'

@@ -220,7 +220,7 @@ class CollectibleController < ApplicationController
   def update
     # The :preview parameter stipulates that the
     update_and_decorate(update_option: response_service.update_option) { |decorator|
-      decorator.regenerate_dependent_content if decorator.respond_to?(:regenerate_dependent_content) # Set the entity up for previewing
+      # decorator.regenerate_dependent_content if decorator.respond_to?(:regenerate_dependent_content) # Set the entity up for previewing
     }
     if resource_errors_to_flash @decorator.object
       render :edit

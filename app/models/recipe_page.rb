@@ -45,25 +45,6 @@ class RecipePage < ApplicationRecord
             else
               rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
             end
-=begin
-            if recipe&.persisted?
-              recipe.update_column :title, title
-              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
-                recipe.update_column :anchor_path, xb.first
-                recipe.update_column :focus_path, xb.last
-                recipe.update_column :content, nil
-              end
-            elsif recipe
-              recipe.title = title
-              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
-                recipe.anchor_path = xb.first
-                recipe.focus_path = xb.last
-                recipe.content = nil
-              end
-            else
-              rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
-            end
-=end
           end
           puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
           # puts sub_parser.report_for(:except => :rp_title) # All other token types
