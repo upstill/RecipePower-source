@@ -7,9 +7,20 @@ class PageRefDecorator < CollectibleDecorator
   end
 
   # Ensure that the entity has its displayable data updated
-  def preview
-    
+  def regenerate_dependent_content
+    # The page_ref will produce different output if the site's trimmers have changed
+    site.trimmers_changed?
   end
+
+=begin
+  def request_dependencies *newly_needed
+    # If we haven't persisted, then the page_ref has no connection back
+    page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    page_ref.request_attributes *(newly_needed & [ :picurl, :title, :description ]) # Those to be got from PageRef
+    page_ref.request_attributes :recipe_page if newly_needed.include?(:content)
+    super *newly_needed if defined? super
+  end
+=end
 
   def human_name plural=false, capitalize=true
     name = object.kind.humanize

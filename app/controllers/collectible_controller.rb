@@ -219,8 +219,9 @@ class CollectibleController < ApplicationController
 
   def update
     # The :preview parameter stipulates that the
-    update_and_decorate update_option: response_service.update_option
-    @decorator.preview if @decorator.respond_to?(:preview) # Set the entity up for previewing
+    update_and_decorate(update_option: response_service.update_option) { |decorator|
+      decorator.regenerate_dependent_content if decorator.respond_to?(:regenerate_dependent_content) # Set the entity up for previewing
+    }
     if resource_errors_to_flash @decorator.object
       render :edit
     else
@@ -286,6 +287,8 @@ class CollectibleController < ApplicationController
 
   def show
     update_options = { touch: true }
+    # The :refresh parameter triggers regeneration of the entity's content,
+    # presumably due to some dependency (like the page_ref or the site changing)
     update_options[:refresh] = [ :content ] if params[:refresh]
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)

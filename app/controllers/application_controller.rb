@@ -164,6 +164,11 @@ class ApplicationController < ActionController::Base
     # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
+      entity.assign_attributes attribute_params if do_update_attributes && attribute_params.present? # There are parameters to update
+      # We invoke any block given AFTER revising attributes but BEFORE saving.
+      # This enables any processing that depends on changed attributes
+      yield(@decorator) if block_given?
+      # If the entity is trackable, we derive needed attributes before saving
       if entity.is_a?(Trackable) # Entity has a specific idea what it needs
         # We'll refresh the content by invalidating the attributes...
         entity.refresh_attributes *options[:refresh] if options[:refresh].present?
@@ -178,7 +183,6 @@ class ApplicationController < ActionController::Base
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
       end
-      entity.assign_attributes attribute_params if do_update_attributes && attribute_params.present? # There are parameters to update
       # We save the entity IFF
       # -- it's previously persisted (except of the :save option is false), or
       # -- either the :save or the :touch option is truthy

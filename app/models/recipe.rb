@@ -144,12 +144,14 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :recipe_page
+    page_ref.ensure_attributes :recipe_page, :content
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
-    if content_needed? && page_ref.recipe_page_ready?  # Ready to build
-      reload if persisted? # Possibly the recipe_page changed us
-      recipe_page.ensure_attributes :content # Parse the page into one or more recipes
+    if content_needed?
+      if page_ref.recipe_page_ready?  # Ready to build
+        # reload if persisted? # Possibly the recipe_page changed us
+        recipe_page.ensure_attributes :content # Parse the page into one or more recipes
+      end
       content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
       return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
