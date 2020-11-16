@@ -38,6 +38,16 @@ class Site < ApplicationRecord
     self.trimmers = str.split /\s+/
   end
 
+  ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
+  def recipe_selector
+    get_selector_for :rp_recipe, :at_css_match
+  end
+
+  def recipe_selector= str
+    # We don't care what kind of whitespace or how long a sequence separates the selectors
+    set_selector_for :rp_recipe, str, :at_css_match
+  end
+
   def method_missing name, *args
     if name.to_s.match /(\w*)_selector(=)?$/
       token = ('rp_'+$1).to_sym
@@ -101,7 +111,6 @@ class Site < ApplicationRecord
     else
       finders.build label: 'Content', attribute_name: 'html', selector: str
     end
-    x=2
   end
 
   has_many :feeds, :dependent=>:restrict_with_error
@@ -373,16 +382,16 @@ public
 
   private
 
-  def get_selector_for token
+  def get_selector_for token, which=:in_css_match
     if grammar_mods[token]
-      grammar_mods[token][:in_css_match]
+      grammar_mods[token][which]
     end
   end
 
-  def set_selector_for token, str
+  def set_selector_for token, str, which=:in_css_match
     if str.present?
       grammar_mods[token] ||= {}
-      grammar_mods[token][:in_css_match] = str
+      grammar_mods[token][which] = str
       grammar_mods[token][:inline] = nil
     else
       grammar_mods.delete token

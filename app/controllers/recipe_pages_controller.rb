@@ -34,13 +34,7 @@ class RecipePagesController < CollectibleController
   end
 
   # PATCH/PUT /recipe_pages/1
-  def update
-    if @recipe_page.update(recipe_page_params)
-      redirect_to @recipe_page, notice: 'Recipe page was successfully updated.'
-    else
-      render :edit
-    end
-  end
+  # Now depending on CollectibleController for update
 
   # DELETE /recipe_pages/1
   def destroy
@@ -56,6 +50,6 @@ class RecipePagesController < CollectibleController
 
     # Only allow a trusted parameter "white list" through.
     def recipe_page_params
-      params.require(:recipe_page).permit(:content, :page_ref_attributes => [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )
+      params.require(:recipe_page).permit(:content, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] ) )
     end
 end

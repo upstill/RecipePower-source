@@ -8,7 +8,7 @@ class RecipePage < ApplicationRecord
   attr_trackable :content
 
   def self.mass_assignable_attributes
-    [ :content ]
+    (defined?(super) ? super : []) + [ :content ]
   end
 
   has_one :page_ref
@@ -21,8 +21,22 @@ class RecipePage < ApplicationRecord
     # NB: we don't block on the PageRef to avoid circular dependency
     # page_ref.ensure_attributes :content
     if content_needed? && page_ref.content_ready?
+      # Clear all recipes but the first
       content = page_ref.trimmed_content
       if content.present?
+        # Reduce the recipes:
+        # -- retain only those that have been collected
+        # -- if none have been collected, reduce the set to the oldest persisted one
+        # -- if none persisted, choose one at random. (There shouldn't even be more than one.)
+        persisted = page_ref.recipes.to_a.select &:persisted?
+        page_ref.recipes =
+        if persisted.present?
+          persisted.select { |rcp| rcp.toucher_pointers.exists? }.if_present ||
+          [ persisted.inject { |memo, rcp| (rcp.created_at < memo.created_at) ? rcp : memo } ]
+        else
+          page_ref.recipes.to_a[0..0]
+        end
+        # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
         parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
         parser.parse content
