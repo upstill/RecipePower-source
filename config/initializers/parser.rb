@@ -92,18 +92,18 @@ Parser.init_grammar(
         inline: true
     },
     rp_prep_time: {
-        match: [ /^Prep:?$/, :rp_time ],
+        match: [ /^Prep:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_cook_time: {
-        match: [ /^Cook:?$/, :rp_time ],
+        match: [ /^Cook:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_total_time: {
-        match: [ /^Total:?$/, :rp_time ],
+        match: [ /^Total:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
-    rp_time: [ :rp_num, /^mins?$/ ],
+    rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
     rp_yield: {
         match: [ /^(Makes|Yield):?$/i, :rp_amt ],
         atline: true
