@@ -9,14 +9,14 @@
                   :placeholder => "CSS Selectors for elements to remove from pages" %>
 
   <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :recipe_selector, 'Selector for Recipe Start' -%>
-  </div>
-  <%= site_builder.text_field :recipe_selector %>
-
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :selector_string, 'Selector(s) for Content' -%>
+    <%= site_builder.label :selector_string, 'Selector(s) for Page Content' -%>
   </div>
   <%= site_builder.text_field :selector_string %>
+
+  <div class='label-enclosure' style="margin-top:.5em">
+    <%= site_builder.label :rcplist_selector, 'Selector for Recipe Start' -%>
+  </div>
+  <%= site_builder.text_field :rcplist_selector %>
 
   <div class='label-enclosure' style="margin-top:.5em">
     <%= site_builder.label :title_selector, 'Title Selector' -%>

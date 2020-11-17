@@ -1,6 +1,8 @@
 require 'scraping/seeker.rb'
 require 'enumerable_utils.rb'
 
+# TODO: 'orange slice', i.e., ingredient FOLLOWED BY unit
+
 class Parser
   attr_reader :grammar
 

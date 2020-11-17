@@ -21,7 +21,14 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector selector_string title_selector recipe_selector ]
+    super + [ :description, :trimmers,
+              :selector_string, # Defines a Finder for Content
+              :trimmers_str, # Enumerates selectors for content to cut from page
+              :rcplist_selector, # Defines the beginning of a recipe on the page
+              :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
+              :title_selector # Finds the title within a recipe
+    # :recipe_selector
+            ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -39,22 +46,22 @@ class Site < ApplicationRecord
   end
 
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
-  def recipe_selector
-    get_selector_for :rp_recipe, :at_css_match
+  def rcplist_selector
+    get_selector_for :rp_recipelist, :match, :at_css_match
   end
 
-  def recipe_selector= str
+  def rcplist_selector str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
-    set_selector_for :rp_recipe, str, :at_css_match
+    set_selector_for str, :rp_recipelist, :match, :at_css_match
   end
 
   def method_missing name, *args
     if name.to_s.match /(\w*)_selector(=)?$/
       token = ('rp_'+$1).to_sym
       if $2 == '='
-        set_selector_for token, args.first
+        set_selector_for args.first, token, :in_css_match
       else
-        get_selector_for token
+        get_selector_for token, :in_css_match
       end
     else
       super if defined?(super)
@@ -382,19 +389,29 @@ public
 
   private
 
-  def get_selector_for token, which=:in_css_match
-    if grammar_mods[token]
-      grammar_mods[token][which]
+  def get_selector_for *tokens
+    hsh = grammar_mods # Start at the top level
+    tokens.each do |token|
+      return unless hsh[token]
+      hsh = hsh[token]
     end
+    return hsh
   end
 
-  def set_selector_for token, str, which=:in_css_match
+  def set_selector_for str, *tokens
+    hsh = grammar_mods # Start at the top level
+    tokens[0...-1].each do |token|
+      if hsh[token]
+        hsh = hsh[token]
+      else
+        hsh = (hsh[token] = {})
+      end
+    end
+    token = tokens.last
     if str.present?
-      grammar_mods[token] ||= {}
-      grammar_mods[token][which] = str
-      grammar_mods[token][:inline] = nil
+      hsh[token] = str
     else
-      grammar_mods.delete token
+      hsh.delete token
     end
   end
 
