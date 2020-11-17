@@ -21,7 +21,7 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector selector_string title_selector ]
+    super + %i[ description trimmers trimmers_str inglist_selector ingline_selector rcplist_selector selector_string title_selector recipe_selector ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
