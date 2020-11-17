@@ -117,8 +117,17 @@ class Parser
           %i{ atline inline },  # :atline and :inline are exclusive options
           %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
       ].each do |flagset|
-        if (wrongset = (keys & flagset))[1]
-          wrongstring, flagstring = [ wrongset, flagset ].map { |list|
+        if (wrongset = (keys & flagset))[1] &&
+            # Eliminate nil values for exclusive keys
+            wrongset.keep_if { |key|
+              if entry[key].nil?
+                entry.delete key
+                false
+              else
+                true
+              end
+            }[1]
+          wrongstring, flagstring = [wrongset, flagset].map { |list|
             '\'' + list[0..-2].join("', '") + "' and '#{list.last}'"
           }
           raise "Error: grammar entry for #{token} has #{wrongstring} flags. (Only one of #{flagstring} allowed)."

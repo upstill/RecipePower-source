@@ -125,7 +125,9 @@ class NokoTokens < Array
     # just add appropriate class(es) and value to the element
     if common_ancestor.name == tagname &&
         stripped_text == common_ancestor.inner_text.strip
-      common_ancestor[:class] = "#{common_ancestor[:class]} #{options[:classes]}" unless common_ancestor[:class].split.include?(options[:classes].to_s)
+      if common_ancestor[:class].present? && !common_ancestor[:class].split.include?(options[:classes].to_s)
+        common_ancestor[:class] = "#{common_ancestor[:class]} #{options[:classes]}"
+      end
       common_ancestor[:'data-value'] = options[:value] if options[:value]
     elsif teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
