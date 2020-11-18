@@ -52,13 +52,37 @@ class RecipePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
+  # Present the recipe's content in its entirety.
+  # THIS SHOULD HANDLED CAREFULLY b/c who knows what nefarious HTML it contains?
   def html_content
-    super.if_present ||
-        if @object.page_ref&.trimmed_content.blank?
-          "No Recipe content (PageRef content is empty)".html_safe
-        elsif @object.recipe_page&.selected_content(@object.anchor_path, @object.focus_path).blank?
-          "No Recipe content (PageRef has content but RecipePage content is empty)".html_safe
-        end
+    # Handle empty content first by returning an error message
+    if @object.content.blank?
+      if @object.page_ref&.trimmed_content.blank?
+        return "No Recipe content (PageRef content is empty)".html_safe
+      elsif @object.recipe_page&.selected_content(@object.anchor_path, @object.focus_path).blank?
+        return "No Recipe content (PageRef has content but RecipePage content is empty)".html_safe
+      else
+        return "Recipe has no content currently. Try Refreshing."
+      end
+    end
+    hc = with_format('html') { render 'recipes/formatted_content', presenter: self }
+    if response_service.admin_view?
+      hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe
+    end
+  end
+
+  def content_for selector
+    return if @object.content.blank?
+    @nkdoc ||= Nokogiri::HTML.fragment @object.content
+    case selector
+    when :rp_title
+    when :rp_author
+    when :rp_yield, :rp_serves
+    when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
+    when :rp_ing_comment
+    when :rp_inglist
+    when :rp_instructions
+    end
   end
 
 end
