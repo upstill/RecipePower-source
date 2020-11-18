@@ -50,7 +50,7 @@ class Site < ApplicationRecord
     get_selector_for :rp_recipelist, :match, :at_css_match
   end
 
-  def rcplist_selector str
+  def rcplist_selector= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
     set_selector_for str, :rp_recipelist, :match, :at_css_match
   end

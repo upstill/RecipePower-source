@@ -116,7 +116,7 @@ class FinderServices
 
   # Return the raw mapping from finders to arrays of hits
   def self.glean url, site=nil, *finders_or_labels
-    unless site.nil? || site.is_a?(Site)
+    unless site.nil? || site.respond_to?(:finders)
       finders_or_labels.unshift site
       site = nil
     end

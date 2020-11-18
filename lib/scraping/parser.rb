@@ -2,6 +2,7 @@ require 'scraping/seeker.rb'
 require 'enumerable_utils.rb'
 
 # TODO: 'orange slice', i.e., ingredient FOLLOWED BY unit
+# '2 tablespoons juice from 1 lemon'
 
 class Parser
   attr_reader :grammar
