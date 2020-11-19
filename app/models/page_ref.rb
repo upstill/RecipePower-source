@@ -118,16 +118,14 @@ class PageRef < ApplicationRecord
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result
-  def request_dependencies *newly_needed
-    if newly_needed.include? :recipe_page
-      request_attributes :content, true
-    end
-    from_gleaning = Gleaning.tracked_attributes & newly_needed
+  def request_dependencies 
+    attrib_needed! :content, true if recipe_page_needed?
+    from_gleaning = Gleaning.tracked_attributes & needed_attributes
     if from_gleaning.present?
       build_gleaning if !gleaning
       gleaning.request_attributes *from_gleaning
     end
-    from_mercury = MercuryResult.tracked_attributes & newly_needed
+    from_mercury = MercuryResult.tracked_attributes & needed_attributes
     if from_mercury.present?
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result

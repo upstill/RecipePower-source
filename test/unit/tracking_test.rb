@@ -55,11 +55,11 @@ class TrackingTest < ActiveSupport::TestCase
     recipe.title_accept 'placeholder2' # Set title and flip 'ready' bit
 
     # Invalidate all the attributes EXCEPT title
-    recipe.refresh_attributes except: :title
+    recipe.refresh_attributes except: [ :title ]
     assert_equal recipe.needed_attributes, Recipe.tracked_attributes - [:title]
-    assert_equal [:url, :title, :picurl, :recipe_page, :description].sort, recipe.page_ref.needed_attributes.sort
-    assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.mercury_result.needed_attributes.sort
-    assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.gleaning.needed_attributes.sort
+    assert_equal [:content, :url, :title, :picurl, :recipe_page, :description].sort, recipe.page_ref.needed_attributes.sort
+    # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.mercury_result.needed_attributes.sort
+    # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.gleaning.needed_attributes.sort
 
     recipe.ensure_attributes # Get the title, etc.
     assert_empty recipe.needed_attributes

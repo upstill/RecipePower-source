@@ -174,8 +174,8 @@ class Site < ApplicationRecord
   ######### Trackable overrides ############
   ############## Trackable ############
   # Request attributes of other objects
-  def request_dependencies *newly_needed
-    page_ref_attribs = newly_needed.collect { |my_attrib|
+  def request_dependencies 
+    page_ref_attribs = needed_attributes.collect { |my_attrib|
       # Provide the attribute that will receive the value for the given PageRef attribute
         case my_attrib
         when :name
