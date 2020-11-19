@@ -65,23 +65,88 @@ class RecipePresenter < CollectiblePresenter
         return "Recipe has no content currently. Try Refreshing."
       end
     end
-    hc = with_format('html') { render 'recipes/formatted_content', presenter: self }
+    hc = with_format('html') { render 'recipes/formatted_content', presenter: self, locals: { presenter: self } }
     if response_service.admin_view?
-      hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe
+      hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe  
     end
   end
 
-  def content_for selector
+=begin
+  # Syntactic sugar to allow the view to refer to fields by name
+  def method_missing namesym, *args, &block
+    content = content_for :"rp_#{namesym}"
+    content = block.call(content) if block_given?
+    content
+  end
+=end
+
+  def assemble_tree node
+    return node.text.html_safe if node.text?
+    content = safe_join node.children.collect { |child| assemble_tree child }
+    node.classes.each do |klass|
+      # For each node, see if we have ideas about how to present it
+      case klass.to_sym
+      when :rp_ingname
+        # Wrap an ingredient tag in a link to that tag in RecipePower
+        tag = Tag.find_by name: node['data-value'], tagtype: Tag.typenum(:Ingredient)
+        return homelink(tag, class: 'rp_ingname') if tag
+      when :rp_ingline
+        return content_tag(:li, content, class: :rp_ingline )
+      end
+    end
+    return content
+  end
+
+  def content_for token
     return if @object.content.blank?
-    @nkdoc ||= Nokogiri::HTML.fragment @object.content
-    case selector
-    when :rp_title
-    when :rp_author
+    html =
+    case token
+    #when :rp_title
+    #when :rp_author
     when :rp_yield, :rp_serves
-    when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
-    when :rp_ing_comment
+      result_for ".#{token} .rp_amt"
+    #when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
+    #when :rp_ing_comment
     when :rp_inglist
-    when :rp_instructions
+      results_for(".rp_inglist") { |listnode|
+        assemble_tree listnode
+      }
+    #when :rp_ingline
+    #when :rp_instructions
+    else # Default is just to return the text at the named node
+      result_for ".#{token}"
+    end
+    # Now we give the view a chance to enclose our result
+    if html.is_a?(Array)
+      safe_join( html.collect { |h| block_given? ? (yield(h) if h.present?) : h }.compact )
+    else
+      block_given? ? (yield(html) if html.present?) : html
+    end
+  end
+
+  private
+
+  # Here's where we can 
+  def extract_from_node token, txt
+    if txt.present?
+      txt
+    end
+  end
+
+  # Find a single result for the given selector
+  def result_for selector
+    results_for(selector).first
+  end
+
+  # Find a collection of results for the given selector
+  # The entirety of the object's content is searched by default, but
+  # a node of a Nokogiri doc may be provided for limiting the scope
+  def results_for selector, nkdoc=nil, &block
+    nkdoc ||= (@nkdoc ||= Nokogiri::HTML.fragment @object.content)
+    if block_given?
+      nkdoc.css(selector).collect &block
+    else
+      nkdoc.css(selector).collect { |node| node.text }.keep_if(&:present?)
     end
   end
 
