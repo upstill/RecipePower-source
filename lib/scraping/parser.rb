@@ -24,6 +24,7 @@ class Parser
   # The default grammar is initialized by config/initializers/parser.rb
   def self.init_grammar grammar={}
     @@DefaultGrammar = grammar
+    @@GrammarYAML = grammar.to_yaml
   end
 
   # How should the token be enclosed?
@@ -67,8 +68,8 @@ class Parser
 
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
-    @grammar = @@DefaultGrammar.clone
-    modify_grammar grammar_mods
+    @grammar = YAML.load @@GrammarYAML
+    modify_grammar YAML.load(grammar_mods.to_yaml) # Protect them against modification
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
