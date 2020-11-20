@@ -214,11 +214,9 @@ module DialogsHelper
 
   def dialog_action_buttons decorator
     dialog_submit_button +
-        if decorator.respond_to?(:regenerate_dependent_content) && false
+        if decorator.respond_to?(:regenerate_dependent_content)
           # The Cancel button will have to restore prior state if we're previewing
-          (true || response_service.update_option == :preview ?
-               dialog_submit_button('Cancel', button_style: 'info', data: {update_option: :restore}) :
-               dialog_cancel_button) +
+               dialog_submit_button('Cancel', button_style: 'info', data: {update_option: :restore}) +
               # Preview the results of the changes
               dialog_submit_button('Preview', button_style: 'primary', data: {update_option: :regenerate_dependent_content})
         else

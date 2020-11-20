@@ -123,6 +123,7 @@ module Trackable
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes
     assert_needed_attributes *list_of_attributes
+    logger.info "Requesting attributes #{needed_attributes} of #{self} ##{id}"
     request_dependencies # Launch all objects that we depend on
     bkg_launch attrib_needed?
   end

@@ -9,7 +9,10 @@ class PageRefDecorator < CollectibleDecorator
   # Ensure that the entity has its displayable data updated
   def regenerate_dependent_content
     # The page_ref will produce different output if the site's trimmers have changed
-    site.trimmers_changed?
+    either = site.trimmers_changed?
+    either = site.finders_for('Content').any? { |f| f.changed? } || either
+    refresh_attributes :content if either
+    either
   end
 
   def human_name plural=false, capitalize=true
