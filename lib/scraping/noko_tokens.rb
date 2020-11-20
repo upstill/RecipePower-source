@@ -125,15 +125,16 @@ class NokoTokens < Array
     # just add appropriate class(es) and value to the element
     if common_ancestor.name == tagname &&
         stripped_text == common_ancestor.inner_text.strip
-      if common_ancestor[:class].present? && !common_ancestor[:class].split.include?(options[:classes].to_s)
-        common_ancestor[:class] = "#{common_ancestor[:class]} #{options[:classes]}"
+      if nclass = options[:classes]&.to_s
+        oclasses = common_ancestor[:class]&.split || []
+        common_ancestor[:class] = "#{common_ancestor[:class]} #{nclass}" unless oclasses.include?(nclass)
       end
       common_ancestor[:'data-value'] = options[:value] if options[:value]
     elsif teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
       # Enclose the selected text in a new span element
       # If the enclosed text is all alone in a span, just add to the classes of the span
-      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options )
+      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options)
       update
     else
       enclose_by_text_elmt_data teleft, teright, options
