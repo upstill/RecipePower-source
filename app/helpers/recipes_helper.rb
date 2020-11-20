@@ -238,6 +238,22 @@ module RecipesHelper
     out.html_safe
   end
 
+  def sequence_instructions txt
+    sentences = txt.strip.split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    return if sentences.blank?
+    step = sentences.shift
+    sentences.each do |sentence|
+      if sentence.split(/\s+/).length > 2
+        yield step if step.present?
+        step = sentence
+      else
+        step << ' ' if step.present?
+        step << sentence
+      end
+    end
+    yield step if step.present?
+  end
+
 # Provide the cookmark-count line
   def cookmark_count(collectible_entity, user)
     count = collectible_entity.num_cookmarks
