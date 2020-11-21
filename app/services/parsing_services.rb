@@ -1,3 +1,5 @@
+require 'recipe.rb'
+require 'recipe_page.rb'
 class ParsingServices
   attr_accessor :entity, # Object (ie., Recipe or RecipePage) to be parsed
                 :parser, # Parser, possibly with modified grammar, to be employed

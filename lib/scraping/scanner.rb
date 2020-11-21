@@ -209,6 +209,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   while focus_elmt.to_s.blank? do
     focus_elmt = predecessor_text common_ancestor, focus_elmt
   end
+
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # focus_elmt may have moved up the tree
   # If there's an ancestor with no preceding or succeeding text, mark that and return
   if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))

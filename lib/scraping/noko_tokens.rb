@@ -184,6 +184,39 @@ class NokoTokens < Array
     #if Rails.env.development?
     #  puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
     #end
+
+    # If there is already a tree whose root matches the tag and class spec, expand it to include the whole selection
+    selector = "#{options[:tag] || 'span'}.#{options[:classes]}"
+    if extant_match = (teleft.ancestors & nkdoc.css(selector)).first
+      # Append selection not already in the extant tree to it
+      caret = teright.text_element
+      while !caret.next do
+        caret = caret.parent
+      end
+      from = caret.parent
+      while caret.parent != extant_match
+        extant_match.add_child from.children.first
+      end
+      return extant_match
+    end
+    # Same procedure if the end of the selection has a viable ancestor
+    if extant_match = (teright.ancestors & nkdoc.css(selector)).first
+      # Append selection not already in the extant tree to it
+      caret = teleft.text_element
+      while !caret.previous do
+        caret = caret.parent
+      end
+      catcher = extant_match.children.first
+      nxt = caret.next_sibling
+      while caret
+        nxt = caret.next_sibling
+        catcher.previous= caret
+        catcher = caret
+        caret = nxt
+      end
+      return extant_match
+    end
+
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
     update
     newnode
