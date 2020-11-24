@@ -243,7 +243,7 @@ module RecipesHelper
     return if sentences.blank?
     step = sentences.shift
     sentences.each do |sentence|
-      if sentence.split(/\s+/).length > 2
+      if sentence.split(/\s+/).length > 3
         yield step if step.present?
         step = sentence
       else

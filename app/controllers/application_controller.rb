@@ -177,8 +177,7 @@ class ApplicationController < ActionController::Base
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
-      return if entity.errors.any?
-      if entity.is_a?(Collectible)
+        if entity.is_a?(Collectible)
         if options[:touch] == :collect # Ensure that
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
@@ -186,10 +185,14 @@ class ApplicationController < ActionController::Base
       # We save the entity IFF
       # -- it's previously persisted (except of the :save option is false), or
       # -- either the :save or the :touch option is truthy
-      entity.save if (entity.persisted? ?
-                          (entity.changed_for_autosave? && do_save) :
-                          (do_save || options[:touch])) # If assign_attributes didn't save
-      return if entity.errors.any?
+      entity.save if entity.errors.empty? &&
+          (entity.persisted? ?
+               (entity.changed_for_autosave? && do_save) :
+               (do_save || options[:touch])) # If assign_attributes didn't save
+      if entity.errors.any?
+        resource_errors_to_flash entity
+        return false
+      end
       if entity.is_a?(Collectible)
         rr =
           case options[:touch]
@@ -214,7 +217,7 @@ class ApplicationController < ActionController::Base
       response_service.title = (@decorator.title || '').truncate(20)
     end
     @presenter = present(entity) rescue nil # Produce a presenter if possible
-    entity.errors.empty? # ...and report back status
+    true # ...and report back status
   end
 
   # Get the model parameters as filtered by strong parameters for the current controller

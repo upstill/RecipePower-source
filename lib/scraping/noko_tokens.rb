@@ -187,34 +187,62 @@ class NokoTokens < Array
 
     # If there is already a tree whose root matches the tag and class spec, expand it to include the whole selection
     selector = "#{options[:tag] || 'span'}.#{options[:classes]}"
-    if extant_match = (teleft.ancestors & nkdoc.css(selector)).first
-      # Append selection not already in the extant tree to it
-      caret = teright.text_element
-      while !caret.next do
-        caret = caret.parent
-      end
-      from = caret.parent
-      while caret.parent != extant_match
-        extant_match.add_child from.children.first
-      end
-      return extant_match
-    end
-    # Same procedure if the end of the selection has a viable ancestor
-    if extant_match = (teright.ancestors & nkdoc.css(selector)).first
-      # Append selection not already in the extant tree to it
-      caret = teleft.text_element
-      while !caret.previous do
-        caret = caret.parent
-      end
-      catcher = extant_match.children.first
-      nxt = caret.next_sibling
-      while caret
+    extant_right = (teright.ancestors & nkdoc.css(selector)).first
+    extant_left = (teleft.ancestors & nkdoc.css(selector)).first
+    if extant_left || extant_right
+      if extant_right == extant_left
+        # The selection is entirely under the requisite node => move OTHER (preceding and succeeding) content out
+        # For lack of a better place, we'll move it all before and after the extant node
+        target = extant_left
+        mark = teleft.text_element
+        while mark != extant_left
+          previous = mark.previous
+          mark = mark.parent
+          while caret = previous
+            previous = caret.previous
+            target.previous = caret
+            target = target.previous
+          end
+        end
+        target = extant_right
+        mark = teright.text_element
+        while mark != extant_right
+          nxt = mark.next
+          mark = mark.parent
+          while caret = nxt
+            nxt = caret.next
+            target.next = caret
+            target = target.next
+          end
+        end
+      elsif extant_left
+        # Append selection not already in the extant tree to it
+        caret = teright.text_element
+        while !caret.next do
+          caret = caret.parent
+        end
+        from = caret.parent
+        while caret.parent != extant_left
+          extant_left.add_child from.children.first
+        end
+        return extant_left
+        # Same procedure if the end of the selection has a viable ancestor
+      elsif extant_right
+        # Append selection not already in the extant tree to it
+        caret = teleft.text_element
+        while !caret.previous do
+          caret = caret.parent
+        end
+        catcher = extant_right.children.first
         nxt = caret.next_sibling
-        catcher.previous= caret
-        catcher = caret
-        caret = nxt
+        while caret
+          nxt = caret.next_sibling
+          catcher.previous = caret
+          catcher = caret
+          caret = nxt
+        end
+        return extant_right
       end
-      return extant_match
     end
 
     newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)

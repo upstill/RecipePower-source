@@ -42,7 +42,7 @@ class Site < ApplicationRecord
 
   def trimmers_str= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
-    self.trimmers = str.split /\s+/
+    self.trimmers = str.split(/\n+/).map &:strip
   end
 
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string

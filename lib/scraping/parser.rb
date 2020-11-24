@@ -308,7 +308,8 @@ class Parser
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
       return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = scanner.past(subscanner) if context[:in_css_match]  # Skip past the element
+      match.tail_stream = (context[:at_css_match] && scanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+          scanner.past(subscanner)
       return match.encompass(scanner)  # Release the limitation to element bounds
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
