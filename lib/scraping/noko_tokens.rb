@@ -78,6 +78,30 @@ class NokoTokens < Array
     @elmt_bounds.delete_at ix
   end
 
+  # Moving nodes under a parent, we have to be careful to maintain the integrity of the
+  # elements index because Nokogiri will merge two succeeding text elements into one child
+  def move_elements_safely parent, *children
+    children.each do |child|
+      if child.text?
+        child_ix = find_elmt_index child
+        children = parent.children
+        prev_child = children.last
+        count_before = children.count
+        parent.add_child child
+        if prev_child&.text?
+          if parent.children.count == count_before
+            # These should be adjacent elements in the elmts array
+            @elmt_bounds.delete_at child_ix
+            child_ix = child_ix - 1
+          end
+        end
+        @elmt_bounds[child_ix][0] = parent.children.last
+      else
+        parent.add_child child
+      end
+    end
+  end
+
   # Return the string representing all the text given by the two token positions
   # NB This is NOT the space-separated join of all tokens in the range, b/c any intervening whitespace is not collapsed
   def text_from first_token_index, limiting_token_index
@@ -245,7 +269,7 @@ class NokoTokens < Array
       end
     end
 
-    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
+    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self, noko_tokens: teleft.noko_tokens)
     update
     newnode
   end
