@@ -269,7 +269,9 @@ class NokoTokens < Array
       end
     end
 
-    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self, noko_tokens: teleft.noko_tokens)
+    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options do |newtree, *nodes_to_move|
+      move_elements_safely newtree, *nodes_to_move
+    end
     update
     newnode
   end

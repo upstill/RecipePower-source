@@ -3,53 +3,6 @@ require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
 require 'scraping/noko_tokens.rb'
 
-class NodeArray < Array
-  attr_reader :noko_tokens
-  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at,
-           :find_elmt_index, :nth_elmt, :delete_nth_elmt,
-           :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :noko_tokens
-
-  def initialize nkt, *contents
-    @noko_tokens = nkt
-    contents.map { |elmt| push_elmt elmt }
-  end
-
-  def real_elmt elmt_or_index
-    return unless elmt_or_index
-    elmt_or_index.is_a?(Fixnum) ? noko_tokens.nth_elmt(elmt_or_index) : elmt_or_index
-  end
-
-  def entry_for elmt
-    elmt.text? ? noko_tokens.find_elmt_index(elmt) : elmt
-  end
-
-  def to_a
-    collect do |elmt|
-      if elmt.is_a?(Fixnum)
-        "Text Element ##{elmt}: #{real_elmt elmt}"
-      else
-        elmt
-      end
-    end
-  end
-
-  def push_elmt elmt
-    push entry_for(elmt)
-  end
-
-  def pop_elmt
-    real_elmt pop
-  end
-
-  def unshift_elmt elmt
-    unshift entry_for(elmt)
-  end
-
-  def shift_elmt
-    real_elmt shift
-  end
-end
-
 # Is the node ready to delete?
 def node_empty? nokonode
   return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)
@@ -66,11 +19,6 @@ end
 def next_siblings nokonode
   found = false
   nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode; nil) }.compact
-end
-
-# Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
-def enclosable? subtree, anchor_elmt, focus_elmt, options
-  options[:classes].blank? || !nknode_has_class?(subtree, options[:classes])
 end
 
 def first_text_element node, blanks_okay = false
@@ -131,114 +79,6 @@ def tag_ancestor node, first_te, last_te, options = {}
   nil
 end
 
-# Test that the nodes have a parent and appropriate siblings
-def confirm_integrity *nodes
-  nodes.each do |node|
-
-  end
-end
-
-# Add a child to a node while ensuring that the child's old environment is maintained
-def add_child parent, newchild, nkt = nil
-  if (parent == newchild) || (newchild.parent == parent)
-    return newchild.next
-  end
-  # If the new node gets merged into an existing child, that's worth knowing
-  child_count = parent.children.count
-  rtnval = newchild.next
-  if newchild == parent.next
-    parent.add_child newchild
-    rtnval = parent.next
-  else
-    parent.add_child newchild
-  end
-  # In the event that the text from the newchild just gets appended to existing text in the parent,
-  # we have to remove that child from the node bounds array.
-  if (child_count == parent.children.count) && # No child added (i.e, newchild was merged in)
-      (ebix = nkt&.find_elmt_index newchild) &&
-      (nkt.nth_elmt(ebix - 1) == nkt.nth_elmt(ebix))
-    nkt.delete_nth_elmt ebix
-  end
-  return rtnval
-  begin
-    orig_prev, orig_next = newchild.previous, newchild.next
-    node_prev, node_next = node.previous, node.next
-    newchild.remove # node.add_child newchild
-    if orig_prev
-      raise '1: Previous node lost its parent after removing' unless orig_prev.parent
-      raise '2: Previous node not linked to next node after removing' unless orig_prev.next == orig_next
-    end
-    if orig_next
-      raise '3: Next node lost its parent after removing' unless orig_next.parent
-      raise '4: Next node not linked back to previous node after removing' unless orig_next.previous == orig_prev
-    end
-    node.add_child newchild
-    if node == orig_prev && node.next != orig_next
-      # Somehow the original next node has gotten unlinked from the DOM.
-      return
-    end
-    if node == orig_next && node.prev != orig_prev
-      return
-    end
-    if orig_prev
-      raise '5: Previous node lost its parent after adding' unless orig_prev.parent
-      raise '6: Previous node not linked to next node after adding' unless orig_prev.next == orig_next
-    end
-    if orig_next
-      raise '7: Next node lost its parent after adding' unless orig_next.parent
-      raise '8: Next node not linked back to previous node after adding' unless orig_next.previous == orig_prev
-    end
-    raise '9: New child not linked in with parent' unless newchild.parent == node
-  rescue Exception => e
-    x = 2
-  end
-
-end
-
-# Insert a node before the given node and return the former
-def insert_before node_or_html, node
-  begin
-    old_prev = node.previous
-    parent = node.parent
-    node.previous = node_or_html
-    newtree = node.previous
-    if old_prev
-      raise 'Prior node not relinked properly' unless old_prev.next == newtree
-      raise 'Old previous lost its parent' unless old_prev.parent == parent
-    end
-    if node_or_html.is_a? String
-      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
-    else
-      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
-    end
-  rescue Exception => e
-    x = 2
-  end
-  newtree
-end
-
-# Insert a node before the given node and return the former
-def insert_after node, node_or_html
-  begin
-    old_next = node.next
-    parent = node.parent
-    node.next = node_or_html
-    newtree = node.next
-    if old_next
-      raise 'Subsequent node not relinked properly' unless old_next.previous == newtree
-      raise 'Old next lost its parent' unless old_next.parent == parent
-    end
-    if node_or_html.is_a? String
-      raise 'New node didn\'t get parent of its successor' unless newtree.parent == parent
-    else
-      raise 'New node didn\'t get parent of its successor' unless node_or_html.parent == parent
-    end
-  rescue Exception => e
-    x = 2
-  end
-  newtree
-end
-
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
 def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
@@ -261,145 +101,80 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))
     return report_tree('After: ', anc)
   end
-  unless enclosable? common_ancestor, anchor_elmt, focus_elmt, options
+  # Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
+  unless options[:classes].blank? || !nknode_has_class?(common_ancestor, options[:classes])
     return report_tree('After: ', common_ancestor)
   end
 
-  if nt = options[:noko_tokens]
-    anchor_ancestry = anchor_elmt.ancestors
-    focus_ancestry = focus_elmt.ancestors
-    common_ancestry = anchor_ancestry & focus_ancestry
-    common_ancestor = common_ancestry.first
+  # We're going to collect a list of nodes to be moved under the new tree, in order
+  anchor_ancestry = anchor_elmt.ancestors
+  focus_ancestry = focus_elmt.ancestors
+  common_ancestry = anchor_ancestry & focus_ancestry
+  common_ancestor = common_ancestry.first
 
-    path_to_anchor_root = [anchor_elmt] + (anchor_ancestry - common_ancestry).to_a
-    # The anchor_root is the first element on the anchor path, a child of common_ancestor
-    anchor_root = path_to_anchor_root.pop
-    # The degenerate case: the anchor (focus) root is the same as anchor_elmt (focus_elmt)
+  path_to_anchor_root = [anchor_elmt] + (anchor_ancestry - common_ancestry).to_a
+  # The anchor_root is the first element on the anchor path, a child of common_ancestor
+  anchor_root = path_to_anchor_root.pop
+  # The degenerate case: the anchor (focus) root is the same as anchor_elmt (focus_elmt)
 
-    # path_to_focus_elmt runs from below focus root to focus_elmt
-    path_to_focus_elmt = (focus_ancestry - common_ancestry).to_a.reverse << focus_elmt
-    focus_root = path_to_focus_elmt.shift
+  # path_to_focus_elmt runs from below focus root to focus_elmt
+  path_to_focus_elmt = (focus_ancestry - common_ancestry).to_a.reverse << focus_elmt
+  focus_root = path_to_focus_elmt.shift
 
-    # We are going to develop an array of nodes to assign to the children of newtree.
-    ns = NodeArray.new nt
+  # We are going to develop an array of nodes to assign to the children of newtree.
+  ns = []
 
-    # Highest_whole_{left|right} are the root of subtrees whose text elements lie entirely within
-    # the range from anchor to focus, if any (otherwise, they are the anchor and/or focus elements themselves)
-    # The first element of the new tree is the highest ancestor of anchor_elmt that can be included in its entirety,
-    # i.e., all of its children are in range. There might be NO such element: anchor_elmt may have previous siblings
+  # Highest_whole_{left|right} are the root of subtrees whose text elements lie entirely within
+  # the range from anchor to focus, if any (otherwise, they are the anchor and/or focus elements themselves)
+  # The first element of the new tree is the highest ancestor of anchor_elmt that can be included in its entirety,
+  # i.e., all of its children are in range. There might be NO such element: anchor_elmt may have previous siblings
 
-    while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
-      path_to_anchor_root.shift
+  while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
+    path_to_anchor_root.shift
+  end
+  ns.push path_to_anchor_root.first || anchor_root
+  path_to_anchor_root.each do |caret|
+    while caret = caret.next_sibling do
+      ns.push caret
     end
-    ns.push_elmt path_to_anchor_root.first || anchor_root
-    path_to_anchor_root.each do |caret|
-      while caret = caret.next_sibling do
-        ns.push_elmt caret
-      end
-    end
-
-    # Add the nodes between the two roots, if any
-    if (caret = anchor_root) != focus_root
-      while (caret = caret.next) != focus_root
-        ns.push_elmt caret
-      end
-    end
-
-    # Find the the last node on path_to_focus_element that can be moved in its entirety
-    # i.e., the one with no children to the left of the one on the path
-    while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
-      path_to_focus_elmt.pop
-    end
-    # ...but the search may have consumed the whole path without finding one
-    if path_to_focus_elmt.present?
-      # Process each node in the path down from (but not including) last_element
-      # by collecting leftward siblings
-      path_to_focus_elmt.each do |right_sibling|
-        right_sibling.parent.children.each { |caret|
-          break if caret == right_sibling
-          ns.push_elmt caret
-        }
-      end
-    end
-    ns.push_elmt path_to_focus_elmt.last || focus_root
-
-    # Now build the tree
-    newtree = insert_before html, anchor_root
-    while (elmt = ns.shift_elmt)
-      nt.move_elements_safely newtree, elmt
-      validate_embedding report_tree('During: ', newtree)
-    end
-    validate_embedding report_tree('After: ', newtree)
-    return
   end
 
-  # We'll attach the new tree as the predecessor node of the anchor element's highest ancestor
-  left_ancestor = (anchor_elmt if anchor_elmt.parent == common_ancestor) ||
-      anchor_elmt.ancestors.find { |elmt| elmt.parent == common_ancestor }
-  newtree = nil
-  left_collector = if options[:insert] != false
-                     if anchor_elmt.parent == common_ancestor
-                       newtree = insert_before html, left_ancestor
-                       # left_ancestor.previous = html
-                       # newtree = left_ancestor.previous
-                       left_ancestor.next
-                     else
-                       newtree = insert_after left_ancestor, html
-                       # left_ancestor.next = html
-                       # newtree = left_ancestor.next
-                       newtree.next
-                     end
-                   else
-                     newtree = Nokogiri::HTML.fragment(html).children[0]
-                     left_ancestor.next
-                   end
-
-  highest_whole_left = anchor_elmt
-  while (highest_whole_left.parent != common_ancestor) && !highest_whole_left.previous_sibling do
-    highest_whole_left = highest_whole_left.parent
+  # Add the nodes between the two roots, if any
+  if (caret = anchor_root) != focus_root
+    while (caret = caret.next) != focus_root
+      ns.push caret
+    end
   end
 
-  # Now we should have an array of elements to be made children of the new node.
-  # Starting with the highest whole node, add nodes that are included in the selection to the new elmt
-  if highest_whole_left == focus_elmt
-    add_child newtree, highest_whole_left, options[:nkt]
-    return report_tree('After: ', newtree)
+  # Find the the last node on path_to_focus_element that can be moved in its entirety
+  # i.e., the one with no children to the left of the one on the path
+  while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
+    path_to_focus_elmt.pop
   end
-  if (newtree.next == focus_elmt) # (newtree.next == highest_whole_left) && (highest_whole_left.next == focus_elmt)
-    right_collector = add_child newtree, highest_whole_left, options[:nkt] # newtree.add_child highest_whole_left
-    focus_elmt = newtree.next
+  # ...but the search may have consumed the whole path without finding one
+  if path_to_focus_elmt.present?
+    # Process each node in the path down from (but not including) last_element
+    # by collecting leftward siblings
+    path_to_focus_elmt.each do |right_sibling|
+      right_sibling.parent.children.each { |caret|
+        break if caret == right_sibling
+        ns.push caret
+      }
+    end
+  end
+  ns.push path_to_focus_elmt.last || focus_root
+
+  # Now build the tree, inserting it before anchor_root
+  anchor_root.previous = html
+  newtree = anchor_root.previous
+  if block_given?
+    yield newtree, *ns
   else
-    right_collector = add_child newtree, highest_whole_left, options[:nkt] # newtree.add_child highest_whole_left
+    ns.each { |node| newtree.add_child node }
   end
-  if right_collector
-    while (right_collector.parent != common_ancestor)
-      parent = right_collector.parent
-      while (right_sib = right_collector&.next) do
-        right_collector = add_child newtree, right_sib, options[:nkt] # newtree.add_child right_sib
-      end
-      right_collector = parent
-    end
-  end
-  ## Now do the same with the right side, adding preceding elements
-  # Find the highest node that can be moved whole
-  highest_whole_right = focus_elmt
-  while (highest_whole_right.parent != common_ancestor) && !highest_whole_right.next_sibling do
-    highest_whole_right = highest_whole_right.parent
-  end
-  # Build a stack from the right node's ancestor below the common ancestor down to the highest whole right node
-  stack = [highest_whole_right]
-  while stack.last.parent != common_ancestor
-    stack.push stack.last.parent
-  end
-  # Go down the tree, collecting all the siblings before and including each ancestor
-  while ancestor = stack.pop
-    while left_collector && left_collector != ancestor do
-      left_collector = add_child newtree, left_collector, options[:nkt] # newtree.add_child left_collector
-    end
-    left_collector = ancestor.children[0] unless stack.empty?
-  end
-  add_child newtree, highest_whole_right, options[:nkt] # newtree.add_child highest_whole_right
   validate_embedding report_tree('After: ', newtree)
+  return newtree
+
 end
 
 def report_tree label, nokonode, first_te = nil, last_te = nil
