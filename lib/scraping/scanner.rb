@@ -164,13 +164,21 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   end
   ns.push path_to_focus_elmt.last || focus_root
 
-  # Now build the tree, inserting it before anchor_root
-  anchor_root.previous = html
-  newtree = anchor_root.previous
+  # Now build the tree. This has a very specific placement requirement: it needs to go <between>
+  # where anchor_root and focus_root are now. But either of those could be moved entirely into
+  # the new tree.
+  newdoc = Nokogiri::HTML.fragment html
+  newtree = newdoc.children[0]
+  successor_node = ns.include?(focus_root) ? focus_root.next : focus_root
   if block_given?
     yield newtree, *ns
   else
     ns.each { |node| newtree.add_child node }
+  end
+  if successor_node # newtree goes where anchor_root was
+    successor_node.previous = newtree
+  else # The focus node was the last child, and now it's gone => make newtree be the last child
+    common_ancestor.add_child newtree
   end
   validate_embedding report_tree('After: ', newtree)
   return newtree
