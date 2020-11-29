@@ -240,6 +240,12 @@ class RangeSeeker < Seeker
       else
         match1
       end
+    elsif stream.peek.match '-'
+      nums = stream.peek.split '-'
+      if (match1 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.first)) &&
+         (match2 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.last))
+        self.new stream, stream.rest, :rp_range, [ match1, match2 ]
+      end
     end
   end
 end
