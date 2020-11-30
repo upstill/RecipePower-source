@@ -1,3 +1,5 @@
+require 'recipe.rb'
+require 'page_ref.rb'
 class CollectiblePolicy < ApplicationPolicy
   # Policies for collectible entities
   # Not CRUD, but common enough

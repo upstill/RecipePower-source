@@ -9,7 +9,7 @@ module Pagerefable
   module ClassMethods
 
     def mass_assignable_attributes keys=[]
-      [ self.url_attribute, {:page_ref_attributes => %i{ kind id } } ].compact + (defined?(super) ? super : [])
+      [ (self.url_attribute if self.respond_to? :url_attribute) ].compact + (defined?(super) ? super : [])
     end
 
     def pagerefable(url_attribute, options = {})

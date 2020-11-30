@@ -8,7 +8,7 @@ class RecipePage < ApplicationRecord
   attr_trackable :content
 
   def self.mass_assignable_attributes
-    [ :content ]
+    (defined?(super) ? super : []) + [ :content ]
   end
 
   has_one :page_ref
@@ -19,9 +19,24 @@ class RecipePage < ApplicationRecord
 
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
+    # page_ref.ensure_attributes :content
     if content_needed? && page_ref.content_ready?
+      # Clear all recipes but the first
       content = page_ref.trimmed_content
       if content.present?
+        # Reduce the recipes:
+        # -- retain only those that have been collected
+        # -- if none have been collected, reduce the set to the oldest persisted one
+        # -- if none persisted, choose one at random. (There shouldn't even be more than one.)
+        persisted = page_ref.recipes.to_a.select &:persisted?
+        page_ref.recipes =
+        if persisted.present?
+          persisted.select { |rcp| rcp.toucher_pointers.exists? }.if_present ||
+          [ persisted.inject { |memo, rcp| (rcp.created_at < memo.created_at) ? rcp : memo } ]
+        else
+          page_ref.recipes.to_a[0..0]
+        end
+        # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
         parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
         parser.parse content
@@ -44,25 +59,6 @@ class RecipePage < ApplicationRecord
             else
               rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
             end
-=begin
-            if recipe&.persisted?
-              recipe.update_column :title, title
-              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
-                recipe.update_column :anchor_path, xb.first
-                recipe.update_column :focus_path, xb.last
-                recipe.update_column :content, nil
-              end
-            elsif recipe
-              recipe.title = title
-              if recipe.anchor_path != xb.first || recipe.focus_path != xb.last
-                recipe.anchor_path = xb.first
-                recipe.focus_path = xb.last
-                recipe.content = nil
-              end
-            else
-              rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
-            end
-=end
           end
           puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
           # puts sub_parser.report_for(:except => :rp_title) # All other token types
@@ -84,7 +80,7 @@ class RecipePage < ApplicationRecord
       # Degenerate case where the selection only has one node
       return anchor_node.to_html
     end
-    nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag => :div, :classes => :rp_recipe, insert: false
+    nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag => :div, :classes => :rp_recipe
     nokotree.to_html if nokotree
   end
 

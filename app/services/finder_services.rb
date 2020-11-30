@@ -116,7 +116,7 @@ class FinderServices
 
   # Return the raw mapping from finders to arrays of hits
   def self.glean url, site=nil, *finders_or_labels
-    unless site.nil? || site.is_a?(Site)
+    unless site.nil? || site.respond_to?(:finders)
       finders_or_labels.unshift site
       site = nil
     end
@@ -130,43 +130,45 @@ class FinderServices
     uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
     nkdoc = NestedBenchmark.measure('making Nokogiri request') { self.open_noko url }
+    # Delete all <script> tags up front
+    nkdoc.css('script').map &:remove
 
     # Initialize the results
     results = Results.new *finders.map(&:label)
     NestedBenchmark.measure('filtering for results with Nokogiri') do
       finders.each do |finder|
-      label = finder.label
-      next unless (selector = finder.selector) &&
-          (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
-          (matches = nkdoc.css(selector)) &&
-          (matches.count > 0)
-      # finder.attribute_name = finder.finder.attribute_name
-      result = Result.new finder # For accumulating results
-      matches.each do |ou|
-        children = (ou.name == 'ul') ? ou.css('li') : [ou]
-        children.each do |child|
-          # If the content is enclosed in a link, emit the link too
-          if attribute_value = finder.attribute_name && child.attributes[finder.attribute_name].to_s.if_present
-            result.push attribute_value
-          elsif finder.attribute_name == 'content'
-            result.push child.content.strip
-          elsif finder.attribute_name == 'html'
-            result.push child.to_html
-          elsif child.name == 'a'
-            result.glean_atag finder[:linkpath], child, pagehome
-          elsif child.name == 'img'
-            outstr = child.attributes['src'].to_s
-            result.push outstr
-            # If there's an enclosed link coextensive with the content, emit the link
-          elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
-            result.glean_atag finder[:linkpath], atag, pagehome
-          else # Otherwise, it's just vanilla content
-            result.push child.content.strip
+        label = finder.label
+        next unless (selector = finder.selector) &&
+            (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
+            (matches = nkdoc.css(selector)) &&
+            (matches.count > 0)
+        # finder.attribute_name = finder.finder.attribute_name
+        result = Result.new finder # For accumulating results
+        matches.each do |ou|
+          children = (ou.name == 'ul') ? ou.css('li') : [ou]
+          children.each do |child|
+            # If the content is enclosed in a link, emit the link too
+            if attribute_value = finder.attribute_name && child.attributes[finder.attribute_name].to_s.if_present
+              result.push attribute_value
+            elsif finder.attribute_name == 'content'
+              result.push child.content.strip
+            elsif finder.attribute_name == 'html'
+              result.push child.to_html, true
+            elsif child.name == 'a'
+              result.glean_atag finder[:linkpath], child, pagehome
+            elsif child.name == 'img'
+              outstr = child.attributes['src'].to_s
+              result.push outstr
+              # If there's an enclosed link coextensive with the content, emit the link
+            elsif (atag = child.css('a').first) && (cleanupstr(atag.content) == cleanupstr(child.content))
+              result.glean_atag finder[:linkpath], atag, pagehome
+            else # Otherwise, it's just vanilla content
+              result.push child.content.strip
+            end
           end
         end
-      end
-      # Make sure that URLs are properly joined
-      case label
+        # Make sure that URLs are properly joined
+        case label
         when 'URI'
         when 'Author Link'
         when 'RSS Feed'
@@ -178,11 +180,11 @@ class FinderServices
               nil
             end
           }.compact
-      end
-      if result.found
-        result.report
-        results[label] << result
-      end
+        end
+        if result.found
+          result.report
+          results[label] << result
+        end
       end
     end
     results

@@ -411,4 +411,20 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     assert_match /Barbecue/, site.name
   end
 
+  ######## Manipulate grammar_mods
+
+  test 'manipulate grammar mods' do
+    s = Site.new
+    s.recipe_selector = 'heading h1'
+    assert_equal Hash( rp_recipelist: { match: { at_css_match: 'heading h1' } } ), s.grammar_mods
+
+    s.recipe_selector = nil
+    assert_equal Hash( rp_recipelist: { match: {  } } ), s.grammar_mods
+
+    s = Site.new
+    s.ingline_selector = 'li.ingredient'
+    assert_equal 'li.ingredient', s.ingline_selector
+    assert_equal Hash( rp_ingline: { :in_css_match => 'li.ingredient' } ), s.grammar_mods
+end
+
 end

@@ -38,8 +38,12 @@ class TextElmtData < Object
       # This is a path/offset specification, so we have to derive the global offset first
       # Find the element from the path
       path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
+      # The selection may end at, e.g., a <p> element; go down to the first text element
+      while path_end.element?
+        path_end = path_end.children.first
+      end
       # Linear search: SAD!
-      global_char_offset = elmt_bounds.find { |elmt| path_end == elmt.first }.last
+      global_char_offset = elmt_bounds.find { |elmt| path_end == elmt.first }&.last
       # Split the offset into a positive value and a negative indicator
       local_offset_mark = local_offset_mark.abs if (negatory = local_offset_mark < 0)
       # We have to correct character offsets b/c Javascript counts "\r\n" as a single character

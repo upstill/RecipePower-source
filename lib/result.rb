@@ -9,7 +9,8 @@ class Result
   end
 
   # Extract the data from a node under the given label
-  def push (str_in, uri=nil)
+  # If append is true, just add the string to the existing string
+  def push str_in, append = false
     unless str_in.nil?
       begin
         # Somehow, str_in can be a URI, so need to ensure it's a string
@@ -23,8 +24,11 @@ class Result
     end
     unless str_out.blank?
       # Add to result
-      str_out << '\t'+uri unless uri.blank?
-      self.out << str_out unless out.include?(str_out) # Add to the list of results
+      if append
+        self.out[0] = "#{out[0]}#{str_out}"
+      else
+        self.out << str_out unless out.include?(str_out) # Add to the list of results
+      end
     end
   end
 
@@ -49,7 +53,10 @@ class Result
       uri = href.value
       uri = safe_uri_join(site_home, uri) if uri =~ /^\// # Prepend domain/site to path as nec.
       outstr = atag.content
-      push outstr, uri if uri =~ /#{matchstr}/ # Apply subsite constraint
+      if uri =~ /#{matchstr}/ # Apply subsite constraint
+        push outstr
+        push '\t'+uri, true unless uri.blank?
+      end
     end
   end
 

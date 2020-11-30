@@ -58,7 +58,7 @@ class ReferentDecorator < CollectibleDecorator
     end
   end
 
-  def dialog_pane_list
+  def dialog_pane_list topic=nil
     @button_list ||= # A memoized list of buttons/panels to offer
         [
             (dialog_pane_spec(:description) if true),

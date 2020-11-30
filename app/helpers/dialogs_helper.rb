@@ -139,9 +139,9 @@ module DialogsHelper
     colorscheme = options[:colorscheme] || 'green'
     bc = content_tag(:div, flash_notifications_div, class: 'notifications-panel')+
         render('form', decorator: decorator, in_panes: true)
-
+    topics = strjoin(response_service.topics.split(',').map(&:capitalize)) if response_service.topics
     modal_dialog "pane_runner #{options[:dialog_class]} new-style #{colorscheme}",
-                 "Edit #{decorator.object.class}",
+                 "Edit #{decorator.object.class.to_s} #{topics}",
                  header_contents: dialog_pane_buttons(decorator),
                  dialog_class: 'modal-lg',
                  body_contents: bc
@@ -210,6 +210,18 @@ module DialogsHelper
 
   def dialogFooter()
     "</div><br class='clear'>".html_safe
+  end
+
+  def dialog_action_buttons decorator
+    dialog_submit_button +
+        if decorator.respond_to?(:regenerate_dependent_content)
+          # The Cancel button will have to restore prior state if we're previewing
+               dialog_submit_button('Cancel', button_style: 'info', data: {update_option: :restore}) +
+              # Preview the results of the changes
+              dialog_submit_button('Preview', button_style: 'primary', data: {update_option: :regenerate_dependent_content})
+        else
+          dialog_cancel_button
+        end
   end
 
   def injector_cancel_button name, options={}

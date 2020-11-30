@@ -22,10 +22,6 @@ class RecipePagesController < CollectibleController
     @recipe_page = RecipePage.new
   end
 
-  # GET /recipe_pages/1/edit
-  def edit
-  end
-
   # POST /recipe_pages
   def create
     @recipe_page = RecipePage.new(recipe_page_params)
@@ -60,6 +56,6 @@ class RecipePagesController < CollectibleController
 
     # Only allow a trusted parameter "white list" through.
     def recipe_page_params
-      params.require(:recipe_page).permit(:content, :page_ref_attributes => [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )
+      params.require(:recipe_page).permit(:content, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] ) )
     end
 end

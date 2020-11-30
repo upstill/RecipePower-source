@@ -139,10 +139,14 @@ class ApplicationController < ActionController::Base
       @decorator = entity
       entity = entity.object
     end
+    # We apply parameters to the entity if we're going to save it or preview changes
+    do_update_attributes = options[:update_option] != :restore
+    # We save if we're not previewing or restoring the entity
+    do_save = ![:preview, :restore].include?(options[:update_option])
     # Finish whatever background task is associated with the entity
     attribute_params =
     if entity
-      # If the entity is provided, ignore parameters
+      # If the entity is provided, ignore parameters unless forced to by :update_attributes
       (options[:attribute_params] || strong_parameters) if options[:update_attributes]
     else # If entity not provided, find/build it and update attributes
       objclass = params[:controller].singularize.camelize.constantize
@@ -160,23 +164,35 @@ class ApplicationController < ActionController::Base
     # We'll have thrown an interrupt if the user isn't authorized (or the options explicitly authorized it)
     if entity.errors.empty? && # No probs. so far
         current_user # Only the current user gets to touch/modify a model
-      if entity.is_a?(Trackable) # Entity has a specific idea what it needs
+      entity.assign_attributes attribute_params if do_update_attributes && attribute_params.present? # There are parameters to update
+      # We invoke any block given AFTER revising attributes but BEFORE saving.
+      # This enables any processing that depends on changed attributes
+      yield(@decorator) if block_given?
+      # If the entity is trackable, we derive needed attributes before saving
+      if entity.respond_to? :refresh_attributes # Entity has a specific idea what it needs
         # We'll refresh the content by invalidating the attributes...
         entity.refresh_attributes *options[:refresh] if options[:refresh].present?
         entity.request_attributes *options[:needed] if options[:needed].present?
-        entity.ensure_attributes # Now go get 'em (as needed)!
+        entity.ensure_attributes if entity.needed_attributes.present? # Now go get 'em (as needed)!
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
-      return if entity.errors.any?
-      if entity.is_a?(Collectible)
+        if entity.is_a?(Collectible)
         if options[:touch] == :collect # Ensure that
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
       end
-      entity.assign_attributes attribute_params if attribute_params.present? # There are parameters to update
-      entity.save if (entity.persisted? ? entity.changed? : (options[:save] || options[:touch])) # If assign_attributes didn't save
-      return if entity.errors.any?
+      # We save the entity IFF
+      # -- it's previously persisted (except of the :save option is false), or
+      # -- either the :save or the :touch option is truthy
+      entity.save if entity.errors.empty? &&
+          (entity.persisted? ?
+               (entity.changed_for_autosave? && do_save) :
+               (do_save || options[:touch])) # If assign_attributes didn't save
+      if entity.errors.any?
+        resource_errors_to_flash entity
+        return false
+      end
       if entity.is_a?(Collectible)
         rr =
           case options[:touch]
@@ -201,7 +217,7 @@ class ApplicationController < ActionController::Base
       response_service.title = (@decorator.title || '').truncate(20)
     end
     @presenter = present(entity) rescue nil # Produce a presenter if possible
-    entity.errors.empty? # ...and report back status
+    true # ...and report back status
   end
 
   # Get the model parameters as filtered by strong parameters for the current controller

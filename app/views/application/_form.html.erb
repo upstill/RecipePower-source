@@ -5,7 +5,7 @@
     <%# form_errors_helper f, decorator.object %>
     <!--The form_content partial is specific to each entity type-->
     <% if defined?(in_panes) && in_panes %>
-        <% decorator.dialog_pane_list.each { |spec|  %>
+        <% decorator.dialog_pane_list(response_service.topics).each { |spec|  %>
           <%= render spec[:partial], decorator: decorator, f: f  %>
         <% } %>
     <% else %>
@@ -22,7 +22,6 @@
                             :method => :delete,
                             confirm: "This will permanently remove the #{mn} from RecipePower for good: it can't be undone. Are you absolutely sure you want to do this?" %>
       <% end %>
-      <%= dialog_submit_button %>
-      <%= dialog_cancel_button %>
+      <%= dialog_action_buttons decorator %>
     </div>
 <% end %>

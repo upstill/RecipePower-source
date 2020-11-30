@@ -118,8 +118,30 @@ module RecipesHelper
         link_to_submit('',
                        polymorphic_path(object, refresh: true),
                        mode: :partial,
-                       class: 'refresh-content glyphicon glyphicon-refresh',
+                       class: 'action-button glyphicon glyphicon-refresh',
                        title: 'Refresh Content') :
+        ''.html_safe
+  end
+
+  def edit_trimmers_button object
+    object ?
+        link_to_submit('',
+                       polymorphic_path([:edit, object], topics: :site),
+                       mode: :modal,
+                       class: 'action-button glyphicon glyphicon-filter',
+                       title: 'Edit Trimmers') :
+        ''.html_safe
+  end
+
+  def edit_recipes_button recipe_page
+    recipe_page ?
+        button_to_submit('',
+                       edit_recipe_page_path(recipe_page, topics: :page_recipes),
+                       'glyph-edit-red',
+                       'lg',
+                       mode: :modal,
+                       class: 'action-button annotate-content', # 'action-button glyphicon glyphicon-filter',
+                       title: 'Edit Trimmers') :
         ''.html_safe
   end
 
@@ -152,11 +174,16 @@ module RecipesHelper
                              'glyph-edit-red',
                              'xl',
                              mode: :modal,
-                             class: 'annotate-content',
+                             class: 'action-button annotate-content',
                              title: 'Annotate Content')
+        buttons += edit_trimmers_button object
       when RecipePage
         # Provide editing button if Recipe or RecipePage
-        buttons += collectible_edit_button object, 'xl', class: 'annotate-content'
+        # buttons += collectible_edit_button object, 'xl', class: 'action-button annotate-content'
+        buttons += edit_recipes_button object
+        buttons += edit_trimmers_button object
+      when PageRef
+        buttons += edit_trimmers_button object
       end
       msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
       buttons += content_tag(:p, "**#{msg}.") if msg.present?
@@ -209,6 +236,22 @@ module RecipesHelper
     out = (recipe.collectible_comment) || ''
     out = "My two cents: '#{out}'<br>" unless out.empty?
     out.html_safe
+  end
+
+  def sequence_instructions txt
+    sentences = txt.strip.split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    return if sentences.blank?
+    step = sentences.shift
+    sentences.each do |sentence|
+      if sentence.split(/\s+/).length > 3
+        yield step if step.present?
+        step = sentence
+      else
+        step << ' ' if step.present?
+        step << sentence
+      end
+    end
+    yield step if step.present?
   end
 
 # Provide the cookmark-count line

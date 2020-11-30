@@ -15,19 +15,58 @@ class Site < ApplicationRecord
   include Trackable
   attr_trackable :home, :name, :logo, :description, :rss_feed
 
-  # TODO: this needs to persist in the database
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
   serialize :grammar_mods, Hash
 
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + %i[ description trimmers grammar_mods ]
+    super + [ :description, :trimmers,
+              :selector_string, # Defines a Finder for Content
+              :trimmers_str, # Enumerates selectors for content to cut from page
+              :rcplist_selector, # Defines the beginning of a recipe on the page
+              :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
+              :title_selector # Finds the title within a recipe
+    # :recipe_selector
+            ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
 
   serialize :trimmers, Array # An array of CSS selectors used to remove extraneous content
+
+  ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
+  def trimmers_str
+    trimmers.join "\n"
+  end
+
+  def trimmers_str= str
+    # We don't care what kind of whitespace or how long a sequence separates the selectors
+    self.trimmers = str.split(/\n+/).map &:strip
+  end
+
+  ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
+  def rcplist_selector
+    get_selector_for :rp_recipelist, :match, :at_css_match
+  end
+
+  def rcplist_selector= str
+    # We don't care what kind of whitespace or how long a sequence separates the selectors
+    set_selector_for str, :rp_recipelist, :match, :at_css_match
+  end
+
+  def method_missing name, *args
+    if name.to_s.match /(\w*)_selector(=)?$/
+      token = ('rp_'+$1).to_sym
+      if $2 == '='
+        set_selector_for args.first, token, :in_css_match
+      else
+        get_selector_for token, :in_css_match
+      end
+    else
+      super if defined?(super)
+    end
+  end
 
   def dependent_page_refs
     page_refs.where.not id: page_ref_id
@@ -55,7 +94,7 @@ class Site < ApplicationRecord
     belongs_to :referent, class_name: 'SourceReferent', optional: true # See before_destroy method, :dependent=>:destroy
   end
 
-  has_many :finders, :dependent=>:destroy
+  has_many :finders, :dependent=>:destroy, autosave: true
   accepts_nested_attributes_for :finders, :allow_destroy => true
   # You might think you could do this with query methods, but those fail to find records that haven't been
   # persisted. That extends to #finders UNLESS they are converted to an Array.
@@ -63,8 +102,22 @@ class Site < ApplicationRecord
   def finder_for label
     finders.find { |f| f.label == label }
   end
+
   def finders_for label
     finders.to_a.keep_if { |f| f.label == label }
+  end
+
+  ## Define the virtual attribute :selector_str for fetching and assigning Content selector as a string
+  def selector_string
+    finder_for('Content')&.selector.if_present || ''
+  end
+
+  def selector_string= str
+    if extant = finder_for('Content')
+      extant.selector = str
+    else
+      finders.build label: 'Content', attribute_name: 'html', selector: str
+    end
   end
 
   has_many :feeds, :dependent=>:restrict_with_error
@@ -121,8 +174,8 @@ class Site < ApplicationRecord
   ######### Trackable overrides ############
   ############## Trackable ############
   # Request attributes of other objects
-  def request_dependencies *newly_needed
-    page_ref_attribs = newly_needed.collect { |my_attrib|
+  def request_dependencies 
+    page_ref_attribs = needed_attributes.collect { |my_attrib|
       # Provide the attribute that will receive the value for the given PageRef attribute
         case my_attrib
         when :name
@@ -304,7 +357,7 @@ public
   end
 
   def home
-    page_ref&.url || "http://#{root}"
+    page_ref&.url || "http://#{self[:root]}"
   end
 
   # Produce a Site for a given url(s) whether one already exists or not,
@@ -331,6 +384,34 @@ public
       referent.express(str, :tagtype => :Source, :form => :generic )
     else
       self.referent = Referent.express(str, :Source, :form => :generic).becomes SourceReferent
+    end
+  end
+
+  private
+
+  def get_selector_for *tokens
+    hsh = grammar_mods # Start at the top level
+    tokens.each do |token|
+      return unless hsh[token]
+      hsh = hsh[token]
+    end
+    return hsh
+  end
+
+  def set_selector_for str, *tokens
+    hsh = grammar_mods # Start at the top level
+    tokens[0...-1].each do |token|
+      if hsh[token]
+        hsh = hsh[token]
+      else
+        hsh = (hsh[token] = {})
+      end
+    end
+    token = tokens.last
+    if str.present?
+      hsh[token] = str
+    else
+      hsh.delete token
     end
   end
 

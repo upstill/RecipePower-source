@@ -8,7 +8,7 @@
 class ResponseServices
 
   attr_accessor :controller, :action, :title, :page_url, :active_menu, :mode, :specs, :item_mode, :controller_instance, :uuid
-  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token
+  attr_reader :format, :trigger, :requestpath, :referer, :notification_token, :invitation_token, :topics, :update_option
   attr_writer :user
 
   def self.has_worker?
@@ -25,8 +25,15 @@ class ResponseServices
     @response = params[:response]
     @controller = params[:controller]
     @active_menu = params[:am]
-    @action = params[:action]
+    if (@action = params[:action]) == 'update'
+      # update option may be:
+      # :save (default) to proceed normally, saving the entity
+      # :preview to adopt the entity parameters WITHOUT saving it, so that the effect of changes is shown
+      # :restore to ignore the entity parameters and show the entity as it exists (undoes any previews)
+      @update_option = params[:updateOption]&.to_sym || :save
+    end
     @nopush = params[:nopush]
+    @topics = params[:topics]
     # A trigger is a request for a popup, embedded in the query string
     @trigger = params[:trigger].sub(/^"?([^"]*)"?/, '\\1') if params[:trigger]
     @title = @controller.capitalize+"#"+@action

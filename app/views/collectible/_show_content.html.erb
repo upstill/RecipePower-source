@@ -7,6 +7,3 @@
       </div>
     <% end %>
   </div>
-  <%= link_to_submit( 'Refresh',
-                         polymorphic_path(entity), # gleaning_path(decorator.gleaning),
-                         class: 'trigger hide') if entity.is_a?(Backgroundable) && entity.dj && entity.virgin? %>

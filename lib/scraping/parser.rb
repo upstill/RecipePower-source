@@ -1,6 +1,9 @@
 require 'scraping/seeker.rb'
 require 'enumerable_utils.rb'
 
+# TODO: 'orange slice', i.e., ingredient FOLLOWED BY unit
+# '2 tablespoons juice from 1 lemon'
+
 class Parser
   attr_reader :grammar
 
@@ -21,6 +24,7 @@ class Parser
   # The default grammar is initialized by config/initializers/parser.rb
   def self.init_grammar grammar={}
     @@DefaultGrammar = grammar
+    @@GrammarYAML = grammar.to_yaml
   end
 
   # How should the token be enclosed?
@@ -64,8 +68,8 @@ class Parser
 
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
-    @grammar = @@DefaultGrammar.clone
-    modify_grammar grammar_mods
+    @grammar = YAML.load @@GrammarYAML
+    modify_grammar YAML.load(grammar_mods.to_yaml) # Protect them against modification
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
@@ -117,8 +121,17 @@ class Parser
           %i{ atline inline },  # :atline and :inline are exclusive options
           %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
       ].each do |flagset|
-        if (wrongset = (keys & flagset))[1]
-          wrongstring, flagstring = [ wrongset, flagset ].map { |list|
+        if (wrongset = (keys & flagset))[1] &&
+            # Eliminate nil values for exclusive keys
+            wrongset.keep_if { |key|
+              if entry[key].nil?
+                entry.delete key
+                false
+              else
+                true
+              end
+            }[1]
+          wrongstring, flagstring = [wrongset, flagset].map { |list|
             '\'' + list[0..-2].join("', '") + "' and '#{list.last}'"
           }
           raise "Error: grammar entry for #{token} has #{wrongstring} flags. (Only one of #{flagstring} allowed)."
@@ -295,7 +308,8 @@ class Parser
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
       return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = scanner.past(subscanner) if context[:in_css_match]  # Skip past the element
+      match.tail_stream = (context[:at_css_match] && scanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+          scanner.past(subscanner)
       return match.encompass(scanner)  # Release the limitation to element bounds
     end
     # The general case of a bounded search: foreshorten the stream to the boundary

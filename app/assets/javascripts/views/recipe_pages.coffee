@@ -7,18 +7,18 @@ RP.recipe_pages = RP.recipe_pages || {}
 # Code adapted from https://stackoverflow.com/questions/7312730/using-xpath-to-restore-a-dom-range-in-javascript
 RP.recipe_pages.serialize = (node) ->
 	if (typeof XMLSerializer != "undefined")
-		# Firefox, etc.
+# Firefox, etc.
 		(new XMLSerializer()).serializeToString node
 	else if (node.xml)
 		node.xml
 
 RP.recipe_pages.parseXMLString = (xml) ->
 	if (typeof DOMParser != "undefined")
-		# Firefox, etc.
+# Firefox, etc.
 		dp = new DOMParser();
 		dp.parseFromString xml, "application/xml"
 	else if (typeof ActiveXObject != "undefined")
-		# IE
+# IE
 		doc = XML.newDocument()
 		doc.loadXML xml
 		doc
@@ -59,7 +59,7 @@ RP.recipe_pages.getPathTo = (element, relative_to) ->
 			ix++
 
 display_fields = (recipeFieldsElmt, itemClass) ->
-	# Show all and only the fields of the given class (editing-item or listing-item)
+# Show all and only the fields of the given class (editing-item or listing-item)
 	$('div.recipe-field', recipeFieldsElmt).removeClass 'visible'
 	$('div.recipe-field', recipeFieldsElmt).addClass 'hidden'
 	$(('div.' + itemClass), recipeFieldsElmt).removeClass 'hidden'
@@ -67,7 +67,7 @@ display_fields = (recipeFieldsElmt, itemClass) ->
 
 edit_field = (recipeFieldsElmt) ->
 	$('div.recipe-fields').each (index, fe) ->
-		# Copy the edited title to the display title
+# Copy the edited title to the display title
 		ttl = $('.editing-item.title input', fe)[0].value
 		if ttl == ''
 			ttl = 'Recipe needs a title!'
@@ -86,13 +86,13 @@ adopt_selection = (fieldsNode) ->
 			if $(sel.anchorNode).parents('div#rp-html-content').length != 1 || $(sel.focusNode).parents('div#rp-html-content').length != 1
 				alert "You need to select viable content for the recipe"
 				return ''
-#			console.debug "Registered data"
-#			console.debug 'anchorPath, anchorOffset: ' + anchorPath + ', ' + anchorOffset
-#			console.debug 'focusPath, focusOffset: ' + focusPath + ', ' + focusOffset
+			#			console.debug "Registered data"
+			#			console.debug 'anchorPath, anchorOffset: ' + anchorPath + ', ' + anchorOffset
+			#			console.debug 'focusPath, focusOffset: ' + focusPath + ', ' + focusOffset
 			$('input.anchorPath', fieldsNode)[0].value = anchorPath
 			$('input.focusPath', fieldsNode)[0].value = focusPath
-#			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
-#			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
+			#			a2 = document.evaluate(anchorPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be anchorNode
+			#			f2 = document.evaluate(focusPath, rootNode, null, XPathResult.FIRST_ORDERED_NODE_TYPE).singleNodeValue # This should be focusNode
 			anchorText = sel.anchorNode.textContent
 	else
 		alert "Select the body of this recipe in the page before grabbing it."
@@ -112,7 +112,7 @@ set_selection = (anchorPath, focusPath) ->
 
 RP.recipe_pages.onload = (dlog) ->
 	$(dlog).on 'click', '.add_fields', (event) ->
-		# Initialize a recipe by giving it a bogus, but unique, ID
+# Initialize a recipe by giving it a bogus, but unique, ID
 		time = new Date().getTime()
 		regexp = new RegExp($(this).data('id'), 'g')
 		row = $(this).parents('div.row')[0]

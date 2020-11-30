@@ -218,7 +218,12 @@ class CollectibleController < ApplicationController
   end
 
   def update
-    update_and_decorate
+    # When inferred content depends on updated attributes, we call
+    # #regenerate_dependent_content in the Decorator to trigger the refresh process
+    # depending on what got updated
+    update_and_decorate(update_option: response_service.update_option) { |decorator|
+      decorator.regenerate_dependent_content if decorator.respond_to?(:regenerate_dependent_content) # Set the entity up for previewing
+    }
     if resource_errors_to_flash @decorator.object
       render :edit
     else
@@ -227,7 +232,15 @@ class CollectibleController < ApplicationController
           @decorator.object.respond_to?(:'gleaning_attributes=')
         @decorator.gleaning_attributes = model_params[:gleaning_attributes]
       end
-      flash[:popup] = "#{@decorator.human_name} is saved"
+      flash[:popup] = @decorator.object.class.to_s +
+          case response_service.update_option
+          when :preview
+            ' Preview is ready'
+          when :restore
+            ' is restored'
+          else
+            ' is saved'
+          end
       render :update
     end
   end
@@ -276,6 +289,8 @@ class CollectibleController < ApplicationController
 
   def show
     update_options = { touch: true }
+    # The :refresh parameter triggers regeneration of the entity's content,
+    # presumably due to some dependency (like the page_ref or the site changing)
     update_options[:refresh] = [ :content ] if params[:refresh]
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)

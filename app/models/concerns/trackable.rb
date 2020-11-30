@@ -2,7 +2,7 @@
 # Each tracked attribute has 2 boolean fields embedded in the :attr_tracking attribute:
 # <attr>_needed indicates an unfulfilled need for the value
 # <attr>_ready indicates that the value has been finalized
-include FlagShihTzu
+include FlagShihTzu  # https://github.com/pboling/flag_shih_tzu
 module Trackable
   extend ActiveSupport::Concern
 
@@ -95,24 +95,19 @@ module Trackable
     super(namesym, *args) if defined?(super)
   end
 
-  # Force launching if any attribute is needed
-  def bkg_launch force=false
-    super(force || attrib_needed?) if defined?(super)
-  end
-
-  # Invalidate the attributes, triggering the request process.
+  # Invalidate the attribute(s), triggering the request process.
   # In the absence of attribute arguments, defaults to ALL tracked attributes.
   # The syntax is a (possibly empty) list of attributes to refresh, possibly followed by a hash of flags:
   # :except provides a list of attributes NOT to refresh
   # :immediate if true, forces the attribute(s) to update before returning
   # An empty list before the argument hash causes ALL tracked attributes to be refreshed
-  def refresh_attributes *args
-    flags = args.last.is_a?(Hash) ? args.pop : {}
+  def refresh_attributes *args, except: [], immediate: false
     # No args => update all tracked attributes
     attrs = args.present? ? args.map(&:to_sym) : self.class.tracked_attributes
-    attrs -= ([flags[:except]].flatten).map(&:to_sym) if flags[:except]
+    attrs -= except.map(&:to_sym)
+    # Invalidate all given attributes
     attribs_ready! attrs, false
-    if flags[:immediate]
+    if immediate
       ensure_attributes *attrs
     else
       request_attributes *attrs
@@ -127,16 +122,14 @@ module Trackable
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes
-    newly_needed = assert_needed_attributes(*list_of_attributes)
-    return if newly_needed.empty?
-    request_dependencies *newly_needed
-    bkg_launch true
+    assert_needed_attributes *list_of_attributes
+    logger.info "Requesting attributes #{needed_attributes} of #{self} ##{id}"
+    request_dependencies # Launch all objects that we depend on
+    bkg_launch attrib_needed?
   end
 
-  # Stub to be overridden for an object to respond to a request for an attribute
-  # by requesting it of another
-  def request_dependencies *newly_needed
-    super *newly_needed if defined? super
+  # Stub to be overridden for an object to launch prerequisites to needed attributes
+  def request_dependencies
   end
 
   # Once the entities we depend on have settled, we take on their values
@@ -146,9 +139,8 @@ module Trackable
 
   # Report on the 'needed' bit for the named attribute.
   # If no attribute specified, report whether ANY attribute is needed
-  def attrib_needed? attrib_sym=nil
-    return send(:"#{attrib_sym}_needed") if attrib_sym
-    selected_attr_trackers.any? { |attrib_sym| attrib_sym.to_s.match(/_needed/) && send(attrib_sym) }
+  def attrib_needed? attrib_sym = nil
+    attrib_sym.nil? ? needed_attributes.present? : send(:"#{attrib_sym}_needed")
   end
 
   # Report on the 'ready' bit for the named attribute
@@ -199,6 +191,7 @@ module Trackable
   end
 
   # Ensure that all of the given attributes are marked as needed UNLESS they're already ready or needed
+  # RETURN the list of attributes needed now that weren't needed previously
   def assert_needed_attributes *list_of_attributes
     list_of_attributes.collect { |attrib|
       attrib_needed!(attrib) unless attrib_ready?(attrib) || attrib_needed?(attrib)

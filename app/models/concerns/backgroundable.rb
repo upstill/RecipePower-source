@@ -311,7 +311,7 @@ module Backgroundable
   # NB: THIS IS THE PLACE FOR BACKGROUNDABLES TO RECORD ANY PERSISTENT ERROR STATE beyond :good or :bad status,
   # because, by default, that's all that's left after saving the record
   def error job, exception
-    errors.add :base, exception.to_s
+    errors.add :base, "#{exception} at #{exception.backtrace&.first}"
   end
 
   # The #after hook is called after #success and #error

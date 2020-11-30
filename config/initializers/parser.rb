@@ -20,7 +20,7 @@ require 'scraping/parser.rb'
 # -- An Array gives a sequence of specifications to match. This is the basis of recursion.
 # -- A Hash is a set of symbol/value pairs specifying instructions and constraints on what matches
 #     Generally speaking, a hash will include a :match key labeling a further specification, and other options for processing
-#     the set. Alternatively, a :tag may be specified
+#     the set. Alternatively, a :tag or multiple :tags may be specified
 #    match: denotes the token or tokens to match. For matching an array, this option is redundant if nothing else is
 #       being specified, i.e. token: { match: [a, b, c] } is no different from token: [a, b, c]. It's only
 #       needed if other elements of the hash (key/value pairs) are needed to assert constraints.
@@ -92,24 +92,24 @@ Parser.init_grammar(
         inline: true
     },
     rp_prep_time: {
-        match: [ /^Prep:?$/, :rp_time ],
+        match: [ /^Prep:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_cook_time: {
-        match: [ /^Cook:?$/, :rp_time ],
+        match: [ /^Cook:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_total_time: {
-        match: [ /^Total:?$/, :rp_time ],
+        match: [ /^Total:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
-    rp_time: [ :rp_num, /^mins?$/ ],
+    rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
     rp_yield: {
         match: [ /^(Makes|Yield):?$/i, :rp_amt ],
         atline: true
     },
     rp_serves: {
-        match: [ /^Serves:?$/, :rp_num ],
+        match: [ /^Serv(ing|e)s?:?$/, :rp_amt ],
         atline: true
     },
     rp_instructions: nil,
@@ -127,7 +127,8 @@ Parser.init_grammar(
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        inline: true },
+        inline: true
+    },
     rp_ing_comment: {
         match: nil,
         terminus: "\n"
@@ -154,6 +155,6 @@ Parser.init_grammar(
     },
     rp_ingname: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
-    rp_num: { match: 'NumberSeeker' },
+    rp_num: { match: 'RangeSeeker' },
     rp_unit: { tag: 'Unit' }
 )

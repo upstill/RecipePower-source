@@ -1,3 +1,5 @@
+require 'recipe.rb'
+require 'recipe_page.rb'
 class ParsingServices
   attr_accessor :entity, # Object (ie., Recipe or RecipePage) to be parsed
                 :parser, # Parser, possibly with modified grammar, to be employed
@@ -109,7 +111,7 @@ class ParsingServices
     when RecipePage
       parse_recipe_page content || @entity.content
     else
-      err_msg = "Illegal attempt to parse #{@entity.class.to_s} object"
+      err_msg = "Illegal attempt to parse #{@entity.class} object"
       @entity.errors.add :url, err_msg
       raise err_msg
     end
@@ -157,12 +159,12 @@ private
 
   def parse_recipe_page content
     # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
-    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods.clone
+    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = parser.match :rp_recipelist
   end
 
   def parse_recipe content
-    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods.clone
+    @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = @parser.match :rp_recipe
   end
 

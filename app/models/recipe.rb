@@ -44,8 +44,10 @@ class Recipe < ApplicationRecord
                   # :total_time, :total_time_low, :total_time_high,
                   # :yield, :page_ref_attributes
 
-  # For reassigning the kind of the page_ref
+  # For reassigning the kind of the page_ref and/or modifying site's parsing info
   accepts_nested_attributes_for :page_ref
+  has_one :site, :through => :page_ref
+  accepts_nested_attributes_for :site
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
@@ -71,7 +73,7 @@ class Recipe < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + [ :title, :description, :content, :anchor_path, :focus_path, {:gleaning_attributes => %w{ Title Description }}]
+    super + [ :title, :description, :content, :anchor_path, :focus_path, { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }, {:gleaning_attributes => %w{ Title Description }}]
   end
 
   # These HTTP response codes lead us to conclude that the URL is not valid
@@ -119,13 +121,12 @@ class Recipe < ApplicationRecord
   end
 
   ##### Trackable matters #########k
-  # Override to request values from page_ref
-  def request_dependencies *newly_needed
+  # Request attributes from page_ref as necessary
+  def request_dependencies 
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    page_ref.request_attributes *(newly_needed & [ :picurl, :title, :description ]) # Those to be got from PageRef
-    page_ref.request_attributes :recipe_page if newly_needed.include?(:content)
-    super *newly_needed if defined? super
+    page_ref.request_attributes *(needed_attributes & [ :picurl, :title, :description ]) # Those to be got from PageRef
+    page_ref.request_attributes :recipe_page if content_needed?
   end
 
   # Override to acccept values from page_ref
@@ -142,18 +143,20 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :recipe_page
+    page_ref.ensure_attributes :recipe_page, :content
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
-    if content_needed? && page_ref.recipe_page_ready?  # Ready to build
-      reload if persisted? # Possibly the recipe_page changed us
-      recipe_page.ensure_attributes :content # Parse the page into one or more recipes
-      content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
-      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
-      if new_content.present? # Parsing was a success
-        accept_attribute :content, new_content, true  # Force the new content
-        RecipeServices.new(self).inventory # Set tags according to annotations
+    if content_needed?
+      if page_ref.recipe_page_ready?  # Ready to build
+        # reload if persisted? # Possibly the recipe_page changed us
+        recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       end
+      content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
+      return unless content_to_parse.present?
+      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      return unless new_content.present? # Parsing was a success
+      accept_attribute :content, new_content, true  # Force the new content
+      RecipeServices.new(self).inventory # Set tags according to annotations
     end
     # super if defined?(super)
   end

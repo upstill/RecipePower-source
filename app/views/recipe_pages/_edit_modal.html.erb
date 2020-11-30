@@ -1,1 +1,5 @@
-<%= do_recipe_pages_panel 'Edit title and select recipe content from the page' %>
+<% if response_service.topics == 'page_recipes' %>
+  <%= do_recipe_pages_panel 'Edit title and select recipe content from the page' %>
+<% else %>
+  <%= render 'collectible/edit_modal' %>
+<% end %>

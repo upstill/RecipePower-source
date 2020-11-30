@@ -6,18 +6,14 @@ class PageRefDecorator < CollectibleDecorator
     super.merge(picurl: :image).except :page_ref_kind, :type
   end
 
-=begin
-  def name
-    # The name by which the reference is referred to is either
-    # 1) the link_text of the reference (preferred), or
-    # 2) the name of the canonical expression of the reference's first referent
-    if object.title.present?
-      object.title
-    elsif object.is_a?(Referrable) && object.referents.first
-      object.referents.first.name
-    end
+  # Ensure that the entity has its displayable data updated
+  def regenerate_dependent_content
+    # The page_ref will produce different output if the site's trimmers have changed
+    either = site.trimmers_changed?
+    either = site.finders_for('Content').any? { |f| f.changed? } || either
+    refresh_attributes :content if either
+    either
   end
-=end
 
   def human_name plural=false, capitalize=true
     name = object.kind.humanize

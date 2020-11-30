@@ -1,0 +1,21 @@
+<h2><%= presenter.content_for(:rp_title) %></h2>
+<% presenter.content_for(:rp_yield) do |html| %>
+  <p>Yield: <%= html %></p>
+<% end %>
+<% presenter.content_for(:rp_author) do |html| %>
+  <p>Author: <%= html %></p>
+<% end %>
+<% presenter.content_for(:rp_inglist) do |html| %>
+  <h3>Ingredients</h3>
+  <ul class="rp_inglist">
+    <%= html %>
+  </ul>
+<% end %>
+<% presenter.content_for(:rp_instructions) do |text| %>
+  <h3>Instructions</h3>
+  <ul>
+    <% sequence_instructions text do |line| %>
+      <li><%= line %></li>
+    <% end %>
+  </ul>
+<% end %>

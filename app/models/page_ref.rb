@@ -24,8 +24,8 @@ class PageRef < ApplicationRecord
 
   # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
-    return gleaning.content if gleaning.content_ready?
-    return mercury_result.content if mercury_result.content_ready?
+    return gleaning.content if gleaning&.content_ready?
+    return mercury_result.content if mercury_result&.content_ready?
   end
 
   def content= val
@@ -38,7 +38,7 @@ class PageRef < ApplicationRecord
   end
 
   def self.mass_assignable_attributes
-    super + %i[ kind title lead_image_url description ]
+    super + [ :kind, :title, :lead_image_url, :description, { :site_attributes => (Site.mass_assignable_attributes << :id) } ]
   end
 
   validates_uniqueness_of :url
@@ -57,8 +57,8 @@ class PageRef < ApplicationRecord
   if Rails::VERSION::STRING[0].to_i < 5
     belongs_to :gleaning, dependent: :destroy
   else
-    belongs_to :gleaning, optional: true, dependent: :destroy
-    belongs_to :mercury_result, optional: true, dependent: :destroy
+    belongs_to :gleaning, autosave: true, optional: true, dependent: :destroy
+    belongs_to :mercury_result, autosave: true, optional: true, dependent: :destroy
   end
   delegate :results_for, :to => :gleaning
   
@@ -95,6 +95,8 @@ class PageRef < ApplicationRecord
 
   # The site for a page_ref is the Site object with the longest root matching the canonical URL
   belongs_to :site, autosave: true
+  # For modifying site parsing info (grammar, trimmers, etc.)
+  accepts_nested_attributes_for :site
 
   has_many :referments, :as => :referee, :dependent => :destroy
   has_many :referents, :through => :referments, inverse_of: :page_refs
@@ -116,13 +118,14 @@ class PageRef < ApplicationRecord
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result
-  def request_dependencies *newly_needed
-    from_gleaning = Gleaning.tracked_attributes & newly_needed
+  def request_dependencies 
+    attrib_needed! :content, true if recipe_page_needed?
+    from_gleaning = Gleaning.tracked_attributes & needed_attributes
     if from_gleaning.present?
       build_gleaning if !gleaning
       gleaning.request_attributes *from_gleaning
     end
-    from_mercury = MercuryResult.tracked_attributes & newly_needed
+    from_mercury = MercuryResult.tracked_attributes & needed_attributes
     if from_mercury.present?
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result

@@ -78,6 +78,30 @@ class NokoTokens < Array
     @elmt_bounds.delete_at ix
   end
 
+  # Moving nodes under a parent, we have to be careful to maintain the integrity of the
+  # elements index because Nokogiri will merge two succeeding text elements into one child
+  def move_elements_safely parent, *children
+    children.each do |child|
+      if child.text?
+        child_ix = find_elmt_index child
+        children = parent.children
+        prev_child = children.last
+        count_before = children.count
+        parent.add_child child
+        if prev_child&.text?
+          if parent.children.count == count_before
+            # These should be adjacent elements in the elmts array
+            @elmt_bounds.delete_at child_ix
+            child_ix = child_ix - 1
+          end
+        end
+        @elmt_bounds[child_ix][0] = parent.children.last
+      else
+        parent.add_child child
+      end
+    end
+  end
+
   # Return the string representing all the text given by the two token positions
   # NB This is NOT the space-separated join of all tokens in the range, b/c any intervening whitespace is not collapsed
   def text_from first_token_index, limiting_token_index
@@ -125,13 +149,16 @@ class NokoTokens < Array
     # just add appropriate class(es) and value to the element
     if common_ancestor.name == tagname &&
         stripped_text == common_ancestor.inner_text.strip
-      common_ancestor[:class] = "#{common_ancestor[:class]} #{options[:classes]}" unless common_ancestor[:class].split.include?(options[:classes].to_s)
+      if nclass = options[:classes]&.to_s
+        oclasses = common_ancestor[:class]&.split || []
+        common_ancestor[:class] = "#{common_ancestor[:class]} #{nclass}" unless oclasses.include?(nclass)
+      end
       common_ancestor[:'data-value'] = options[:value] if options[:value]
     elsif teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
       # Enclose the selected text in a new span element
       # If the enclosed text is all alone in a span, just add to the classes of the span
-      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options )
+      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options)
       update
     else
       enclose_by_text_elmt_data teleft, teright, options
@@ -181,7 +208,70 @@ class NokoTokens < Array
     #if Rails.env.development?
     #  puts "Assembling #{options[:classes]} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
     #end
-    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options.merge(nkt: self)
+
+    # If there is already a tree whose root matches the tag and class spec, expand it to include the whole selection
+    selector = "#{options[:tag] || 'span'}.#{options[:classes]}"
+    extant_right = (teright.ancestors & nkdoc.css(selector)).first
+    extant_left = (teleft.ancestors & nkdoc.css(selector)).first
+    if extant_left || extant_right
+      if extant_right == extant_left
+        # The selection is entirely under the requisite node => move OTHER (preceding and succeeding) content out
+        # For lack of a better place, we'll move it all before and after the extant node
+        target = extant_left
+        mark = teleft.text_element
+        while mark != extant_left
+          previous = mark.previous
+          mark = mark.parent
+          while caret = previous
+            previous = caret.previous
+            target.previous = caret
+            target = target.previous
+          end
+        end
+        target = extant_right
+        mark = teright.text_element
+        while mark != extant_right
+          nxt = mark.next
+          mark = mark.parent
+          while caret = nxt
+            nxt = caret.next
+            target.next = caret
+            target = target.next
+          end
+        end
+      elsif extant_left
+        # Append selection not already in the extant tree to it
+        caret = teright.text_element
+        while !caret.next do
+          caret = caret.parent
+        end
+        from = caret.parent
+        while caret.parent != extant_left
+          extant_left.add_child from.children.first
+        end
+        return extant_left
+        # Same procedure if the end of the selection has a viable ancestor
+      elsif extant_right
+        # Append selection not already in the extant tree to it
+        caret = teleft.text_element
+        while !caret.previous do
+          caret = caret.parent
+        end
+        catcher = extant_right.children.first
+        nxt = caret.next_sibling
+        while caret
+          nxt = caret.next_sibling
+          catcher.previous = caret
+          catcher = caret
+          caret = nxt
+        end
+        return extant_right
+      end
+    end
+
+    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options do |newtree, *nodes_to_move|
+      move_elements_safely newtree, *nodes_to_move
+    end
     update
     newnode
   end
