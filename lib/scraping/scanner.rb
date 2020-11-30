@@ -121,48 +121,52 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   path_to_focus_elmt = (focus_ancestry - common_ancestry).to_a.reverse << focus_elmt
   focus_root = path_to_focus_elmt.shift
 
-  # We are going to develop an array of nodes to assign to the children of newtree.
-  ns = []
+  if anchor_root != focus_root
+    # We are going to develop an array of nodes to assign to the children of newtree.
+    ns = []
 
-  # Highest_whole_{left|right} are the root of subtrees whose text elements lie entirely within
-  # the range from anchor to focus, if any (otherwise, they are the anchor and/or focus elements themselves)
-  # The first element of the new tree is the highest ancestor of anchor_elmt that can be included in its entirety,
-  # i.e., all of its children are in range. There might be NO such element: anchor_elmt may have previous siblings
+    # Highest_whole_{left|right} are the root of subtrees whose text elements lie entirely within
+    # the range from anchor to focus, if any (otherwise, they are the anchor and/or focus elements themselves)
+    # The first element of the new tree is the highest ancestor of anchor_elmt that can be included in its entirety,
+    # i.e., all of its children are in range. There might be NO such element: anchor_elmt may have previous siblings
 
-  while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
-    path_to_anchor_root.shift
-  end
-  ns.push path_to_anchor_root.first || anchor_root
-  path_to_anchor_root.each do |caret|
-    while caret = caret.next_sibling do
-      ns.push caret
+    while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
+      path_to_anchor_root.shift
     end
-  end
-
-  # Add the nodes between the two roots, if any
-  if (caret = anchor_root) != focus_root
-    while (caret = caret.next) != focus_root
-      ns.push caret
-    end
-  end
-
-  # Find the the last node on path_to_focus_element that can be moved in its entirety
-  # i.e., the one with no children to the left of the one on the path
-  while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
-    path_to_focus_elmt.pop
-  end
-  # ...but the search may have consumed the whole path without finding one
-  if path_to_focus_elmt.present?
-    # Process each node in the path down from (but not including) last_element
-    # by collecting leftward siblings
-    path_to_focus_elmt.each do |right_sibling|
-      right_sibling.parent.children.each { |caret|
-        break if caret == right_sibling
+    ns.push path_to_anchor_root.first || anchor_root
+    path_to_anchor_root.each do |caret|
+      while caret = caret.next_sibling do
         ns.push caret
-      }
+      end
     end
+
+    # Add the nodes between the two roots, if any
+    if (caret = anchor_root) != focus_root
+      while (caret = caret.next) != focus_root
+        ns.push caret
+      end
+    end
+
+    # Find the the last node on path_to_focus_element that can be moved in its entirety
+    # i.e., the one with no children to the left of the one on the path
+    while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
+      path_to_focus_elmt.pop
+    end
+    # ...but the search may have consumed the whole path without finding one
+    if path_to_focus_elmt.present?
+      # Process each node in the path down from (but not including) last_element
+      # by collecting leftward siblings
+      path_to_focus_elmt.each do |right_sibling|
+        right_sibling.parent.children.each { |caret|
+          break if caret == right_sibling
+          ns.push caret
+        }
+      end
+    end
+    ns.push path_to_focus_elmt.last || focus_root
+  else
+    ns = [ anchor_root ]
   end
-  ns.push path_to_focus_elmt.last || focus_root
 
   # Now build the tree. This has a very specific placement requirement: it needs to go <between>
   # where anchor_root and focus_root are now. But either of those could be moved entirely into
@@ -175,7 +179,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   else
     ns.each { |node| newtree.add_child node }
   end
-  if successor_node # newtree goes where anchor_root was
+  if successor_node # newtree goes where focus_root was
     successor_node.previous = newtree
   else # The focus node was the last child, and now it's gone => make newtree be the last child
     common_ancestor.add_child newtree
