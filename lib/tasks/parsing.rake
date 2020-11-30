@@ -39,7 +39,7 @@ namespace :parsing do
         oldvals = object.attributes
         puts "----------------------------- Assigning for #{klass}##{id}: -----------------------------"
         puts bfr
-        keyvals.each { |attribute, val|
+        keyvals.except(:id).each { |attribute, val|
           oldval = oldvals[attribute.to_s]
           if val == oldval
             puts "'#{attribute}' unchanged"
