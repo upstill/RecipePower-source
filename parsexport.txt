@@ -1,33 +1,115 @@
---- Finder#2366
+--- Finder#2357
 label: Content
 selector: div.content__main, div.article-body-commercial-selector
 attribute_name: html
 site_id: 3667
---- Finder#2367
+--- Finder#2358
 label: Content
 selector: article.article div.l-container
 attribute_name: html
 site_id: 4072
---- Finder#2368
+--- Finder#2359
 label: Content
 selector: article.article div.l-container
 attribute_name: html
 site_id: 4072
---- Finder#2369
+--- Finder#2360
 label: Content
 selector: section.recipe_instructions
 attribute_name: html
 site_id: 3643
+--- Finder#2361
+label: Content
+selector: div.heading, div.chop-content
+attribute_name: html
+site_id: 3965
+--- Finder#2362
+label: Content
+selector: div.recipe-callout
+attribute_name: html
+site_id: 1997
+--- Finder#2363
+label: Content
+selector: div.entry-header-inner, div.recipe-ingredients, div.recipe-procedures
+attribute_name: html
+site_id: 3630
+--- Finder#2364
+label: Content
+selector: div.title-source, div.recipe-summary, div.ingredients-info, div.instructions
+attribute_name: html
+site_id: 1268
+--- Finder#2365
+label: Content
+selector: div.main-content
+attribute_name: html
+site_id: 4136
+--- Finder#2366
+label: Content
+selector: div.post-content
+attribute_name: html
+site_id: 1787
+--- Finder#2367
+label: Content
+selector: div.post-content
+attribute_name: html
+site_id: 1787
+--- Finder#2368
+label: Content
+selector: div.content__main
+attribute_name: html
+site_id: 4057
+--- Site#1268
+:trimmers:
+- div.mediavoice-native-ad
+- div.additional-info
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: ul.ingredients
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: h1
+--- Site#1787
+:trimmers:
+- div#jp-post-flair
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist: {}
+  :rp_ingline: {}
+  :rp_title: {}
+--- Site#1997
+:trimmers:
+- div.recipe-callout-buttons
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: h2
+--- Site#3630
+:trimmers:
+- div.nav-share
+- div.pubmod-date
+- figure
+- div.author-byline
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: div.recipe-ingredients ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: h1
 --- Site#3643
 :trimmers:
 - div.social
 - div#recipetoolbar
-:grammar_mods:
-  :rp_inglist:
-    :in_css_match: ul.ingredients
-  :rp_ingline:
-    :inline: 
-    :in_css_match: li.ingredient-item
+:grammar_mods: {}
 --- Site#3667
 :trimmers:
 - div.meta__extras
@@ -35,14 +117,56 @@ site_id: 3643
 - figure[itemprop="associatedMedia image"]
 - div.submeta
 :grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist: {}
   :rp_ingline:
     :in_css_match: strong
+  :rp_title:
+    :in_css_match: h2
+--- Site#3965
+:trimmers:
+- div.inline-video
+- div.feedback-block
+- div.article-intro
+- div.mntl-sc-block-featuredlink
+- div.disqus-block
+:grammar_mods:
+  :rp_title:
+    :in_css_match: h1
+    :inline:
+  :rp_inglist:
+    :in_css_match: ul.ingredient-list
+    :inline:
+  :rp_ingline:
+    :in_css_match: li.ingredient
+    :inline:
+--- Site#4057
+:trimmers:
+- div.meta__extras
+- div.js-ad-slot
+- picture
+- figure[itemprop="associatedMedia image"]
+- div.submeta
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist:
+    :in_css_match: p
+  :rp_ingline:
+    :inline: true
+  :rp_title:
+    :in_css_match: h2
 --- Site#4072
 :trimmers:
 - ul.tag-nav__list
 - ul.social-nav__list
+- div.figure__media
 - div.aggregate-star-rating
-- li.mntl-sc-block figure
+- li.mntl-sc-block
+- figure
 - div.section-header
 - div.nutrition-info
 - div.decision-block__feedback
@@ -51,14 +175,29 @@ site_id: 3643
 - div.mntl-bio-tooltip__top
 - div.article-updated-date
 - div.feedback-block
-- div.featured-link-image
+- div.inline-block
 - div.inline-video
+- div.featured-link
+- div.sources
 :grammar_mods:
   :rp_recipelist:
     :match:
       :at_css_match: h1
   :rp_ingline:
-    :inline: 
-    :in_css_match: li.ingredient
+    :inline:
+    :in_css_match: li
   :rp_inglist:
     :in_css_match: ul.ingredient-list
+    :inline:
+--- Site#4136
+:trimmers:
+- div.article-gallery
+- h6
+- a.btn-large
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: div.ingredients ul
+  :rp_ingline: {}
+  :rp_title: {}
