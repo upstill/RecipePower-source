@@ -110,7 +110,16 @@ protected
       end
       # Peek ahead and consume any tokens which are empty in the normalized name
       onward = stream.rest
-      onward = onward.rest if onward.peek == '.'
+      case onward.peek
+      when '.' # Ignore period
+        onward = onward.rest
+      when '(' # Elide parenthetical by hunting for matching ')'
+        to_match = onward.rest
+        while to_match && (to_match.peek != ')') do
+          to_match = to_match.rest
+        end
+        onward = to_match.rest if to_match
+      end
       tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
