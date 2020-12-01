@@ -3,6 +3,10 @@ require 'enumerable_utils.rb'
 
 # TODO: 'orange slice', i.e., ingredient FOLLOWED BY unit
 # '2 tablespoons juice from 1 lemon'
+# '1 teaspoon sherry (or other wine) vinegar' Recipe 15644
+# 'Needles from one, 6-inch section of fresh rosemary' Recipe 15644
+# '1 1/2 cups diced autumn mushrooms, such as blewits and maitake' Recipe 15644
+# '1 garlic clove'
 
 class Parser
   attr_reader :grammar

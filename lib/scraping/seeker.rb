@@ -256,9 +256,14 @@ class NumberSeeker < Seeker
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
     stream = stream.rest if stream.peek.match /about/i
-    return self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)
-    return self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)
-    return self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek
+    result = (self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)) ||
+      (self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)) ||
+      (self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek)
+    # Elide gratuitous punctuation after the number
+    if result && result.tail_stream.peek&.match(',')
+      result.tail_stream = result.tail_stream.rest
+    end
+    result
   end
 
   # Is the string either an integer or a fraction?
