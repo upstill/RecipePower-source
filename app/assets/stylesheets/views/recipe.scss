@@ -12,18 +12,13 @@
 
 li.rp_ingline {
   font-size: 1.2em;
-  span.rp_amt {
+  span.rp_amt, span.rp_amt_with_alt {
     // Amount
     color: #5aab7a;
   }
-  span.rp_presteps {
+  span.rp_presteps, span.rp_condition {
     // Presteps in grey italic
-    color: #8c8c8c;
-    font-style: italic;
-  }
-  span.rp_condition {
-    // Presteps in grey italic
-    color: #8c8c8c;
+    color: #9e7536;
     font-style: italic;
   }
   span.rp_ingname {

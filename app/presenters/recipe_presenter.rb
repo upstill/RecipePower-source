@@ -92,6 +92,8 @@ class RecipePresenter < CollectiblePresenter
         return homelink(tag, class: 'rp_ingname') if tag
       when :rp_ingline
         return content_tag(:li, content, class: :rp_ingline )
+      when :rp_amt_with_alt, :rp_presteps, :rp_condition
+        return content_tag(:span, content, class: klass.to_sym )
       end
     end
     return content
