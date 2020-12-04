@@ -7,6 +7,8 @@ require 'enumerable_utils.rb'
 # 'Needles from one, 6-inch section of fresh rosemary' Recipe 15644
 # '1 1/2 cups diced autumn mushrooms, such as blewits and maitake' Recipe 15644
 # '1 garlic clove'
+# Detecting multiple ingredient lists and labelling them: Recipe 15636: Mixed vegetable and potato fritters with harissa
+# "Cook 1 hr 20 min", ibid
 
 class Parser
   attr_reader :grammar
@@ -34,12 +36,14 @@ class Parser
   # How should the token be enclosed?
   def self.tag_for_token token
     case token.to_sym
-    when :rp_recipelist, :rp_recipe, :rp_instructions
+    when :rp_recipelist, :rp_recipe, :rp_instructions, :rp_inglist, :rp_ingline
       'div'
+=begin
     when :rp_inglist
       'ul'
     when :rp_ingline
       'li'
+=end
     else
       'span'
     end
