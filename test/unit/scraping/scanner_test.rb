@@ -320,9 +320,9 @@ EOF
     nkt = nokoscan.tokens
     check_integrity nokoscan
     assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_by_token_indices 3, 5, :classes => :rp_ingspec, :tag => 'span'
+    nkt.enclose_tokens 3, 5, :classes => :rp_ingspec, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_by_token_indices 4, 5, :classes => :rp_ingname, :tag => 'span'
+    nkt.enclose_tokens 4, 5, :classes => :rp_ingname, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
   end
 

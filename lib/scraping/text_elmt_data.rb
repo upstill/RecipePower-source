@@ -31,52 +31,64 @@ class TextElmtData < Object
   attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset # , :local_char_range
   attr_reader :noko_tokens, :global_start_offset
 
-  def initialize nkt, global_char_offset_or_path, local_offset_mark=0 # character offset within the text element
+  # Here we initialize a TextElmtData object for a given Nokogiri text element within the document
+  # associated with a NokoTokens provider. The text element may be specified in three ways, depending on the
+  # class of the first parameter:
+  # -- a String denotes a selection path through the document
+  # -- a global character offset denotes the element's location within the NokoTokens virtual buffer.
+  #     NB: since an offset at the boundary between two text elements is ambiguous, we use a negative offset
+  #       to denote the text element prior to the boundary.
+  # -- a Nokogiri text element itself.
+
+  # The TextElmtData object emerges from initialization with the following instance variables:
+  # @noko_tokens: the NokoTokens object with which we are associated
+  # @text_element: the Nokogiri text element that we express
+  # @local_char_offset: a marker within the text element
+  # @global_char_offset: the location of the text element's text within the virtual buffer of NokoTokens
+  # @parent: the text element's containing Nokogiri node
+  # @elmt_bounds_index: index for this text element in the elmt_bounds array, which pairs each text element with
+  #   its global character offset.
+  # Note: by definition, @text_element, @global_start_offset == @noko_tokens.elmt_bounds[@elmt_bounds_index]
+  def initialize nkt, global_char_offset_or_path_or_text_elmt, local_offset_mark=0 # character offset within the text element
     @noko_tokens = nkt
     @local_char_offset = 0
-    if global_char_offset_or_path.is_a? String
-      # This is a path/offset specification, so we have to derive the global offset first
-      # Find the element from the path
-      path_end = nkt.nkdoc.xpath(global_char_offset_or_path.downcase)&.first   # Presumably there's only one match!
-      # The selection may end at, e.g., a <p> element; go down to the first text element
-      while path_end.element?
-        path_end = path_end.children.first
+    if global_char_offset_or_path_or_text_elmt.is_a? Integer
+      signed_global_char_offset = global_char_offset_or_path_or_text_elmt # Could be signed
+    else
+      # Derive the text element as necessary
+      if global_char_offset_or_path_or_text_elmt.is_a? String
+        # This is a path/offset specification, so we have to derive the global offset first
+        # Find the element from the path
+        text_elmt = nkt.nkdoc.xpath(global_char_offset_or_path_or_text_elmt.downcase)&.first   # Presumably there's only one match!
+        # The selection may end at, e.g., a <p> element; go down to the first text element
+        while text_elmt.element?
+          text_elmt = text_elmt.children.first
+        end
+      else
+        text_elmt = global_char_offset_or_path_or_text_elmt
       end
       # Linear search: SAD!
-      global_char_offset = elmt_bounds.find { |elmt| path_end == elmt.first }&.last
+      global_char_offset = elmt_bounds.find { |elmt| text_elmt == elmt.first }&.last
       # Split the offset into a positive value and a negative indicator
       local_offset_mark = local_offset_mark.abs if (negatory = local_offset_mark < 0)
       # We have to correct character offsets b/c Javascript counts "\r\n" as a single character
-      local_offset_mark = correct_selection_offset local_offset_mark, path_end
+      local_offset_mark = correct_selection_offset local_offset_mark, text_elmt
       signed_global_char_offset = global_char_offset + local_offset_mark
       signed_global_char_offset = -signed_global_char_offset if negatory
-    else
-      signed_global_char_offset = global_char_offset_or_path # Could be signed
     end
-    locate_text_element signed_global_char_offset
-    @parent = @text_element.parent
-  end
-
-  # Get the Nokogiri text element, its global character offset, and its index in the tokens scanner, based on global character offset
-  def locate_text_element signed_global_char_offset
+    # Get the Nokogiri text element, its global character offset, and its index in the tokens scanner, based on global character offset
     # Ensure that the pointer does not violate token boundaries
     signed_global_char_offset = to_token_bound signed_global_char_offset
     # A negative global character offset denotes a terminating position.
     # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
     @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
-=begin
-    if !@elmt_bounds_index = binsearch(elmt_bounds, global_char_offset, &:last)
-      # Too low (before the first text element)
-      @elmt_bounds_index = 0
-      signed_global_char_offset = elmt_bounds[0].last
-    end
-=end
     # The FIRST character of a text element is treated as the LAST character of the previous text element for a terminating offset
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
     @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
-    @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index]
+    @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
+    @parent = @text_element.parent
   end
 
   def self.for_range nkt, global_character_range
@@ -145,6 +157,7 @@ class TextElmtData < Object
     # Move the element under the shell
     elmt.next.add_child elmt
     validate_embedding newnode
+    newnode
   end
 
   # Return the text of the text element prior to the selection point

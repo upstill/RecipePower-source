@@ -3,6 +3,7 @@ require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
 require 'scraping/noko_tokens.rb'
 
+# TODO: most of these methods should be moved to noko_ut
 # Is the node ready to delete?
 def node_empty? nokonode
   return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)
@@ -81,8 +82,7 @@ end
 
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
-def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
-  html = html_enclosure(options) # insert=true
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classes: nil, value: nil
 
   # Back the focus_elmt up as long as it's blank
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
@@ -98,95 +98,41 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, options = {}
   end
 
   # If there's an ancestor with no preceding or succeeding text, mark that and return
-  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, options.slice(:tag, :classes, :value))
+  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, tag: tag_or_node, classes: classes, value: value)
     return report_tree('After: ', anc)
   end
   # Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
-  unless options[:classes].blank? || !nknode_has_class?(common_ancestor, options[:classes])
+  unless classes.blank? || !nknode_has_class?(common_ancestor, classes)
     return report_tree('After: ', common_ancestor)
   end
 
-  # We're going to collect a list of nodes to be moved under the new tree, in order
-  anchor_ancestry = anchor_elmt.ancestors
-  focus_ancestry = focus_elmt.ancestors
-  common_ancestry = anchor_ancestry & focus_ancestry
-  common_ancestor = common_ancestry.first
-
-  path_to_anchor_root = [anchor_elmt] + (anchor_ancestry - common_ancestry).to_a
-  # The anchor_root is the first element on the anchor path, a child of common_ancestor
-  anchor_root = path_to_anchor_root.pop
-  # The degenerate case: the anchor (focus) root is the same as anchor_elmt (focus_elmt)
-
-  # path_to_focus_elmt runs from below focus root to focus_elmt
-  path_to_focus_elmt = (focus_ancestry - common_ancestry).to_a.reverse << focus_elmt
-  focus_root = path_to_focus_elmt.shift
-
-  if anchor_root != focus_root
-    # We are going to develop an array of nodes to assign to the children of newtree.
-    ns = []
-
-    # Highest_whole_{left|right} are the root of subtrees whose text elements lie entirely within
-    # the range from anchor to focus, if any (otherwise, they are the anchor and/or focus elements themselves)
-    # The first element of the new tree is the highest ancestor of anchor_elmt that can be included in its entirety,
-    # i.e., all of its children are in range. There might be NO such element: anchor_elmt may have previous siblings
-
-    while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
-      path_to_anchor_root.shift
-    end
-    ns.push path_to_anchor_root.first || anchor_root
-    path_to_anchor_root.each do |caret|
-      while caret = caret.next_sibling do
-        ns.push caret
-      end
-    end
-
-    # Add the nodes between the two roots, if any
-    if (caret = anchor_root) != focus_root
-      while (caret = caret.next) != focus_root
-        ns.push caret
-      end
-    end
-
-    # Find the the last node on path_to_focus_element that can be moved in its entirety
-    # i.e., the one with no children to the left of the one on the path
-    while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
-      path_to_focus_elmt.pop
-    end
-    # ...but the search may have consumed the whole path without finding one
-    if path_to_focus_elmt.present?
-      # Process each node in the path down from (but not including) last_element
-      # by collecting leftward siblings
-      path_to_focus_elmt.each do |right_sibling|
-        right_sibling.parent.children.each { |caret|
-          break if caret == right_sibling
-          ns.push caret
-        }
-      end
-    end
-    ns.push path_to_focus_elmt.last || focus_root
+  if tag_or_node.is_a?(Nokogiri::XML::Element) # The new tree may be given directly as a node
+    newtree = tag_or_node
   else
-    ns = [ anchor_root ]
+    # If not provided directly, build the tree.
+    # It is to appear under the common ancestor of the anchor and the focus, so
+    # it has a very specific placement requirement: <between>
+    # where anchor_root and focus_root are now. But either of those could be moved entirely into
+    # the new tree.
+    # Create a Nokogiri node from the parameters
+    newtree = (Nokogiri::HTML.fragment html_enclosure(tag_or_node, classes, value)).children[0]
   end
-
-  # Now build the tree. This has a very specific placement requirement: it needs to go <between>
-  # where anchor_root and focus_root are now. But either of those could be moved entirely into
-  # the new tree.
-  newdoc = Nokogiri::HTML.fragment html
-  newtree = newdoc.children[0]
-  successor_node = ns.include?(focus_root) ? focus_root.next : focus_root
-  if block_given?
-    yield newtree, *ns
+  # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
+  iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
+  if block_given? # Let the caller handle iteration
+    yield newtree, iterator
   else
-    ns.each { |node| newtree.add_child node }
+    iterator.walk { |node| newtree.add_child node }
   end
-  if successor_node # newtree goes where focus_root was
-    successor_node.previous = newtree
-  else # The focus node was the last child, and now it's gone => make newtree be the last child
-    common_ancestor.add_child newtree
+  unless tag_or_node == newtree # It's been given, so presumably it's already been placed
+    if iterator.successor_node # newtree goes where focus_root was
+      iterator.successor_node.previous = newtree
+    else # The focus node was the last child, and now it's gone => make newtree be the last child
+      common_ancestor.add_child newtree
+    end
   end
   validate_embedding report_tree('After: ', newtree)
   return newtree
-
 end
 
 def report_tree label, nokonode, first_te = nil, last_te = nil
@@ -236,11 +182,10 @@ def validate_embedding newtree
   newtree
 end
 
-def html_enclosure options = {}
-  tag = options[:tag] || 'div'
-  classes = "rp_elmt #{options[:classes]}".strip
-  valuestr = "data-value='#{options[:value]}'" if options[:value]
-  "<#{tag} class='#{classes}' #{valuestr}></#{tag}>" # For constructing the new node
+def html_enclosure tag, classes, value=nil
+  tag ||= 'div'
+  valuestr = "data-value='#{value}'" if value
+  "<#{tag} class='rp_elmt #{classes}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
 def seekline tokens, within, opos, obound, delimiter = nil
@@ -363,7 +308,7 @@ class NokoScanner # < Scanner
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at,
            :find_elmt_index, :nth_elmt, :delete_nth_elmt,
-           :enclose_by_token_indices, :enclose_by_selection, :text_elmt_data, to: :tokens
+           :enclose_tokens, :enclose_selection, :text_elmt_data, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -608,7 +553,7 @@ class NokoScanner # < Scanner
 
   def enclose_to limit, options = {}
     return unless limit > pos
-    @tokens.enclose_by_token_indices @pos, limit, options
+    @tokens.enclose_tokens @pos, limit, options
   end
 
   # Provide the text element data for the current character position

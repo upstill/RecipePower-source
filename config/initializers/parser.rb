@@ -78,7 +78,6 @@ Parser.init_grammar(
                 { optional: :rp_cook_time },
                 { optional: :rp_total_time },
                 { optional: :rp_serves },
-                { optional: :rp_author },
                 { optional: :rp_yield }
             ] },
         ]

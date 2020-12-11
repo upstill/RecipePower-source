@@ -9,6 +9,7 @@ require 'enumerable_utils.rb'
 # '1 garlic clove'
 # Detecting multiple ingredient lists and labelling them: Recipe 15636: Mixed vegetable and potato fritters with harissa
 # "Cook 1 hr 20 min", ibid
+  # :rp_author should opt for tag(s) lookup
 
 class Parser
   attr_reader :grammar
@@ -31,6 +32,11 @@ class Parser
   def self.init_grammar grammar={}
     @@DefaultGrammar = grammar
     @@GrammarYAML = grammar.to_yaml
+  end
+
+  # Provide a copy of the grammar as initialized
+  def self.initialized_grammar
+    YAML.load @@GrammarYAML
   end
 
   # How should the token be enclosed?
@@ -76,7 +82,7 @@ class Parser
 
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
-    @grammar = YAML.load @@GrammarYAML
+    @grammar = self.initialized_grammar
     modify_grammar YAML.load(grammar_mods.to_yaml) # Protect them against modification
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
@@ -530,4 +536,37 @@ class Parser
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
+end
+
+# The ParserEvaluator provides analysis of the current (initialized) grammar. Methods:
+# can_include? evaluates whether a token could appear as a child of a parent token.
+class ParserEvaluator
+
+  def initialize
+    def scan_for_tokens grammar_entry
+      collected_tokens = []
+      case grammar_entry
+      when Array
+        grammar_entry.each { |list_member| collected_tokens += scan_for_tokens list_member }
+      when Symbol
+        collected_tokens << grammar_entry
+      when Hash
+        grammar_entry.each { |key, subentry| collected_tokens += scan_for_tokens subentry }
+      end
+      collected_tokens
+    end
+    @grammar_inclusions = {}
+    init_g = Parser.initialized_grammar
+    init_g.each { |token, entry| @grammar_inclusions[token] = scan_for_tokens(entry).uniq }
+  end
+
+# Evaluate whether child_token can appear as a child of parent_token.
+  def can_include? parent_token, child_token, transitive=true
+    def refers_to? supe, sub, transitive
+      @grammar_inclusions[supe].include?(sub) ||
+          transitive && @grammar_inclusions[supe].find { |supe| refers_to? supe, sub, transitive }
+    end
+    refers_to? parent_token.to_sym, child_token.to_sym, transitive
+  end
+
 end

@@ -1,5 +1,6 @@
 require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
+require 'scraping/dom_traversor.rb'
 
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
@@ -78,26 +79,73 @@ class NokoTokens < Array
     @elmt_bounds.delete_at ix
   end
 
-  # Moving nodes under a parent, we have to be careful to maintain the integrity of the
-  # elements index because Nokogiri will merge two succeeding text elements into one child
-  def move_elements_safely parent, *children
-    children.each do |child|
-      if child.text?
-        child_ix = find_elmt_index child
-        children = parent.children
-        prev_child = children.last
-        count_before = children.count
-        parent.add_child child
-        if prev_child&.text?
-          if parent.children.count == count_before
-            # These should be adjacent elements in the elmts array
-            @elmt_bounds.delete_at child_ix
-            child_ix = child_ix - 1
-          end
+  # Moving nodes under a parent, we have to be careful to maintain the integrity of
+  # 1) the hierarchy of elements (i.e., :rp_ingline under :rp_inglist), and
+  # 2) the elements index, because Nokogiri will merge two succeeding text elements into one child
+  # Parameters:
+  # attach: how to place incoming nodes relative to the parent
+  # -- before: add as previous sibling
+  # -- after:  add as next sibling
+  # -- extend_left: insert as first child
+  # -- extend_right: insert as last child
+  def move_elements_safely attach: :extend_right, relative_to:, iterator:
+    # attach_node: execute the mechanics of moving a node into place
+    # return: the node as added to the parent (may change if text elements are merged)
+    def attach_node node, relative_to, how
+      case how
+      when :extend_right
+        extant = relative_to.children.last
+        relative_to.add_child node
+        relative_to.children.last
+      when :extend_left
+        if extant = relative_to.children.first
+          extant.previous = node
+        else
+          # Degenerate case of an empty parent
+          relative_to.add_child node
         end
-        @elmt_bounds[child_ix][0] = parent.children.last
-      else
-        parent.add_child child
+        relative_to.children.first
+      when :before
+        extant = relative_to
+        relative_to.previous = node
+        relative_to.previous
+      when :after
+        extant = relative_to
+        relative_to.next = node
+        relative_to.next
+      end
+    end
+    # Find the lowest enclosing RP class of the parent
+    enclosing_classes = ([relative_to] + relative_to.ancestors).to_a.
+        inject { |node| rpc = classes_for_node(node, /^rp_/); break rpc if rpc.delete(:rp_elmt) }
+    pe = ParserEvaluator.new
+
+    # The iterator produces a series of nodes, which we add to relative_to, after processing
+    iterator.walk do |node|
+      next if node == relative_to
+      processed_children(relative_to, node) { |descendant|
+        pe.can_include? enclosing_classes.first, classes_for_node(descendant, /rp_/).without(:rp_elmt).first
+      }.each do |descendant|
+        parent = (attach == :before || attach == :after) ? relative_to.parent : relative_to
+        if descendant.text?
+          child_ix = find_elmt_index descendant
+          prior_count = parent.children.count
+          as_attached = attach_node descendant, relative_to, attach
+          if parent.children.count == prior_count # indicator that Nokogiri has merged adjacent text elements
+            if attach == :extend_left
+              # Under the assumption that the inserted text-element has and will continue to precede
+              # the first child, its index must be retained
+              @elmt_bounds.delete_at child_ix+1
+            else
+              # They should be adjacent elements in the elmts array
+              @elmt_bounds.delete_at child_ix
+              child_ix = child_ix - 1
+            end
+          end
+          @elmt_bounds[child_ix][0] = as_attached
+        else
+          attach_node descendant, relative_to, attach
+        end
       end
     end
   end
@@ -135,69 +183,55 @@ class NokoTokens < Array
     teleft.subsq_text + nodes.flatten.map(&:text).join + teright.prior_text
   end
 
+  ###### The following methods pertain to rearranging a DOM to enclose selected text within a marking element
+
   # Convenience method to specify requisite text in terms of tokens
-  def enclose_by_token_indices first_token_index, limiting_token_index, options={}
+  def enclose_tokens first_token_index, limiting_token_index, options={}
     stripped_text = text_from(first_token_index, limiting_token_index).strip
     return if stripped_text.blank?
-    tagname = options[:tag].if_present&.to_s || 'span'
     global_character_position_start = token_offset_at first_token_index
     global_character_position_end = token_limit_at limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range self, global_character_position_start...global_character_position_end
-    common_ancestor = (teleft.text_element.ancestors & teright.text_element.ancestors).first
-    # If the common ancestor of the relevant text elements encompasses all and only the text to be enclosed,
-    # just add appropriate class(es) and value to the element
-    if common_ancestor.name == tagname &&
-        stripped_text == common_ancestor.inner_text.strip
-      if nclass = options[:classes]&.to_s
-        oclasses = common_ancestor[:class]&.split || []
-        common_ancestor[:class] = "#{common_ancestor[:class]} #{nclass}" unless oclasses.include?(nclass)
-      end
-      common_ancestor[:'data-value'] = options[:value] if options[:value]
-    elsif teleft.text_element == teright.text_element
+    if teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
       # Enclose the selected text in a new span element
       # If the enclosed text is all alone in a span, just add to the classes of the span
-      teleft.enclose_to global_character_position_end, html_enclosure({tag: tagname}.merge options)
-      update
+      teleft.enclose_to global_character_position_end, html_enclosure(options[:tag] || 'span', *options.values_at(:classes, :value))
     else
       enclose_by_text_elmt_data teleft, teright, options
     end
-    x=2
   end
 
   # Return the Nokogiri node that was built
-  def enclose_by_selection anchor_path, anchor_offset, focus_path, focus_offset, options={}
-    newnode = nil
-    if anchor_path == focus_path
-      anchor_offset, focus_offset = focus_offset, anchor_offset if anchor_offset > focus_offset
-      first_te = TextElmtData.new self, anchor_path, anchor_offset
-      # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
-      unless first_te.prior_text.blank? &&
-          first_te.text[correct_selection_offset(focus_offset, first_te.text)...-1].blank? &&
-        newnode = tag_ancestor(first_te.parent,
-                               first_te.text_element,
-                               first_te.text_element,
-                               options.slice(:tag, :classes, :value))
-        newnode = first_te.enclose_to (first_te.local_to_global focus_offset ), html_enclosure({tag: :span}.merge options)
-        update
-      end     # 1/2 ounce​ Green Chartreuse #
-    else
-      first_te = TextElmtData.new self, anchor_path, anchor_offset
-      last_te = TextElmtData.new self, focus_path, -focus_offset
-      # Need to ensure the selection is in the proper order
-      if last_te.elmt_bounds_index < first_te.elmt_bounds_index
-        first_te = TextElmtData.new self, focus_path, focus_offset
-        last_te = TextElmtData.new self, anchor_path, -anchor_offset
-      end
-      # The two elmt data are marked, ready for enclosing
-      newnode = enclose_by_text_elmt_data first_te, last_te, options
+  def enclose_selection anchor_path, anchor_offset, focus_path, focus_offset, options={}
+    if anchor_path == focus_path && anchor_offset > focus_offset
+      anchor_offset, focus_offset = focus_offset, anchor_offset
     end
-    newnode
+    first_te = TextElmtData.new self, anchor_path, anchor_offset
+    last_te = TextElmtData.new self, focus_path, -focus_offset
+    # Need to ensure the selection is in the proper order
+    if last_te.elmt_bounds_index < first_te.elmt_bounds_index
+      first_te = TextElmtData.new self, focus_path, focus_offset
+      last_te = TextElmtData.new self, anchor_path, -anchor_offset
+    end
+    # The two elmt data are marked, ready for enclosing
+    enclose_by_text_elmt_data first_te, last_te, options
   end
 
+  # This is the main method for rearranging text in the DOM, enclosing
+  # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
   def enclose_by_text_elmt_data teleft, teright, options={}
+    if teleft.text_element == teright.text_element # Simple case: enclosing text w/in a single element
+      # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
+      newnode = tag_ancestor(teleft.parent,
+                             teleft.text_element,
+                             teleft.text_element,
+                             options.slice(:tag, :classes, :value)) if teleft.prior_text.blank? && teright.subsq_text.blank?
+      return newnode || teleft.enclose_to(teright.local_to_global teright.local_char_offset), html_enclosure(:span, *options.values_at(:classes, :value))
+    end
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
+    # -- before teleft and after teright
     # We may need to adjust the right elmt_bounds_index if the left's split introduced new elmts
     bounds_prior = teleft.elmt_bounds_index
     teleft.split_left
@@ -217,60 +251,31 @@ class NokoTokens < Array
       if extant_right == extant_left
         # The selection is entirely under the requisite node => move OTHER (preceding and succeeding) content out
         # For lack of a better place, we'll move it all before and after the extant node
-        target = extant_left
-        mark = teleft.text_element
-        while mark != extant_left
-          previous = mark.previous
-          mark = mark.parent
-          while caret = previous
-            previous = caret.previous
-            target.previous = caret
-            target = target.previous
-          end
-        end
-        target = extant_right
-        mark = teright.text_element
-        while mark != extant_right
-          nxt = mark.next
-          mark = mark.parent
-          while caret = nxt
-            nxt = caret.next
-            target.next = caret
-            target = target.next
-          end
-        end
+        move_elements_safely attach: :before, relative_to: extant_left, iterator: DomTraversor.new(teleft.text_element, extant_left, :left)
+        move_elements_safely attach: :after, relative_to: extant_left, iterator: DomTraversor.new(teleft.text_element, extant_left, :right)
+        nu.left_of_path { |node| extant_left.previous = node }
+        nu = DomTraversor.new(teright.text_element, extant_right)
+        nu.right_of_path { |node| extant_right.next = node  }
       elsif extant_left
-        # Append selection not already in the extant tree to it
-        caret = teright.text_element
-        while !caret.next do
-          caret = caret.parent
-        end
-        from = caret.parent
-        while caret.parent != extant_left
-          extant_left.add_child from.children.first
-        end
+        move_elements_safely attach: :extend_right, relative_to: extant_left, iterator: DomTraversor.new(extant_left, teright.text_element, :enclosed)
         return extant_left
         # Same procedure if the end of the selection has a viable ancestor
       elsif extant_right
+        move_elements_safely attach: :extend_left, relative_to: extant_right, iterator: DomTraversor.new(teleft.text_element, extant_right, :enclosed)
         # Append selection not already in the extant tree to it
-        caret = teleft.text_element
-        while !caret.previous do
-          caret = caret.parent
-        end
-        catcher = extant_right.children.first
-        nxt = caret.next_sibling
-        while caret
-          nxt = caret.next_sibling
-          catcher.previous = caret
-          catcher = caret
-          caret = nxt
-        end
         return extant_right
       end
     end
 
-    newnode = assemble_tree_from_nodes teleft.text_element, teright.text_element, options do |newtree, *nodes_to_move|
-      move_elements_safely newtree, *nodes_to_move
+    to_move = []
+    # If needed, #assemble_tree_from_nodes builds an iterator on the appropriate bounds for the tree walk.
+    # We use that iterator to to earmark nodes for #move_elements_safely
+    newnode = assemble_tree_from_nodes teleft.text_element,
+                                       teright.text_element,
+                                       tag_or_node: options[:tag],
+                                       classes: options[:classes],
+                                       value: options[:value] do |newtree, iterator|
+      move_elements_safely relative_to: newtree, iterator: iterator
     end
     update
     newnode
@@ -433,4 +438,5 @@ class NokoTokens < Array
       return first_token_index..first_token_index
     end
   end
+
 end

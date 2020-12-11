@@ -17,7 +17,7 @@ class ParsingServices
     nokoscan = NokoScanner.new nkdoc
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      newnode = nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, classes: token, tag: Parser.tag_for_token(token)
+      newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, classes: token, tag: Parser.tag_for_token(token)
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
       [ nkdoc.to_s, xpath ]

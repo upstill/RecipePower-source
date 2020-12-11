@@ -80,7 +80,7 @@ class RecipePage < ApplicationRecord
       # Degenerate case where the selection only has one node
       return anchor_node.to_html
     end
-    nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag => :div, :classes => :rp_recipe
+    nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag_or_node => :div, :classes => :rp_recipe
     nokotree.to_html if nokotree
   end
 
