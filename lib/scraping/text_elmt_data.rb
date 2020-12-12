@@ -27,7 +27,7 @@ end
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  delegate :elmt_bounds, :token_index_for, :to_token_bound, :valid_mark?, to: :noko_tokens
+  delegate :token_index_for, :to_token_bound, :valid_mark?, to: :noko_tokens
   attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset # , :local_char_range
   attr_reader :noko_tokens, :global_start_offset
 
@@ -68,7 +68,7 @@ class TextElmtData < Object
         text_elmt = global_char_offset_or_path_or_text_elmt
       end
       # Linear search: SAD!
-      global_char_offset = elmt_bounds.find { |elmt| text_elmt == elmt.first }&.last
+      global_char_offset = @noko_tokens.global_position_of_elmt text_elmt # elmt_bounds.find { |elmt| text_elmt == elmt.first }&.last
       # Split the offset into a positive value and a negative indicator
       local_offset_mark = local_offset_mark.abs if (negatory = local_offset_mark < 0)
       # We have to correct character offsets b/c Javascript counts "\r\n" as a single character
@@ -82,11 +82,12 @@ class TextElmtData < Object
     # A negative global character offset denotes a terminating position.
     # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
-    @elmt_bounds_index = binsearch elmt_bounds, global_char_offset, &:last
+    @elmt_bounds_index = @noko_tokens.elmt_index_for_position global_char_offset # binsearch elmt_bounds, global_char_offset, &:last
     # The FIRST character of a text element is treated as the LAST character of the previous text element for a terminating offset
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (elmt_bounds[@elmt_bounds_index].last == global_char_offset)
-    @text_element, @global_start_offset = elmt_bounds[@elmt_bounds_index] # ...by definition
+    @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (@noko_tokens.elmt_offset_at(@elmt_bounds_index) == global_char_offset)
+    @text_element = @noko_tokens.nth_elmt @elmt_bounds_index
+    @global_start_offset = @noko_tokens.elmt_offset_at @elmt_bounds_index # elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
     @parent = @text_element.parent
   end
@@ -111,6 +112,10 @@ class TextElmtData < Object
     @global_start_offset+local_offset
   end
 
+  def global_char_offset
+    local_to_global @local_char_offset
+  end
+
   def global_to_local global_offset
     global_offset - @global_start_offset
   end
@@ -122,7 +127,11 @@ class TextElmtData < Object
     text_element.next = subsq_text
     text_element.content = prior_text
     @global_start_offset += @local_char_offset
-    elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
+    @noko_tokens.split_elmt_at @elmt_bounds_index, text_element, text_element.next
+    @text_element = text_element.next
+    @elmt_bounds_index += 1
+    # elmt_bounds[@elmt_bounds_index][0] = text_element
+    # elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
     @local_char_offset = 0
   end
 
@@ -132,8 +141,10 @@ class TextElmtData < Object
     return if prior_text.empty? || subsq_text.empty?
     text_element.previous = prior_text
     text_element.content = subsq_text
-    elmt_bounds[@elmt_bounds_index][1] = @global_start_offset + @local_char_offset # Fix existing entry
-    elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
+    @noko_tokens.split_elmt_at @elmt_bounds_index, text_element.previous, text_element
+    # elmt_bounds[@elmt_bounds_index] = [text_element, (@global_start_offset + @local_char_offset)] # Fix existing entry
+    # elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
+    @text_element = text_element.previous
     @local_char_offset = text.length # Goes to the end of this node
   end
 
@@ -144,7 +155,7 @@ class TextElmtData < Object
 
   # Divide an existing text element, splitting off the text between the mark and the given end mark into
   # an element that encloses that text
-  def enclose_to global_character_position_end, html
+  def enclose_to global_character_position_end, classes:, tag: nil, value: nil
     # Split off a text element for text to the left of the mark (if any such text)
     split_left
     # Split off a text element for text to the right of the limit (if any such text)
@@ -152,10 +163,11 @@ class TextElmtData < Object
     split_right
     # Now add a next element: the html shell
     elmt = text_element
-    elmt.next = html
+    elmt.next = html_enclosure tag: tag, classes: classes, value: value
     newnode = elmt.next
-    # Move the element under the shell
-    elmt.next.add_child elmt
+    # Move the element under the shell while ensuring that elmt_bounds remains valid
+    @noko_tokens.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
+    @noko_tokens.fix_nth_elmt @elmt_bounds_index+1, newnode.next if newnode.next&.text?
     validate_embedding newnode
     newnode
   end
@@ -173,15 +185,6 @@ class TextElmtData < Object
   # Return the text from the beginning to the mark (expressed globally)
   def delimited_text mark = nil
     text[mark ? @local_char_offset...(mark-@global_start_offset) : @local_char_offset..-1]&.strip || ''
-  end
-
-  def replace_bound newbounds, text_shrinkage = 0
-    elmt_bounds[@elmt_bounds_index..-1].each { |pair| pair[1] -= text_shrinkage } if text_shrinkage != 0
-    if newbounds.empty?
-      elmt_bounds.delete_at @elmt_bounds_index
-    else
-      elmt_bounds[@elmt_bounds_index..@elmt_bounds_index] = newbounds
-    end
   end
 
   def remove

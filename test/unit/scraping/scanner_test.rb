@@ -7,7 +7,7 @@ class ScannerTest < ActiveSupport::TestCase
     tn = 0
     nks.nkdoc.traverse do |node|
       if node.text?
-        assert_equal node, nks.elmt_bounds[tn].first, "node '#{node.to_s}' does not match '#{nks.elmt_bounds[tn].first.to_s}'"
+        assert_equal node, nks.nth_elmt(tn), "text elmt ##{tn} '#{node.to_s}' does not match '#{nks.nth_elmt(tn).to_s}'"
         tn += 1
       end
     end
@@ -188,7 +188,7 @@ EOF
     assert_equal [0], nks.elmt_bounds.map(&:last)
 
     # Enclose two strings in the middle
-    nks.enclose_by_token_indices 2, 4
+    nks.enclose_tokens 2, 4
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     # assert_equal 4, nks.tokens.count
@@ -199,7 +199,7 @@ EOF
 
     # Enclose the last two strings
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 3,5
+    nks.enclose_tokens 3,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
@@ -209,7 +209,7 @@ EOF
 
     # Enclose the first two strings
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0,2
+    nks.enclose_tokens 0,2
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 4, nks.tokens.count
@@ -219,7 +219,7 @@ EOF
 
     # Enclose the last string
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 4,5
+    nks.enclose_tokens 4,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
@@ -229,7 +229,7 @@ EOF
 
     # Enclose the first string
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0,1
+    nks.enclose_tokens 0,1
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
     #assert_equal 5, nks.tokens.count
@@ -253,7 +253,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0, 2
+    nks.enclose_tokens 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -276,7 +276,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0,2
+    nks.enclose_tokens 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -298,7 +298,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0,2
+    nks.enclose_tokens 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -379,7 +379,7 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.from_string html
-    nks.enclose_by_token_indices 0, 2
+    nks.enclose_tokens 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
@@ -465,7 +465,7 @@ EOF
     nks = NokoScanner.new nkdoc
     assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=1]').first.name
     assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=2]').first.name
-    nks.enclose_by_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
+    nks.enclose_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
                              'div/p[position()=2]/span[position()=2]/text()', 21,
                              tag: 'div', classes: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first
@@ -478,7 +478,7 @@ EOF
     nkdoc = Nokogiri::HTML.fragment(html)
     nks = NokoScanner.new nkdoc
     assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=1]').first.name
-    nks.enclose_by_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
+    nks.enclose_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
                              'div/p[position()=2]/span[position()=1]/text()', 63,
                              tag: 'div', classes: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first
@@ -490,7 +490,7 @@ EOF
 <p>ice, combine 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice blah blah blah.</p></div>'
     nkdoc = Nokogiri::HTML.fragment(html)
     nks = NokoScanner.new nkdoc
-    nks.enclose_by_selection 'div/p[position()=2]/text()', 13,
+    nks.enclose_selection 'div/p[position()=2]/text()', 13,
                              'div/p[position()=2]/text()', 76,
                              tag: 'div', classes: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first

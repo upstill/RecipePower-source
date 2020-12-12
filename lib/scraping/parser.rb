@@ -561,12 +561,15 @@ class ParserEvaluator
   end
 
 # Evaluate whether child_token can appear as a child of parent_token.
-  def can_include? parent_token, child_token, transitive=true
+  def can_include? parent_token, child_token, transitive = true
     def refers_to? supe, sub, transitive
       @grammar_inclusions[supe].include?(sub) ||
           transitive && @grammar_inclusions[supe].find { |supe| refers_to? supe, sub, transitive }
     end
-    refers_to? parent_token.to_sym, child_token.to_sym, transitive
+
+    parent_token.nil? ||
+        child_token.nil? ||
+        refers_to?(parent_token.to_sym, child_token.to_sym, transitive)
   end
 
 end

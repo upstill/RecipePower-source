@@ -67,13 +67,13 @@ end
 # If possible, apply the classes to an ancestor of the two text elements
 # "possible" means that all text of the ancestor before the first and after the last
 # text element is blank
-def tag_ancestor node, first_te, last_te, options = {}
-  tag = options[:tag] || 'span'
-  classes = options[:classes] || ''
+def tag_ancestor node, first_te, last_te, classes:, tag: nil, value: nil
+  tag = tag.to_s || 'span'
+  classes ||= ''
   scan_ancestors node, first_te, last_te do |anc|
-    if anc.name == tag&.to_s
+    if anc.name == tag
       nknode_add_classes anc, "rp_elmt #{classes}"
-      anc['value'] = options[:value] if options[:value]
+      anc['value'] = value if value
       return anc
     end
   end
@@ -82,7 +82,7 @@ end
 
 # Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
 # the common ancestor of the two.
-def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classes: nil, value: nil
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, value: nil
 
   # Back the focus_elmt up as long as it's blank
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
@@ -98,7 +98,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classe
   end
 
   # If there's an ancestor with no preceding or succeeding text, mark that and return
-  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, tag: tag_or_node, classes: classes, value: value)
+  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, tag: tag, classes: classes, value: value)
     return report_tree('After: ', anc)
   end
   # Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
@@ -106,8 +106,8 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classe
     return report_tree('After: ', common_ancestor)
   end
 
-  if tag_or_node.is_a?(Nokogiri::XML::Element) # The new tree may be given directly as a node
-    newtree = tag_or_node
+  if tag.is_a?(Nokogiri::XML::Element) # The new tree may be given directly as a node
+    newtree = tag
   else
     # If not provided directly, build the tree.
     # It is to appear under the common ancestor of the anchor and the focus, so
@@ -115,7 +115,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classe
     # where anchor_root and focus_root are now. But either of those could be moved entirely into
     # the new tree.
     # Create a Nokogiri node from the parameters
-    newtree = (Nokogiri::HTML.fragment html_enclosure(tag_or_node, classes, value)).children[0]
+    newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, classes: classes, value: value)).children[0]
   end
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
@@ -124,11 +124,11 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, tag_or_node: :span, classe
   else
     iterator.walk { |node| newtree.add_child node }
   end
-  unless tag_or_node == newtree # It's been given, so presumably it's already been placed
+  unless tag == newtree # It's been given, so presumably it's already been placed
     if iterator.successor_node # newtree goes where focus_root was
-      iterator.successor_node.previous = newtree
+      attach_node_safely newtree, iterator.successor_node, :before # iterator.successor_node.previous = newtree
     else # The focus node was the last child, and now it's gone => make newtree be the last child
-      common_ancestor.add_child newtree
+      attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
   end
   validate_embedding report_tree('After: ', newtree)
@@ -182,10 +182,12 @@ def validate_embedding newtree
   newtree
 end
 
-def html_enclosure tag, classes, value=nil
+def html_enclosure tag: 'div', classes:'', value: nil
   tag ||= 'div'
   valuestr = "data-value='#{value}'" if value
-  "<#{tag} class='rp_elmt #{classes}' #{valuestr}></#{tag}>" # For constructing the new node
+  class_str = 'rp_elmt'
+  class_str << ' ' + classes.to_s if classes.present?
+  "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
 def seekline tokens, within, opos, obound, delimiter = nil
@@ -551,9 +553,9 @@ class NokoScanner # < Scanner
     ted.xpath
   end
 
-  def enclose_to limit, options = {}
+  def enclose_to limit, classes:, tag: nil, value: nil
     return unless limit > pos
-    @tokens.enclose_tokens @pos, limit, options
+    @tokens.enclose_tokens @pos, limit, tag: tag, classes: classes, value: value
   end
 
   # Provide the text element data for the current character position

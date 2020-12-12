@@ -127,7 +127,7 @@ end
 
 # Extract the CSS classes for a Nokogiri node, applying a regexp and converting all to symbols
 def classes_for_node node, regexp=nil
-  classes = node['class'].split
+  return [] unless classes = node['class']&.split
   classes.keep_if { |klass| klass.match(regexp) } if regexp
   classes.map &:to_sym
 end

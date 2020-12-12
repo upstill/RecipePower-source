@@ -35,7 +35,7 @@ class NokoTokenTest < ActiveSupport::TestCase
     initialize_doc '<div>starting<span>text</span><div><p><br><b>more text</b></p></div></div>'
     ted = text_element_data_containing 'more'
     # Go directly to assemble the tree within Nokogiri
-    newtree = assemble_tree_from_nodes ted, ted, :tag_or_node => :div, :classes => :rp_ingname
+    newtree = assemble_tree_from_nodes ted, ted, :tag => :div, :classes => :rp_ingname
     # @nokotokens.enclose_by_text_elmt_data ted, ted, tag: 'div', classes: :rp_ingname
     assert_equal 1, @nkdoc.css('div.rp_ingname').count
     assert_equal 'more text', @nkdoc.css('div.rp_ingname').first.inner_text
@@ -50,13 +50,13 @@ class NokoTokenTest < ActiveSupport::TestCase
 
   test 'bringing outlying text under existing node' do
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 5, @nokotokens.count, :tag => :div, :classes => :rp_ingline
+    newtree = @nokotokens.enclose_tokens 5, @nokotokens.count, tag: :div, classes: :rp_ingline
     assert_equal 1, @nkdoc.css('div.rp_ingline').count
     assert_equal 'line text outside line this is', @nkdoc.css('div.rp_ingline').inner_text.split.join(' ')
 
     # Go again prefixing the :rp_ingline node with the prefatory text
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 1, 6, :tag => :div, :classes => :rp_ingline
+    newtree = @nokotokens.enclose_tokens 1, 6, tag: :div, classes: :rp_ingline
     assert_equal 1, @nkdoc.css('div.rp_ingline').count
     assert_equal 'some prefatory text line text', @nkdoc.css('div.rp_ingline').inner_text.split.join(' ')
   end
