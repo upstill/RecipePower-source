@@ -82,7 +82,7 @@ class Parser
 
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
-    @grammar = self.initialized_grammar
+    @grammar = Parser.initialized_grammar
     modify_grammar YAML.load(grammar_mods.to_yaml) # Protect them against modification
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []

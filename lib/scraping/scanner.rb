@@ -2,67 +2,7 @@ require 'string_utils.rb'
 require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
 require 'scraping/noko_tokens.rb'
-
-# TODO: most of these methods should be moved to noko_ut
-# Is the node ready to delete?
-def node_empty? nokonode
-  return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)
-  nokonode.children.blank? || nokonode.children.all? { |child| node_empty? child }
-end
-
-# Return all the siblings BEFORE this node
-def prev_siblings nokonode
-  found = false
-  nokonode.parent.children.collect { |child| child unless (found ||= child == nokonode) }.compact
-end
-
-# Return all the siblings AFTER this node
-def next_siblings nokonode
-  found = false
-  nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode; nil) }.compact
-end
-
-def first_text_element node, blanks_okay = false
-  node.traverse do |child|
-    return child if child.text? && (blanks_okay || child.text.present?)
-  end
-end
-
-def last_text_element node, blanks_okay = false
-  last = nil
-  node.traverse do |child|
-    last = child if child.text? && (blanks_okay || child.text.present?)
-  end
-  last
-end
-
-def predecessor_text tree, text_elmt
-  prev = nil
-  tree.traverse do |node|
-    return prev if node == text_elmt # NB: will return nil if no predecessor
-    if node.text?
-      prev = node
-    end
-  end
-end
-
-def successor_text tree, text_elmt
-  passed = false
-  tree.traverse do |node|
-    return node if passed && node.text?
-    passed = true if node == text_elmt
-  end
-end
-
-# An ancestor of a node is markable if the first text elmt and the last text element are the entirety of non-blank text
-def scan_ancestors node, first_text_elmt, last_text_elmt
-  while !node.fragment? &&
-      first_text_element(node) == first_text_elmt &&
-      last_text_element(node) == last_text_elmt do
-    yield node
-    node = node.parent
-  end
-end
+require 'scraping/noko_utils.rb'
 
 # If possible, apply the classes to an ancestor of the two text elements
 # "possible" means that all text of the ancestor before the first and after the last
@@ -70,12 +10,17 @@ end
 def tag_ancestor node, first_te, last_te, classes:, tag: nil, value: nil
   tag = tag.to_s || 'span'
   classes ||= ''
-  scan_ancestors node, first_te, last_te do |anc|
-    if anc.name == tag
-      nknode_add_classes anc, "rp_elmt #{classes}"
-      anc['value'] = value if value
-      return anc
+
+  # Scan a node and its ancestors to see if any contain all and only the text between the two text elements
+  while !node.fragment? &&
+      first_text_element(node) == first_te &&
+      last_text_element(node) == last_te do
+    if node.name == tag
+      nknode_add_classes node, "rp_elmt #{classes}"
+      node['value'] = value if value
+      return node
     end
+    node = node.parent
   end
   nil
 end
@@ -308,9 +253,8 @@ end
 class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_index_for, :token_offset_at,
-           :find_elmt_index, :nth_elmt, :delete_nth_elmt,
-           :enclose_tokens, :enclose_selection, :text_elmt_data, to: :tokens
+  delegate :token_starts, :token_index_for, :token_offset_at,
+           :elmt_bounds, :enclose_tokens, :enclose_selection, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node

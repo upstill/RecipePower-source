@@ -27,9 +27,8 @@ end
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  delegate :token_index_for, :to_token_bound, :valid_mark?, to: :noko_tokens
   attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset # , :local_char_range
-  attr_reader :noko_tokens, :global_start_offset
+  attr_reader :noko_tokens, :global_start_offset, :elmt_bounds
 
   # Here we initialize a TextElmtData object for a given Nokogiri text element within the document
   # associated with a NokoTokens provider. The text element may be specified in three ways, depending on the
@@ -51,6 +50,7 @@ class TextElmtData < Object
   # Note: by definition, @text_element, @global_start_offset == @noko_tokens.elmt_bounds[@elmt_bounds_index]
   def initialize nkt, global_char_offset_or_path_or_text_elmt, local_offset_mark=0 # character offset within the text element
     @noko_tokens = nkt
+    @elmt_bounds = @noko_tokens.elmt_bounds
     @local_char_offset = 0
     if global_char_offset_or_path_or_text_elmt.is_a? Integer
       signed_global_char_offset = global_char_offset_or_path_or_text_elmt # Could be signed
@@ -68,7 +68,7 @@ class TextElmtData < Object
         text_elmt = global_char_offset_or_path_or_text_elmt
       end
       # Linear search: SAD!
-      global_char_offset = @noko_tokens.global_position_of_elmt text_elmt # elmt_bounds.find { |elmt| text_elmt == elmt.first }&.last
+      global_char_offset = @elmt_bounds.global_position_of_elmt text_elmt # elmt_bounds.find { |elmt| text_elmt == elmt.first }&.last
       # Split the offset into a positive value and a negative indicator
       local_offset_mark = local_offset_mark.abs if (negatory = local_offset_mark < 0)
       # We have to correct character offsets b/c Javascript counts "\r\n" as a single character
@@ -78,16 +78,17 @@ class TextElmtData < Object
     end
     # Get the Nokogiri text element, its global character offset, and its index in the tokens scanner, based on global character offset
     # Ensure that the pointer does not violate token boundaries
-    signed_global_char_offset = to_token_bound signed_global_char_offset
+    signed_global_char_offset = @noko_tokens.to_token_bound signed_global_char_offset
     # A negative global character offset denotes a terminating position.
     # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
-    @elmt_bounds_index = @noko_tokens.elmt_index_for_position global_char_offset # binsearch elmt_bounds, global_char_offset, &:last
+    @elmt_bounds_index = @elmt_bounds.elmt_index_for_position global_char_offset # binsearch elmt_bounds, global_char_offset, &:last
     # The FIRST character of a text element is treated as the LAST character of the previous text element for a terminating offset
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (@noko_tokens.elmt_offset_at(@elmt_bounds_index) == global_char_offset)
-    @text_element = @noko_tokens.nth_elmt @elmt_bounds_index
-    @global_start_offset = @noko_tokens.elmt_offset_at @elmt_bounds_index # elmt_bounds[@elmt_bounds_index] # ...by definition
+    @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (@elmt_bounds.elmt_offset_at(@elmt_bounds_index) == global_char_offset)
+    @text_element, @global_start_offset =
+        @elmt_bounds.nth_elmt(@elmt_bounds_index),
+        @elmt_bounds.elmt_offset_at(@elmt_bounds_index) # elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
     @parent = @text_element.parent
   end
@@ -104,7 +105,7 @@ class TextElmtData < Object
 
   # Change the @local_char_offset to reflect a new global offset, which had better be in range of the text
   def mark_at signed_global_char_offset
-    @local_char_offset = global_to_local to_token_bound(signed_global_char_offset).abs
+    @local_char_offset = global_to_local @noko_tokens.to_token_bound(signed_global_char_offset).abs
   end
 
   # Express a local offset in the text element as a global one
@@ -127,7 +128,7 @@ class TextElmtData < Object
     text_element.next = subsq_text
     text_element.content = prior_text
     @global_start_offset += @local_char_offset
-    @noko_tokens.split_elmt_at @elmt_bounds_index, text_element, text_element.next
+    @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element, text_element.next
     @text_element = text_element.next
     @elmt_bounds_index += 1
     # elmt_bounds[@elmt_bounds_index][0] = text_element
@@ -141,7 +142,7 @@ class TextElmtData < Object
     return if prior_text.empty? || subsq_text.empty?
     text_element.previous = prior_text
     text_element.content = subsq_text
-    @noko_tokens.split_elmt_at @elmt_bounds_index, text_element.previous, text_element
+    @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element.previous, text_element
     # elmt_bounds[@elmt_bounds_index] = [text_element, (@global_start_offset + @local_char_offset)] # Fix existing entry
     # elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
     @text_element = text_element.previous
@@ -166,8 +167,8 @@ class TextElmtData < Object
     elmt.next = html_enclosure tag: tag, classes: classes, value: value
     newnode = elmt.next
     # Move the element under the shell while ensuring that elmt_bounds remains valid
-    @noko_tokens.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
-    @noko_tokens.fix_nth_elmt @elmt_bounds_index+1, newnode.next if newnode.next&.text?
+    @elmt_bounds.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
+    @elmt_bounds.fix_nth_elmt @elmt_bounds_index+1, newnode.next if newnode.next&.text?
     validate_embedding newnode
     newnode
   end

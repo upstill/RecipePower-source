@@ -1,12 +1,14 @@
 require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
 require 'scraping/dom_traversor.rb'
+require 'scraping/elmt_bounds.rb'
 
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
   attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
   delegate :pp, :to => :nkdoc
+  delegate :attach_node_safely, :to => :elmt_bounds
   def initialize nkdoc
     def to_tokens newtext = nil
       # Append the string to the priorly held text, if any
@@ -29,7 +31,7 @@ class NokoTokens < Array
       case
       when child.text?
         # Save this element and its starting point
-        @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
+        @elmt_bounds.push child, (@processed_text_len + @held_text.length) # @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
         to_tokens if child.name.match(/^(p|br|ul|li)$/)
@@ -39,7 +41,7 @@ class NokoTokens < Array
 
     # Take the parameters as instance variables, creating @tokens if nec.
     @nkdoc = nkdoc.is_a?(String) ? Nokogiri::HTML.fragment(nkdoc) : nkdoc
-    @elmt_bounds = []
+    @elmt_bounds = ElmtBounds.new nkdoc
     @token_starts = []
     @processed_text_len = 0
     @held_text = ''
@@ -61,45 +63,6 @@ class NokoTokens < Array
   def token_limit_at token_limit_index
     return 0 if token_limit_index == 0
     token_offset_at(token_limit_index-1) + self[token_limit_index-1].length
-  end
-
-  def elmt_offset_at token_index
-    (@elmt_bounds[token_index]&.last if token_index) || @processed_text_len
-  end
-
-  def find_elmt_index elmt
-    @elmt_bounds.find_index { |rcd| rcd.first.object_id.equal? elmt.object_id } if elmt
-  end
-
-  def global_position_of_elmt elmt
-    elmt_offset_at find_elmt_index(elmt)
-  end
-
-  def elmt_index_for_position global_position
-    binsearch @elmt_bounds, global_position, &:last
-  end
-
-  def nth_elmt ix
-    @elmt_bounds[ix]&.first
-  end
-
-  def delete_nth_elmt ix
-    @elmt_bounds.delete_at ix
-  end
-
-  # Replace the text element in the elmt_bounds array, BUT ONLY IF THE TEXT IS IDENTICAL
-  def fix_nth_elmt ix, text_element
-    begin
-      @elmt_bounds[ix][0] = text_element
-    rescue Exception => e
-      puts "ERROR maintaining @elmt_bounds array! Replacement does not match text of original"
-    end
-  end
-
-  def split_elmt_at ix, first_te, second_te
-    elmt_bounds[ix][0] = first_te
-    second_start = elmt_bounds[ix].last + first_te.to_s.length
-    elmt_bounds.insert (ix += 1), [second_te, second_start]
   end
 
   # Moving nodes under a parent, we have to be careful to maintain the integrity of
@@ -127,65 +90,6 @@ class NokoTokens < Array
       }.each do |descendant|
         attach_node_safely descendant, relative_to, attach
       end
-    end
-  end
-
-  # Move a node into position in relation to element relative_to
-  # CRITICALLY, we ensure that all text elements under the node are recorded in the elmt_bounds array
-  def attach_node_safely node, relative_to, how
-    parent = (how == :before || how == :after) ? relative_to.parent : relative_to
-    if node.text?
-      child_ix = find_elmt_index node
-      prior_count = parent.children.count
-    else
-      elmt_bounds_index = nil
-      node.traverse { |node| elmt_bounds_index ||= (find_elmt_index(node) if node.text?) }
-    end
-
-    # Now make the move
-    as_attached =
-    case how
-    when :extend_right
-      relative_to.add_child node
-      relative_to.children.last
-    when :extend_left
-      if extant = relative_to.children.first
-        extant.previous = node
-      else
-        # Degenerate case of an empty parent
-        relative_to.add_child node
-      end
-      relative_to.children.first
-    when :before
-      relative_to.previous = node
-      relative_to.previous
-    when :after
-      relative_to.next = node
-      relative_to.next
-    end
-
-    # Finally, repair the @elmt_bounds as needed
-    if node.text?
-      if parent.children.count == prior_count # indicator that Nokogiri has merged adjacent text elements
-        if how == :extend_left
-          # Under the assumption that the inserted text-element has and will continue to precede
-          # the first child, its index must be retained
-          @elmt_bounds.delete_at child_ix+1
-        else
-          # They should be adjacent elements in the elmts array
-          @elmt_bounds.delete_at child_ix
-          child_ix = child_ix - 1
-        end
-      end
-      @elmt_bounds[child_ix][0] = as_attached
-    else
-      # Ensure that the node's text elements are maintained correctly in elmt_bounds
-      node.traverse do |descendant|
-        if descendant.text?
-          fix_nth_elmt elmt_bounds_index, descendant
-          elmt_bounds_index += 1
-        end
-      end if elmt_bounds_index
     end
   end
 
@@ -280,15 +184,6 @@ class NokoTokens < Array
     signed_global_char_offset < 0 ? -(token_start+self[token_ix].length) : token_start
   end
 
-  # Raise an error if a proposed marker doesn't conform to token bounds:
-  # -- It can't be within a token
-  # -- A beginning marker must be at the head of a token
-  # -- An ending marker must be at the end of the token
-  def valid_mark? signed_global_char_offset
-    return true if to_token_bound(signed_global_char_offset) == signed_global_char_offset
-    raise "TextElmtData error: proposed marker #{signed_global_char_offset} violates token constraints"
-  end
-
   # Provide TextElmtData objects for the beginning and ending of the (globally expressed) range.
   # If both ends of the range are in the same Nokogiri text element, the same TextElmtData object gets returned.
   # NB: if either end of the range falls inside a token, it's rounded to token boundaries
@@ -330,16 +225,16 @@ class NokoTokens < Array
   # If not found, nil
   def dom_range selector_or_node
     return unless node = selector_or_node.is_a?(String) ? nkdoc.search(selector_or_node).first : selector_or_node
-    range_from_subtree node
+    token_range_for_subtree node
   end
 
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
   def dom_ranges spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
     ranges = nkdoc.search(selector)&.map do |found|
-      range_from_subtree found
+      token_range_for_subtree found
     end || []
-    ranges << range_from_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
+    ranges << token_range_for_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
     # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
     ranges.each_index do |ix|
       ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)
@@ -347,9 +242,12 @@ class NokoTokens < Array
     ranges
   end
 
-  def range_from_subtree node
+  # What are the tokens for encompassing the given subtree?
+  # Returns: a Range giving those indices in @token_starts
+  def token_range_for_subtree node
     first_text_element = nil
     last_text_element = nil
+    # Traverse the node tree in search of the first and last text elements
     node.traverse do |child|
       if child.text?
         last_text_element = child
@@ -357,17 +255,13 @@ class NokoTokens < Array
       end
     end
     first_text_element ||= successor_text @nkdoc, node # The node has no text elements, perhaps because it's a <br> tag. Return an empty range for the next text element
-    first_pos = last_pos = last_limit = nil
-    @elmt_bounds.each_with_index do |pair, index|
-      if !first_pos && pair.first == first_text_element
-        first_pos = pair.last
-      end
-      if !last_pos && pair.first == last_text_element
-        last_pos = pair.last
-        last_limit = elmt_offset_at(index+1)
-        break
-      end
-    end
+    token_range_for_text_elements first_text_element, last_text_element
+  end
+
+  # What are the tokens for the document between two text elements?
+  # Returns: a Range giving those indices in @token_starts
+  def token_range_for_text_elements first_text_element, last_text_element
+    first_pos, last_limit = @elmt_bounds.range_encompassing first_text_element, last_text_element
     # Now we have an index in the elmts array, but we need a range in the tokens array.
     # Fortunately, that is sorted by index, so: binsearch!
     first_token_index = binsearch(@token_starts, first_pos) || 0 # Find the token at this position
@@ -375,9 +269,9 @@ class NokoTokens < Array
     if last_limit
       last_token_index = binsearch @token_starts, last_limit # The last token is a limit
       last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
-      return first_token_index...last_token_index
+      first_token_index...last_token_index
     else
-      return first_token_index..first_token_index
+      first_token_index..first_token_index
     end
   end
 
@@ -405,7 +299,7 @@ class NokoTokens < Array
     teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
     teright.split_right
     #if Rails.env.development?
-    #  puts "Assembling #{classes} from #{teleft.text_element.to_s} (node ##{find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{find_elmt_index teright.text_element})"
+    #  puts "Assembling #{classes} from #{teleft.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teright.text_element})"
     #end
 
     # If there is already a tree whose root matches the tag and class spec, expand it to include the whole selection

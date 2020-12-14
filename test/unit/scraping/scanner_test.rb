@@ -5,9 +5,10 @@ class ScannerTest < ActiveSupport::TestCase
 
   def check_integrity nks
     tn = 0
+    elmt_bounds = nks.tokens.elmt_bounds
     nks.nkdoc.traverse do |node|
       if node.text?
-        assert_equal node, nks.nth_elmt(tn), "text elmt ##{tn} '#{node.to_s}' does not match '#{nks.nth_elmt(tn).to_s}'"
+        assert_equal node, elmt_bounds.nth_elmt(tn), "text elmt ##{tn} '#{node.to_s}' does not match '#{elmt_bounds.nth_elmt(tn).to_s}'"
         tn += 1
       end
     end
