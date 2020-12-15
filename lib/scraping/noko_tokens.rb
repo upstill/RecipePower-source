@@ -55,14 +55,14 @@ class NokoTokens < Array
     self.freeze
   end
 
-  def token_offset_at token_index
+  def character_position_at_token token_index
     @token_starts[token_index] || @processed_text_len
   end
 
   # What's the global character offset at the END of the token before the limiting token?
-  def token_limit_at token_limit_index
+  def character_position_after_token token_limit_index
     return 0 if token_limit_index == 0
-    token_offset_at(token_limit_index-1) + self[token_limit_index-1].length
+    character_position_at_token(token_limit_index-1) + self[token_limit_index-1].length
   end
 
   # Moving nodes under a parent, we have to be careful to maintain the integrity of
@@ -96,11 +96,11 @@ class NokoTokens < Array
   # Return the string representing all the text given by the two token positions
   # NB This is NOT the space-separated join of all tokens in the range, b/c any intervening whitespace is not collapsed
   def text_from first_token_index, limiting_token_index
-    pos_begin = token_offset_at first_token_index
-    pos_end = token_limit_at limiting_token_index
+    pos_begin = character_position_at_token first_token_index
+    pos_end = character_position_after_token limiting_token_index
     return '' if first_token_index >= limiting_token_index || pos_begin == @processed_text_len # Boundary condition: no more text!
 
-    teleft, teright = TextElmtData.for_range self, pos_begin...pos_end
+    teleft, teright = TextElmtData.for_range @elmt_bounds, pos_begin...pos_end
     return teleft.delimited_text(pos_end) if teleft.text_element == teright.text_element
 
     left_ancestors = teleft.ancestors - teright.ancestors # All ancestors below the common ancestor
@@ -132,10 +132,10 @@ class NokoTokens < Array
   def enclose_tokens first_token_index, limiting_token_index, tag: nil, classes: nil, value: nil
     stripped_text = text_from(first_token_index, limiting_token_index).strip
     return if stripped_text.blank?
-    global_character_position_start = token_offset_at first_token_index
-    global_character_position_end = token_limit_at limiting_token_index
+    global_character_position_start = character_position_at_token first_token_index
+    global_character_position_end = character_position_after_token limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
-    teleft, teright = TextElmtData.for_range self, global_character_position_start...global_character_position_end
+    teleft, teright = TextElmtData.for_range @elmt_bounds, global_character_position_start...global_character_position_end
     if teleft.text_element == teright.text_element
       # Both beginning and end are on the same text node
       # Enclose the selected text in a new span element
@@ -151,12 +151,12 @@ class NokoTokens < Array
     if anchor_path == focus_path && anchor_offset > focus_offset
       anchor_offset, focus_offset = focus_offset, anchor_offset
     end
-    first_te = TextElmtData.new self, anchor_path, anchor_offset
-    last_te = TextElmtData.new self, focus_path, -focus_offset
+    first_te = TextElmtData.new elmt_bounds, anchor_path, anchor_offset
+    last_te = TextElmtData.new elmt_bounds, focus_path, -focus_offset
     # Need to ensure the selection is in the proper order
     if last_te.elmt_bounds_index < first_te.elmt_bounds_index
-      first_te = TextElmtData.new self, focus_path, focus_offset
-      last_te = TextElmtData.new self, anchor_path, -anchor_offset
+      first_te = TextElmtData.new elmt_bounds, focus_path, focus_offset
+      last_te = TextElmtData.new elmt_bounds, anchor_path, -anchor_offset
     end
     # The two elmt data are marked, ready for enclosing
     enclose_by_text_elmt_data first_te, last_te, tag: tag, classes: classes, value: value
@@ -202,22 +202,12 @@ class NokoTokens < Array
     token_end = token_starts[end_ix] + self[endix].length
     # End the range at the end of the token
     global_range = global_range.first...token_end if global_range.last < token_end
-    return TextElmtData.for_range(self, global_range)
+    return TextElmtData.for_range(@elmt_bounds, global_range)
   end
 
   # Extract the text element data for the character "at" the given global position.
-  # A negative sign on signed_global_char_offset signifies that this position terminates a selection.
-  def text_elmt_data global_char_offset
-    if global_char_offset < 0
-      global_char_offset = -global_char_offset
-      token_ix = binsearch token_starts, global_char_offset
-      token_ix -= 1 if token_ix > 0 && token_starts[token_ix] == global_char_offset
-      # Clamp the global character offset to be within the token
-      token_end = token_starts[token_ix] + self[token_ix].length
-      global_char_offset = token_end if (global_char_offset > token_end)
-      global_char_offset = -global_char_offset
-    end
-    TextElmtData.new self, global_char_offset
+  def text_elmt_data token_index
+    TextElmtData.new @elmt_bounds, character_position_at_token(token_index)
   end
 
   # Provide the token range enclosed by the CSS selector
@@ -265,10 +255,10 @@ class NokoTokens < Array
     # Now we have an index in the elmts array, but we need a range in the tokens array.
     # Fortunately, that is sorted by index, so: binsearch!
     first_token_index = binsearch(@token_starts, first_pos) || 0 # Find the token at this position
-    first_token_index += 1 if token_offset_at(first_token_index) < first_pos # Round up if the token overlaps the boundary
+    first_token_index += 1 if character_position_at_token(first_token_index) < first_pos # Round up if the token overlaps the boundary
     if last_limit
       last_token_index = binsearch @token_starts, last_limit # The last token is a limit
-      last_token_index += 1 if (token_offset_at(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
+      last_token_index += 1 if (character_position_at_token(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
       first_token_index...last_token_index
     else
       first_token_index..first_token_index

@@ -25,7 +25,9 @@ class DomTraversor
     nodes.uniq.each { |node| yield node }
   end
 
-  # Do a depth-first enumeration of nodes in the tree BETWEEN the anchor and the focus
+  # Do a depth-first enumeration of nodes in the tree BETWEEN the anchor and the focus,
+  # walking up to their common ancestor, then across to the node containing (however indirectly)
+  # @focus_node
   def across
     # We're going to collect a list of nodes to be moved under the new tree, in order
     anchor_ancestry = @anchor_node.ancestors
@@ -124,6 +126,8 @@ class DomTraversor
     result
   end
 end
+
+####### Utility functions #####################
 
 # Extract the CSS classes for a Nokogiri node, applying a regexp and converting all to symbols
 def classes_for_node node, regexp=nil

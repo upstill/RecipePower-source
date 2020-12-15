@@ -44,7 +44,7 @@ class NokoTokenTest < ActiveSupport::TestCase
   test 'initializing TextElmtData object from text element' do
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
     anchor_elmt = text_element_containing 'line text'
-    anchor_te = TextElmtData.new @nokotokens, anchor_elmt
+    anchor_te = TextElmtData.new @nokotokens.elmt_bounds, anchor_elmt
     assert_equal anchor_elmt, anchor_te.elmt_bounds[anchor_te.elmt_bounds_index].first
   end
 

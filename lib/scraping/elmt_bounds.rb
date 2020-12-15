@@ -2,6 +2,7 @@
 # Each element of the array is a pair: first, a text element as found in the document
 # last, a global character offset
 class ElmtBounds < Array
+  attr_reader :nkdoc
 
   def initialize nkdoc
     @nkdoc = nkdoc

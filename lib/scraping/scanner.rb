@@ -253,8 +253,8 @@ end
 class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :token_starts, :token_index_for, :token_offset_at,
-           :elmt_bounds, :enclose_tokens, :enclose_selection, to: :tokens
+  delegate :elmt_bounds, :token_starts, :token_index_for,
+           :enclose_tokens, :enclose_selection, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -375,17 +375,12 @@ class NokoScanner # < Scanner
     self
   end
 
-  # Get the text_elmt_data info for the current position
-  def current_ted
-    TextElmtData.new @tokens, @tokens.token_offset_at(@pos) # Locate the text element that we're in
-  end
-
   # Test certain conditions about the current token. According to key on h, test
   #   after_elmt: token is immediately preceded by a tag that matches(nominally <br>)
   #   within_elmt: token is the first non-blank content within the element
   #   newline: the token is preceded by a newline
   def is_at? h
-    tedata = current_ted
+    tedata = text_elmt_data
     if tedata.prior_text.blank? # Only counts at beginning of a text element
       start = tedata.text_element
       if selector = h[:after_elmt]
@@ -493,7 +488,7 @@ class NokoScanner # < Scanner
   # Provide xpath and offset for locating the current position in the document
   def xpath terminating = false
     @nkdoc.children.first
-    ted = TextElmtData.new @tokens, @tokens.token_offset_at(@pos) * (terminating ? -1 : 1)
+    ted = TextElmtData.new elmt_bounds, @tokens.character_position_at_token(@pos) * (terminating ? -1 : 1)
     ted.xpath
   end
 
@@ -504,7 +499,7 @@ class NokoScanner # < Scanner
 
   # Provide the text element data for the current character position
   def text_elmt_data pos = @pos
-    @tokens.text_elmt_data(@tokens.token_offset_at pos) if pos < @bound
+    @tokens.text_elmt_data(pos) if pos < @bound
   end
 
   def parent_tagged_with token
@@ -529,18 +524,18 @@ class NokoScanner # < Scanner
     end
     # Advance the position marker until we reach the end of the last text element in the parent
     new_pos = @pos
-    global_token_offset = @tokens.token_offset_at new_pos
-    ted = TextElmtData.new @tokens, global_token_offset # Locate the text element that we're in
+    global_token_offset = @tokens.character_position_at_token new_pos
+    ted = TextElmtData.new elmt_bounds, global_token_offset # Locate the text element that we're in
     # NB: we assume that a newly-allocated text element encompasses the requisite token offset
     while true do
       new_pos += 1
       break if new_pos == @bound
-      global_token_offset = @tokens.token_offset_at new_pos
+      global_token_offset = @tokens.character_position_at_token new_pos
       next if ted.encompasses_offset global_token_offset # Continue with the the current text element
       # Now that we've passed up one text element, we check if there's more
       break if ted.text_element == last_text_element # If this is the last text element in the nokonode, we're done
       # Advance to the NEXT text element
-      ted = TextElmtData.new tokens, global_token_offset
+      ted = TextElmtData.new elmt_bounds, global_token_offset
     end
     NokoScanner.new tokens, new_pos, @bound
   end
