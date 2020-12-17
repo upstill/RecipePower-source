@@ -6,8 +6,10 @@ require 'scraping/noko_utils.rb'
 
 # If possible, apply the classes to an ancestor of the two text elements
 # "possible" means that all text of the ancestor before the first and after the last
-# text element is blank
-def tag_ancestor node, first_te, last_te, classes:, tag: nil, value: nil
+# text element is blank.
+# We must also take care not to violate the associated grammar hierarchy:
+#   we want to tag the highest compatible node
+def tag_ancestor_safely node, first_te, last_te, classes:, tag: nil, value: nil
   tag = tag.to_s || 'span'
   classes ||= ''
 
@@ -15,7 +17,7 @@ def tag_ancestor node, first_te, last_te, classes:, tag: nil, value: nil
   while !node.fragment? &&
       first_text_element(node) == first_te &&
       last_text_element(node) == last_te do
-    if node.name == tag
+    if node_works_as node, tag, classes, value
       nknode_add_classes node, "rp_elmt #{classes}"
       node['value'] = value if value
       return node
@@ -43,7 +45,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, valu
   end
 
   # If there's an ancestor with no preceding or succeeding text, mark that and return
-  if anc = tag_ancestor(common_ancestor, anchor_elmt, focus_elmt, tag: tag, classes: classes, value: value)
+  if anc = tag_ancestor_safely(common_ancestor, anchor_elmt, focus_elmt, tag: tag, classes: classes, value: value)
     return report_tree('After: ', anc)
   end
   # Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
@@ -64,7 +66,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, valu
   end
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
-  if block_given? # Let the caller handle iteration
+  if block_given? # Let the caller handle iteration, presumably adding nodes to the tree
     yield newtree, iterator
   else
     iterator.walk { |node| newtree.add_child node }

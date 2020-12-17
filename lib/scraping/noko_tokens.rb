@@ -85,7 +85,7 @@ class NokoTokens < Array
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|
       next if node == relative_to
-      processed_children(relative_to, node) { |descendant|
+      processed_children(node) { |descendant|
         pe.can_include? enclosing_classes.first, classes_for_node(descendant, /rp_/).without(:rp_elmt).first
       }.each do |descendant|
         attach_node_safely descendant, relative_to, attach
@@ -136,14 +136,7 @@ class NokoTokens < Array
     global_character_position_end = character_position_after_token limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range @elmt_bounds, global_character_position_start...global_character_position_end
-    if teleft.text_element == teright.text_element
-      # Both beginning and end are on the same text node
-      # Enclose the selected text in a new span element
-      # If the enclosed text is all alone in a span, just add to the classes of the span
-      teleft.enclose_to global_character_position_end, tag: tag, classes: classes, value: value
-    else
-      enclose_by_text_elmt_data teleft, teright, tag: tag, classes: classes, value: value
-    end
+    enclose_by_text_elmt_data teleft, teright, tag: tag, classes: classes, value: value
   end
 
   # Return the Nokogiri node that was built
@@ -154,7 +147,7 @@ class NokoTokens < Array
     first_te = TextElmtData.new elmt_bounds, anchor_path, anchor_offset
     last_te = TextElmtData.new elmt_bounds, focus_path, -focus_offset
     # Need to ensure the selection is in the proper order
-    if last_te.elmt_bounds_index < first_te.elmt_bounds_index
+    if last_te.precedes first_te
       first_te = TextElmtData.new elmt_bounds, focus_path, focus_offset
       last_te = TextElmtData.new elmt_bounds, anchor_path, -anchor_offset
     end
@@ -270,29 +263,26 @@ class NokoTokens < Array
   # This is the main method for rearranging text in the DOM, enclosing
   # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
   def enclose_by_text_elmt_data teleft, teright, classes:, tag: nil, value: nil
-    if teleft.text_element == teright.text_element # Simple case: enclosing text w/in a single element
+     if teleft.text_element == teright.text_element # Simple case: enclosing text w/in a single element
       # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
-      newnode = tag_ancestor(teleft.parent,
-                             teleft.text_element,
-                             teleft.text_element,
-                             tag: tag,
-                             classes: classes,
-                             value: value) if teleft.prior_text.blank? && teright.subsq_text.blank?
+      newnode = tag_ancestor_safely(teleft.parent,
+                                    teleft.text_element,
+                                    teleft.text_element,
+                                    tag: tag,
+                                    classes: classes,
+                                    value: value) if teleft.prior_text.blank? && teright.subsq_text.blank?
       return newnode || teleft.enclose_to(teright.global_char_offset, tag: tag, classes: classes, value: value)
     end
     # Remove unselected text from the two text elements and leave remaining text, if any, next door
     # -- before teleft and after teright
-    # We may need to adjust the right elmt_bounds_index if the left's split introduced new elmts
-    bounds_prior = teleft.elmt_bounds_index
-    teleft.split_left
-    nshifted = teleft.elmt_bounds_index - bounds_prior
-    teright.elmt_bounds_index += nshifted if teright.elmt_bounds_index > bounds_prior
-    teright.split_right
+    teleft.split_left teright # Adjust teright as needed to accomodate teleft's shift
+    teright.split_right teleft  # Adjust teleft as needed to accomodate teright's shift
     #if Rails.env.development?
     #  puts "Assembling #{classes} from #{teleft.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teright.text_element})"
     #end
 
-    # If there is already a tree whose root matches the tag and class spec, expand it to include the whole selection
+    # If teleft or teright are descendants of a node that matches the tag and class spec,
+    # expand that node to encompass the whole selection
     if classes
       selector = "#{tag || 'span'}.#{classes}"
       extant_right, extant_left =
@@ -303,19 +293,29 @@ class NokoTokens < Array
           # The selection is entirely under the requisite node => move OTHER (preceding and succeeding) content out
           # For lack of a better place, we'll move it all before and after the extant node
           move_elements_safely attach: :before, relative_to: extant_left, iterator: DomTraversor.new(teleft.text_element, extant_left, :left)
-          move_elements_safely attach: :after, relative_to: extant_left, iterator: DomTraversor.new(teleft.text_element, extant_left, :right)
-          nu.left_of_path { |node| extant_left.previous = node }
-          nu = DomTraversor.new(teright.text_element, extant_right)
-          nu.right_of_path { |node| extant_right.next = node  }
+          move_elements_safely attach: :after, relative_to: extant_left, iterator: DomTraversor.new(extant_left, teright.text_element, :right)
+          return extant_left
         elsif extant_left
           move_elements_safely attach: :extend_right, relative_to: extant_left, iterator: DomTraversor.new(extant_left, teright.text_element, :enclosed)
           return extant_left
           # Same procedure if the end of the selection has a viable ancestor
         elsif extant_right
-          move_elements_safely attach: :extend_left, relative_to: extant_right, iterator: DomTraversor.new(teleft.text_element, extant_right, :enclosed)
+          move_elements_safely attach: :extend_left, relative_to: extant_right, iterator: DomTraversor.new(teleft.text_element, extant_right, :enclosed_reversed)
           # Append selection not already in the extant tree to it
           return extant_right
         end
+      end
+      # If there is an extant node, tagged compatibly, embedded somewhere else within the range,
+      # move everything to that node, proceeding as though it serves as BOTH extant_left and extant_right
+      # Search for a set of extant nodes in the tree that are suitably tagged
+      extant_candidates = nil
+      DomTraversor.new(teleft.text_element, teright.text_element, :enclosed_reversed).walk { |node| extant_candidates = extant_candidates ? (extant_candidates + node.css(selector)) : node.css(selector) }
+      if extant = extant_candidates.first
+        # We've identified a node on which we can hang selected elements.
+        # Ensure that we don't try to add it or its ancestor to itself
+        move_elements_safely attach: :extend_left, relative_to: extant, iterator: DomTraversor.new(teleft.text_element, extant, :enclosed_reversed)
+        move_elements_safely attach: :extend_right, relative_to: extant, iterator: DomTraversor.new(extant, teright.text_element, :enclosed)
+        return extant
       end
     end
 

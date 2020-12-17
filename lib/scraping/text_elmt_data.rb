@@ -121,7 +121,7 @@ class TextElmtData < Object
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_left
+  def split_left *others
     # No need to split at the beginning or end of the text
     return if subsq_text.empty? || prior_text.empty?
     text_element.next = subsq_text
@@ -130,22 +130,31 @@ class TextElmtData < Object
     @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element, text_element.next
     @text_element = text_element.next
     @elmt_bounds_index += 1
-    # elmt_bounds[@elmt_bounds_index][0] = text_element
-    # elmt_bounds.insert (@elmt_bounds_index += 1), [(@text_element = text_element.next), @global_start_offset]
     @local_char_offset = 0
+    # Finally, repair any other TextElmtData objects that might have been affected
+    others.
+        find_all { |other| other.elmt_bounds_index >= @elmt_bounds_index }.
+        each { |other| other.elmt_bounds_index += 1 }
+  end
+
+  # Do I come before another?
+  def precedes other
+    @elmt_bounds_index < other.elmt_bounds_index
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_right
+  def split_right *others
     # No need to split at the beginning or end of the text
     return if prior_text.empty? || subsq_text.empty?
     text_element.previous = prior_text
     text_element.content = subsq_text
     @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element.previous, text_element
-    # elmt_bounds[@elmt_bounds_index] = [text_element, (@global_start_offset + @local_char_offset)] # Fix existing entry
-    # elmt_bounds.insert @elmt_bounds_index, [(@text_element = text_element.previous), @global_start_offset]
     @text_element = text_element.previous
     @local_char_offset = text.length # Goes to the end of this node
+    # Finally, repair any other TextElmtData objects higher in the array
+    others.
+        find_all { |other| other.elmt_bounds_index > @elmt_bounds_index }.
+        each { |other| other.elmt_bounds_index += 1 }
   end
 
   # Does the text element include the text at the end offset

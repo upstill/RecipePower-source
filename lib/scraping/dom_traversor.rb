@@ -2,7 +2,7 @@
 class DomTraversor
   attr_reader :successor_node
 
-  def initialize anchor_node, focus_node, how=:full
+  def initialize anchor_node, focus_node, how=:enclosed
     @anchor_node, @focus_node, @how = anchor_node, focus_node, how
   end
 
@@ -16,13 +16,17 @@ class DomTraversor
     case @how
     when :enclosed
       across
+    when :enclosed_reversed
+      across.reverse
     when :left
       left_of_path
     when :right
       right_of_path
     end
     # Now pass the visited nodes back to the caller
-    nodes.uniq.each { |node| yield node }
+    nodes = nodes.uniq
+    nodes.each { |node| yield node } if block_given?
+    nodes
   end
 
   # Do a depth-first enumeration of nodes in the tree BETWEEN the anchor and the focus,
@@ -57,7 +61,7 @@ class DomTraversor
       # The first element of the new tree is the highest ancestor of @anchor_node that can be included in its entirety,
       # i.e., all of its children are in range. There might be NO such element: @anchor_node may have previous siblings
 
-      while path_to_anchor_root.first && !path_to_anchor_root.first.previous do
+      while path_to_anchor_root.first && !path_to_anchor_root.first.previous && !path_to_anchor_root.first.next do
         path_to_anchor_root.shift
       end
       result.push path_to_anchor_root.first || anchor_root
@@ -76,7 +80,7 @@ class DomTraversor
 
       # Find the the last node on path_to_focus_element that can be moved in its entirety
       # i.e., the one with no children to the left of the one on the path
-      while path_to_focus_elmt.last && !path_to_focus_elmt.last.next_sibling do
+      while path_to_focus_elmt.last && !path_to_focus_elmt.last.next && !path_to_focus_elmt.last.previous do
         path_to_focus_elmt.pop
       end
       # ...but the search may have consumed the whole path without finding one
@@ -136,10 +140,8 @@ def classes_for_node node, regexp=nil
   classes.map &:to_sym
 end
 
-# Conditionally add either a node or the node's children to a parent
-# The condition is that the rp class of the node be compatible with that of the parent
-# NB: We have to traverse the node's whole tree to check for appropriateness of children
-def processed_children parent, *nodes, &block
+# Break up a node's children as necessary to avoid subtrees that fail a test (implemented as a block)
+def processed_children node, &block
   # Recursively examine the node, returning an array of valid descendants or, if they are all valid, the node itself
   def do_children node, &block
     return [ node ] if node.text?
@@ -154,5 +156,5 @@ def processed_children parent, *nodes, &block
     collected.flatten
   end
   # For each potential new child, look into expanding it and/or approving it by calling the block
-  nodes.collect { |node| do_children(node, &block) }.flatten
+  do_children node, &block
 end
