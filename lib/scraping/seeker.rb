@@ -94,7 +94,7 @@ class Seeker
     return unless @token
     # Check that some ancestor doesn't already have the tag
     if !head_stream.descends_from?(tag, @token)
-      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tag, value: @value
+      @head_stream.enclose_to @tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
     end
   end
 

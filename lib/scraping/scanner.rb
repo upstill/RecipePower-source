@@ -4,32 +4,16 @@ require 'scraping/text_elmt_data.rb'
 require 'scraping/noko_tokens.rb'
 require 'scraping/noko_utils.rb'
 
-# If possible, apply the classes to an ancestor of the two text elements
+# If possible, apply the rp_elmt_class to an ancestor of the two text elements
 # "possible" means that all text of the ancestor before the first and after the last
 # text element is blank.
 # We must also take care not to violate the associated grammar hierarchy:
 #   we want to tag the highest compatible node
 # &block will assess
-def tag_ancestor_safely node, first_te, last_te, classes:, tag: nil, value: nil
-
-  # Find the first text element under the node with non-blank text
-  def first_text_element node, nonblank = true
-    node.traverse do |child|
-      return child if child.text? && (nonblank ? child.text.match(/^\S*$/) : child.text.present?)
-    end
-  end
-
-  # Find the last text element under the node with non-blank text
-  def last_text_element node, nonblank = true
-    last = nil
-    node.traverse do |child|
-      last = child if child.text? && (nonblank ? child.text.match(/^\S*$/) : child.text.present?)
-    end
-    last
-  end
+def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil
 
   tag = tag.to_s || 'span'
-  classes ||= ''
+  rp_elmt_class ||= ''
 
   # Scan a node and its ancestors to see if any contain all and only the text between the two text elements
   # Also perform a check, if given by a block
@@ -44,8 +28,8 @@ def tag_ancestor_safely node, first_te, last_te, classes:, tag: nil, value: nil
     node = node.parent
   end
 
-  # We can just apply the classes and value to the parent element if the two text elements are the first and last text elements in the subtree
-  nknode_apply anc, classes: classes, value: value if anc
+  # We can just apply the rp_elmt_class and value to the parent element if the two text elements are the first and last text elements in the subtree
+  nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value if anc
   anc
 end
 
@@ -65,14 +49,16 @@ end
 # Brute-force moving all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive,
 # into an enclosure that's a child of their common ancestor--unless there's already an ancestor tagged
 # according to spec, or can be so modified.
-def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, value: nil
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span, value: nil
 
   # Ignore blank text outside the range
   anchor_elmt, focus_elmt = tighten_text_elmt_enclosure anchor_elmt, focus_elmt
+  anchor_elmt = undivided_ancestor anchor_elmt, :blank_left
+  focus_elmt = undivided_ancestor focus_elmt, :blank_right
 
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
   # If there's an ancestor with no preceding or succeeding text, mark that and return
-  if anc = tag_ancestor_safely(common_ancestor, anchor_elmt, focus_elmt, tag: tag, classes: classes, value: value)
+  if anc = tag_ancestor_safely(common_ancestor, anchor_elmt, focus_elmt, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
     return anc
   end
 
@@ -83,7 +69,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, valu
   # the new tree.
   # Create a Nokogiri node from the parameters
   throw "Can't #assemble_tree_from_nodes where tag is not a string or a symbol" if !(tag.is_a?(String) || tag.is_a?(Symbol))
-  newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, classes: classes, value: value)).children[0]
+  newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)).children[0]
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
   iterator.walk { |node| newtree.add_child node }
@@ -143,11 +129,11 @@ def validate_embedding newtree
   newtree
 end
 
-def html_enclosure tag: 'div', classes:'', value: nil
+def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   tag ||= 'div'
   valuestr = "data-value='#{value}'" if value
   class_str = 'rp_elmt'
-  class_str << ' ' + classes.to_s if classes.present?
+  class_str << ' ' + rp_elmt_class.to_s if rp_elmt_class
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
@@ -508,9 +494,9 @@ class NokoScanner # < Scanner
     ted.xpath
   end
 
-  def enclose_to limit, classes:, tag: nil, value: nil
+  def enclose_to limit, rp_elmt_class:, tag: nil, value: nil
     return unless limit > pos
-    @tokens.enclose_tokens @pos, limit, tag: tag, classes: classes, value: value
+    @tokens.enclose_tokens @pos, limit, tag: tag, rp_elmt_class: rp_elmt_class, value: value
   end
 
   # Provide the text element data for the current character position

@@ -321,9 +321,9 @@ EOF
     nkt = nokoscan.tokens
     check_integrity nokoscan
     assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_tokens 3, 5, :classes => :rp_ingspec, :tag => 'span'
+    nkt.enclose_tokens 3, 5, :rp_elmt_class => :rp_ingspec, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_tokens 4, 5, :classes => :rp_ingname, :tag => 'span'
+    nkt.enclose_tokens 4, 5, :rp_elmt_class => :rp_ingname, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
   end
 
@@ -468,7 +468,7 @@ EOF
     assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=2]').first.name
     nks.enclose_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
                              'div/p[position()=2]/span[position()=2]/text()', 21,
-                             tag: 'div', classes: 'rp_inglist'
+                             tag: 'div', rp_elmt_class: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first
     assert_equal 'div', p.next.name
     assert_equal 'p', p.next.next.name
@@ -481,7 +481,7 @@ EOF
     assert_equal 'span', nkdoc.xpath('div/p[position()=2]/span[position()=1]').first.name
     nks.enclose_selection 'div/p[position()=2]/span[position()=1]/text()', 0,
                              'div/p[position()=2]/span[position()=1]/text()', 63,
-                             tag: 'div', classes: 'rp_inglist'
+                             tag: 'div', rp_elmt_class: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first
     assert_equal 'div', p.next.name
     assert_equal 'p', p.next.next.name
@@ -493,7 +493,7 @@ EOF
     nks = NokoScanner.new nkdoc
     nks.enclose_selection 'div/p[position()=2]/text()', 13,
                              'div/p[position()=2]/text()', 76,
-                             tag: 'div', classes: 'rp_inglist'
+                             tag: 'div', rp_elmt_class: 'rp_inglist'
     p = nkdoc.xpath('div/p[position()=2]').first
     assert_equal 'div', p.next.name
     assert_equal 'p', p.next.next.name

@@ -18,8 +18,8 @@ def nknode_add_classes node, css_classes
   node['class'] = "#{node['class']} #{absent}"
 end
 
-def nknode_apply node, classes:, value:
-  nknode_add_classes node, "rp_elmt #{classes}"
+def nknode_apply node, rp_elmt_class:, value:
+  nknode_add_classes node, "rp_elmt #{rp_elmt_class}"
   node['value'] = value if value
 end
 
@@ -59,5 +59,33 @@ def successor_text tree, text_elmt
   end
 end
 
-class NokoUtils
+# Find the first text element under the node with non-blank text
+def first_text_element node, nonblank = true
+  node.traverse do |child|
+    return child if child.text? && (nonblank ? child.text.match(/\S/) : child.text.present?)
+  end
+end
+
+# Find the last text element under the node with non-blank text
+def last_text_element node, nonblank = true
+  last = nil
+  node.traverse do |child|
+    last = child if child.text? && (nonblank ? child.text.match(/\S/) : child.text.present?)
+  end
+  last
+end
+
+# Find a parent of the text_element which won't be split in a tree walk.
+# if how is :blank_left, the ancestor qualifies if it only has blank text before the text_element
+# if how is :blank_right, the ancestor qualifies if it only has blank text after the text_element
+def undivided_ancestor text_element, how
+  anc = text_element
+  node = text_element.parent
+  while !node.fragment? &&
+      text_element == (how == :blank_left ? first_text_element(node) : last_text_element(node)) &&
+      (!block_given? || yield(node)) do
+    anc = node
+    node = node.parent
+  end
+  anc
 end

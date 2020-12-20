@@ -161,7 +161,7 @@ class TextElmtData < Object
 
   # Divide an existing text element, splitting off the text between the mark and the given end mark into
   # an element that encloses that text
-  def enclose_to global_character_position_end, classes:, tag: nil, value: nil
+  def enclose_to global_character_position_end, rp_elmt_class:, tag: nil, value: nil
     # Split off a text element for text to the left of the mark (if any such text)
     split_left
     # Split off a text element for text to the right of the limit (if any such text)
@@ -169,7 +169,7 @@ class TextElmtData < Object
     split_right
     # Now add a next element: the html shell
     elmt = text_element
-    elmt.next = html_enclosure tag: tag, classes: classes, value: value
+    elmt.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
     newnode = elmt.next
     # Move the element under the shell while ensuring that elmt_bounds remains valid
     @elmt_bounds.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
@@ -195,7 +195,7 @@ class TextElmtData < Object
       while (text_element != limit_te) && (prev = text_element.previous)&.blank? do
         self.text_element = prev if prev.text?
       end
-      mark_at elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
+      mark_at @elmt_bounds.elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
     end
   end
 
@@ -205,7 +205,7 @@ class TextElmtData < Object
       while (text_element != limit_te) && (nxt = text_element.next)&.blank? do
         self.text_element = nxt if nxt.text?
       end
-      mark_at elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
+      mark_at @elmt_bounds.elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
     end
   end
 
