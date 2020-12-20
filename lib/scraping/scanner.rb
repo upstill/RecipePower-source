@@ -9,76 +9,90 @@ require 'scraping/noko_utils.rb'
 # text element is blank.
 # We must also take care not to violate the associated grammar hierarchy:
 #   we want to tag the highest compatible node
+# &block will assess
 def tag_ancestor_safely node, first_te, last_te, classes:, tag: nil, value: nil
+
+  # Find the first text element under the node with non-blank text
+  def first_text_element node, nonblank = true
+    node.traverse do |child|
+      return child if child.text? && (nonblank ? child.text.match(/^\S*$/) : child.text.present?)
+    end
+  end
+
+  # Find the last text element under the node with non-blank text
+  def last_text_element node, nonblank = true
+    last = nil
+    node.traverse do |child|
+      last = child if child.text? && (nonblank ? child.text.match(/^\S*$/) : child.text.present?)
+    end
+    last
+  end
+
   tag = tag.to_s || 'span'
   classes ||= ''
 
   # Scan a node and its ancestors to see if any contain all and only the text between the two text elements
+  # Also perform a check, if given by a block
+  anc = nil
   while !node.fragment? &&
       first_text_element(node) == first_te &&
-      last_text_element(node) == last_te do
-    if node_works_as node, tag, classes, value
-      nknode_add_classes node, "rp_elmt #{classes}"
-      node['value'] = value if value
-      return node
-    end
+      last_text_element(node) == last_te &&
+      (!block_given? || yield(node)) do
+    anc = node if node.name == tag &&
+        (value.nil? || node['value'].nil?) # Here we should be testing for parser compatibility
+    break if nknode_has_class?(node, :rp_elmt) # Don't rise above the innermost :rp_elmt
     node = node.parent
   end
-  nil
+
+  # We can just apply the classes and value to the parent element if the two text elements are the first and last text elements in the subtree
+  nknode_apply anc, classes: classes, value: value if anc
+  anc
 end
 
-# Move all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive, into an enclosure that's a child of
-# the common ancestor of the two.
-def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, value: nil
-
-  # Back the focus_elmt up as long as it's blank
+# Minimize the text enclosed by the two text elements, by ignoring empty text
+def tighten_text_elmt_enclosure anchor_elmt, focus_elmt
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
-  if Rails.env.development?
-    report_tree 'Before: ', common_ancestor, anchor_elmt, focus_elmt
-  end
-  # We can just apply the class to the parent element if the two text elements are the first and last text elements in the subtree
   while anchor_elmt.to_s.blank? do
     anchor_elmt = successor_text common_ancestor, anchor_elmt
   end
+  # Back the focus_elmt up as long as it's blank
   while focus_elmt.to_s.blank? do
     focus_elmt = predecessor_text common_ancestor, focus_elmt
   end
+  return [ anchor_elmt, focus_elmt ]
+end
 
+# Brute-force moving all the text enclosed in the tree between anchor_elmt and focus_elmt, inclusive,
+# into an enclosure that's a child of their common ancestor--unless there's already an ancestor tagged
+# according to spec, or can be so modified.
+def assemble_tree_from_nodes anchor_elmt, focus_elmt, classes:, tag: :span, value: nil
+
+  # Ignore blank text outside the range
+  anchor_elmt, focus_elmt = tighten_text_elmt_enclosure anchor_elmt, focus_elmt
+
+  common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
   # If there's an ancestor with no preceding or succeeding text, mark that and return
   if anc = tag_ancestor_safely(common_ancestor, anchor_elmt, focus_elmt, tag: tag, classes: classes, value: value)
-    return report_tree('After: ', anc)
-  end
-  # Can enclosure proceed? At first, this test merely heads off making a redundant enclosure
-  unless classes.blank? || !nknode_has_class?(common_ancestor, classes)
-    return report_tree('After: ', common_ancestor)
+    return anc
   end
 
-  if tag.is_a?(Nokogiri::XML::Element) # The new tree may be given directly as a node
-    newtree = tag
-  else
-    # If not provided directly, build the tree.
-    # It is to appear under the common ancestor of the anchor and the focus, so
-    # it has a very specific placement requirement: <between>
-    # where anchor_root and focus_root are now. But either of those could be moved entirely into
-    # the new tree.
-    # Create a Nokogiri node from the parameters
-    newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, classes: classes, value: value)).children[0]
-  end
+  # If not provided directly, build the tree.
+  # It is to appear under the common ancestor of the anchor and the focus, so
+  # it has a very specific placement requirement: <between>
+  # where anchor_root and focus_root are now. But either of those could be moved entirely into
+  # the new tree.
+  # Create a Nokogiri node from the parameters
+  throw "Can't #assemble_tree_from_nodes where tag is not a string or a symbol" if !(tag.is_a?(String) || tag.is_a?(Symbol))
+  newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, classes: classes, value: value)).children[0]
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
-  if block_given? # Let the caller handle iteration, presumably adding nodes to the tree
-    yield newtree, iterator
-  else
-    iterator.walk { |node| newtree.add_child node }
+  iterator.walk { |node| newtree.add_child node }
+  if iterator.successor_node # newtree goes where focus_root was
+    iterator.successor_node.previous = newtree
+  else # The focus node was the last child, and now it's gone => make newtree be the last child
+    common_ancestor.add_child newtree
   end
-  unless tag == newtree # It's been given, so presumably it's already been placed
-    if iterator.successor_node # newtree goes where focus_root was
-      attach_node_safely newtree, iterator.successor_node, :before # iterator.successor_node.previous = newtree
-    else # The focus node was the last child, and now it's gone => make newtree be the last child
-      attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
-    end
-  end
-  validate_embedding report_tree('After: ', newtree)
+  validate_embedding newtree
   return newtree
 end
 

@@ -133,13 +133,6 @@ end
 
 ####### Utility functions #####################
 
-# Extract the CSS classes for a Nokogiri node, applying a regexp and converting all to symbols
-def classes_for_node node, regexp=nil
-  return [] unless classes = node['class']&.split
-  classes.keep_if { |klass| klass.match(regexp) } if regexp
-  classes.map &:to_sym
-end
-
 # Break up a node's children as necessary to avoid subtrees that fail a test (implemented as a block)
 def processed_children node, &block
   # Recursively examine the node, returning an array of valid descendants or, if they are all valid, the node itself

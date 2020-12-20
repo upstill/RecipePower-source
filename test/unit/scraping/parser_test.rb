@@ -308,7 +308,7 @@ EOF
 
     # Test that the results get enclosed properly
     seeker.enclose_all
-    assert_not_nil seeker.head_stream.nkdoc.search('ul').first # Check that the ingredient list's <ul> is still enclosed in the original <p>
+    assert_not_nil seeker.head_stream.nkdoc.search('div.rp_inglist').first # Check that the ingredient list's <ul> is still enclosed in the original <p>
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes

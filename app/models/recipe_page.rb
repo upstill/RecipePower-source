@@ -76,10 +76,9 @@ class RecipePage < ApplicationRecord
     anchor_node = nk.xpath(anchor_path.downcase)&.first   # Presumably there's only one match!
     focus_node = nk.xpath(focus_path.downcase)&.last
     return unless anchor_node && focus_node
-    if anchor_node == focus_node
-      # Degenerate case where the selection only has one node
-      return anchor_node.to_html
-    end
+    # Degenerate case where the selection only has one node
+    return anchor_node.to_html if anchor_node == focus_node
+
     nokotree = assemble_tree_from_nodes anchor_node, focus_node, :tag => :div, :classes => :rp_recipe
     nokotree.to_html if nokotree
   end

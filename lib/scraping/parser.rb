@@ -549,22 +549,30 @@ class ParserEvaluator
       when Array
         grammar_entry.each { |list_member| collected_tokens += scan_for_tokens list_member }
       when Symbol
-        collected_tokens << grammar_entry
+        collected_tokens << grammar_entry if grammar_entry.to_s.match(/^rp_/)
       when Hash
-        grammar_entry.each { |key, subentry| collected_tokens += scan_for_tokens subentry }
+        grammar_entry.each do |key, subentry|
+          if key == :tags
+            # Find the grammar entry that has a :tag key and the same string
+            collected_tokens << @init_g.find { |token, entry| entry.is_a?(Hash) && entry[:tag] == subentry }&.first
+          else
+            collected_tokens += scan_for_tokens subentry
+          end
+        end
       end
       collected_tokens
     end
     @grammar_inclusions = {}
-    init_g = Parser.initialized_grammar
-    init_g.each { |token, entry| @grammar_inclusions[token] = scan_for_tokens(entry).uniq }
+    @init_g = Parser.initialized_grammar
+    @init_g.each { |token, entry| @grammar_inclusions[token] = scan_for_tokens(entry).uniq }
   end
 
 # Evaluate whether child_token can appear as a child of parent_token.
   def can_include? parent_token, child_token, transitive = true
-    def refers_to? supe, sub, transitive
-      @grammar_inclusions[supe].include?(sub) ||
-          transitive && @grammar_inclusions[supe].find { |supe| refers_to? supe, sub, transitive }
+    def refers_to? supe, sub, transitive=true
+      return unless (inclusions = @grammar_inclusions[supe])
+      inclusions.include?(sub) ||
+          transitive && inclusions.find { |inner| refers_to? inner, sub }
     end
 
     parent_token.nil? ||

@@ -1,16 +1,5 @@
 require 'scraping/scanner.rb'
 
-def nknode_has_class? node, css_class
-  node['class']&.split&.include?(css_class.to_s) if node
-end
-
-def nknode_add_classes node, css_classes
-  absent = css_classes.split.collect { |css_class|
-    css_class unless nknode_has_class? node, css_class
-  }.compact.join(' ')
-  node['class'] = "#{node['class']} #{absent}"
-end
-
 # We have to correct character offsets b/c Javascript counts "\r\n" as a single character
 # Therefore, every '\r\n' pair prior to an offset should increment the offset.
 def correct_selection_offset nominal_offset, text_element
@@ -27,8 +16,8 @@ end
 # TextElmtData manages a Nokogiri TextElement object
 class TextElmtData < Object
   delegate :parent, :text, :'content=', :delete, :ancestors, to: :text_element
-  attr_accessor :elmt_bounds_index, :text_element, :parent, :local_char_offset # , :local_char_range
-  attr_reader :noko_tokens, :global_start_offset, :elmt_bounds
+  attr_accessor :elmt_bounds_index, :parent, :local_char_offset # , :local_char_range
+  attr_reader :noko_tokens, :global_start_offset, :elmt_bounds, :text_element
 
   # Here we initialize a TextElmtData object for a given Nokogiri text element within the document
   # associated with a NokoTokens provider. The text element may be specified in three ways, depending on the
@@ -86,6 +75,14 @@ class TextElmtData < Object
         @elmt_bounds.nth_elmt(@elmt_bounds_index),
         @elmt_bounds.elmt_offset_at(@elmt_bounds_index) # elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
+    @parent = @text_element.parent
+  end
+
+  # Adopt another text element with its associated information
+  def text_element= te
+    @elmt_bounds_index = @elmt_bounds.find_elmt_index (@text_element = te)
+    @global_start_offset = @elmt_bounds.elmt_offset_at @elmt_bounds_index
+    @local_char_offset = 0
     @parent = @text_element.parent
   end
 
@@ -189,6 +186,27 @@ class TextElmtData < Object
   # Return the text from the mark to the end of the text element
   def subsq_text mark = @local_char_offset
     text[mark..-1] || ''
+  end
+
+  # Incorporate any preceding blank text to the beginning of the parent.
+  # NB: Does not examine any intervening nodes, just checks that they are blank
+  def retreat_over_space limit_te=nil
+    if prior_text.blank?
+      while (text_element != limit_te) && (prev = text_element.previous)&.blank? do
+        self.text_element = prev if prev.text?
+      end
+      mark_at elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
+    end
+  end
+
+  # Incorporate any following blank text to the end of the parent
+  def advance_over_space limit_te=nil
+    if subsq_text.blank?
+      while (text_element != limit_te) && (nxt = text_element.next)&.blank? do
+        self.text_element = nxt if nxt.text?
+      end
+      mark_at elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
+    end
   end
 
   # Return the text from the beginning to the mark (expressed globally)
