@@ -292,8 +292,8 @@ class NokoTokens < Array
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
     # anchor_elmt, focus_elmt = tighten_text_elmt_enclosure teleft.text_element, teright.text_element
 
-    clear_classification_context anchor_elmt.parent, rp_elmt_class
     if anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent
+      clear_classification_context anchor_elmt.parent, rp_elmt_class
       # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
       newnode = tag_ancestor_safely(anchor_elmt.parent,
                                     anchor_elmt,
