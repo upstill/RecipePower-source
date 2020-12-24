@@ -239,16 +239,18 @@ module RecipesHelper
   end
 
   def sequence_instructions txt
-    sentences = txt.strip.split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    sentences = txt.strip.sub(/\.$/,'').split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    while step = sentences.shift do
+      break if step.present? && !step.match(/^[\d.,)]*$/)
+    end
     return if sentences.blank?
-    step = sentences.shift
     sentences.each do |sentence|
       if sentence.split(/\s+/).length > 3
         yield step if step.present?
         step = sentence
       else
         step << ' ' if step.present?
-        step << sentence
+        step << sentence unless sentence.match(/^[\d.,)]*$/)
       end
     end
     yield step if step.present?

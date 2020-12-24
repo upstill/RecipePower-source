@@ -9,7 +9,9 @@ require 'enumerable_utils.rb'
 # '1 garlic clove'
 # Detecting multiple ingredient lists and labelling them: Recipe 15636: Mixed vegetable and potato fritters with harissa
 # "Cook 1 hr 20 min", ibid
-  # :rp_author should opt for tag(s) lookup
+# :rp_author should opt for tag(s) lookup
+# Recipe #15663 Intermediate: Mandarin and Screwdriver (https://www.foodandwine.com/cocktails-spirits/mandarine-napoleon-cocktail-recipes)
+#   an ounce and a half of vodka, half an ounce of Mandarine Napoléon, an ounce of fresh mandarin orange juice, and half an ounce of simple syrup.
 
 class Parser
   attr_reader :grammar
