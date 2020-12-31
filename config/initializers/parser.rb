@@ -134,8 +134,8 @@ Parser.init_grammar(
     rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
     rp_amt: {# An Amount is a number followed by a unit (only one required)
              match: [
-                 [:rp_num, :rp_unit],
-                 :rp_num,
+                 [:rp_num_or_range, :rp_unit],
+                 :rp_num_or_range,
                  :rp_unit,
                  { match: 'AmountSeeker' }
              ],

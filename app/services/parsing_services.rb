@@ -62,6 +62,12 @@ class ParsingServices
     nkdoc.to_s
   end
 
+  def self.parse_from_string html, token
+    parser = Parser.new NokoScanner.from_string(html)
+    match = parser.match token
+    match
+  end
+
   def self.enclose_results seeker
     if seeker.success?
       seeker.enclose_all
