@@ -95,7 +95,7 @@ class ParsingServices
         puts "-------------- #{token} ---------------"
         seekers = seeker.find(token)
         seekers.each { |seeker|
-          puts seeker.head_stream.to_s
+          puts seeker
         }
       end
       ParsingServices.enclose_results seeker

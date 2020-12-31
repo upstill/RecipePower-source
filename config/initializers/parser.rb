@@ -72,7 +72,7 @@ Parser.init_grammar(
             { optional: :rp_title },
              # Everything after the ingredient list
             { checklist: [
-                [ :rp_inglist, :rp_instructions ],
+                [ { :repeating => :rp_inglist }, :rp_instructions ],
                 { optional: :rp_author },
                 { optional: :rp_prep_time },
                 { optional: :rp_cook_time },
@@ -113,9 +113,7 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: :rp_ingline,
-        repeating: true,
-        enclose: :non_empty,
+        match: [ { or: [:rp_ingline, :rp_inglist_label] }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
         :in_css_match => 'ul, p',
     },
     rp_ingline: {
@@ -128,6 +126,7 @@ Parser.init_grammar(
         enclose: true,
         inline: true
     },
+    rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {
         match: nil,
         terminus: "\n"
@@ -154,6 +153,8 @@ Parser.init_grammar(
     },
     rp_ingname: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
-    rp_num: { match: 'RangeSeeker' },
+    rp_num_or_range: { or: [ :rp_range, :rp_num ] },
+    rp_num: { match: 'NumberSeeker' },
+    rp_range: { match: 'RangeSeeker' },
     rp_unit: { tag: 'Unit' }
 )

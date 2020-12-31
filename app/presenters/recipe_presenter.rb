@@ -80,9 +80,10 @@ class RecipePresenter < CollectiblePresenter
   end
 =end
 
-  def assemble_tree node
+  def assemble_tree node, selector = nil
     return node.text.html_safe if node.text?
-    content = safe_join node.children.collect { |child| assemble_tree child }
+    selection = selector ? node.css(selector) : node.children
+    content = safe_join selection.collect { |child| assemble_tree child }
     node.classes.each do |klass|
       # For each node, see if we have ideas about how to present it
       case klass.to_sym
@@ -111,7 +112,7 @@ class RecipePresenter < CollectiblePresenter
     #when :rp_ing_comment
     when :rp_inglist
       results_for(".rp_inglist") { |listnode|
-        assemble_tree listnode
+        [assemble_tree(listnode, '.rp_ingline'), listnode.css('.rp_inglist_label').first&.inner_text]
       }
     #when :rp_ingline
     #when :rp_instructions
@@ -120,7 +121,17 @@ class RecipePresenter < CollectiblePresenter
     end
     # Now we give the view a chance to enclose our result
     if html.is_a?(Array)
-      safe_join( html.collect { |h| block_given? ? (yield(h) if h.present?) : h }.compact )
+      safe_join html.collect { |h|
+        if block_given?
+          if h.is_a?(Array)
+            yield *h
+          else
+            yield h
+          end
+        else
+          h
+        end
+      }.compact
     else
       block_given? ? (yield(html) if html.present?) : html
     end

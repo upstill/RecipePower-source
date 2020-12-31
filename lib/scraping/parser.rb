@@ -44,14 +44,12 @@ class Parser
   # How should the token be enclosed?
   def self.tag_for_token token
     case token.to_sym
-    when :rp_recipelist, :rp_recipe, :rp_instructions, :rp_inglist, :rp_ingline
+    when :rp_recipelist, :rp_recipe, :rp_instructions # :rp_inglist, :rp_ingline
       'div'
-=begin
     when :rp_inglist
       'ul'
     when :rp_ingline
       'li'
-=end
     else
       'span'
     end
