@@ -53,10 +53,10 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span
 
   # Ignore blank text outside the range
   anchor_elmt, focus_elmt = tighten_text_elmt_enclosure anchor_elmt, focus_elmt
-  anchor_elmt = undivided_ancestor anchor_elmt, :blank_left
-  focus_elmt = undivided_ancestor focus_elmt, :blank_right
-
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+  anchor_elmt = undivided_ancestor anchor_elmt, :blank_left, common_ancestor
+  focus_elmt = undivided_ancestor focus_elmt, :blank_right, common_ancestor
+
   # If there's an ancestor with no preceding or succeeding text, mark that and return
   if anc = tag_ancestor_safely(common_ancestor, anchor_elmt, focus_elmt, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
     return anc
@@ -131,7 +131,7 @@ end
 
 def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   tag ||= 'div'
-  valuestr = "data-value='#{value}'" if value
+  valuestr = "value='#{value}'" if value
   class_str = 'rp_elmt'
   class_str << ' ' + rp_elmt_class.to_s if rp_elmt_class
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node

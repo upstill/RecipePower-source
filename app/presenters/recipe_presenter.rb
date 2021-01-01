@@ -89,7 +89,7 @@ class RecipePresenter < CollectiblePresenter
       case klass.to_sym
       when :rp_ingname
         # Wrap an ingredient tag in a link to that tag in RecipePower
-        tag = Tag.find_by name: node['data-value'], tagtype: Tag.typenum(:Ingredient)
+        tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
         return homelink(tag, class: 'rp_ingname', title: node.text) if tag
       when :rp_ingline
         return content_tag(:li, content, class: :rp_ingline )

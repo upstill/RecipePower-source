@@ -78,10 +78,12 @@ end
 # Find a parent of the text_element which won't be split in a tree walk.
 # if how is :blank_left, the ancestor qualifies if it only has blank text before the text_element
 # if how is :blank_right, the ancestor qualifies if it only has blank text after the text_element
-def undivided_ancestor text_element, how
+# limit: an ancestor of text_element that the search should stop before
+def undivided_ancestor text_element, how, limit
   anc = text_element
   node = text_element.parent
   while !node.fragment? &&
+      node != limit &&
       text_element == (how == :blank_left ? first_text_element(node) : last_text_element(node)) &&
       (!block_given? || yield(node)) do
     anc = node
