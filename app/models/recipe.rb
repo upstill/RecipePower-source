@@ -156,7 +156,14 @@ class Recipe < ApplicationRecord
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success
       accept_attribute :content, new_content, true  # Force the new content
-      RecipeServices.new(self).inventory # Set tags according to annotations
+      # Set tags according to annotations
+      RecipeServices.new(self).inventory do |rpclass, text|
+        # #inventory will call a block on found nodes
+        case rpclass
+        when :rp_title
+          accept_attribute :title, text
+        end
+      end
     end
     # super if defined?(super)
   end
