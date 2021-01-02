@@ -23,6 +23,19 @@ def nknode_apply node, rp_elmt_class:, value:
   node['value'] = value if value
 end
 
+  # Test a node(tree, if recur is true) to ensure that it can be properly accessed
+def nknode_valid? node, recur: false
+  begin
+    throw "Node can't be found among its parent's children" if node.parent.children.index(node).nil?
+    progenitor = node.ancestors.first
+    throw "Node's ancestors can't be found among progenitor's children" if progenitor && (progenitor.children & node.ancestors).nil?
+  rescue Exception => exc
+    return false
+  end
+  return true unless recur
+  node.children.all? { |child| child.text? || nknode_valid?(child, recur: true) }
+end
+
 # Is the node ready to delete?
 def node_empty? nokonode
   return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)

@@ -4,6 +4,26 @@ class DomTraversor
 
   def initialize anchor_node, focus_node, how=:enclosed
     @anchor_node, @focus_node, @how = anchor_node, focus_node, how
+    nknode_valid? @anchor_node
+    nknode_valid? @focus_node
+    @anchor_ancestry = @anchor_node.ancestors
+    @focus_ancestry = @focus_node.ancestors
+    while @focus_ancestry.last == @anchor_ancestry.last
+      common_ancestor = @focus_ancestry.pop
+      @anchor_ancestry.pop
+    end
+    @anchor_root = @anchor_node
+    while @anchor_root.parent != common_ancestor
+      @anchor_root = @anchor_root.parent
+    end
+    anchor_root_ix = common_ancestor.children.index(@anchor_root)
+
+    @focus_root = @focus_node
+    while @focus_root.parent != common_ancestor
+      @focus_root = @focus_root.parent
+    end
+    focus_root_ix = common_ancestor.children.index(@focus_root)
+    x=2
   end
 
   # iterator covering a tree walk from anchor_node to focus_node, inclusive. Call the block at

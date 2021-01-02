@@ -93,7 +93,27 @@ class ElmtBounds < Array
           child_ix = child_ix - 1
         end
       end
+      nknode_valid? as_attached
       self[child_ix][0] = as_attached
+      # For some reason, we need to ensure that all the parent's text nodes validly appear in @elmt_bounds
+      # 'as_attached' is a text node, guaranteed to be valid, found at child_ix
+      # This will be our anchor for matching text elements in the elmt_bounds
+      text_elmts = []
+      first_te_ix = nil
+      parent.traverse do |node|
+        if node.text?
+          first_te_ix = child_ix - text_elmts.count if node == as_attached
+          text_elmts.push node
+        end
+      end
+      text_elmts.each do |te|
+        if self[first_te_ix].first != te
+          self[first_te_ix][0] = te
+        end
+        first_te_ix += 1
+      end
+      ted = TextElmtData.new(self, self[child_ix].last)
+      ted.valid?
     else
       # Ensure that the node's text elements are maintained correctly in elmt_bounds
       node.traverse do |descendant|

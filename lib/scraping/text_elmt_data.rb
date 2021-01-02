@@ -76,6 +76,7 @@ class TextElmtData < Object
         @elmt_bounds.elmt_offset_at(@elmt_bounds_index) # elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
     @parent = @text_element.parent
+    nknode_valid? @text_element # Validate that the associated text element hasn't been replaced in the document tree
   end
 
   # Adopt another text element with its associated information
@@ -132,6 +133,7 @@ class TextElmtData < Object
     others.
         find_all { |other| other.elmt_bounds_index >= @elmt_bounds_index }.
         each { |other| other.elmt_bounds_index += 1 }
+    valid?
   end
 
   # Do I come before another?
@@ -152,6 +154,24 @@ class TextElmtData < Object
     others.
         find_all { |other| other.elmt_bounds_index > @elmt_bounds_index }.
         each { |other| other.elmt_bounds_index += 1 }
+    valid?
+  end
+
+  # Is this TextElementData instance still a valid representation of a node in the document?
+  def valid?
+    return false unless nknode_valid?(@text_element)
+    begin
+      throw "TextElmtData no longer has place in @elmt_bounds" unless @elmt_bounds[@elmt_bounds_index].first == @text_element
+      if predecessor = @elmt_bounds[@elmt_bounds_index-1]&.first
+        throw "TextElmtData's predecessor in @elmt_bounds is invalid" unless nknode_valid?(predecessor)
+      end
+      if successor = @elmt_bounds[@elmt_bounds_index+1]&.first
+        throw "TextElmtData's successor in @elmt_bounds is invalid" unless nknode_valid?(successor)
+      end
+    rescue Exception => exc
+      return false
+    end
+    true
   end
 
   # Does the text element include the text at the end offset
@@ -174,6 +194,7 @@ class TextElmtData < Object
     # Move the element under the shell while ensuring that elmt_bounds remains valid
     @elmt_bounds.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
     @elmt_bounds.fix_nth_elmt @elmt_bounds_index+1, newnode.next if newnode.next&.text?
+    valid?
     validate_embedding newnode
     newnode
   end
