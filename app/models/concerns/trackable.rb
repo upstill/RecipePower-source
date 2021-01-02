@@ -103,7 +103,8 @@ module Trackable
   # An empty list before the argument hash causes ALL tracked attributes to be refreshed
   def refresh_attributes *args, except: [], immediate: false
     # No args => update all tracked attributes
-    attrs = args.present? ? args.map(&:to_sym) : self.class.tracked_attributes
+    attrs = self.class.tracked_attributes
+    attrs &= args.map(&:to_sym) if args.present? # Slyly eliding invalid attributes
     attrs -= except.map(&:to_sym)
     # Invalidate all given attributes
     attribs_ready! attrs, false

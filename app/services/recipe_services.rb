@@ -37,7 +37,7 @@ class RecipeServices
         nkdoc.css('.rp_elmt').present? # This content has been tagged
       if block_given?
         nkdoc.css('.rp_elmt').each { |node|
-          nknode_classes(node).without(:rp_elmt).each { |rpclass| yield rpclass, node.text }
+          nknode_classes(node).without(:rp_elmt).each { |rpclass| yield rpclass, node }
         }
       end
       tagnames[:Ingredient] = nkdoc.css('.rp_ingname').collect { |node|

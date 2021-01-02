@@ -74,7 +74,7 @@ class RecipePage < ApplicationRecord
     return content unless anchor_path.present? && focus_path.present?
     nk = Nokogiri::HTML.fragment content
     anchor_node = nk.xpath(anchor_path.downcase)&.first   # Presumably there's only one match!
-    focus_node = nk.xpath(focus_path.downcase)&.last
+    focus_node = nk.xpath(focus_path.downcase)&.first
     return unless anchor_node && focus_node
     # Degenerate case where the selection only has one node
     return anchor_node.to_html if anchor_node == focus_node
