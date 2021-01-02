@@ -321,7 +321,11 @@ module Backgroundable
     dj_status = (job.destroyed? ? "(destroyed)" : '(not destroyed)') if job
     puts ">>> After #{status} job '#{job}'#{dj_status} on #{self.class.to_s}##{id} -> dj##{dj_id}"
     self.dj = nil if good?
-    save if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
+    if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
+      msgs = errors.messages.clone
+      save
+      msgs.each { |type, errs| errs.each { |err| errors.add type, err } }
+    end
   end
 
   def failure job=nil

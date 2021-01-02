@@ -97,7 +97,7 @@ class ParsingServices
   # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
   def parse_and_annotate content
     if seeker = parse(content)
-      [ :rp_ingline ].each do |token|
+      [:rp_ingline].each do |token|
         puts "-------------- #{token} ---------------"
         seekers = seeker.find(token)
         seekers.each { |seeker|
