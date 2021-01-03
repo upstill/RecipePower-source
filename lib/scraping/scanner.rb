@@ -72,7 +72,9 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span
   newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)).children[0]
   # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree
   iterator = DomTraversor.new anchor_elmt, focus_elmt, :enclosed
-  iterator.walk { |node| newtree.add_child node }
+  iterator.walk do |node|
+    newtree.add_child node
+  end
   if iterator.successor_node # newtree goes where focus_root was
     iterator.successor_node.previous = newtree
   else # The focus node was the last child, and now it's gone => make newtree be the last child
@@ -131,7 +133,7 @@ end
 
 def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   tag ||= 'div'
-  valuestr = "value='#{value}'" if value
+  valuestr = "value='#{HTMLEntities.new.encode(value)}'" if value.present?
   class_str = 'rp_elmt'
   class_str << ' ' + rp_elmt_class.to_s if rp_elmt_class
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node

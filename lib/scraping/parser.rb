@@ -6,7 +6,7 @@ require 'enumerable_utils.rb'
 # '1 teaspoon sherry (or other wine) vinegar' Recipe 15644
 # 'Needles from one, 6-inch section of fresh rosemary' Recipe 15644
 # '1 1/2 cups diced autumn mushrooms, such as blewits and maitake' Recipe 15644
-# '1 garlic clove'
+# '1 garlic clove', 1 salmon fillet (Recipe #2176)
 # Detecting multiple ingredient lists and labelling them: Recipe 15636: Mixed vegetable and potato fritters with harissa
 # "Cook 1 hr 20 min", ibid
 # :rp_author should opt for tag(s) lookup

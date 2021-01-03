@@ -108,6 +108,9 @@ class ElmtBounds < Array
       end
       text_elmts.each do |te|
         if self[first_te_ix].first != te
+          if self[first_te_ix].first.text != te.text
+            throw "Attempt to replace @elmt_bounds[#{first_te_ix}] (#{self[first_te_ix].first.text}) with non-matching #{te.text}"
+          end
           self[first_te_ix][0] = te
         end
         first_te_ix += 1

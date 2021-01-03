@@ -162,6 +162,8 @@ class Recipe < ApplicationRecord
         case rpclass
         when :rp_title
           accept_attribute :title, node.text
+        when :rp_ingline
+          x=2
         end
       end
     end

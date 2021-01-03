@@ -110,6 +110,7 @@ protected
       end
       # Peek ahead and consume any tokens which are empty in the normalized name
       onward = stream.rest
+      unskipped = onward
       case onward.peek
       when '.' # Ignore period
         onward = onward.rest
@@ -123,7 +124,7 @@ protected
       tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
-            block.call terms, onward, lexpath # The block must check for acceptance and return true for the process to end
+            block.call terms, unskipped, lexpath # The block must check for acceptance and return true for the process to end
           end
     end
   end
