@@ -113,7 +113,7 @@ protected
       unskipped = onward
       case onward.peek
       when '.' # Ignore period
-        onward = onward.rest
+        unskipped = onward = onward.rest
       when '(' # Elide parenthetical by hunting for matching ')'
         to_match = onward.rest
         while to_match && (to_match.peek != ')') do

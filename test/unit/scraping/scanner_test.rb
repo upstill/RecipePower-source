@@ -44,14 +44,14 @@ class ScannerTest < ActiveSupport::TestCase
   end
 
   test 'basic stream operations' do
-    scanner = StrScanner.from_string "Fourscore and seven years ago "
+    scanner = StrScanner.new "Fourscore and seven years ago "
     assert_equal 'Fourscore', scanner.first
     assert_equal 'and seven', scanner.peek(2)
     assert_equal 'and seven', scanner.first(2)
   end
 
   test 'string boundaries' do
-    scanner = StrScanner.from_string "We've got all the \"gang\" here for 1/2 hot minutes. Dig? {bracketed material }( parenthetical) [ with braces]."
+    scanner = StrScanner.new "We've got all the \"gang\" here for 1/2 hot minutes. Dig? {bracketed material }( parenthetical) [ with braces]."
     assert_equal ["We've", "got", "all", "the", "\"gang\"", "here", "for", "1/2", "hot", "minutes", ".", "Dig", "?", "{", "bracketed", "material", "}", "(", "parenthetical", ")", "[", "with", "braces", "]", "."], scanner.strings
   end
 
@@ -70,7 +70,7 @@ class ScannerTest < ActiveSupport::TestCase
 
   test 'toline text' do
     str = "first line \n second line \n third line \n"
-    scanner = StrScanner.from_string str
+    scanner = StrScanner.new str
     line1 = scanner.toline
     assert_equal str, line1.to_s
     line2 = line1.rest.toline
@@ -85,7 +85,7 @@ class ScannerTest < ActiveSupport::TestCase
     line2 = scanner.rest.toline true
     assert_equal "second line \n", line2.to_s
 
-    scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
+    scanner = StrScanner.new "\n\n\n" # Should produce three blank lines
     line1 = scanner.toline
     assert_equal "\n \n \n", line1.to_s
     line2 = line1.rest.toline
@@ -94,13 +94,13 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal "\n", line3.to_s
     assert_nil line3.rest.toline
 
-    scanner = StrScanner.from_string "\nend" # Should produce a blank, then 'end'
+    scanner = StrScanner.new "\nend" # Should produce a blank, then 'end'
     line1 = scanner.toline true
     assert_equal "\n", line1.to_s
     line2 = scanner.rest.toline true
     assert_equal 'end', line2.to_s
 
-    scanner = StrScanner.from_string "\n\n\n" # Should produce three blank lines
+    scanner = StrScanner.new "\n\n\n" # Should produce three blank lines
     line1 = scanner.toline true
     assert_equal "\n", line1.to_s
     line2 = scanner.rest.toline true
@@ -184,7 +184,7 @@ EOF
 
   test "simple text replacement in nkscanner" do
     html = "a simple undifferentiated text string"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 5, nks.tokens.count
     assert_equal [0], nks.elmt_bounds.map(&:last)
 
@@ -199,7 +199,7 @@ EOF
     assert_equal [0, 9, 30], nks.elmt_bounds.map(&:last)
 
     # Enclose the last two strings
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 3,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
@@ -209,7 +209,7 @@ EOF
     assert_equal [0, 26], nks.elmt_bounds.map(&:last)
 
     # Enclose the first two strings
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0,2
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
@@ -219,7 +219,7 @@ EOF
     assert_equal [0, 8], nks.elmt_bounds.map(&:last)
 
     # Enclose the last string
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 4,5
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
@@ -229,7 +229,7 @@ EOF
     assert_equal [0, 31], nks.elmt_bounds.map(&:last)
 
     # Enclose the first string
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0,1
     check_integrity nks
     assert_equal html, nks.nkdoc.inner_text  # The enclosure shouldn't change the text stream
@@ -241,7 +241,7 @@ EOF
 
   test 'element Bounds in text' do
     html = "<div class=\"upper div\"><div class=\"lower div\">\n<div class=\"lower left\">text1</div>\n<div class=\"lower right\">text2</div>\n</div></div>"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal [0,1,6,7,12], nks.elmt_bounds.collect(&:last)
   end
 
@@ -253,7 +253,7 @@ EOF
 </div>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
@@ -276,7 +276,7 @@ EOF
 </div>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
@@ -298,7 +298,7 @@ EOF
 </div>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0,2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
@@ -341,27 +341,27 @@ EOF
 </div>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 0...2, nks.tokens.dom_range('div.div')
     assert_equal 1...2, nks.tokens.dom_range('div.right')
     html = "some text<span>and spanned text</span>extended"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 2...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
 
     html = "some text <span>and spanned text</span> extended"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 2...5, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
 
     html = "some text<span> and spanned text </span>extended"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 2...5, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
 
     html = "<span>some spanned text</span>"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 0...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
 
     html = "<span> some spanned text </span>"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal 0...3, nks.tokens.dom_range('span') # Include only tokens that are entirely w/in the DOM element
   end
 
@@ -379,7 +379,7 @@ EOF
 </div>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     nks.enclose_tokens 0, 2
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
@@ -403,7 +403,7 @@ EOF
 
   test "TextElmtData" do
     html = "<span>Beginning text </span>and then a random text stream<span> followed by more text"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
 
     assert_equal [ 0, 15, 44 ], nks.elmt_bounds.map(&:last)
     ted = nks.text_elmt_data 0
@@ -431,7 +431,7 @@ EOF
     assert_equal 'random text stream', ted.subsq_text
 
     html = "<span>Beginning text</span>and then a random text stream<span>followed by more text"
-    nks = NokoScanner.from_string html
+    nks = NokoScanner.new html
     assert_equal [0, 10, 18, 23, 25, 32, 37, 52, 55, 60 ], nks.token_starts
     assert_equal [0, 14, 43], nks.elmt_bounds.map(&:last)
 

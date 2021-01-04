@@ -62,9 +62,9 @@ class ParsingServices
     nkdoc.to_s
   end
 
-  def self.parse_from_string html, token
-    parser = Parser.new NokoScanner.from_string(html)
-    match = parser.match token
+  def self.parse_from_string input, token, site: nil, lexaur: nil
+    parser = Parser.new(input, lexaur)
+    match = parser.match(token)
     match
   end
 

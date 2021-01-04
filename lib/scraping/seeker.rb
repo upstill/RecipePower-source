@@ -61,6 +61,21 @@ class Seeker
     results.flatten.compact
   end
 
+  def found_string token=nil
+    if f = find(token).first
+      f.head_stream.except(f.tail_stream).to_s
+    end
+  end
+
+  # Root out the value associated with the token
+  def find_value token=nil
+    find(token).first&.value
+  end
+
+  def find_values token=nil
+    find(token).map &:value
+  end
+
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
   def to_s
     head_stream.to_s tail_stream.pos

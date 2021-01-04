@@ -66,6 +66,7 @@ class ParserTest < ActiveSupport::TestCase
       black\ pepper
       Brussels\ sprouts
       white\ cauliflower
+      Cointreau
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
@@ -102,15 +103,15 @@ EOF
     assert_equal Array, grammar[:rp_amt][:match].class
 
                                              # Check for grammar violations
-    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :inline => true, :atline => true}}) }
-    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { :bound => true, :terminus => true}}) }
-    assert_raises { Parser.new(NokoScanner.from_string(nonsense), { :rp_recipelist => { at_css_match: true, after_css_match: true}}) }
+    assert_raises { Parser.new(NokoScanner.new(nonsense), { :rp_recipelist => { :inline => true, :atline => true}}) }
+    assert_raises { Parser.new(NokoScanner.new(nonsense), { :rp_recipelist => { :bound => true, :terminus => true}}) }
+    assert_raises { Parser.new(NokoScanner.new(nonsense), { :rp_recipelist => { at_css_match: true, after_css_match: true}}) }
 
     grammar_mods = {
         :rp_ingname => { terminus: ',' }, # Test value gets added
         :rp_ing_comment => { terminus: ',' } # Make sure value gets replaced
     }
-    parser = Parser.new NokoScanner.from_string(nonsense), grammar_mods
+    parser = Parser.new NokoScanner.new(nonsense), grammar_mods
     assert_equal ',', parser.grammar[:rp_ingname][:terminus]
     assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
   end
@@ -118,7 +119,7 @@ EOF
   test 'parse amount specs' do
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
-      nokoscan = NokoScanner.from_string amtstr
+      nokoscan = NokoScanner.new amtstr
       is = AmountSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{amtstr} doesn't parse"
       parser = Parser.new nokoscan, @lex
@@ -133,7 +134,7 @@ EOF
 
   test 'parse individual ingredient' do
     ingstr = 'Dijon mustard'
-    nokoscan = NokoScanner.from_string ingstr
+    nokoscan = NokoScanner.new ingstr
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
@@ -145,7 +146,7 @@ EOF
 
   test 'parse alt ingredient' do
     ingstr = 'small capers, black pepper or Brussels sprouts'
-    nokoscan = NokoScanner.from_string ingstr
+    nokoscan = NokoScanner.new ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
@@ -190,23 +191,62 @@ EOF
   test 'parse ingredient line' do
     # Test a failed ingredient line
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
-    parser = Parser.new html, @lex
-    seeker = parser.match :rp_ingline
+    # parser = Parser.new html, @lex
+    # seeker = parser.match :rp_ingline
+    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex
     assert seeker.hard_fail?
 
-    html = '1/2 tsp. sifted baking soda'
+    html = '1/2 ounce sifted baking soda'
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingline
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
-    assert_equal 2, seeker.children.count
-    assert_equal :rp_ingspec, seeker.children.first.token
-    assert_equal :rp_ing_comment, seeker.children.last.token
+    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
+    assert_equal 'sifted', seeker.find_value(:rp_condition)
+    assert_equal 'ounce', seeker.find_value(:rp_unit)
+    assert_not_empty seeker.find(:rp_ingspec)
+    assert_not_empty seeker.find(:rp_ing_comment)
+
+    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex
+    assert seeker.success?
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
+    assert_equal 'sifted', seeker.find_value(:rp_condition)
+    assert_equal 'ounce', seeker.find_value(:rp_unit)
+    assert_not_empty seeker.find(:rp_ingspec)
+    assert_not_empty seeker.find(:rp_ing_comment)
 
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingline
     assert seeker.success?
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
+    assert_equal 'sifted', seeker.find_value(:rp_condition)
+    assert_equal 'tsp.', seeker.find_value(:rp_unit)
+    assert_not_empty seeker.find(:rp_ingspec)
+  end
+
+  test 'tag has terminating period' do
+    html = '1/2 tsp. sifted (or lightly sifted) baking soda'
+    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex
+    assert seeker.success?
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
+    assert_equal 'sifted', seeker.find_value(:rp_condition)
+    assert_equal 'tsp.', seeker.find_value(:rp_unit)
+    assert_not_empty seeker.find(:rp_ingspec)
+  end
+
+  test 'simple ingline with fractional number' do
+    html = '3/4 ounce Cointreau'
+    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex
+    assert seeker.success?
+    assert_equal :rp_ingline, seeker.token
+    assert_equal 'Cointreau', seeker.found_string(:rp_ingname)
+    assert_equal 'ounce', seeker.found_string(:rp_unit)
+    assert_equal '3/4', seeker.found_string(:rp_range)
+    assert_not_empty seeker.find(:rp_ingspec)
   end
 
   test 'parse ing list from modified grammar' do
@@ -408,7 +448,7 @@ EOF
 
   def parse html, token, options={}
     add_tags :Ingredient, options[:ingredients]
-    nokoscan = NokoScanner.from_string html
+    nokoscan = NokoScanner.new html
     parser = Parser.new(nokoscan, @lex)
     if seeker = parser.match(token)
       seeker.enclose_all

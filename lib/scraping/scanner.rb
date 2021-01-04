@@ -197,16 +197,12 @@ end
 class StrScanner < Scanner
   attr_reader :strings, :pos, :bound # :length
 
-  def initialize strings, pos = 0, bound = nil
+  def initialize string_or_strings, pos = 0, bound = nil
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
-    @strings = strings
+    @strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
     @pos = pos
     # @length = @strings.count
     @bound = bound || @strings.count
-  end
-
-  def self.from_string string, pos = 0
-    self.new tokenize(string), pos
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
@@ -278,10 +274,6 @@ class NokoScanner # < Scanner
     end
     @bound = bound || @tokens.length
     @pos = (pos <= @bound) ? pos : @bound
-  end
-
-  def self.from_string html
-    self.new Nokogiri::HTML.fragment(html)
   end
 
   # Return the stream of tokens as an array of strings

@@ -40,7 +40,7 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
   test 'parse amount specs' do
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
-      nokoscan = NokoScanner.from_string amtstr
+      nokoscan = NokoScanner.new amtstr
       is = AmountSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{amtstr} doesn't parse"
       parser = Parser.new nokoscan, @lex
@@ -55,7 +55,7 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
 
   test 'parse individual ingredient' do
     ingstr = 'Dijon mustard'
-    nokoscan = NokoScanner.from_string ingstr
+    nokoscan = NokoScanner.new ingstr
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
@@ -67,7 +67,7 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
 
   test 'parse alt ingredient' do
     ingstr = 'small capers, black pepper or Brussels sprouts'
-    nokoscan = NokoScanner.from_string ingstr
+    nokoscan = NokoScanner.new ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
@@ -93,18 +93,18 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
   test 'parse individual ingredient specs' do
     @ingred_specs.each do |ingspec|
       puts "Parsing '#{ingspec}'"
-      nokoscan = NokoScanner.from_string ingspec
+      nokoscan = NokoScanner.new ingspec
       is = IngredientSpecSeeker.match nokoscan, lexaur: @lex
       assert_not_nil is, "#{ingspec} doesn't parse"
     end
   end
 
   test 'parse a whole ingredient list' do
-    nokoscan = NokoScanner.from_string @ings_list
+    nokoscan = NokoScanner.new @ings_list
   end
 
   test 'find the ingredient list embedded in a recipe' do
-    nokoscan = NokoScanner.from_string @recipe
+    nokoscan = NokoScanner.new @recipe
     il = IngredientListSeeker nokoscan
     assert_not_nil il
   end
@@ -254,7 +254,7 @@ EOF
 
   def parse html, token, options={}
     add_tags :Ingredient, options[:ingredients]
-    nokoscan = NokoScanner.from_string html
+    nokoscan = NokoScanner.new html
     parser = Parser.new(nokoscan, @lex)
     if seeker = parser.match(token)
       seeker.enclose_all

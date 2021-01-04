@@ -92,16 +92,9 @@ class Parser
     end
     @grammar.freeze
     @lexaur = lex if lex
-    @stream = case noko_scanner_or_nkdoc_or_nktokens
-              when NokoScanner
-                noko_scanner_or_nkdoc_or_nktokens
-              when String
-                NokoScanner.from_string noko_scanner_or_nkdoc_or_nktokens
-              when NokoTokens
-                NokoScanner.new noko_scanner_or_nkdoc_or_nktokens
-              else
-                raise "Trying to initialize Parser with #{noko_scanner_or_nkdoc_or_nktokens.class.to_s}"
-              end
+    @stream = noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner) ?
+                  noko_scanner_or_nkdoc_or_nktokens :
+                  NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
 
   # Revise the default grammar by specifying new bindings for tokens
@@ -175,8 +168,10 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match spec, at=@stream
-    matched = match_specification at, spec
+  def match token, stream: @stream
+    spec = grammar[token]
+    spec = spec.without( :in_css_match, :at_css_match, :after_css_match) if spec.is_a?(Hash)
+    matched = match_specification stream, spec, token
     matched
   end
 
