@@ -138,7 +138,7 @@ class FinderServices
     NestedBenchmark.measure('filtering for results with Nokogiri') do
       finders.each do |finder|
         label = finder.label
-        next unless (selector = finder.selector) &&
+        next unless (selector = finder.selector.split(/\s*\n/).join(', ')) &&
             (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
             (matches = nkdoc.css(selector)) &&
             (matches.count > 0)

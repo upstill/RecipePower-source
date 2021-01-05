@@ -151,7 +151,9 @@ class Recipe < ApplicationRecord
         # reload if persisted? # Possibly the recipe_page changed us
         recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       end
-      content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
+      content_to_parse =
+        (recipe_page.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
+        page_ref.trimmed_content
       return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success

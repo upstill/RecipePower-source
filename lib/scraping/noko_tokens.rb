@@ -8,7 +8,6 @@ require 'scraping/elmt_bounds.rb'
 class NokoTokens < Array
   attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
   delegate :pp, :to => :nkdoc
-  delegate :attach_node_safely, :to => :elmt_bounds
   def initialize nkdoc
     def to_tokens newtext = nil
       # Append the string to the priorly held text, if any
@@ -97,7 +96,7 @@ class NokoTokens < Array
       processed_children(node) { |descendant|
         enclosing_classes.blank? || @parser_evaluator.can_include?(enclosing_classes.first, rp_classes_for_node(descendant).first)
       }.each do |descendant|
-        attach_node_safely descendant, relative_to, attach
+        elmt_bounds.attach_node_safely descendant, relative_to, attach
       end
     end
   end
@@ -364,9 +363,9 @@ class NokoTokens < Array
     iterator = DomTraversor.new teleft.text_element, teright.text_element, :enclosed
     move_elements_safely attach: :extend_right, relative_to: newtree, iterator: iterator
     if iterator.successor_node # newtree goes where focus_root was
-      attach_node_safely newtree, iterator.successor_node, :before # iterator.successor_node.previous = newtree
+      elmt_bounds.attach_node_safely newtree, iterator.successor_node, :before # iterator.successor_node.previous = newtree
     else # The focus node was the last child, and now it's gone => make newtree be the last child
-      attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
+      elmt_bounds.attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
     validate_embedding report_tree('After: ', newtree)
     newtree

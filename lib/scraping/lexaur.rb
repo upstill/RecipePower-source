@@ -99,6 +99,9 @@ protected
     lexpath, block = [], lexpath if lexpath.is_a?(Proc)
     lexpath = lexpath + [self]
     # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
+    while stream.more? && (stream.peek == "\n") do
+      stream = stream.rest
+    end
     if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       substrs = Tag.normalizeName(token).split '-'
       tracker = self
