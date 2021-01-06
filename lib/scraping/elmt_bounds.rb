@@ -7,11 +7,19 @@ class ElmtBounds < Array
   def initialize nkdoc
     @nkdoc = nkdoc
     @text_length = 0
+    nkdoc.traverse do |node|
+      if node.text?
+        push [ node, @text_length ]
+        @text_length += node.text.length
+      end
+    end
   end
 
+=begin
   def push text_elmt, global_char_offset
     super [ text_elmt, global_char_offset ]
   end
+=end
 
   def global_position_of_elmt elmt
     elmt_offset_at find_elmt_index(elmt)
