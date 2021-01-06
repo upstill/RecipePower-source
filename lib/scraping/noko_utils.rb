@@ -36,6 +36,10 @@ def nknode_valid? node, recur: false
   node.children.all? { |child| child.text? || nknode_valid?(child, recur: true) }
 end
 
+def nknode_first_text_element node
+  node.text? ? node : node.traverse { |node| return node if node.text? }
+end
+
 # Is the node ready to delete?
 def node_empty? nokonode
   return nokonode.text.match /^\n*$/ if nokonode.text? # A text node is empty if all it contains are newlines (if any)

@@ -38,12 +38,13 @@ class ElmtBounds < Array
   end
 
   # Replace the text element in the elmt_bounds array, BUT ONLY IF THE TEXT IS IDENTICAL
-  def fix_nth_elmt ix, text_element
-    begin
-      self[ix][0] = text_element
-    rescue Exception => e
-      puts "ERROR maintaining @elmt_bounds array! Replacement does not match text of original"
+  def replace_nth_element ix, text_elmt
+    old_te = nth_elmt ix
+    if old_te.text != text_elmt.text
+      error = "Bogus attempt to set ##{ix}-th element '#{}' to '#{text_elmt.text}'"
+      throw error
     end
+    self[ix][0] = text_elmt
   end
 
   # Move a node into position in relation to element relative_to
@@ -93,6 +94,7 @@ class ElmtBounds < Array
           child_ix = child_ix - 1
         end
       end
+      # The node may have changed after being attached
       nknode_valid? as_attached
       self[child_ix][0] = as_attached
       # For some reason, we need to ensure that all the parent's text nodes validly appear in @elmt_bounds
@@ -148,7 +150,39 @@ class ElmtBounds < Array
 
   # Where in the array is the elmt kept?
   def find_elmt_index elmt
-    find_index { |rcd| rcd.first.object_id.equal? elmt.object_id } if elmt
+    return nil unless elmt&.text?
+    find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
   end
 
+  def update_for parent, anchor_te=nil, anchor_ix=nil
+    replace_nth_element anchor_ix, anchor_te if anchor_ix && anchor_te&.text?
+    ix = 0
+    parent.document.traverse do |node|
+      if node.text?
+        replace_nth_element ix, node
+        ix += 1
+      end
+    end
+  end
+=begin
+      text_elmts = []
+      first_te_ix = nil
+      parent.traverse do |node|
+        if node.text?
+          first_te_ix = child_ix - text_elmts.count if node == as_attached
+          text_elmts.push node
+        end
+      end
+      text_elmts.each do |te|
+        if self[first_te_ix].first != te
+          if self[first_te_ix].first.text != te.text
+            throw "Attempt to replace @elmt_bounds[#{first_te_ix}] (#{self[first_te_ix].first.text}) with non-matching #{te.text}"
+          end
+          self[first_te_ix][0] = te
+        end
+        first_te_ix += 1
+      end
+      ted = TextElmtData.new(self, self[child_ix].last)
+      ted.valid?
+=end
 end

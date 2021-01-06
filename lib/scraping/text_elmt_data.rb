@@ -192,8 +192,8 @@ class TextElmtData < Object
     elmt.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
     newnode = elmt.next
     # Move the element under the shell while ensuring that elmt_bounds remains valid
-    @elmt_bounds.fix_nth_elmt @elmt_bounds_index, newnode.add_child(elmt)
-    @elmt_bounds.fix_nth_elmt @elmt_bounds_index+1, newnode.next if newnode.next&.text?
+    @elmt_bounds.replace_nth_element @elmt_bounds_index, newnode.add_child(elmt)
+    @elmt_bounds.replace_nth_element @elmt_bounds_index+1, newnode.next if newnode.next&.text?
     valid?
     validate_embedding newnode
     newnode

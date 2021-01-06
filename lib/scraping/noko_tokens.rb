@@ -30,7 +30,7 @@ class NokoTokens < Array
       case
       when child.text?
         # Save this element and its starting point
-        @elmt_bounds.push child, (@processed_text_len + @held_text.length) # @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
+        # @elmt_bounds.push child, (@processed_text_len + @held_text.length) # @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
         to_tokens if child.name.match(/^(p|br|ul|li)$/)
