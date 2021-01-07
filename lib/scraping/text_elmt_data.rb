@@ -76,7 +76,7 @@ class TextElmtData < Object
         @elmt_bounds.elmt_offset_at(@elmt_bounds_index) # elmt_bounds[@elmt_bounds_index] # ...by definition
     mark_at signed_global_char_offset
     @parent = @text_element.parent
-    nknode_valid? @text_element # Validate that the associated text element hasn't been replaced in the document tree
+    @elmt_bounds.text_element_valid? @text_element # Validate that the associated text element hasn't been replaced in the document tree
   end
 
   # Adopt another text element with its associated information
@@ -188,11 +188,12 @@ class TextElmtData < Object
     mark_at -global_character_position_end
     split_right
     # Now add a next element: the html shell
-    elmt = text_element
-    elmt.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
-    newnode = elmt.next
+    @text_element.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
+    newnode = @text_element.next
+    newnode.add_child(@text_element)
+    @text_element = newnode.children.first
     # Move the element under the shell while ensuring that elmt_bounds remains valid
-    @elmt_bounds.replace_nth_element @elmt_bounds_index, newnode.add_child(elmt)
+    @elmt_bounds.replace_nth_element @elmt_bounds_index, @text_element
     @elmt_bounds.replace_nth_element @elmt_bounds_index+1, newnode.next if newnode.next&.text?
     valid?
     validate_embedding newnode

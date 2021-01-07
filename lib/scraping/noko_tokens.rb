@@ -145,7 +145,7 @@ class NokoTokens < Array
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range @elmt_bounds, global_character_position_start...global_character_position_end
     newtree = enclose_by_text_elmt_data teleft, teright, tag: tag, rp_elmt_class: rp_elmt_class, value: value
-    nknode_valid? newtree, recur: true # Double-check to ensure the new tree is good
+    @elmt_bounds.text_element_valid? newtree # Double-check to ensure the new tree is good
     newtree
   end
 
@@ -293,11 +293,11 @@ class NokoTokens < Array
     teright.retreat_over_space teright
     teright.valid?
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
-    # anchor_elmt, focus_elmt = tighten_text_elmt_enclosure teleft.text_element, teright.text_element
 
     if anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent
       clear_classification_context anchor_elmt.parent, rp_elmt_class
       # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
+      # #tag_ancestor_safely doesn't affect the DOM or @elmt_bounds, so there's no need for validation
       newnode = tag_ancestor_safely(anchor_elmt.parent,
                                     anchor_elmt,
                                     focus_elmt,
@@ -306,6 +306,7 @@ class NokoTokens < Array
                                     value: value) if teleft.prior_text.blank? && teright.subsq_text.blank?
       return newnode if newnode
       if anchor_elmt == focus_elmt
+        # #enclose_to does its own validation
         return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
       end
     end
@@ -314,9 +315,6 @@ class NokoTokens < Array
     # -- before teleft and after teright
     teleft.split_left teright # Adjust teright as needed to accommodate teleft's shift
     teright.split_right teleft # Adjust teleft as needed to accommodate teright's shift
-    #if Rails.env.development?
-    #  puts "Assembling #{rp_elmt_class} from #{teleft.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teleft.text_element}) to #{teright.text_element.to_s} (node ##{@elmt_bounds.find_elmt_index teright.text_element})"
-    #end
 
     # If teleft or teright are descendants of a node that matches the tag and class spec,
     # expand that node to encompass the whole selection
@@ -352,6 +350,7 @@ class NokoTokens < Array
         # Ensure that we don't try to add it or its ancestor to itself
         move_elements_safely attach: :extend_left, relative_to: extant, iterator: DomTraversor.new(teleft.text_element, extant, :enclosed_reversed)
         move_elements_safely attach: :extend_right, relative_to: extant, iterator: DomTraversor.new(extant, teright.text_element, :enclosed)
+        @elmt_bounds.text_element_valid? extant
         return extant
       end
     end
@@ -368,6 +367,7 @@ class NokoTokens < Array
       elmt_bounds.attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
     validate_embedding report_tree('After: ', newtree)
+    @elmt_bounds.text_element_valid? newtree
     newtree
   end
 

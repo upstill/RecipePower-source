@@ -23,17 +23,21 @@ def nknode_apply node, rp_elmt_class:, value:
   node['value'] = value if value
 end
 
-  # Test a node(tree, if recur is true) to ensure that it can be properly accessed
-def nknode_valid? node, recur: false
-  begin
-    throw "Node can't be found among its parent's children" if node.parent.children.index(node).nil?
-    progenitor = node.ancestors.first
-    throw "Node's ancestors can't be found among progenitor's children" if progenitor && (progenitor.children & node.ancestors).nil?
-  rescue Exception => exc
-    return false
+  # Test a text element or a whole tree to ensure that it can be properly accessed
+def nknode_valid? node
+  node.traverse do |node_or_text_element|
+    if node_or_text_element.text?
+      text_elmt = node_or_text_element
+      begin
+        throw "Node can't be found among its parent's children" if text_elmt.parent.children.index(text_elmt).nil?
+        progenitor = text_elmt.ancestors.first
+        throw "Node's ancestors can't be found among progenitor's children" if progenitor && (progenitor.children & text_elmt.ancestors).nil?
+      rescue Exception => exc
+        return false
+      end
+    end
+    true
   end
-  return true unless recur
-  node.children.all? { |child| child.text? || nknode_valid?(child, recur: true) }
 end
 
 def nknode_first_text_element node

@@ -103,7 +103,8 @@ class ElmtBounds < Array
         end
       end
       # The node may have changed after being attached
-      nknode_valid? as_attached
+      update_for parent, as_attached, child_ix
+      return
       self[child_ix][0] = as_attached
       # For some reason, we need to ensure that all the parent's text nodes validly appear in @elmt_bounds
       # 'as_attached' is a text node, guaranteed to be valid, found at child_ix
@@ -126,16 +127,34 @@ class ElmtBounds < Array
         first_te_ix += 1
       end
       ted = TextElmtData.new(self, self[child_ix].last)
-      ted.valid?
     else
       # Ensure that the node's text elements are maintained correctly in elmt_bounds
       node.traverse do |descendant|
         if descendant.text?
-          fix_nth_elmt elmt_bounds_index, descendant
+          replace_nth_element elmt_bounds_index, descendant
           elmt_bounds_index += 1
         end
       end if elmt_bounds_index
+      update_for node
     end
+  end
+
+  # Ensure that 1) the text element can be found in the array, and
+  # 2) it is properly embedded in the tree
+  def text_element_valid? node
+    node.traverse do |self_or_descendant|
+      if self_or_descendant.text?
+        begin
+          if find_elmt_index(self_or_descendant).nil?
+            throw "Text element for '#{self_or_descendant.text}' can't be found in elmt_bounds."
+          end
+        rescue Exception => exc
+          return false
+        end
+        return false unless nknode_valid?(self_or_descendant)
+      end
+    end
+    return true
   end
 
   # Provide the character range for a pair of text elements
