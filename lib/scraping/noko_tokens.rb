@@ -99,6 +99,7 @@ class NokoTokens < Array
         elmt_bounds.attach_node_safely descendant, relative_to, attach
       end
     end
+    elmt_bounds.text_element_valid? relative_to.parent
   end
 
   # Return the string representing all the text given by the two token positions
@@ -144,9 +145,7 @@ class NokoTokens < Array
     global_character_position_end = character_position_after_token limiting_token_index
     # Provide a hash of data about the text node that has the token at 'global_character_position_start'
     teleft, teright = TextElmtData.for_range @elmt_bounds, global_character_position_start...global_character_position_end
-    newtree = enclose_by_text_elmt_data teleft, teright, tag: tag, rp_elmt_class: rp_elmt_class, value: value
-    @elmt_bounds.text_element_valid? newtree # Double-check to ensure the new tree is good
-    newtree
+    enclose_by_text_elmt_data teleft, teright, tag: tag, rp_elmt_class: rp_elmt_class, value: value
   end
 
   # Return the Nokogiri node that was built
@@ -289,9 +288,7 @@ class NokoTokens < Array
   def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: nil, value: nil
     # Ignore blank text outside the range
     teleft.advance_over_space teleft # Don't pass through each other!
-    teleft.valid?
     teright.retreat_over_space teright
-    teright.valid?
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
 
     if anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent

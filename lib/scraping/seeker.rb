@@ -117,13 +117,9 @@ class Seeker
   def enclose_all
     # The seeker reflects a successful parsing of the (subtree) scanner against the token.
     # Now we should modify the Nokogiri DOM to reflect the elements found
-    stillgood = head_stream.tokens.elmt_bounds.text_element_valid? head_stream.nkdoc
-    stillgood
     traverse do |inner|
       if inner.token
         inner.enclose Parser.tag_for_token(inner.token)
-        stillgood = head_stream.tokens.elmt_bounds.text_element_valid? head_stream.nkdoc
-        stillgood
       end
     end
   end

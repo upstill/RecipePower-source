@@ -60,12 +60,16 @@ class ElmtBounds < Array
   def attach_node_safely node, relative_to, how
     parent = (how == :before || how == :after) ? relative_to.parent : relative_to
     if node.text?
-      child_ix = find_elmt_index node
+      anchor_te = node
       prior_count = parent.children.count
     else
-      elmt_bounds_index = nil
-      node.traverse { |node| elmt_bounds_index ||= (find_elmt_index(node) if node.text?) }
+      # Use the first text element in the tree as an anchor, if any
+      anchor_te = nknode_first_text_element(node)
     end
+    # We will know the location (anchor_ix) in our array of at least one text element (anchor_te)
+    # This will give us a constant location to ensure that all related text elements
+    # (ie., those under the node or its parent) can be renewed
+    anchor_ix = find_elmt_index anchor_te
 
     # Now make the move
     as_attached =
@@ -95,47 +99,18 @@ class ElmtBounds < Array
         if how == :extend_left
           # Under the assumption that the inserted text-element has and will continue to precede
           # the first child, its index must be retained
-          delete_at child_ix+1
+          delete_at anchor_ix+1
         else
           # They should be adjacent elements in the elmts array
-          delete_at child_ix
-          child_ix = child_ix - 1
+          delete_at anchor_ix
+          anchor_ix = anchor_ix - 1
         end
       end
-      # The node may have changed after being attached
-      update_for parent, as_attached, child_ix
-      return
-      self[child_ix][0] = as_attached
-      # For some reason, we need to ensure that all the parent's text nodes validly appear in @elmt_bounds
-      # 'as_attached' is a text node, guaranteed to be valid, found at child_ix
-      # This will be our anchor for matching text elements in the elmt_bounds
-      text_elmts = []
-      first_te_ix = nil
-      parent.traverse do |node|
-        if node.text?
-          first_te_ix = child_ix - text_elmts.count if node == as_attached
-          text_elmts.push node
-        end
-      end
-      text_elmts.each do |te|
-        if self[first_te_ix].first != te
-          if self[first_te_ix].first.text != te.text
-            throw "Attempt to replace @elmt_bounds[#{first_te_ix}] (#{self[first_te_ix].first.text}) with non-matching #{te.text}"
-          end
-          self[first_te_ix][0] = te
-        end
-        first_te_ix += 1
-      end
-      ted = TextElmtData.new(self, self[child_ix].last)
+      # The node may have changed after being attached, but we WILL have an anchor_ix
+      update_for parent, as_attached, anchor_ix
     else
       # Ensure that the node's text elements are maintained correctly in elmt_bounds
-      node.traverse do |descendant|
-        if descendant.text?
-          replace_nth_element elmt_bounds_index, descendant
-          elmt_bounds_index += 1
-        end
-      end if elmt_bounds_index
-      update_for node
+      update_for as_attached, nknode_first_text_element(as_attached), anchor_ix if anchor_ix # There mightn't be a text element 
     end
   end
 
@@ -181,10 +156,24 @@ class ElmtBounds < Array
     find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
   end
 
-  def update_for parent, anchor_te=nil, anchor_ix=nil
-    replace_nth_element anchor_ix, anchor_te if anchor_ix && anchor_te&.text?
-    ix = 0
-    parent.document.traverse do |node|
+  def update_for parent, anchor_te, anchor_ix
+    # How many text elements precede anchor_te under parent?
+    def preceding_text_elmts te
+      count = 0
+      te.parent.traverse do |node|
+        if node.text?
+          if node.object_id == te.object_id
+            return count
+          else
+            count += 1
+          end
+        end
+      end
+    end
+    replace_nth_element anchor_ix, anchor_te
+    # ix is the index in our array of the first text element under the parent
+    ix = anchor_ix - preceding_text_elmts(anchor_te)
+    parent.traverse do |node|
       if node.text?
         replace_nth_element ix, node
         ix += 1
