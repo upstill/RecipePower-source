@@ -287,8 +287,8 @@ class NokoTokens < Array
   # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
   def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: nil, value: nil
     # Ignore blank text outside the range
-    teleft.advance_over_space teleft # Don't pass through each other!
-    teright.retreat_over_space teright
+    teleft.advance_over_space teright # Don't pass through each other!
+    teright.retreat_over_space teleft
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
 
     if anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent

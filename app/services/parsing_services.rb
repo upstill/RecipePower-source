@@ -71,26 +71,7 @@ class ParsingServices
   def self.enclose_results seeker
     if seeker.success?
       seeker.enclose_all
-      nkdoc = seeker.head_stream.nkdoc
-      nodes = if nkdoc.parent && nkdoc.matches?('.rp_inglist')
-        [nkdoc]
-      else
-        nkdoc.css('.rp_inglist').to_a
-      end
-      # Remove all <br> tags inside the ingredient list
-      nodes.each do |listnode|
-        listnode.traverse do |node|
-          if node.name == 'br' ||
-              (node.name == 'p' && node.children.empty?) ||
-              (node.matches?('.rp_ingline') && node.children.empty?)
-            node.remove
-          elsif node.name == 'strong' ||
-              (node.matches?('.rp_ingline') && node.children.all? { |child| child.text? && child.blank? })
-            node.replace node.children
-          end
-        end
-      end
-      nkdoc.to_s
+      seeker.head_stream.nkdoc.to_s
     end
   end
 
