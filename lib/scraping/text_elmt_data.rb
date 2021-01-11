@@ -201,13 +201,17 @@ class TextElmtData < Object
   end
 
   # Return the text of the text element prior to the selection point
-  def prior_text
-    text[0...@local_char_offset]
+  # If a Nokogiri node is provided as 'within', include the text of earlier text elements under that node
+  def prior_text within: nil
+    before = text[0...@local_char_offset]
+    within ? (nknode_text_before(@text_element, within: within) + before) : before
   end
 
   # Return the text from the mark to the end of the text element
-  def subsq_text mark = @local_char_offset
-    text[mark..-1] || ''
+  # If a Nokogiri node is provided as 'within', include the text of later text elements under that node
+  def subsq_text mark = @local_char_offset, within: nil
+    after = text[mark..-1] || ''
+    within ? (after + nknode_text_after(@text_element, within: within)) : after
   end
 
   # Incorporate any preceding blank text to the beginning of the parent.

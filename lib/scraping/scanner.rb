@@ -19,8 +19,8 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
   # Also perform a check, if given by a block
   anc = nil
   while !node.fragment? &&
-      first_text_element(node) == first_te &&
-      last_text_element(node) == last_te &&
+      nknode_text_before(first_te, within: node).blank? &&
+      nknode_text_after(last_te, within: node).blank? &&
       (!block_given? || yield(node)) do
     anc = node if node.name == tag &&
         (value.nil? || node['value'].nil?) # Here we should be testing for parser compatibility
@@ -37,11 +37,11 @@ end
 def tighten_text_elmt_enclosure anchor_elmt, focus_elmt
   common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
   while anchor_elmt.to_s.blank? do
-    anchor_elmt = successor_text common_ancestor, anchor_elmt
+    anchor_elmt = nknode_successor_text_elmt common_ancestor, anchor_elmt
   end
   # Back the focus_elmt up as long as it's blank
   while focus_elmt.to_s.blank? do
-    focus_elmt = predecessor_text common_ancestor, focus_elmt
+    focus_elmt = nknode_predecessor_text_elmt common_ancestor, focus_elmt
   end
   return [ anchor_elmt, focus_elmt ]
 end

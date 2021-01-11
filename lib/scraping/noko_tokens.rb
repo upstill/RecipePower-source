@@ -87,8 +87,9 @@ class NokoTokens < Array
   # return: the node as added to the parent (may change if text elements are merged)
   def move_elements_safely attach: :extend_right, relative_to:, iterator:
     # Find the lowest enclosing RP class of the parent
-    enclosing_classes = ([relative_to] + relative_to.ancestors).to_a.
-        inject { |node| rpc = rp_classes_for_node(node); break rpc if rpc.present? }
+    enclosing_classes = ([relative_to] + relative_to.ancestors).
+        to_a.
+        find { |node| rp_classes_for_node(node).if_present }
 
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|
@@ -246,7 +247,7 @@ class NokoTokens < Array
         first_text_element ||= child
       end
     end
-    first_text_element ||= successor_text @nkdoc, node # The node has no text elements, perhaps because it's a <br> tag. Return an empty range for the next text element
+    first_text_element ||= nknode_successor_text_elmt @nkdoc, node # The node has no text elements, perhaps because it's a <br> tag. Return an empty range for the next text element
     token_range_for_text_elements first_text_element, last_text_element
   end
 
@@ -290,18 +291,22 @@ class NokoTokens < Array
     teleft.advance_over_space teright # Don't pass through each other!
     teright.retreat_over_space teleft
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
+    common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
-    if anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent
+    if common_ancestor # anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent
       clear_classification_context anchor_elmt.parent, rp_elmt_class
-      # When preceding and succeeding text is blank, and we can use an enclosing <span>, just mark it
+      clear_classification_context focus_elmt.parent, rp_elmt_class
+      # When text of the common ancestor is blank before and after the selection, and we can use an existing element, just mark it
       # #tag_ancestor_safely doesn't affect the DOM or @elmt_bounds, so there's no need for validation
-      newnode = tag_ancestor_safely(anchor_elmt.parent,
-                                    anchor_elmt,
-                                    focus_elmt,
-                                    tag: tag,
-                                    rp_elmt_class: rp_elmt_class,
-                                    value: value) if teleft.prior_text.blank? && teright.subsq_text.blank?
-      return newnode if newnode
+      if teleft.prior_text.blank? && teright.subsq_text.blank?
+        newnode = tag_ancestor_safely(common_ancestor,
+                                      anchor_elmt,
+                                      focus_elmt,
+                                      tag: tag,
+                                      rp_elmt_class: rp_elmt_class,
+                                      value: value)
+        return newnode if newnode
+      end
       if anchor_elmt == focus_elmt
         # #enclose_to does its own validation
         return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
