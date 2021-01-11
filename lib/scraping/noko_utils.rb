@@ -62,20 +62,22 @@ def next_siblings nokonode
   nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode; nil) }.compact
 end
 
-def nknode_text_before text_elmt, within: nil
+def nknode_text_before text_elmt, within: text_elmt.parent
   before = ''
-  while pred = nknode_predecessor_text_elmt(within, pred || text_elmt)
-    before = pred.text + before
+  within.traverse do |node|
+    return before if node.object_id == text_elmt.object_id
+    before << node.text if node.text?
   end
   before
 end
 
 def nknode_text_after text_elmt, within: text_elmt.parent
-  after = ''
-  while succ = nknode_successor_text_elmt(within, succ || text_elmt)
-    after << succ.text
+  after = nil
+  within.traverse do |node|
+    after << node.text if node.text? && after
+    after = '' if node.object_id == text_elmt.object_id
   end
-  after
+  after || ''
 end
 
 def nknode_predecessor_text_elmt tree, text_elmt
