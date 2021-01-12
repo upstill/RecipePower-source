@@ -89,7 +89,7 @@ class NokoTokens < Array
     # Find the lowest enclosing RP class of the parent
     enclosing_classes = ([relative_to] + relative_to.ancestors).
         to_a.
-        find { |node| rp_classes_for_node(node).if_present }
+        inject { |memo, node| memo ||= rp_classes_for_node(node).if_present }
 
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|
@@ -310,6 +310,10 @@ class NokoTokens < Array
       if anchor_elmt == focus_elmt
         # #enclose_to does its own validation
         return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
+      elsif teleft.prior_text(within: common_ancestor).blank? && teright.subsq_text(within: common_ancestor).blank?
+        common_ancestor.next = html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)
+        @elmt_bounds.attach_node_safely common_ancestor, common_ancestor.next
+        return common_ancestor.parent
       end
     end
 

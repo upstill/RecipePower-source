@@ -57,7 +57,7 @@ class ElmtBounds < Array
 
   # Move a node into position in relation to element relative_to
   # CRITICALLY, we ensure that all text elements under the node are recorded in the elmt_bounds array
-  def attach_node_safely node, relative_to, how
+  def attach_node_safely node, relative_to, how=:extend_right
     parent = (how == :before || how == :after) ? relative_to.parent : relative_to
     if node.text?
       anchor_te = node
