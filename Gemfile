@@ -75,7 +75,7 @@ gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitab
 gem 'ruby-openid'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
-gem 'omniauth-google-oauth2'
+gem 'omniauth-google-oauth2', '>= 0.8.0'
 gem 'omniauth-openid'
 gem 'pundit'
 # gem 'declarative_authorization', git: 'http://github.com/stffn/declarative_authorization.git'     # simple auth rules/roles, create config/authorization_rules.rb, add filter_resource_access to each controller, use permitted_to? in views
@@ -86,7 +86,7 @@ gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
 gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 # Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
-gem 'redcarpet' # https://github.com/vmg/redcarpet
+gem 'redcarpet' , '>= 3.5.1' # https://github.com/vmg/redcarpet
 
 ###### Worker management
 gem 'delayed_job', git: 'git://github.com/collectiveidea/delayed_job.git'
