@@ -264,7 +264,7 @@ class NokoTokens < Array
       last_token_index += 1 if (character_position_at_token(last_token_index)+self[last_token_index].length) <= last_limit # Increment if token is entirely w/in the element
       first_token_index...last_token_index
     else
-      first_token_index..first_token_index
+      first_token_index...first_token_index
     end
   end
 

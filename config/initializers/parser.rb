@@ -124,7 +124,7 @@ Parser.init_grammar(
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        atline: true
+        inline: true
     },
     rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {

@@ -468,6 +468,11 @@ class NokoScanner # < Scanner
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
     @tokens.dom_ranges(spec).each do |range|
+      # Reject empty ranges for :in_css_match, because
+      # 1) it can't be incremented beyond, and
+      # 2) an empty set of tokens can't be matched anyway
+      # In general, this is an artifact of the ambiguity inherent in expressing ranges as tokens
+      next if flag == :in_css_match && range.size < 1
       # Look at the first range that starts after this scanner, and return the part of the match within the scanner's bounds
       return (scanner_for_range(range, flag) if range.begin <= @bound) if range.begin >= @pos
     end

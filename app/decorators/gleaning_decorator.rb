@@ -1,4 +1,6 @@
 class GleaningDecorator < ModelDecorator
+  include Templateer
+  include DialogPanes
   delegate_all
 
   # Define presentation-specific methods here. Helpers are accessed through

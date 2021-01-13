@@ -292,13 +292,6 @@ class Parser
       context = context.except :token
     end
     found = nil
-    # puts "Match #{token} (#{spec}) starting at '#{scanner.peek(6)}'." if token
-    # Intercept a section that has already been parsed (or previously declared)
-=begin
-    if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
-      return Seeker.new scanner, scanner.past(nokonode), token
-    end
-=end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
       return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner

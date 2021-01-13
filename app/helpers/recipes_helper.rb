@@ -184,6 +184,8 @@ module RecipesHelper
         buttons += edit_trimmers_button object
       when PageRef
         buttons += edit_trimmers_button object
+      when Gleaning
+        buttons += edit_trimmers_button object
       end
       msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
       buttons += content_tag(:p, "**#{msg}.") if msg.present?

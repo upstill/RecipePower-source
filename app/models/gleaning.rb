@@ -10,6 +10,12 @@ class Gleaning < ApplicationRecord
 
   has_one :page_ref, :dependent => :nullify
   has_one :site, :through => :page_ref
+  accepts_nested_attributes_for :page_ref
+  accepts_nested_attributes_for :site
+
+  def self.mass_assignable_attributes
+    [ { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }]
+  end
 
   # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
