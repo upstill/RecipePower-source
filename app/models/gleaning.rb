@@ -8,8 +8,8 @@ class Gleaning < ApplicationRecord
 
   require 'finder_services.rb'
 
-  has_one :page_ref, :dependent => :nullify
-  has_one :site, :through => :page_ref
+  has_one :page_ref, :dependent => :nullify, :autosave => true
+  has_one :site, :through => :page_ref, :autosave => true
   accepts_nested_attributes_for :page_ref
   accepts_nested_attributes_for :site
 

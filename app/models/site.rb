@@ -113,7 +113,7 @@ class Site < ApplicationRecord
   end
 
   def selector_string= str
-    if extant = finder_for('Content')
+    if extant = finders.find { |f| f.label == 'Content' }
       extant.selector = str
     else
       finders.build label: 'Content', attribute_name: 'html', selector: str

@@ -29,4 +29,10 @@ class GleaningDecorator < ModelDecorator
     result_for 'Title'
   end
 
+  # Regenerate content when the site finders for Content have changed
+  def regenerate_dependent_content
+    # The page_ref will produce different output if the site's trimmers have changed
+    refresh_attributes :content if changed_for_autosave? # site.finders_for('Content').any? { |f| f.changed? }
+  end
+
 end
