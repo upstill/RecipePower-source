@@ -114,7 +114,7 @@ Parser.init_grammar(
     rp_instructions: nil,
     rp_inglist: {
         match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-        :in_css_match => 'ul, p',
+        :in_css_match => 'ul',
     },
     rp_ingline: {
         match: [
@@ -124,7 +124,7 @@ Parser.init_grammar(
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        inline: true
+        in_css_match: 'li'
     },
     rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {

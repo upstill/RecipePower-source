@@ -408,13 +408,25 @@ public
 
   private
 
+  # Get the entry in the grammar modifications.
+  # We have to preserve the distinction between a nil entry (which modifies by eliminating the grammr entry)
+  # and an entry that doesn't exist (which leaves the grammar unaffected)
   def get_grammar_mods_entry *tokens
-    hsh = grammar_mods # Start at the top level
-    tokens.each do |token|
-      return unless hsh[token]
-      hsh = hsh[token]
+    def plumb hsh, *tokens
+      tokens.each do |token|
+        if hsh[token]
+          hsh = hsh[token]
+        else
+          yield if block_given? && !hsh.has_key?(token)
+          return nil
+        end
+      end
+      hsh
     end
-    return hsh
+    plumb(grammar_mods, *tokens) {
+      # If the grammar entry wasn't ACTUALLY nil, fall back on the standard grammar
+      return plumb(Parser.initialized_grammar, *tokens)
+    }
   end
 
   def set_grammar_mods_entry newval, *tokens
@@ -428,12 +440,8 @@ public
     end
     token = tokens.last
     case newval
-    when String
-      if newval.present?
-        hsh[token] = newval
-      else
-        hsh.delete token
-      end
+    when String # Blank string sets grammar mod to nil, which cancels the entry in the grammar
+      hsh[token] = newval.if_present
     when TrueClass, FalseClass
       hsh[token] = newval
     when NilClass
