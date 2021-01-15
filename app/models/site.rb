@@ -21,14 +21,16 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + [ :description, :trimmers,
-              :selector_string, # Defines a Finder for Content
-              :trimmers_str, # Enumerates selectors for content to cut from page
-              :rcplist_selector, # Defines the beginning of a recipe on the page
-              :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
-              :title_selector # Finds the title within a recipe
+    super + [:description, :trimmers,
+             :selector_string, # Defines a Finder for Content
+             :trimmers_str, # Enumerates selectors for content to cut from page
+             :rcplist_selector, # Defines the beginning of a recipe on the page
+             :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
+             :title_selector, # Finds the title within a recipe
+             :instructions_selector,
+             :ingredient_lines_with_css
     # :recipe_selector
-            ]
+    ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -45,23 +47,40 @@ class Site < ApplicationRecord
     self.trimmers = str.split(/\n+/).map &:strip
   end
 
+  # Manage the :in_css_match and :inline attributes for :rp_ingred_line grammar entry
+  def ingredient_lines_with_css
+    get_grammar_mods_entry( nil, :rp_inglist, :inline) == true ? "1" : "0"
+
+    "1"
+    "0"
+  end
+
+  def ingredient_lines_with_css= bool
+    case bool
+    when "0" # Turned off:
+      set_grammar_mods_entry nil, :rp_inglist, :inline
+    when "1" # Turned on:
+      set_grammar_mods_entry true, :rp_inglist, :inline
+    end
+  end
+
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
   def rcplist_selector
-    get_selector_for :rp_recipelist, :match, :at_css_match
+    get_grammar_mods_entry :rp_recipelist, :match, :at_css_match
   end
 
   def rcplist_selector= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
-    set_selector_for str, :rp_recipelist, :match, :at_css_match
+    set_grammar_mods_entry str, :rp_recipelist, :match, :at_css_match
   end
 
   def method_missing name, *args
     if name.to_s.match /(\w*)_selector(=)?$/
       token = ('rp_'+$1).to_sym
       if $2 == '='
-        set_selector_for args.first, token, :in_css_match
+        set_grammar_mods_entry args.first, token, :in_css_match
       else
-        get_selector_for token, :in_css_match
+        get_grammar_mods_entry token, :in_css_match
       end
     else
       super if defined?(super)
@@ -389,7 +408,7 @@ public
 
   private
 
-  def get_selector_for *tokens
+  def get_grammar_mods_entry *tokens
     hsh = grammar_mods # Start at the top level
     tokens.each do |token|
       return unless hsh[token]
@@ -398,7 +417,7 @@ public
     return hsh
   end
 
-  def set_selector_for str, *tokens
+  def set_grammar_mods_entry newval, *tokens
     hsh = grammar_mods # Start at the top level
     tokens[0...-1].each do |token|
       if hsh[token]
@@ -408,9 +427,16 @@ public
       end
     end
     token = tokens.last
-    if str.present?
-      hsh[token] = str
-    else
+    case newval
+    when String
+      if newval.present?
+        hsh[token] = newval
+      else
+        hsh.delete token
+      end
+    when TrueClass, FalseClass
+      hsh[token] = newval
+    when NilClass
       hsh.delete token
     end
   end

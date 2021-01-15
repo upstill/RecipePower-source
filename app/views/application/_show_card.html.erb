@@ -1,6 +1,6 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator do |presenter| %>
-  <% if presenter.is_a? CardPresentation %>
+  <% if presenter.respond_to? :card_avatar_column %>
     <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
          style="min-height: 200px"
          onload="RP.card.onload(event)"

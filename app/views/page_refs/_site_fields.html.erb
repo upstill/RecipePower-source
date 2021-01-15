@@ -25,20 +25,41 @@
     </div>
     <%= site_builder.text_field :title_selector %>
   <% elsif for_object.is_a?(Recipe) %>
-
+    Specify CSS selectors for Recipe elements:
     <div class='label-enclosure' style="margin-top:.5em">
-      <%= site_builder.label :title_selector, 'Title Selector (CSS)' -%>
+      <%= site_builder.label :title_selector, 'Title' -%>
     </div>
     <%= site_builder.text_field :title_selector %>
 
     <div class='label-enclosure' style="margin-top:.5em">
-      <%= site_builder.label :inglist_selector, 'Ingredient List Selector (CSS)' -%>
+      <%= site_builder.label :inglist_selector, 'Ingredient List' -%>
     </div>
     <%= site_builder.text_field :inglist_selector %>
 
     <div class='label-enclosure' style="margin-top:.5em">
-      <%= site_builder.label :ingline_selector, 'Ingredient Line Selector (CSS)' -%>
+      <%= site_builder.label :ingline_selector, 'Ingredient Line' -%>
     </div>
     <%= site_builder.text_field :ingline_selector %>
+
+<!--
+    <div class='row'>
+      <div class='col-md-12'>
+        <div class='item-enclosure'>
+          <%# site_builder.check_box :ingredient_lines_with_css %>
+          <span class="prompt">Use CSS (&#60;p&#62; and &#60;b&#62;) to delimit ingredient lines</span>
+        </div>
+      </div>
+    </div>
+-->
+
+    <div class='row'>
+      <div class='col-md-12'>
+        <div class='label-enclosure' style="margin-top:.5em">
+          <%= site_builder.label :instructions_selector, 'Instructions' -%>
+        </div>
+        <%= site_builder.text_field :instructions_selector %>
+      </div>
+    </div>
+
   <% end %>
 <% end %>
