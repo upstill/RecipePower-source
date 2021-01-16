@@ -404,14 +404,14 @@ class Parser
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       match_specification scanner, @grammar[spec], spec, context
     when String
-      StringSeeker.match scanner, string: spec, token: token
+      StringSeeker.match scanner.past_newline, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Hash
-      match_hash scanner, spec, token, context
+      match_hash scanner.past_newline, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner, context.merge(token: token, lexaur: lexaur)
+      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end

@@ -180,6 +180,15 @@ class Scanner < Object
 
   end
 
+  # Skip any newlines
+  def past_newline
+    result = self
+    while result.peek == "\n"
+      result = result.rest
+    end
+    result
+  end
+
   def chunk data
     if (data || (ptr == (head + 1)))
       head = ptr
@@ -341,6 +350,15 @@ class NokoScanner # < Scanner
   # Return this scanner, exhausted
   def end
     NokoScanner.new tokens, @bound, @bound
+  end
+
+  # Skip any newlines
+  def past_newline
+    result = self
+    while result.peek == "\n"
+      result = result.rest
+    end
+    result
   end
 
   def chunk data
