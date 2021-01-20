@@ -196,7 +196,7 @@ class TextElmtData < Object
     @elmt_bounds.replace_nth_element @elmt_bounds_index, @text_element
     @elmt_bounds.replace_nth_element @elmt_bounds_index+1, newnode.next if newnode.next&.text?
     valid?
-    validate_embedding newnode
+    # validate_embedding newnode
     newnode
   end
 
@@ -256,10 +256,10 @@ class TextElmtData < Object
   end
 
   # Does this text element have an ancestor of the given tag, with a class that includes the token?
-  def descends_from? tag, token=nil
-    text_element.ancestors.find do |ancestor|
-      ancestor.name == tag && (token.nil? || nknode_has_class?(ancestor, token))
-    end
+  def descends_from? tag: nil, token: nil
+    selector = tag.if_present || ''
+    selector << ".#{token}" if token.present?
+    !text_element.ancestors.css(selector).empty?
   end
 
   def to_s

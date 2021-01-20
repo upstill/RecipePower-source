@@ -333,7 +333,7 @@ end
     nokoscan = NokoScanner.new html
     parser = Parser.new(nokoscan, @lex, options[:grammar_mods] || {})
     if seeker = parser.match(token)
-      seeker.enclose_all
+      seeker.enclose_all parser: parser
     end
     [ nokoscan.nkdoc, seeker ]
   end

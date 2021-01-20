@@ -55,6 +55,15 @@ class Parser
     end
   end
 
+  # How should a successful match on the token be enclosed in the DOM?
+  # There are defaults, but mainly it's also a function of the grammar, which is site-dependent
+  def tag_for_token token
+    if (grammar_hash = @grammar[token.to_sym]).is_a?(Hash) &&
+        (selector = grammar_hash[:in_css_match])
+      selector.split('.').first.if_present
+    end || Parser.tag_for_token(token)
+  end
+
   # Provide a list of tokens available to match
   def tokens
     @grammar.keys
@@ -168,9 +177,9 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream
+  def match token, stream: @stream, context_free: false
     spec = grammar[token]
-    spec = spec.without( :in_css_match, :at_css_match, :after_css_match) if spec.is_a?(Hash)
+    spec = spec.without( :in_css_match, :at_css_match, :after_css_match) if spec.is_a?(Hash) && context_free
     matched = match_specification stream, spec, token
     matched
   end
@@ -181,7 +190,7 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      mtch = (block_given? ? yield(stream) : match(spec, stream))
+      mtch = (block_given? ? yield(stream) : match(spec, stream: stream))
       return mtch if mtch.success?
       stream = mtch.next
     end
@@ -310,7 +319,7 @@ class Parser
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
       return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = (context[:at_css_match] && scanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
           scanner.past(subscanner)
       return match.encompass(scanner)  # Release the limitation to element bounds
     end

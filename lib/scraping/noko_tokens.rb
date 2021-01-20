@@ -372,7 +372,7 @@ class NokoTokens < Array
     else # The focus node was the last child, and now it's gone => make newtree be the last child
       elmt_bounds.attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
-    validate_embedding report_tree('After: ', newtree)
+    # validate_embedding report_tree('After: ', newtree)
     @elmt_bounds.text_element_valid? newtree
     newtree
   end

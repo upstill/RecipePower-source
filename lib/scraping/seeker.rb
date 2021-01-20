@@ -108,18 +108,19 @@ class Seeker
   def enclose tag='span'
     return unless @token
     # Check that some ancestor doesn't already have the tag
-    if !head_stream.descends_from?(tag, @token)
+    if !head_stream.descends_from?(token: @token)
       @head_stream.enclose_to @tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
     end
   end
 
   # Recursively modify the Nokogiri tree to reflect seekers
-  def enclose_all
+  def enclose_all parser: nil
     # The seeker reflects a successful parsing of the (subtree) scanner against the token.
     # Now we should modify the Nokogiri DOM to reflect the elements found
     traverse do |inner|
       if inner.token
-        inner.enclose Parser.tag_for_token(inner.token)
+        with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
+        inner.enclose with_tag
       end
     end
   end
@@ -335,11 +336,11 @@ class  TagsSeeker < Seeker
     children = []
     stream = start_stream
     operand = nil
+    rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[Tag.typename opts[:types]]
+    scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
     opts[:lexaur].match_list(stream) do |data, next_stream|
       # The Lexaur provides the data at sequence end, and the post-consumption stream
-      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[opts[:types]]
         children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, rptype)
         operand = next_stream.peek
         stream = next_stream.rest
@@ -448,7 +449,7 @@ end
 
 class IngredientsSeeker < TagsSeeker
   def self.match stream, opts
-    super stream, opts.merge(types: 4)
+    super stream, opts.merge(types: 4, token: :rp_ingalts)
   end
 end
 

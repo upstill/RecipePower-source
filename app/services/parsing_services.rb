@@ -56,21 +56,21 @@ class ParsingServices
       else
         @parser = Parser.new nokoscan, @lexaur
         token = token.to_sym
-        enclose_results @parser.match(token)
+        enclose_results @parser.match(token), parser: @parser
       end
     end
     nkdoc.to_s
   end
 
-  def self.parse_from_string input, token, site: nil, lexaur: nil
+  def self.parse_from_string input, token, site: nil, lexaur: nil, context_free: false
     parser = Parser.new(input, lexaur)
-    match = parser.match(token)
+    match = parser.match(token, context_free: context_free)
     match
   end
 
-  def self.enclose_results seeker
+  def self.enclose_results seeker, parser: nil
     if seeker.success?
-      seeker.enclose_all
+      seeker.enclose_all parser: parser
       seeker.head_stream.nkdoc.to_s
     end
   end
@@ -85,7 +85,7 @@ class ParsingServices
           puts seeker
         }
       end
-      ParsingServices.enclose_results seeker
+      ParsingServices.enclose_results seeker, parser: @parser
       seeker.head_stream.nkdoc.to_s
     end
   end

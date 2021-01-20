@@ -80,7 +80,7 @@ def assemble_tree_from_nodes anchor_elmt, focus_elmt, rp_elmt_class:, tag: :span
   else # The focus node was the last child, and now it's gone => make newtree be the last child
     common_ancestor.add_child newtree
   end
-  validate_embedding newtree
+  # validate_embedding newtree
   return newtree
 end
 
@@ -110,21 +110,34 @@ end
 def validate_embedding newtree
   if %w{ div ul li }.include? newtree.name
     # We have to split ancestors up to and including any <p>
-    while newtree.ancestors.find { |node| node.name == 'p' } do
+    while inappropriate_ancestor = newtree.ancestors.find { |node| node.name == 'p' } do
+      # This is a node in newtree's ancestry which is disqualified from containing newtree,
+      # directly or indirectly. Without violating text order, we need to move newtree to be a
+      # sibling of the offending ancestor.
+
       parent = newtree.parent
       # If the interfering element has no successor or predecessor in the paragraph, simply hoist it up to be a sibling
       if !newtree.next
         parent.next = newtree
+        parent.remove if parent.text.empty?
       elsif !newtree.previous
         parent.previous = newtree
+        parent.remove if parent.text.empty?
       else
         # We have to split the paragraph, leaving the new tree between parts
-        ix = parent.children.find_index { |child| child == newtree }
-        parent.next = newtree
+        # first_down is the child of inappropriate_ancestor which is an ancestor of newtree.
+        # Of course, it may be newtree itself
+        first_down = (newtree.child.ancestors - inappropriate_ancestor.child.ancestors).last
+        ix = inappropriate_ancestor.children.find_index { |child| child == first_down }
+        inappropriate_ancestor.next = newtree.document.create_element inappropriate_ancestor.name, inappropriate_ancestor.attributes
+        inappropriate_ancestor.next.children = inappropriate_ancestor.children[ix..-1]
+        inappropriate_ancestor.next = inappropriate_ancestor.next.children.first
+        #
+        # ix = parent.children.find_index { |child| child == newtree }
+        # parent.next = newtree
         # break if ix == parent.children.count # No more work to do if this is the last child of the parent
-        newtree.next = newtree.document.create_element parent.name, parent.attributes
-        # Move the paragraph content following the new tree into the new paragraph
-        newtree.next.children = parent.children[ix..-1]
+        # newtree.next = newtree.document.create_element parent.name, parent.attributes
+        # newtree.next.children = parent.children[ix..-1]
       end
     end
   end
@@ -525,8 +538,8 @@ class NokoScanner # < Scanner
     text_elmt_data&.parent_tagged_with token
   end
 
-  def descends_from? tag, token = nil
-    text_elmt_data&.descends_from? tag, token
+  def descends_from? tag: nil, token: nil
+    text_elmt_data&.descends_from? tag: tag, token: token
   end
 
   # Get a scanner whose position is past the end of the given nokonode or nokoscanner,
