@@ -100,6 +100,7 @@ class RecipePresenter < CollectiblePresenter
     return content
   end
 
+  # TODO: We're leaving behind embedded links
   def content_for token
     return if @object.content.blank?
     html =

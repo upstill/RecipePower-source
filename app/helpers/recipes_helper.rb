@@ -241,7 +241,11 @@ module RecipesHelper
   end
 
   def sequence_instructions txt
-    sentences = txt.strip.sub(/\.$/,'').split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    sentences = txt.
+        strip.   # No whitespace fore and aft
+    # sub(/\.$/,'').
+        split( /\.\s+/ ). # Break on sentences
+        collect { |sentence| sentence.match(/[?!]/) ? sentence : (sentence.strip << '.') }
     while step = sentences.shift do
       break if step.present? && !step.match(/^[\d.,)]*$/)
     end
