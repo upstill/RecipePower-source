@@ -88,8 +88,7 @@ class NokoTokens < Array
   def move_elements_safely attach: :extend_right, relative_to:, iterator:
     # Find the lowest enclosing RP class of the parent
     enclosing_classes = ([relative_to] + relative_to.ancestors).
-        to_a.
-        inject { |memo, node| memo ||= rp_classes_for_node(node).if_present }
+        to_a.inject(nil) { |memo, node| memo ||= rp_classes_for_node(node).if_present }
 
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|

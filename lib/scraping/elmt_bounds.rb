@@ -148,13 +148,6 @@ class ElmtBounds < Array
     [first_pos, last_limit]
   end
 
-  private
-
-  # Where in the array is the elmt kept?
-  def find_elmt_index elmt
-    return nil unless elmt&.text?
-    find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
-  end
 
   def update_for parent, anchor_te, anchor_ix
     # How many text elements precede anchor_te under parent?
@@ -180,6 +173,15 @@ class ElmtBounds < Array
       end
     end
   end
+  
+  private
+
+  # Where in the array is the elmt kept?
+  def find_elmt_index elmt
+    return nil unless elmt&.text?
+    find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
+  end
+
 =begin
       text_elmts = []
       first_te_ix = nil

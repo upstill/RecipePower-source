@@ -157,6 +157,40 @@ class TextElmtData < Object
     valid?
   end
 
+  # Split the text element's parent in two, inserting the text element between the two
+  def split_parent
+    p = text_element.parent
+    gp = p.parent
+    if text_element.previous.nil?
+      # The first element in the parent: simply make it the parent's rightmost sibling
+      p.previous = text_element
+      newte = p.previous
+    elsif text_element.next.nil?
+      # The last element in the parent: simply make it the parent's rightmost sibling
+      p.next = text_element
+      newte = p.next
+    else
+      # Worst case scenario: there is material before and after the text
+      # Split the parent at the te's index
+      ix = p.children.index text_element
+      pix = gp.children.index p # Index of the parent in ITS parent
+      p.next = p.document.create_element(p.name)
+      to_move = p.children[(ix+1)..-1]
+      to_move.remove
+      p.next << to_move
+      p.next = text_element
+      newte = p.next
+    end
+    if newte.object_id != text_element.object_id
+      # Since the associated text_element has changed, we need to fix @elmt_bounds
+      @text_element = newte
+      @elmt_bounds.update_for gp, newte, @elmt_bounds_index
+      if newte.object_id != text_element.object_id
+        x=2
+      end
+    end
+  end
+
   # Is this TextElementData instance still a valid representation of a node in the document?
   def valid?
     return false unless nknode_valid?(@text_element)
@@ -187,6 +221,9 @@ class TextElmtData < Object
     # Split off a text element for text to the right of the limit (if any such text)
     mark_at -global_character_position_end
     split_right
+    while illegal_enclosure(tag) do
+      split_parent
+    end
     # Now add a next element: the html shell
     @text_element.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
     newnode = @text_element.next
@@ -255,12 +292,23 @@ class TextElmtData < Object
     text_element.parent if nknode_has_class?(text_element.parent, token)
   end
 
+  def illegal_enclosure tagname
+    invalid_enclosures =
+    case tagname.to_sym
+    when :li, :div, :ul
+      %w{ p }
+    else
+      []
+    end
+    invalid_enclosures.any? { |ivt| descends_from? tag: ivt }
+  end
+
   # Does this text element have an ancestor of the given tag, with a class that includes the token?
   def descends_from? tag: nil, token: nil
     token = token&.to_s
     text_element.ancestors.find do |ancestor|
-      (tag.blank? || ancestor.name == tag) &&
-      (token.blank? || nknode_has_class?(ancestor, token))
+          (tag.blank? || ancestor.name == tag) &&
+          (token.blank? || nknode_has_class?(ancestor, token))
     end
   end
 
