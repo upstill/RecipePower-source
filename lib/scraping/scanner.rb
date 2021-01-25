@@ -193,6 +193,11 @@ class Scanner < Object
 
   end
 
+  # Move past the end, returning an exhausted stream
+  def end
+
+  end
+
   # Skip any newlines
   def past_newline
     result = self
@@ -250,7 +255,12 @@ class StrScanner < Scanner
   def rest nchars = 1
     newpos = @pos + nchars
     # StrScanner.new(@strings, (newpos > @length ? @length : newpos))
-    StrScanner.new(@strings, (newpos > @bound ? @bound : newpos), @bound)
+    StrScanner.new @strings, (newpos > @bound ? @bound : newpos), @bound
+  end
+
+  # Return this scanner, exhausted
+  def end
+    StrScanner.new @strings, @bound, @bound
   end
 
   def more?

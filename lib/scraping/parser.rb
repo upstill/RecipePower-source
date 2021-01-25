@@ -317,11 +317,12 @@ class Parser
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
+      return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
+
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
           scanner.past(subscanner)
-      return match.encompass(scanner)  # Release the limitation to element bounds
+      return match.encompass(scanner) # Release the limitation to element bounds
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
@@ -446,7 +447,7 @@ class Parser
         best_guess = nil
         while scanner.more? && !(child = match_specification scanner, spec, distributed_context).success? do
           best_guess = child if child.enclose? # Save the last child to enclose
-          scanner = child.next # Skip past what the child consumed
+          scanner = child.next # Skip past what the child rejected
         end
         return best_guess if best_guess&.hard_fail?
         next unless child
@@ -473,7 +474,7 @@ class Parser
         child = match_specification end_stream, spec, distributed_context
         children << child.if_retain
         end_stream = child.tail_stream
-        if child.hard_fail?
+        if child.hard_fail? && !child.enclose?
           return Seeker.failed((children.first || child).head_stream,
                                end_stream,
                                token,

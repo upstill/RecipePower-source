@@ -1,5 +1,12 @@
 # Library of methods on Nokogiri documents/nodes
 
+# Clean up the HTML of a node
+def nknode_sanitize(node)
+  # Turn <p> tags embedded in list tags (illegal) into <li> tags
+  node.css('ul p,ol p').each { |found| found.name = 'li' }
+  node
+end
+
 # Extract the CSS classes for a Nokogiri node, applying a regexp and converting all to symbols
 def nknode_classes node, regexp=nil
   return [] unless classes = node['class']&.split

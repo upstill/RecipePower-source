@@ -115,6 +115,7 @@ Parser.init_grammar(
     rp_inglist: {
         match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
         :in_css_match => 'ul',
+        :enclose => true
     },
     rp_ingline: {
         match: [

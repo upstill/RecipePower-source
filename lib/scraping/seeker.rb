@@ -160,11 +160,11 @@ class Seeker
   # * the match was optional: the tokens are consumed anyway: @head_stream.rest at a minimum, possibly @tail_stream
   def next context=nil
     subsq = if @failed
-              if @optional
+              # if @optional # For some reason I thought it was a good idea to increment past a non-optional failure
                 @tail_stream.pos > @head_stream.pos ? @tail_stream : @head_stream.rest
-              else
-                @head_stream.rest
-              end
+              # else
+                # @head_stream.rest
+              # end
             else # Success!
               @tail_stream
             end
