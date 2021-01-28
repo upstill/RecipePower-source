@@ -11,6 +11,18 @@ class RecipesController < CollectibleController
     super
   end
 
+  # For getting and creating a new recipe page
+  def recipe_page
+    update_and_decorate
+    if @recipe.page_ref.recipe_page.nil? && request.method == 'POST'
+      rp = @recipe.page_ref.create_recipe_page
+      # Fire up the parser
+      rp.request_attributes :content
+      rp.save
+    end
+    redirect_to @recipe.page_ref.recipe_page
+  end
+
   def index
     redirect_to default_next_path
     # return if need_login true

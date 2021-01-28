@@ -249,6 +249,7 @@ RP::Application.routes.draw do
     member do
       get 'piclist'
       get :recipe_page
+      post :recipe_page
       resource :recipe_contents do
         patch 'annotate'
       end

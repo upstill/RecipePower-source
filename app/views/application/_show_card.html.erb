@@ -1,13 +1,13 @@
 <% viewparams = @viewparams || (@filtered_presenter && @filtered_presenter.viewparams) unless defined?(viewparams) && viewparams %>
 <%= present decorator do |presenter| %>
-  <% if presenter.respond_to? :card_avatar_column %>
-    <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
-         style="min-height: 200px"
-         onload="RP.card.onload(event)"
-         data-masonry-options='{
+  <div class="container-fluid card-item card-grid js-masonry <%= viewparams.display_style %>-card <%= decorator.dom_id %>"
+       style="min-height: 200px"
+       onload="RP.card.onload(event)"
+       data-masonry-options='{
             "gutter": 10,
             "itemSelector": ".grid-item",
             "stamp": ".stamp" }'>
+  <% if presenter.respond_to? :card_avatar_column %>
       <!--"columnWidth": 200,-->
       <!--onload="RP.masonry.onload(event)"-->
       <% NestedBenchmark.measure '...Rendering card label' do %>
@@ -50,7 +50,7 @@
           <%= presenter.share_button %>
         <% end %>
       </div>
-    </div>
     <%# feed_update_button Feed.find(2555), force=true %>
   <% end %>
+  </div>
 <% end %>

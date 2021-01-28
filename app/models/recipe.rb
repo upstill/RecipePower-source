@@ -126,7 +126,6 @@ class Recipe < ApplicationRecord
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     page_ref.request_attributes *(needed_attributes & [ :picurl, :title, :description ]) # Those to be got from PageRef
-    page_ref.request_attributes :recipe_page if content_needed?
   end
 
   # Override to acccept values from page_ref
