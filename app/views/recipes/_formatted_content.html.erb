@@ -1,4 +1,4 @@
-<h2><%= presenter.content_for(:rp_title) %></h2>
+<h2><%= @decorator.title %></h2>
 <% presenter.content_for(:rp_yield) do |html| %>
   <p>Yield: <%= html %></p>
 <% end %>

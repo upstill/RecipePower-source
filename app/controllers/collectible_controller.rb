@@ -291,7 +291,7 @@ class CollectibleController < ApplicationController
     update_options = { touch: true }
     # The :refresh parameter triggers regeneration of the entity's content,
     # presumably due to some dependency (like the page_ref or the site changing)
-    update_options[:refresh] = [ :content, :title ] if params[:refresh]
+    update_options[:refresh] = [ :content ] if params[:refresh]
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil

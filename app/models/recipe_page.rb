@@ -24,45 +24,56 @@ class RecipePage < ApplicationRecord
       # Clear all recipes but the first
       content = page_ref.trimmed_content
       if content.present?
-        # Reduce the recipes:
-        # -- retain only those that have been collected
-        # -- if none have been collected, reduce the set to the oldest persisted one
-        # -- if none persisted, choose one at random. (There shouldn't even be more than one.)
-        persisted = page_ref.recipes.to_a.select &:persisted?
-        page_ref.recipes =
-        if persisted.present?
-          persisted.select { |rcp| rcp.toucher_pointers.exists? }.if_present ||
-          [ persisted.inject { |memo, rcp| (rcp.created_at < memo.created_at) ? rcp : memo } ]
-        else
-          page_ref.recipes.to_a[0..0]
-        end
         # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
         parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
         parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
-        rset = page_ref.recipes.to_a
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
+        rcpdata = []
         parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
-          title = sub_parser.value_for :rp_title
           xb = sub_parser.xbounds
-          recipe = rset.find do |r|
-            (r.anchor_path == xb.first && r.focus_path == xb.last) || (r.title == title)
-          end || rset.find { |r| r.anchor_path.nil? }
-          if title.present? # There's an existing recipe
-            if recipe
-              recipe.accept_attribute :title, title, true
-              recipe.anchor_path, recipe.focus_path = xb
-              # recipe.accept_attribute(:anchor_path, xb.first, true) { |attrname| recipe.accept_attribute :content, nil}
-              # recipe.accept_attribute(:focus_path, xb.last, true) { |attrname| recipe.accept_attribute :content, nil}
-            else
-              rcp = page_ref.recipes.build title: title, anchor_path: xb.first, focus_path: xb.last
-            end
-          end
-          puts sub_parser.report_for(:rp_title) { |title_seekers| "Parsed out recipe '#{title_seekers.first.to_s}'" }
-          # puts sub_parser.report_for(:except => :rp_title) # All other token types
+          rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
         end
+
+        # Try to match existing recipes on selection, collecting those that don't match
+        unresolved = []
+        page_ref.recipes.each do |recipe|
+          # Keep recipes that can't be matched on path
+          if rcpdi = rcpdata.find_index { |rcpdatum| recipe.anchor_path == rcpdatum[:anchor_path] && recipe.focus_path == rcpdatum[:focus_path] }
+            rcpdata.delete_at rcpdi
+          else
+            unresolved << recipe
+          end
+        end
+
+        # Match by titles on recipes that didn't match by selection
+        unresolved.keep_if do |recipe|
+          if rcpdi = rcpdata.find_index { |rcpdatum| recipe.title == rcpdatum[:title] }
+            recipe.anchor_path = rcpdatum[:anchor_path]
+            recipe.focus_path = rcpdatum[:focus_path]
+            rcpdata.delete_at rcpdi
+          end
+          rcpdi.nil?
+        end
+
+        # Assign remaining data to random unresolved recipes
+        unresolved.sort_by { |recipe| recipe.collector_pointers.size }
+        while rcpdata.present? && unresolved.present? do
+          existing_rcp = unresolved.pop
+          rcpdatum = rcpdata.pop
+          existing_rcp.accept_attribute :title, rcpdatum[:title], true
+          existing_rcp.anchor_path = rcpdatum[:anchor_path]
+          existing_rcp.focus_path = rcpdatum[:focus_path]
+        end
+
+        # Build recipes from any data that hasn't found a home
+        page_ref.recipes.create rcpdata
+
+        # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
+        page_ref.recipes.destroy *unresolved
+
         accept_attribute :content, content
       end
     end

@@ -66,18 +66,20 @@ display_fields = (recipeFieldsElmt, itemClass) ->
 	$(('div.' + itemClass), recipeFieldsElmt).addClass 'visible'
 
 edit_field = (recipeFieldsElmt) ->
+	# Get the root of the fields that are currently being edited
+	# prevRecipeFieldsElmt = $('div.recipe-field.visible a.copy-selection').parents('div.recipe-fields')[0]
 	$('div.recipe-fields').each (index, fe) ->
-# Copy the edited title to the display title
+	# Copy the edited title to the display title
 		ttl = $('.editing-item.title input', fe)[0].value
 		if ttl == ''
 			ttl = 'Recipe needs a title!'
-		$('.listing-item.title h3', fe).text ttl
+		$('h4', fe).text ttl
 		# Hide the editing fields
 		display_fields fe, 'listing-item'
 	display_fields recipeFieldsElmt, 'editing-item'
 	set_selection $('input.anchorPath', recipeFieldsElmt)[0].value, $('input.focusPath', recipeFieldsElmt)[0].value
 
-adopt_selection = (fieldsNode) ->
+adopt_changes = (fieldsNode) ->
 	sel = window.getSelection()
 	anchorText = ''
 	if sel.anchorNode && sel.focusNode && sel.anchorNode != sel.focusNode
@@ -118,7 +120,7 @@ RP.recipe_pages.onload = (dlog) ->
 		row = $(this).parents('div.row')[0]
 		$(row).before($(this).data('fields').replace(regexp, time))
 		new_field = $('div.recipe-fields').last()[0]
-		ttl = adopt_selection new_field
+		ttl = adopt_changes new_field
 		if ttl && (ttl != '')
 			$('.listing-item.title h4', new_field).text ttl
 			$('.editing-item.title input', new_field).val ttl
@@ -128,15 +130,16 @@ RP.recipe_pages.onload = (dlog) ->
 		edit_field $(event.target).parents('div.recipe-fields')[0]  # The enclosing fields set
 		event.preventDefault()
 	$(dlog).on "click", '.copy-selection', (event) ->
-		adopt_selection $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
+		adopt_changes $(event.target).parents('div.recipe-fields')[0] # The enclosing fields set
 		event.preventDefault()
 		RP.notifications.post 'Selection copied to recipe', 'popup'
 	$(dlog).on "click", '.post-selection', (event) ->
 		fieldsNode = $(event.target).parents('div.recipe-fields')[0]
 		anchor_path = $('input.anchorPath', fieldsNode)[0].value
 		focus_path = $('input.focusPath', fieldsNode)[0].value
+		title = $('div.title input', fieldsNode)[0].value
 		elem = $('a.post-selection', fieldsNode)[0]
-		params = { 'recipe[anchor_path]': anchor_path, 'recipe[focus_path]': focus_path }
+		params = { 'recipe[title]': title, 'recipe[anchor_path]': anchor_path, 'recipe[focus_path]': focus_path }
 		if event.altKey
 			params['recipe[content]'] = ''
 		url = RP.build_request $(elem).data('href'), params

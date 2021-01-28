@@ -193,7 +193,7 @@ class ApplicationController < ActionController::Base
         resource_errors_to_flash entity
         return false
       end
-      if entity.is_a?(Collectible)
+      if entity.respond_to? :be_touched # is_a?(Collectible)
         rr =
           case options[:touch]
           when true

@@ -1,6 +1,7 @@
 # A picable class has an associated image
 module Picable
   require 'image_reference.rb'
+  require 'image_reference_services.rb'
   extend ActiveSupport::Concern
   # include Linkable
 
