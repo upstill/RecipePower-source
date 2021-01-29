@@ -65,7 +65,11 @@ class RecipePresenter < CollectiblePresenter
         return "Recipe has no content currently. Try Refreshing."
       end
     end
-    hc = with_format('html') { render 'recipes/formatted_content', presenter: self, locals: { presenter: self } }
+    hc = if content_for(:rp_inglist).present? && content_for(:rp_instructions).present?
+           with_format('html') { render 'recipes/formatted_content', presenter: self, locals: {presenter: self} }
+         else
+           @object.content.html_safe
+         end
     if response_service.admin_view?
       hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe  
     end

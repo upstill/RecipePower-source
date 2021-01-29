@@ -168,16 +168,13 @@ module RecipesHelper
       end
       case object
       when Recipe
-        split_options = {
-            class: 'action-button glyphicon glyphicon-asterisk',
-            mode: :partial,
-            title: 'Split Recipe',
-        }
-        if !object.recipe_page
-          split_options[:method] = 'POST'
-          # split_options[:with_form] = true
-        end
-        buttons += button_to_submit '', recipe_page_recipe_path(object), split_options
+        buttons +=
+            link_to_submit '',
+                             recipe_page_recipe_path(object, launch_dialog: 'annotate-content' ),
+                             class: 'action-button glyphicon glyphicon-asterisk',
+                             mode: :partial,
+                             title: 'Split Recipe',
+                             method: (object.recipe_page.nil? ? 'POST' : 'GET')
         buttons +=
             button_to_submit('',
                              edit_recipe_contents_path(recipe),

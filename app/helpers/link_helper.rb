@@ -19,6 +19,7 @@ module LinkHelper
       class_str << " btn btn-#{kind}"
       class_str << " btn-#{size}" if size
     end
+    class_str << ' trigger' if response_service.trigger.present? && class_str.split.include?(response_service.trigger)
     options[:class] = class_str
 
     link_options = linkto_options path_or_options, options
