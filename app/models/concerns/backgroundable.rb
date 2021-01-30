@@ -288,6 +288,7 @@ module Backgroundable
   end
 
   # relaunch? determines whether a job that didn't return an error should be rerun
+  # NB: May be overridden for more subtle relaunch criteria
   def relaunch?
     errors.present?
   end
@@ -299,8 +300,17 @@ module Backgroundable
     # with a proper report, which will then get recorded in errors[:base]
     if relaunch?
       raise Exception, self.errors.full_messages # Make sure DJ gets the memo
-    else # With success and no errors, the DelayedJob record--if any--is about to go away, so we remove our pointer to it
-      self.dj = nil
+    end
+    self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
+    self.dj = nil if good?
+    if persisted?
+      if changed? #  && !bad? # By this point, any error state should be part of the record
+        msgs = errors.messages.clone
+        save
+        msgs.each { |type, errs| errs.each { |err| errors.add type, err } }
+      else
+        update_attribute :dj_id, dj&.id
+      end
     end
   end
 
@@ -311,21 +321,18 @@ module Backgroundable
   # NB: THIS IS THE PLACE FOR BACKGROUNDABLES TO RECORD ANY PERSISTENT ERROR STATE beyond :good or :bad status,
   # because, by default, that's all that's left after saving the record
   def error job, exception
-    errors.add :base, "#{exception} at #{exception.backtrace&.first}"
+    if tracetop = exception.backtrace&.first
+      # Extract the file and line # from the stack top
+      tracetop = " at<br>" + tracetop.match(/(.*:[\d]*)/).to_s.if_present || tracetop
+      tracetop.sub! Rails.root.to_s+'/', ''
+    end
+    errors.add :base, exception.to_s+tracetop
+    self.status = :bad if processing? # ...thus allowing others to set the status
   end
 
-  # The #after hook is called after #success and #error
+  # The #after hook is called after #success or #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=dj
-    self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
-    dj_status = (job.destroyed? ? "(destroyed)" : '(not destroyed)') if job
-    puts ">>> After #{status} job '#{job}'#{dj_status} on #{self.class.to_s}##{id} -> dj##{dj_id}"
-    self.dj = nil if good?
-    if persisted? && changed? #  && !bad? # By this point, any error state should be part of the record
-      msgs = errors.messages.clone
-      save
-      msgs.each { |type, errs| errs.each { |err| errors.add type, err } }
-    end
   end
 
   def failure job=nil

@@ -3,6 +3,11 @@ class GleaningDecorator < ModelDecorator
   include DialogPanes
   delegate_all
 
+  # Provide a list of the editing panes available for the object
+  def dialog_pane_list topics=nil # A comma-separated list of topics to edit
+    Pundit.policy(User.current, object.site).edit? ? [dialog_pane_spec( :site)] : []
+  end
+
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
   #

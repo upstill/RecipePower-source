@@ -86,7 +86,9 @@ class Gleaning < ApplicationRecord
       self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
       self.http_status = breakdown[:status]
       errors.add :url, breakdown[:msg]
-      raise breakdown[:msg] if dj
+      exc = Exception.new breakdown[:msg]
+      exc.set_backtrace msg.backtrace
+      raise exc # msg, breakdown[:msg] if dj
     end
   end
 

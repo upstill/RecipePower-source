@@ -177,7 +177,7 @@ class ApplicationController < ActionController::Base
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
-        if entity.is_a?(Collectible)
+      if entity.is_a?(Collectible)
         if options[:touch] == :collect # Ensure that
           (attribute_params ||= {})[:collectible_in_collection] = true
         end

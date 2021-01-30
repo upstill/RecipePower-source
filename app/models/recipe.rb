@@ -142,7 +142,7 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :recipe_page, :content
+    page_ref.ensure_attributes :content
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed?
@@ -151,7 +151,7 @@ class Recipe < ApplicationRecord
         recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       end
       content_to_parse =
-        (recipe_page.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
+        (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
       return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse

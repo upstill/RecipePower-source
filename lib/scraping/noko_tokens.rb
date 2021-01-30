@@ -246,13 +246,16 @@ class NokoTokens < Array
         first_text_element ||= child
       end
     end
-    first_text_element ||= nknode_successor_text_elmt @nkdoc, node # The node has no text elements, perhaps because it's a <br> tag. Return an empty range for the next text element
-    token_range_for_text_elements first_text_element, last_text_element
+    token_range_for_text_elements first_text_element || nknode_successor_text_elmt( @nkdoc, node), 
+                                  last_text_element
   end
 
   # What are the tokens for the document between two text elements?
   # Returns: a Range giving those indices in @token_starts
   def token_range_for_text_elements first_text_element, last_text_element
+    # By convention, a nil first element means an empty token range past the range of tokens
+    return @token_starts.count..@token_starts.count if first_text_element.nil?
+
     first_pos, last_limit = @elmt_bounds.range_encompassing first_text_element, last_text_element
     # Now we have an index in the elmts array, but we need a range in the tokens array.
     # Fortunately, that is sorted by index, so: binsearch!

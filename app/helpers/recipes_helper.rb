@@ -194,8 +194,6 @@ module RecipesHelper
       when Gleaning
         buttons += edit_trimmers_button object
       end
-      msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
-      buttons += content_tag(:p, "**#{msg}.") if msg.present?
       content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
     end
   end

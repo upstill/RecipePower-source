@@ -94,7 +94,7 @@ class FinderServices
           end
         end
       end
-      raise(Exception, errstr) unless pagefile
+      raise(Exception, "HTTP error on #{uri}: #{errstr}") unless pagefile
 
       # We've got a set of finders to apply and an open page to apply them to. Nokogiri time!
       nkdoc = Nokogiri::HTML pagefile
@@ -139,9 +139,13 @@ class FinderServices
       finders.each do |finder|
         label = finder.label
         next unless (selector = finder.selector.split(/\s*\n/).join(', ')) &&
-            (labels.blank? || labels.include?(label)) && # Filter for specified labels, if any
-            (matches = nkdoc.css(selector)) &&
-            (matches.count > 0)
+            (labels.blank? || labels.include?(label))
+        # Filter for specified labels, if any
+        begin
+          next unless (matches = nkdoc.css(selector)).count > 0
+        rescue Exception => exc
+          raise exc, "CSS Selector (#{selector}) caused an error"
+        end
         # finder.attribute_name = finder.finder.attribute_name
         result = Result.new finder # For accumulating results
         matches.each do |ou|
@@ -196,7 +200,8 @@ class FinderServices
     msg = msg.to_s
     http_status = (m=msg.match(/\b\d{3}\b/)) ? m[0].to_i : (401 if msg.match('redirection forbidden:'))
 
-    errmsg = " #{url} failed to glean (http_status #{http_status}): #{msg}"
+    # errmsg = " #{url} failed to glean (http_status #{http_status}): #{msg}"
+    errmsg = "Gleaning failed: #{msg}"
     { status: http_status, msg: errmsg }
   end
 
