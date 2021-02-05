@@ -137,19 +137,11 @@ class Parser
           %i{ atline inline },  # :atline and :inline are exclusive options
           %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
       ].each do |flagset|
-        if (wrongset = (keys & flagset))[1] &&
-            # Eliminate nil values for exclusive keys
-            wrongset.keep_if { |key|
-              if entry[key].nil?
-                entry.delete key
-                false
-              else
-                true
-              end
-            }[1]
-          wrongstring, flagstring = [wrongset, flagset].map { |list|
-            '\'' + list[0..-2].join("', '") + "' and '#{list.last}'"
-          }
+        # At most one of the flags in the flagset can be non-nil
+        setflags = (entry.slice *flagset).compact # Eliminating the nil flags
+        if setflags.count > 1
+          wrongstring = ':' + setflags.keys.map(&:to_s).join(', :')
+          flagstring = ':' + flagset.map(&:to_s).join(', :')
           raise "Error: grammar entry for #{token} has #{wrongstring} flags. (Only one of #{flagstring} allowed)."
         end
       end
@@ -176,11 +168,22 @@ class Parser
     end
   end
 
+  # Save the current grammar and apply mods to it for parsing
+  def push_grammar mods
+    @grammar_stack ||= []
+    @grammar_stack.push grammar
+    @grammar = YAML.load(grammar.to_yaml) # Clone the grammar for modification
+    modify_grammar YAML.load(mods.to_yaml)
+  end
+
+  # Restore the grammar to its prior state
+  def pop_grammar
+    @grammar = YAML.load(@grammar_stack.pop.to_yaml)
+  end
+
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream, context_free: false
-    spec = grammar[token]
-    spec = spec.without( :in_css_match, :at_css_match, :after_css_match) if spec.is_a?(Hash) && context_free
-    matched = match_specification stream, spec, token
+  def match token, stream: @stream
+    matched = match_specification stream, grammar[token], token
     matched
   end
 

@@ -254,15 +254,13 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.new html
-    nks.enclose_tokens 0, 2
+    nks.enclose_tokens 0, 2, tag: 'div'
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
-<div class="upper div">
-    <div class="rp_elmt">
-        <span>text1 </span>
-        text2
-    </div>
+<div class=\"upper div rp_elmt\">
+      <span>text1 </span>
+      text2
 </div>
 EOF
     expected = expected.gsub(/\n+\s*/, '')
@@ -277,15 +275,13 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.new html
-    nks.enclose_tokens 0,2
+    nks.enclose_tokens 0,2, tag: 'div'
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
-<div class="upper div">
-    <div class="rp_elmt">
+<div class="upper div rp_elmt">
         text2 
         <span>text1</span>
-    </div>
 </div>
 EOF
     expected = expected.gsub(/\n+\s*/, '')
@@ -299,15 +295,13 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.new html
-    nks.enclose_tokens 0,2
+    nks.enclose_tokens 0,2, tag: 'div'
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
-<div class="upper div">
-    <div class="rp_elmt">
+<div class="upper div rp_elmt">
         <span>text1 </span>
         <span>text2</span>
-    </div>
 </div>
 EOF
     expected = expected.gsub(/\n+\s*/, '')
@@ -380,19 +374,17 @@ EOF
 EOF
     html = html.gsub(/\n+\s*/, '')
     nks = NokoScanner.new html
-    nks.enclose_tokens 0, 2
+    nks.enclose_tokens 0, 2, tag: 'div'
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
-<div class="upper div">
+<div class="upper div rp_elmt">
   <div class="lower div">
-    <div class="rp_elmt">
-      <div class="lower left">
-        <span>text1 </span>
-      </div>
-      <div class="lower right">
-        text2
-      </div>
+    <div class="lower left">
+      <span>text1 </span>
+    </div>
+    <div class="lower right">
+      text2
     </div>
   </div>
 </div>

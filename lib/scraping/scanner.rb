@@ -12,7 +12,7 @@ require 'scraping/noko_utils.rb'
 # &block will assess
 def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil
 
-  tag = tag.to_s || 'span'
+  # tag = tag.to_s || 'span'
   rp_elmt_class ||= ''
 
   # Scan a node and its ancestors to see if any contain all and only the text between the two text elements
@@ -22,7 +22,7 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
       nknode_text_before(first_te, within: node).blank? &&
       nknode_text_after(last_te, within: node).blank? &&
       (!block_given? || yield(node)) do
-    anc = node if node.name == tag &&
+    anc = node if (tag.blank? || node.name == tag) &&
         (value.nil? || node['value'].nil?) # Here we should be testing for parser compatibility
     break if nknode_has_class?(node, :rp_elmt) # Don't rise above the innermost :rp_elmt
     node = node.parent
@@ -549,7 +549,7 @@ class NokoScanner # < Scanner
   end
 
   def descends_from? tag: nil, token: nil
-    text_elmt_data&.descends_from? tag: tag, token: token
+    nknode_descends_from? text_elmt_data.text_element, tag: tag, token: token if text_elmt_data
   end
 
   # Get a scanner whose position is past the end of the given nokonode or nokoscanner,

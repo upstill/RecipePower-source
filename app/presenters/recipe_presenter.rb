@@ -122,7 +122,7 @@ class RecipePresenter < CollectiblePresenter
     #when :rp_ingline
     when :rp_instructions
       instrs = results_for(".#{token} li").if_present || [result_for( ".#{token}")]
-      instrs.collect { |instr| instr.strip.sub(/\.$/,'')+'.'}.join ' '
+      instrs.compact.collect { |instr| instr.strip.sub(/\.$/,'')+'.'}.join ' '
     else # Default is just to return the text at the named node
       result_for ".#{token}"
     end

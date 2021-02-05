@@ -56,7 +56,7 @@ class NokoTokenTest < ActiveSupport::TestCase
 
     # Go again prefixing the :rp_ingline node with the prefatory text
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 1, 6, tag: :div, rp_elmt_class: :rp_ingline
+    newtree = @nokotokens.enclose_tokens 1, 7, tag: :div, rp_elmt_class: :rp_ingline
     assert_equal 1, @nkdoc.css('div.rp_ingline').count
     assert_equal 'some prefatory text line text', @nkdoc.css('div.rp_ingline').inner_text.split.join(' ')
   end

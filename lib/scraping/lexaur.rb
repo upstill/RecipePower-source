@@ -26,7 +26,7 @@ class Lexaur < Object
     lex = self.new
     puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
     Tag.of_type(types).each { |tag|
-      # puts "#{tag.typename}: (#{tag.id}) #{tag.name}"
+      puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
       lex.take tag.name, tag.id
     }
     lex

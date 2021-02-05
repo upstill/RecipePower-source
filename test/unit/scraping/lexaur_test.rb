@@ -58,10 +58,10 @@ class LexaurTest < ActiveSupport::TestCase
 
   test 'lexaur chunks simple stream' do
     lex = Lexaur.from_tags
-    scanner = StrScanner.from_string'jalapeño' # Fail gracefully
+    scanner = StrScanner.new'jalapeño' # Fail gracefully
     assert_nil lex.chunk(scanner)
 
-    scanner = StrScanner.from_string 'jalapeño peppers'
+    scanner = StrScanner.new 'jalapeño peppers'
     lex.chunk(scanner) {|data, stream|
       assert_not_nil data
       assert_includes data, 1
@@ -69,7 +69,7 @@ class LexaurTest < ActiveSupport::TestCase
       assert_nil stream.first
     }
 
-    scanner = StrScanner.from_string 'jalapeño peppers, and more'
+    scanner = StrScanner.new 'jalapeño peppers, and more'
     assert_not_nil lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       assert_includes data, 1
@@ -79,7 +79,7 @@ class LexaurTest < ActiveSupport::TestCase
 
   # Test whether the lex finds the given string, and consumes the entire string
   def assert_finds_tag lex, string
-    scanner = StrScanner.from_string string
+    scanner = StrScanner.new string
     tag_id = nil
     lex.chunk(scanner) { |data, stream|
       assert_not_nil data
@@ -116,14 +116,14 @@ class LexaurTest < ActiveSupport::TestCase
     Tag.assert 'almonds', :Ingredient
     Tag.assert 'walnuts', :Ingredient
     lex = Lexaur.from_tags
-    scanner = StrScanner.from_string 'chopped almonds'
+    scanner = StrScanner.new 'chopped almonds'
     result = lex.chunk scanner do |terms, onward|
       Tag.where(id: terms, tagtype: Tag.typenum(:Condition)).first
     end
     assert_equal result.class, Tag
     assert_equal 'chopped', result.name
 
-    scanner = StrScanner.from_string 'chopped almonds or walnuts'
+    scanner = StrScanner.new 'chopped almonds or walnuts'
     tags = []
     lex.match_list scanner do |terms, onward|
       tags << Tag.where(id: terms, tagtype: Tag.typenum(:Ingredient)).first
@@ -149,12 +149,12 @@ class LexaurTest < ActiveSupport::TestCase
   test 'Lexaur parses lists of tags' do
     lex = Lexaur.from_tags
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    lex.match_list(StrScanner.from_string('ground turmeric, cumin and cinnamon')) do |terms, stream|
+    lex.match_list(StrScanner.new('ground turmeric, cumin and cinnamon')) do |terms, stream|
       target = strings.shift
       assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
     end
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    lex.match_list(StrScanner.from_string('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
+    lex.match_list(StrScanner.new('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
       target = strings.shift
       assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
     end

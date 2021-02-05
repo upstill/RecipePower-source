@@ -121,6 +121,68 @@ def last_text_element node, nonblank = true
   last
 end
 
+# Should a node be precluded from being enclosed in a tag b/c it has an incompatible ancestor?
+def nknode_has_illegal_enclosure? node, tagname
+  return if tagname.blank?
+  invalid_enclosures =
+      case tagname.to_sym
+      when :li, :div, :ul
+        %w{ p }
+      else
+        []
+      end
+  invalid_enclosures.any? { |ivt| nknode_descends_from? node, tag: ivt }
+end
+
+# Does this text element have an ancestor of the given tag, with a class that includes the token?
+def nknode_descends_from? node, tag: nil, token: nil
+  token = token&.to_s
+  node.ancestors.find do |ancestor|
+    (tag.blank? || ancestor.name == tag) &&
+        (token.blank? || nknode_has_class?(ancestor, token))
+  end
+end
+
+# Split the common ancestor of the two nodes in two, moving each node between them up to the parent's parent
+def nknode_split_ancestor_of first, last
+  meta_ancestry = first.ancestors & last.ancestors
+  first = (first.ancestors - meta_ancestry).first || first
+  last = (last.ancestors - meta_ancestry).first || last
+  common_ancestor = meta_ancestry.first # Common ancestor
+  family = common_ancestor.children
+  first_ix, last_ix = family.index(first), family.index(last)
+  to_move = family[first_ix..last_ix]
+  gp = common_ancestor.parent
+  if first.previous.nil?
+    # The first element in the parent: simply move the children before the parent's leftmost sibling
+    to_move.remove
+    common_ancestor.previous = to_move
+  elsif last.next.nil?
+    # The last element in the parent: simply make it the parent's rightmost sibling
+    to_move.remove
+    common_ancestor.next = to_move
+    newte = common_ancestor.next
+  else
+    # Worst case scenario: there is material before and after the node range
+    # Split the parent at the te's index
+    after = family[(last_ix+1)..-1]
+    common_ancestor.next = common_ancestor.document.create_element(common_ancestor.name)
+    after.remove
+    common_ancestor.next.children = after
+    common_ancestor.next = to_move
+  end
+  # Now we have to repair any damage to the @elmt_bounds array of text elements
+  return gp
+  if newte.object_id != text_element.object_id
+    # Since the associated text_element has changed, we need to fix @elmt_bounds
+    @text_element = newte
+    @elmt_bounds.update_for gp, newte, @elmt_bounds_index
+    if newte.object_id != text_element.object_id
+      x=2
+    end
+  end
+end
+
 # Find a parent of the text_element which won't be split in a tree walk.
 # if how is :blank_left, the ancestor qualifies if it only has blank text before the text_element
 # if how is :blank_right, the ancestor qualifies if it only has blank text after the text_element

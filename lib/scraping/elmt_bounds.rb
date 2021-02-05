@@ -173,8 +173,6 @@ class ElmtBounds < Array
       end
     end
   end
-  
-  private
 
   # Where in the array is the elmt kept?
   def find_elmt_index elmt

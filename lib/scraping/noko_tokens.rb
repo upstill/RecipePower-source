@@ -138,7 +138,7 @@ class NokoTokens < Array
   ###### The following methods pertain to rearranging a DOM to enclose selected text within a marking element
 
   # Convenience method to specify requisite text in terms of tokens
-  def enclose_tokens first_token_index, limiting_token_index, tag: nil, rp_elmt_class: nil, value: nil
+  def enclose_tokens first_token_index, limiting_token_index, tag: 'span', rp_elmt_class: nil, value: nil
     stripped_text = text_from(first_token_index, limiting_token_index).strip
     return if stripped_text.blank?
     global_character_position_start = character_position_at_token first_token_index
@@ -149,7 +149,7 @@ class NokoTokens < Array
   end
 
   # Return the Nokogiri node that was built
-  def enclose_selection anchor_path, anchor_offset, focus_path, focus_offset, tag: nil, rp_elmt_class: nil, value: nil
+  def enclose_selection anchor_path, anchor_offset, focus_path, focus_offset, tag: 'span', rp_elmt_class: nil, value: nil
     if anchor_path == focus_path && anchor_offset > focus_offset
       anchor_offset, focus_offset = focus_offset, anchor_offset
     end
@@ -288,14 +288,13 @@ class NokoTokens < Array
 
   # This is the main method for rearranging text in the DOM, enclosing
   # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
-  def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: nil, value: nil
+  def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: 'span', value: nil
     # Ignore blank text outside the range
     teleft.advance_over_space teright # Don't pass through each other!
     teright.retreat_over_space teleft
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
-    common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
-    if common_ancestor # anchor_elmt.parent == focus_elmt.parent # Simple case: enclosing text w/in a single parent
+    if common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # Simple case: enclosing text w/in a single parent
       clear_classification_context anchor_elmt.parent, rp_elmt_class
       clear_classification_context focus_elmt.parent, rp_elmt_class
       # When text of the common ancestor is blank before and after the selection, and we can use an existing element, just mark it
@@ -364,6 +363,10 @@ class NokoTokens < Array
     end
 
     common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
+    # We can't attach the new node under an illegal ancestor, directly or indirectly
+    while nknode_has_illegal_enclosure?(common_ancestor.children.first, tag) do
+      common_ancestor = teleft.split_common teright
+    end
     # Create a new tree, and move it to the appropriate place under common_ancestor
     newtree = (Nokogiri::HTML.fragment html_enclosure(tag: tag, rp_elmt_class: rp_elmt_class, value: value)).children[0]
     # We let #node_walk determine the insertion point: successor_node is the node that comes AFTER the new tree

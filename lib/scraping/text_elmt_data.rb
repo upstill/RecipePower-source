@@ -157,7 +157,24 @@ class TextElmtData < Object
     valid?
   end
 
+  # Split the ancestor shared with 'other'
+  def split_common other
+    common_ancestor = (@text_element.ancestors & other.text_element.ancestors).first
+    # Split the ancestor before and after the selected text, as necessary
+    # We'll need to update @elmt_bounds appropriately
+    fixture = nknode_first_text_element common_ancestor.parent
+    fixture_index = @elmt_bounds.find_elmt_index fixture
+    common_ancestor = nknode_split_ancestor_of @text_element, other.text_element
+    # The element index of the first text element of the common ancestor's parent should be unchanged
+    @elmt_bounds.update_for common_ancestor, nknode_first_text_element(common_ancestor), fixture_index
+    # Refresh the TextElement from the elmt_bounds
+    @text_element = @elmt_bounds.nth_elmt @elmt_bounds_index
+    other.text_element = @elmt_bounds.nth_elmt other.elmt_bounds_index
+    common_ancestor
+  end
+
   # Split the text element's parent in two, inserting the text element between the two
+=begin
   def split_parent
     p = text_element.parent
     gp = p.parent
@@ -190,6 +207,7 @@ class TextElmtData < Object
       end
     end
   end
+=end
 
   # Is this TextElementData instance still a valid representation of a node in the document?
   def valid?
@@ -221,8 +239,8 @@ class TextElmtData < Object
     # Split off a text element for text to the right of the limit (if any such text)
     mark_at -global_character_position_end
     split_right
-    while illegal_enclosure(tag) do
-      split_parent
+    while nknode_has_illegal_enclosure?(self, tag) do
+      split_common self # split_parent
     end
     # Now add a next element: the html shell
     @text_element.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
@@ -290,26 +308,6 @@ class TextElmtData < Object
   # Returns: the Nokogiri node with that tag that contains the token
   def parent_tagged_with token
     text_element.parent if nknode_has_class?(text_element.parent, token)
-  end
-
-  def illegal_enclosure tagname
-    invalid_enclosures =
-    case tagname.to_sym
-    when :li, :div, :ul
-      %w{ p }
-    else
-      []
-    end
-    invalid_enclosures.any? { |ivt| descends_from? tag: ivt }
-  end
-
-  # Does this text element have an ancestor of the given tag, with a class that includes the token?
-  def descends_from? tag: nil, token: nil
-    token = token&.to_s
-    text_element.ancestors.find do |ancestor|
-          (tag.blank? || ancestor.name == tag) &&
-          (token.blank? || nknode_has_class?(ancestor, token))
-    end
   end
 
   def to_s

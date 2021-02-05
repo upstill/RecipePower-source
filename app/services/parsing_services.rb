@@ -20,6 +20,10 @@ class ParsingServices
       newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: Parser.tag_for_token(token)
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
+      # Test the revised document: it should not change when converted to html and back into Nokogiri
+      if Nokogiri::HTML.fragment(nkdoc.to_s).to_s != nkdoc.to_s
+        raise "Annotation failed: new doc. changes on cycling through Nokogiri."
+      end
       [ nkdoc.to_s, xpath ]
     end
   end
@@ -55,16 +59,42 @@ class ParsingServices
         end
       else
         @parser = Parser.new nokoscan, @lexaur
-        token = token.to_sym
-        enclose_results @parser.match(token), parser: @parser
+        seeker = @parser.match token.to_sym
+        seeker = second_guess seeker, @parser, token.to_sym # Renegotiate for the contents of the results
+        enclose_results seeker, parser: @parser
       end
     end
     nkdoc.to_s
   end
 
+  # After a seeker has come back from parsing with a failure, deploy strategies for re-parsing
+  def self.second_guess seeker, parser, token
+    # For any given token, assess the result and take any needed steps to correct it.
+    grammar_mods = nil
+    case token
+    when :rp_inglist, :rp_recipe
+      # Does the list have any :ingline's? Try parsing different
+      if seeker.find(:rp_ingline).empty?
+        grammar_mods = { :rp_ingline => { :in_css_match => nil, :inline => true } }
+      end
+    end
+    if grammar_mods
+      parser.push_grammar grammar_mods
+      # enclose_results seeker, parser: parser
+      # The nkdoc is now modified and ready to re-parse
+      seeker = parser.match token.to_sym
+      parser.pop_grammar
+    end
+    seeker
+  end
+
   def self.parse_from_string input, token, site: nil, lexaur: nil, context_free: false
-    parser = Parser.new(input, lexaur)
-    match = parser.match(token, context_free: context_free)
+    grammar_mods = context_free ?
+                       { token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}} :
+                       { }
+    parser = Parser.new input, lexaur, grammar_mods
+    match = parser.match token
+    match = second_guess match, parser, token.to_sym # Renegotiate for the contents of the results
     match
   end
 
@@ -148,11 +178,13 @@ private
     # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = parser.match :rp_recipelist
+    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipelist # Renegotiate for the contents of the results
   end
 
   def parse_recipe content
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = @parser.match :rp_recipe
+    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
   end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)
