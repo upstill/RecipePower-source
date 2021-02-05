@@ -180,9 +180,9 @@ EOF
 
     html = 'ground turmeric, cumin or ground cinnamon'
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    #parser = Parser.new html, @lex
-    #seeker = parser.match :rp_ingalts, context_free: true
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
+    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
+    ps = ParserServices.new content: html, lexaur: @lex
+    seeker = ps.parse :rp_ingline, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 3, seeker.find(:rp_ingname).count
@@ -192,15 +192,12 @@ EOF
   test 'parse ingredient line' do
     # Test a failed ingredient line
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
-    # parser = Parser.new html, @lex
-    # seeker = parser.match :rp_ingline
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    seeker = ps.parse :rp_ingline
     assert seeker.hard_fail?
 
     html = '1/2 ounce sifted baking soda'
-    parser = Parser.new html, @lex
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
-    # seeker = parser.match :rp_ingline, :context_free => true
+    seeker = ps.parse :rp_ingline, content: html, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'baking soda', seeker.find_value(:rp_ingname)
@@ -209,7 +206,9 @@ EOF
     assert_not_empty seeker.find(:rp_ingspec)
     assert_not_empty seeker.find(:rp_ing_comment)
 
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
+    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
+    ps = ParserServices.new content: html, lexaur: @lex
+    seeker = ps.parse :rp_ingline, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'baking soda', seeker.find_value(:rp_ingname)
@@ -219,9 +218,8 @@ EOF
     assert_not_empty seeker.find(:rp_ing_comment)
 
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
-    #parser = Parser.new html, @lex
-    #seeker = parser.match :rp_ingline, :context_free => true
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
+    seeker = ps.parse :rp_ingline, content: html, context_free: true
+    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'baking soda', seeker.find_value(:rp_ingname)
@@ -232,7 +230,9 @@ EOF
 
   test 'tag has terminating period' do
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
+    ps = ParserServices.new content: html, lexaur: @lex
+    seeker = ps.parse :rp_ingline, context_free: true
+    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'baking soda', seeker.find_value(:rp_ingname)
@@ -243,7 +243,9 @@ EOF
 
   test 'simple ingline with fractional number' do
     html = '3/4 ounce Cointreau'
-    seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
+    ps = ParserServices.new content: html, lexaur: @lex
+    seeker = ps.parse :rp_ingline, context_free: true
+    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'Cointreau', seeker.found_string(:rp_ingname)
@@ -455,12 +457,9 @@ EOF
 
   def parse html, token, options={}
     add_tags :Ingredient, options[:ingredients]
-    #nokoscan = NokoScanner.new html
-    #parser = Parser.new(nokoscan, @lex)
-    #if seeker = parser.match(token, context_free: (options[:context_free] == true))
-    #  seeker.enclose_all
-    #end
-    seeker = ParsingServices.parse_from_string html, token, lexaur: @lex, :context_free => (options[:context_free] == true)
+    # seeker = ParsingServices.parse_from_string html, token, lexaur: @lex, :context_free => (options[:context_free] == true)
+    ps = ParserServices.new content: html, lexaur: @lex
+    seeker = ps.parse :rp_ingline, context_free: (options[:context_free] == true)
     seeker.enclose_all
     [ seeker.head_stream.nkdoc, seeker ]
   end
