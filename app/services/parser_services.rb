@@ -7,7 +7,7 @@ class ParserServices
               :grammar_mods, # Modifications to be used on the parser beforehand
               # :token, # What the last parse requested
               :context_free # Whether the last parse was context free
-  delegate :'success?', :find, :hard_fail?, :find_value, to: :seeker
+  delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, to: :seeker
 
   def initialize(entity: nil, token: nil, content: nil, lexaur: nil, grammar_mods: nil)
     self.entity = entity # Object (ie., Recipe or RecipePage) to be parsed
@@ -251,6 +251,35 @@ The dependencies are as follows:
     elmt.document.to_s
   end
 
+  def do_for *tokens, &block
+    return unless @seeker
+    glean_tokens(tokens).each do |token|  # For each specified token
+      @seeker.find(token).each do |seeker| # For each result under that token
+        with_seeker(seeker) do |parser| # Call the given block with a parser using that seeker
+          block.call parser, token
+        end
+      end
+    end
+  end
+
   private
+
+  def glean_tokens token_list
+    exceptions =
+        if exceptions_index = token_list.index { |v| v.is_a? Hash } # returns index if block is true
+          [token_list.delete_at(exceptions_index)[:except]].flatten # ...allowing single token or array
+        else
+          []
+        end
+    token_list = @parser.tokens if token_list.empty?
+    token_list - exceptions
+  end
+
+  # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)
+  def with_seeker seeker, &block
+    dupe = self.clone
+    dupe.seeker = seeker
+    block.call dupe
+  end
 
 end

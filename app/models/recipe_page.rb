@@ -25,14 +25,15 @@ class RecipePage < ApplicationRecord
       content = page_ref.trimmed_content
       if content.present?
         # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
-        parser = ParsingServices.new self
+        # parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
-        parser.parse content
+        # parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
-        parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
+        # parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
+        ParserServices.parse(entity: self).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           xb = sub_parser.xbounds
           rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
         end
@@ -51,6 +52,7 @@ class RecipePage < ApplicationRecord
         # Match by titles on recipes that didn't match by selection
         unresolved.keep_if do |recipe|
           if rcpdi = rcpdata.find_index { |rcpdatum| recipe.title == rcpdatum[:title] }
+            rcpdatum = rcpdata[rcpdi]
             recipe.anchor_path = rcpdatum[:anchor_path]
             recipe.focus_path = rcpdatum[:focus_path]
             rcpdata.delete_at rcpdi

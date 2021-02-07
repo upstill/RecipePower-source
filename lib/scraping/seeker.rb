@@ -170,6 +170,15 @@ class Seeker
             end
     context ? subsq.encompass(context) : subsq
   end
+
+  def value_for token
+    find(token).first&.to_s
+  end
+
+  # Provide a path and offset in the Nokogiri doc for the results of the parse
+  def xbounds
+    [ head_stream.xpath, tail_stream.xpath(true) ]
+  end
 end
 
 # An Empty Seeker does nothing, and does not advance the stream
