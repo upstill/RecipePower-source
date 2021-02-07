@@ -145,19 +145,23 @@ end
 
 # Split the common ancestor of the two nodes in two, moving each node between them up to the parent's parent
 def nknode_split_ancestor_of first, last
-  meta_ancestry = first.ancestors & last.ancestors
-  first = (first.ancestors - meta_ancestry).first || first
-  last = (last.ancestors - meta_ancestry).first || last
-  common_ancestor = meta_ancestry.first # Common ancestor
+  #meta_ancestry = first.ancestors & last.ancestors
+  #first = (first.ancestors - meta_ancestry).first || first
+  #last = (last.ancestors - meta_ancestry).first || last
+  #common_ancestor = meta_ancestry.first # Common ancestor
+  overlap_index = -1 - (first.ancestors & last.ancestors).length
+  first_sib = first.ancestors[overlap_index] || first
+  last_sib = last.ancestors[overlap_index] || first
+  common_ancestor = first_sib.parent
   family = common_ancestor.children
-  first_ix, last_ix = family.index(first), family.index(last)
+  first_ix, last_ix = family.index(first_sib), family.index(last_sib)
   to_move = family[first_ix..last_ix]
   gp = common_ancestor.parent
-  if first.previous.nil?
+  if first_sib.previous.nil?
     # The first element in the parent: simply move the children before the parent's leftmost sibling
     to_move.remove
     common_ancestor.previous = to_move
-  elsif last.next.nil?
+  elsif last_sib.next.nil?
     # The last element in the parent: simply make it the parent's rightmost sibling
     to_move.remove
     common_ancestor.next = to_move
