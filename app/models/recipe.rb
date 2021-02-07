@@ -154,7 +154,9 @@ class Recipe < ApplicationRecord
         (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
       return unless content_to_parse.present?
-      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      ps = ParserServices.parse entity: self, content: content_to_parse
+      new_content = ps.annotate
+      nc1 = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success
       accept_attribute :content, new_content, true  # Force the new content
       # Set tags according to annotations

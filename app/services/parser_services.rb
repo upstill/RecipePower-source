@@ -2,113 +2,203 @@ require 'recipe.rb'
 require 'scraping/parser.rb'
 require 'recipe_page.rb'
 class ParserServices
-  attr_accessor :parser, # Parser, possibly with modified grammar, to be employed
-                :seeker  # Resulting tree of seeker results
+  attr_reader :seeker,  # Resulting tree of seeker results (returned by #parse)
+              # :parser, # Parser, possibly with modified grammar, to be employed
+              :grammar_mods, # Modifications to be used on the parser beforehand
+              # :token, # What the last parse requested
+              :context_free # Whether the last parse was context free
+  delegate :'success?', :find, :hard_fail?, :find_value, to: :seeker
 
-  def initialize(entity: nil, content: nil, lexaur: nil, grammar_mods: nil)
-    @entity = entity # Object (ie., Recipe or RecipePage) to be parsed
-    @content = content
-    @lexaur = lexaur
-    @grammar_mods = grammar_mods
-    x=2
+  def initialize(entity: nil, token: nil, content: nil, lexaur: nil, grammar_mods: nil)
+    self.entity = entity # Object (ie., Recipe or RecipePage) to be parsed
+    self.token = token
+    self.content = content
+    self.lexaur = lexaur
+    self.grammar_mods = grammar_mods
   end
 
-  def parser scanner=nokoscan
-    @parser ||= Parser.new( scanner, @lexaur, grammar_mods)
+=begin
+Here is where all dependencies in the parser are expressed: dependent variables are cleared
+when the entities on which they depend are expressed.
+The dependencies are as follows:
+@seeker
+  @token
+  @context_free
+  @grammar_mods
+  @nokoscan
+    @content
+      @entity
+  @parser
+    @lexaur
+...therefore, when any of them are set, their dependents must be nulled out (recursively)
+=end
+
+  # Apply the parser to a NokoScanner
+  def parser ct=@content
+    self.content = ct
+    @parser ||= Parser.new( nokoscan, @lexaur, @entity&.site&.grammar_mods)
   end
 
-  def grammar_mods
-    @grammar_mods ||= @entity&.site&.grammar_mods
+  def parser=p # There's no reason for anything but nil to be set
+    if p != @parser
+      @parser = p
+      @seeker = nil
+    end
+  end
+
+  def lexaur=l
+    if l != @lexaur
+      @lexaur = l
+      self.parser = nil
+    end
   end
 
   def grammar_mods=gm
     if gm != @grammar_mods
       @grammar_mods = gm
-      @parser = nil
+      @seeker = nil
     end
   end
 
-  def content
-    @content ||= @entity&.content
-  end
-
+  # Setting @content invalidates @nokoscan--unless it IS a NokoScanner
   def content=ct
     if ct != @content
+      if ct.nil? && @entity.nil?
+        raise "Error in ParserServices#content=: can't clear content without an entity"
+      end
       @content = ct
-      @parser = nil
-      @nokoscan = nil
+      self.nokoscan = ct.is_a?(NokoScanner) ? ct : nil
+    end
+  end
+
+  def entity=e
+    if @entity != e
+      @entity = e
+      # Changing the entity changes grammar mods
+      self.seeker = nil
+      self.nokoscan = nil if @content.nil?
     end
   end
 
   # What is the default top-level ask for the entity?
   def token
-    case @entity
-    when Recipe
-      :rp_recipe
-    when RecipePage
-      :rp_recipelist
-    else
-      err_msg = "Illegal attempt to parse #{@entity&.class || 'without associated'} object"
-      @entity.errors.add :url, err_msg if @entity
-      raise err_msg
+    @token ||=
+        case @entity
+        when Recipe
+          :rp_recipe
+        when RecipePage
+          :rp_recipelist
+        else
+          err_msg = "Illegal attempt to parse #{@entity&.class || 'without associated'} object"
+          @entity.errors.add :url, err_msg if @entity
+          raise err_msg
+        end
+  end
+
+  def token=tk
+    if tk != @token
+      @token = tk
+      self.seeker = nil
     end
   end
 
+  def context_free=b
+    if @context_free != b
+      @context_free = b
+      self.seeker = nil
+    end
+  end
+
+  def seeker=s
+    if s != @seeker
+      @seeker = s
+    end
+  end
+
+  # The NokoScanner is derived from the designated content or, if no content, the entity
+  # per NokoScanner initialization, @content may be any of a string, scanner, tokens or Nokogiri document
   def nokoscan
     @nokoscan ||=
-        case content
+        case @content
         when NokoScanner
-          content
-        when String
-          NokoScanner.new content
+          @content
+        when nil # Fall back on the entity's content
+          NokoScanner.new @entity&.content
+        else # Let NokoScanner sort it out
+          NokoScanner.new @content
         end
   end
 
   def nokoscan=nks
     if nks != @nokoscan
       @nokoscan = nks
-      @parser = nil # Parser depends on the scanner
+      self.seeker = nil # Parser depends on the scanner
     end
   end
 
   def nkdoc
-    nokoscan.nkdoc
+    @nkdoc ||= nokoscan.nkdoc
   end
 
   def nkdoc=nkd
     if @nkdoc != nkd
       @nkdoc = nkd
-      self.nokoscan = nil
+      self.content = nkd
     end
   end
 
+  def ParserServices.parse entity: nil, content: nil, token: nil, lexaur: nil, context_free: nil, grammar_mods: nil
+    # There must be EITHER content or an entity specified
+    if content.nil? && entity.nil?
+      raise "Error in ParserServices.parse: must provide EITHER content or an entity"
+    end
+    # Likewise, either a token or an entity must be specified
+    if token.nil? && entity.nil?
+      raise "Error in ParserServices.parse: must provide EITHER a token or an entity"
+    end
+    ps = ParserServices.new entity: entity, token: token, content: content, lexaur: lexaur, grammar_mods: grammar_mods
+    ps.parse context_free: context_free
+    ps
+  end
+
   # Extract information from an entity (Recipe or RecipePage) or presented content
-  def parse token=self.token, options={}
+  def parse options={}
     self.content = options[:content] if options[:content]
-    if options[:context_free]
+    self.context_free = options[:context_free] if options[:context_free]
+    self.token = options[:token] if options[:token]
+    parser.stream = nokoscan
+    if @context_free
       parser.push_grammar token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}
-      seeker = parser.match token.to_sym
+      @seeker = parser.match token
       parser.pop_grammar
     else
-      seeker = parser.match token.to_sym
+      @seeker = parser.match token
     end
 
     # For any given token, assess the result and take any needed steps to correct it.
-    return seeker unless gm =
+    return @seeker unless gm =
         case token
         when :rp_inglist, :rp_recipe
           # Does the list have any :ingline's? Try parsing different
-          if seeker.find(:rp_ingline).empty?
+          if @seeker.find(:rp_ingline).empty?
             gm = { :rp_ingline => { :in_css_match => nil, :inline => true } }
           end
         end
     parser.push_grammar gm
-    seeker = parser.match token.to_sym
+    @seeker = parser.match token.to_sym
     parser.pop_grammar
-    @seeker = seeker
+    @seeker
   end
 
-  def annotate token, anchor_path, anchor_offset, focus_path, focus_offset
+  # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
+  def annotate
+    if seeker&.success?
+      seeker.enclose_all parser: parser
+      nkdoc.to_s
+    end
+  end
+
+  def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
     # nokoscan = NokoScanner.new content
     # nkdoc = nokoscan.nkdoc
     # Do QA on the parameters
@@ -154,32 +244,13 @@ class ParserServices
           yield typenum, tagstr if block_given?
         end
       else
-        seeker = parse content: elmt, token: token.to_sym
-        enclose_results seeker
+        parse content: elmt, token: token.to_sym
+        seeker.enclose_all parser: parser
       end
     end
     elmt.document.to_s
   end
 
-  def parse_and_annotate content=self.content
-    if seeker = parse(content: content)
-      [:rp_ingline].each do |token|
-        puts "-------------- #{token} ---------------"
-        seekers = seeker.find(token)
-        seekers.each { |seeker|
-          puts seeker
-        }
-      end
-      enclose_results seeker
-      seeker.head_stream.nkdoc.to_s
-    end
-  end
-
-  def enclose_results seeker
-    if seeker.success?
-      seeker.enclose_all parser: parser
-      seeker.head_stream.nkdoc.to_s
-    end
-  end
+  private
 
 end

@@ -95,6 +95,41 @@ EOF
 EOF
   end
 
+  # Check that all of the named instance variables are set, and others are nil
+  def check_ivs ps, *names
+    names.each do |ivname|
+      assert_not_nil ps.instance_variable_get("@#{ivname}".to_sym), "Instance Variable #{ivname} expected to be set but wasn't"
+    end
+    (%i{ parser seeker grammar_mods entity token context_free content lexaur } - names).each do |ivname|
+      assert_nil ps.instance_variable_get("@#{ivname}".to_sym), "Instance Variable #{ivname} was nil"
+    end
+  end
+
+  test 'parser services management' do
+    assert_raises { ParserServices.parse() }
+    assert_raises { ParserServices.parse(content: 'No Intention To Parse This String') }
+    ps = ParserServices.parse(content: 'Dijon mustard', token: :rp_ingstr, context_free: true)
+    assert ps.success?
+    check_ivs ps, :content, :nokoscan, :parser, :seeker, :context_free, :token
+    ps.context_free = false
+    check_ivs ps, :content, :nokoscan, :parser, :context_free, :token
+    ps.entity = nil
+    check_ivs ps, :content, :nokoscan, :parser, :context_free, :token# Shouldn't change any dependencies, since content is still available
+    assert_raises { ps.content = nil } # Removing content without an entity for backup is an error
+    ps.entity = Recipe.new
+    check_ivs ps, :entity, :content, :nokoscan, :parser, :context_free, :token# Shouldn't change any dependencies, since content is still available
+    ps.content = nil # Now we're allowed to clear the content
+    check_ivs ps, :entity, :parser, :context_free, :token# Clearing content eliminates the scanner but not the parser
+    ps.content = 'Dijon mustard'
+    check_ivs ps, :entity, :content, :parser, :context_free, :token# Clearing content eliminates the scanner but not the parser
+    ps.parse
+    assert ps.success?
+    check_ivs ps, :entity, :content, :parser, :seeker, :context_free, :token# Clearing content eliminates the scanner but not the parser
+    ps.entity = nil
+    check_ivs ps, :content, :parser, :context_free, :token# Clearing content eliminates the scanner but not the parser
+
+  end
+
   test 'grammar mods' do
     nonsense = 'No Intention To Parse This String'
 
@@ -180,9 +215,8 @@ EOF
 
     html = 'ground turmeric, cumin or ground cinnamon'
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
     ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse :rp_ingline, context_free: true
+    seeker = ps.parse token: :rp_ingline, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 3, seeker.find(:rp_ingname).count
@@ -193,59 +227,54 @@ EOF
     # Test a failed ingredient line
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
     ps = ParserServices.new(content: html, lexaur: @lex)
-    seeker = ps.parse :rp_ingline
-    assert seeker.hard_fail?
+    ps.parse token: :rp_ingline
+    assert ps.hard_fail?
 
     html = '1/2 ounce sifted baking soda'
-    seeker = ps.parse :rp_ingline, content: html, context_free: true
-    assert seeker.success?
-    assert_equal :rp_ingline, seeker.token
-    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
-    assert_equal 'sifted', seeker.find_value(:rp_condition)
-    assert_equal 'ounce', seeker.find_value(:rp_unit)
-    assert_not_empty seeker.find(:rp_ingspec)
-    assert_not_empty seeker.find(:rp_ing_comment)
+    ps.parse token:  :rp_ingline, content: html, context_free: true
+    assert ps.success?
+    assert_equal :rp_ingline, ps.token
+    assert_equal 'baking soda', ps.find_value(:rp_ingname)
+    assert_equal 'sifted', ps.find_value(:rp_condition)
+    assert_equal 'ounce', ps.find_value(:rp_unit)
+    assert_not_empty ps.find(:rp_ingspec)
+    assert_not_empty ps.find(:rp_ing_comment)
 
-    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
     ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse :rp_ingline, context_free: true
-    assert seeker.success?
-    assert_equal :rp_ingline, seeker.token
-    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
-    assert_equal 'sifted', seeker.find_value(:rp_condition)
-    assert_equal 'ounce', seeker.find_value(:rp_unit)
-    assert_not_empty seeker.find(:rp_ingspec)
-    assert_not_empty seeker.find(:rp_ing_comment)
+    ps.parse token:  :rp_ingline, context_free: true
+    assert ps.success?
+    assert_equal :rp_ingline, ps.token
+    assert_equal 'baking soda', ps.find_value(:rp_ingname)
+    assert_equal 'sifted', ps.find_value(:rp_condition)
+    assert_equal 'ounce', ps.find_value(:rp_unit)
+    assert_not_empty ps.find(:rp_ingspec)
+    assert_not_empty ps.find(:rp_ing_comment)
 
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
-    seeker = ps.parse :rp_ingline, content: html, context_free: true
-    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, :context_free => true
-    assert seeker.success?
-    assert_equal :rp_ingline, seeker.token
-    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
-    assert_equal 'sifted', seeker.find_value(:rp_condition)
-    assert_equal 'tsp.', seeker.find_value(:rp_unit)
-    assert_not_empty seeker.find(:rp_ingspec)
+    ps.parse token:  :rp_ingline, content: html, context_free: true
+    assert ps.success?
+    assert_equal :rp_ingline, ps.token
+    assert_equal 'baking soda', ps.find_value(:rp_ingname)
+    assert_equal 'sifted', ps.find_value(:rp_condition)
+    assert_equal 'tsp.', ps.find_value(:rp_unit)
+    assert_not_empty ps.find(:rp_ingspec)
   end
 
   test 'tag has terminating period' do
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
-    ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse :rp_ingline, context_free: true
-    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
-    assert seeker.success?
-    assert_equal :rp_ingline, seeker.token
-    assert_equal 'baking soda', seeker.find_value(:rp_ingname)
-    assert_equal 'sifted', seeker.find_value(:rp_condition)
-    assert_equal 'tsp.', seeker.find_value(:rp_unit)
-    assert_not_empty seeker.find(:rp_ingspec)
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+    assert_equal :rp_ingline, ps.token
+    assert_equal 'baking soda', ps.find_value(:rp_ingname)
+    assert_equal 'sifted', ps.find_value(:rp_condition)
+    assert_equal 'tsp.', ps.find_value(:rp_unit)
+    assert_not_empty ps.find(:rp_ingspec)
   end
 
   test 'simple ingline with fractional number' do
     html = '3/4 ounce Cointreau'
     ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse :rp_ingline, context_free: true
-    # seeker = ParsingServices.parse_from_string html, :rp_ingline, lexaur: @lex, context_free: true
+    seeker = ps.parse token:  :rp_ingline, context_free: true
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 'Cointreau', seeker.found_string(:rp_ingname)
@@ -457,9 +486,8 @@ EOF
 
   def parse html, token, options={}
     add_tags :Ingredient, options[:ingredients]
-    # seeker = ParsingServices.parse_from_string html, token, lexaur: @lex, :context_free => (options[:context_free] == true)
     ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse :rp_ingline, context_free: (options[:context_free] == true)
+    seeker = ps.parse token: :rp_ingline, context_free: (options[:context_free] == true)
     seeker.enclose_all
     [ seeker.head_stream.nkdoc, seeker ]
   end

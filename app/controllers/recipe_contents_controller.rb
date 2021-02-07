@@ -18,7 +18,8 @@ class RecipeContentsController < ApplicationController
     #    was meant by the problematic tag. The latter can be optionally entered as a synonym of the intended name.
     if rcparams[:anchor_path] # Initial annotation on browser selection
       logger.debug "Annotating with anchor_path = '#{rcparams[:anchor_path]}'"
-      @annotation, @parse_path = ParsingServices.new(@recipe).annotate *params[:recipe][:recipeContents].values_at(:content, :token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
+      ps = ParserServices.new entity: @recipe, content: params[:recipe][:recipeContents][:content]
+      @annotation, @parse_path = ps.annotate_selection *params[:recipe][:recipeContents].values_at(:token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
     elsif @parse_path = rcparams[:parse_path] # Specifying an element of the DOM
       @tagname = rcparams[:tagname]
       if !@tagname

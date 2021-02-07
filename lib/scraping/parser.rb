@@ -101,9 +101,13 @@ class Parser
     end
     @grammar.freeze
     @lexaur = lex if lex
+    self.stream = noko_scanner_or_nkdoc_or_nktokens
+  end
+
+  def stream=noko_scanner_or_nkdoc_or_nktokens
     @stream = noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner) ?
-                  noko_scanner_or_nkdoc_or_nktokens :
-                  NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
+                      noko_scanner_or_nkdoc_or_nktokens :
+                      NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
 
   # Revise the default grammar by specifying new bindings for tokens
