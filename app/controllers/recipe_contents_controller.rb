@@ -10,6 +10,7 @@ class RecipeContentsController < ApplicationController
   def annotate
     redirect_to :show unless rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
+    ps = ParserServices.new entity: @recipe, content: @content
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse
     # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of a findable tag, a dialog is presented
@@ -18,18 +19,18 @@ class RecipeContentsController < ApplicationController
     #    was meant by the problematic tag. The latter can be optionally entered as a synonym of the intended name.
     if rcparams[:anchor_path] # Initial annotation on browser selection
       logger.debug "Annotating with anchor_path = '#{rcparams[:anchor_path]}'"
-      ps = ParserServices.new entity: @recipe, content: params[:recipe][:recipeContents][:content]
-      @annotation, @parse_path = ps.annotate_selection *params[:recipe][:recipeContents].values_at(:token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
+      @annotation, @parse_path = ps.annotate_selection *rcparams.values_at(:token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
     elsif @parse_path = rcparams[:parse_path] # Specifying an element of the DOM
       @tagname = rcparams[:tagname]
       if !@tagname
-        logger.debug "Looking for tag at '#{rcparams[:parse_path]}'"
-        @annotation = ParsingServices.parse_on_path *params[:recipe][:recipeContents].values_at(:content, :parse_path) do |tagtype, tagname|
+        logger.debug "Looking for tag at '#{@parse_path}'"
+        # @annotation = ParsingServices.parse_on_path *rcparams.values_at(:content, :parse_path) do |tagtype, tagname|
+        @annotation = ps.parse_on_path @parse_path do |tagtype, tagname|
           @tagtype, @tagname = tagtype, tagname
         end
         @parse_path = nil unless @tagname # We'll need the parse path for identifying the tag
       else # There IS a tagname: use that as a tag
-        noko_elmt = ParsingServices.extract_via_path @content, @parse_path
+        noko_elmt = ps.extract_via_path @parse_path
         @tagtype = rcparams[:tagtype]
         @annotation = rcparams[:content]
         # @tagname of type @tagtype is a mystery tag previously identified by a failed parse.

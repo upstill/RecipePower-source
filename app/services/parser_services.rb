@@ -232,7 +232,7 @@ The dependencies are as follows:
       if tagtype = Parser.tagtype(token) # This token calls for a tag
         # Go directly to tag lookup in the database
         typenum = Tag.typenum tagtype
-        tagstr = elmt.to_s
+        tagstr = elmt.text
         if Tag.strmatch(tagstr, tagtype: typenum, matchall: true).empty? # No such tag found
           # If no such tag exists, we need a decision from the user whether to
           # 1) assert the tag into the database, or
@@ -248,7 +248,7 @@ The dependencies are as follows:
         seeker.enclose_all parser: parser
       end
     end
-    elmt.document.to_s
+    nkdoc.to_s
   end
 
   def do_for *tokens, &block
