@@ -378,8 +378,8 @@ EOF
     check_integrity nks
     # assert nks.tokens[0].is_a?(NokoScanner)
     expected = <<EOF
-<div class="upper div rp_elmt">
-  <div class="lower div">
+<div class="upper div">
+  <div class="lower div rp_elmt">
     <div class="lower left">
       <span>text1 </span>
     </div>

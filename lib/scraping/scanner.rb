@@ -29,7 +29,10 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
   end
 
   # We can just apply the rp_elmt_class and value to the parent element if the two text elements are the first and last text elements in the subtree
-  nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value if anc
+  if anc
+    clear_classification_context anc, rp_elmt_class
+    nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
+  end
   anc
 end
 

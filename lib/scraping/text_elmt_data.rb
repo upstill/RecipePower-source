@@ -67,24 +67,28 @@ class TextElmtData < Object
     # A negative global character offset denotes a terminating position.
     # Here, we split that into a non-negative global character offset and a 'terminating' flag
     global_char_offset = (terminating = signed_global_char_offset < 0) ? -signed_global_char_offset : signed_global_char_offset
-    @elmt_bounds_index = @elmt_bounds.elmt_index_for_position global_char_offset # binsearch elmt_bounds, global_char_offset, &:last
+    ebx = @elmt_bounds.elmt_index_for_position global_char_offset # binsearch elmt_bounds, global_char_offset, &:last
     # The FIRST character of a text element is treated as the LAST character of the previous text element for a terminating offset
     # Boundary condition: if the given offset is at a node boundary AND the given offset was negative, we are referring to the prior node
-    @elmt_bounds_index -= 1 if (@elmt_bounds_index > 0) && terminating && (@elmt_bounds.elmt_offset_at(@elmt_bounds_index) == global_char_offset)
+    ebx -= 1 if (ebx > 0) && terminating && (@elmt_bounds.elmt_offset_at(ebx) == global_char_offset)
+    assign_to_nth_elmt ebx, signed_global_char_offset
+  end
+
+  # Assign a different text element by index
+  def assign_to_nth_elmt at_index, signed_global_char_offset=local_to_global(@local_char_offset || 0)
+    return nil unless @elmt_bounds[at_index]
+    @elmt_bounds_index = at_index
     @text_element, @global_start_offset =
         @elmt_bounds.nth_elmt(@elmt_bounds_index),
-        @elmt_bounds.elmt_offset_at(@elmt_bounds_index) # elmt_bounds[@elmt_bounds_index] # ...by definition
-    mark_at signed_global_char_offset
+            @elmt_bounds.elmt_offset_at(@elmt_bounds_index)
+    mark_at signed_global_char_offset #   @local_char_offset = 0
     @parent = @text_element.parent
     @elmt_bounds.text_element_valid? @text_element # Validate that the associated text element hasn't been replaced in the document tree
   end
 
   # Adopt another text element with its associated information
   def text_element= te
-    @elmt_bounds_index = @elmt_bounds.find_elmt_index (@text_element = te)
-    @global_start_offset = @elmt_bounds.elmt_offset_at @elmt_bounds_index
-    @local_char_offset = 0
-    @parent = @text_element.parent
+    assign_to_nth_elmt @elmt_bounds.find_elmt_index(te)
   end
 
   def self.for_range elmt_bounds, global_character_range
@@ -118,43 +122,24 @@ class TextElmtData < Object
     global_offset - @global_start_offset
   end
 
-  # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_left *others
-    # No need to split at the beginning or end of the text
-    return if subsq_text.empty? || prior_text.empty?
-    text_element.next = subsq_text
-    text_element.content = prior_text
-    @global_start_offset += @local_char_offset
-    @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element, text_element.next
-    @text_element = text_element.next
-    @elmt_bounds_index += 1
-    @local_char_offset = 0
-    # Finally, repair any other TextElmtData objects that might have been affected
-    others.
-        find_all { |other| other.elmt_bounds_index >= @elmt_bounds_index }.
-        each { |other| other.elmt_bounds_index += 1 }
-    valid?
-  end
-
   # Do I come before another?
   def precedes other
     @elmt_bounds_index < other.elmt_bounds_index
   end
 
   # Split the text element, insert a new bounds entry and modify self to represent the new node, if any
-  def split_right *others
+  # -- and_advance: when true, the ted advances to the next text element
+  def split and_advance:
     # No need to split at the beginning or end of the text
-    return if prior_text.empty? || subsq_text.empty?
-    text_element.previous = prior_text
-    text_element.content = subsq_text
-    @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element.previous, text_element
-    @text_element = text_element.previous
-    @local_char_offset = text.length # Goes to the end of this node
-    # Finally, repair any other TextElmtData objects higher in the array
-    others.
-        find_all { |other| other.elmt_bounds_index > @elmt_bounds_index }.
-        each { |other| other.elmt_bounds_index += 1 }
+    return 0 if subsq_text.empty? || prior_text.empty?
+    # Split the text element at the local marker
+    text_element.next = subsq_text
+    text_element.content = prior_text
+    @elmt_bounds.split_elmt_at @elmt_bounds_index, text_element, text_element.next
+    @elmt_bounds_index += 1 if and_advance
+    assign_to_nth_elmt @elmt_bounds_index
     valid?
+    return 1
   end
 
   # Split the ancestor shared with 'other'
@@ -167,9 +152,9 @@ class TextElmtData < Object
     common_ancestor = nknode_split_ancestor_of @text_element, other.text_element
     # The element index of the first text element of the common ancestor's parent should be unchanged
     @elmt_bounds.update_for common_ancestor, nknode_first_text_element(common_ancestor), fixture_index
-    # Refresh the TextElement from the elmt_bounds
-    @text_element = @elmt_bounds.nth_elmt @elmt_bounds_index
-    other.text_element = @elmt_bounds.nth_elmt other.elmt_bounds_index
+    # Refresh the TextElementDatas from the elmt_bounds
+    assign_to_nth_elmt @elmt_bounds_index
+    other.assign_to_nth_elmt other.elmt_bounds_index # Refresh the other text element
     common_ancestor
   end
 
@@ -235,10 +220,10 @@ class TextElmtData < Object
   # an element that encloses that text
   def enclose_to global_character_position_end, rp_elmt_class:, tag: nil, value: nil
     # Split off a text element for text to the left of the mark (if any such text)
-    split_left
+    split and_advance: true  # Shed the prior text into a new text element
     # Split off a text element for text to the right of the limit (if any such text)
     mark_at -global_character_position_end
-    split_right
+    split and_advance: false # Shed the subsq text into a new text element
     while nknode_has_illegal_enclosure?(self, tag) do
       split_common self # split_parent
     end
@@ -269,24 +254,28 @@ class TextElmtData < Object
     within ? (after + nknode_text_after(@text_element, within: within)) : after
   end
 
-  # Incorporate any preceding blank text to the beginning of the parent.
-  # NB: Does not examine any intervening nodes, just checks that they are blank
   def retreat_over_space limit_te=nil
-    if prior_text.blank?
-      while (text_element != limit_te) && (prev = text_element.previous)&.blank? do
-        self.text_element = prev if prev.text?
+    # Move the local_char_offset past whitespace
+    while (nblanks = prior_text.match(/[[:space:]]*\z/)[0].length) > 0 || prior_text.empty? do
+      @local_char_offset -= nblanks
+      break if text_element == limit_te
+      if prior_text.empty? # If, after eliding spaces, there's nothing else, go to the prior text elmt, if any
+        break if @elmt_bounds_index == 0 # End of the line!
+        # Adopt the previous text element
+        text_element_index = @elmt_bounds_index-1
       end
-      mark_at @elmt_bounds.elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
     end
   end
 
-  # Incorporate any following blank text to the end of the parent
   def advance_over_space limit_te=nil
-    if subsq_text.blank?
-      while (text_element != limit_te) && (nxt = text_element.next)&.blank? do
-        self.text_element = nxt if nxt.text?
+    # Move the local_char_offset past whitespace
+    while (nblanks = subsq_text.match(/\A[[:space:]]*/)[0].length) > 0 || subsq_text.empty? do
+      @local_char_offset += nblanks
+      break if text_element == limit_te
+      if subsq_text.empty? # If, after eliding spaces, there's nothing else, go to the next text elmt, if any
+        break if !(text_element_index = @elmt_bounds_index+1) # End of the line!
+        # Adopt the subsequent text element
       end
-      mark_at @elmt_bounds.elmt_offset_at(@elmt_bounds_index + 1) # Mark at the end of the element
     end
   end
 
@@ -311,7 +300,7 @@ class TextElmtData < Object
   end
 
   def to_s
-    text_element.text
+    text_element.text[0...@local_char_offset] + '|' + text_element.text[@local_char_offset..-1]
   end
 
 end

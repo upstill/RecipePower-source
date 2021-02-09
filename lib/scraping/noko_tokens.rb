@@ -317,11 +317,13 @@ class NokoTokens < Array
         return common_ancestor.parent
       end
     end
+=end
 
-    # Remove unselected text from the two text elements and leave remaining text, if any, next door
-    # -- before teleft and after teright
-    teleft.split_left teright # Adjust teright as needed to accommodate teleft's shift
-    teright.split_right teleft # Adjust teleft as needed to accommodate teright's shift
+    # Remove unselected text from the two text elements and leave remaining text, if any,
+    # before teleft and after teright
+    nelmts_inserted = teleft.split and_advance: true
+    teright.assign_to_nth_elmt teright.elmt_bounds_index + nelmts_inserted # Adjust teright as needed to accommodate teleft's shift
+    teright.split and_advance: false # Note the assumption that teleft will be unaffected by teright splitting
 
     # If teleft or teright are descendants of a node that matches the tag and class spec,
     # expand that node to encompass the whole selection
