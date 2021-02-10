@@ -292,22 +292,21 @@ class NokoTokens < Array
     # Ignore blank text outside the range
     teleft.advance_over_space teright # Don't pass through each other!
     teright.retreat_over_space teleft
+    # Now teleft should be empty before its mark
+    # and teright should be empty after its mark
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
+    common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
-    if common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first # Simple case: enclosing text w/in a single parent
-      clear_classification_context anchor_elmt.parent, rp_elmt_class
-      clear_classification_context focus_elmt.parent, rp_elmt_class
-      # When text of the common ancestor is blank before and after the selection, and we can use an existing element, just mark it
-      # #tag_ancestor_safely doesn't affect the DOM or @elmt_bounds, so there's no need for validation
-      if teleft.prior_text.blank? && teright.subsq_text.blank?
-        newnode = tag_ancestor_safely(common_ancestor,
-                                      anchor_elmt,
-                                      focus_elmt,
-                                      tag: tag,
-                                      rp_elmt_class: rp_elmt_class,
-                                      value: value)
-        return newnode if newnode
-      end
+    # Check that an existing ancestor can be tagged
+    if teleft.prior_text.blank? && # no meaningful text before the leftmost mark
+        teright.subsq_text.blank? # ...or after the rightmost mark
+      newnode = tag_ancestor_safely(common_ancestor,
+                                    anchor_elmt,
+                                    focus_elmt,
+                                    tag: tag,
+                                    rp_elmt_class: rp_elmt_class,
+                                    value: value)
+      return newnode if newnode
       if anchor_elmt == focus_elmt
         # #enclose_to does its own validation
         return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
@@ -317,12 +316,10 @@ class NokoTokens < Array
         return common_ancestor.parent
       end
     end
-=end
 
     # Remove unselected text from the two text elements and leave remaining text, if any,
     # before teleft and after teright
-    nelmts_inserted = teleft.split and_advance: true
-    teright.assign_to_nth_elmt teright.elmt_bounds_index + nelmts_inserted # Adjust teright as needed to accommodate teleft's shift
+    teleft.split(and_advance: true) { |nelmts_inserted| teright.assign_to_nth_elmt(teright.elmt_bounds_index + nelmts_inserted) }
     teright.split and_advance: false # Note the assumption that teleft will be unaffected by teright splitting
 
     # If teleft or teright are descendants of a node that matches the tag and class spec,

@@ -131,7 +131,7 @@ class TextElmtData < Object
   # -- and_advance: when true, the ted advances to the next text element
   def split and_advance:
     # No need to split at the beginning or end of the text
-    return 0 if subsq_text.empty? || prior_text.empty?
+    return if subsq_text.empty? || prior_text.empty?
     # Split the text element at the local marker
     text_element.next = subsq_text
     text_element.content = prior_text
@@ -139,7 +139,7 @@ class TextElmtData < Object
     @elmt_bounds_index += 1 if and_advance
     assign_to_nth_elmt @elmt_bounds_index
     valid?
-    return 1
+    yield(1) if block_given? # Report back an adjustment in @elmt_bounds
   end
 
   # Split the ancestor shared with 'other'
@@ -260,9 +260,8 @@ class TextElmtData < Object
       @local_char_offset -= nblanks
       break if text_element == limit_te
       if prior_text.empty? # If, after eliding spaces, there's nothing else, go to the prior text elmt, if any
-        break if @elmt_bounds_index == 0 # End of the line!
         # Adopt the previous text element
-        text_element_index = @elmt_bounds_index-1
+        break if !(assign_to_nth_elmt @elmt_bounds_index-1) # End of the line!
       end
     end
   end
@@ -273,8 +272,8 @@ class TextElmtData < Object
       @local_char_offset += nblanks
       break if text_element == limit_te
       if subsq_text.empty? # If, after eliding spaces, there's nothing else, go to the next text elmt, if any
-        break if !(text_element_index = @elmt_bounds_index+1) # End of the line!
         # Adopt the subsequent text element
+        break if !(assign_to_nth_elmt @elmt_bounds_index+1) # End of the line!
       end
     end
   end

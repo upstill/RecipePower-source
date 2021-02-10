@@ -9,7 +9,6 @@ require 'scraping/noko_utils.rb'
 # text element is blank.
 # We must also take care not to violate the associated grammar hierarchy:
 #   we want to tag the highest compatible node
-# &block will assess
 def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil
 
   # tag = tag.to_s || 'span'
@@ -24,6 +23,7 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
       (!block_given? || yield(node)) do
     anc = node if (tag.blank? || node.name == tag) &&
         (value.nil? || node['value'].nil?) # Here we should be testing for parser compatibility
+    break if anc # Pick the lowest enclosing node
     break if nknode_has_class?(node, :rp_elmt) # Don't rise above the innermost :rp_elmt
     node = node.parent
   end
