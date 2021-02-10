@@ -13,7 +13,7 @@ tmp/
 eventmachine/
 /public/assets
 /backups
-/app/views/pages/home_*
+/app/views/pages/home_5.html.erb
 
 /db_timings
 /config/database.yml

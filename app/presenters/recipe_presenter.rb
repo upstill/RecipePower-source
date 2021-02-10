@@ -75,15 +75,6 @@ class RecipePresenter < CollectiblePresenter
     end
   end
 
-=begin
-  # Syntactic sugar to allow the view to refer to fields by name
-  def method_missing namesym, *args, &block
-    content = content_for :"rp_#{namesym}"
-    content = block.call(content) if block_given?
-    content
-  end
-=end
-
   def assemble_tree node, selector = nil
     return node.text.html_safe if node.text?
     selection = selector ? node.css(selector) : node.children

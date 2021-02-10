@@ -229,8 +229,12 @@ class NokoTokens < Array
     ranges << token_range_for_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
     # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
     ranges.each_index do |ix|
-      ranges[ix] = ranges[ix].begin..(ranges[ix+1]&.begin || @bound)
-    end if flag == :at_css_match
+      min, max = ranges[ix].begin, ranges[ix].end
+      # Discard blank tokens at the beginning
+      max = (ranges[ix+1]&.begin || @bound) if flag == :at_css_match
+      while min < @bound && self[min].blank? do min += 1 end
+      ranges[ix] = min..max
+    end
     ranges
   end
 
