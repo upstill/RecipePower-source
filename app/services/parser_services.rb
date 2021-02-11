@@ -233,8 +233,10 @@ The dependencies are as follows:
         # Go directly to tag lookup in the database
         typenum = Tag.typenum tagtype
         tagstr = elmt.text
-        if Tag.strmatch(tagstr, tagtype: typenum, matchall: true).empty? # No such tag found
-          # If no such tag exists, we need a decision from the user whether to
+        if extant = Tag.strmatch(tagstr, tagtype: typenum, matchall: true).first
+          elmt['value'] = extant.name
+        else # No such tag found
+          # We need a decision from the user whether to
           # 1) assert the tag into the database, or
           # 2) identify an existing tag to which it corresponds.
           # To get a ruling, we present a dialog which asks the question, possibly getting a tag to use.

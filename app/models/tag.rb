@@ -290,7 +290,7 @@ class Tag < ApplicationRecord
     self.tagtype = 0 unless tagtype
     if clashing_tag?
       # Shouldn't be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used
-      self.errors[:key] = "Tag can't be saved because of possible redundancy"
+      errors.add :key, "Tag can't be saved because of possible redundancy"
       false
     else
       true

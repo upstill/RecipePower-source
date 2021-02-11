@@ -233,6 +233,7 @@ class NokoTokens < Array
       # Discard blank tokens at the beginning
       max = (ranges[ix+1]&.begin || @bound) if flag == :at_css_match
       while min < @bound && self[min].blank? do min += 1 end
+      max = min if max < min
       ranges[ix] = min..max
     end
     ranges
