@@ -55,6 +55,20 @@ class ElmtBounds < Array
     self[ix][0] = text_elmt
   end
 
+  # Define the nodeset as the children of relative_to
+  def attach_nodes_safely nodeset, relative_to
+    # Find the first text element to use as an anchor
+    nodeset.each do |node| # Find a node with a text element to use as anchor
+      if (anchor_te = nknode_first_text_element(node)) && (anchor_ix = find_elmt_index anchor_te)
+        relative_to.children = nodeset
+        # Ensure that the node's text elements are maintained correctly in elmt_bounds
+        # The first text element in the node set becomes the first text element under relative_to
+        update_for relative_to, nknode_first_text_element(relative_to), anchor_ix
+        return relative_to
+      end
+    end
+  end
+
   # Move a node into position in relation to element relative_to
   # CRITICALLY, we ensure that all text elements under the node are recorded in the elmt_bounds array
   def attach_node_safely node, relative_to, how=:extend_right

@@ -25,7 +25,7 @@ class CollectiblePolicy < ApplicationPolicy
   end
 
   def tag?
-    @user&.is_user? && (@record.is_a?(Taggable) || @record.is_a?(PageRef))
+    @user&.is_user? && @record.respond_to?(:tag_with)
   end
 
   def touch?
