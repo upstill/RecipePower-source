@@ -225,11 +225,9 @@ The dependencies are as follows:
     elmt = extract_via_path path
     #@nkdoc = elmt.ancestors.last
     # nokoscan = NokoScanner.new elmt
-    if (class_attr = elmt.attribute('class')) &&
-        (token = class_attr.to_s.split.find { |cl| cl.match(/^rp_/) && cl != 'rp_elmt' }) &&
-        token.present?
+    if (tokens = nknode_rp_classes(elmt)).present?
       # For direct Tag terminals, short-circuit the parsing process with a tag lookup
-      if tagtype = Parser.tagtype(token) # This token calls for a tag
+      if tagtype = tokens.map { |token| Parser.tagtype(token) }.compact.first # This token calls for a tag
         # Go directly to tag lookup in the database
         typenum = Tag.typenum tagtype
         tagstr = elmt.text
@@ -246,7 +244,7 @@ The dependencies are as follows:
           yield typenum, tagstr if block_given?
         end
       else
-        parse content: elmt, token: token.to_sym
+        parse content: elmt, token: tokens.first
         seeker.enclose_all parser: parser
       end
     end

@@ -21,8 +21,7 @@ class RecipeContentsController < ApplicationController
       logger.debug "Annotating with anchor_path = '#{rcparams[:anchor_path]}'"
       @annotation, @parse_path = ps.annotate_selection *rcparams.values_at(:token, :anchor_path, :anchor_offset, :focus_path, :focus_offset)
     elsif @parse_path = rcparams[:parse_path] # Specifying an element of the DOM
-      @tagname = rcparams[:tagname]
-      if !@tagname
+      if !(@tagname = rcparams[:tagname])
         logger.debug "Looking for tag at '#{@parse_path}'"
         # @annotation = ParsingServices.parse_on_path *rcparams.values_at(:content, :parse_path) do |tagtype, tagname|
         @annotation = ps.parse_on_path @parse_path do |tagtype, tagname|
@@ -59,7 +58,7 @@ class RecipeContentsController < ApplicationController
         @tagname = nil # Go back to the annotation dialog
         @parse_path = nil
         if noko_elmt
-          noko_elmt[:'data-value'] = value
+          noko_elmt[:value] = value
           @annotation = noko_elmt.ancestors.last.to_s
         end
       end

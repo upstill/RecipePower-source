@@ -4,6 +4,8 @@
 def nknode_sanitize(node)
   # Turn <p> tags embedded in list tags (illegal) into <li> tags
   node.css('ul p,ol p').each { |found| found.name = 'li' }
+  node.css('script').remove
+  node.css('span.loading').remove
   node
 end
 
@@ -12,6 +14,16 @@ def nknode_classes node, regexp=nil
   return [] unless classes = node['class']&.split
   classes.keep_if { |klass| klass.match(regexp) } if regexp
   classes.map &:to_sym
+end
+
+def nknode_rp_classes node, to_assign = nil
+  if to_assign
+    classes = nknode_classes(node).map(&:to_s).delete_if { |klass| klass.match /^rp_/ }
+    classes += ['rp_elmt'] + to_assign.map(&:to_s) if to_assign.present?
+    node['class'] = classes.join ' '
+  else
+    nknode_classes(node, /^rp_/).without :rp_elmt
+  end
 end
 
 def nknode_has_class? node, css_class

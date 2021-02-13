@@ -34,6 +34,7 @@ class Counts < Hash
             end
           else
             # We are accumulating hits, using as values what we will later sort by
+            pluck_key_or_increment = Arel.sql pluck_key_or_increment
             to_pluck = [ :id, pluck_key_or_increment].compact
             key_or_keys.pluck(*to_pluck).uniq.each do |idval| # #pluck provides an array of results per record
               id, sortval = idval

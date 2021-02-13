@@ -31,6 +31,18 @@ class Recipe < ApplicationRecord
       recipe.content = nil
       recipe.status = "virgin"
     end
+    if recipe.content_changed?
+      # Set tags according to annotations
+      RecipeServices.new(self).inventory do |rpclass, node|
+        # #inventory will call a block on found nodes, once for each token
+        case rpclass
+        when :rp_title
+          accept_attribute :title, node.text
+        when :rp_ingline
+          x=2
+        end
+      end
+    end
   end
 
   # This is kind of smelly, but, given that 1) there is no association that maps between one RecipePage
@@ -159,16 +171,6 @@ class Recipe < ApplicationRecord
       nc1 = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success
       accept_attribute :content, new_content, true  # Force the new content
-      # Set tags according to annotations
-      RecipeServices.new(self).inventory do |rpclass, node|
-        # #inventory will call a block on found nodes, once for each token
-        case rpclass
-        when :rp_title
-          accept_attribute :title, node.text
-        when :rp_ingline
-          x=2
-        end
-      end
     end
     # super if defined?(super)
   end

@@ -65,16 +65,6 @@ class NokoTokens < Array
     character_position_at_token(token_limit_index-1) + self[token_limit_index-1].length
   end
 
-  def rp_classes_for_node node, to_assign = nil
-    if to_assign
-      classes = nknode_classes(node).map(&:to_s).delete_if { |klass| klass.match /^rp_/ }
-      classes += ['rp_elmt'] + to_assign.map(&:to_s) if to_assign.present?
-      node['class'] = classes.join ' '
-    else
-      nknode_classes(node, /^rp_/).without :rp_elmt
-    end
-  end
-
   # Moving nodes under a parent, we have to be careful to maintain the integrity of
   # 1) the hierarchy of elements (i.e., :rp_ingline under :rp_inglist), and
   # 2) the elements index, because Nokogiri will merge two succeeding text elements into one child
@@ -88,13 +78,13 @@ class NokoTokens < Array
   def move_elements_safely attach: :extend_right, relative_to:, iterator:
     # Find the lowest enclosing RP class of the parent
     enclosing_classes = ([relative_to] + relative_to.ancestors).
-        to_a.inject(nil) { |memo, node| memo ||= rp_classes_for_node(node).if_present }
+        to_a.inject(nil) { |memo, node| memo ||= nknode_rp_classes(node).if_present }
 
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|
       next if node == relative_to
       processed_children(node) { |descendant|
-        enclosing_classes.blank? || @parser_evaluator.can_include?(enclosing_classes.first, rp_classes_for_node(descendant).first)
+        enclosing_classes.blank? || @parser_evaluator.can_include?(enclosing_classes.first, nknode_rp_classes(descendant).first)
       }.each do |descendant|
         elmt_bounds.attach_node_safely descendant, relative_to, attach
       end
@@ -283,9 +273,9 @@ class NokoTokens < Array
     return unless rp_elmt_class
 
     while !node.is_a?(Nokogiri::HTML::DocumentFragment) do
-      if (classes = rp_classes_for_node node).present?
+      if (classes = nknode_rp_classes node).present?
         legit_classes = classes.find_all { |parent_class| @parser_evaluator.can_include?(parent_class, rp_elmt_class) }
-        rp_classes_for_node node, legit_classes
+        nknode_rp_classes node, legit_classes
       end
       node = node.parent
     end
