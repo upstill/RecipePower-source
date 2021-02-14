@@ -55,9 +55,79 @@ attribute_name: html
 site_id: 1787
 --- Finder#2368
 label: Content
-selector: div.content__main
+selector: div.article-body-commercial-selector
 attribute_name: html
 site_id: 4057
+--- Finder#2369
+label: Content
+selector: div.articleContainer
+attribute_name: html
+site_id: 1293
+--- Finder#2371
+label: Content
+selector: div.easyrecipe
+attribute_name: html
+site_id: 1989
+--- Finder#2372
+label: Content
+selector: "h1.recipe__title\r\ndiv.recipe__list--ingredients\r\ndiv.recipe__list--steps"
+attribute_name: html
+site_id: 1361
+--- Finder#2373
+label: Content
+selector: div.wprm-recipe
+attribute_name: html
+site_id: 3581
+--- Finder#2383
+label: Content
+selector: div#comp-inhsovxx
+attribute_name: html
+site_id: 4138
+--- Finder#2384
+label: Content
+selector: div#comp-inhsovxx
+attribute_name: html
+site_id: 4138
+--- Finder#2385
+label: Content
+selector: article
+attribute_name: html
+site_id: 4139
+--- Finder#2386
+label: Content
+selector: article
+attribute_name: html
+site_id: 4139
+--- Finder#2387
+label: Content
+selector: section.o-Recipe
+attribute_name: html
+site_id: 3464
+--- Finder#2388
+label: Content
+selector: section.o-Recipe
+attribute_name: html
+site_id: 3464
+--- Finder#2389
+label: Content
+selector: "div.js_post-content\r\nheader h1"
+attribute_name: html
+site_id: 4011
+--- Finder#2390
+label: Content
+selector: div.js_post-content
+attribute_name: html
+site_id: 4011
+--- Finder#2391
+label: Content
+selector: "header h1\r\ndiv.content-wrapper"
+attribute_name: html
+site_id: 3302
+--- Finder#2392
+label: Content
+selector: "header h1\r\ndiv.content-wrapper"
+attribute_name: html
+site_id: 3302
 --- Site#1268
 :trimmers:
 - div.mediavoice-native-ad
@@ -71,18 +141,80 @@ site_id: 4057
     :in_css_match: li.ingredient
   :rp_title:
     :in_css_match: h1
+  :rp_instructions:
+    :in_css_match: div.instructions ol
+--- Site#1293
+:trimmers:
+- div.articleContainer__rail
+- div.docked-sharebar
+- div.lazy-image
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match:
+--- Site#1361
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: div.recipe__list ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h1.recipe__title
+  :rp_instructions:
+    :in_css_match: div.recipe__list--steps ol
 --- Site#1787
 :trimmers:
 - div#jp-post-flair
 :grammar_mods:
   :rp_recipelist:
     :match: {}
-  :rp_inglist: {}
-  :rp_ingline: {}
-  :rp_title: {}
+  :rp_inglist:
+    :in_css_match: p
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h1,h2
+  :rp_instructions:
+    :in_css_match:
+--- Site#1913
+:trimmers: []
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match:
+--- Site#1989
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: div.ERSName
+  :rp_instructions:
+    :in_css_match: ol
 --- Site#1997
 :trimmers:
 - div.recipe-callout-buttons
+- p.dont-steal
 :grammar_mods:
   :rp_inglist:
     :in_css_match: ul
@@ -90,6 +222,57 @@ site_id: 4057
     :in_css_match: li.ingredient
   :rp_title:
     :in_css_match: h2
+--- Site#3302
+:trimmers:
+- section.relatedStories
+- div.inDepth
+- div.articleFooter
+:grammar_mods: {}
+--- Site#3464
+:trimmers:
+- div.reviewSummary
+- section.o-RecipeLead
+- div.recipeLead
+- div.print-recipe
+- div.o-AssetActions
+- div.o-Ingredients__m-Footer
+- div.recipe-body-footer
+- div#dfp_cartridge
+- div.lookingForSomethingElse
+- section.relatedClasses
+- section.bodyRight-footer
+- div.attribution
+- p.o-Ingredients__a-Ingredient--SelectAll
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: div.o-Ingredients__m-Body
+  :rp_ingline:
+    :in_css_match: p.o-Ingredients__a-Ingredient
+  :rp_title:
+    :in_css_match: h1.o-AssetTitle__a-Headline
+  :rp_instructions:
+    :in_css_match: section.o-Method
+--- Site#3581
+:trimmers:
+- div.wprm-recipe-notes-container
+- div.wprm-recipe-image
+- div.wprm-call-to-action-text-container
+- a.wprm-recipe-print
+- a.wprm-recipe-pin
+- a.wprm-recipe-jump
+- div.wprm-recipe-rating
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist:
+    :in_css_match: ul.wprm-recipe-ingredients
+  :rp_ingline:
+    :in_css_match: li.wprm-recipe-ingredient
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match: div.wprm-recipe-instruction-text
 --- Site#3630
 :trimmers:
 - div.nav-share
@@ -98,7 +281,8 @@ site_id: 4057
 - div.author-byline
 :grammar_mods:
   :rp_recipelist:
-    :match: {}
+    :match:
+      :at_css_match: section.entry-container
   :rp_inglist:
     :in_css_match: div.recipe-ingredients ul
   :rp_ingline:
@@ -120,11 +304,14 @@ site_id: 4057
   :rp_recipelist:
     :match:
       :at_css_match: h2
-  :rp_inglist: {}
   :rp_ingline:
     :in_css_match: strong
   :rp_title:
     :in_css_match: h2
+  :rp_instructions:
+    :in_css_match:
+  :rp_inglist:
+    :in_css_match:
 --- Site#3965
 :trimmers:
 - div.inline-video
@@ -141,7 +328,16 @@ site_id: 4057
     :inline:
   :rp_ingline:
     :in_css_match: li.ingredient
-    :inline:
+  :rp_instructions:
+    :in_css_match: section.section--instructions div.section-content ol
+--- Site#4011
+:trimmers:
+- div.img-wrapper
+- div.fIUNXF
+- div.movable-ad
+- div.content-summary__SummaryBox
+- aside.inset--story
+:grammar_mods: {}
 --- Site#4057
 :trimmers:
 - div.meta__extras
@@ -155,8 +351,6 @@ site_id: 4057
       :at_css_match: h2
   :rp_inglist:
     :in_css_match: p
-  :rp_ingline:
-    :inline: true
   :rp_title:
     :in_css_match: h2
 --- Site#4072
@@ -165,7 +359,6 @@ site_id: 4057
 - ul.social-nav__list
 - div.figure__media
 - div.aggregate-star-rating
-- li.mntl-sc-block
 - figure
 - div.section-header
 - div.nutrition-info
@@ -189,6 +382,10 @@ site_id: 4057
   :rp_inglist:
     :in_css_match: ul.ingredient-list
     :inline:
+  :rp_title:
+    :in_css_match: h1
+  :rp_instructions:
+    :in_css_match: div.structured-project__steps ol
 --- Site#4136
 :trimmers:
 - div.article-gallery
@@ -199,5 +396,34 @@ site_id: 4057
     :match: {}
   :rp_inglist:
     :in_css_match: div.ingredients ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h1,h2
+  :rp_instructions:
+    :in_css_match: div.instructions
+--- Site#4137
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h3
+  :rp_inglist:
+    :in_css_match: p
   :rp_ingline: {}
-  :rp_title: {}
+  :rp_title:
+    :in_css_match: h3
+--- Site#4139
+:trimmers:
+- div.page__teeth
+- div.colorful__teeth
+- picture
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h1,h2
+  :rp_instructions:
+    :in_css_match: ol
