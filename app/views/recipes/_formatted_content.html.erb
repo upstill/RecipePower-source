@@ -1,12 +1,16 @@
-<h2><%= presenter.content_for(:rp_title) %></h2>
+<h2><%= presenter.decorator.title %></h2>
 <% presenter.content_for(:rp_yield) do |html| %>
   <p>Yield: <%= html %></p>
 <% end %>
 <% presenter.content_for(:rp_author) do |html| %>
   <p>Author: <%= html %></p>
 <% end %>
-<% presenter.content_for(:rp_inglist) do |html| %>
-  <h3>Ingredients</h3>
+<% presenter.content_for(:rp_inglist) do |html, label=nil| %>
+  <% if label.nil? %>
+    <h3>Ingredients</h3>
+  <% else %>
+    <h4><%= label %></h4>
+  <% end %>
   <ul class="rp_inglist">
     <%= html %>
   </ul>

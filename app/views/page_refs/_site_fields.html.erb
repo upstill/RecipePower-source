@@ -1,36 +1,65 @@
 <%= pr_builder.fields_for :site do |site_builder| %>
+  <!--  For Gleaning, include the selector string (and only that)-->
+  <% if for_object.is_a?(Gleaning) %>
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :selector_string, 'CSS Selector(s) for page content to glean' -%>
+    </div>
+    <%= site_builder.text_area :selector_string %>
+  <% elsif for_object.is_a?(PageRef) %>
+    <div class='label-enclosure'>
+      <%= site_builder.label :trimmers, 'Trimmers (CSS selectors for content to remove)' -%>
+    </div>
+    <%= site_builder.text_area :trimmers_str,
+                               :class => 'trimmers',
+                               :id => @decorator.element_id(:trimmers_str),
+                               :label => false,
+                               :placeholder => "CSS Selectors for elements to remove from pages" %>
+  <% elsif for_object.is_a?(RecipePage) %>
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :rcplist_selector, 'Selector for Recipe Start' -%>
+    </div>
+    <%= site_builder.text_field :rcplist_selector %>
 
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :selector_string, 'Selector(s) for Page Content' -%>
-  </div>
-  <%= site_builder.text_area :selector_string %>
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :title_selector, 'Title Selector (CSS)' -%>
+    </div>
+    <%= site_builder.text_field :title_selector %>
+  <% elsif for_object.is_a?(Recipe) %>
+    Specify CSS selectors for Recipe elements:
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :title_selector, 'Title' -%>
+    </div>
+    <%= site_builder.text_field :title_selector %>
 
-  <div class='label-enclosure'>
-    <%= site_builder.label :trimmers, 'Trimmers' -%>
-  </div>
-  <%= site_builder.text_area :trimmers_str,
-                  :class => 'trimmers',
-                  :id => @decorator.element_id(:trimmers_str),
-                  :label => false,
-                  :placeholder => "CSS Selectors for elements to remove from pages" %>
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :inglist_selector, 'Ingredient List' -%>
+    </div>
+    <%= site_builder.text_field :inglist_selector %>
 
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :rcplist_selector, 'Selector for Recipe Start' -%>
-  </div>
-  <%= site_builder.text_field :rcplist_selector %>
+    <div class='label-enclosure' style="margin-top:.5em">
+      <%= site_builder.label :ingline_selector, 'Ingredient Line' -%>
+    </div>
+    <%= site_builder.text_field :ingline_selector %>
 
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :title_selector, 'Title Selector' -%>
-  </div>
-  <%= site_builder.text_field :title_selector %>
+<!--
+    <div class='row'>
+      <div class='col-md-12'>
+        <div class='item-enclosure'>
+          <%# site_builder.check_box :ingredient_lines_with_css %>
+          <span class="prompt">Use CSS (&#60;p&#62; and &#60;b&#62;) to delimit ingredient lines</span>
+        </div>
+      </div>
+    </div>
+-->
 
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :inglist_selector, 'Ingredient List Selector' -%>
-  </div>
-  <%= site_builder.text_field :inglist_selector %>
+    <div class='row'>
+      <div class='col-md-12'>
+        <div class='label-enclosure' style="margin-top:.5em">
+          <%= site_builder.label :instructions_selector, 'Instructions' -%>
+        </div>
+        <%= site_builder.text_field :instructions_selector %>
+      </div>
+    </div>
 
-  <div class='label-enclosure' style="margin-top:.5em">
-    <%= site_builder.label :ingline_selector, 'Ingredient Line Selector' -%>
-  </div>
-  <%= site_builder.text_field :ingline_selector %>
+  <% end %>
 <% end %>

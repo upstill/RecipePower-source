@@ -321,6 +321,9 @@ div.card-item {
     letter-spacing: 1.5px;
     line-height: 1.2em;
   }
+  &.recipe_page-card, &.mercury_result-card, &.gleaning-card {
+    display: none;
+  }
   &.recipe-card {
     @include card-color-scheme(recipe);
     /*

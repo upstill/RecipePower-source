@@ -31,6 +31,18 @@ class Recipe < ApplicationRecord
       recipe.content = nil
       recipe.status = "virgin"
     end
+    if recipe.content_changed?
+      # Set tags according to annotations
+      RecipeServices.new(self).inventory do |rpclass, node|
+        # #inventory will call a block on found nodes, once for each token
+        case rpclass
+        when :rp_title
+          accept_attribute :title, node.text
+        when :rp_ingline
+          x=2
+        end
+      end
+    end
   end
 
   # This is kind of smelly, but, given that 1) there is no association that maps between one RecipePage
@@ -126,7 +138,6 @@ class Recipe < ApplicationRecord
     # If we haven't persisted, then the page_ref has no connection back
     page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     page_ref.request_attributes *(needed_attributes & [ :picurl, :title, :description ]) # Those to be got from PageRef
-    page_ref.request_attributes :recipe_page if content_needed?
   end
 
   # Override to acccept values from page_ref
@@ -143,7 +154,7 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :recipe_page, :content
+    page_ref.ensure_attributes :content
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed?
@@ -151,12 +162,15 @@ class Recipe < ApplicationRecord
         # reload if persisted? # Possibly the recipe_page changed us
         recipe_page.ensure_attributes :content # Parse the page into one or more recipes
       end
-      content_to_parse = recipe_page.selected_content(anchor_path, focus_path).if_present || page_ref.trimmed_content
+      content_to_parse =
+        (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
+        page_ref.trimmed_content
       return unless content_to_parse.present?
-      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      ps = ParserServices.parse entity: self, content: content_to_parse
+      new_content = ps.annotate
+      nc1 = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success
       accept_attribute :content, new_content, true  # Force the new content
-      RecipeServices.new(self).inventory # Set tags according to annotations
     end
     # super if defined?(super)
   end

@@ -26,7 +26,7 @@ class Lexaur < Object
     lex = self.new
     puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
     Tag.of_type(types).each { |tag|
-      puts "#{tag.typename}: (#{tag.id}) #{tag.name}"
+      puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
       lex.take tag.name, tag.id
     }
     lex
@@ -99,6 +99,9 @@ protected
     lexpath, block = [], lexpath if lexpath.is_a?(Proc)
     lexpath = lexpath + [self]
     # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
+    while stream.more? && (stream.peek == "\n") do
+      stream = stream.rest
+    end
     if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       substrs = Tag.normalizeName(token).split '-'
       tracker = self
@@ -110,9 +113,10 @@ protected
       end
       # Peek ahead and consume any tokens which are empty in the normalized name
       onward = stream.rest
+      unskipped = onward
       case onward.peek
       when '.' # Ignore period
-        onward = onward.rest
+        unskipped = onward = onward.rest
       when '(' # Elide parenthetical by hunting for matching ')'
         to_match = onward.rest
         while to_match && (to_match.peek != ')') do
@@ -123,7 +127,7 @@ protected
       tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
           # ...otherwise, we consume the head of the stream
           if terms = tracker.terminals[head]
-            block.call terms, onward, lexpath # The block must check for acceptance and return true for the process to end
+            block.call terms, unskipped, lexpath # The block must check for acceptance and return true for the process to end
           end
     end
   end

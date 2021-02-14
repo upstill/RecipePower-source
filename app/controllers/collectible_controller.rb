@@ -221,10 +221,10 @@ class CollectibleController < ApplicationController
     # When inferred content depends on updated attributes, we call
     # #regenerate_dependent_content in the Decorator to trigger the refresh process
     # depending on what got updated
-    update_and_decorate(update_option: response_service.update_option) { |decorator|
+    update_and_decorate( update_option: response_service.update_option ) { |decorator|
       decorator.regenerate_dependent_content if decorator.respond_to?(:regenerate_dependent_content) # Set the entity up for previewing
     }
-    if resource_errors_to_flash @decorator.object
+    if @decorator.object.errors.any?
       render :edit
     else
       # Record gleaning attributes, if available and relevant

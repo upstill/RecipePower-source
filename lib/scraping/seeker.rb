@@ -61,15 +61,24 @@ class Seeker
     results.flatten.compact
   end
 
+  def found_string token=nil
+    if f = find(token).first
+      f.head_stream.except(f.tail_stream).to_s
+    end
+  end
+
+  # Root out the value associated with the token
+  def find_value token=nil
+    find(token).first&.value
+  end
+
+  def find_values token=nil
+    find(token).map &:value
+  end
+
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
   def to_s
     head_stream.to_s tail_stream.pos
-  end
-
-  # Apply the results of the parse to the Nokogiri scanner
-  def apply
-    @children.each { |child| child.apply }
-    head_stream.enclose_by_token_indices(@head_stream, @tail_stream, tag: @token) if @token
   end
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
@@ -96,21 +105,22 @@ class Seeker
   end
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
-  def enclose tagname='span'
+  def enclose tag='span'
     return unless @token
     # Check that some ancestor doesn't already have the tag
-    if !head_stream.descends_from?(tagname, @token)
-      @head_stream.enclose_to @tail_stream.pos, classes: @token, tag: tagname, value: @value
+    if !head_stream.descends_from?(token: @token)
+      @head_stream.enclose_to @tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
     end
   end
 
   # Recursively modify the Nokogiri tree to reflect seekers
-  def enclose_all
+  def enclose_all parser: nil
     # The seeker reflects a successful parsing of the (subtree) scanner against the token.
     # Now we should modify the Nokogiri DOM to reflect the elements found
     traverse do |inner|
       if inner.token
-        inner.enclose Parser.tag_for_token(inner.token)
+        with_tag = parser&.tag_for_token(inner.token) || Parser.tag_for_token(inner.token)
+        inner.enclose with_tag
       end
     end
   end
@@ -150,15 +160,24 @@ class Seeker
   # * the match was optional: the tokens are consumed anyway: @head_stream.rest at a minimum, possibly @tail_stream
   def next context=nil
     subsq = if @failed
-              if @optional
+              # if @optional # For some reason I thought it was a good idea to increment past a non-optional failure
                 @tail_stream.pos > @head_stream.pos ? @tail_stream : @head_stream.rest
-              else
-                @head_stream.rest
-              end
+              # else
+                # @head_stream.rest
+              # end
             else # Success!
               @tail_stream
             end
     context ? subsq.encompass(context) : subsq
+  end
+
+  def value_for token
+    find(token).first&.to_s
+  end
+
+  # Provide a path and offset in the Nokogiri doc for the results of the parse
+  def xbounds
+    [ head_stream.xpath, tail_stream.xpath(true) ]
   end
 end
 
@@ -326,11 +345,11 @@ class  TagsSeeker < Seeker
     children = []
     stream = start_stream
     operand = nil
+    rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[Tag.typename opts[:types]]
+    scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
     opts[:lexaur].match_list(stream) do |data, next_stream|
       # The Lexaur provides the data at sequence end, and the post-consumption stream
-      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[opts[:types]]
         children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, rptype)
         operand = next_stream.peek
         stream = next_stream.rest
@@ -439,7 +458,7 @@ end
 
 class IngredientsSeeker < TagsSeeker
   def self.match stream, opts
-    super stream, opts.merge(types: 4)
+    super stream, opts.merge(types: 4, token: :rp_ingalts)
   end
 end
 

@@ -65,30 +65,26 @@ class RecipePresenter < CollectiblePresenter
         return "Recipe has no content currently. Try Refreshing."
       end
     end
-    hc = with_format('html') { render 'recipes/formatted_content', presenter: self, locals: { presenter: self } }
+    hc = if content_for(:rp_inglist).present? && content_for(:rp_instructions).present?
+           with_format('html') { render 'recipes/formatted_content', presenter: self, locals: {presenter: self} }
+         else
+           @object.content.html_safe
+         end
     if response_service.admin_view?
       hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe  
     end
   end
 
-=begin
-  # Syntactic sugar to allow the view to refer to fields by name
-  def method_missing namesym, *args, &block
-    content = content_for :"rp_#{namesym}"
-    content = block.call(content) if block_given?
-    content
-  end
-=end
-
-  def assemble_tree node
+  def assemble_tree node, selector = nil
     return node.text.html_safe if node.text?
-    content = safe_join node.children.collect { |child| assemble_tree child }
+    selection = selector ? node.css(selector) : node.children
+    content = safe_join selection.collect { |child| assemble_tree child }
     node.classes.each do |klass|
       # For each node, see if we have ideas about how to present it
       case klass.to_sym
       when :rp_ingname
         # Wrap an ingredient tag in a link to that tag in RecipePower
-        tag = Tag.find_by name: node['data-value'], tagtype: Tag.typenum(:Ingredient)
+        tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
         return homelink(tag, class: 'rp_ingname', title: node.text) if tag
       when :rp_ingline
         return content_tag(:li, content, class: :rp_ingline )
@@ -99,6 +95,7 @@ class RecipePresenter < CollectiblePresenter
     return content
   end
 
+  # TODO: We're leaving behind embedded links
   def content_for token
     return if @object.content.blank?
     html =
@@ -111,16 +108,28 @@ class RecipePresenter < CollectiblePresenter
     #when :rp_ing_comment
     when :rp_inglist
       results_for(".rp_inglist") { |listnode|
-        assemble_tree listnode
+        [assemble_tree(listnode, '.rp_ingline'), listnode.css('.rp_inglist_label').first&.inner_text]
       }
     #when :rp_ingline
-    #when :rp_instructions
+    when :rp_instructions
+      instrs = results_for(".#{token} li").if_present || [result_for( ".#{token}")]
+      instrs.compact.collect { |instr| instr.strip.sub(/\.$/,'')+'.'}.join ' '
     else # Default is just to return the text at the named node
       result_for ".#{token}"
     end
     # Now we give the view a chance to enclose our result
     if html.is_a?(Array)
-      safe_join( html.collect { |h| block_given? ? (yield(h) if h.present?) : h }.compact )
+      safe_join html.collect { |h|
+        if block_given?
+          if h.is_a?(Array)
+            yield *h
+          else
+            yield h
+          end
+        else
+          h
+        end
+      }.compact
     else
       block_given? ? (yield(html) if html.present?) : html
     end

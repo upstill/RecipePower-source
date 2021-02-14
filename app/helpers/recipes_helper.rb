@@ -169,6 +169,13 @@ module RecipesHelper
       case object
       when Recipe
         buttons +=
+            link_to_submit '',
+                             recipe_page_recipe_path(object, launch_dialog: 'annotate-content' ),
+                             class: 'action-button glyphicon glyphicon-asterisk',
+                             mode: :partial,
+                             title: 'Split Recipe',
+                             method: (object.recipe_page.nil? ? 'POST' : 'GET')
+        buttons +=
             button_to_submit('',
                              edit_recipe_contents_path(recipe),
                              'glyph-edit-red',
@@ -184,9 +191,9 @@ module RecipesHelper
         buttons += edit_trimmers_button object
       when PageRef
         buttons += edit_trimmers_button object
+      when Gleaning
+        buttons += edit_trimmers_button object
       end
-      msg = 'Refresh Recipe to create Recipe Page' if !page_ref.recipe_page
-      buttons += content_tag(:p, "**#{msg}.") if msg.present?
       content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
     end
   end
@@ -239,16 +246,22 @@ module RecipesHelper
   end
 
   def sequence_instructions txt
-    sentences = txt.strip.split( /\.\s+/ ).collect { |sentence| sentence.strip << '.' }
+    sentences = txt.
+        strip.   # No whitespace fore and aft
+    # sub(/\.$/,'').
+        split( /\.\s+/ ). # Break on sentences
+        collect { |sentence| sentence.match(/[?!]/) ? sentence : (sentence.strip << '.') }
+    while step = sentences.shift do
+      break if step.present? && !step.match(/^[\d.,)]*$/)
+    end
     return if sentences.blank?
-    step = sentences.shift
     sentences.each do |sentence|
       if sentence.split(/\s+/).length > 3
         yield step if step.present?
         step = sentence
       else
         step << ' ' if step.present?
-        step << sentence
+        step << sentence unless sentence.match(/^[\d.,)]*$/)
       end
     end
     yield step if step.present?

@@ -8,8 +8,14 @@ class Gleaning < ApplicationRecord
 
   require 'finder_services.rb'
 
-  has_one :page_ref, :dependent => :nullify
-  has_one :site, :through => :page_ref
+  has_one :page_ref, :dependent => :nullify, :autosave => true
+  has_one :site, :through => :page_ref, :autosave => true
+  accepts_nested_attributes_for :page_ref
+  accepts_nested_attributes_for :site
+
+  def self.mass_assignable_attributes
+    [ { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }]
+  end
 
   # attr_accessible :results, :http_status, :err_msg, :entity_type, :entity_id, :page_ref # , :decorator # Decorator corresponding to entity
 
@@ -80,7 +86,9 @@ class Gleaning < ApplicationRecord
       self.err_msg = breakdown[:msg] + msg.backtrace.join("\n")
       self.http_status = breakdown[:status]
       errors.add :url, breakdown[:msg]
-      raise breakdown[:msg] if dj
+      exc = Exception.new breakdown[:msg]
+      exc.set_backtrace msg.backtrace
+      raise exc # msg, breakdown[:msg] if dj
     end
   end
 

@@ -13,6 +13,7 @@ tmp/
 eventmachine/
 /public/assets
 /backups
+/app/views/pages/home_5.html.erb
 
 /db_timings
 /config/database.yml
@@ -22,18 +23,9 @@ eventmachine/
 /log/logout
 
 /shared
-localhost.crt
-localhost.key
-myCA.key
-myCA.pem
 trial/
 vendor/bundle
-local.recipepower.com.crt
-local.recipepower.com.csr
-local.recipepower.com.ext
-local.recipepower.com.key
-myCA.srl
-server.crt
-server.csr
-server.key
 
+config/ssl/local.recipepower.com.cer
+config/ssl/local.recipepower.com.key
+config/ssl/req.conf

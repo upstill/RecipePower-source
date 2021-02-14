@@ -177,7 +177,7 @@ class ApplicationController < ActionController::Base
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
-        if entity.is_a?(Collectible)
+      if entity.is_a?(Collectible)
         if options[:touch] == :collect # Ensure that
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
@@ -193,7 +193,7 @@ class ApplicationController < ActionController::Base
         resource_errors_to_flash entity
         return false
       end
-      if entity.is_a?(Collectible)
+      if entity.respond_to? :be_touched # is_a?(Collectible)
         rr =
           case options[:touch]
           when true

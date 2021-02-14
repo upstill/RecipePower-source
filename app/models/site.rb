@@ -21,14 +21,16 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + [ :description, :trimmers,
-              :selector_string, # Defines a Finder for Content
-              :trimmers_str, # Enumerates selectors for content to cut from page
-              :rcplist_selector, # Defines the beginning of a recipe on the page
-              :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
-              :title_selector # Finds the title within a recipe
+    super + [:description, :trimmers,
+             :selector_string, # Defines a Finder for Content
+             :trimmers_str, # Enumerates selectors for content to cut from page
+             :rcplist_selector, # Defines the beginning of a recipe on the page
+             :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
+             :title_selector, # Finds the title within a recipe
+             :instructions_selector,
+             :ingredient_lines_with_css
     # :recipe_selector
-            ]
+    ]
   end
 
   has_many :page_refs # Each PageRef refers back to some site based on its path
@@ -45,23 +47,40 @@ class Site < ApplicationRecord
     self.trimmers = str.split(/\n+/).map &:strip
   end
 
+  # Manage the :in_css_match and :inline attributes for :rp_ingred_line grammar entry
+  def ingredient_lines_with_css
+    get_grammar_mods_entry( nil, :rp_inglist, :inline) == true ? "1" : "0"
+
+    "1"
+    "0"
+  end
+
+  def ingredient_lines_with_css= bool
+    case bool
+    when "0" # Turned off:
+      set_grammar_mods_entry nil, :rp_inglist, :inline
+    when "1" # Turned on:
+      set_grammar_mods_entry true, :rp_inglist, :inline
+    end
+  end
+
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
   def rcplist_selector
-    get_selector_for :rp_recipelist, :match, :at_css_match
+    get_grammar_mods_entry :rp_recipelist, :match, :at_css_match
   end
 
   def rcplist_selector= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
-    set_selector_for str, :rp_recipelist, :match, :at_css_match
+    set_grammar_mods_entry str, :rp_recipelist, :match, :at_css_match
   end
 
   def method_missing name, *args
     if name.to_s.match /(\w*)_selector(=)?$/
       token = ('rp_'+$1).to_sym
       if $2 == '='
-        set_selector_for args.first, token, :in_css_match
+        set_grammar_mods_entry args.first, token, :in_css_match
       else
-        get_selector_for token, :in_css_match
+        get_grammar_mods_entry token, :in_css_match
       end
     else
       super if defined?(super)
@@ -113,7 +132,7 @@ class Site < ApplicationRecord
   end
 
   def selector_string= str
-    if extant = finder_for('Content')
+    if extant = finders.find { |f| f.label == 'Content' }
       extant.selector = str
     else
       finders.build label: 'Content', attribute_name: 'html', selector: str
@@ -389,16 +408,28 @@ public
 
   private
 
-  def get_selector_for *tokens
-    hsh = grammar_mods # Start at the top level
-    tokens.each do |token|
-      return unless hsh[token]
-      hsh = hsh[token]
+  # Get the entry in the grammar modifications.
+  # We have to preserve the distinction between a nil entry (which modifies by eliminating the grammr entry)
+  # and an entry that doesn't exist (which leaves the grammar unaffected)
+  def get_grammar_mods_entry *tokens
+    def plumb hsh, *tokens
+      tokens.each do |token|
+        if hsh[token]
+          hsh = hsh[token]
+        else
+          yield if block_given? && !hsh.has_key?(token)
+          return nil
+        end
+      end
+      hsh
     end
-    return hsh
+    plumb(grammar_mods, *tokens) {
+      # If the grammar entry wasn't ACTUALLY nil, fall back on the standard grammar
+      return plumb(Parser.initialized_grammar, *tokens)
+    }
   end
 
-  def set_selector_for str, *tokens
+  def set_grammar_mods_entry newval, *tokens
     hsh = grammar_mods # Start at the top level
     tokens[0...-1].each do |token|
       if hsh[token]
@@ -408,9 +439,12 @@ public
       end
     end
     token = tokens.last
-    if str.present?
-      hsh[token] = str
-    else
+    case newval
+    when String # Blank string sets grammar mod to nil, which cancels the entry in the grammar
+      hsh[token] = newval.if_present
+    when TrueClass, FalseClass
+      hsh[token] = newval
+    when NilClass
       hsh.delete token
     end
   end

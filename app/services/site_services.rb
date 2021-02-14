@@ -150,7 +150,12 @@ class SiteServices
       trimmers = (site.trimmers || []) + ['script'] # Squash all <script> elements
       trimmers.each do |trimmer|
         puts "Trimming with CSS selector #{trimmer}"
-        @nkdoc.css(trimmer).map &:remove
+        begin
+          matches = @nkdoc.css trimmer # Protection against bad trimmer
+        rescue Exception => exc
+          raise exc, "CSS Selector (#{trimmer}) caused an error"
+        end
+        matches.map &:remove
       end
       @nkdoc.traverse do |node|
         # Ensure that link tags have a global url
@@ -344,9 +349,10 @@ class SiteServices
       puts "Processing Recipe #{recipe.url}"
       begin
         @nkdoc = Nokogiri::HTML(open recipe.url)
-      rescue
-        puts "Error: couldn't open recipe '#{recipe.url}' for analysis."
-        return {}
+      rescue Exception => msg
+        exc = Exception.new "Error: couldn't open recipe '#{recipe.url}' for analysis."
+        exc.set_backtrace msg.backtrace
+        raise exc # msg, breakdown[:msg] if dj
       end
     end
     candidates = summ.keys.collect { |key| @nkdoc.css(key) }.flatten

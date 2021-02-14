@@ -177,7 +177,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def votable_from_card?
-    decorator.object.is_a?(Voteable)
+    decorator.object.respond_to? :upvotes # .is_a?(Voteable)
   end
 
   def vote_buttons
@@ -185,7 +185,7 @@ class CollectiblePresenter < BasePresenter
   end
 
   def collectible_from_card?
-    decorator.object.is_a? Collectible
+    decorator.object.respond_to? :be_touched # .is_a? Collectible
   end
 
   def collect_button

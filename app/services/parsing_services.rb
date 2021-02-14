@@ -17,9 +17,13 @@ class ParsingServices
     nokoscan = NokoScanner.new nkdoc
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      newnode = nokoscan.tokens.enclose_by_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, classes: token, tag: Parser.tag_for_token(token)
+      newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: Parser.tag_for_token(token)
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
+      # Test the revised document: it should not change when converted to html and back into Nokogiri
+      if Nokogiri::HTML.fragment(nkdoc.to_s).to_s != nkdoc.to_s
+        raise "Annotation failed: new doc. changes on cycling through Nokogiri."
+      end
       [ nkdoc.to_s, xpath ]
     end
   end
@@ -55,50 +59,63 @@ class ParsingServices
         end
       else
         @parser = Parser.new nokoscan, @lexaur
-        token = token.to_sym
-        enclose_results @parser.match(token)
+        seeker = @parser.match token.to_sym
+        seeker = second_guess seeker, @parser, token.to_sym # Renegotiate for the contents of the results
+        enclose_results seeker, parser: @parser
       end
     end
     nkdoc.to_s
   end
 
-  def self.enclose_results seeker
+  # After a seeker has come back from parsing with a failure, deploy strategies for re-parsing
+  def self.second_guess seeker, parser, token
+    # For any given token, assess the result and take any needed steps to correct it.
+    grammar_mods = nil
+    case token
+    when :rp_inglist, :rp_recipe
+      # Does the list have any :ingline's? Try parsing different
+      if seeker.find(:rp_ingline).empty?
+        grammar_mods = { :rp_ingline => { :in_css_match => nil, :inline => true } }
+      end
+    end
+    if grammar_mods
+      parser.push_grammar grammar_mods
+      # enclose_results seeker, parser: parser
+      # The nkdoc is now modified and ready to re-parse
+      seeker = parser.match token.to_sym
+      parser.pop_grammar
+    end
+    seeker
+  end
+
+  def self.parse_from_string input, token, site: nil, lexaur: nil, context_free: false
+    grammar_mods = context_free ?
+                       { token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}} :
+                       { }
+    parser = Parser.new input, lexaur, grammar_mods
+    match = parser.match token
+    match = second_guess match, parser, token.to_sym # Renegotiate for the contents of the results
+    match
+  end
+
+  def self.enclose_results seeker, parser: nil
     if seeker.success?
-      seeker.enclose_all
-      nkdoc = seeker.head_stream.nkdoc
-      nodes = if nkdoc.parent && nkdoc.matches?('.rp_inglist')
-        [nkdoc]
-      else
-        nkdoc.css('.rp_inglist').to_a
-      end
-      # Remove all <br> tags inside the ingredient list
-      nodes.each do |listnode|
-        listnode.traverse do |node|
-          if node.name == 'br' ||
-              (node.name == 'p' && node.children.empty?) ||
-              (node.matches?('.rp_ingline') && node.children.empty?)
-            node.remove
-          elsif node.name == 'strong' ||
-              (node.matches?('.rp_ingline') && node.children.all? { |child| child.text? && child.blank? })
-            node.replace node.children
-          end
-        end
-      end
-      nkdoc.to_s
+      seeker.enclose_all parser: parser
+      seeker.head_stream.nkdoc.to_s
     end
   end
 
   # Put the content through the mill, annotate it with the parsing results, and return HTML for the whole thing
   def parse_and_annotate content
     if seeker = parse(content)
-      [ :rp_ingline ].each do |token|
+      [:rp_ingline].each do |token|
         puts "-------------- #{token} ---------------"
         seekers = seeker.find(token)
         seekers.each { |seeker|
-          puts seeker.head_stream.to_s
+          puts seeker
         }
       end
-      ParsingServices.enclose_results seeker
+      ParsingServices.enclose_results seeker, parser: @parser
       seeker.head_stream.nkdoc.to_s
     end
   end
@@ -161,11 +178,13 @@ private
     # grammar[:rp_recipelist][:start] = { match: //, within_css_match: 'h2' }
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = parser.match :rp_recipelist
+    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipelist # Renegotiate for the contents of the results
   end
 
   def parse_recipe content
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = @parser.match :rp_recipe
+    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
   end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)

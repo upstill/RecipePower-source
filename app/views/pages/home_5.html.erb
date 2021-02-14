@@ -1,298 +1,138 @@
-<%= flash_all %>
-<div class="centerblock" style="margin-top:50px;">
-  <div style="position:absolute; bottom: 0px; height: 75px;"><%= image_tag "CookmarkButton.png", style: "float: left; height:59px; width: 70px;", alt: "Cookmark" %></div>
-  <div style="position:absolute; bottom: 0px; left: 90px; height: 55px;"><span class="logo">RecipePower</span></div>
-</div>
-<%# <div class="centerblock bold">Vault</div>
-<div class="centerblock bold">Water Cooler</div>
-<div class="centerblock bold">Newsstand</div> %>
-<div class="centerblock sub">Keep Your Inspiration</div>
-<div class="centerblock">
-  <% if current_user %>
-    <%= link_to("To My Collections!!", collection_user_path(current_user), class: "btn btn-lg btn-info") %>
-    <%# link_to("Show Me First", collection_path(popup: "pages/need_to_know_modal"), class: "btn btn-lg btn-info") %>
-  <% else %>
-    <%= signup_button %>
-  <% end %>
-</div>
-<div class="need_to_know page">
-  <%= render "pages/need_to_know_content" %>
-</div>
-
-<div class="l-container rp_elmt rp_recipe">
-  <header class="article__header ">
-    <nav id="article-header-tag-nav_1-0" class="comp article-header-tag-nav tag-nav" role="navigation" data-tracking-container="true">
-      <div class="loc tag-nav-content"></div>
-    </nav>
-    <div id="heading_1-0" class="comp heading">
-      <h1 class="heading__title"><span class="rp_elmt rp_title">Chartreuse Martini</span></h1></div>
-    <div id="article-meta_1-0" class="comp article-meta mntl-block" data-tracking-container="true">
-      <div id="article-byline_1-0" class="comp article-byline mntl-byline mntl-block">
-        <span id="mntl-byline__text_1-0" class="comp mntl-byline__text mntl-text-block"> Written by</span>
-        <div id="mntl-byline__name_1-0" class="comp mntl-byline__name mntl-block" data-tooltip>
-          <div id="mntl-bio-tooltip_1-0" class="comp mntl-bio-tooltip bio-tooltip mntl-block" data-tracking-container="true"></div>
-          <a href="https://www.thespruceeats.com/colleen-graham-758955" id="mntl-byline__link_1-0" class=" mntl-byline__link mntl-text-link" data-tracking-container="true"><span class="link__wrapper">Colleen Graham</span></a>
+<section class="o-Recipe">
+  <div class="recipe-lead" data-module="recipe-lead">  <!-- Recipe Info (Summary) Section -->
+    <div class="m-RecipeSummary" data-module="recipe-summary">
+      <div class="attribution">
+        <span style="display: none" class="clicktracking" data-resource-type="/apps/foodcom/components/recipe/attribution"></span>
+        <div class="o-Attribution">
+          <div class="o-Attribution__m-Body">
+            <div class="o-Attribution__m-TextWrap">
+              <div class="o-Attribution__m-Author">
+                <span class="o-Attribution__a-Author--Prefix"> <span class="o-Attribution__a-Name"> Recipe courtesy of Rob Marshall </span> and <span class="o-Attribution__a-Name"> John DeLuca </span> </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="assetTitle">
+        <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/article/assetTitle"></span>
+        <section class="o-AssetTitle">
+          <h1 class="o-AssetTitle__a-Headline"><span class="o-AssetTitle__a-HeadlineText">Blood Orange Cosmos</span>
+          </h1></section>
+      </div>
+      <div class="review reviewSummary">
+        <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/hidden/reviewSummary"></span>
+        <div class="o-ReviewSummary" data-module="user/rating-summary">
+          <div class="review-summary">
+            <div class="rating-stars" title="loading">
+              <div class="rating-star rating-star-empty"></div>
+              <div class="rating-star rating-star-empty"></div>
+              <div class="rating-star rating-star-empty"></div>
+              <div class="rating-star rating-star-empty"></div>
+              <div class="rating-star rating-star-empty"></div>
+            </div>
+            <span class="loading">Getting reviews...</span></div>
         </div>
       </div>
     </div>
-  </header>
-  <div class="article__body right-rail">
-    <div id="mntl-chop_1-0--chop-content" class="loc chop-content is-chopped" style="--chop-height: 10000px">
-      <div id="article__header-block_1-0" class="comp article__header-block mntl-block">
-        <div id="article__decision-block_1-0" class="comp article__decision-block mntl-block">
-          <ul id="project-meta_1-0" class="comp project-meta">
-            <li class="loc total-time project-meta__total-time">
-              <span id="meta-text_1-0" class="comp meta-text"> <span class="meta-text__label">Total: </span> <span class="meta-text__data">3 mins</span> </span>
-            </li>
-            <li class="loc prep-time project-meta__prep-time">
-              <span id="meta-text_2-0" class="comp meta-text"> <span class="meta-text__label">Prep: </span> <span class="meta-text__data">3 mins</span> </span>
-            </li>
-            <li class="loc cook-time project-meta__cook-time">
-              <span id="meta-text_3-0" class="comp meta-text"> <span class="meta-text__label">Cook: </span> <span class="meta-text__data">0 mins</span> </span>
-            </li>
-            <li class="loc recipe-yield project-meta__recipe-yield">
-              <span id="meta-text_5-0" class="comp meta-text"> <span class="meta-text__label">Yield: </span> <span class="meta-text__data">1 cocktail (1 serving)</span> </span>
-    </li>
-          </ul>
-        </div>
+    <div class="assetDescription">
+      <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/article/assetDescription"></span>
+    </div>
+    <div class="categories">
+      <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/recipe/categories"></span>
+    </div>
+    <div class="recipeInfo">
+      <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/recipe/recipeInfo"></span>
+      <div class="o-RecipeInfo">
+        <ul class="o-RecipeInfo__m-Level">
+          <li><span class="o-RecipeInfo__a-Headline">Level:</span> <span class="o-RecipeInfo__a-Description">Easy</span>
+          </li>
+        </ul>
+        <ul class="o-RecipeInfo__m-Time">
+          <li><span class="o-RecipeInfo__a-Headline m-RecipeInfo__a-Headline--Total">Total:</span>
+            <span class="o-RecipeInfo__a-Description m-RecipeInfo__a-Description--Total"> 15 min</span></li>
+          <li><span class="o-RecipeInfo__a-Headline">Active:</span>
+            <span class="o-RecipeInfo__a-Description"> 15 min</span></li>
+        </ul>
+        <ul class="o-RecipeInfo__m-Yield">
+          <span style="display: none" class="clicktracking" data-resource-type="sni-foundation/components/recipe/yield"></span>
+          <li><span class="o-RecipeInfo__a-Headline">Yield:</span>
+            <span class="o-RecipeInfo__a-Description">6 drinks</span></li>
+          <span style="display: none" class="clicktracking" data-resource-type="sni-foundation/components/recipe/nutritionInfo"></span>
+        </ul>
       </div>
-      <div id="article__header--project_1-0" class="comp article-intro text-passage structured-content article__header--project mntl-sc-page mntl-block" data-sc-sticky-offset="80" data-sc-ad-label-height="11" data-sc-ad-track-spacing="100" data-sc-min-track-height="250" data-sc-max-track-height="600" data-sc-breakpoint="54em" data-sc-load-immediate="4" data-sc-content-positions="[1, 1, 1, 1, 1, 1, 1]" data-bind-scroll-on-start="true">
-        <div id="mntl-sc-block_1-0" class="comp mntl-sc-block mntl-sc-block-html">
-          <p>Few Green Chartreuse cocktails offer as pure a taste of the herbal liqueur as the Chartreuse martini. The
-            recipe is incredibly simple and all you really need to do is add Chartreuse to the
-            <a href="https://www.thespruceeats.com/classic-gin-martini-recipe-759739" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">classic
-              gin martini</a>.</p></div>
-        <div id="mntl-sc-block_1-0-1" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-        <div id="mntl-sc-block_1-0-2" class="comp mntl-sc-block mntl-sc-block-html"><p>The Chartreuse in this
-          <a href="https://www.thespruceeats.com/martini-recipe-collection-4051778" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">martini</a>
-          adds a subtle touch of sweetened herbs that pairs wonderfully with the botanicals found in
-          <a href="https://www.thespruceeats.com/introduction-to-gin-760701" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="2">gin</a>
-          and
-          <a href="https://www.thespruceeats.com/all-about-vermouth-760251" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="3">dry
-            vermouth</a>. It also helps make this a fabulous choice for a dinner drink. Gin and vermouth are aperitifs
-          and
-          <a href="https://www.thespruceeats.com/about-chartreuse-liqueur-760267" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="4">Chartreuse</a>
-          is a digestif, so enjoy it before, during, or after a meal and it will enhance the experience, no matter
-          what's on the table.</p></div>
-        <div id="mntl-sc-block_1-0-3" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-        <div id="mntl-sc-block_1-0-4" class="comp mntl-sc-block mntl-sc-block-html">
-          <p>As an extra bonus, the Chartreuse martini also offers the allure of a beautiful green color that you won't
-            be able to ignore. It is one of the few
-            <a href="https://www.thespruceeats.com/how-to-make-green-cocktails-760303" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">green
-              cocktails</a> that doesn't rely on Midori or green apple schnapps, so it offers a completely different
-            taste that is definitely more sophisticated.</p></div>
-        <div id="ads-config_1-0" class="comp js-scads-inline-content ads-config mntl-block">
-          <div id="ad-group-1_1-0" class="comp ad-group-1 mntl-block">
-            <div id="billboard1-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard1-sticky-dynamic billboard-sticky--sc" data-height="1050" data-breakpoint="medium2">
-              <div class="spacer">
-                <div id="billboard1-dynamic_1-0" class="comp billboard1-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard" class="wrapper" data-type="billboard" data-pos="atf" data-priority="2" data-sizes='[[300, 250], [300, 600], [300, 1050], [1, 2], "fluid"]' data-rtb="true" data-targeting="{}" data-auction-floor-id="dcf06ebab4e34cc9926cf7cf00c9c38e" data-auction-floor-value="130"></div>
-                </div>
-              </div>
+    </div>
+    <div class="wallOfText">
+      <span style="display: none" class="clicktracking" data-resource-type="foodcom/components/recipe/wallOfText"></span>
+    </div> <!-- Asset Actions == save + meal plan + print + social in beta -->  </div>
+  <div class="recipe-body">
+    <div class="bodyLeft">
+      <section>
+        <section class="o-Ingredients" data-module="recipe-ingredients">
+          <header class="o-Ingredients__m-Header">
+            <div class="o-Ingredients__m-TextWrap">
+              <h3 class="o-Ingredients__a-Headline"><span class="o-Ingredients__a-HeadlineText">Ingredients</span></h3>
             </div>
-          </div>
-          <div id="ad-group-2_1-0" class="comp ad-group-2 mntl-block">
-            <div id="billboard2-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard2-sticky-dynamic billboard-sticky--sc" data-height="601">
-              <div class="spacer">
-                <div id="billboard2-dynamic_1-0" class="comp billboard2-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard2" class="wrapper" data-type="billboard" data-pos="btf1" data-priority="3" data-sizes='[[300, 250], [300, 251], [300, 600], [300, 601], [2, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="b8ebf4d1fab34bfe8ced994021cf3a45" data-auction-floor-value="115"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="ad-group-3_1-0" class="comp ad-group-3 mntl-block">
-            <div id="billboard3-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard3-sticky-dynamic billboard-sticky--sc" data-height="600">
-              <div class="spacer">
-                <div id="billboard3-dynamic_1-0" class="comp billboard3-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard3" class="wrapper" data-type="billboard" data-pos="btf2" data-priority="4" data-sizes='[[300, 250], [300, 252], [3, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="a8fa32f992fc406e98ff61b4753082ab" data-auction-floor-value="85"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="ad-group-4_1-0" class="comp ad-group-4 mntl-block">
-            <div id="billboard4-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard4-sticky-dynamic billboard-sticky--sc" data-height="600">
-              <div class="spacer">
-                <div id="billboard4-dynamic_1-0" class="comp billboard4-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard4" class="wrapper" data-type="billboard" data-pos="btf3" data-priority="5" data-sizes='[[300, 250], [300, 253], [4, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="ab526341c48a4514b98858aaa8be04b0" data-auction-floor-value="65"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="ad-group-5_1-0" class="comp ad-group-5 mntl-block">
-            <div id="billboard5-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard5-sticky-dynamic billboard-sticky--sc" data-height="600">
-              <div class="spacer">
-                <div id="billboard5-dynamic_1-0" class="comp billboard5-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard5" class="wrapper" data-type="billboard" data-pos="btf4" data-priority="7" data-sizes='[[300, 250], [300, 254], [6, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="0b503a884898447ea50e69e6a3f6f96b" data-auction-floor-value="75"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="ad-group-6_1-0" class="comp ad-group-6 mntl-block">
-            <div id="billboard6-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard6-sticky-dynamic billboard-sticky--sc" data-height="600">
-              <div class="spacer">
-                <div id="billboard6-dynamic_1-0" class="comp billboard6-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard6" class="wrapper" data-type="billboard" data-pos="btf5" data-priority="8" data-sizes='[[300, 250], [300, 255], [7, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="901eba4ba9774978bccfaf3809333168" data-auction-floor-value="65"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-          <div id="ad-group-7_1-0" class="comp ad-group-7 mntl-block">
-            <div id="billboard7-sticky-dynamic_1-0" class="comp scads-to-load right-rail__item billboard-sticky billboard7-sticky-dynamic billboard-sticky--sc" data-height="600">
-              <div class="spacer">
-                <div id="billboard7-dynamic_1-0" class="comp billboard7-dynamic mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt billboard dynamic">
-                  <div id="billboard7" class="wrapper" data-type="billboard" data-pos="btf6" data-priority="9" data-sizes='[[300, 250], [300, 256], [8, 1], "fluid"]' data-rtb="true" data-targeting="null" data-auction-floor-id="6a08a45f73174d1a8602daadb5d48d18" data-auction-floor-value="60"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-      <div id="structured-project-content_1-0" class="comp article__content structured-content structured-project-content mntl-block">
-        <section id="section--ingredients_1-0" class="comp section--fixed-width section--ingredients section">
-          <header class="section__header "><h2 class="section__title section__title--dashed">Ingredients</h2></header>
-          <div class="loc section-content section__content ">
-            <ul id="ingredient-list_1-0" class="comp text-passage ingredient-list simple-list simple-list--bulleted ">
-              <li class="simple-list__item js-checkbox-trigger ingredient"> 1 1/2 ounces gin</li>
-              <li class="simple-list__item js-checkbox-trigger ingredient">
-              <li class="rp_elmt rp_ingline">1/2 ounce​ Green Chartreuse</li>
-              </li>
-              <li class="simple-list__item js-checkbox-trigger ingredient"> 1/2 ounce​ dry vermouth</li>
-            </ul>
-          </div>
-        </section>
-        <div id="native--manual_1-0" class="comp native--manual native mntl-gpt-dynamic-adunit mntl-gpt-adunit gpt native dynamic">
-          <div id="native" class="wrapper" data-type="native" data-pos="native" data-priority="4" data-sizes='[[1, 3], "fluid"]' data-rtb="false" data-targeting="{}"></div>
-        </div>
-        <section id="section--instructions_1-0" class="comp section--instructions section">
-          <header class="section__header "><h2 class="section__title section__title--dashed">Steps to Make It</h2>
           </header>
-          <div class="loc section-content section__content ">
-            <div id="structured-project__steps_1-0" class="comp text-passage structured-content structured-project__steps mntl-sc-page mntl-block" data-sc-sticky-offset="60" data-sc-ad-label-height="24" data-sc-ad-track-spacing="100" data-sc-min-track-height="250" data-sc-max-track-height="600" data-sc-breakpoint="54em" data-sc-load-immediate="1" data-sc-content-positions="[300,600,900,1200,1500,1800,2100]" data-bind-scroll-on-start="true">
-              <ol id="mntl-sc-block_2-0" class="comp mntl-sc-block-group--OL mntl-sc-block mntl-sc-block-startgroup">
-                <li id="mntl-sc-block_2-0-1" class="comp mntl-sc-block-group--LI mntl-sc-block mntl-sc-block-startgroup">
-                  <div id="mntl-sc-block_2-0-2" class="comp mntl-sc-block mntl-sc-block-html">
-                    <p>Gather the ingredients.</p></div>
-                  <div id="mntl-sc-block_2-0-3" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-                </li>
-                <li id="mntl-sc-block_2-0-5" class="comp mntl-sc-block-group--LI mntl-sc-block mntl-sc-block-startgroup">
-                  <div id="mntl-sc-block_2-0-6" class="comp mntl-sc-block mntl-sc-block-html"><p>In a
-                    <a href="https://www.thespruceeats.com/best-cocktail-shakers-4159164" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">cocktail
-                      shaker</a> filled with ice, pour the gin, Chartreuse, and vermouth.</p></div>
-                  <div id="mntl-sc-block_2-0-7" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-                </li>
-                <li id="mntl-sc-block_2-0-9" class="comp mntl-sc-block-group--LI mntl-sc-block mntl-sc-block-startgroup">
-                  <div id="mntl-sc-block_2-0-10" class="comp mntl-sc-block mntl-sc-block-html"><p>
-                    <a href="https://www.thespruceeats.com/how-to-shake-cocktails-760319" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">Shake
-                      well</a>.</p></div>
-                  <div id="mntl-sc-block_2-0-11" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-                </li>
-                <li id="mntl-sc-block_2-0-13" class="comp mntl-sc-block-group--LI mntl-sc-block mntl-sc-block-startgroup">
-                  <div id="mntl-sc-block_2-0-14" class="comp mntl-sc-block mntl-sc-block-html"><p>
-                    <a href="https://www.thespruceeats.com/how-to-strain-cocktails-759342" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">Strain</a>
-                    into a chilled cocktail glass.</p></div>
-                  <div id="mntl-sc-block_2-0-15" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-                </li>
-                <li id="mntl-sc-block_2-0-17" class="comp mntl-sc-block-group--LI mntl-sc-block mntl-sc-block-startgroup">
-                  <div id="mntl-sc-block_2-0-18" class="comp mntl-sc-block mntl-sc-block-html"><p>Serve and enjoy!</p>
-                  </div>
-                  <div id="mntl-sc-block_2-0-19" class="comp mntl-sc-block mntl-sc-block-adslot mntl-block"></div>
-                </li>
-              </ol>
-              <div id="mntl-sc-block_2-0-22" class="comp theme-recipetip text-passage mntl-sc-block lifestyle-sc-block-callout mntl-sc-block-callout mntl-block" data-tracking-id="mntl-sc-block-callout" data-tracking-container="true">
-                <h3 id="mntl-sc-block-callout-heading_1-0" class="comp mntl-sc-block-callout-heading mntl-text-block">
-                  Tips</h3>
-                <div id="mntl-sc-block-callout-body_1-0" class="comp text-passage mntl-sc-block-callout-body mntl-text-block">
-                  <ul>
-                    <li>Just like any liquor-only martini, you may
-                      <a href="https://www.thespruceeats.com/shaken-or-stirred-760306" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">prefer
-                        to stir this cocktail</a>. Everyone has their preference, so experiment with the two methods to
-                      see which you enjoy most.
-                    </li>
-                    <li>
-                      <a href="https://www.thespruceeats.com/popular-brands-of-gin-to-try-4027227" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="2">Top-shelf
-                        gin</a> is highly recommended for the Chartreuse martini. London dry gins are great choices,
-                      offering a classic juniper-forward profile that works very well against Chartreuse.
-                    </li>
-                    <li>Experiment with lesser-known brands, too. There are many
-                      <a href="https://www.thespruceeats.com/transform-your-cocktails-with-craft-gin-4048143" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="3">fascinating
-                        craft gins</a> that don't follow the traditional flavor profile but would excel in this
-                      cocktail.
-      </li>
-                    <li>Make sure that your dry vermouth is not outdated. Once a bottle is open it should be
-                      refrigerated and has a
-                      <a href="https://www.thespruceeats.com/shelf-life-of-distilled-spirits-760730" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="4">shelf-life</a>
-                      of just two to three months. If your vermouth doesn't fit that criterion, it's time to replace it.
-                    </li>
-                  </ul>
-                </div>
-              </div>
-              <div id="mntl-sc-block_2-0-23" class="comp theme-recipevariation text-passage mntl-sc-block lifestyle-sc-block-callout mntl-sc-block-callout mntl-block" data-tracking-id="mntl-sc-block-callout" data-tracking-container="true">
-                <h3 id="mntl-sc-block-callout-heading_1-0-1" class="comp mntl-sc-block-callout-heading mntl-text-block">
-                  Recipe Variations</h3>
-                <div id="mntl-sc-block-callout-body_1-0-1" class="comp text-passage mntl-sc-block-callout-body mntl-text-block">
-                  <ul>
-                    <li>You can make the Chartreuse martini
-                      "<a href="https://www.thespruceeats.com/dirty-martini-cocktail-recipe-759643" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">dirty</a>"
-                      by adding a little olive juice if you like. If you want to be a little more subtle, give it the
-                      essence of olives by garnishing with three olives instead.
-                    </li>
-                    <li>Yellow Chartreuse will work just as well as its green counterpart in the martini. The two
-                      liqueurs use different flavoring ingredients, so the drink's taste will change. Where Green
-                      Chartreuse is dominated by clove, citrus, thyme, and rosemary, Yellow Chartreuse has more of a
-                      citrus, violet, and honey taste.
-                    </li>
-  </ul>
-                </div>
-              </div>
-              <div id="mntl-sc-block_2-0-24" class="comp theme-cocktailstrength text-passage mntl-sc-block lifestyle-sc-block-callout mntl-sc-block-callout mntl-block" data-tracking-id="mntl-sc-block-callout" data-tracking-container="true">
-                <h3 id="mntl-sc-block-callout-heading_1-0-2" class="comp mntl-sc-block-callout-heading mntl-text-block">
-                  How Strong Is a Chartreuse Martini?</h3>
-                <div id="mntl-sc-block-callout-body_1-0-2" class="comp text-passage mntl-sc-block-callout-body mntl-text-block">
-                  <p>Green Chartreuse is bottled at 110 proof (55 percent ABV), so it is definitely not a light liqueur.
-                    It also makes this martini
-                    <a href="https://www.thespruceeats.com/determining-cocktail-alcohol-proof-760307" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1">a
-                      very potent drink</a>, which is why it's served at just 3 ounces. The cocktail's alcohol content
-                    should be in the 32 percent ABV (64 proof) range, falling right in line with
-                    <a href="https://www.thespruceeats.com/vodka-martini-recipe-760983" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="2">similar
-                      martinis</a>.</p></div>
-              </div>
-            </div>
-            <div id="recipe-search-suggestions_1-0" class="comp recipe-search-suggestions mntl-block" data-tracking-container="true">
-              <p id="recipe-search-suggestions__heading_2-0" class="comp recipe-search-suggestions__heading text-block">
-                Recipe Tags: </p>
-              <ul id="recipe-search-suggestions__chip-list_2-0" class="comp recipe-search-suggestions__chip-list link-list">
-                <li class="link-list__item recipe-search-suggestions__chip">
-                  <a href="https://www.thespruceeats.com/search?q=Gin+Cocktail&page=1&searchType=recipe" rel="nofollow" class="link-list__link js-link-btn recipe-search-suggestions__chip-link">Gin
-                    Cocktail</a></li>
-                <li class="link-list__item recipe-search-suggestions__chip">
-                  <a href="https://www.thespruceeats.com/search?q=&page=1&searchType=recipe&fh=eyJmYWNldHMiOnsiZ3JvdXBfY291cnNlIjpbeyJ2YWx1ZSI6ImNvY2t0YWlsIiwiZGlzcGxheU5hbWUiOiJjb2NrdGFpbCJ9XX19" rel="nofollow" class="link-list__link js-link-btn recipe-search-suggestions__chip-link">cocktail</a>
-                </li>
-                <li class="link-list__item recipe-search-suggestions__chip">
-                  <a href="https://www.thespruceeats.com/search?q=&page=1&searchType=recipe&fh=eyJmYWNldHMiOnsiZ3JvdXBfY3Vpc2luZSI6W3sidmFsdWUiOiJhbWVyaWNhbiIsImRpc3BsYXlOYW1lIjoiYW1lcmljYW4ifV19fQ" rel="nofollow" class="link-list__link js-link-btn recipe-search-suggestions__chip-link">american</a>
-                </li>
-                <li class="link-list__item recipe-search-suggestions__chip">
-                  <a href="https://www.thespruceeats.com/search?q=&page=1&searchType=recipe&fh=eyJmYWNldHMiOnsiZ3JvdXBfb2NjYXNpb24iOlt7InZhbHVlIjoicGFydHkiLCJkaXNwbGF5TmFtZSI6InBhcnR5In1dfX0" rel="nofollow" class="link-list__link js-link-btn recipe-search-suggestions__chip-link">party</a>
-                </li>
-              </ul>
-            </div>
-          </div>
+          <div class="o-Ingredients__m-Body"> <!-- Terms are food and cook, isFood is food OR cook -->
+            <p class="o-Ingredients__a-Ingredient o-Ingredients__a-Ingredient--SelectAll"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="Deselect All">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">Deselect All</span> </label></p>
+            <p class="o-Ingredients__a-Ingredient"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="2 cups good vodka">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">2 cups good vodka</span> </label></p>
+            <p class="o-Ingredients__a-Ingredient"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="1 cup orange liqueur">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">1 cup orange liqueur</span> </label></p>
+            <p class="o-Ingredients__a-Ingredient"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="2 cups blood orange juice">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">2 cups blood orange juice</span> </label></p>
+            <p class="o-Ingredients__a-Ingredient"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="1/2 cup freshly squeezed lime juice (4 limes)">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">1/2 cup freshly squeezed lime juice (4 limes)</span>
+            </label></p>
+            <p class="o-Ingredients__a-Ingredient"><label class="checkbox-text">
+              <input type="checkbox" class="o-Ingredients__a-Ingredient--Checkbox" checked value="6 generous peels from a fresh blood orange">
+              <span class="o-Ingredients__a-Ingredient--CheckboxMock"></span>
+              <span class="o-Ingredients__a-Ingredient--CheckboxLabel">6 generous peels from a fresh blood orange</span>
+            </label></p></div>
         </section>
-      </div>
-      <div id="sources_1-0" class="comp sources mntl-block"></div>
-      <div id="disqus-block_1-0" class="comp disqus-block mntl-disqus" data-scroll-defer-offset="650" data-defer="scroll" data-defer-params></div>
+      </section>
     </div>
-    <div id="mntl-chop_1-0" class="comp is-hidden mntl-chop" data-chop-height="10000"><span class="loc chop-trigger"> <button class="chop-btn btn btn-chop " type="button"> <div class="btn-chop-top"> <span class="btn-title">Show Full Recipe</span> </div> <span class="btn-text"></span> </button> </span>
+    <div class="bodyRight">
+      <header class="o-Method__m-Header">
+        <div class="o-Method__m-TextWrap">
+          <h3 class="o-Method__a-Headline"><span class="o-Method__a-HeadlineText">Directions</span></h3></div>
+      </header>
+      <section class="o-Method" data-module="recipe-method" data-read-more-target>
+        <div class="o-Method__m-Body oneStep">
+          <ol>
+            <li class="o-Method__m-Step"> Combine the vodka, orange liqueur, blood orange juice and lime juice in a
+              large pitcher. Fill a cocktail shaker half full with ice, pour the cocktail mixture in, and shake for a
+              full 30 seconds. Pour into chilled martini glasses, rub the rim of each glass with a blood orange peel and
+              add as a garnish. Serve immediately.
+            </li>
+          </ol>
+        </div>
+      </section>
+      <section class="bodyRight-footer">
+        <section class="o-Warnings">
+          <p class="o-Warnings__a-Description">A viewer or guest of the show, who may not be a professional cook,
+            provided this recipe. It has not been tested for home use.</p></section>
+        <section class="o-Copyright">
+          <p class="o-Copyright__a-Credit"> Copyright 2014, Rob Marshall and John DeLuca, All Rights Reserved. </p>
+        </section>
+      </section>
     </div>
-    <noscript>
-      <style>#mntl-chop_1-0--chop-content {
-        max-height: initial;
-      }
-
-      #mntl-chop_1-0 {
-        display: none;
-      }</style>
-    </noscript>
   </div>
-  <footer class="article__footer"></footer>
-</div>
-
+  <section class="o-RatingsAndReviews o-RatingsAndReviews--NoReviews o-Capsule">
+    <header class="o-Capsule__m-Header" id="reviewsTop" data-module="user/rating-summary">
+      <div class="review-summary"></div>
+    </header>
+    <div class="o-UserComments" data-module="user/comments-feed"></div>
+  </section>
+</section>

@@ -72,13 +72,12 @@ Parser.init_grammar(
             { optional: :rp_title },
              # Everything after the ingredient list
             { checklist: [
-                [ :rp_inglist, :rp_instructions ],
+                [ { :repeating => :rp_inglist }, :rp_instructions ],
                 { optional: :rp_author },
                 { optional: :rp_prep_time },
                 { optional: :rp_cook_time },
                 { optional: :rp_total_time },
                 { optional: :rp_serves },
-                { optional: :rp_author },
                 { optional: :rp_yield }
             ] },
         ]
@@ -114,10 +113,9 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: :rp_ingline,
-        repeating: true,
-        enclose: :non_empty,
-        :in_css_match => 'ul, p',
+        match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
+        :in_css_match => 'ul',
+        :enclose => true
     },
     rp_ingline: {
         match: [
@@ -127,8 +125,9 @@ Parser.init_grammar(
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        inline: true
+        in_css_match: 'li'
     },
+    rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {
         match: nil,
         terminus: "\n"
@@ -136,8 +135,8 @@ Parser.init_grammar(
     rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
     rp_amt: {# An Amount is a number followed by a unit (only one required)
              match: [
-                 [:rp_num, :rp_unit],
-                 :rp_num,
+                 [:rp_num_or_range, :rp_unit],
+                 :rp_num_or_range,
                  :rp_unit,
                  { match: 'AmountSeeker' }
              ],
@@ -150,11 +149,13 @@ Parser.init_grammar(
         match: [
             {optional: [:rp_amt_with_alt, {optional: 'each'} ] },
             {optional: 'of'},
-            { or: [ :rp_ingname, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingname ] ] }
+            { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
         ]
     },
     rp_ingname: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
-    rp_num: { match: 'RangeSeeker' },
+    rp_num_or_range: { or: [ :rp_range, :rp_num ] },
+    rp_num: { match: 'NumberSeeker' },
+    rp_range: { match: 'RangeSeeker' },
     rp_unit: { tag: 'Unit' }
 )

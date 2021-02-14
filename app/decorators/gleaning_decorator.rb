@@ -1,5 +1,12 @@
 class GleaningDecorator < ModelDecorator
+  include Templateer
+  include DialogPanes
   delegate_all
+
+  # Provide a list of the editing panes available for the object
+  def dialog_pane_list topics=nil # A comma-separated list of topics to edit
+    Pundit.policy(User.current, object.site).edit? ? [dialog_pane_spec( :site)] : []
+  end
 
   # Define presentation-specific methods here. Helpers are accessed through
   # `helpers` (aka `h`). You can override attributes, for example:
@@ -25,6 +32,12 @@ class GleaningDecorator < ModelDecorator
 
   def title
     result_for 'Title'
+  end
+
+  # Regenerate content when the site finders for Content have changed
+  def regenerate_dependent_content
+    # The page_ref will produce different output if the site's trimmers have changed
+    refresh_attributes :content if changed_for_autosave? # site.finders_for('Content').any? { |f| f.changed? }
   end
 
 end

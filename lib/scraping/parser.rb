@@ -6,7 +6,12 @@ require 'enumerable_utils.rb'
 # '1 teaspoon sherry (or other wine) vinegar' Recipe 15644
 # 'Needles from one, 6-inch section of fresh rosemary' Recipe 15644
 # '1 1/2 cups diced autumn mushrooms, such as blewits and maitake' Recipe 15644
-# '1 garlic clove'
+# '1 garlic clove', 1 salmon fillet (Recipe #2176)
+# Detecting multiple ingredient lists and labelling them: Recipe 15636: Mixed vegetable and potato fritters with harissa
+# "Cook 1 hr 20 min", ibid
+# :rp_author should opt for tag(s) lookup
+# Recipe #15663 Intermediate: Mandarin and Screwdriver (https://www.foodandwine.com/cocktails-spirits/mandarine-napoleon-cocktail-recipes)
+#   an ounce and a half of vodka, half an ounce of Mandarine Napoléon, an ounce of fresh mandarin orange juice, and half an ounce of simple syrup.
 
 class Parser
   attr_reader :grammar
@@ -31,10 +36,15 @@ class Parser
     @@GrammarYAML = grammar.to_yaml
   end
 
+  # Provide a copy of the grammar as initialized
+  def self.initialized_grammar
+    YAML.load @@GrammarYAML
+  end
+
   # How should the token be enclosed?
   def self.tag_for_token token
     case token.to_sym
-    when :rp_recipelist, :rp_recipe, :rp_instructions
+    when :rp_recipelist, :rp_recipe, :rp_instructions # :rp_inglist, :rp_ingline
       'div'
     when :rp_inglist
       'ul'
@@ -43,6 +53,15 @@ class Parser
     else
       'span'
     end
+  end
+
+  # How should a successful match on the token be enclosed in the DOM?
+  # There are defaults, but mainly it's also a function of the grammar, which is site-dependent
+  def tag_for_token token
+    if (grammar_hash = @grammar[token.to_sym]).is_a?(Hash) &&
+        (selector = grammar_hash[:in_css_match])
+      selector.split('.').first.if_present
+    end || Parser.tag_for_token(token)
   end
 
   # Provide a list of tokens available to match
@@ -72,8 +91,8 @@ class Parser
 
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
-    @grammar = YAML.load @@GrammarYAML
-    modify_grammar YAML.load(grammar_mods.to_yaml) # Protect them against modification
+    @grammar = Parser.initialized_grammar
+    modify_grammar YAML.load(grammar_mods.to_yaml) if grammar_mods # Protect them against modification
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
@@ -82,16 +101,13 @@ class Parser
     end
     @grammar.freeze
     @lexaur = lex if lex
-    @stream = case noko_scanner_or_nkdoc_or_nktokens
-              when NokoScanner
-                noko_scanner_or_nkdoc_or_nktokens
-              when String
-                NokoScanner.from_string noko_scanner_or_nkdoc_or_nktokens
-              when NokoTokens
-                NokoScanner.new noko_scanner_or_nkdoc_or_nktokens
-              else
-                raise "Trying to initialize Parser with #{noko_scanner_or_nkdoc_or_nktokens.class.to_s}"
-              end
+    self.stream = noko_scanner_or_nkdoc_or_nktokens
+  end
+
+  def stream=noko_scanner_or_nkdoc_or_nktokens
+    @stream = noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner) ?
+                      noko_scanner_or_nkdoc_or_nktokens :
+                      NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
 
   # Revise the default grammar by specifying new bindings for tokens
@@ -125,19 +141,11 @@ class Parser
           %i{ atline inline },  # :atline and :inline are exclusive options
           %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
       ].each do |flagset|
-        if (wrongset = (keys & flagset))[1] &&
-            # Eliminate nil values for exclusive keys
-            wrongset.keep_if { |key|
-              if entry[key].nil?
-                entry.delete key
-                false
-              else
-                true
-              end
-            }[1]
-          wrongstring, flagstring = [wrongset, flagset].map { |list|
-            '\'' + list[0..-2].join("', '") + "' and '#{list.last}'"
-          }
+        # At most one of the flags in the flagset can be non-nil
+        setflags = (entry.slice *flagset).compact # Eliminating the nil flags
+        if setflags.count > 1
+          wrongstring = ':' + setflags.keys.map(&:to_s).join(', :')
+          flagstring = ':' + flagset.map(&:to_s).join(', :')
           raise "Error: grammar entry for #{token} has #{wrongstring} flags. (Only one of #{flagstring} allowed)."
         end
       end
@@ -164,9 +172,22 @@ class Parser
     end
   end
 
+  # Save the current grammar and apply mods to it for parsing
+  def push_grammar mods
+    @grammar_stack ||= []
+    @grammar_stack.push grammar
+    @grammar = YAML.load(grammar.to_yaml) # Clone the grammar for modification
+    modify_grammar YAML.load(mods.to_yaml)
+  end
+
+  # Restore the grammar to its prior state
+  def pop_grammar
+    @grammar = YAML.load(@grammar_stack.pop.to_yaml)
+  end
+
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match spec, at=@stream
-    matched = match_specification at, spec
+  def match token, stream: @stream
+    matched = match_specification stream, grammar[token], token
     matched
   end
 
@@ -176,7 +197,7 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      mtch = (block_given? ? yield(stream) : match(spec, stream))
+      mtch = (block_given? ? yield(stream) : match(spec, stream: stream))
       return mtch if mtch.success?
       stream = mtch.next
     end
@@ -287,13 +308,6 @@ class Parser
       context = context.except :token
     end
     found = nil
-    # puts "Match #{token} (#{spec}) starting at '#{scanner.peek(6)}'." if token
-    # Intercept a section that has already been parsed (or previously declared)
-=begin
-    if @atomic_tokens[token] && nokonode = scanner.parent_tagged_with(token)
-      return Seeker.new scanner, scanner.past(nokonode), token
-    end
-=end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
       return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
@@ -310,11 +324,12 @@ class Parser
     end
     if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, context.except(:enclose)) unless subscanner # There is no such match in prospect
+      return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
+
       match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = (context[:at_css_match] && scanner.rest.on_css_match( context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
           scanner.past(subscanner)
-      return match.encompass(scanner)  # Release the limitation to element bounds
+      return match.encompass(scanner) # Release the limitation to element bounds
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
@@ -406,14 +421,14 @@ class Parser
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       match_specification scanner, @grammar[spec], spec, context
     when String
-      StringSeeker.match scanner, string: spec, token: token
+      StringSeeker.match scanner.past_newline, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Hash
-      match_hash scanner, spec, token, context
+      match_hash scanner.past_newline, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner, context.merge(token: token, lexaur: lexaur)
+      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
@@ -439,7 +454,7 @@ class Parser
         best_guess = nil
         while scanner.more? && !(child = match_specification scanner, spec, distributed_context).success? do
           best_guess = child if child.enclose? # Save the last child to enclose
-          scanner = child.next # Skip past what the child consumed
+          scanner = child.next # Skip past what the child rejected
         end
         return best_guess if best_guess&.hard_fail?
         next unless child
@@ -466,7 +481,7 @@ class Parser
         child = match_specification end_stream, spec, distributed_context
         children << child.if_retain
         end_stream = child.tail_stream
-        if child.hard_fail?
+        if child.hard_fail? && !child.enclose?
           return Seeker.failed((children.first || child).head_stream,
                                end_stream,
                                token,
@@ -526,4 +541,48 @@ class Parser
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
+end
+
+# The ParserEvaluator provides analysis of the current (initialized) grammar. Methods:
+# can_include? evaluates whether a token could appear as a child of a parent token.
+class ParserEvaluator
+
+  def initialize
+    def scan_for_tokens grammar_entry
+      collected_tokens = []
+      case grammar_entry
+      when Array
+        grammar_entry.each { |list_member| collected_tokens += scan_for_tokens list_member }
+      when Symbol
+        collected_tokens << grammar_entry if grammar_entry.to_s.match(/^rp_/)
+      when Hash
+        grammar_entry.each do |key, subentry|
+          if key == :tags
+            # Find the grammar entry that has a :tag key and the same string
+            collected_tokens << @init_g.find { |token, entry| entry.is_a?(Hash) && entry[:tag] == subentry }&.first
+          else
+            collected_tokens += scan_for_tokens subentry
+          end
+        end
+      end
+      collected_tokens
+    end
+    @grammar_inclusions = {}
+    @init_g = Parser.initialized_grammar
+    @init_g.each { |token, entry| @grammar_inclusions[token] = scan_for_tokens(entry).uniq }
+  end
+
+# Evaluate whether child_token can appear as a child of parent_token.
+  def can_include? parent_token, child_token, transitive = true
+    def refers_to? supe, sub, transitive=true
+      return unless (inclusions = @grammar_inclusions[supe])
+      inclusions.include?(sub) ||
+          transitive && inclusions.find { |inner| refers_to? inner, sub }
+    end
+
+    parent_token.nil? ||
+        child_token.nil? ||
+        refers_to?(parent_token.to_sym, child_token.to_sym, transitive)
+  end
+
 end

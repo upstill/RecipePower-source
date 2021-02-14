@@ -11,6 +11,19 @@ class RecipesController < CollectibleController
     super
   end
 
+  # For getting and creating a new recipe page
+  def recipe_page
+    update_and_decorate
+    # It's a security failure to expect a GET method to create the recipe_page
+    if (rp = @recipe.page_ref.recipe_page).nil? && request.method == 'POST'
+      rp = @recipe.page_ref.create_recipe_page
+      # Fire up the parser
+      rp.request_attributes :content
+      rp.save
+    end
+    redirect_to recipe_page_path(rp, { trigger: params['launch_dialog'] }.compact)
+  end
+
   def index
     redirect_to default_next_path
     # return if need_login true

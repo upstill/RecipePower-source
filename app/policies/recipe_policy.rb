@@ -41,6 +41,10 @@ class RecipePolicy < CollectiblePolicy
     true
   end
 
+  def recipe_page?
+    true
+  end
+
 =begin
   def capture?
     super
