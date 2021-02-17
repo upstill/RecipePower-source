@@ -66,9 +66,9 @@ div.dialog.recipe-contents.new-style.green {
     }
     div.modal-footer {
       position: absolute;
-      bottom: 10px;
-      width: 100%;
-      padding-right: 25px;
+      bottom: 0;
+      right: 0;
+      padding: 0.5em;
     }
   }
   
