@@ -105,30 +105,36 @@ protected
     if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       substrs = Tag.normalizeName(token).split '-'
       tracker = self
-      head = substrs.pop || '' # Save the last substring
-      # Descend the tree for each substring, depending on there being a head marker at each step along the way
-      substrs.each do |substr|
-        tracker = tracker.nexts[substr]
-        return if tracker.nil?
-      end
-      # Peek ahead and consume any tokens which are empty in the normalized name
-      onward = stream.rest
-      unskipped = onward
-      case onward.peek
-      when '.' # Ignore period
-        unskipped = onward = onward.rest
-      when '(' # Elide parenthetical by hunting for matching ')'
-        to_match = onward.rest
-        while to_match && (to_match.peek != ')') do
-          to_match = to_match.rest
+      if substrs.present?
+        head = substrs.pop || '' # Save the last substring
+        # Descend the tree for each substring, depending on there being a head marker at each step along the way
+        substrs.each do |substr|
+          tracker = tracker.nexts[substr]
+          return if tracker.nil?
         end
-        onward = to_match.rest if to_match
-      end
-      tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
-          # ...otherwise, we consume the head of the stream
-          if terms = tracker.terminals[head]
-            block.call terms, unskipped, lexpath # The block must check for acceptance and return true for the process to end
+        # Peek ahead and consume any tokens which are empty in the normalized name
+        onward = stream.rest
+        unskipped = onward
+        case onward.peek
+        when '.' # Ignore period
+          unskipped = onward = onward.rest
+        when '(' # Elide parenthetical by hunting for matching ')'
+          to_match = onward.rest
+          while to_match && (to_match.peek != ')') do
+            to_match = to_match.rest
           end
+          onward = to_match.rest if to_match
+        end
+        tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
+            # ...otherwise, we consume the head of the stream
+            if terms = tracker.terminals[head]
+              block.call terms, unskipped, lexpath # The block must check for acceptance and return true for the process to end
+            end
+      else # This token didn't match to anything in Tag.normalizeName
+        head = ''
+        unskipped = onward = stream.rest
+        tracker.chunk1(onward, lexpath, block)
+      end
     end
   end
 end

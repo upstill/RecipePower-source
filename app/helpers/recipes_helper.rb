@@ -123,31 +123,65 @@ module RecipesHelper
         ''.html_safe
   end
 
-  def edit_trimmers_button object
-    object ?
-        link_to_submit('',
-                       polymorphic_path([:edit, object], topics: :site),
-                       mode: :modal,
-                       class: 'action-button glyphicon glyphicon-filter',
-                       title: 'Edit Trimmers') :
-        ''.html_safe
+  def edit_trimmers_button object, label=''
+    return ''.html_safe unless object
+    options = { mode: :modal, title: 'Edit Trimmers' }
+    options[:class] = 'action-button glyphicon glyphicon-filter' if label.blank?
+    link_to_submit label, polymorphic_path([:edit, object], topics: :site), options
   end
 
-  def edit_recipes_button recipe_page
-    recipe_page ?
-        button_to_submit('',
+  def split_recipe_button recipe, label = ''
+    return ''.html_safe unless recipe
+    options = {
+        mode: :partial,
+        title: 'Split Recipe',
+        method: (recipe.recipe_page.nil? ? 'POST' : 'GET')
+    }
+
+    options[:class] = 'action-button glyphicon glyphicon-asterisk' if label.blank?
+
+    link_to_submit label,
+                   recipe_page_recipe_path(recipe, launch_dialog: 'annotate-content'),
+                   options
+  end
+
+  def edit_recipes_button recipe_page, label=''
+    return ''.html_safe unless recipe_page
+    options = { mode: :modal, title: 'Edit Trimmers' }
+    if label.present?
+      link_to_submit label, edit_recipe_page_path(recipe_page, topics: :page_recipes)
+    else
+      button_to_submit '',
                        edit_recipe_page_path(recipe_page, topics: :page_recipes),
                        'glyph-edit-red',
                        'lg',
-                       mode: :modal,
-                       class: 'action-button annotate-content', # 'action-button glyphicon glyphicon-filter',
-                       title: 'Edit Trimmers') :
-        ''.html_safe
+                       options.merge(class: 'action-button annotate-content')
+    end
   end
 
-  def content_button object
+  def content_button_label object
+    label =
+    case object
+    when PageRef
+      'Trimmed Content'
+    when Recipe
+      'Presentation'
+    when RecipePage
+      'Recipes'
+    when Gleaning
+      'Raw Content'
+      # when MercuryResult
+    else
+      object.model_name.human
+    end
+    label.html_safe
+  end
+
+  # Offer a selection of forms for the recipe's content
+  def content_button object, is_present=false
+    return '&nbsp;'.html_safe + content_tag( :strong, content_button_label(object)) + '&nbsp;'.html_safe if is_present
     object ?
-        button_to_submit("#{object.model_name}".html_safe, polymorphic_path(object, mode: :partial)) :
+        button_to_submit(content_button_label(object), polymorphic_path(object, mode: :partial)) :
         ''.html_safe
   end
 
@@ -155,47 +189,41 @@ module RecipesHelper
     return unless policy(object).update?
     if [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
       page_ref = object.page_ref
-      buttons = ActiveSupport::SafeBuffer.new
       recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
+
+      buttons = ActiveSupport::SafeBuffer.new
       if response_service.admin_view?
-        buttons += "#{object.class.to_s}<strong></strong>&nbsp;".html_safe
-        buttons += content_button(page_ref) if object != page_ref
-        buttons += content_button(recipe) if object != recipe
-        buttons += content_button(page_ref.mercury_result) if object != page_ref.mercury_result
-        buttons += content_button(page_ref.gleaning) if object != page_ref.gleaning
-        buttons += content_button(page_ref.recipe_page) if object != page_ref.recipe_page
+        buttons += content_button page_ref.gleaning, object == page_ref.gleaning
+        buttons += content_button page_ref, object == page_ref
+        buttons += content_button recipe, object == recipe
         buttons += refresh_button object
       end
-      case object
-      when Recipe
-        buttons +=
-            link_to_submit '',
-                             recipe_page_recipe_path(object, launch_dialog: 'annotate-content' ),
-                             class: 'action-button glyphicon glyphicon-asterisk',
-                             mode: :partial,
-                             title: 'Split Recipe',
-                             method: (object.recipe_page.nil? ? 'POST' : 'GET')
-        buttons +=
-            button_to_submit('',
-                             edit_recipe_contents_path(recipe),
-                             'glyph-edit-red',
-                             'xl',
-                             mode: :modal,
-                             class: 'action-button annotate-content',
-                             title: 'Annotate Content')
-        buttons += edit_trimmers_button object
-      when RecipePage
-        # Provide editing button if Recipe or RecipePage
-        # buttons += collectible_edit_button object, 'xl', class: 'action-button annotate-content'
-        buttons += edit_recipes_button object
-        buttons += edit_trimmers_button object
-      when PageRef
-        buttons += edit_trimmers_button object
-      when Gleaning
-        buttons += edit_trimmers_button object
-      end
+      buttons +=
+          button_to_submit('',
+                           edit_recipe_contents_path(recipe),
+                           'glyph-edit-red',
+                           'xl',
+                           mode: :modal,
+                           class: 'action-button annotate-content',
+                           title: 'Annotate Content') if object.is_a?(Recipe)
       content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
     end
+  end
+
+# Provide a header which suggests how to improve the content
+  def recipe_content_sugg object
+    dialog_link = edit_trimmers_button object, 'here'
+    sugg =
+        case object
+        # when MercuryResult
+        when RecipePage
+<<EOF
+          This page is supposed to have multiple recipes.<br>
+          Click #{dialog_link} to direct how to demarcate them algorithmically.<br>
+          Click #{edit_recipes_button object, 'here'} to select them directly.
+EOF
+        end
+    return (sugg.if_present || '').html_safe
   end
 
   def tagjoin tags, enquote = false, before = '', after = '', joiner = ','

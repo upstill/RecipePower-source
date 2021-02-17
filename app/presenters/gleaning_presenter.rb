@@ -1,6 +1,10 @@
 class GleaningPresenter < BasePresenter
   def html_content 
-    super.if_present || '[No content gleaned]'.html_safe
+    @object.content.html_safe if @object.content.present?
+  end
+
+  def content_suggestion
+    "This is the material gleaned directly from the page. Click #{edit_trimmers_button @object, 'here'} to capture by CSS.".html_safe
   end
 
   # When a Gleaning is updated, what types of item get replaced?

@@ -272,12 +272,12 @@ class NokoTokens < Array
   def clear_classification_context node, rp_elmt_class
     return unless rp_elmt_class
 
-    while !node.is_a?(Nokogiri::HTML::DocumentFragment) do
-      if (classes = nknode_rp_classes node).present?
+    node.ancestors.each do |ancestor|
+      return if ancestor.fragment?
+      if (classes = nknode_rp_classes ancestor).present?
         legit_classes = classes.find_all { |parent_class| @parser_evaluator.can_include?(parent_class, rp_elmt_class) }
-        nknode_rp_classes node, legit_classes
+        nknode_rp_classes ancestor, legit_classes if legit_classes != classes
       end
-      node = node.parent
     end
   end
 
@@ -380,6 +380,7 @@ class NokoTokens < Array
       elmt_bounds.attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
     # validate_embedding report_tree('After: ', newtree)
+    clear_classification_context newtree, rp_elmt_class
     @elmt_bounds.text_element_valid? newtree
     newtree
   end
