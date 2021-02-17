@@ -32,8 +32,12 @@ class BasePresenter
         class: 'label-rotator rotate'
   end
 
+  def content_preface
+    recipe_content_buttons(@object) + content_suggestion
+  end
+
   # Provide the HTML presentation for the object, if any
-  def html_content 
+  def html_content
     # Individual presenters may override to present content
     @object.content&.html_safe if @object.respond_to? :content
   end

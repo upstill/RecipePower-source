@@ -1,9 +1,8 @@
   <div class="content-item" style="width:100%">
     <% entity = decorator.object %>
-    <%= recipe_content_buttons entity if policy(entity).update? %>
-    <% if card_content = present(entity).html_content %>
-      <div id="rp-html-content">
-        <%= card_content.html_safe %>
-      </div>
-    <% end %>
+    <% presenter = present(entity) %>
+    <%= presenter.content_preface if policy(entity).update? %>
+    <div id="rp-html-content">
+      <%= presenter.html_content %>
+    </div>
   </div>

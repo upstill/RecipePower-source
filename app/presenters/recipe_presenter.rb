@@ -52,27 +52,46 @@ class RecipePresenter < CollectiblePresenter
     [ label, contents ]
   end
 
+  def content_preface
+    if @object.content.blank?
+      if @object.page_ref&.gleaning.content.blank?
+        return GleaningPresenter.new(@object.page_ref&.gleaning, @template, @viewer).content_preface
+      elsif @object.page_ref&.trimmed_content.blank?
+        return PageRefPresenter.new(@object.page_ref, @template, @viewer).content_preface
+      end
+    end
+    super
+  end
+
   # Present the recipe's content in its entirety.
   # THIS SHOULD HANDLED CAREFULLY b/c who knows what nefarious HTML it contains?
   def html_content
     # Handle empty content first by returning an error message
     if @object.content.blank?
-      if @object.page_ref&.trimmed_content.blank?
-        return "No Recipe content (PageRef content is empty)".html_safe
-      elsif @object.recipe_page&.selected_content(@object.anchor_path, @object.focus_path).blank?
-        return "No Recipe content (PageRef has content but RecipePage content is empty)".html_safe
-      else
-        return "Recipe has no content currently. Try Refreshing."
+      if @object.page_ref&.gleaning.content.blank?
+        return GleaningPresenter.new(@object.page_ref&.gleaning, @template, @viewer).html_content
+      elsif @object.page_ref&.trimmed_content.blank?
+        return PageRefPresenter.new(@object.page_ref, @template, @viewer).html_content
       end
     end
+
     hc = if content_for(:rp_inglist).present? && content_for(:rp_instructions).present?
            with_format('html') { render 'recipes/formatted_content', presenter: self, locals: {presenter: self} }
          else
-           @object.content.html_safe
+           (@object.content || '').html_safe
          end
-    if response_service.admin_view?
-      hc + content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe  
+    if response_service.admin_view? && @object.content
+      hc += content_tag(:h2, 'Raw Parsed Content -------------------------------') + @object.content.html_safe
     end
+    hc
+  end
+
+  def content_suggestion
+    cs = <<EOF
+          Click #{edit_trimmers_button @object, 'here'} to direct the parsing process algorithmically.<br>
+          If the recipe page contains multiple recipes, click #{split_recipe_button @object, 'here'}
+EOF
+    cs.html_safe
   end
 
   def assemble_tree node, selector = nil

@@ -14,26 +14,25 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
   # tag = tag.to_s || 'span'
   rp_elmt_class ||= ''
 
-  # Scan a node and its ancestors to see if any contain all and only the text between the two text elements
-  # Also perform a check, if given by a block
-  anc = nil
-  while !node.fragment? &&
-      nknode_text_before(first_te, within: node).blank? &&
-      nknode_text_after(last_te, within: node).blank? &&
-      (!block_given? || yield(node)) do
-    anc = node if (tag.blank? || node.name == tag) &&
-        (value.nil? || node['value'].nil?) # Here we should be testing for parser compatibility
-    break if anc # Pick the lowest enclosing node
-    break if nknode_has_class?(node, :rp_elmt) # Don't rise above the innermost :rp_elmt
-    node = node.parent
+  # The set of nodes to search is the node's ancestors,
+  # including the node but excluding the top-level fragment,
+  # which have no other non-blank text.
+  node.
+  ancestors.
+  to_a[0...-1].
+  unshift(node).
+  each do |anc|
+    return unless nknode_text_before(first_te, within: anc).blank? && nknode_text_after(last_te, within: anc).blank?
+    # Disqualify a node that can't be contained under the requisite class
+    if (tag.blank? || anc.name == tag) && (value.nil? || anc['value'].nil?)
+      clear_classification_context anc, rp_elmt_class
+      nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
+      return anc
+    else
+      # Stop looking when we reach an ancestor that can't be enclosed by the class
+      return unless nknode_rp_classes(anc).all? { |cl| @parser_evaluator.can_include? rp_elmt_class, cl }
+    end
   end
-
-  # We can just apply the rp_elmt_class and value to the parent element if the two text elements are the first and last text elements in the subtree
-  if anc
-    clear_classification_context anc, rp_elmt_class
-    nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
-  end
-  anc
 end
 
 # Minimize the text enclosed by the two text elements, by ignoring empty text
