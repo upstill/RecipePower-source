@@ -53,26 +53,15 @@ class RecipePresenter < CollectiblePresenter
   end
 
   def content_preface
-    if @object.content.blank?
-      if @object.page_ref&.gleaning.content.blank?
-        return GleaningPresenter.new(@object.page_ref&.gleaning, @template, @viewer).content_preface
-      elsif @object.page_ref&.trimmed_content.blank?
-        return PageRefPresenter.new(@object.page_ref, @template, @viewer).content_preface
-      end
-    end
-    super
+    (prpr = proxy_presenter) ? prpr.content_preface : super
   end
 
   # Present the recipe's content in its entirety.
   # THIS SHOULD HANDLED CAREFULLY b/c who knows what nefarious HTML it contains?
   def html_content
     # Handle empty content first by returning an error message
-    if @object.content.blank?
-      if @object.page_ref&.gleaning.content.blank?
-        return GleaningPresenter.new(@object.page_ref&.gleaning, @template, @viewer).html_content
-      elsif @object.page_ref&.trimmed_content.blank?
-        return PageRefPresenter.new(@object.page_ref, @template, @viewer).html_content
-      end
+    if prpr = proxy_presenter
+      return prpr.html_content
     end
 
     hc = if content_for(:rp_inglist).present? && content_for(:rp_instructions).present?
@@ -155,6 +144,19 @@ EOF
   end
 
   private
+
+  def proxy_presenter
+    return @prpr if @prpr
+    @object.ensure_attributes :content
+    @prpr =
+    if @object.content.blank?
+      if @object.page_ref&.gleaning.content.blank?
+        GleaningPresenter.new @object.page_ref&.gleaning, @template, @viewer
+      elsif @object.page_ref&.trimmed_content.blank?
+        PageRefPresenter.new @object.page_ref, @template, @viewer
+      end
+    end
+  end
 
   # Here's where we can 
   def extract_from_node token, txt
