@@ -52,6 +52,7 @@ class NokoTokens < Array
     self.map &:freeze
     @bound = count
     @parser_evaluator = ParserEvaluator.new
+    @parser_evaluator.can_include :rp_instructions, :rp_inglist
     self.freeze
   end
 

@@ -547,29 +547,19 @@ end
 # can_include? evaluates whether a token could appear as a child of a parent token.
 class ParserEvaluator
 
+  attr_reader :init_g
+
   def initialize
-    def scan_for_tokens grammar_entry
-      collected_tokens = []
-      case grammar_entry
-      when Array
-        grammar_entry.each { |list_member| collected_tokens += scan_for_tokens list_member }
-      when Symbol
-        collected_tokens << grammar_entry if grammar_entry.to_s.match(/^rp_/)
-      when Hash
-        grammar_entry.each do |key, subentry|
-          if key == :tags
-            # Find the grammar entry that has a :tag key and the same string
-            collected_tokens << @init_g.find { |token, entry| entry.is_a?(Hash) && entry[:tag] == subentry }&.first
-          else
-            collected_tokens += scan_for_tokens subentry
-          end
-        end
-      end
-      collected_tokens
-    end
     @grammar_inclusions = {}
     @init_g = Parser.initialized_grammar
     @init_g.each { |token, entry| @grammar_inclusions[token] = scan_for_tokens(entry).uniq }
+  end
+
+  # Declare that an arbitrary inclusion is okay
+  def can_include parent_token, child_token
+    parent_token, child_token = parent_token.to_sym, child_token.to_sym
+    @grammar_inclusions[parent_token] ||= []
+    @grammar_inclusions[parent_token] |= [child_token] 
   end
 
 # Evaluate whether child_token can appear as a child of parent_token.
@@ -583,6 +573,28 @@ class ParserEvaluator
     parent_token.nil? ||
         child_token.nil? ||
         refers_to?(parent_token.to_sym, child_token.to_sym, transitive)
+  end
+
+  private
+
+  def scan_for_tokens grammar_entry
+    collected_tokens = []
+    case grammar_entry
+    when Array
+      grammar_entry.each { |list_member| collected_tokens += scan_for_tokens list_member }
+    when Symbol
+      collected_tokens << grammar_entry if grammar_entry.to_s.match(/^rp_/)
+    when Hash
+      grammar_entry.each do |key, subentry|
+        if key == :tags
+          # Find the grammar entry that has a :tag key and the same string
+          collected_tokens << @init_g.find { |token, entry| entry.is_a?(Hash) && entry[:tag] == subentry }&.first
+        else
+          collected_tokens += scan_for_tokens subentry
+        end
+      end
+    end
+    collected_tokens
   end
 
 end
