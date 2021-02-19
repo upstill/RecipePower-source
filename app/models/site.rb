@@ -441,7 +441,7 @@ public
     token = tokens.last
     case newval
     when String # Blank string sets grammar mod to nil, which cancels the entry in the grammar
-      hsh[token] = newval.if_present
+      hsh[token] = newval.strip.if_present
     when TrueClass, FalseClass
       hsh[token] = newval
     when NilClass
