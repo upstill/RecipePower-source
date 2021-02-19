@@ -83,6 +83,7 @@ EOF
     cs.html_safe
   end
 
+  # Assemble HTML to represent the DOM subtree denoted by node
   def assemble_tree node, selector = nil
     return node.text.html_safe if node.text?
     selection = selector ? node.css(selector) : node.children
@@ -103,7 +104,6 @@ EOF
     return content
   end
 
-  # TODO: We're leaving behind embedded links
   def content_for token
     return if @object.content.blank?
     html =
@@ -116,12 +116,17 @@ EOF
     #when :rp_ing_comment
     when :rp_inglist
       results_for(".rp_inglist") { |listnode|
-        [assemble_tree(listnode, '.rp_ingline'), listnode.css('.rp_inglist_label').first&.inner_text]
-      }
+        [ assemble_tree(listnode, '.rp_ingline'),
+          listnode.css('.rp_inglist_label').first&.inner_text
+        ] unless listnode.ancestors.to_a[0...-1].any? { |anc|
+          anc.matches? '.rp_instructions'
+        }
+      }.compact
     #when :rp_ingline
     when :rp_instructions
-      instrs = results_for(".#{token} li").if_present || [result_for( ".#{token}")]
-      instrs.compact.collect { |instr| instr.strip.sub(/\.$/,'')+'.'}.join ' '
+      # The instructions will be probed for embedded ingredient(list)s, and those interspersed in the text.
+      result = result_for ".#{token}"
+      result.strip.sub(/\.$/,'')+'.' if result.present?
     else # Default is just to return the text at the named node
       result_for ".#{token}"
     end
@@ -140,6 +145,21 @@ EOF
       }.compact
     else
       block_given? ? (yield(html) if html.present?) : html
+    end
+  end
+
+  # Look out for ingredient(list)s embedded in the instructions; return an array containing:
+  # -- strings to be turned into instruction lists
+  # -- ingredient lists and lines to be interspersed therein
+  def instructions_results
+    results_for('.rp_instructions') do |node|
+      prev_ilist = nil
+      node.css('.rp_inglist, .rp_ingline').each { |inglist_node|
+        yield nknode_text_before(nknode_first_text_element(inglist_node), within: node, starting_after: prev_ilist)
+        prev_ilist = inglist_node
+        yield inglist_node
+      }
+      yield (prev_ilist ? nknode_text_after(prev_ilist, within: node) : node.text)
     end
   end
 

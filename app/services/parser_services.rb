@@ -161,6 +161,26 @@ The dependencies are as follows:
     ps
   end
 
+  # Divide a line by commas and 'and'
+  def chunk_line token: :rp_ingline
+    nks = nokoscan # Save for later
+    ct = @content
+    results = nks.split(',').collect { |chunk| parse content: chunk, token: token, context_free: true }
+    # If the last clause contains multiple 'and' tokens, split across each one in turn
+    turns = results.last.head_stream.split('and').delete_if &(:blank?)
+    pairs = []
+    turns[0...-1].each_index do |i|
+      pairs.push [ parse(content: turns[0].encompass(turns[i]), token: token, context_free: true),
+                   parse(content: turns[(i+1)].encompass(turns[-1]), token: token, context_free: true) ]
+    end
+    if pairs.first&.all? &:'success?'
+      results.pop
+      results += pairs.first
+    end
+    self.content = nks
+    @seeker = Seeker.new nks, results.last.tail_stream, token, results
+  end
+
   # Extract information from an entity (Recipe or RecipePage) or presented content
   def parse options={}
     self.content = options[:content] if options[:content]
@@ -175,18 +195,27 @@ The dependencies are as follows:
       @seeker = parser.match token
     end
 
+    # Second-guess a failed parse
     # For any given token, assess the result and take any needed steps to correct it.
-    return @seeker unless gm =
+    if grammar_mod =
         case token
         when :rp_inglist, :rp_recipe
           # Does the list have any :ingline's? Try parsing different
           if @seeker.find(:rp_ingline).empty?
-            gm = { :rp_ingline => { :in_css_match => nil, :inline => true } }
+            { :rp_ingline => { :in_css_match => nil, :inline => true } }
           end
         end
-    parser.push_grammar gm
-    @seeker = parser.match token.to_sym
-    parser.pop_grammar
+      parser.push_grammar grammar_mod
+      @seeker = parser.match token.to_sym
+      parser.pop_grammar
+    end
+    if !@seeker.success?
+      # Try using a line scan for the ingredient list
+      case token
+      when :rp_inglist
+        @seeker = chunk_line
+      end
+    end
     @seeker
   end
 
@@ -244,7 +273,7 @@ The dependencies are as follows:
           yield typenum, tagstr if block_given?
         end
       else
-        parse content: elmt, token: tokens.first
+        parse content: elmt, token: tokens.first, context_free: true
         seeker.enclose_all parser: parser
       end
     end

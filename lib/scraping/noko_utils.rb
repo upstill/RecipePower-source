@@ -81,11 +81,13 @@ def next_siblings nokonode
   nokonode.parent.children.collect { |child| found ? child : (found ||= child == nokonode; nil) }.compact
 end
 
-def nknode_text_before text_elmt, within: text_elmt.parent
+def nknode_text_before text_elmt, within: text_elmt.parent, starting_after: nil
   before = ''
+  collecting = starting_after.nil?
   within.traverse do |node|
     return before if node.object_id == text_elmt.object_id
-    before << node.text if node.text?
+    before << node.text if node.text? && collecting
+    collecting ||= (node.object_id == starting_after.object_id)
   end
   before
 end
