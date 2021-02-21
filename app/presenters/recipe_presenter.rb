@@ -148,16 +148,37 @@ EOF
     end
   end
 
-  # Look out for ingredient(list)s embedded in the instructions; return an array containing:
+  # Break instructions into a sequence of <li> tags
+  def present_instructions
+    prior_line = nil
+    instructions_results do |instrs_or_ingline|
+      if instrs_or_ingline.is_a?(String)
+        sequence_instructions(instrs_or_ingline) do |line|
+          yield content_tag :li, prior_line if prior_line
+          prior_line = line
+        end
+      elsif instrs_or_ingline.matches?('.rp_ingline')
+        if prior_line
+          yield content_tag :li, prior_line.sub(/\.$/, ':')
+          prior_line = nil
+        end
+        yield assemble_tree(instrs_or_ingline)
+      end
+    end
+    yield content_tag :li, prior_line.sub(/\.*$/, '.') if prior_line
+  end
+
+  # Look out for ingredient(list)s embedded in the instructions; yield to the block for each:
   # -- strings to be turned into instruction lists
   # -- ingredient lists and lines to be interspersed therein
   def instructions_results
     results_for('.rp_instructions') do |node|
       prev_ilist = nil
-      node.css('.rp_inglist, .rp_ingline').each { |inglist_node|
-        yield nknode_text_before(nknode_first_text_element(inglist_node), within: node, starting_after: prev_ilist)
-        prev_ilist = inglist_node
-        yield inglist_node
+      node.css('.rp_ingline').each { |ingline_node|
+        intervening_text = nknode_text_before(nknode_first_text_element(ingline_node), within: node, starting_after: prev_ilist)
+        yield intervening_text if intervening_text.present?
+        prev_ilist = ingline_node
+        yield ingline_node
       }
       yield (prev_ilist ? nknode_text_after(prev_ilist, within: node) : node.text)
     end

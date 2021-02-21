@@ -16,17 +16,8 @@
   </ul>
 <% end %>
 <h3>Instructions</h3>
-<% presenter.instructions_results do |instrs_or_inglist| %>
-  <% if instrs_or_inglist.is_a?(String) %>
-    <ul>
-      <% sequence_instructions(instrs_or_inglist) do |line| %>
-        <li><%= line %></li>
-      <% end %>
-    </ul>
-  <% elsif instrs_or_inglist.matches?('.rp_ingline') %>
-    <!--    We've got either an ingredient list or an ingredient line -->
-    <ul class="rp_inglist">
-      <%= presenter.assemble_tree(instrs_or_inglist) %>
-    </ul>
+<ul>
+  <% presenter.present_instructions do |line| %>
+    <%= line %>
   <% end %>
-<% end %>
+</ul>
