@@ -15,11 +15,9 @@
     <%= html %>
   </ul>
 <% end %>
-<% presenter.content_for(:rp_instructions) do |text| %>
-  <h3>Instructions</h3>
-  <ul>
-    <% sequence_instructions text do |line| %>
-      <li><%= line %></li>
-    <% end %>
-  </ul>
-<% end %>
+<h3>Instructions</h3>
+<ul>
+  <% presenter.present_instructions do |line| %>
+    <%= line %>
+  <% end %>
+</ul>

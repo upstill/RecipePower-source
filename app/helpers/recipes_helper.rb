@@ -273,6 +273,7 @@ EOF
     out.html_safe
   end
 
+# For a (possibly long) text string, break it into sentences and call the block for each.
   def sequence_instructions txt
     sentences = txt.
         strip.   # No whitespace fore and aft
@@ -282,7 +283,6 @@ EOF
     while step = sentences.shift do
       break if step.present? && !step.match(/^[\d.,)]*$/)
     end
-    return if sentences.blank?
     sentences.each do |sentence|
       if sentence.split(/\s+/).length > 3
         yield step if step.present?

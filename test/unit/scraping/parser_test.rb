@@ -43,6 +43,10 @@ class ParserTest < ActiveSupport::TestCase
       ground\ turmeric
       ground\ cumin
       ground\ cinnamon
+      ground\ clove
+      ground\ nutmeg
+      brown\ sugar
+      white\ sugar
       lemon\ zest
       lemon\ juice
       anchovy\ fillets
@@ -258,6 +262,20 @@ EOF
     assert_equal 'sifted', ps.find_value(:rp_condition)
     assert_equal 'tsp.', ps.find_value(:rp_unit)
     assert_not_empty ps.find(:rp_ingspec)
+  end
+
+
+  test 'parse multiple ingredient lines separated by punctuation' do
+    # Try it with plain text
+    html = "1 pound softened butter, 1 pound brown sugar, 1 pound white sugar, 1 tablespoon ground cinnamon and 1 teaspoon each ground clove and ground nutmeg"
+    ps = ParserServices.new content: html, lexaur: @lex
+    subscanners = ps.nokoscan.split(',')
+    assert_equal 4, subscanners.count
+    
+    seeker = ps.parse token: :rp_inglist, context_free: true
+
+    assert seeker.success?
+    assert_equal 5, seeker.children.count
   end
 
   test 'tag has terminating period' do

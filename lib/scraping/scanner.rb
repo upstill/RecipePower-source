@@ -529,6 +529,22 @@ class NokoScanner # < Scanner
     ranges.map { |range| scanner_for_range range, flag }.compact
   end
 
+  # Divide the scanner into multiple scanners at tokens matching the matcher
+  def split matcher
+    token_index = @pos
+    prev_start = @pos
+    results = []
+    while token_index < @bound do
+      if tokens[token_index].match matcher
+        results << NokoScanner.new(@tokens, prev_start, token_index) if token_index > prev_start
+        prev_start = token_index+1
+      end
+      token_index += 1
+    end
+    results << NokoScanner.new(@tokens, prev_start, token_index) if token_index > prev_start
+    results
+  end
+
   # Provide xpath and offset for locating the current position in the document
   def xpath terminating = false
     @nkdoc.children.first
