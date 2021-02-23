@@ -165,7 +165,7 @@ EOF
         yield assemble_tree(instrs_or_ingline)
       end
     end
-    yield content_tag :li, prior_line.sub(/\.*$/, '.') if prior_line
+    yield content_tag :li,  prior_line.sub(/\.*$/, '.') if prior_line
   end
 
   # Look out for ingredient(list)s embedded in the instructions; yield to the block for each:
