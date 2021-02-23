@@ -151,11 +151,10 @@ class SiteServices
       trimmers.each do |trimmer|
         puts "Trimming with CSS selector #{trimmer}"
         begin
-          matches = @nkdoc.css trimmer # Protection against bad trimmer
+          matches = @nkdoc.css(trimmer).remove # Protection against bad trimmer
         rescue Exception => exc
           raise exc, "CSS Selector (#{trimmer}) caused an error"
         end
-        matches.map &:remove
       end
       @nkdoc.traverse do |node|
         # Ensure that link tags have a global url

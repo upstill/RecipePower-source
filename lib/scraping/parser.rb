@@ -481,7 +481,7 @@ class Parser
         child = match_specification end_stream, spec, distributed_context
         children << child.if_retain
         end_stream = child.tail_stream
-        if child.hard_fail? && !child.enclose?
+        if child.hard_fail? # && !child.enclose?
           return Seeker.failed((children.first || child).head_stream,
                                end_stream,
                                token,

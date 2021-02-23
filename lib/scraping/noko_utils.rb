@@ -3,7 +3,8 @@
 # Clean up the HTML of a node
 def nknode_sanitize(node)
   # Turn <p> tags embedded in list tags (illegal) into <li> tags
-  node.css('ul p,ol p').each { |found| found.name = 'li' }
+  # Rename any paragraph tags under <ul> or <li> tags (without an intervening <li>) as <li>
+  (node.css('ul p,ol p') - node.css('ul li p,ol li p')).each { |p| p.name = 'li' }
   node.css('script').remove
   node.css('span.loading').remove
   node

@@ -276,9 +276,9 @@ EOF
 # For a (possibly long) text string, break it into sentences and call the block for each.
   def sequence_instructions txt
     sentences = txt.
+        gsub(/[[:space:]]+/, ' '). # Replace all sequences of whitespace with a single blank
         strip.   # No whitespace fore and aft
-    # sub(/\.$/,'').
-        split( /\.\s+/ ). # Break on sentences
+        split( /\. / ). # Break on sentences
         collect { |sentence| sentence.match(/[?!]/) ? sentence : (sentence.strip << '.') }
     while step = sentences.shift do
       break if step.present? && !step.match(/^[\d.,)]*$/)

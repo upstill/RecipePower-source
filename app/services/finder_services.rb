@@ -131,7 +131,7 @@ class FinderServices
     pagehome = "#{uri.scheme}://#{uri.host}"
     nkdoc = NestedBenchmark.measure('making Nokogiri request') { self.open_noko url }
     # Delete all <script> tags up front
-    nkdoc.css('script').map &:remove
+    nkdoc.css('script').remove # No scripts allowed!
 
     # Initialize the results
     results = Results.new *finders.map(&:label)
