@@ -12,6 +12,16 @@ div.content-item {
       color:  darkgray;
       font-size: 1.2em;
     }
+    &.edit-filters {
+      color: red;
+      font-size: 1.0em;
+      background-color: #0000;
+      border-color: #0000;
+      padding: 0;
+      img {
+        width: 1.9em;
+      }
+    }
   }
 }
 div.dialog.recipe-contents.new-style.green {

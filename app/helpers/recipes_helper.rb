@@ -125,9 +125,15 @@ module RecipesHelper
 
   def edit_trimmers_button object, label=''
     return ''.html_safe unless object
-    options = { mode: :modal, title: 'Edit Trimmers' }
-    options[:class] = 'action-button glyphicon glyphicon-filter' if label.blank?
-    link_to_submit label, polymorphic_path([:edit, object], topics: :site), options
+    options = { mode: :modal, title: 'Edit CSS Filters' }
+    path = polymorphic_path [:edit, object], topics: :site
+    if label.blank?
+      options[:class] = 'action-button edit-filters'
+      # options[:class] = 'action-button glyphicon glyphicon-filter' if label.blank?
+      button_to_submit image_tag('CSS Logo.svg'), path, options
+    else
+      link_to_submit label, path, options
+    end
   end
 
   def split_recipe_button recipe, label = ''
@@ -138,7 +144,7 @@ module RecipesHelper
         method: (recipe.recipe_page.nil? ? 'POST' : 'GET')
     }
 
-    options[:class] = 'action-button glyphicon glyphicon-asterisk' if label.blank?
+    options[:class] = 'action-button glyphicon glyphicon-list-alt' if label.blank?
 
     link_to_submit label,
                    recipe_page_recipe_path(recipe, launch_dialog: 'annotate-content'),
@@ -193,6 +199,7 @@ module RecipesHelper
 
       buttons = ActiveSupport::SafeBuffer.new
       if response_service.admin_view?
+        buttons += edit_trimmers_button object
         buttons += content_button page_ref.gleaning, object == page_ref.gleaning
         buttons += content_button page_ref, object == page_ref
         buttons += content_button recipe, object == recipe
