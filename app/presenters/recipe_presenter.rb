@@ -77,7 +77,7 @@ class RecipePresenter < CollectiblePresenter
 
   def content_suggestion
     cs = <<EOF
-          Click #{edit_trimmers_button @object, 'here'} to direct the parsing process algorithmically.<br>
+          Ingredients, instructions and title are identified using CSS.<br>
           If the recipe page contains multiple recipes, click #{split_recipe_button @object, 'here'}
 EOF
     cs.html_safe

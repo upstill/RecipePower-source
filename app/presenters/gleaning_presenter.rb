@@ -10,9 +10,8 @@ class GleaningPresenter < BasePresenter
 
   def content_suggestion
     (@object.content.present? ?
-        'This is the content that has been extracted from the page.' :
-        'Nothing has been extracted from the page.').html_safe + 
-    " To specify how to extract content using CSS, click #{edit_trimmers_button @object, 'here'}.".html_safe
+        'This is the content that has been extracted from the page using CSS selectors.' :
+        'Nothing has been extracted from the page.').html_safe
   end
 
   # When a Gleaning is updated, what types of item get replaced?

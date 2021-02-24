@@ -18,6 +18,6 @@ class PageRefPresenter < CollectiblePresenter
   end
 
   def content_suggestion
-    "This is the raw content after trimming. Click #{edit_trimmers_button @object, 'here'} to remove more material via CSS.".html_safe
+    "This is the raw content after trimming with CSS selectors.".html_safe
   end
 end
