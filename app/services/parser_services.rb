@@ -195,6 +195,7 @@ The dependencies are as follows:
       @seeker = parser.match token
     end
 
+=begin
     # Second-guess a failed parse
     # For any given token, assess the result and take any needed steps to correct it.
     if grammar_mod =
@@ -209,6 +210,7 @@ The dependencies are as follows:
       @seeker = parser.match token.to_sym
       parser.pop_grammar
     end
+=end
     if !@seeker.success?
       # Try using a line scan for the ingredient list
       case token

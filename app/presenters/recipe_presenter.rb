@@ -115,13 +115,24 @@ EOF
     #when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
     #when :rp_ing_comment
     when :rp_inglist
+      # There may be multiple ingredient lists, each one with embedded labels,
+      # but we want to deliver a set of label/lines pairs
+      pairlist = []
       results_for(".rp_inglist") { |listnode|
-        [ assemble_tree(listnode, '.rp_ingline'),
-          listnode.css('.rp_inglist_label').first&.inner_text
-        ] unless listnode.ancestors.to_a[0...-1].any? { |anc|
-          anc.matches? '.rp_instructions'
-        }
-      }.compact
+        unless listnode.ancestors.to_a[0...-1].any? { |anc| anc.matches? '.rp_instructions' }
+          runs = []
+          listnode.css('.rp_inglist_label, .rp_ingline').each { |node|
+            runs << [ ] if node.matches? '.rp_inglist_label'
+            (runs.last ||= []) << node
+          }
+          runs.each do |run|
+            label = (run.shift.inner_text if run.first&.matches? '.rp_inglist_label')
+            # Each run will be a sequence of inglines, possibly led by a label
+            pairlist << [ safe_join(run.collect { |ingline| assemble_tree ingline }), label ] if run.present?
+          end
+        end
+      }
+      pairlist
     #when :rp_ingline
     when :rp_instructions
       # The instructions will be probed for embedded ingredient(list)s, and those interspersed in the text.

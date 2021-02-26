@@ -12,7 +12,15 @@ require 'enumerable_utils.rb'
 # :rp_author should opt for tag(s) lookup
 # Recipe #15663 Intermediate: Mandarin and Screwdriver (https://www.foodandwine.com/cocktails-spirits/mandarine-napoleon-cocktail-recipes)
 #   an ounce and a half of vodka, half an ounce of Mandarine Napoléon, an ounce of fresh mandarin orange juice, and half an ounce of simple syrup.
-
+# Recipe 15663(public) Tofu and Kale Salad With Avocado, Grapefruit, and Miso-Tahini Dressing
+# 1 (14-ounce; 400g) block firm (non-silken) tofu
+# 3/4 ounce (about 1/4 cup; 20g) za'atar, divided
+# 1 tablespoon (15ml) white or yellow miso paste
+# 1 tablespoon (15ml) juice from 1 lemon
+# Recipe 15662(public) Real-Deal Mapo Tofu
+# 1 1/2 pounds medium to firm silken tofu, cut into 1/2-inch cubes
+# Recipe 15662(public) Sheet-Pan Spiced Cauliflower and Tofu With Ginger Yogurt
+# 1 large (2 3/4-pound; 1.25kg) head cauliflower
 class Parser
   attr_reader :grammar
 
@@ -58,9 +66,12 @@ class Parser
   # How should a successful match on the token be enclosed in the DOM?
   # There are defaults, but mainly it's also a function of the grammar, which is site-dependent
   def tag_for_token token
-    if (grammar_hash = @grammar[token.to_sym]).is_a?(Hash) &&
-        (selector = grammar_hash[:in_css_match])
-      selector.split('.').first.if_present
+    if (grammar_hash = @grammar[token.to_sym]).is_a? Hash
+      if selector = grammar_hash[:in_css_match]
+        selector.split('.').first.if_present
+      elsif grammar_hash[:inline]
+        'span'
+      end
     end || Parser.tag_for_token(token)
   end
 
@@ -363,12 +374,17 @@ class Parser
       # we return a single seeker with no token and matching children
       matches.compact!
       if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
-        return Seeker.failed(matches.first&.head_stream || start_scanner,
-                             matches.last&.tail_stream || scanner, token, context.except(:enclose)) if matches.all?(&:hard_fail?)
-        while matches.present? && matches.last.hard_fail? do
-          matches.pop
+        if matches.all? &:hard_fail?
+          return Seeker.failed matches.first&.head_stream || start_scanner,
+                               matches.last&.tail_stream || scanner, 
+                               token,
+                               context.except(:enclose)
         end
       end
+      consolidation = consolidate_matches spec, matches
+      return consolidation if consolidation
+      # Default handling is to delete failed matches, then assess the remainder
+      matches.delete_if &:'hard_fail?'
       return case matches.count
              when 0
                Seeker.failed start_scanner, scanner, token, context
@@ -541,6 +557,21 @@ class Parser
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || match.soft_fail?) ? true : false))
   end
+
+  def consolidate_matches token, matches
+    return if token != :rp_ingline
+    # An ingredient list needs special attention:
+    # -- individual lines may have failed but still need to be retained
+    # -- failed lines may represent labels of sublists
+    matches.each do |match|
+      # Label detection: failed lines that are preceded by two <br> tags get converted to :rp_inglist_label
+      if match.hard_fail? && match_specification(match.head_stream, :rp_amt).hard_fail?
+        match.token = :rp_inglist_label
+      end
+    end
+    Seeker.new(matches.first.head_stream, matches.last.tail_stream, matches) if matches.count > 1
+  end
+
 end
 
 # The ParserEvaluator provides analysis of the current (initialized) grammar. Methods:

@@ -1,9 +1,5 @@
 class GleaningPresenter < BasePresenter
 
-  def content_preface
-    recipe_content_buttons(@object) + content_suggestion
-  end
-  
   def html_content
     @object.content.html_safe if @object.content.present?
   end
