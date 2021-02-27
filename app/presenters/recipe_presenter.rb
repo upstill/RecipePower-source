@@ -88,18 +88,16 @@ EOF
     return node.text.html_safe if node.text?
     selection = selector ? node.css(selector) : node.children
     content = safe_join selection.collect { |child| assemble_tree child }
-    node.classes.each do |klass|
-      # For each node, see if we have ideas about how to present it
-      case klass.to_sym
-      when :rp_ingname
-        # Wrap an ingredient tag in a link to that tag in RecipePower
-        tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
-        return homelink(tag, class: 'rp_ingname', title: node.text) if tag
-      when :rp_ingline
-        return content_tag(:li, content, class: :rp_ingline )
-      when :rp_amt_with_alt, :rp_presteps, :rp_condition
-        return content_tag(:span, content, class: klass.to_sym )
-      end
+    classes = node.classes.map &:to_sym
+    # Since a node may have multiple rp classes, it's important to prioritize the possibilities
+    if classes.include? :rp_ingline
+      return content_tag :li, content, class: classes
+    elsif classes.include? :rp_ingname
+      # Wrap an ingredient tag in a link to that tag in RecipePower
+      tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
+      return homelink(tag, class: 'rp_ingname', title: node.text) if tag
+    elsif (classes &= %i{ rp_amt_with_alt rp_presteps rp_condition }).first
+      return content_tag :span, content, class: classes.join(' ')
     end
     return content
   end
@@ -115,13 +113,26 @@ EOF
     #when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
     #when :rp_ing_comment
     when :rp_inglist
+      # There may be multiple ingredient lists, each one with embedded labels,
+      # but we want to deliver a set of label/lines pairs
+      pairlist = []
       results_for(".rp_inglist") { |listnode|
-        [ assemble_tree(listnode, '.rp_ingline'),
-          listnode.css('.rp_inglist_label').first&.inner_text
-        ] unless listnode.ancestors.to_a[0...-1].any? { |anc|
-          anc.matches? '.rp_instructions'
-        }
-      }.compact
+        # An ingredient list embedded in instructions will be handled in the instructions
+        unless listnode.ancestors.to_a[0...-1].any? { |anc| anc.matches? '.rp_instructions' }
+          # Partition each ingredient list into a set of runs, each possibly starting with a label
+          runs = [[]]
+          listnode.css('.rp_inglist_label, .rp_ingline').each { |node|
+            runs << [ ] unless node.matches? '.rp_ingline'
+            runs.last << node
+          }
+          runs.each do |run|
+            label = (run.shift.inner_text unless run.first&.matches? '.rp_ingline')
+            # Each run will be a sequence of inglines, possibly led by a label
+            pairlist << [ safe_join(run.collect { |ingline| assemble_tree ingline }), label ] if run.present?
+          end
+        end
+      }
+      pairlist
     #when :rp_ingline
     when :rp_instructions
       # The instructions will be probed for embedded ingredient(list)s, and those interspersed in the text.

@@ -33,7 +33,7 @@ class BasePresenter
   end
 
   def content_preface
-    recipe_content_buttons(@object) + content_suggestion
+    recipe_content_buttons(@object) + content_suggestion + h.tag.hr(style: 'margin: 10px; color: #bbb')
   end
 
   # Provide the HTML presentation for the object, if any

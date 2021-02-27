@@ -10,7 +10,7 @@
   }
 }
 
-li.rp_ingline {
+.rp_ingline {
   font-size: 1.2em;
   span.rp_amt, span.rp_amt_with_alt {
     // Amount
@@ -21,7 +21,7 @@ li.rp_ingline {
     color: #9e7536;
     font-style: italic;
   }
-  span.rp_ingname {
+  .rp_ingname, &.rp_ingname {
     // Ingredients in bold, slightly larger
     color: #1c94c4;
     font-weight: 500;

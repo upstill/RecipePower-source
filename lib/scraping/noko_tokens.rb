@@ -224,10 +224,9 @@ class NokoTokens < Array
       # Discard blank tokens at the beginning
       max = (ranges[ix+1]&.begin || @bound) if flag == :at_css_match
       while min < @bound && self[min].blank? do min += 1 end
-      max = min if max < min
-      ranges[ix] = min..max
+      ranges[ix] = max > min ? min..max : min...min
     end
-    ranges
+    ranges.compact
   end
 
   # What are the tokens for encompassing the given subtree?
@@ -250,7 +249,7 @@ class NokoTokens < Array
   # Returns: a Range giving those indices in @token_starts
   def token_range_for_text_elements first_text_element, last_text_element
     # By convention, a nil first element means an empty token range past the range of tokens
-    return @token_starts.count..@token_starts.count if first_text_element.nil?
+    return @token_starts.count...@token_starts.count if first_text_element.nil?
 
     first_pos, last_limit = @elmt_bounds.range_encompassing first_text_element, last_text_element
     # Now we have an index in the elmts array, but we need a range in the tokens array.
