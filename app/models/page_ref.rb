@@ -71,11 +71,12 @@ class PageRef < ApplicationRecord
                   # :recipes, :sites # Entities that uniquely refer to this pageref
 
   unless method_defined? :"link?"
-    enum kind: [ :link, :recipe, :site, :referrable, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event]
+    enum kind: [ :link, :recipe, :site, :referrable, :about, :article, :news_item, :tip, :video, :home_page, :product, :offering, :event, :recipe_page ]
   end
 
-  def kind_as_fixnum
-    PageRef.kinds[kind]
+  def self.kind_name kind
+    @@KIND_NAMES ||= { :recipe_page => "Page of recipes" }
+    @@KIND_NAMES[kind.to_sym] || kind.to_s.gsub('_',' ').capitalize
   end
 
   # Provides access to PageRefs of a particular named kind, denoted by either symbol or integer

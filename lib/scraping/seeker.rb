@@ -287,7 +287,7 @@ class NumberSeeker < Seeker
 
   # Is the string either an integer or a fraction?
   def self.num1 str
-    str&.match(/^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/) ||
+    str&.match(/^\d*\/{1}\d*(\.\d*)?$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/) ||
         (str && self.num_word(str))
   end
 
@@ -308,7 +308,9 @@ class NumberSeeker < Seeker
   def self.num3 str
     return if str.blank?
     strs = str.split (/\ /)
-    self.whole_num(strs.first) && strs[1] && %q{ and plus }.include?(strs[1]) && self.fraction(strs.last)
+    self.whole_num(strs.first) && strs[1] &&
+        ((%q{ and plus }.include?(strs[1]) && self.fraction(strs.last)) ||
+          (strs[1] == '.' && self.whole_num(strs.last)))
   end
 
   def self.num_word str

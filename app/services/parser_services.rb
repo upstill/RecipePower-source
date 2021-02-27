@@ -234,7 +234,7 @@ The dependencies are as follows:
     # nkdoc = nokoscan.nkdoc
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: Parser.tag_for_token(token)
+      newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: parser.tag_for_token(token)
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
       # Test the revised document: it should not change when converted to html and back into Nokogiri

@@ -17,7 +17,7 @@ class PageRefServices
   def self.kind_selections options={}
     kinds = PageRefServices.selectable_kinds options[:include]
     except = (options[:except] || []).map &:to_s
-    kinds.except(*except).collect { |kind, kind_id| [ kind.gsub('_',' ').capitalize, kind ]}
+    kinds.except(*except).collect { |kind, kind_id| [ PageRef.kind_name(kind), kind ]}
   end
 
   # Try to translate a PageRef kind into English
