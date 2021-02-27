@@ -125,7 +125,7 @@ EOF
             runs << [ ] unless node.matches? '.rp_ingline'
             runs.last << node
           }
-          runs.each do |run|
+          runs.delete_if(&:empty?).each do |run|
             label = (run.shift.inner_text unless run.first&.matches? '.rp_ingline')
             # Each run will be a sequence of inglines, possibly led by a label
             pairlist << [ safe_join(run.collect { |ingline| assemble_tree ingline }), label ] if run.present?
