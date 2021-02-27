@@ -73,7 +73,7 @@ class ParserTest < ActiveSupport::TestCase
       Cointreau
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
+    @unit_tags = %w{ can ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
     @condition_tags = %w{ chopped softened rinsed crustless sifted }.
         each { |name| Tag.assert name, :Condition }
@@ -276,6 +276,41 @@ EOF
 
     assert seeker.success?
     assert_equal 5, seeker.children.count
+  end
+
+  test 'qualified unit' do
+    html = '13-ounce'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '(13-ounce)'
+    ps = ParserServices.parse token: :rp_altamt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '(13-ounce) can'
+    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '13-ounce can'
+    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '1 (13-ounce) can baking soda'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
+    html = '1 (13-ounce; 45g) can baking soda'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
+    html = '1 (13-ounce; 45g) can baking soda'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
+    html = '1 13-ounce can baking soda'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
   end
 
   test 'tag has terminating period' do
