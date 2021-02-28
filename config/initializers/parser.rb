@@ -132,17 +132,6 @@ Parser.init_grammar(
         match: nil,
         terminus: "\n"
     }, # NB: matches even if the bound is immediate
-    rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
-    rp_amt: {# An Amount is a number followed by a unit (only one required)
-             match: [
-                 [:rp_num_or_range, :rp_unit],
-                 :rp_num_or_range,
-                 :rp_unit,
-                 { match: 'AmountSeeker' }
-             ],
-             or: true
-    },
-    rp_altamt: [ '(', :rp_amt, ')' ],
     rp_presteps: { tags: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_ingspec: {
@@ -154,8 +143,37 @@ Parser.init_grammar(
     },
     rp_ingname: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
+    rp_amt_with_alt: [:rp_amt, {optional: :rp_altamt}] , # An amount may optionally be followed by an alternative amt enclosed in parentheses
+    rp_amt: {# An Amount is a number followed by a unit (only one required)
+             match: [
+                 [:rp_num_or_range, :rp_qualified_unit],
+                 :rp_num_or_range,
+                 :rp_qualified_unit,
+                 { match: AmountSeeker }
+             ],
+             or: true
+    },
+    rp_unqualified_amt: {# An Unqualified Amount is a number followed by a unit (only one required)
+             match: [
+                 [:rp_num_or_range, :rp_unit],
+                 :rp_num_or_range,
+                 :rp_unit,
+                 { match: AmountSeeker }
+             ],
+             or: true
+    },
+    # An altamt may show up to clarify the amount or qualify the unit
+    rp_altamt: {
+        match: [
+            [{match: '(', optional: true}, :rp_unqualified_amt, {match: [';', :rp_unqualified_amt], optional: true}, ')'],
+            [:rp_unqualified_amt, {match: [';', :rp_unqualified_amt], optional: true}]
+        ],
+        or: true
+    },
     rp_num_or_range: { or: [ :rp_range, :rp_num ] },
     rp_num: { match: 'NumberSeeker' },
     rp_range: { match: 'RangeSeeker' },
+    # A qualified unit is, e.g., '16-ounce can'
+    rp_qualified_unit: [ { match: :rp_altamt, optional: true }, :rp_unit ],
     rp_unit: { tag: 'Unit' }
 )
