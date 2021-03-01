@@ -50,11 +50,14 @@ class ParserTest < ActiveSupport::TestCase
       lemon\ zest
       lemon\ juice
       anchovy\ fillets
+      agave\ nectar
       asparagus
       flaked\ sea\ salt
       sourdough\ bread
       garlic
       garlic\ clove
+      ginger
+      honey
       basil\ leaves
       salt
       baking\ soda
@@ -70,10 +73,12 @@ class ParserTest < ActiveSupport::TestCase
       black\ pepper
       Brussels\ sprouts
       white\ cauliflower
+      sesame\ tahini
       Cointreau
+      za'atar
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ can ounce g tablespoon tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
+    @unit_tags = %w{ can inch knob ounce g ml tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
     @condition_tags = %w{ chopped softened rinsed crustless sifted }.
         each { |name| Tag.assert name, :Condition }
@@ -279,6 +284,30 @@ EOF
   end
 
   test 'qualified unit' do
+    html = '2 tablespoons (30ml) sesame tahini'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = "3/4 ounce (about 1/4 cup; 20g) za'atar, divided"
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '1 teaspoon (5ml) honey or agave nectar'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '2 inch knob'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '2 inch knob of ginger, peeled and thinly sliced'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
+    html = '2 can (30g) baking soda'
+    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    assert ps.success?
+
     html = '13-ounce'
     ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
     assert ps.success?

@@ -274,7 +274,7 @@ class NumberSeeker < Seeker
 
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
-    stream = stream.rest if stream.peek.match /about/i
+    stream = stream.rest if stream.peek&.match /about/i
     result = (self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)) ||
       (self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)) ||
       (self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek)
@@ -405,14 +405,14 @@ class AmountSeeker < Seeker
   end
 
   def self.match stream, opts={}
-    stream = stream.rest if stream.peek.match /about/i
+    stream = stream.rest if stream.peek&.match /about/i
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(.*)/)
       num = $1
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
-      self.new(stream, stream.rest, num, unit) if unit
+      self.new(stream, stream.rest, num, unit) if num.present? && unit
     end
   end
 end
