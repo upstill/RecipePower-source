@@ -158,6 +158,23 @@ class LexaurTest < ActiveSupport::TestCase
       target = strings.shift
       assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
     end
+    strings = %w{ yellow\ miso\ paste red\ miso\ paste }
+    lex.match_list(StrScanner.new('yellow or red miso paste')) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
+  end
+
+  test 'Lexaur handles interrupted multitoken tag' do
+    lex = Lexaur.from_tags
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
+    skipper = -> (stream){
+      stream.peek == 'to_skip' ? stream.rest : stream
+    }
+    lex.match_list(StrScanner.new('ground to_skip turmeric'), skipper: skipper) do |terms, stream|
+      target = strings.shift
+      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    end
   end
 
   # Called after every test method runs. Can be used to tear

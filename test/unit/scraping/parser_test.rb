@@ -73,12 +73,13 @@ class ParserTest < ActiveSupport::TestCase
       black\ pepper
       Brussels\ sprouts
       white\ cauliflower
+      cauliflower
       sesame\ tahini
       Cointreau
       za'atar
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ can inch knob ounce g ml tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
+    @unit_tags = %w{ can inch knob massive\ head ounce g ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
     @condition_tags = %w{ chopped softened rinsed crustless sifted }.
         each { |name| Tag.assert name, :Condition }
@@ -172,7 +173,7 @@ EOF
       assert_equal 2, seeker.children.count
       assert_equal :rp_amt, seeker.token
       assert_equal :rp_num_or_range, seeker.children.first.token
-      assert_equal :rp_unit, seeker.children.last.token
+      assert_equal :rp_qualified_unit, seeker.children.last.token
     end
   end
 
@@ -284,6 +285,14 @@ EOF
   end
 
   test 'qualified unit' do
+    html = '1 massive (2 3/4-pound; 1.25kg) head cauliflower'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '1 large (15-oz) can'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    assert ps.success?
+
     html = '2 tablespoons (30ml) sesame tahini'
     ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
     assert ps.success?
@@ -397,6 +406,9 @@ EOF
   end
 
   test 'parse Ottolenghi ingredient list' do
+    html = '½ tsp each finely grated lemon zest and juice'
+    ps = ParserServices.parse content: html, token: :rp_ingline, context_free: true
+    assert ps.success?
     html = <<EOF
   <p><strong>30g each crustless sourdough bread</strong><br>
     <strong>½ tsp each finely grated lemon zest and juice</strong><br>
