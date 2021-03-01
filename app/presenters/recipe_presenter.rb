@@ -96,7 +96,7 @@ EOF
       # Wrap an ingredient tag in a link to that tag in RecipePower
       tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
       return homelink(tag, class: 'rp_ingname', title: node.text) if tag
-    elsif (classes &= %i{ rp_amt_with_alt rp_presteps rp_condition }).first
+    elsif (classes &= %i{ rp_amt rp_presteps rp_condition }).first
       return content_tag :span, content, class: classes.join(' ')
     end
     return content
