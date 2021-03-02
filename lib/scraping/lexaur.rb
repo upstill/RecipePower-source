@@ -59,19 +59,17 @@ class Lexaur < Object
   # -- #first peaks at the head but also advances the stream, consuming the first element
   #     for the remainder
   # -- #rest returns a stream for the stream minus the head.
-  def chunk stream, &block
-    chunk1 stream, -> (terms, onward, lexpath) do
-      block.call terms, onward
-    end
+  def chunk stream, skipper: -> (stream){ stream }, &block
+    chunk1 stream, -> (terms, onward, lexpath) { block.call terms, onward }, skipper: skipper
   end
 
   # Match a list of tags of the form 'tag1, tag2...and/or tag3'
-  def match_list stream, &block
+  def match_list stream, skipper: -> (stream){ stream }, &block
     lexpath = onward = terms = nil
-    chunked = chunk1 stream, -> (trms, onwrd, lexpth) do
+    chunked = chunk1 stream, -> (trms, onwrd, lexpth) {
       lexpath = lexpth
       block.call (terms = trms), (onward = onwrd)
-    end
+    }, skipper: skipper
     if chunked
       lexpath = lexpath.reverse
       # chunk_path provides a path through the tree to the terminals
@@ -95,7 +93,7 @@ protected
     strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
   end
 
-  def chunk1 stream, lexpath = [], block
+  def chunk1 stream, lexpath = [], block, skipper: -> (stream) { stream }
     lexpath, block = [], lexpath if lexpath.is_a?(Proc)
     lexpath = lexpath + [self]
     # If there's a :nexts entry on the token of the stream, we try chunking the remainder,
@@ -113,19 +111,8 @@ protected
           return if tracker.nil?
         end
         # Peek ahead and consume any tokens which are empty in the normalized name
-        onward = stream.rest
-        unskipped = onward
-        case onward.peek
-        when '.' # Ignore period
-          unskipped = onward = onward.rest
-        when '(' # Elide parenthetical by hunting for matching ')'
-          to_match = onward.rest
-          while to_match && (to_match.peek != ')') do
-            to_match = to_match.rest
-          end
-          onward = to_match.rest if to_match
-        end
-        tracker.nexts[head]&.chunk1(onward, lexpath, block) ||
+        onward, unskipped = elide(stream.rest, skipper)
+        tracker.nexts[head]&.chunk1(onward, lexpath, block, skipper: skipper) ||
             # ...otherwise, we consume the head of the stream
             if terms = tracker.terminals[head]
               block.call terms, unskipped, lexpath # The block must check for acceptance and return true for the process to end
@@ -133,8 +120,27 @@ protected
       else # This token didn't match to anything in Tag.normalizeName
         head = ''
         unskipped = onward = stream.rest
-        tracker.chunk1(onward, lexpath, block)
+        tracker.chunk1(onward, lexpath, block, skipper: skipper)
       end
     end
+  end
+
+  private
+
+  # Take an opportunity to pass up unwanted/irrelevant tokens
+  def elide stream, skipper
+    unskipped = stream
+    stream = skipper.call stream
+    case stream.peek
+    when '.' # Ignore period
+      unskipped = stream = stream.rest
+    when '(' # Elide parenthetical by hunting for matching ')'
+      to_match = stream.rest
+      while to_match && (to_match.peek != ')') do
+        to_match = to_match.rest
+      end
+      stream = to_match.rest if to_match
+    end
+    [stream, unskipped]
   end
 end
