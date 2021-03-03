@@ -119,7 +119,7 @@ class Recipe < ApplicationRecord
   end
 
   # Absorb another recipe
-  def absorb other, destroy=true
+  def absorb( other, destroy: true)
     self.description = other.description if description.blank?
     # Move feed_entries from the old recipe to the new
     FeedEntry.where(:recipe_id => other.id).each { |fe|

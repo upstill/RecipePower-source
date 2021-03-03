@@ -40,7 +40,7 @@ module QueryHelper
     if options[:type_selector]
       type_select = 'Show&nbsp;'.html_safe +
           select_tag(:tagtype,
-                     options_from_collection_for_select(Tag.type_selections(true, true), :last, :first, options[:tagtype]) || 0,
+                     options_from_collection_for_select(Tag.type_selections(withnull: true, withall: true), :last, :first, options[:tagtype]) || 0,
                      :include_blank => false,
                      :onchange => 'RP.tagger.select_type(event);') +
           '&nbsp;Names'.html_safe

@@ -14,7 +14,7 @@
           <span style="color: red">Private</span>
       <% end %>
       <br>
-      <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(true), :last, :first, item.tagtype),
+      <%= select_tag :tagtype, options_from_collection_for_select(Tag.type_selections(withnull: true), :last, :first, item.tagtype),
                      class: 'tag_type_selector',
                      onchange: 'RP.change(event);',
                      data: {request: '/tags/typify',
