@@ -28,9 +28,8 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
       clear_classification_context anc, rp_elmt_class
       nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
       return anc
-    else
-      # Stop looking when we reach an ancestor that can't be enclosed by the class
-      return unless nknode_rp_classes(anc).all? { |cl| @parser_evaluator.can_include? rp_elmt_class, cl }
+    elsif (incompatible_classes = nknode_rp_classes(anc).delete_if { |cl| @parser_evaluator.can_include? rp_elmt_class, cl }).present?
+      nknode_rp_classes anc, (nknode_rp_classes(anc) - incompatible_classes)
     end
   end
 end

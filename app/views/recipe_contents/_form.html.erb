@@ -28,8 +28,27 @@
         <tr>
           <td colspan="1">&nbsp;</td>
           <td colspan="6"><%= annotation_button :rp_ingline, class: 'text-only tag-button tag-button-mdl', style: 'width: 100%' %></td>
-          <td colspan="1"></td>
-          <td colspan="1"><%= annotation_button :tag, class: 'text-only tag-button tag-button-mdl', style: 'width: 60%; float: right;' %></td>
+          <td colspan="1">
+          </td>
+          <td colspan="1">
+            <%# annotation_button :tag, class: 'text-only', style: 'width: 60%; float: right;' %>
+            <%= tag :input, {
+                name: 'commit',
+                class: 'dialog-submit-button',
+                style: 'background-color: #488158;
+                        border-color: #ece6cd;
+                        border-radius: 6px;
+                        border-width: 3px;
+                        float: right;
+                        padding: 6px;
+                        font-size: .8em;
+                        vertical-align: bottom;
+                        position: relative;
+                        top: 20px;',
+                type: 'submit',
+                value: 'Add Name',
+                data: {'recipe[recipe_contents][token]' => 'tag', method: 'post' } } %>
+          </td>
         </tr>
         <tr>
           <td colspan="1">&nbsp;</td>

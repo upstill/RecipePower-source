@@ -12,24 +12,39 @@ class RecipeContentsController < ApplicationController
   def tag
     rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
-    @form_name = 'newtag_form'
-    @form_title = 'Define New Name'
-    case request.method
-    when 'PATCH', 'POST'
+    if params[:button_name] == 'Cancel'
+      render :annotate
+    elsif rcparams[:tagname]  # No tag parameters => open dialog
       # If the submission is successful, we redirect to #annotate
       # prms = request.parameters
       # %i{ tagname, tagrelation, tagrelatives }.each { |name| prms[:recipe][:recipeContents].delete name }
-      redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
-    when 'GET'
-      render :annotate
+      if rcparams[:tagname].blank?
+        @recipe.errors.add :base, "You need to name that name!"
+      elsif tag = Tag.assert(rcparams[:tagname], Tag.typenum(rcparams[:tagtype]), extant_only: true)
+        flash[:popup] = "Name was there all along."
+        render :annotate
+        # redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
+      elsif !(tag = Tag.assert rcparams[:tagname], Tag.typenum(rcparams[:tagtype]))
+        @recipe.errors.add :base, 'Couldn\'t make new name'
+      elsif tag.errors.any?
+        # Report errors and re-enter dialog
+        @recipe.errors.add :base, tag.full_messages
+      else
+        flash[:popup] = "'#{tag.name}' successfully added as #{tag.typename}!"
+        render :annotate
+        # redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
+      end
     end
+    @form_name, @form_title = 'newtag_form', 'Define New Name'
+    render :annotate
   end
 
   # Modify the content HTML to mark a selection with a parsing tag
   def annotate
     redirect_to :show unless rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
-    redirect_to tag_recipe_contents_path( recipe: { recipeContents: { content: @content } } ) if rcparams[:token] == 'tag'
+    tag if rcparams[:token] == 'tag'
+    # redirect_to tag_recipe_contents_path( recipe: { recipeContents: { content: @content } } ) if rcparams[:token] == 'tag'
     ps = ParserServices.new entity: @recipe, content: @content
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse

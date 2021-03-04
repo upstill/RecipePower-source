@@ -26,6 +26,7 @@
       %>
       <br><%= check_box_tag 'recipe[recipeContents][assert]', true %>&nbsp;Add to dictionary as a synonym
     </div>
+    <%= dialog_cancel_button 'Cancel', disabled: true, style: 'position: absolute; right: 30px; bottom: 12px;' %>
     <%= dialog_submit_button 'Submit', disabled: true, style: 'position: absolute; right: 30px; bottom: 12px;' %>
   </div></div>
 <% end %>
