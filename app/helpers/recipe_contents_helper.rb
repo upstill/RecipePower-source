@@ -14,7 +14,7 @@ module RecipeContentsHelper
     button_options = options.merge(data: {'recipe[recipe_contents][token]' => token},
                                    class: "#{options[:class]} submit-selection",
                                    button_style: 'default')
-    dialog_submit_button Parser.token_to_title(token), button_options
+    dialog_submit_button Parser.token_to_title(token, default: '+ Name'), button_options
   end
 
   # Button in the recipe_contents editor to accept a tag. Give it a title, and declare its token for submission
@@ -23,15 +23,5 @@ module RecipeContentsHelper
                                    class: "#{options[:class]} submit-selection",
                                    button_style: 'default')
     dialog_submit_button "Accept '#{tagname}' as a new #{Tag.typename(tagtype)}", button_options
-  end
-
-  def do_recipe_contents_panel title, form_variant='form' # do_panel
-    render('recipe_contents/panel',
-           title: title,
-           pane_for: :recipe_contents,
-           form_variant: form_variant || 'form',
-           wide: true,
-           data: {oncancel: recipe_contents_path(@recipe)}
-    )
   end
 end

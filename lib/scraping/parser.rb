@@ -85,8 +85,8 @@ class Parser
     @lexaur ||= Lexaur.from_tags *types
   end
 
-  def self.token_to_title token
-    @@TokenTitles[token] || "Unnamed Token #{token.to_s}"
+  def self.token_to_title token, default: nil
+    @@TokenTitles[token] || default || "Unnamed Token #{token.to_s}"
   end
 
   def self.title_to_token title

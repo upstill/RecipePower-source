@@ -1,15 +1,35 @@
 require 'parsing_services.rb'
 class RecipeContentsController < ApplicationController
-  before_action :set_recipe, only: [:show, :edit, :update, :destroy, :annotate]
+  before_action :set_recipe, only: [:show, :edit, :update, :destroy, :annotate, :tag]
   before_action :login_required
 
   def edit
+  end
+
+  # Actions for getting and accepting a new tag
+  # POST submits new tag
+  # GET returns form
+  def tag
+    rcparams = params[:recipe][:recipeContents]
+    @content = rcparams[:content]
+    @form_name = 'newtag_form'
+    @form_title = 'Define New Name'
+    case request.method
+    when 'PATCH', 'POST'
+      # If the submission is successful, we redirect to #annotate
+      # prms = request.parameters
+      # %i{ tagname, tagrelation, tagrelatives }.each { |name| prms[:recipe][:recipeContents].delete name }
+      redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
+    when 'GET'
+      render :annotate
+    end
   end
 
   # Modify the content HTML to mark a selection with a parsing tag
   def annotate
     redirect_to :show unless rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
+    redirect_to tag_recipe_contents_path( recipe: { recipeContents: { content: @content } } ) if rcparams[:token] == 'tag'
     ps = ParserServices.new entity: @recipe, content: @content
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse
@@ -27,7 +47,11 @@ class RecipeContentsController < ApplicationController
         @annotation = ps.parse_on_path @parse_path do |tagtype, tagname|
           @tagtype, @tagname = tagtype, tagname
         end
-        @parse_path = nil unless @tagname # We'll need the parse path for identifying the tag
+        if @tagname
+          @form_name = 'tagtype_form'
+        else
+          @parse_path = nil
+        end
       else # There IS a tagname: use that as a tag
         noko_elmt = ps.extract_via_path @parse_path
         @tagtype = rcparams[:tagtype]
