@@ -14,7 +14,7 @@
     <div class="row">
       <div class="col-md-12">
         <div class="form-group">
-          <%= f.label 'What it names' %>&nbsp;
+          <%= f.label 'Name for' %>&nbsp;
           <input type="radio" id="ingredient" name="recipe[recipeContents][tagtype]" value="Ingredient" checked>
           <label for="ingredient">&nbsp;Ingredient&nbsp;</label>
           <input type="radio" id="unit" name="recipe[recipeContents][tagtype]" value="Unit">
@@ -51,10 +51,9 @@
   </div>
   <div class='row'>
     <div class="col-md-12">
-      <input class="button_name" type="hidden" name="button_name" value="submit">
-      <%= dialog_submit_button 'Save' %>
+      <%= dialog_submit_button %>
       <%# dialog_cancel_button 'Cancel', data: {:'oncancel' => annotate_recipe_contents_path(@recipe, recipe: { recipeContents: { content: @content } })} %>
-      <%= dialog_submit_button 'Cancel', button_style: 'info' %>
+      <%= dialog_cancel_button submit_to_cancel: true %>
     </div>
   </div>
 <% end %>

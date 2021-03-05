@@ -12,18 +12,12 @@ class RecipeContentsController < ApplicationController
   def tag
     rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
-    if params[:button_name] == 'Cancel'
-      render :annotate
-    elsif rcparams[:tagname]  # No tag parameters => open dialog
+    if params[:button_name] != 'Cancel' && rcparams[:tagname]  # No tag parameters => open dialog
       # If the submission is successful, we redirect to #annotate
-      # prms = request.parameters
-      # %i{ tagname, tagrelation, tagrelatives }.each { |name| prms[:recipe][:recipeContents].delete name }
       if rcparams[:tagname].blank?
         @recipe.errors.add :base, "You need to name that name!"
       elsif tag = Tag.assert(rcparams[:tagname], Tag.typenum(rcparams[:tagtype]), extant_only: true)
         flash[:popup] = "Name was there all along."
-        render :annotate
-        # redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
       elsif !(tag = Tag.assert rcparams[:tagname], Tag.typenum(rcparams[:tagtype]))
         @recipe.errors.add :base, 'Couldn\'t make new name'
       elsif tag.errors.any?
@@ -31,11 +25,10 @@ class RecipeContentsController < ApplicationController
         @recipe.errors.add :base, tag.full_messages
       else
         flash[:popup] = "'#{tag.name}' successfully added as #{tag.typename}!"
-        render :annotate
-        # redirect_to annotate_recipe_contents_path(recipe: { recipeContents: { content: @content } } )
       end
     end
-    @form_name, @form_title = 'newtag_form', 'Define New Name'
+    # We open the tag dialog if this is the initial call, or a Save failed
+    @form_name, @form_title = 'newtag_form', 'Define New Name' if rcparams[:tagname].nil? || @recipe.errors.any?
     render :annotate
   end
 

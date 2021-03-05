@@ -279,11 +279,25 @@ module DialogsHelper
                                            button_style: (options[:button_style] || 'info'),
                                            class: "#{options[:class]} #{options[:style] || 'form-button'}"
                                        )
-    tag :input,
-        class: "#{options[:class]} cancel dialog-cancel-button",
+    # If a submission is required to cancel, we define a button to declare the submission
+    # happened via the Cancel button
+    if options[:submit_to_cancel]
+      submission_class = 'dialog-submit-button submit-to-cancel'
+      name_button = tag :input,
+                        class: "button_name",
+                        type: "hidden",
+                        name: "button_name",
+                        value: "submit"
+    else
+      submission_class = 'dialog-cancel-button'
+      name_button = ''.html_safe
+    end
+    name_button +
+    tag( :input,
+        class: "#{options[:class]} cancel #{submission_class}",
         data: {dismiss: 'modal'}.merge(options[:data] || {}),
         name: 'commit',
         type: 'submit',
-        value: label||'Cancel'
+        value: label||'Cancel')
   end
 end
