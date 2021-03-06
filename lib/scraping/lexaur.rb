@@ -71,7 +71,7 @@ class Lexaur < Object
       block.call (terms = trms), (onward = onwrd)
     }, skipper: skipper
     if chunked
-      lexpath = lexpath.reverse
+      # lexpath = lexpath.reverse
       # chunk_path provides a path through the tree to the terminals
       while %w{ , and or }.include? (delim = onward.peek) do
         onward = onward.rest
