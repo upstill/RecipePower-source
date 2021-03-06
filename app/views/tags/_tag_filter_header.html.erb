@@ -4,7 +4,7 @@
     <% if type_selector %>
         <div style="display:inline-block; vertical-align:bottom; margin:5px 10px">
           <%= select_tag :tagtype,
-                         options_from_collection_for_select(Tag.type_selections(true, true),
+                         options_from_collection_for_select(Tag.type_selections(withnull: true, withall: true),
                                                             :last,
                                                             :first,
                                                             viewparams.param(:tagtype)

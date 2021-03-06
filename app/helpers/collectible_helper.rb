@@ -1,3 +1,4 @@
+require 'referent_policy.rb'
 module CollectibleHelper
 
   # List of buttons in the panel

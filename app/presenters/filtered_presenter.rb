@@ -691,7 +691,7 @@ class TagsIndexPresenter < FilteredPresenter
 
   def panel_title
     typenum = tagtype.to_i
-    selection = Tag.type_selections(true).find { |ts| ts.last == typenum } if tagtype
+    selection = Tag.type_selections(withnull: true).find { |ts| ts.last == typenum } if tagtype
     (selection || [ 'All'] ).first + ' Names'
   end
 end

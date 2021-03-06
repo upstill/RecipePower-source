@@ -154,9 +154,15 @@ open_modal = (dlog, omit_button) ->
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	$('.dialog-submit-button').click ->
 		$('input[name="button_name"]').val $(this).attr('value')
+		dlog = RP.dialog.enclosing_modal event.target
+		$('form', dlog).submit()
+		# close_modal dlog, 'close'
+		event.preventDefault()
 	$('.dialog-cancel-button', dlog).click (event) ->
 		# When canceling, check for pending dialog/page, following instructions in the response
-		if url = $(event.target).data('oncancel') || $(dlog).data 'oncancel'
+		if $('input.dialog-submit-button.submit-to-cancel')[0]
+			$('input.dialog-submit-button.submit-to-cancel').click()
+		else if url = $(event.target).data('oncancel') || $(dlog).data 'oncancel'
 			RP.submit.submit_and_process url, dlog
 		close_modal RP.dialog.enclosing_modal(event.target), 'close'
 		event.preventDefault()

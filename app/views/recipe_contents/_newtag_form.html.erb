@@ -1,0 +1,59 @@
+<%= form_for([:recipe_contents, @recipe ], url: tag_recipe_contents_path(@recipe), html: { class: 'annotate-recipe' } ) do |f| %>
+  <%= form_errors_helper f %>
+  <input class="content" type="hidden" name="recipe[recipeContents][content]" id="recipe_annotation_content" value="<%= @content %>">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="form-group">
+        <%= f.label 'Name' %>
+        <br/>
+        <%= text_field_tag 'recipe[recipeContents][tagname]' %>
+      </div>
+    </div>
+  </div>
+  <% if response_service.admin_view? %>
+    <div class="row">
+      <div class="col-md-12">
+        <div class="form-group">
+          <%= f.label 'Name for' %>&nbsp;
+          <input type="radio" id="ingredient" name="recipe[recipeContents][tagtype]" value="Ingredient" checked>
+          <label for="ingredient">&nbsp;Ingredient&nbsp;</label>
+          <input type="radio" id="unit" name="recipe[recipeContents][tagtype]" value="Unit">
+          <label for="unit">&nbsp;Unit&nbsp;</label>
+          <input type="radio" id="condition" name="recipe[recipeContents][tagtype]" value="Condition">
+          <label for="condition">&nbsp;Condition</label>
+          <%# select_tag 'recipe[recipeContents][tagtype]', tagtype_selections(only: %w{ Ingredient Unit Condition }), style: 'padding: 3px 7px; border-radius: 8px' %>
+        </div>
+      </div>
+    </div>
+  <% end %>
+  <div class="row">
+    <div class="col-md-12">
+      It's&nbsp;
+      <input type="radio" id="child" name="recipe[recipeContents][tagrelation]" value="parents" checked>
+      <label for="child">&nbsp;a kind of&nbsp;</label>
+      <input type="radio" id="synonym" name="recipe[recipeContents][tagrelation]" value="synonym">
+      <label for="synonym">&nbsp;a synonym for:</label>
+      <br>
+      <div style="width: 93%; float: right">
+        <%= token_input_tag "recipe[recipeContents][tagrelatives]",
+                            # :tagtype => @tagtype,
+                            :placeholder => "Name(s) of existing category(ies)",
+                            :hint => '',
+                            :onAdd => 'RP.recipe_contents.onAdd',
+                            :onDelete => 'RP.recipe_contents.onDelete',
+                            # :tokenLimit => 1,
+                            :allowFreeTagging => false,
+                            :allowCustomEntry => false
+        %>
+        <br>
+      </div>
+    </div>
+  </div>
+  <div class='row'>
+    <div class="col-md-12">
+      <%= dialog_submit_button %>
+      <%# dialog_cancel_button 'Cancel', data: {:'oncancel' => annotate_recipe_contents_path(@recipe, recipe: { recipeContents: { content: @content } })} %>
+      <%= dialog_cancel_button submit_to_cancel: true %>
+    </div>
+  </div>
+<% end %>

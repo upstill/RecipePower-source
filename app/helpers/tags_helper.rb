@@ -1,11 +1,14 @@
 module TagsHelper
 
   # Helper to define a selection menu for tag type
-  def type_selections val = nil
-    rmv = [Tag.typenum(:Course), Tag.typenum(:List), Tag.typenum(:Epitaph)]
-    selections = Tag.type_selections(val.kind_of? Tag).keep_if {|sel| !rmv.include? sel.last}
-    selections.insert 3, ['Course', 18]
-    selections.first[0] = 'No Type'
+  def tagtype_selections val = nil, only: nil, except: %i{ List Epitaph }
+    selections = Tag.type_selections withnull: val.kind_of?(Tag), only: only, except: except
+    if course_ix = selections.find_index( ['Course', 18] ) # Move 'Course' to an earlier spot in the array
+      selections.insert 3, selections.delete_at(course_ix)
+    end
+    if null_ix = selections.find_index(['Random', 0])
+      selections[null_ix][0] = 'No Type'
+    end
     if val.kind_of? Tag
       options_for_select selections, val.typenum
     elsif val.nil?

@@ -33,6 +33,30 @@ div.dialog {
     padding-left: 1%;
     padding-right: 1%;
   }
+  input.dialog-action-button {
+    background-color: #488158;
+    color: inherit;
+    border-color: #74a984;
+    border-radius: 6px;
+    border-width: 3px;
+    border-style: outset;
+    float: right;
+    padding: 6px;
+    font-size: .8em;
+    vertical-align: bottom;
+  }
+  input.submit-selection {
+    background-color: #488158;
+    color: inherit;
+    border-color: #74a984;
+    border-radius: 6px;
+    border-width: 3px;
+    border-style: outset;
+    float: right;
+    padding: 6px;
+    font-size: .8em;
+    vertical-align: bottom;
+  }
   .form-button {
     float: right;
     margin: 10px;

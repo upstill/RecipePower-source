@@ -1,8 +1,4 @@
 {
-  replacements: [
-      recipe_content_replacement(@recipe)
-  ],
-  dlog: with_format('html') {
-    do_recipe_contents_panel 'Replacement Annotator', ('tagtype_form' if @tagname)
-  }
+  replacements: [ recipe_content_replacement(@recipe) ],
+  dlog: with_format('html') { render 'recipe_contents/edit_modal' }
 }.merge(flash_notify).to_json

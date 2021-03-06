@@ -1,1 +1,9 @@
-<%= do_recipe_contents_panel 'Annotate Recipe' %>
+<%=     render('recipe_contents/panel',
+               title: @form_title.if_present || 'Replacement Annotator',
+               pane_for: :recipe_contents,
+               form_variant: @form_name.if_present || 'form',
+               wide: true,
+               data: {oncancel: recipe_contents_path(@recipe)}
+        )
+%>
+

@@ -251,7 +251,10 @@ RP::Application.routes.draw do
       get :recipe_page
       post :recipe_page
       resource :recipe_contents do
+        get 'annotate'
         patch 'annotate'
+        get 'tag'
+        patch 'tag'
       end
     end
     collection do

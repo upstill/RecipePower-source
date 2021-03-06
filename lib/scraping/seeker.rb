@@ -259,7 +259,7 @@ class RangeSeeker < Seeker
       else
         match1
       end
-    elsif stream.peek.match '-'
+    elsif stream.peek&.match '-'
       nums = stream.peek.split '-'
       if (match1 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.first)) &&
          (match2 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.last))
@@ -329,6 +329,42 @@ class TagSeeker < Seeker
 
   def self.match stream, opts={}
     opts[:lexaur].chunk(stream) { |data, next_stream| # Find ids in the tags table
+      # The Lexaur provides the data at sequence end, and the post-consumption stream
+      scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
+      return unless tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
+      tagdata = [:id, :name].zip(tagdata).to_h
+      return self.new(stream, next_stream, tagdata, opts[:token])
+    }
+    nil
+  end
+end
+
+class UnitSeeker < TagSeeker
+  attr_reader :tagdata, :value
+
+=begin
+  def initialize(stream, next_stream, tagdata, token=nil)
+    super stream, next_stream, token
+    @value = tagdata[:name] if (@tagdata = tagdata).present?
+  end
+=end
+
+  # A unit tag may have an embedded unit qualifier
+  def self.match stream, opts={}
+    qualifier = nil
+    skipper = -> (stream) {
+      stream
+=begin
+      result = opts[:parser]&.match(:rp_altamt, stream: stream)
+      if result.success?
+        qualifier = result
+        result.tail_stream
+      else
+        stream
+      end
+=end
+    }
+    opts[:lexaur].chunk(stream, skipper: skipper) { |data, next_stream| # Find ids in the tags table
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       return unless tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first

@@ -85,8 +85,8 @@ class Parser
     @lexaur ||= Lexaur.from_tags *types
   end
 
-  def self.token_to_title token
-    @@TokenTitles[token] || "Unnamed Token #{token.to_s}"
+  def self.token_to_title token, default: nil
+    @@TokenTitles[token] || default || "Unnamed Token #{token.to_s}"
   end
 
   def self.title_to_token title
@@ -444,7 +444,7 @@ class Parser
     when Hash
       match_hash scanner.past_newline, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur)
+      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end

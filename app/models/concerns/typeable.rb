@@ -32,10 +32,16 @@ module Typeable
     end
 
     # Return a list of name/type pairs, suitable for making a selection list
-    def type_selections(withnull = false, withall = false)
+    def type_selections(withnull: false, withall: false, only: nil, except: nil)
       range = withnull ? 0..-1 : 1..-1
       items = @tag_types.list.compact[range]
       items.unshift ['All Types', -1] if withall
+      if only = only&.map { |str_or_sym_or_num| Tag.typenum str_or_sym_or_num }
+        items.keep_if { |item| only.include? item.last }
+      end
+      if except = except&.map { |str_or_sym_or_num| Tag.typenum str_or_sym_or_num }
+        items.delete_if { |item| except.include? item.last }
+      end
       items
     end
 
