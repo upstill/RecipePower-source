@@ -37,7 +37,7 @@
                 class: 'dialog-submit-button dialog-action-button',
                 style: 'position: relative; top: 20px;',
                 type: 'submit',
-                value: 'Add Name',
+                value: "Add Name…",
                 data: {'recipe[recipe_contents][token]' => 'tag' } } %>
           </td>
         </tr>
@@ -78,7 +78,7 @@
   <input type='hidden' name='recipe[content]' id='recipe_content'>
 
   <div class='modal-footer'>
-    <%= dialog_submit_button 'Save', disabled: true %>
-    <%= dialog_cancel_button 'Cancel', data: {:'oncancel' => recipe_contents_path(@recipe)} %>
+    <%= dialog_submit_button 'Done', disabled: true %>
+    <%= dialog_cancel_button 'Revert', data: {:'oncancel' => recipe_contents_path(@recipe)} %>
   </div>
 <% end %>

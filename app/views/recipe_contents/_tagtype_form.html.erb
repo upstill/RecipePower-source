@@ -34,8 +34,8 @@
     </div>
   </div>
   <div class="row" >
-    <div style='display: inline-block; width: 100px'></div>
-    <%= check_box_tag 'recipe[recipeContents][assert]', true %>&nbsp;Add to dictionary as a synonym
+    <div style='display: inline-block; width: 60px'></div>
+    <%= check_box_tag 'recipe[recipeContents][assert]', '1', false, disabled: true %>&nbsp;&#8230;plus, recognize it as a synonym in future
     <%= dialog_submit_button disabled: true %>
     <%= dialog_cancel_button submit_to_cancel: true %>
   </div>
