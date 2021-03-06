@@ -13,7 +13,7 @@ module RecipeContentsHelper
   def annotation_button token, options={}
     button_options = options.merge(data: {'recipe[recipe_contents][token]' => token},
                                    class: "#{options[:class]} submit-selection",
-                                   button_style: 'default')
+                                   button_style: nil) # Not a bootstrap button
     dialog_submit_button Parser.token_to_title(token, default: 'Add Name'), button_options
   end
 
