@@ -237,10 +237,11 @@ module DialogsHelper
     if label.is_a? Hash
       options, label = label, nil
     end
+    # Forget about Bootstrap if :button_style option is specified as nil
     options = bootstrap_button_options options.merge(
-                                           button_style: (options[:button_style] || 'success'),
-                                           class: "#{options[:class]} #{options[:style] || 'form-button'}"
-                                       )
+        button_style: (options[:button_style] || 'success'),
+        class: "#{options[:class]} #{options[:style] || 'form-button'}"
+    ) unless options.has_key?(:button_style) && options[:button_style].nil?
     options[:class] << ' dialog-submit-button'
     options[:data] ||= {}
     options[:data][:method] = options[:method] || 'post'
