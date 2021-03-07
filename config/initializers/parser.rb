@@ -162,6 +162,7 @@ Parser.init_grammar(
     # An altamt may show up to clarify the amount or qualify the unit
     rp_altamt: {
         match: [
+            [ '/', :rp_unqualified_amt ],
             [{match: '(', optional: true}, :rp_unqualified_amt, {match: [';', :rp_unqualified_amt], optional: true}, {match: ')', optional: true}],
             [:rp_unqualified_amt, {match: [';', :rp_unqualified_amt], optional: true}]
         ],

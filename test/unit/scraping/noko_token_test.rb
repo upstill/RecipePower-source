@@ -21,7 +21,13 @@ class NokoTokenTest < ActiveSupport::TestCase
 
   def text_element_data_containing text
     ted = text_element_containing 'more'
+  end
 
+  test 'correct tokenizing' do
+    initialize_doc '1/2 cup'
+    assert_equal [ '1/2', 'cup' ], @nokotokens
+    initialize_doc '8 oz/1 cup'
+    assert_equal [ '8', 'oz', '/', '1', 'cup'], @nokotokens
   end
 
   test 'text element finder' do

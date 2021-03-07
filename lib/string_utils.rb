@@ -5,7 +5,8 @@ def tokenize str, terminates=false, &block
     offset = 0
     while str.length > 0 do
       ostr = str
-      str = ostr.sub /(^[ \t\r\f\v\u00a0]*)([^\]\[)(}{;,.?\s\u00a0]+|[()\[\]{};,.?\n])/i, '' # Pluck the next token
+      # '/' is a separate token UNLESS surrounded by digit strings--a fraction
+      str = ostr.sub /(^[ \t\r\f\v\u00a0]*)(\d+\/\d+|[^\/\]\[)(}{;,.?\s\u00a0]+|[()\/\[\]{};,.?\n])/i, '' # Pluck the next token
       spaces, token = $1, $2
       if token && ((str.length > 0) || terminates || token.match(/^[()\[\]{};,.?\n]/)) # This string really ends here (no continuation of non-delimiter)
         offset += spaces&.length || 0
