@@ -7,7 +7,7 @@ class Finder < ApplicationRecord
   end
 
   def attributes_hash
-    { id: id, label: label, selector: selector, attribute_name: attribute_name, site: site, site_id: site_id}
+    { id: id, label: label, selector: selector, attribute_name: attribute_name, site_id: site_id }
   end
 
   def labelsym

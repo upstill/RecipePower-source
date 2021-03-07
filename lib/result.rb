@@ -67,7 +67,7 @@ class Result
       finder_id = fd[:id]
       unless Finder.exists?(id: finder_id)
         site = fd[:site] || Site.find_by(id: fd[:site_id])
-        finder = Finder.create fd.slice(:label, :selector, :attribute_name).merge(site: site)
+        finder = Finder.create fd.slice(:label, :selector, :attribute_name) # .merge(site: site)
         finder_id = finder.id
       end
       dumped[:finder_id] = finder_id
