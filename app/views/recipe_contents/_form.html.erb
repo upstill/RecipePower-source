@@ -78,7 +78,7 @@
   <input type='hidden' name='recipe[content]' id='recipe_content'>
 
   <div class='modal-footer'>
-    <%= dialog_submit_button 'Done', disabled: true %>
+    <%= dialog_submit_button 'Done' %>
     <%= dialog_cancel_button 'Revert', data: {:'oncancel' => recipe_contents_path(@recipe)} %>
   </div>
 <% end %>

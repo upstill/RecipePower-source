@@ -21,6 +21,8 @@ require 'enumerable_utils.rb'
 # 1 1/2 pounds medium to firm silken tofu, cut into 1/2-inch cubes
 # Recipe 15662(public) Sheet-Pan Spiced Cauliflower and Tofu With Ginger Yogurt
 # 1 large (2 3/4-pound; 1.25kg) head cauliflower
+# Recipe #15673(public) Fish-Fragrant Eggplants...
+# 1 pound 5 ounces (600g) eggplants (1–2 large)
 class Parser
   attr_reader :grammar
 

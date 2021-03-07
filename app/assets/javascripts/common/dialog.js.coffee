@@ -154,8 +154,9 @@ open_modal = (dlog, omit_button) ->
 		RP.submit.bind dlog # Arm submission links and preload sub-dialogs
 	$('.dialog-submit-button').click ->
 		$('input[name="button_name"]').val $(this).attr('value')
-		dlog = RP.dialog.enclosing_modal event.target
-		$('form', dlog).submit()
+		# Submit either the closest enclosing form, or the first form in the enclosing dialog
+		form = $(event.target).closest('form')[0] || $('form', RP.dialog.enclosing_modal event.target)[0]
+		$(form).submit()
 		# close_modal dlog, 'close'
 		event.preventDefault()
 	$('.dialog-cancel-button', dlog).click (event) ->

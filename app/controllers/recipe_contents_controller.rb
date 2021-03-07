@@ -98,8 +98,7 @@ class RecipeContentsController < ApplicationController
     end
   end
 
-  def patch
-    @recipe.recipe_contents = params[:recipe][:recipeContents][:content]
+  def update
   end
 
   def create

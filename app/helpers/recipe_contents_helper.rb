@@ -21,7 +21,7 @@ module RecipeContentsHelper
   def tag_usage_button tagtype, tagname, options={}
     button_options = options.merge(data: {'recipe[recipe_contents][tagname]' => tagname},
                                    class: "#{options[:class]} submit-selection",
-                                   button_style: 'default')
+                                   button_style: nil)
     dialog_submit_button "Accept '#{tagname}' as a new #{Tag.typename(tagtype)}", button_options
   end
 end
