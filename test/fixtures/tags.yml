@@ -135,3 +135,38 @@ cilantro:
   id: 21
   name: cilantro
   tagtype: 4
+
+ground_cinnamon:
+  id: 22
+  name: ground cinnamon
+  tagtype: 4
+
+ground_nutmeg:
+  id: 23
+  name: ground nutmeg
+  tagtype: 4
+
+instant_dry_yeast:
+  id: 24
+  name: instant dry yeast
+  tagtype: 4
+
+active_dry_yeast:
+  id: 25
+  name: active dry yeast
+  tagtype: 4
+
+yellow_miso_paste:
+  id: 26
+  name: yellow miso paste
+  tagtype: 4
+
+red_miso_paste:
+  id: 27
+  name: red miso paste
+  tagtype: 4
+
+flayed:
+  id: 28
+  name: flayed
+  tagtype: 22

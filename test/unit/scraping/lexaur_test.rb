@@ -52,8 +52,45 @@ class LexaurTest < ActiveSupport::TestCase
 
   test 'lexaur finds longer tag' do
     lex = Lexaur.from_tags
-    result = lex.find('lemon juice')
+    str = 'lemon juice'
+    result = lex.find str
     assert_not_empty result
+  end
+
+  test 'lexaur distribute' do
+    lex = Lexaur.from_tags
+
+    str = 'lemon juice'
+    result = nil
+    lex.distribute StrScanner.new(str) do |terms, onward|
+      refute onward.more?
+      result = Tag.where(id: terms).first
+    end
+    assert_not_nil result
+    assert_equal str, result.name
+
+    str = 'sea salt and black pepper'
+    results, past = [], nil
+    lex.distribute(StrScanner.new(str)) { |terms, onward| results << Tag.where(id: terms).first }
+    assert_not_empty results
+    assert_equal 'sea salt', results.last.name
+    assert_equal 'black pepper', results.first.name
+
+    # Distribute initial substring of antecedent to successor
+    str = 'ground cinnamon and nutmeg'
+    results = []
+    lex.distribute(StrScanner.new(str)) { |terms, onward| results << Tag.where(id: terms).first }
+    assert_not_empty results
+    assert_equal 'ground cinnamon', results.last.name
+    assert_equal 'ground nutmeg', results.first.name
+
+    # Distribute terminal substring of successor to antecedent
+    str = 'instant or active dry yeast'
+    results = []
+    lex.distribute(StrScanner.new(str)) { |terms, onward| results << Tag.where(id: terms).first }
+    assert_not_empty results
+    assert_equal 'instant dry yeast', results.last.name
+    assert_equal 'active dry yeast', results.first.name
   end
 
   test 'lexaur chunks simple stream' do
@@ -62,12 +99,12 @@ class LexaurTest < ActiveSupport::TestCase
     assert_nil lex.chunk(scanner)
 
     scanner = StrScanner.new 'jalapeño peppers'
-    lex.chunk(scanner) {|data, stream|
+    lex.chunk(scanner) do |data, stream|
       assert_not_nil data
       assert_includes data, 1
       assert_equal 2, stream.pos
       assert_nil stream.first
-    }
+    end
 
     scanner = StrScanner.new 'jalapeño peppers, and more'
     assert_not_nil lex.chunk(scanner) { |data, stream|
@@ -116,21 +153,24 @@ class LexaurTest < ActiveSupport::TestCase
     Tag.assert 'almonds', :Ingredient
     Tag.assert 'walnuts', :Ingredient
     lex = Lexaur.from_tags
-    scanner = StrScanner.new 'chopped almonds'
-    result = lex.chunk scanner do |terms, onward|
-      Tag.where(id: terms, tagtype: Tag.typenum(:Condition)).first
+    scanner = StrScanner.new 'chopped'
+    # result = lex.chunk scanner do |terms, onward|
+    result = nil
+    lex.distribute scanner do |terms, onward|
+      result = Tag.where(id: terms, tagtype: Tag.typenum(:Condition)).first
     end
     assert_equal result.class, Tag
     assert_equal 'chopped', result.name
 
     scanner = StrScanner.new 'chopped almonds or walnuts'
     tags = []
-    lex.match_list scanner do |terms, onward|
+    # lex.match_list scanner do |terms, onward|
+    lex.distribute scanner do |terms, onward|
       tags << Tag.where(id: terms, tagtype: Tag.typenum(:Ingredient)).first
       tags.last
     end
     assert_equal 2, tags.count
-    assert_equal ['chopped almonds', 'chopped walnuts'], tags.map(&:name)
+    assert_equal ['chopped walnuts', 'chopped almonds'], tags.map(&:name)
   end
 
   test 'Lexaur manages tokens with embedded dash correctly' do
@@ -148,21 +188,29 @@ class LexaurTest < ActiveSupport::TestCase
 
   test 'Lexaur parses lists of tags' do
     lex = Lexaur.from_tags
-    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    lex.match_list(StrScanner.new('ground turmeric, cumin and cinnamon')) do |terms, stream|
-      target = strings.shift
-      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }  # Expect to find
+    # lex.match_list(StrScanner.new('ground turmeric, cumin and cinnamon')) do |terms, stream|
+    lex.distribute(StrScanner.new('ground turmeric, cumin and cinnamon')) do |terms, stream|
+      found = Tag.find(terms.first).name
+      assert (strings.delete found), "Didn't match #{found}"
     end
+    assert_empty strings, "Strings not found: #{strings}"
+
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    lex.match_list(StrScanner.new('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
-      target = strings.shift
-      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    # lex.match_list(StrScanner.new('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
+    lex.distribute(StrScanner.new('ground turmeric, cumin or ground cinnamon')) do |terms, stream|
+      found = Tag.find(terms.first).name
+      assert (strings.delete found), "Didn't match #{found}"
     end
+    assert_empty strings, "Strings not found: #{strings}"
+
     strings = %w{ yellow\ miso\ paste red\ miso\ paste }
-    lex.match_list(StrScanner.new('yellow or red miso paste')) do |terms, stream|
-      target = strings.shift
-      assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
+    # lex.match_list(StrScanner.new('yellow or red miso paste')) do |terms, stream|
+    lex.distribute(StrScanner.new('yellow or red miso paste')) do |terms, stream|
+      found = Tag.find(terms.first).name
+      assert (strings.delete found), "Didn't match #{found}"
     end
+    assert_empty strings, "Strings not found: #{strings}"
   end
 
   test 'Lexaur handles interrupted multitoken tag' do
@@ -171,7 +219,8 @@ class LexaurTest < ActiveSupport::TestCase
     skipper = -> (stream){
       stream.peek == 'to_skip' ? stream.rest : stream
     }
-    lex.match_list(StrScanner.new('ground to_skip turmeric'), skipper: skipper) do |terms, stream|
+    # lex.match_list(StrScanner.new('ground to_skip turmeric'), skipper: skipper) do |terms, stream|
+    lex.distribute(StrScanner.new('ground to_skip turmeric'), skipper: skipper) do |terms, stream|
       target = strings.shift
       assert_equal target, Tag.find(terms.first).name, "Didn't match #{target}"
     end

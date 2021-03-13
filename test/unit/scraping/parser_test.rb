@@ -77,6 +77,8 @@ class ParserTest < ActiveSupport::TestCase
       sesame\ tahini
       Cointreau
       za'atar
+      instant\ dry\ yeast
+      active\ dry\ yeast
       Romanesco\ (green)\ cauliflower}.
         each { |name| Tag.assert name, :Ingredient }
     @unit_tags = %w{ can inch knob massive\ head ounce g ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
@@ -209,8 +211,12 @@ EOF
   end
 
   test 'parse list of tags distributing first word' do
+    html = 'instant or active dry yeast'
+    parser = Parser.new html, @lex
+    seeker = parser.match :rp_ingalts
+    assert seeker.success?
+
     lex = Lexaur.from_tags
-    html = 'ground turmeric, cumin and cinnamon'
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
     parser = Parser.new html, @lex
     seeker = parser.match :rp_ingalts
