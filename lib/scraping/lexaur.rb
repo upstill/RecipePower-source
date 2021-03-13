@@ -80,7 +80,7 @@ class Lexaur < Object
         # stream: the stream as consumed in proceeding down the tree
         # newpath: the lexaur path from the root to the matched data
         # We want the longest path and the furthest stream that produces a term
-        result.propose trms, onwrd, lexpth, strpth
+        result.propose onwrd, lexpth, strpth
         if %w{ , and or }.include? (delim = onwrd.peek)
           # subsq_terms, subsq_stream, subsq_path = [], onwrd = onwrd.rest, []
           # ...and we might be able to extend the current longest_path with tokens from the subsequent result
