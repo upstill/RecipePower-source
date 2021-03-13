@@ -60,13 +60,22 @@ class Lexaur < Object
   # -- #first peaks at the head but also advances the stream, consuming the first element
   #     for the remainder
   # -- #rest returns a stream for the stream minus the head.
+  # The block is called with the data at the end of the path
   def chunk stream, skipper: -> (stream){ stream }, &block
-    chunk1 stream, -> (terms, onward, lexpath, strpath) {
+    chunk1 stream, -> (onward, lexpath, strpath) {
+      terms = lexpath.last.terminals[strpath.last]
       block.call terms, onward if block_given? && terms.present?
     }, skipper: skipper
   end
 
-  # Distribute subterms about a delimiter token
+  # Distribute subterms about a delimiter token,
+  # skipping tokens as performed by :skipper
+  # This is a recursive function for accumulating results, collected as:
+  # -- lexpath: a path down the Lexaur tree driven by processed tokens
+  # -- strpath: the tokens driving that path
+  # -- result: a LexResult object which takes proposed paths and saves the longest one until its #report method is called
+  # -- reporter: a Proc (passed as a block on the initial call) which takes each result as 1) terminal
+  #       data from the lexpath, and 2) the location in the stream where the path ended
   def distribute stream, skipper: -> (stream){ stream }, lexpath: [self], strpath: [], result: LexResult.new(stream), reporter: nil, &block
     reporter ||= block
     onward = terms = nil
@@ -74,7 +83,7 @@ class Lexaur < Object
     # #chunk1 invokes this block once each time a sequence hits, longest first
     # furthest_terms, furthest_stream, longest_path = [], stream, []
     while lex = lexpath.pop do
-      lex.chunk1 stream, -> (trms, onwrd, lexpth, strpth) {
+      lex.chunk1 stream, -> (onwrd, lexpth, strpth) {
         # A completed path has been found => check for delimiter, and offer the path to subsequent tokens
         # terms: the data found at the terminus of the search
         # stream: the stream as consumed in proceeding down the tree
@@ -120,9 +129,12 @@ class Lexaur < Object
   # Match a list of tags of the form 'tag1, tag2...and/or tag3'
   def match_list stream, skipper: -> (stream){ stream }, &block
     lexpath = onward = terms = nil
-    chunked = chunk1 stream, -> (trms, onwrd, lexpth) {
+    chunked = chunk1 stream, -> (onwrd, lexpth, strpth) {
       lexpath = lexpth
-      block.call (terms = trms), (onward = onwrd) if trms.present? # We call back up when one is found
+      if lexpth.last
+        terms = lexpath.last.terminals[strpth.last]
+        block.call terms, (onward = onwrd) if terms.present? # We call back up when one is found
+      end
     }, skipper: skipper
     if chunked
       # lexpath = lexpath.reverse
@@ -137,14 +149,6 @@ class Lexaur < Object
         return onward if delim != ',' # Termination condition: hitting 'and' or 'or'
       end
     end
-  end
-
-protected
-
-  # Our own #split function which (currently) separates out punctuation
-  def split string_or_strings
-    strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
   end
 
   # Consume tokens from the stream and walk down the Lexaur tree.
@@ -175,13 +179,13 @@ protected
               # Once there are no more matches along/down, we consume the head of the stream.
               # NB This has the effect of returning the longest match first
               # Report back the terminals even if absent
-              if terms = tracker.terminals[head]
-                block.call(tracker.terminals[head], onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+              if tracker.terminals[head]
+                block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
               end
-        elsif terms = tracker.terminals[head]
-          block.call(tracker.terminals[head], onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+        elsif tracker.terminals[head]
+          block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
         else
-          block.call(nil, elide(stream, skipper).first, lexpath, strpath) # The block must check for acceptance and return true for the process to end
+          block.call(elide(stream, skipper).first, lexpath, strpath) # The block must check for acceptance and return true for the process to end
         end
       else # This token didn't bear anything of relevance to Tag.normalizeName
         head = ''
@@ -192,6 +196,12 @@ protected
   end
 
   private
+
+  # Our own #split function which (currently) separates out punctuation
+  def split string_or_strings
+    strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
+    strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
+  end
 
   # Take an opportunity to pass up unwanted/irrelevant tokens
   def elide stream, skipper
