@@ -78,7 +78,7 @@ class Lexaur < Object
   #       data from the lexpath, and 2) the location in the stream where the path ended
   def distribute stream, skipper: -> (stream){ stream }, lexpath: [self], strpath: [], result: LexResult.new(stream), reporter: nil, &block
     reporter ||= block
-    onward = terms = nil
+    operand = ''
     # Find at least one path down the tree driven by the incoming tokens.
     # #chunk1 invokes this block once each time a sequence hits, longest first
     # furthest_terms, furthest_stream, longest_path = [], stream, []
@@ -90,65 +90,19 @@ class Lexaur < Object
         # newpath: the lexaur path from the root to the matched data
         # We want the longest path and the furthest stream that produces a term
         result.propose onwrd, lexpth, strpth
-        if %w{ , and or }.include? (delim = onwrd.peek)
-          # subsq_terms, subsq_stream, subsq_path = [], onwrd = onwrd.rest, []
+        if %w{ , and or }.include? (operand = onwrd.peek)
           # ...and we might be able to extend the current longest_path with tokens from the subsequent result
-          result.extend lex.distribute(onwrd = onwrd.rest,
+          further = lex.distribute(onwrd = onwrd.rest,
                           skipper: skipper,
                           lexpath: lexpath+lexpth,
                           strpath: strpath+strpth,
                           reporter: reporter)
+          result.extend further if further
         end
       }, skipper: skipper
     end
-    result.report reporter
+    result.report { |data, stream_start, stream_end| reporter.call data, stream_start, stream_end, operand if data }
     return result
-    onward = onward.rest
-    if chunked
-      # We have a successful match => search for the longest stream that can be
-      # gleaned using an initial subpath of lexnode
-      lexpath.each do |lexnode|
-        lexnode.chunk(onward) { |terms, newstream|
-          onward = newstream if block.call terms, newstream # Report found tokens back
-        }
-      end
-      # lexpath = lexpath.reverse
-      # chunk_path provides a path through the tree to the terminals
-      while %w{ , and or }.include? (delim = onward.peek) do
-        lexpath.each do |lexnode|
-          lexnode.chunk(onward) { |terms, newstream|
-            onward = newstream if block.call terms, newstream # Report found tokens back
-          }
-        end
-        return onward if onward.peek != ',' # Terminate if began with hitting 'and' or 'or'
-        onward = onward.rest
-      end
-    end
-  end
-
-  # Match a list of tags of the form 'tag1, tag2...and/or tag3'
-  def match_list stream, skipper: -> (stream){ stream }, &block
-    lexpath = onward = terms = nil
-    chunked = chunk1 stream, -> (onwrd, lexpth, strpth) {
-      lexpath = lexpth
-      if lexpth.last
-        terms = lexpath.last.terminals[strpth.last]
-        block.call terms, (onward = onwrd) if terms.present? # We call back up when one is found
-      end
-    }, skipper: skipper
-    if chunked
-      # lexpath = lexpath.reverse
-      # chunk_path provides a path through the tree to the terminals
-      while %w{ , and or }.include? (delim = onward.peek) do
-        onward = onward.rest
-        lexpath.each do |lexnode|
-          lexnode.chunk(onward) { |terms, newstream|
-            onward = newstream if block.call terms, newstream # Report found tokens back
-          }
-        end
-        return onward if delim != ',' # Termination condition: hitting 'and' or 'or'
-      end
-    end
   end
 
   # Consume tokens from the stream and walk down the Lexaur tree.
@@ -188,9 +142,7 @@ class Lexaur < Object
           block.call(elide(stream, skipper).first, lexpath, strpath) # The block must check for acceptance and return true for the process to end
         end
       else # This token didn't bear anything of relevance to Tag.normalizeName
-        head = ''
-        unskipped = onward = stream.rest
-        tracker.chunk1 onward, lexpath, strpath, block, skipper: skipper
+        block.call(stream, lexpath[0..-2], strpath) # The block must check for acceptance and return true for the process to end
       end
     end
   end

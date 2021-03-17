@@ -119,17 +119,17 @@ cups:
 peeled:
   id: 18
   name: peeled
-  tagtype: 3
+  tagtype: 22
 
 seeded:
   id: 19
   name: seeded
-  tagtype: 3
+  tagtype: 22
 
 chopped:
   id: 20
   name: chopped
-  tagtype: 3
+  tagtype: 22
 
 cilantro:
   id: 21
@@ -170,3 +170,8 @@ flayed:
   id: 28
   name: flayed
   tagtype: 22
+
+tsp:
+  id: 29
+  name: tsp
+  tagtype: 5

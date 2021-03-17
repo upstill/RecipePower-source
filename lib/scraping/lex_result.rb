@@ -3,7 +3,7 @@ class LexResult < Object
   attr_reader :furthest_stream, :str_path
 
   def initialize stream
-    @furthest_stream, @longest_path, @str_path = stream, [], []
+    @furthest_stream, @longest_path, @str_path = (@initial_stream = stream), [], []
   end
 
   # Propose a match, recording it if it exceeds the length of the longest previously match
@@ -12,8 +12,8 @@ class LexResult < Object
   end
 
   # Report the current longest-path result by calling a block
-  def report block
-    block.call @longest_path.last.terminals[@str_path.last], @furthest_stream if @longest_path.present?
+  def report
+    yield @longest_path.last.terminals[@str_path.last], @initial_stream, @furthest_stream if @longest_path.present?
   end
 
   # Use a trailing substring from the sequel to extend our path, if possible

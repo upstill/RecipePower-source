@@ -557,7 +557,7 @@ class Parser
                          match.tail_stream,
                          token,
                          enclose: (really_enclose ? true : false),
-                         optional: ((context[:optional] || match.soft_fail?) ? true : false))
+                         optional: ((context[:optional] || inspec[:optional] || match.soft_fail?) ? true : false))
   end
 
   def consolidate_matches token, matches
