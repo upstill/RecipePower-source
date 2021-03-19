@@ -1,6 +1,7 @@
 class RecipePagePresenter < BasePresenter
 
   def content_suggestion
+    return ''.html_safe unless response_service.admin_view?
     dlg = link_to_submit 'here',
                          edit_recipe_page_path(@object, topics: :page_recipes),
                          mode: :modal,

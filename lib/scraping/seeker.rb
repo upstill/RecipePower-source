@@ -5,6 +5,8 @@ require 'scraping/lexaur.rb'
 class Seeker
   attr_accessor :head_stream, :tail_stream, :token, :children
   attr_reader :value
+  delegate :pos, to: :head_stream
+  delegate :bound, to: :tail_stream
 
   def initialize(head_stream, tail_stream, token = nil, children=[])
     if token.is_a?(Array)
@@ -379,26 +381,26 @@ end
 class  TagsSeeker < Seeker
   attr_accessor :operand
 
-  def self.match start_stream, opts={}
+  def initialize head_stream, tail_stream, token = nil, children=[], operand: nil
+    super head_stream, tail_stream, token, children
+    @operand = operand
+  end
+
+  def self.match stream, opts={}
     children = []
-    stream = start_stream
-    operand = nil
     rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[Tag.typename opts[:types]]
     scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
-    opts[:lexaur].match_list(stream) do |data, next_stream|
+    operand = ''
+    opts[:lexaur].distribute(stream) do |data, stream_start, stream_end, op|
+      operand = op if op != ','
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        children << TagSeeker.new(stream, next_stream, [:id, :name].zip(tagdata).to_h, rptype)
-        operand = next_stream.peek
-        stream = next_stream.rest
-      else
-        nil
+        children << TagSeeker.new(stream_start, stream_end, [:id, :name].zip(tagdata).to_h, rptype)
       end
     end
     if children.present?
-      result = self.new start_stream, children.last.tail_stream, opts[:token], children
-      result.operand = operand
-      result
+      children.sort_by &:pos
+      self.new children.first.head_stream, children.last.tail_stream, opts[:token], children, operand: operand
     end
   end
 
@@ -445,12 +447,21 @@ class AmountSeeker < Seeker
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
-    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(.*)/)
-      num = $1
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(.*)/) &&
+      (($1.present? && $2.present?) || !opts[:full_only])
+      num = $1.if_present || '1'
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
       self.new(stream, stream.rest, num, unit) if num.present? && unit
     end
   end
+end
+
+# A FullAmountSeeker requires BOTH number and unit
+class FullAmountSeeker < AmountSeeker
+  def self.match stream, opts={}
+    super stream, opts.merge(:full_only => true)
+  end
+
 end
 
 # Check for a matched set of parentheses in the stream and call a block on the contents
@@ -490,7 +501,7 @@ end
 
 class ConditionsSeeker < TagsSeeker
   def self.match stream, opts
-    super stream, opts.merge(types: 3)
+    super stream, opts.merge(types: 22)
   end
 end
 
