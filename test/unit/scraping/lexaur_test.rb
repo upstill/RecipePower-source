@@ -107,7 +107,7 @@ class LexaurTest < ActiveSupport::TestCase
     end
 
     scanner = StrScanner.new 'jalapeño peppers, and more'
-    assert_not_nil lex.chunk(scanner) { |data, stream|
+    lex.chunk(scanner) { |data, stream|
       assert_not_nil data
       assert_includes data, 1
       assert_equal 2, stream.pos

@@ -241,6 +241,11 @@ EOF
   end
 
   test 'parse ingredient line' do
+    html = 'Salt and black pepper'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
     # Test a failed ingredient line
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
     ps = ParserServices.new(content: html, lexaur: @lex)
@@ -638,7 +643,7 @@ EOF
     ingred_seekers = seeker.find :rp_ingname
     ingreds_found = ingred_seekers.map(&:value).uniq
     assert_empty (ingreds_found - ingreds), "Ingredients found but not included"
-    assert_equal ["salt"], (ingreds - ingreds_found), "Ingredients included but not found"
+    assert_empty (ingreds - ingreds_found), "Ingredients included but not found"
 
     assert (rcp_seeker = seeker.find(:rp_recipe).first)
     assert (ttl_seeker = rcp_seeker.find(:rp_title).first)

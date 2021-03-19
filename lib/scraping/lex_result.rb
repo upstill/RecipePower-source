@@ -18,19 +18,18 @@ class LexResult < Object
 
   # Use a trailing substring from the sequel to extend our path, if possible
   def extend sequel
+    return unless @longest_path.present? && (pe_start = @longest_path[@str_path.length-1].nexts[@str_path.last])
     sequel.str_path.each_index do |ix|
       # Can we use the end sequence of strings to extend our path?
-      prev = @longest_path.last
-      path_extension = []
-      string_extension = sequel.str_path[ix..-1] # Proposed string extension
-      string_extension.each { |newstr|
-        break unless prev = prev.nexts[newstr]
-        path_extension.push prev
-      }
-      next unless string_extension.present?
-      terms = (path_extension.last || @longest_path.last).terminals[string_extension.last]
-      if path_extension.length == (string_extension.length-1) && terms
-        propose @furthest_stream, @longest_path+path_extension, @str_path+string_extension
+      path_extension = [ appendix = pe_start ]
+      string_extension = sequel.str_path[ix..-2] # Proposed string extension
+      while next_str = string_extension.shift do
+        break unless appendix = appendix.nexts[next_str]
+        path_extension.push appendix
+      end
+      if string_extension.empty? && appendix && # All prior strings have been mapped
+          appendix.terminals[sequel.str_path.last]  # ...and the last string has terminal data
+        propose @furthest_stream, @longest_path+path_extension, @str_path+sequel.str_path[ix..-1]
         return
       end
     end

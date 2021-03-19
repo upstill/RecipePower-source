@@ -63,7 +63,7 @@ class Lexaur < Object
   # The block is called with the data at the end of the path
   def chunk stream, skipper: -> (stream){ stream }, &block
     chunk1 stream, -> (onward, lexpath, strpath) {
-      terms = lexpath.last.terminals[strpath.last]
+      terms = (lexpath.last.terminals[strpath.last] if lexpath.last)
       block.call terms, onward if block_given? && terms.present?
     }, skipper: skipper
   end
@@ -90,7 +90,8 @@ class Lexaur < Object
         # newpath: the lexaur path from the root to the matched data
         # We want the longest path and the furthest stream that produces a term
         result.propose onwrd, lexpth, strpth
-        if %w{ , and or }.include? (operand = onwrd.peek)
+        if %w{ , and or }.include? onwrd.peek
+          operand = onwrd.peek if onwrd.peek != ','
           # ...and we might be able to extend the current longest_path with tokens from the subsequent result
           further = lex.distribute(onwrd = onwrd.rest,
                           skipper: skipper,
@@ -129,17 +130,17 @@ class Lexaur < Object
         onward, unskipped = elide(stream.rest, skipper)
         # Recursively continue along the stream and down the tree
         if nxt = tracker.nexts[head]
-          nxt.chunk1(onward, lexpath, strpath + [head], block, skipper: skipper) ||
-              # Once there are no more matches along/down, we consume the head of the stream.
-              # NB This has the effect of returning the longest match first
-              # Report back the terminals even if absent
-              if tracker.terminals[head]
-                block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
-              end
+          nxt.chunk1(onward, lexpath, strpath + [head], block, skipper: skipper)
+          # Once there are no more matches along/down, we consume the head of the stream.
+          # NB This has the effect of returning the longest match first
+          # Report back the terminals even if absent
+          if tracker.terminals[head]
+            block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+          end
         elsif tracker.terminals[head]
           block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
         else
-          block.call(elide(stream, skipper).first, lexpath, strpath) # The block must check for acceptance and return true for the process to end
+          block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end
         end
       else # This token didn't bear anything of relevance to Tag.normalizeName
         block.call(stream, lexpath[0..-2], strpath) # The block must check for acceptance and return true for the process to end
