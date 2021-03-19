@@ -18,6 +18,7 @@ class PageRefPresenter < CollectiblePresenter
   end
 
   def content_suggestion
+    return ''.html_safe unless response_service.admin_view?
     "This is the raw content after trimming with CSS selectors.".html_safe
   end
 end

@@ -76,6 +76,7 @@ class RecipePresenter < CollectiblePresenter
   end
 
   def content_suggestion
+    return ''.html_safe unless response_service.admin_view?
     cs = <<EOF
           Ingredients, instructions and title are identified using CSS.<br>
           If the recipe page contains multiple recipes, click #{split_recipe_button @object, 'here'}

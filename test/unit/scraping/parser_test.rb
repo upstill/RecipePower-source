@@ -434,6 +434,18 @@ EOF
     assert_equal "followed", seeker.tail_stream.token_at
   end
 
+  test 'various ingredient lines' do
+    # Note: rinsed and finely grated are tags, but not ingredients
+    ps = ParserServices.parse content: '<li>1 large cauliflower, rinsed and finely grated (220g net weight)</li>', token: :rp_ingline
+    assert ps.success?
+
+    ps = ParserServices.parse content: '1 large', token: :rp_amt
+    assert ps.success?
+
+    ps = ParserServices.parse content: '1 large cauliflower', token: :rp_ingspec
+    assert ps.success?
+  end
+
   test 'parse Ottolenghi ingredient list' do
     html = 'lemon zest and juice'
     ps = ParserServices.parse content: html, token: :rp_ingalts
