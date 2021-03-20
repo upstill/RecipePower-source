@@ -32,6 +32,10 @@ class BasePresenter
         class: 'label-rotator rotate'
   end
 
+  def content_suggestion
+    ''.html_safe
+  end
+
   def content_preface
     recipe_content_buttons(@object) + content_suggestion + h.tag.hr(style: 'margin: 10px; color: #bbb')
   end
