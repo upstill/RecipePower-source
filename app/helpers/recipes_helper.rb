@@ -192,29 +192,28 @@ module RecipesHelper
   end
 
   def recipe_content_buttons object
-    return unless policy(object).update?
-    if [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
-      page_ref = object.page_ref
-      recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
+    return ''.html_safe unless policy(object).update? && [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
 
-      buttons = ActiveSupport::SafeBuffer.new
-      if response_service.admin_view?
-        buttons += edit_trimmers_button object
-        buttons += content_button page_ref.gleaning, object == page_ref.gleaning
-        buttons += content_button page_ref, object == page_ref
-        buttons += content_button recipe, object == recipe
-        buttons += refresh_button object
-      end
-      buttons +=
-          button_to_submit('',
-                           edit_recipe_contents_path(recipe),
-                           'glyph-edit-red',
-                           'xl',
-                           mode: :modal,
-                           class: 'action-button annotate-content',
-                           title: 'Annotate Content') if object.is_a?(Recipe)
-      content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
+    page_ref = object.page_ref
+    recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
+
+    buttons = ActiveSupport::SafeBuffer.new
+    if response_service.admin_view?
+      buttons += edit_trimmers_button object
+      buttons += content_button page_ref.gleaning, object == page_ref.gleaning
+      buttons += content_button page_ref, object == page_ref
+      buttons += content_button recipe, object == recipe
+      buttons += refresh_button object
     end
+    buttons +=
+        button_to_submit('',
+                         edit_recipe_contents_path(recipe),
+                         'glyph-edit-red',
+                         'xl',
+                         mode: :modal,
+                         class: 'action-button annotate-content',
+                         title: 'Annotate Content') if object.is_a?(Recipe)
+    content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
   end
 
 # Provide a header which suggests how to improve the content
