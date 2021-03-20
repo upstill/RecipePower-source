@@ -125,6 +125,7 @@ class Lexaur < Object
         substrs.each do |substr|
           tracker = tracker.nexts[substr]
           return if tracker.nil?
+          lexpath.push tracker
         end
         # Peek ahead and consume any tokens which are empty in the normalized name
         onward, unskipped = elide(stream.rest, skipper)
@@ -135,10 +136,10 @@ class Lexaur < Object
           # NB This has the effect of returning the longest match first
           # Report back the terminals even if absent
           if tracker.terminals[head]
-            block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+            block.call(unskipped, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
           end
         elsif tracker.terminals[head]
-          block.call(onward, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+          block.call(unskipped, lexpath, strpath + substrs + [head]) # The block must check for acceptance and return true for the process to end
         else
           block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end
         end
