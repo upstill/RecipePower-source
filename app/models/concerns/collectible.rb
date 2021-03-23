@@ -18,7 +18,7 @@ module Collectible
     # 2) ensure that changes to refs are saved when the entity is saved.
     # NB: this is because ActiveRecord doesn't keep a record of individual members of an association,
     # and so can't :autosave them
-    before_save :flush_ref_cache
+    after_save :flush_ref_cache
 
     def flush_ref_cache
       if @cached_refs
@@ -36,11 +36,13 @@ module Collectible
       super
     end
 
+=begin
     def save options={}
       result = super
       flush_ref_cache
       return result
     end
+=end
 
     # We seek to preload the user pointer (collection flag) for an entity, which shows up using
     has_many :rcprefs, :dependent => :destroy, :as => :entity, :autosave => true
@@ -194,9 +196,9 @@ module Collectible
       if cr
         yield(cr) if block_given?
       elsif assert
-        cr = rcprefs.new user_id: user_id, entity: self
+        cr = self.rcprefs.build user_id: user_id
         yield(cr) if block_given?
-        cr.ensconce
+        # cr.ensconce
       end
     end
     @cached_refs[user_id] = cr

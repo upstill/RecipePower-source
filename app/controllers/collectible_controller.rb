@@ -333,7 +333,7 @@ class CollectibleController < ApplicationController
       params[entity.model_name.param_key] = modelparams.except :editable_misc_tag_tokens
       update_and_decorate entity,
                           touch: :collect, # Add to user's collection
-                          needs: [ :title ],  # Get title from page_ref
+                          needed: [ :title ],  # Get title from page_ref
                           update_attributes: true,
                           skip_landing: true  # Don't wait for background processing (i.e., parsing) to complete
     end
