@@ -114,16 +114,15 @@ class CollectibleController < ApplicationController
     entity_params = params[response_service.controller_model_name]
     # Get the entity being addressed by the controller
     nominal_entity = response_service.controller_model_class.find_by_id params[:id]
-    case nominal_entity
-      when PageRef
-        @page_ref, prparams = nominal_entity, entity_params
-      when Pagerefable
-        @page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
-      when NilClass
-        prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
-        @page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
-      else
-        return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
+    if nominal_entity.class == PageRef
+      @page_ref, prparams = nominal_entity, entity_params
+    elsif nominal_entity.nil?
+      prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
+      @page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
+    elsif nominal_entity.respond_to?(:page_ref)
+      @page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
+    else
+      return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
 
     # The page_ref takes on incoming urls, as possible
@@ -177,7 +176,7 @@ class CollectibleController < ApplicationController
       modelname = model.model_name.param_key
       params[modelname] = modelparams
 
-      # The editable tag tokens need to be set through the decorator, since Taggable
+      # The editable tag tokens need to be set through the decorator, since Taggable        
       # doesn't know what tag types pertain.
       # So, first we pull the misc_tag_tokens from the params...
       misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
