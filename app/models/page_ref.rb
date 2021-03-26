@@ -16,7 +16,7 @@ class PageRef < ApplicationRecord
   has_many :aliases, :dependent => :destroy
 
   # The associated recipe page maintains the page's content in a parsed form
-  belongs_to :recipe_page, :dependent => :destroy
+  has_one :recipe_page, :dependent => :destroy
 
   # We track attributes from Gleanings and MercuryResult except URL
   include Trackable

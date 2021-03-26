@@ -1,17 +1,8 @@
-class RecipePagePresenter < BasePresenter
+class RecipePagePresenter < CollectiblePresenter
 
   def content_suggestion
     return ''.html_safe unless response_service.admin_view?
-    dlg = link_to_submit 'here',
-                         edit_recipe_page_path(@object, topics: :page_recipes),
-                         mode: :modal,
-                         title: 'Edit Trimmers'
-    cs = <<EOF
-          This page is supposed to have multiple recipes.<br>
-          Click #{edit_trimmers_button @object, 'here'} to stipulate how to demarcate them algorithmically.<br>
-          Click #{dlg} to select them directly.
-EOF
-    cs.html_safe
+    'Supposedly, this page has multiple recipes. Click the Edit button at right to demarcate them.'.html_safe
   end
 
   # When a Gleaning is updated, what types of item get replaced?

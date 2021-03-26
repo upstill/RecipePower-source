@@ -196,7 +196,7 @@ class CollectibleController < ApplicationController
           flash[:popup] = "#{@decorator.human_name} saved"
           render 'collectible/update.json'
         else
-          response_service.title = @decorator.title.truncate(20) # Get title (or name, etc.) from the entity
+          response_service.title = @decorator.title&.truncate(20) || 'Unknown Title' # Get title (or name, etc.) from the entity
           smartrender
         end
       end

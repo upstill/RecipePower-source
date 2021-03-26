@@ -40,7 +40,7 @@ class ResultType < String
           when '', nil
             { }
           when 'cookmarks'
-            { entity_type: %w{ Recipe Site FeedEntry PageRef } }
+            { entity_type: %w{ Recipe Site FeedEntry PageRef RecipePage } }
           else
             { entity_type: self.model_name }
         end

@@ -1,6 +1,7 @@
 require 'scraping/scanner.rb'
 class RecipePage < ApplicationRecord
   include Pagerefable
+  pagerefable :url
   include Taggable
   include Collectible
   picable :picurl, :picture
@@ -10,15 +11,16 @@ class RecipePage < ApplicationRecord
   include Trackable
   attr_trackable :content
 
-  has_one :page_ref
   accepts_nested_attributes_for :page_ref
+
   has_many :recipes, :through => :page_ref
 
   def self.mass_assignable_attributes
-    (defined?(super) ? super : []) + [ :content, :picurl, :title, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
+    (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
 
-  def initialize attribs={}
+  def initialize attribs=nil
+    attribs ||= {}
     super attribs.except(:needed_attributes)
     request_attributes *attribs[:needed_attributes] if attribs[:needed_attributes]
   end

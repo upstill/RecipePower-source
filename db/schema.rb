@@ -312,7 +312,7 @@ ActiveRecord::Schema.define(version: 2021_03_24_162143) do
     t.text "description"
     t.integer "kind", default: 1
     t.integer "mercury_result_id"
-    t.integer "recipe_page_id"
+    t.integer "old_recipe_page_id"
     t.integer "attr_trackers", default: 0
     t.text "rss_feeds", default: [], array: true
     t.index ["url"], name: "page_refs_index_by_url", unique: true
@@ -360,6 +360,7 @@ ActiveRecord::Schema.define(version: 2021_03_24_162143) do
     t.datetime "updated_at", null: false
     t.integer "attr_trackers", default: 0
     t.integer "picture_id"
+    t.integer "page_ref_id"
     t.string "title"
   end
 

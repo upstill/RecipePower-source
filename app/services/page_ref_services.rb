@@ -48,12 +48,8 @@ class PageRefServices
     case
     when page_ref.recipe_page?
       klass = RecipePage
-      if extant = (as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page
-        return extant
-      else # Make a new RecipePage
-        extant = RecipePage.new(page_ref: page_ref, needed_attributes: :content)
-        return extant
-      end
+      needed = [ :content ]
+      (as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page
     when page_ref.recipe?
       klass = Recipe
       (as_called if as_called.is_a?(Recipe)) ||
