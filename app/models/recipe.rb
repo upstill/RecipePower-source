@@ -145,6 +145,8 @@ class Recipe < ApplicationRecord
     super if defined? super
     # Get the available attributes from the PageRef
     # Translate what the PageRef is offering into our attributes
+    needed_from_page_ref = needed_attributes & PageRef.tracked_attributes
+    page_ref.ensure_attributes *needed_from_page_ref if needed_from_page_ref.present?
     accept_attribute :picurl, page_ref.picurl if page_ref.picurl_ready?
     accept_attribute :title, page_ref.title if page_ref.title_ready?
     accept_attribute :description, page_ref.description if page_ref.description_ready?

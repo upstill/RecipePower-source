@@ -45,35 +45,58 @@ class CollectibleDecorator < ModelDecorator
     %w{ Image Title Description }
   end
 
+  # Specify what attribute should receive a given type of Result
   def attribute_name_for label
     case label
-      when 'Title'
-        'title'
-      when 'Description'
-        'description'
+    when 'Title'
+      :title
+    when 'Description'
+      :description
+    when 'href', 'URI'
+      object.url_attribute if object.respond_to?(:url_attribute)
+    when 'Content'
+      :content
+    when 'Prep Time'
+      :prep_time
+    when 'Cooking Time'
+      :cook_time
+    when'Yield'
+      :yield # self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
+    when 'Image'
+      object.picable_attribute if object.respond_to?(:picable_attribute)
     end
   end
 
   # Here's where we incorporate findings from a page into the corresponding entity
   def findings= findings
-    self.title = findings.result_for('Title') if findings.result_for('Title').present?
-    self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
+    def accept_result findings, result_name
+      return unless (attrname = attribute_name_for(result_name)) &&
+          findings.result_for(result_name) &&
+          (value = findings.result_for(result_name)).present?
+      klass = object.class
+      attrname = attrname.to_sym
+      if klass.respond_to?(:tracked_attributes) && klass.tracked_attributes.include?(attrname)
+        object.accept_attribute attrname, value
+      else
+        setter = (attrname.to_s+'=').to_sym
+        object.send setter, value if object.respond_to?(setter)
+      end
+    end
+    accept_result findings, 'Title'
+    accept_result findings, 'Description'
+    accept_result findings, 'Content' # self.content = findings.result_for('Content') if findings.result_for('Content').present?
+    # self.description = findings.result_for('Description') if findings.result_for('Description').present? && description.blank?
     ts = nil # TaggingService object
     if self.is_a? Recipe
-      self.content = findings.result_for('Content') if findings.result_for('Content').present?
-      self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
-      self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
+      accept_result findings, 'Prep Time' # self.prep_time = findings.result_for('Prep Time') if findings.result_for('Prep Time').present?
+      accept_result findings, 'Cooking Time' # self.cook_time = findings.result_for('Cooking Time') if findings.result_for('Cooking Time').present?
       if findings.result_for('Total Time').present?
         tt = Tag.assert (self.total_time = findings.result_for('Total Time')), :Time
         tt && ((ts ||= TaggingServices.new object).tag_with tt, User.super_id)
       end
-      self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
+      accept_result findings, 'Yield' # self.yield = findings.result_for('Yield') if findings.result_for('Yield').present?
     end
-    if findings.result_for('Image').present? && self.image.blank?
-      self.image = findings.result_for('Image')
-      image_changed = image.present?
-    end
-    # save if id.nil? || changed? || image_changed # No other extractions need apply until saved
+    accept_result findings,'Image'
     ts = nil
     {
         'Author' => 'Author',

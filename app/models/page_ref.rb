@@ -118,11 +118,11 @@ class PageRef < ApplicationRecord
   ######### Trackable overrides ############
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
-  # off dependencies from gleaning and mercury_result
+  # off dependencies from gleaning and mercury_result, IF we need them to do our work
   def request_dependencies 
     attrib_needed! :content, true if recipe_page_needed?
     from_gleaning = Gleaning.tracked_attributes & needed_attributes
-    if from_gleaning.present?
+    if either = from_gleaning.present?
       build_gleaning if !gleaning
       gleaning.request_attributes *from_gleaning
     end
@@ -131,7 +131,10 @@ class PageRef < ApplicationRecord
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result
       mercury_result.request_attributes *from_mercury
+      either = true
     end
+    # We need to get attributes from Gleaning and/or Mercury
+    either
   end
 
   # Ask gleaning and mercury_result for attributes

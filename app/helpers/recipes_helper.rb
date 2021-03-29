@@ -169,14 +169,14 @@ module RecipesHelper
     label =
     case object
     when Gleaning
-      'Raw Page<br>Content'
+      'Raw Page Content'
       # when MercuryResult
     when PageRef
-      'Trimmed Page<br>Content'
+      'Trimmed Page Content'
     when Recipe
-      'Recipe As<br>Presented'
+      'Recipe As Presented'
     when RecipePage
-      'Recipe<br>Set'
+      'Recipe Set'
     else
       object.model_name.human
     end

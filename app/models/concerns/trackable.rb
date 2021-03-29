@@ -1,7 +1,7 @@
 # Tracking of attributes.                                                                                   flags
 # Each tracked attribute has 2 boolean fields embedded in the :attr_tracking attribute:
 # <attr>_needed indicates an unfulfilled need for the value
-# <attr>_ready indicates that the value has been finalized
+# <attr>_ready indicates that the value has been accepted
 include FlagShihTzu  # https://github.com/pboling/flag_shih_tzu
 module Trackable
   extend ActiveSupport::Concern
@@ -19,6 +19,29 @@ module Trackable
       self.tracked_attributes = list
       # Now FlagShihTzu will provide a _needed and a _ready bit for each tracked attribute
       # By default, an attribute is neither needed nor ready
+
+      # For each tracked attribute, we define:
+      # -- an override of the getter method which attempts to ensure that the attribute is ready
+      # -- an override of the setter method which also sets the ready bit
+      # -- aliases for the existing getter and setter methods to call them directly, for the use of this module
+=begin
+      self.instance_eval do
+        # URL, PageRef -> PageRef
+        # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
+        # be different from the one provided
+        list.each do |attrname|
+          define_method "#{attrname}=" do |val|
+            puts "#{self.class} writing #{val} to #{attrname}"
+            super(val)
+          end
+          
+          define_method "#{attrname}" do
+            puts "#{self.class} reading #{attrname}"
+            super()
+          end
+        end
+      end
+=end
     end
 
     # List out the tracked attributes by examining the tracking bits
@@ -43,24 +66,30 @@ module Trackable
   # ready, needed => set
   # In other words, if a value has been accepted and not previously invalidated, leave it alone.
   # ** the 'force' flag sets the attribute whether or not it's needed or accepted
+  # In the case of an untracked attribute, the effect should be identical to simple assignment
   def accept_attribute attrname, value, force=false
-    attrname = attrname.to_s
-    return if attrib_ready?(attrname) && !(attrib_needed?(attrname) || force)
+    setter = :"#{attrname}="
+    tracked = self.class.tracked_attributes.include? attrname.to_sym
+    # Basic policy: attributes values "stick" unless priorly invalidated by 'need'ing them
+    return if tracked &&
+        (attrib_ready?(attrname) && !(force || attrib_needed?(attrname))) # ...and that it's open to change
+    # Now assign the attribute as usual, calling any provided block if the value has changed
     if block_given?
       # For any side-effects as a result of changing the attribute, call the block
       previous = self.send attrname.to_sym
-      self.send (attrname+'=').to_sym, value
+      rtnval = self.send setter, value
       # NB: it's possible that the accepted value is NOT the same as the provided value, so we compare
       # changes on the attribute.
       yield value if self.send(attrname.to_sym) != previous
     else  # No block? Just set the value
-      self.send (attrname+'=').to_sym, value
+      rtnval = self.send setter, value
     end
-    if all_attr_trackers.include?((attrname+'_needed').to_sym)
+    if tracked
       # This attribute is tracked => clear 'needed' bit and set the 'ready' bit
       self.send (attrname+'_needed=').to_sym, false
       self.send (attrname+'_ready=').to_sym, true
     end
+    rtnval
   end
 
   # Call attribute setter or accept_attribute for each key-value pair in the hash
@@ -115,10 +144,23 @@ module Trackable
     end
   end
 
+  # Ensure that the given attributes have been acquired if at all possible.
+  # Calling ensure_attributes with no arguments means that all needed attributes should be acquired
+  # NB: needed attributes other than those specified may be side-effectably acquired
   def ensure_attributes *list_of_attributes
-    request_attributes *list_of_attributes
-    bkg_land
+    if list_of_attributes.present?
+      request_attributes *list_of_attributes
+    else
+      list_of_attributes = needed_attributes
+    end
+    # Try to acquire attributes from their dependencies without landing
     adopt_dependencies
+    # If any attributes are still needed, call them in
+    if (list_of_attributes & needed_attributes).present?
+      # Force background process to land for any remaining unfulfilled
+      bkg_land
+      adopt_dependencies
+    end
   end
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.

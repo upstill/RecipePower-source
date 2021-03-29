@@ -40,41 +40,45 @@ class PageRefServices
   # 3) If its URL is the domain root (has no path), create and return a new site
   # 4) If its kind is :recipe, create and return a new recipe
   # 5) Otherwise, just return the PageRef itself
-  def editable_entity as_called=nil, params={}
+  def editable_entity as_called = nil, params = {}
     if as_called.is_a? Hash
       as_called, params = nil, as_called
     end
-    extant =
-    case
-    when page_ref.recipe_page?
-      klass = RecipePage
-      needed = [ :content ]
-      (as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page
-    when page_ref.recipe?
-      klass = Recipe
-      (as_called if as_called.is_a?(Recipe)) ||
-      (Recipe.find_by(page_ref_id: page_ref.id) if page_ref.id)
-    when page_ref.site?
-      klass = URI(page_ref.url).path.length < 2 ? Site : Recipe
-      (as_called if as_called.is_a?(Site)) ||
-      (Site.find_by(page_ref_id: page_ref.id) if page_ref.id)
-    else
-      page_ref
+    object, needed =
+        case
+        when page_ref.recipe_page?
+          klass = RecipePage
+          [((as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page), [ :title, :content, :picurl ] ]
+        when page_ref.recipe?
+          klass = Recipe
+          [((as_called if as_called.is_a?(Recipe)) ||
+              (Recipe.find_by(page_ref_id: page_ref.id) if page_ref.id)), [ :title, :content, :picurl ] ]
+        when page_ref.site?
+          klass = URI(page_ref.url).path.length < 2 ? Site : Recipe
+          (as_called if as_called.is_a?(Site)) ||
+              [(Site.find_by(page_ref_id: page_ref.id) if page_ref.id), [ :title ]]
+        else
+          [page_ref, [ :content ] ]
+        end
+    if !object
+      # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
+      # Initialize the recipe from parameters and extractions, as needed
+      # defaults = page_ref.decorate.translate_params params[:page_ref], entity
+      defaults = {
+          'Title' => params[:page_ref][:title],
+          'href' => page_ref.url,
+          'Image' => params[:page_ref][:picurl]
+      }
+      params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
+        defaults[key] = value
+      end
+      # Produce a set of initializers for the target class
+      object = CollectibleServices.find_or_build page_ref, defaults, klass
     end
-    return extant if extant
-    # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
-    # Initialize the recipe from parameters and extractions, as needed
-    # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-    defaults = {
-        'Title' => params[:page_ref][:title],
-        'href' => page_ref.url,
-        'Image' => params[:page_ref][:picurl]
-    }
-    params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
-      defaults[key] = value
-    end
-    # Produce a set of initializers for the target class
-    CollectibleServices.find_or_build page_ref, defaults, klass
+    # Request the needed attributes from the object
+    needed = needed - object.ready_attributes # Don't try to reset existing attributes
+    object.request_attributes *needed if needed.present?
+    object
   end
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)

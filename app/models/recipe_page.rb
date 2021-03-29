@@ -9,7 +9,7 @@ class RecipePage < ApplicationRecord
   backgroundable
 
   include Trackable
-  attr_trackable :content
+  attr_trackable :content, :picurl, :title
 
   accepts_nested_attributes_for :page_ref
 
@@ -19,13 +19,24 @@ class RecipePage < ApplicationRecord
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
 
-  def initialize attribs=nil
-    attribs ||= {}
-    super attribs.except(:needed_attributes)
-    request_attributes *attribs[:needed_attributes] if attribs[:needed_attributes]
+  ############# Backgroundable #############
+
+  # In order to make our content, we need content from the PageRef
+  def request_dependencies
+    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title ]) # , :description
+    adopt_dependencies # If the PageRef has already satisfied our needs
   end
 
-  ############# Backgroundable #############
+  def adopt_dependencies
+    super if defined? super
+    # Get the available attributes from the PageRef
+    # Translate what the PageRef is offering into our attributes
+    needed_from_page_ref = needed_attributes & PageRef.tracked_attributes
+    page_ref.ensure_attributes *needed_from_page_ref if needed_from_page_ref.present?
+    accept_attribute :picurl, page_ref.picurl if page_ref.picurl_ready?
+    accept_attribute :title, page_ref.title if page_ref.title_ready?
+    accept_attribute :description, page_ref.description if page_ref.description_ready?
+  end
 
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency

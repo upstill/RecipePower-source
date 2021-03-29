@@ -171,7 +171,7 @@ class CollectibleController < ApplicationController
       if @page_ref
         @page_ref.adopt_extractions params[:extractions] if params[:extractions]
         @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
-        update_options[:needs] = [ :picurl, :title ]
+        update_options[:needed] = [ :picurl, :title ] # We need these for tagging
       end
       modelname = model.model_name.param_key
       params[modelname] = modelparams
