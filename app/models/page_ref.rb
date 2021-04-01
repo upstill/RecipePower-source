@@ -140,13 +140,23 @@ class PageRef < ApplicationRecord
   # Ask gleaning and mercury_result for attributes
   def adopt_dependencies
     super if defined? super
-    # After everything has settled down, we can extract our attributes
-    accept_attributes gleaning.ready_attribute_values
+    if gleaning.good?
+      adopt_dependency :url, gleaning
+      assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
+    end
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
-    accept_attributes mercury_result.ready_attribute_values
+    if mercury_result.good? # All is well
+      adopt_dependency :url, mercury_result
+      assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
+        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
+        # Create a new alias on this page_ref for every derived alias that isn't already in use
+        (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
+      end
+    end
     if recipe_page_needed?
       recipe_page || build_recipe_page
-      accept_attribute :recipe_page, recipe_page
+      self.recipe_page = recipe_page
       # Could do this to get the RecipePage parsing done sooner
       # recipe_page.request_attributes :content
     end
@@ -182,28 +192,19 @@ class PageRef < ApplicationRecord
         alias_for subject_url, true
         subject_url = next_url
       end
-      accept_attribute :url, subject_url
+      self.url = subject_url # accept_attribute :url, subject_url
       hr # Return the last error code
     end
 
     # Now that we have a url, move on to the mercury_result and the gleaning
     mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
-    if mercury_result.good? # All is well
-      accept_url mercury_result.url if mercury_result.url_ready?
-      if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
-        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
-        # Create a new alias on this page_ref for every derived alias that isn't already in use
-        (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
-      end
-    elsif mercury_result.bad?
+    if mercury_result.bad?
       errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
     end
     self.http_status = mercury_result.http_status
 
     gleaning.ensure_attributes # Block until gleaning has completed and accepted its attributes
-    if gleaning.good?
-      accept_url gleaning.url if gleaning.url_ready?
-    elsif gleaning.bad?
+    if gleaning.bad?
       errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
     end
 

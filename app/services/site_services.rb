@@ -58,9 +58,7 @@ class SiteServices
       end
       # Need to make a new one. We'll leave this up to PageRef, which will do the actual work
       # of creating the site while managing indirects
-      site = self.build_site options
-      site.request_attributes :home
-      return site
+      self.build_site options
     end
   end
 

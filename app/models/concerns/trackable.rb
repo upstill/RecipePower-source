@@ -7,7 +7,7 @@ module Trackable
   extend ActiveSupport::Concern
 
   module ClassMethods
-    # Declare a set of attributes that will be tracked
+# Declare a set of attributes that will be tracked
     def attr_trackable *list
       flags = {}
       list.collect { |attrib| [ "#{attrib.to_s}_needed", "#{attrib.to_s}_ready" ] }.
@@ -24,24 +24,36 @@ module Trackable
       # -- an override of the getter method which attempts to ensure that the attribute is ready
       # -- an override of the setter method which also sets the ready bit
       # -- aliases for the existing getter and setter methods to call them directly, for the use of this module
-=begin
       self.instance_eval do
         # URL, PageRef -> PageRef
         # Assign the URL to be used in accessing the entity. In the case of a successful redirect, this <may>
         # be different from the one provided
         list.each do |attrname|
-          define_method "#{attrname}=" do |val|
+          setter = :"#{attrname}="
+          osetter = :"o_tkbl_#{attrname}_eq"
+          alias_method osetter, setter if public_instance_methods.include?(setter)
+          define_method setter do |val|
             puts "#{self.class} writing #{val} to #{attrname}"
-            super(val)
+            # Clear 'needed' bit and set the 'ready' bit
+            attrib_done attrname
+            if defined?(super)
+              super(val)
+            elsif self.respond_to? osetter
+              self.send osetter, val
+            else
+              x=2
+            end
+            # self.call :"o_tkbl_#{attrname}_eq", val
           end
-          
+
+=begin    Hell, just use the default reader
           define_method "#{attrname}" do
             puts "#{self.class} reading #{attrname}"
             super()
           end
+=end
         end
       end
-=end
     end
 
     # List out the tracked attributes by examining the tracking bits
@@ -84,11 +96,7 @@ module Trackable
     else  # No block? Just set the value
       rtnval = self.send setter, value
     end
-    if tracked
-      # This attribute is tracked => clear 'needed' bit and set the 'ready' bit
-      self.send (attrname+'_needed=').to_sym, false
-      self.send (attrname+'_ready=').to_sym, true
-    end
+    attrib_done attrname if tracked
     rtnval
   end
 
@@ -110,9 +118,11 @@ module Trackable
   #   -- 'accept' means to assign the attribute, clear the associated 'needed' bit and set the 'ready' bit
   #   -- 'if_ready' is for reporting a value. If the corresponding 'ready' bit is true, invoke the passed block with the attribute value
   def method_missing namesym, *args
-    if match = namesym.to_s.match(/(.*)_(accept|if_ready)$/)
+    if match = namesym.to_s.match(/(.*)_(accept|if_ready|open\?)$/)
       attrname, verb = match[1..2]
       case verb
+      when 'open?'
+        !attrib_ready?(attrname) || attrib_need?(attrname)
       when 'accept'
         accept_attribute attrname, args.first
       when 'if_ready'
@@ -146,7 +156,7 @@ module Trackable
 
   # Ensure that the given attributes have been acquired if at all possible.
   # Calling ensure_attributes with no arguments means that all needed attributes should be acquired
-  # NB: needed attributes other than those specified may be side-effectably acquired
+  # NB: needed attributes other than those specified may be acquired as a side effect
   def ensure_attributes *list_of_attributes
     if list_of_attributes.present?
       request_attributes *list_of_attributes
@@ -155,12 +165,13 @@ module Trackable
     end
     # Try to acquire attributes from their dependencies without landing
     adopt_dependencies
-    # If any attributes are still needed, call them in
-    if (list_of_attributes & needed_attributes).present?
-      # Force background process to land for any remaining unfulfilled
-      bkg_land
-      adopt_dependencies
-    end
+    # If any attributes are still needed, call them in via background job
+    bkg_land if (list_of_attributes & needed_attributes).present?
+  end
+
+  def success job=nil
+    super(job) if defined?(super)
+    adopt_dependencies
   end
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
@@ -178,6 +189,21 @@ module Trackable
   # Once the entities we depend on have settled, we take on their values
   def adopt_dependencies
     super if defined? super
+  end
+
+  # Take on an attribute from elsewhere, so long as it's open locally
+  # (has never been set, or explicitly declared needed)
+  def adopt_dependency attrib, dependent, dependent_attrib=attrib
+    if attrib_open?(attrib) && dependent.attrib_ready?(dependent_attrib)
+      accept_attribute attrib, dependent.send(dependent_attrib)
+    end
+  end
+
+  def attrib_done attrname
+    return unless self.class.tracked_attributes.include?(attrname.to_sym)
+    # No further work is needed on this attribute => clear 'needed' bit and set the 'ready' bit
+    self.send :"#{attrname}_needed=", false
+    self.send :"#{attrname}_ready=", true
   end
 
   # Report on the 'needed' bit for the named attribute.
@@ -199,6 +225,13 @@ module Trackable
     end
   end
 
+  # This is syntactic sugar to test whether an attribute MAY be set, either
+  # 1) before it's been set, or the ready bit has been otherwise cleared; or
+  # 2) it's been asked to refresh (needed bit is true, regardless whether it's ready or not)
+  def attrib_open? attrib_sym
+    !send(:"#{attrib_sym}_ready") || send(:"#{attrib_sym}_needed")
+  end
+
   # What attributes are now good?
   def ready_attributes
     selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_ready$/ ; $1&.to_sym }.compact
@@ -211,6 +244,11 @@ module Trackable
   # What attributes are currently needed?
   def needed_attributes
     selected_attr_trackers.collect { |ready_or_needed| ready_or_needed.to_s.match /(.*)_needed$/ ; $1&.to_sym }.compact
+  end
+
+  # Which attributes are open?
+  def open_attributes
+    self.class.tracked_attributes.keep_if { |attrname| attrib_open?(attrname) }
   end
 
   private

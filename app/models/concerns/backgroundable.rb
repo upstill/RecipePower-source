@@ -312,6 +312,7 @@ module Backgroundable
         update_attribute :dj_id, dj&.id
       end
     end
+    super if defined?(super) # Give all modules a shot at the results
   end
 
   # When an unhandled error occurs, record it among the object's errors

@@ -27,16 +27,11 @@ class MercuryResult < ApplicationRecord
 
   def adopt_dependencies
     return unless good?
-    # Use the data from Mercury to set all needed keys
+    # Map the results from Mercury into attributes, if any
     results.each do |result_name, result_val|
-      if attr = MercuryResult.attribute_for_result(result_name.to_sym)
-        if MercuryResult.tracked_attributes.include?(attr)
-          accept_attribute attr, result_val
-        else
-          write_attribute attr, value
-          # self.send (attr.to_s + '=').to_sym, value
-        end
-      end
+      next unless (attrname = MercuryResult.attribute_for_result(result_name.to_sym)) &&
+          attrib_open?(attrname)
+      self.send :"#{attrname}=", result_val
     end
     # Should we really be declaring that no more attributes are needed?
     clear_needed_attributes

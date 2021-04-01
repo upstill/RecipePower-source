@@ -171,9 +171,11 @@ class ApplicationController < ActionController::Base
       # If the entity is trackable, we derive needed attributes before saving
       if entity.respond_to? :refresh_attributes # Entity has a specific idea what it needs
         # We'll refresh the content by invalidating the attributes...
+        # Attributes to be refreshed (now) need to be regenerated (now)
         if (refresh = options[:refresh] || []).present?
           entity.refresh_attributes *refresh
         end
+        # 'needed' attributes don't have to be refreshed, but they need to be valid before proceeding
         if (needed = (options[:needed] || []) + refresh).present?
           # Now go get 'em (but only as needed)!
           entity.ensure_attributes *needed

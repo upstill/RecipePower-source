@@ -103,9 +103,11 @@ class Recipe < ApplicationRecord
   end
 
   # Write the title attribute only after trimming and resolving HTML entities
+  alias_method :o_title_eq, :'title='
   def title= ttl
     ttl = site_service.trim_title(ttl) if site_service
-    write_attribute :title, @@coder.decode(ttl)
+    puts "Recipe writing title"
+    o_title_eq(ttl) # write_attribute :title, @@coder.decode(ttl)
   end
 
   # Writing the picture URL redirects to acquiring an image reference
@@ -145,11 +147,12 @@ class Recipe < ApplicationRecord
     super if defined? super
     # Get the available attributes from the PageRef
     # Translate what the PageRef is offering into our attributes
-    needed_from_page_ref = needed_attributes & PageRef.tracked_attributes
-    page_ref.ensure_attributes *needed_from_page_ref if needed_from_page_ref.present?
-    accept_attribute :picurl, page_ref.picurl if page_ref.picurl_ready?
-    accept_attribute :title, page_ref.title if page_ref.title_ready?
-    accept_attribute :description, page_ref.description if page_ref.description_ready?
+    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
+    adopt_dependency :picurl, page_ref
+    adopt_dependency :title, page_ref
+    adopt_dependency :description, page_ref
   end
 
   ##### Backgroundable matters #########
@@ -170,9 +173,8 @@ class Recipe < ApplicationRecord
       return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
       return unless new_content.present? # Parsing was a success
-      accept_attribute :content, new_content, true  # Force the new content
+      self.content = new_content
     end
-    # super if defined?(super)
   end
 
 end

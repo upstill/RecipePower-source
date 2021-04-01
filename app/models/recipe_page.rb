@@ -31,11 +31,12 @@ class RecipePage < ApplicationRecord
     super if defined? super
     # Get the available attributes from the PageRef
     # Translate what the PageRef is offering into our attributes
-    needed_from_page_ref = needed_attributes & PageRef.tracked_attributes
-    page_ref.ensure_attributes *needed_from_page_ref if needed_from_page_ref.present?
-    accept_attribute :picurl, page_ref.picurl if page_ref.picurl_ready?
-    accept_attribute :title, page_ref.title if page_ref.title_ready?
-    accept_attribute :description, page_ref.description if page_ref.description_ready?
+    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
+    adopt_dependency :picurl, page_ref
+    adopt_dependency :title, page_ref
+    adopt_dependency :description, page_ref
   end
 
   def perform
@@ -97,7 +98,7 @@ class RecipePage < ApplicationRecord
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved
 
-        accept_attribute :content, content
+        self.content = content
       end
     end
   end

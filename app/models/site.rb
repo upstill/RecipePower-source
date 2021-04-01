@@ -13,7 +13,7 @@ class Site < ApplicationRecord
 
   # We track attributes from Gleanings and MercuryResult except URL
   include Trackable
-  attr_trackable :home, :name, :logo, :description, :rss_feed
+  attr_trackable :name, :logo, :description, :rss_feed
 
   # :grammar_mods: a hash of modifications to the parsing grammar for the site
   serialize :grammar_mods, Hash
@@ -193,30 +193,38 @@ class Site < ApplicationRecord
   ######### Trackable overrides ############
   ############## Trackable ############
   # Request attributes of other objects
-  def request_dependencies 
-    page_ref_attribs = needed_attributes.collect { |my_attrib|
+  def to_get_from_page_ref attribs
+    attribs.collect { |my_attrib|
       # Provide the attribute that will receive the value for the given PageRef attribute
-        case my_attrib
-        when :name
-          :title
-        when :logo
-          :picurl
-        when :home
-          :url
-        else
-          my_attrib
-        end
+      case my_attrib
+      when :name
+        :title
+      when :logo
+        :picurl
+      when :home
+        :url
+      when :rss_feed
+        :rss_feeds
+      else
+        my_attrib
+      end
     }
-    page_ref || build_page_ref
-    page_ref.request_attributes *page_ref_attribs
+  end
+
+  def request_dependencies 
+    build_page_ref unless page_ref
+    page_ref.request_attributes *to_get_from_page_ref(open_attributes)
   end
 
   # Get the available attributes from the PageRef
   def adopt_dependencies
     # Translate what the PageRef is offering into our attributes
-    accept_attribute :logo, page_ref.picurl if page_ref.picurl_ready?
-    accept_attribute :name, page_ref.title if page_ref.title_ready?
-    accept_attribute :description, page_ref.description if page_ref.description_ready?
+    if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
+    adopt_dependency :logo, page_ref, :picurl
+    adopt_dependency :name, page_ref, :title
+    adopt_dependency :description, page_ref, :description
     page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
   end
 

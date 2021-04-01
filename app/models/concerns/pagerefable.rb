@@ -73,6 +73,7 @@ module Pagerefable
               self.errors.add :url, "can't be used: #{page_ref&.errors&.full_messages}"
             end
           end
+          attrib_done url_attribute if errors[:url].empty? && self.respond_to?(:attrib_done)
           url_or_pr
         end
 
