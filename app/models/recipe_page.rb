@@ -36,7 +36,6 @@ class RecipePage < ApplicationRecord
     end
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
-    adopt_dependency :description, page_ref
   end
 
   def perform
@@ -93,7 +92,7 @@ class RecipePage < ApplicationRecord
         end
 
         # Build recipes from any data that hasn't found a home
-        page_ref.recipes.create rcpdata
+        page_ref.recipes.create rcpdata if rcpdata.present?
 
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved

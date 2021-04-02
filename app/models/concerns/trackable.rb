@@ -15,8 +15,8 @@ module Trackable
           map(&:to_sym).
           each_with_index { |val, ix| flags[ix+1] = val }
       has_flags flags.merge(:column => 'attr_trackers')
-      tracked_attributes = list
-      self.tracked_attributes = list
+      @tracked_attributes = list
+      @tracked_attributes.freeze
       # Now FlagShihTzu will provide a _needed and a _ready bit for each tracked attribute
       # By default, an attribute is neither needed nor ready
 
@@ -56,13 +56,8 @@ module Trackable
       end
     end
 
-    # List out the tracked attributes by examining the tracking bits
     def tracked_attributes
       @tracked_attributes || []
-    end
-
-    def tracked_attributes= list
-      @tracked_attributes = list
     end
 
   end
@@ -248,7 +243,7 @@ module Trackable
 
   # Which attributes are open?
   def open_attributes
-    self.class.tracked_attributes.keep_if { |attrname| attrib_open?(attrname) }
+    self.class.tracked_attributes.select { |attrname| attrib_open?(attrname) }
   end
 
   private

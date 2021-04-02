@@ -30,6 +30,7 @@ class PageRef < ApplicationRecord
 
   def content= val
     gleaning&.accept_attribute :content, val
+    attrib_done :content
   end
 
   # The site specifies material to be removed from the content

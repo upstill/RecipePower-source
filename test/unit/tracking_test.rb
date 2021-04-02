@@ -27,7 +27,7 @@ class TrackingTest < ActiveSupport::TestCase
     assert_equal [ :url ], pr.needed_attributes
     # Get the definitive URL from the Gleaning and/or MercuryResult
     pr.ensure_attributes
-    assert_equal [ :url, :domain, :title, :picurl, :date_published, :author, :description, :rss_feeds ], pr.ready_attributes
+    assert_equal [ :url, :domain, :title, :content, :picurl, :date_published, :author, :description, :rss_feeds ], pr.ready_attributes
     assert_empty pr.needed_attributes
 
   end
@@ -39,11 +39,13 @@ class TrackingTest < ActiveSupport::TestCase
     pr.ensure_attributes :recipe_page
     rp = pr.recipe_page
     assert_not_nil rp
-    assert pr.content_ready?
+    assert pr.recipe_page_ready?
+    # RecipePage exists, but it hasn't had any attributes set
+    assert_empty rp.ready_attributes
 
     # We parse out the page by asking the RecipePage for its content
     rp.ensure_attributes :content
-    assert_equal 3, pr.recipes.to_a.count
+    assert_equal [ :picurl, :title, :content ].sort, rp.ready_attributes.sort
   end
 
   test "recipe gets parsed correctly" do
@@ -52,11 +54,8 @@ class TrackingTest < ActiveSupport::TestCase
     pr = recipe.page_ref
     # We create a RecipePage by asking the PageRef for it
     recipe.ensure_attributes :content
-    rp = pr.recipe_page
-    assert_not_nil rp
     assert pr.content_ready?
 
-    assert_equal 3, pr.recipes.to_a.count
     assert recipe.content_ready? # Parsed successfully
     assert_not_empty recipe.description
 
@@ -91,7 +90,7 @@ class TrackingTest < ActiveSupport::TestCase
     # Invalidate all the attributes EXCEPT title
     recipe.refresh_attributes except: [ :title ]
     assert_equal recipe.needed_attributes, Recipe.tracked_attributes - [:title]
-    assert_equal [:content, :url, :title, :picurl, :recipe_page, :description].sort, recipe.page_ref.needed_attributes.sort
+    assert_equal [:content, :url, :title, :picurl, :description].sort, recipe.page_ref.needed_attributes.sort
     # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.mercury_result.needed_attributes.sort
     # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.gleaning.needed_attributes.sort
 
