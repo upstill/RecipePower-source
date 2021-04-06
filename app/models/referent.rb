@@ -163,7 +163,7 @@ class Referent < ApplicationRecord
   def absorb other, nuke_it=true
     return false if type != other.type
     return true if other.id == id
-    puts "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
+    logger.debug "Merging '"+name+"' (#{children.count} children) with '"+other.name+"' (#{other.children.count} children):"
     other.children.each { |child| children << child unless (child_ids.include? child.id) }
     other.parents.each { |parent| parents << parent unless (parent_ids.include? parent.id) }
     other.expressions.each { |expr| self.express expr.tag }
@@ -194,13 +194,13 @@ class Referent < ApplicationRecord
   # Dump a specified referent with the given indent
   def dump indent = "", path = []
     if path.include? self.id
-      puts "#{indent}!!Loop back to #{self.id.to_s}: #{self.name}"
+      logger.debug "#{indent}!!Loop back to #{self.id.to_s}: #{self.name}"
     else
-      puts "#{indent}Referent #{self.id.to_s}: #{self.name}"
+      logger.debug "#{indent}Referent #{self.id.to_s}: #{self.name}"
       indent = indent + "    "
       self.tags.each do |tag|
-        puts "#{indent}Tag #{tag.id.to_s}: #{tag.name}"
-        tag.links.each { |link| puts "#{indent}    Link #{link.id.to_s}: #{link.uri}" }
+        logger.debug "#{indent}Tag #{tag.id.to_s}: #{tag.name}"
+        tag.links.each { |link| logger.debug "#{indent}    Link #{link.id.to_s}: #{link.uri}" }
       end
       self.children.each { |child| child.dump(indent, path+[self.id]) }
     end
@@ -296,7 +296,7 @@ class Referent < ApplicationRecord
       set << ref unless !ref || set.find { |collected| collected.id == ref.id }
       set
     }
-    puts 'Tokens converted to referents: '+refs.inspect
+    logger.debug 'Tokens converted to referents: '+refs.inspect
     refs
   end
 
@@ -425,7 +425,7 @@ class Referent < ApplicationRecord
     children = []
     if key
       ref = Referent.find key
-      puts ("    "*level)+"#{ref.id.to_s}: #{ref.name} (#{ref.tag_id})"
+      logger.debug ("    "*level)+"#{ref.id.to_s}: #{ref.name} (#{ref.tag_id})"
       children = ref.children
       level = level+1
     else

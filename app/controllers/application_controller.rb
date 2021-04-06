@@ -449,7 +449,7 @@ class ApplicationController < ActionController::Base
                 # cache item do
                 NestedBenchmark.measure "Render item ##{item.id}: " do
                   cache [item, fp.item_mode, admin_sensitive && response_service.admin_view?] do
-                    puts "Cache miss rendering element #{item}"
+                    logger.debug "Cache miss rendering element #{item}"
                     view_context.render_item item, fp.item_mode
                   end
                 end

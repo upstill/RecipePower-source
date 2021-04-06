@@ -65,7 +65,7 @@ class SiteServices
   def report_extractors *what
     # Provide a string suitable for giving to #assign_extractors to pass the site's :trimmers, :grammar_mods and :finders
     content_selector = site.finder_for('Content')&.selector || 'nil'
-    puts "SiteServices.new(Site.find #{site.id}).adopt_extractors #{site.trimmers || '[]'}, '#{content_selector}', #{site.grammar_mods || '{}'}"
+    logger.debug "SiteServices.new(Site.find #{site.id}).adopt_extractors #{site.trimmers || '[]'}, '#{content_selector}', #{site.grammar_mods || '{}'}"
   end
 
   def adopt_extractors trimmers, content_selector=nil, grammar_mods
@@ -147,7 +147,7 @@ class SiteServices
       # Remove nodes from the content according to the site's :trimmers collection
       trimmers = (site.trimmers || []) + ['script'] # Squash all <script> elements
       trimmers.each do |trimmer|
-        puts "Trimming with CSS selector #{trimmer}"
+        logger.debug "Trimming with CSS selector #{trimmer}"
         begin
           matches = @nkdoc.css(trimmer).remove # Protection against bad trimmer
         rescue Exception => exc
@@ -158,7 +158,7 @@ class SiteServices
         # Ensure that link tags have a global url
         if node.element? && (node.name == 'a') && (url = node.attribute('href').to_s).present?
           absolute = safe_uri_join(site.home, url).to_s
-          puts "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
+          logger.debug "'#{url}' absolutizes to '#{absolute}' in the context of '#{site.home}'"
           node.attribute('href').value = absolute if absolute != url
         elsif node.text?
           # Reduce all sequences of whitespace in text strings to either
@@ -192,19 +192,19 @@ class SiteServices
 
   def scrape
     # extractions = extract_from_page(@site.home)
-    puts "Site # #{@site.id}"
-    puts "\tname: #{@site.name}"
-    puts "\thome: (#{@site.home})"
-    puts "\tdescription: (#{@site.description})"
-    puts "\tlogo: (#{@site.logo})"
+    logger.debug "Site # #{@site.id}"
+    logger.debug "\tname: #{@site.name}"
+    logger.debug "\thome: (#{@site.home})"
+    logger.debug "\tdescription: (#{@site.description})"
+    logger.debug "\tlogo: (#{@site.logo})"
     begin
       results = FinderServices.glean @site.home, @site
-      results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
+      results.labels.each { |label| logger.debug "\t\t#{label}: #{results.result_for(label)}" }
     rescue Exception => msg
-      puts '!!! Couldn\'t open the page for analysis!'
+      logger.debug '!!! Couldn\'t open the page for analysis!'
       breakdown = FinderServices.err_breakdown @site.home, msg
       @site.errors.add :url, breakdown[:msg]
-      puts breakdown[:msg]
+      logger.debug breakdown[:msg]
     end
     results
   end
@@ -225,7 +225,7 @@ class SiteServices
           site_map[site.id] = [recipe]
         end
       else
-        puts "!!!Recipe #{recipe.title} has no site!"
+        logger.debug "!!!Recipe #{recipe.title} has no site!"
       end
     end
     sought = found = matched = 0
@@ -236,12 +236,12 @@ class SiteServices
     moved_out = []
     unmapped = []
     Site.all.each do |site|
-      puts '---------------'
+      logger.debug '---------------'
       sought = sought+1
 
       # Probe the site's sample URL for validity or relocation
       test_url = site.sample
-      puts 'Cracking '+test_url
+      logger.debug 'Cracking '+test_url
       if !(testback = test_link(test_url))
         bogus_in << test_url
       elsif testback.class == String
@@ -268,31 +268,31 @@ class SiteServices
 
       # Check that the (possibly redirected) derived URL has a recipe on file
       if Recipe.where(:url => recipe_url)[0]
-        puts 'URI matches recipe: '+recipe_url
+        logger.debug 'URI matches recipe: '+recipe_url
         matched = matched + 1
       elsif (test_url != recipe_url) && Recipe.where(:url => test_url)[0]
-        puts 'Unredirected URI matches recipe: '+test_url
+        logger.debug 'Unredirected URI matches recipe: '+test_url
         matched = matched + 1
       end
 
       if !site_map[site.id]
-        puts "#{site.name} has no recipes"
+        logger.debug "#{site.name} has no recipes"
         unmapped << "\t"+site.name
       end
     end
-    puts "Found replacement for #{found} out of #{sought} URLs; result or default matched #{matched} times."
-    puts "#{bogus_in.count} invalid links among the samples:"
-    puts bogus_in.join("\n")
-    puts "#{moved_in.count} redirected links among the samples:"
-    puts moved_in.join("\n")
-    puts "#{bogus_out.count} invalid links extracted:"
-    puts bogus_out.join("\n")
-    puts "#{moved_out.count} redirected links among the samples:"
-    puts moved_out.join("\n")
-    puts "#{suspect.count} samples that had no URL within:"
-    puts suspect.join("\n")
-    puts "#{unmapped.count} sites with no recipes:"
-    puts unmapped.join("\n")
+    logger.debug "Found replacement for #{found} out of #{sought} URLs; result or default matched #{matched} times."
+    logger.debug "#{bogus_in.count} invalid links among the samples:"
+    logger.debug bogus_in.join("\n")
+    logger.debug "#{moved_in.count} redirected links among the samples:"
+    logger.debug moved_in.join("\n")
+    logger.debug "#{bogus_out.count} invalid links extracted:"
+    logger.debug bogus_out.join("\n")
+    logger.debug "#{moved_out.count} redirected links among the samples:"
+    logger.debug moved_out.join("\n")
+    logger.debug "#{suspect.count} samples that had no URL within:"
+    logger.debug suspect.join("\n")
+    logger.debug "#{unmapped.count} sites with no recipes:"
+    logger.debug unmapped.join("\n")
   end
 
 =begin
@@ -337,13 +337,13 @@ class SiteServices
   end
 
   def stab_at_sample summ = {}
-    puts "Processing Site #{@site.sample}"
+    logger.debug "Processing Site #{@site.sample}"
     begin
       @nkdoc = Nokogiri::HTML(open @site.sample)
     rescue
-      puts "Error: couldn't open page '#{@site.sample}' for analysis."
+      logger.debug "Error: couldn't open page '#{@site.sample}' for analysis."
       recipe = @site.recipes_scope.first
-      puts "Processing Recipe #{recipe.url}"
+      logger.debug "Processing Recipe #{recipe.url}"
       begin
         @nkdoc = Nokogiri::HTML(open recipe.url)
       rescue Exception => msg
@@ -377,7 +377,7 @@ class SiteServices
     begin
       pagetags = PageTags.new(url, spec[:finders] || FinderServices.applicable(@site), spec[:all], false)
     rescue Exception => e
-      puts "Error: couldn't open page '#{url}' for analysis."
+      logger.debug "Error: couldn't open page '#{url}' for analysis."
       return {}
     end
     results = {}
@@ -410,31 +410,31 @@ class SiteServices
     Site.all.each do |site|
       name = site.name
       if (first_found ||= (site.id == id))
-        puts "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
-        puts site.sample
-        puts "\tid: #{site.id}"
-        puts "\tname: #{name}"
-        puts "\tdescription: #{site.description}"
-        puts "\tlogo: #{site.logo}"
+        logger.debug "#{site_n}/#{nsites} >>>>>>>>>>>>>>>>>>>>>>"
+        logger.debug site.sample
+        logger.debug "\tid: #{site.id}"
+        logger.debug "\tname: #{name}"
+        logger.debug "\tdescription: #{site.description}"
+        logger.debug "\tlogo: #{site.logo}"
         begin
           okay_to_quit = true
           if site.ttlcut && site.ttlcut.match(site.name)
-            puts "\tttlcut: #{site.ttlcut}"
-            puts '...assuming name is okay'
+            logger.debug "\tttlcut: #{site.ttlcut}"
+            logger.debug '...assuming name is okay'
           else
-            puts 'Name? (blank to keep as is)'
+            logger.debug 'Name? (blank to keep as is)'
             newname = gets.strip
             case newname
               when 'Q'
                 return
               when /^D\s/
                 site.description = newname.sub(/^D\s*/, '')
-                puts "Saving Description \'#{site.description}\'"
+                logger.debug "Saving Description \'#{site.description}\'"
                 site.save
                 okay_to_quit = false
               when /^L\s/
                 site.logo = newname.sub(/^L\s*/, '')
-                puts "Saving Logo \'#{site.logo}\'"
+                logger.debug "Saving Logo \'#{site.logo}\'"
                 site.save
                 okay_to_quit = false
               else
@@ -447,7 +447,7 @@ class SiteServices
           end
         end until okay_to_quit
       else
-        puts "...skipping #{name}..."
+        logger.debug "...skipping #{name}..."
       end
       site_n += 1
     end

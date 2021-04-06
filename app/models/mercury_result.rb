@@ -98,7 +98,7 @@ class MercuryResult < ApplicationRecord
                 hr = header_result hr
                 break
               end
-              puts "Redirecting from #{mercury_data['url']} to #{hr}"
+              logger.debug "Redirecting from #{mercury_data['url']} to #{hr}"
               begin
                 new_aliases << (redirected_from = mercury_data['url'])
                 # alias_for((redirected_from = mercury_data['url']), true) # Stash the redirection source in the aliases

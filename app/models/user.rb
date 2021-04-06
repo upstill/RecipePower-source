@@ -37,7 +37,7 @@ class User < ApplicationRecord
       # We want to save rcprefs that need to be saved because they're not part of an association
       # the sign of which is they're persisted and have an entity_id
       # We save the cached refs that are newly created, under the assumption that
-      @cached_tps.values.compact.each { |ref| puts "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
+      @cached_tps.values.compact.each { |ref| logger.debug "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
       @cached_tps = {}
     end
   end
@@ -149,11 +149,11 @@ class User < ApplicationRecord
       if collectible_class.method_defined?(:collector_pointers) && User.method_defined?(meth)
         self.method(meth).call *args, &block
       else
-        # puts "Failed to define method '#{meth}'"
+        # logger.debug "Failed to define method '#{meth}'"
         super
       end
     rescue Exception => e
-      # puts "D'OH! Couldn't create association between User and #{collectible_class}"
+      # logger.debug "D'OH! Couldn't create association between User and #{collectible_class}"
       super
     end
   end

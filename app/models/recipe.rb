@@ -106,7 +106,7 @@ class Recipe < ApplicationRecord
   alias_method :o_title_eq, :'title='
   def title= ttl
     ttl = site_service.trim_title(ttl) if site_service
-    puts "Recipe writing title"
+    logger.debug "Recipe writing title"
     o_title_eq(ttl) # write_attribute :title, @@coder.decode(ttl)
   end
 

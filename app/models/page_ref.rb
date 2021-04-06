@@ -175,7 +175,7 @@ class PageRef < ApplicationRecord
       # Check the header for the url from the server.
       # If it's a string, the header returned a redirect
       # otherwise, it's an HTTP code
-      puts "Checking direct access of PageRef ##{id} at '#{url}'"
+      logger.debug "Checking direct access of PageRef ##{id} at '#{url}'"
       subject_url = url
       # Loop over the redirects from the link, adding each to the record.
       # Stop when we get to the final page or an error occurs
@@ -187,7 +187,7 @@ class PageRef < ApplicationRecord
           hr = header_result next_url
           break
         end
-        puts "Redirecting from #{subject_url} to #{next_url}"
+        logger.debug "Redirecting from #{subject_url} to #{next_url}"
         alias_for subject_url, true
         subject_url = next_url
       end

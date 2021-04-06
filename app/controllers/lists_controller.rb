@@ -27,7 +27,7 @@ class ListsController < CollectibleController
   def create
     @first_entity = params[:entity_type].singularize.camelize.constantize.find(params[:entity_id]) rescue nil
     response_service.title = 'New List'
-    puts "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
+    logger.debug "List#create params: "+params[:list].to_s+" for user '#{current_user.name}'"
     l = List.assert( params[:list][:name], current_user)
     update_and_decorate l, touch: true, update_attributes: !l.persisted?
 

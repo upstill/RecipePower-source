@@ -83,9 +83,9 @@ class List < ApplicationRecord
 
   # Using the name string, either find an existing list or create a new one FOR THE CURRENT USER
   def self.assert name, user, options={}
-    STDERR.puts "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
+    logger.debug "Asserting tag '#{name}' for user ##{user.id} (#{user.name})"
     tag = Tag.assert(name, 'List', userid: user.id)
-    puts "...asserted with id #{tag.id}"
+    logger.debug "...asserted with id #{tag.id}"
     l = List.where(owner_id: user.id, name_tag_id: tag.id).first || List.new(owner: user, name_tag: tag)
     l.save if options[:create] && !l.id
     user.touch l # ...to ensure it's visible in "recently viewed" lists
@@ -124,7 +124,7 @@ class List < ApplicationRecord
   alias_method :title, :name
 
   def name=(new_name)
-    puts "Setting name '#{new_name}'"
+    logger.debug "Setting name '#{new_name}'"
     oname = name_tag
     newname = Tag.assert(new_name, "List", userid: owner.id)
     if oname != newname

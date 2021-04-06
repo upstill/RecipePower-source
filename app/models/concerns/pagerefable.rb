@@ -134,7 +134,7 @@ module Pagerefable
   # One linkable is being merged into another => transfer PageRefs
   def absorb other
     return true if !other.page_ref || (other.id == id)
-    puts "PageRef ##{page_ref ? page_ref.id : '<null>'} absorbing #{other.page_ref ? other.page_ref.id : '<null>'}"
+    logger.debug "PageRef ##{page_ref ? page_ref.id : '<null>'} absorbing #{other.page_ref ? other.page_ref.id : '<null>'}"
     if page_ref
       PageRefServices.new(page_ref).absorb other.page_ref
     else

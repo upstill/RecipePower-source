@@ -91,17 +91,17 @@ class UserServices
       keep = false
       if u.first_name.blank?
         if u.fullname.present?
-          puts "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+          logger.debug "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
           keep = UserServices.new(u).glean_names
-          puts " => #{u.first_name} | #{u.last_name}"
+          logger.debug " => #{u.first_name} | #{u.last_name}"
         else
-          puts "Dud: #{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+          logger.debug "Dud: #{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
         end
       end
       keep
     }
     changed.each { |u|
-      puts "'#{u.fullname}' => #{u.first_name} | #{u.last_name} (#{u.id}/#{u.email}/#{u.username})"
+      logger.debug "'#{u.fullname}' => #{u.first_name} | #{u.last_name} (#{u.id}/#{u.email}/#{u.username})"
     }
     nil
   end
@@ -117,7 +117,7 @@ class UserServices
       u.fullname = "#{first_name} #{last_name}"
     end
     u.save
-    puts "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+    logger.debug "#{u.id}(#{u.email}=#{u.username}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
   end
 
   # Infer default first and last names from the full name, and vice versa
@@ -138,7 +138,7 @@ class UserServices
   def self.fix_names
     # Interactively sort out names
     User.where(first_name: nil).each { |u|
-      puts "#{u.id}(#{u.email}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
+      logger.debug "#{u.id}(#{u.email}): #{u.first_name} | #{u.last_name} | #{u.fullname}"
       name = gets
       return unless name && name.length > 0
       name.chomp!

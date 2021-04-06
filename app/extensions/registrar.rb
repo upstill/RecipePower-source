@@ -59,8 +59,8 @@ class Registrar < Object
   def self.register_link_for_tag tagname, link, ts_options
     link = absolutize link
     if Rails.development?
-      puts "#{link} gets linked to tag #{tagname}"
-      ts_options.each { |name, val| puts "    #{name} => #{val}" }
+      logger.debug "#{link} gets linked to tag #{tagname}"
+      ts_options.each { |name, val| logger.debug "    #{name} => #{val}" }
     else
       TagServices.define tagname, ts_options.merge(page_link: link)
     end

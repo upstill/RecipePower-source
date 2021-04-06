@@ -210,9 +210,9 @@ class Tag < ApplicationRecord
     if new_normal != normalized_name
       collisions = Tag.where(normalized_name: new_normal).to_a.keep_if { |t| t.id != id }
       if collisions.present?
-        puts "Tag ##{id} (#{name}) changes normalized_name '#{normalized_name}' to '#{new_normal}'"
+        logger.debug "Tag ##{id} (#{name}) changes normalized_name '#{normalized_name}' to '#{new_normal}'"
         reports = collisions.map { |coll| "'#{coll.name}' (#{coll.id})"}
-        puts "...and it collides with: #{reports.join ', '}"
+        logger.debug "...and it collides with: #{reports.join ', '}"
         return self
       end
     end

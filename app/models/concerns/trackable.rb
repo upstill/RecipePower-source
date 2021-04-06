@@ -35,7 +35,7 @@ module Trackable
           define_method setter do |val|
             if Rails.env.development?
               printable = val.is_a?(String) ? "'#{val.truncate 100}'" : val.to_s
-              puts "#{self.class} writing #{printable} to #{attrname}"
+              logger.debug "#{self.class} writing #{printable} to #{attrname}"
             end
             # Clear 'needed' bit and set the 'ready' bit
             attrib_done attrname
@@ -51,7 +51,7 @@ module Trackable
 
 =begin    Hell, just use the default reader
           define_method "#{attrname}" do
-            puts "#{self.class} reading #{attrname}"
+            logger.debug "#{self.class} reading #{attrname}"
             super()
           end
 =end
@@ -175,9 +175,11 @@ module Trackable
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes
     assert_needed_attributes *list_of_attributes
-    puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
     request_dependencies # Launch all objects that we depend on
-    bkg_launch true if attrib_needed?
+    if attrib_needed?
+      logger.debug "Requesting attributes #{needed_attributes} of #{self} ##{id}"
+      bkg_launch true
+    end
   end
 
   # Stub to be overridden for an object to launch prerequisites to needed attributes

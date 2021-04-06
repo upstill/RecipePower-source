@@ -184,7 +184,7 @@ module Backgroundable
             dj.save if dj.changed?
           end
           needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
+          logger.debug ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
         end
         self.virgin! unless virgin?
       end
@@ -194,7 +194,7 @@ module Backgroundable
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
         needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
+        logger.debug ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
       end
       self.virgin! unless virgin?
     end
@@ -238,14 +238,14 @@ module Backgroundable
       # Force execution if it's never been completed, or it's due, or we force the issue
       if virgin? || force || (dj && (dj.run_at <= Time.now))
         dj.payload_object = self # ...ensuring that the two versions don't get out of sync
-        puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
+        logger.debug ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
         Delayed::Worker.new.run dj
         # It doesn't do to reload the job b/c it may have been deleted
         self.dj = Delayed::Job.find_by id: dj.id if dj
         # dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
       end
     elsif virgin? || force # No DJ => run it only if not run before, or things have changed (virgin), or it's needed (force)
-      puts ">>>>>>>>>>> bkg_land #{self} (no dj)"
+      logger.debug ">>>>>>>>>>> bkg_land #{self} (no dj)"
       perform_without_dj
     end
     good?
@@ -339,7 +339,7 @@ module Backgroundable
   end
 
   def failure job=nil
-    puts "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
+    logger.debug "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
     update_attribute :dj_id, nil
   end
 

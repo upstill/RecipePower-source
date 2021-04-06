@@ -238,16 +238,16 @@ class FinderServices
       matching_sites = Site.where('root ILIKE ?', "%#{site_or_root}%")
       case matching_sites.count
       when 0 # No match found
-        puts "Can't find a site to match #{site_or_root}"
+        logger.debug "Can't find a site to match #{site_or_root}"
       when 1
         site = matching_sites.first
       else
-        puts "More than one site matches #{site_or_root}"
+        logger.debug "More than one site matches #{site_or_root}"
       end
     when Site
       site = site_or_root
     else
-      puts "FinderServices.content_finder_for must take a site or a string that matches ONE site's root"
+      logger.debug "FinderServices.content_finder_for must take a site or a string that matches ONE site's root"
     end
     if site
       # Create

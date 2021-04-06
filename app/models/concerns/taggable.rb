@@ -113,7 +113,7 @@ module Taggable
         filter_options[:tagtype_x] = tagtype_x.uniq
       end
     rescue Exception => e
-      puts "Parse of #{namesym} failed: #{e}"
+      logger.debug "Parse of #{namesym} failed: #{e}"
     end
     if is_assignment && User.current_id
       nids =
