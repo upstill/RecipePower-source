@@ -169,7 +169,7 @@ class CollectibleController < ApplicationController
       # #edittable_proxify() sorts all that out, returning an editable model and (for a POST call) parameters for modification
       model, modelparams = edittable_proxy # A page_ref may proxify into the associated Recipe or Site, or another PageRef
       if @page_ref
-        @page_ref.adopt_extractions params[:extractions] if params[:extractions]
+        @page_ref.decorate.adopt_extractions params[:extractions]
         @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
         update_options[:needed] = [ :picurl, :title ] # We need these for tagging
       end
@@ -293,6 +293,7 @@ class CollectibleController < ApplicationController
     # The :refresh parameter triggers regeneration of the entity's content,
     # presumably due to some dependency (like the page_ref or the site changing)
     update_options[:refresh] = [ :content ] if params[:refresh]
+    update_options[:needed] = [ :content ]
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
@@ -391,9 +392,13 @@ class CollectibleController < ApplicationController
             # By failing to find an existing PageRef on this url, we ensure that the new url is unique
             # What we DON'T know is whether that url redirects to others that are NOT unique.
             # Sorting this out (and possibly merging this new PageRef into an old one) is handled when getting Mercury results
-            page_ref = PageRef.fetch url # build_by_url(url)
+            finders_options = { only: ['Content'] }
+            page_ref = PageRef.fetch url, title: params[:recipe][:title] do |new_pr|
+              # Block called when creating a new page_ref
+              finders_options = {}
+              new_pr.request_attributes :picurl # Launch to derive
+            end
             # We use the initial title for now, until the extractions come in
-            page_ref.title = params[:recipe][:title] if (first_time = page_ref.title.blank?)  # PageRef that existed prior
             page_ref.save # Persist the record, triggering analysis in background
             if page_ref.errors.present?
               msg = page_ref.errors.messages.gsub /\"/, '\''
@@ -410,7 +415,7 @@ class CollectibleController < ApplicationController
 
               @url = tag_page_ref_url page_ref, edit_params
               # finders possible for ["URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"]
-              @finders = FinderServices.js_finders page_ref.site, (first_time ? {} : { only: ['Content'] })
+              @finders = FinderServices.js_finders page_ref.site, finders_options
               render
             end
           end

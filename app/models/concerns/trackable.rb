@@ -33,7 +33,10 @@ module Trackable
           osetter = :"o_tkbl_#{attrname}_eq"
           alias_method osetter, setter if public_instance_methods.include?(setter)
           define_method setter do |val|
-            puts "#{self.class} writing #{val} to #{attrname}"
+            if Rails.env.development?
+              printable = val.is_a?(String) ? "'#{val.truncate 100}'" : val.to_s
+              puts "#{self.class} writing #{printable} to #{attrname}"
+            end
             # Clear 'needed' bit and set the 'ready' bit
             attrib_done attrname
             if defined?(super)
@@ -172,9 +175,9 @@ module Trackable
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes
     assert_needed_attributes *list_of_attributes
-    logger.info "Requesting attributes #{needed_attributes} of #{self} ##{id}"
+    puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
     request_dependencies # Launch all objects that we depend on
-    bkg_launch attrib_needed?
+    bkg_launch true if attrib_needed?
   end
 
   # Stub to be overridden for an object to launch prerequisites to needed attributes
@@ -244,6 +247,11 @@ module Trackable
   # Which attributes are open?
   def open_attributes
     self.class.tracked_attributes.select { |attrname| attrib_open?(attrname) }
+  end
+
+  # Reduce the hash to values that are either open or untracked
+  def assignable_values hsh
+    hsh.slice(open_attributes).merge hsh.except(self.class.tracked_attributes)
   end
 
   private

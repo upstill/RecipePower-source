@@ -121,7 +121,7 @@ class PageRef < ApplicationRecord
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
   def request_dependencies 
-    attrib_needed! :content, true if recipe_page_needed?
+    # attrib_needed! :content, true if recipe_page_needed?
     from_gleaning = Gleaning.tracked_attributes & needed_attributes
     if either = from_gleaning.present?
       build_gleaning if !gleaning
@@ -142,12 +142,10 @@ class PageRef < ApplicationRecord
   def adopt_dependencies
     super if defined? super
     if gleaning.good?
-      adopt_dependency :url, gleaning
       assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
     end
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
     if mercury_result.good? # All is well
-      adopt_dependency :url, mercury_result
       assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
       if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
         new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
@@ -193,7 +191,7 @@ class PageRef < ApplicationRecord
         alias_for subject_url, true
         subject_url = next_url
       end
-      self.url = subject_url # accept_attribute :url, subject_url
+      self.url = subject_url
       hr # Return the last error code
     end
 
@@ -287,14 +285,19 @@ class PageRef < ApplicationRecord
   # Return a (possibly newly-created) PageRef on the given URL
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
-  def self.fetch url_or_page_ref
+  def self.fetch url_or_page_ref, initializers={}
     # Enabling "fetch" of existing page_ref
     return url_or_page_ref if url_or_page_ref.is_a?(PageRef)
     # (self.find_by_url(url_or_page_ref) || self.build_by_url(url_or_page_ref)) if url_or_page_ref.present?
     if url_or_page_ref.present?
       standardized_url = PageRef.standardized_url url_or_page_ref
-      self.find_by_url(standardized_url) || self.new(url: standardized_url)
+      unless pr = self.find_by_url(standardized_url)
+        pr = self.new initializers.merge(url: standardized_url)
+        yield pr if block_given?
+        pr.refresh_attributes :url  # Relaunch to finalize url
+      end
     end
+    pr
   end
 
   def self.standardized_url url
@@ -306,6 +309,8 @@ class PageRef < ApplicationRecord
   # * clearing http_status and virginizing the PageRef in anticipation of launching it (when/if saved)
   # * ensuring the existence of virginized MercuryResult and Gleaning associates
   def url= new_url
+    self.url_ready = true
+    self.url_needed = false
     new_url = self.class.standardized_url new_url
     return if new_url == url
     super new_url # Heading for trouble if url wasn't unique
@@ -318,8 +323,6 @@ class PageRef < ApplicationRecord
     self.kind = :site if site&.page_ref == self # Site may have failed to build
     # We trigger the site-adoption process if the existing site doesn't serve the new url
     # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
-    request_attributes :url # Trigger gleaning and mercury_result to validate/modify url
-    attrib_ready! :url # Has been requested but is currently ready
   end
 
   # Before assigning a url and possibly triggering an error, check to see how it will play out
@@ -375,22 +378,6 @@ class PageRef < ApplicationRecord
     # self.write_attribute :url, url
   end
 
-  # Accept attribute values extracted from a page:
-  # 1: hand them off to the gleaning
-  # 2: adopt them back from there
-  def adopt_extractions extraction_params={}
-    if extraction_params.present?
-      build_gleaning unless gleaning
-      # Declare the attributes needed w/o launching to glean
-      # NB: we take ALL proffered attributes, not just those that are priorly needed
-      # gleaning.attribs_needed! *extraction_params.keys
-      gleaning.accept_attributes extraction_params
-
-      # attribs_needed! *extraction_params.keys
-      accept_attributes extraction_params
-    end
-  end
-  
   private
 
 

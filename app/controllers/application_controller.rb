@@ -170,21 +170,30 @@ class ApplicationController < ActionController::Base
       yield(@decorator) if block_given?
       # If the entity is trackable, we derive needed attributes before saving
       if entity.respond_to? :refresh_attributes # Entity has a specific idea what it needs
-        # We'll refresh the content by invalidating the attributes...
-        # Attributes to be refreshed (now) need to be regenerated (now)
-        if (refresh = options[:refresh] || []).present?
-          entity.refresh_attributes *refresh
+        # There are three ways to indicate the need for attributes:
+        # 1) Attributes that must be ready before proceeding are specified in options[:needed]
+        # 2) Attributes that need to be refreshed are in options[:refresh]
+        # 3) Attributes that should be launched for background acquisition are in options[:request]
+        # NB: if an attribute needs to be refreshed AND is needed, it will be validated now
+        # If it needs to be refreshed and is NOT needed now, it will be included in the launch
+        needed = options[:needed] || []
+        refresh = options[:refresh] || []
+        if (refresh_now = needed & refresh).present?
+          entity.refresh_attributes *refresh_now
         end
-        # 'needed' attributes don't have to be refreshed, but they need to be valid before proceeding
-        if (needed = (options[:needed] || []) + refresh).present?
-          # Now go get 'em (but only as needed)!
-          entity.ensure_attributes *needed
-        end
+        refresh_later = refresh - refresh_now
+        # 'needed' attributes need to be valid before proceeding
+        # Now go get 'em (but only as needed)!
+        entity.ensure_attributes *needed if needed.present?
+        # At this point, all needed attributes should have been collected.
+        # It should be safe to launch in search of further ones
+        entity.refresh_attributes *refresh_later if refresh_later.present?
+        entity.request_attributes *options[:request] if options[:request].present?
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
       if entity.is_a?(Collectible)
-        if options[:touch] == :collect # Ensure that
+        if options[:touch] == :collect # Ensure that user has entity in collection
           (attribute_params ||= {})[:collectible_in_collection] = true
         end
       end

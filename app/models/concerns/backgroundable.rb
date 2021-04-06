@@ -183,7 +183,8 @@ module Backgroundable
             dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now, payload_object: self) # Need to undo the failed_at lock, if any
             dj.save if dj.changed?
           end
-          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
+          needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
+          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
         end
         self.virgin! unless virgin?
       end
@@ -192,7 +193,8 @@ module Backgroundable
         yield if block_given? # Give the caller a chance to do any pre-launch work
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
-        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
+        needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
+        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
       end
       self.virgin! unless virgin?
     end

@@ -48,17 +48,17 @@ class PageRefServices
         case
         when page_ref.recipe_page?
           klass = RecipePage
-          [((as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page), [ :title, :content, :picurl ] ]
+          [((as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page), [ :title, :picurl ] ]
         when page_ref.recipe?
           klass = Recipe
           [((as_called if as_called.is_a?(Recipe)) ||
-              (Recipe.find_by(page_ref_id: page_ref.id) if page_ref.id)), [ :title, :content, :picurl ] ]
+              (Recipe.find_by(page_ref_id: page_ref.id) if page_ref.id)), [ :title, :picurl ] ]
         when page_ref.site?
           klass = URI(page_ref.url).path.length < 2 ? Site : Recipe
           (as_called if as_called.is_a?(Site)) ||
               [(Site.find_by(page_ref_id: page_ref.id) if page_ref.id), [ :title ]]
         else
-          [page_ref, [ :content ] ]
+          [page_ref, [ ] ]
         end
     if !object
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
