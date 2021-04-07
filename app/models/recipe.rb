@@ -172,8 +172,11 @@ class Recipe < ApplicationRecord
         page_ref.trimmed_content
       return unless content_to_parse.present?
       new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
-      return unless new_content.present? # Parsing was a success
-      self.content = new_content
+      if new_content.present? # Parsing was a success
+        self.content = new_content
+      else
+        self.content_needed = false   # Give up on content until notified otherwise
+      end
     end
   end
 

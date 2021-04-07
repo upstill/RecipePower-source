@@ -44,8 +44,8 @@ class TrackingTest < ActiveSupport::TestCase
     assert_empty rp.ready_attributes
 
     # We parse out the page by asking the RecipePage for its content
-    rp.ensure_attributes :content
-    assert_equal [ :picurl, :title, :content ].sort, rp.ready_attributes.sort
+    rp.ensure_attributes :title
+    assert_equal [ :picurl, :title ].sort, rp.ready_attributes.sort
   end
 
   test "recipe gets parsed correctly" do
@@ -63,8 +63,8 @@ class TrackingTest < ActiveSupport::TestCase
     assert recipe.content_needed?
     refute recipe.content_ready?
     recipe.refresh_attributes :content, immediate: true # Initiate a re-parse and complete it RIGHT NOW
-    assert recipe.content_ready? # Parsed successfully
-    refute recipe.content_needed? # Parsed successfully
+    assert recipe.content_ready? # Parse failed
+    refute recipe.content_needed? # ...but gave up
   end
 
   test "refresh attributes" do
@@ -73,7 +73,6 @@ class TrackingTest < ActiveSupport::TestCase
     assert_equal [:picurl, :title, :description, :content], Recipe.tracked_attributes
     recipe.title = 'placeholder' # Set title and flip 'ready' bit
     assert recipe.title_ready
-    assert recipe.attrib_ready?(:title)
     refute recipe.title_needed
 
     # Invalidate the title
@@ -96,7 +95,7 @@ class TrackingTest < ActiveSupport::TestCase
 
     recipe.ensure_attributes # Get the title, etc.
     assert_empty recipe.needed_attributes
-    assert_equal recipe.ready_attributes, Recipe.tracked_attributes
+    assert_equal recipe.ready_attributes.sort, Recipe.tracked_attributes.sort
     assert_empty recipe.page_ref.needed_attributes
     assert_empty recipe.page_ref.mercury_result.needed_attributes
     assert_empty recipe.page_ref.gleaning.needed_attributes
@@ -107,15 +106,11 @@ class TrackingTest < ActiveSupport::TestCase
     recipe = Recipe.new url: url
     assert_equal [:picurl, :title, :description, :content], Recipe.tracked_attributes
     refute recipe.title_needed
-    refute recipe.attrib_needed?(:title)
     refute recipe.title_ready
-    refute recipe.attrib_ready?(:title)
 
     recipe.title = 'placeholder' # Set title and flip 'ready' bit
     assert recipe.title_ready
-    assert recipe.attrib_ready?(:title)
     refute recipe.title_needed
-    refute recipe.attrib_needed?(:title)
     assert_equal 'placeholder', recipe.title
 
     recipe.request_attributes :picurl, :title

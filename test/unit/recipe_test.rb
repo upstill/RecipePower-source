@@ -78,8 +78,8 @@ class RecipeTest < ActiveSupport::TestCase
     assert_equal url, recipe.url
     assert recipe.page_ref.virgin?
     recipe.ensure_attributes :title, :description
-    refute recipe.attrib_ready?(:description)
-    refute recipe.attrib_ready?(:title)
+    refute recipe.description_ready
+    refute recipe.title_ready
     assert recipe.page_ref.bad?
     refute recipe.save
     assert_nil recipe.id
@@ -91,8 +91,8 @@ class RecipeTest < ActiveSupport::TestCase
     assert_equal url, recipe.url
     assert recipe.page_ref.virgin?
     recipe.ensure_attributes :title, :description
-    assert recipe.attrib_ready?(:description)
-    assert recipe.attrib_ready?(:title)
+    assert recipe.description_ready
+    assert recipe.title_ready
     assert recipe.page_ref.good?
     assert_equal 'https://www.tasteofbeirut.com/eggplant-in-yogurt-sauce-batenjane-be-laban/', recipe.url
     assert_equal recipe.picture, recipe.page_ref.picture # Identical unpersisted ImageReferences

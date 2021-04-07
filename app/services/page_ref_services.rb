@@ -116,14 +116,14 @@ class PageRefServices
     # aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
     if options[:force] || ((page_ref.http_status != 200) && (other.http_status == 200))
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
-      logger.debug "...taking #{hard_attribs} from other"
+      Rails.logger.debug "...taking #{hard_attribs} from other"
       page_ref.assign_attributes hard_attribs
 
       # Soft attributes are copied only if not already set
       soft_attribs = other.ready_attributes + %w{ link_text }
       soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
-          logger.debug "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
+          Rails.logger.debug "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
           page_ref.send "#{attrname}=", other.send(attrname)
         end
       }
@@ -169,9 +169,9 @@ class PageRefServices
     # Many circumstances under which we go out to check the reference, not nec. for the first time
     if (page_ref.http_status != 200) || !(page_ref.bad? || page_ref.good?) || page_ref.url_changed? || force
       page_ref.bkg_launch priority: 10 # Must be enqueued as a PageRef b/c subclasses aren't recognized by DJ
-      logger.debug "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
+      Rails.logger.debug "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
       page_ref.bkg_land
-      logger.debug "...returned"
+      Rails.logger.debug "...returned"
       sentences << "Ran #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' err_msg #{page_ref.error_message} to get status: now #{page_ref.http_status}"
     else
       sentences << "#{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' is okay: status '#{page_ref.status}' http_status = #{page_ref.http_status}, url #{page_ref.url_changed? ? '' : 'not '} changed."

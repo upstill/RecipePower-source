@@ -294,7 +294,7 @@ class PageRef < ApplicationRecord
       unless pr = self.find_by_url(standardized_url)
         pr = self.new initializers.merge(url: standardized_url)
         yield pr if block_given?
-        pr.refresh_attributes :url  # Relaunch to finalize url
+        pr.request_attributes :url, force: true  # Redo to finalize url
       end
     end
     pr

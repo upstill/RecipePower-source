@@ -42,7 +42,7 @@ class ImageReferenceServices
     end
     extant_ids -= Referment.where(referee_type: 'ImageReference').pluck :referee_id
     report << "#{extant_ids.count} ids after Referments"
-    logger.debug report
+    Rails.logger.debug report
     ImageReference.where id: extant_ids
   end
 

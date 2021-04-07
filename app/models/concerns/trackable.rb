@@ -98,14 +98,6 @@ module Trackable
     rtnval
   end
 
-  # Call attribute setter or accept_attribute for each key-value pair in the hash
-  def accept_attributes attribs={}
-    attribs.slice(*self.class.tracked_attributes).each do |attrib, value|
-      setter = :"accept_#{attrib}"
-      respond_to?(setter) ? self.send(setter, value) : accept_attribute(attrib, value)
-    end
-  end
-
   def clear_needed_attributes
     needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
   end
@@ -167,14 +159,17 @@ module Trackable
     bkg_land if (list_of_attributes & needed_attributes).present?
   end
 
+  # A Trackable winds up its (successful) work by taking any attributes from its dependencies
   def success job=nil
     super(job) if defined?(super)
     adopt_dependencies
   end
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
-  def request_attributes *list_of_attributes
-    assert_needed_attributes *list_of_attributes
+  def request_attributes *list_of_attributes, force: false
+    list_of_attributes.each { |attrib|
+      attrib_needed!(attrib) if !(attrib_ready?(attrib) || attrib_needed?(attrib)) || force
+    }
     request_dependencies # Launch all objects that we depend on
     if attrib_needed?
       logger.debug "Requesting attributes #{needed_attributes} of #{self} ##{id}"
@@ -199,30 +194,12 @@ module Trackable
     end
   end
 
+  # Register the attribute as closed, without setting it
   def attrib_done attrname
     return unless self.class.tracked_attributes.include?(attrname.to_sym)
     # No further work is needed on this attribute => clear 'needed' bit and set the 'ready' bit
     self.send :"#{attrname}_needed=", false
     self.send :"#{attrname}_ready=", true
-  end
-
-  # Report on the 'needed' bit for the named attribute.
-  # If no attribute specified, report whether ANY attribute is needed
-  def attrib_needed? attrib_sym = nil
-    attrib_sym.nil? ? needed_attributes.present? : send(:"#{attrib_sym}_needed")
-  end
-
-  # Report on the 'ready' bit for the named attribute
-  def attrib_ready? attrib_sym
-    send :"#{attrib_sym}_ready"
-  end
-
-  # Set the 'ready' bit for the attribute and return the attribute_sym iff wasn't ready before
-  def attrib_ready! attrib_sym, ready_now=true
-    unless attrib_ready?(attrib_sym) == ready_now
-      send :"#{attrib_sym}_ready=", ready_now
-      attrib_sym
-    end
   end
 
   # This is syntactic sugar to test whether an attribute MAY be set, either
@@ -256,9 +233,30 @@ module Trackable
     hsh.slice(open_attributes).merge hsh.except(self.class.tracked_attributes)
   end
 
+  protected
+
+  # Report on the 'ready' bit for the named attribute
+  def attrib_ready? attrib_sym
+    send :"#{attrib_sym}_ready"
+  end
+
   private
 
   # Convenience methods, for internal use only
+
+  # Report on the 'needed' bit for the named attribute.
+  # If no attribute specified, report whether ANY attribute is needed
+  def attrib_needed? attrib_sym = nil
+    attrib_sym.nil? ? needed_attributes.present? : send(:"#{attrib_sym}_needed")
+  end
+
+  # Set the 'ready' bit for the attribute and return the attribute_sym iff wasn't ready before
+  def attrib_ready! attrib_sym, ready_now=true
+    unless attrib_ready?(attrib_sym) == ready_now
+      send :"#{attrib_sym}_ready=", ready_now
+      attrib_sym
+    end
+  end
 
   def attribs_needed! attrib_syms, needed_now=true
     attrib_syms.each { |attrib_sym| attrib_needed! attrib_sym, needed_now }
@@ -274,14 +272,6 @@ module Trackable
       send :"#{attrib_sym}_needed=", needed_now
       attrib_sym
     end
-  end
-
-  # Ensure that all of the given attributes are marked as needed UNLESS they're already ready or needed
-  # RETURN the list of attributes needed now that weren't needed previously
-  def assert_needed_attributes *list_of_attributes
-    list_of_attributes.collect { |attrib|
-      attrib_needed!(attrib) unless attrib_ready?(attrib) || attrib_needed?(attrib)
-    }.compact
   end
 
 end

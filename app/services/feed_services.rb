@@ -14,7 +14,7 @@ class FeedServices
       rescue Exception => e
         next
       end
-      logger.debug "SCRAPING #{page_url}..."
+      Rails.logger.debug "SCRAPING #{page_url}..."
       candidates = {}
       # We find the following elements:
       # <a> elements where the link text OR the title attribute OR the href attribute includes 'RSS', 'rss', 'feedburner' or 'feedblitz'
@@ -49,17 +49,17 @@ class FeedServices
             keepers.find { |f| f.url == url } ||
             !(feed = Feed.new( url: url, description: content))
           if feed.follow_url # save
-            logger.debug "\tCAPTURED feed #{url}"
+            Rails.logger.debug "\tCAPTURED feed #{url}"
             keepers << feed # site.feeds << feed
           else
-            # logger.debug "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
+            # Rails.logger.debug "\tREJECTED #{url}...because\n\t"+feed.errors.collect { |k, v| k.to_s+" "+v }.join('\n\t...')
             if (url =~ /rss|xml/) && (SiteServices.find_or_build_for(url) == site) # Another page on the same site with rss in the url; maybe a page of links?
               unless queue.include?(url)
                 if queue.length < 10
-                  logger.debug "\tPUSHING #{url}"
+                  Rails.logger.debug "\tPUSHING #{url}"
                   queue.push url
                 else
-                  logger.debug "\AVOIDING #{url} (too many bloody pages)"
+                  Rails.logger.debug "\AVOIDING #{url} (too many bloody pages)"
                 end
               end
             end
