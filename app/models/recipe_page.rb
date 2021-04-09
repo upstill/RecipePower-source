@@ -19,6 +19,23 @@ class RecipePage < ApplicationRecord
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
 
+  before_save do |entity|
+    # When first saved, we establish needed attributes for background processing
+    entity.request_for_background if !entity.persisted?
+    x=2
+    # update_column :attr_trackers, attr_trackers if attr_trackers_changed?
+  end
+
+  after_save do |entity|
+    entity.request_attributes  # Launch as necessary
+  end
+
+    # To be overridden by entities to ensure that attributes are needed
+  def request_for_background
+    request_attributes :content
+    x=2
+  end
+
   ############# Backgroundable #############
 
   # In order to make our content, we need content from the PageRef
@@ -43,8 +60,9 @@ class RecipePage < ApplicationRecord
     # page_ref.ensure_attributes :content
     if content_needed? && page_ref.content_ready?
       # Clear all recipes but the first
-      content = page_ref.trimmed_content
-      if content.present?
+      parsing_input = page_ref.trimmed_content
+      if parsing_input.present?
+        puts "RecipPage parsing #{parsing_input.truncate 100}"
         # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
         # parser = ParsingServices.new self
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
@@ -54,7 +72,7 @@ class RecipePage < ApplicationRecord
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
         # parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
-        ParserServices.parse(entity: self).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
+        ParserServices.parse(entity: self, content: parsing_input).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           xb = sub_parser.xbounds
           rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
         end
@@ -97,7 +115,7 @@ class RecipePage < ApplicationRecord
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved
 
-        self.content = content
+        self.content = parsing_input
       end
     end
   end

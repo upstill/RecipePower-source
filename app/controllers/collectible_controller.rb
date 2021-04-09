@@ -192,7 +192,7 @@ class CollectibleController < ApplicationController
       if resource_errors_to_flash @decorator, preface: 'Couldn\'t save.'
         render :errors
       else
-        unless request.method == 'GET'
+        if request.method != 'GET'  # POST or PATCH
           flash[:popup] = "#{@decorator.human_name} saved"
           render 'collectible/update.json'
         else

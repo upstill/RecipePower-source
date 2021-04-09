@@ -63,6 +63,11 @@ module Trackable
       @tracked_attributes || []
     end
 
+    # Should be overridden by any Trackable model to request attributes to be generated in background
+    def request_for_background
+
+    end
+
   end
 
   def self.included(base)
@@ -232,8 +237,6 @@ module Trackable
   def assignable_values hsh
     hsh.slice(open_attributes).merge hsh.except(self.class.tracked_attributes)
   end
-
-  protected
 
   # Report on the 'ready' bit for the named attribute
   def attrib_ready? attrib_sym

@@ -64,11 +64,11 @@ class PageRefServices
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
       # Initialize the recipe from parameters and extractions, as needed
       # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-      defaults = {
-          'Title' => params[:page_ref][:title],
-          'href' => page_ref.url,
-          'Image' => params[:page_ref][:picurl]
-      }
+      defaults = { 'href' => page_ref.url }
+      if prparams = params[:page_ref]
+        defaults['Title'] = prparams[:title]
+        defaults['Image'] = prparams[:picurl]
+      end
       params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
         defaults[key] = value
       end
