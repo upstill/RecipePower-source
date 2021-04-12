@@ -22,18 +22,16 @@ class RecipePage < ApplicationRecord
   before_save do |entity|
     # When first saved, we establish needed attributes for background processing
     entity.request_for_background if !entity.persisted?
-    x=2
-    # update_column :attr_trackers, attr_trackers if attr_trackers_changed?
   end
 
   after_save do |entity|
-    entity.request_attributes  # Launch as necessary
+    entity.request_attributes  # (re)Launch dj as necessary
   end
 
     # To be overridden by entities to ensure that attributes are needed
   def request_for_background
-    request_attributes :content
-    x=2
+    # Content is refreshed on first save
+    refresh_attributes :content
   end
 
   ############# Backgroundable #############
