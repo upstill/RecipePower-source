@@ -344,10 +344,8 @@ class CollectibleController < ApplicationController
           redirect_to default_next_path
         }
         format.json {
-          @data = { onget: [ 'submit.submit_and_process', collection_user_url(current_user, layout: false) ] }
-          response_service.mode = :modal
           flash[:popup] = "'#{@decorator.title}' now appearing in your collection."
-          render :action => 'collect_and_tag', :mode => :modal
+          redirect_to @decorator.object
         }
       end
     else # failure (not a valid collectible) => return to new
