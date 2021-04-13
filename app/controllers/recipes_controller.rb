@@ -15,8 +15,14 @@ class RecipesController < CollectibleController
   def recipe_page
     update_and_decorate
     # It's a security failure to expect a GET method to create the recipe_page
-    if (rp = @recipe.page_ref.recipe_page).nil? && request.method == 'POST'
-      rp = @recipe.page_ref.create_recipe_page
+    pr = @recipe.page_ref
+    if (rp = pr.recipe_page).nil? && request.method == 'POST'
+      rp = pr.create_recipe_page
+      if pr.kind == 'recipe'
+        # Modify the associated PageRef to denote a recipe page rather than the recipe
+        pr.kind = 'recipe_page'
+        pr.save
+      end
       # Fire up the parser
       rp.request_attributes :content
       rp.save

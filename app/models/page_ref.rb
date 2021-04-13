@@ -141,17 +141,13 @@ class PageRef < ApplicationRecord
   # Ask gleaning and mercury_result for attributes
   def adopt_dependencies
     super if defined? super
-    if gleaning.good?
-      assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
-    end
+    assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
-    if mercury_result.good? # All is well
-      assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
-      if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
-        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
-        # Create a new alias on this page_ref for every derived alias that isn't already in use
-        (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
-      end
+    assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+    if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
+      new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
+      # Create a new alias on this page_ref for every derived alias that isn't already in use
+      (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
     end
     if recipe_page_needed?
       recipe_page || build_recipe_page

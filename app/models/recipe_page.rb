@@ -18,17 +18,8 @@ class RecipePage < ApplicationRecord
   def self.mass_assignable_attributes
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
-
-  before_save do |entity|
-    # When first saved, we establish needed attributes for background processing
-    entity.request_for_background if !entity.persisted?
-  end
-
-  after_save do |entity|
-    entity.request_attributes  # (re)Launch dj as necessary
-  end
-
-    # To be overridden by entities to ensure that attributes are needed
+  
+  # To be overridden by entities to ensure that attributes are needed
   def request_for_background
     # Content is refreshed on first save
     refresh_attributes :content

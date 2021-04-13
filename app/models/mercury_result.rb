@@ -26,7 +26,7 @@ class MercuryResult < ApplicationRecord
   end
 
   def adopt_dependencies
-    return unless good?
+    return if bad? || results.empty?
     # Map the results from Mercury into attributes, if any
     results.each do |result_name, result_val|
       next unless (attrname = MercuryResult.attribute_for_result(result_name.to_sym)) &&

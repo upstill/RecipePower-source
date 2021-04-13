@@ -30,6 +30,7 @@ class Recipe < ApplicationRecord
         (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
       recipe.content = nil
       recipe.status = "virgin"
+      recipe.refresh_attributes :content # To be derived via parsing
     end
     if recipe.content_changed?
       # Set tags according to annotations
@@ -156,6 +157,12 @@ class Recipe < ApplicationRecord
   end
 
   ##### Backgroundable matters #########
+
+  # Called when first saved, as a hook for (re)generating attributes
+  def request_for_background
+    # Content is refreshed on first save
+    refresh_attributes :content
+  end
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform

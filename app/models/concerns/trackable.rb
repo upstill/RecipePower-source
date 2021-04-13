@@ -6,6 +6,18 @@ include FlagShihTzu  # https://github.com/pboling/flag_shih_tzu
 module Trackable
   extend ActiveSupport::Concern
 
+  included do
+    # before_save :request_for_background
+    before_save do |entity|
+      # When first saved, we establish needed attributes for background processing
+      entity.request_for_background if !entity.persisted?
+    end
+
+    after_save do |entity|
+      entity.request_attributes  # (re)Launch dj as necessary
+    end
+  end
+
   module ClassMethods
 # Declare a set of attributes that will be tracked
     def attr_trackable *list
@@ -63,15 +75,16 @@ module Trackable
       @tracked_attributes || []
     end
 
-    # Should be overridden by any Trackable model to request attributes to be generated in background
-    def request_for_background
-
-    end
-
   end
 
   def self.included(base)
     base.extend(ClassMethods)
+  end
+
+  # Should be overridden by any Trackable model to request attributes to be generated in background
+  # when entity is first saved
+  def request_for_background
+
   end
 
   # Set and accept the attribute. Action depends on the 'ready' and 'needed' bits
