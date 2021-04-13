@@ -194,6 +194,7 @@ class CollectibleController < ApplicationController
       else
         if request.method != 'GET'  # POST or PATCH
           flash[:popup] = "#{@decorator.human_name} saved"
+          @decorator.ensure_attributes :content if @presenter.update_items.include?(:content)
           render 'collectible/update.json'
         else
           response_service.title = @decorator.title&.truncate(20) || 'Unknown Title' # Get title (or name, etc.) from the entity
@@ -293,7 +294,7 @@ class CollectibleController < ApplicationController
     # The :refresh parameter triggers regeneration of the entity's content,
     # presumably due to some dependency (like the page_ref or the site changing)
     update_options[:refresh] = [ :content ] if params[:refresh]
-    update_options[:needed] = [ :content ]
+    update_options[:needed] = [ :content ] # Needed whether it's refreshed or not
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil

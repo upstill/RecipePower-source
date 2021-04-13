@@ -188,7 +188,6 @@ class ApplicationController < ActionController::Base
         # At this point, all needed attributes should have been collected.
         # It should be safe to launch in search of further ones
         entity.refresh_attributes *refresh_later if refresh_later.present?
-        entity.request_attributes *options[:request] if options[:request].present?
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end
