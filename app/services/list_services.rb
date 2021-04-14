@@ -74,7 +74,7 @@ class ListServices
     query = "(lists.availability = 0 AND lists.owner_id in (#{user.followee_ids.join(', ')}))"
     if (extras = user.followee_ids & user.collector_ids).present?
       query << " OR (lists.availability = 1 AND lists.owner_id in (#{extras.join(', ')}))"
-      Rails.logger.debug 'extras: ', extras.sort.join(', ')
+      Rails.logger.debug 'extras: ' + extras.sort.join(', ')
     end
     # HOWEVER: since many people may use the list's tag, we only present
     # lists for an entity when the owner of the list has tagged the entity with the list's name tag

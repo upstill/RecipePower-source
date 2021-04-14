@@ -14,6 +14,11 @@ class BasePresenter
     @viewer = viewer
   end
 
+  # When an object is updated, what types of item get replaced?
+  def update_items
+    [ ]
+  end
+
   def ribbon ribbon_class=nil, name=@decorator.human_name
     return unless name.present?
     content = h.content_tag :div,

@@ -183,9 +183,9 @@ class MercuryResult < ApplicationRecord
     apphome = Rails.env.production? ? ENV['HOME'] : (ENV['HOME']+'/Dev')
     cmd = "node #{apphome}/mercury/fetch.js #{url}"
     logger.debug "Invoking '#{cmd}'"
-    content = `#{cmd}`
-    logger.debug "...got #{content.length} bytes from Mercury, starting with '#{content.truncate 100}'."
-    data = JSON.parse content
+    bytes = `#{cmd}`
+    logger.debug "...got #{bytes.length} bytes from Mercury, starting with '#{bytes.truncate 100}'."
+    data = JSON.parse bytes
     data['url'] = url
     data
   end
