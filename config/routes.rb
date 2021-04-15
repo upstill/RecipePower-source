@@ -4,7 +4,6 @@
 # a second, POST, method (#query), which wasn't being POSTed to upon page reload.
 
 RP::Application.routes.draw do
-  resources :recipe_pages
   resources :offerings
   resources :editions
 
@@ -57,6 +56,8 @@ RP::Application.routes.draw do
   end
 
   get 'search/index'
+
+  resources :recipe_pages, :concerns => [:taggable, :collectible, :picable]
 
   resources :page_refs, :concerns => [:taggable, :collectible, :picable] do
     collection do

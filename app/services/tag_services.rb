@@ -344,10 +344,10 @@ class TagServices
       (tags.empty? ? "No match on #{ingred["term"]}" : "Matched #{ingred["term"]}:")+
           tags.collect { |tag| "\n\t#{tag.typename} #{tag.id}: #{tag.name}"}.join('')
     }.sort { |line1, line2| line1 <=> line2 }
-    results.each { |line| puts line }
+    results.each { |line| Rails.logger.debug line }
     total = results.count
     nmatched = results.keep_if { |result| result.match /^Matched/ }.compact.count
-    puts "Matched #{nmatched} of #{total}."
+    Rails.logger.debug "Matched #{nmatched} of #{total}."
   end
 
 end

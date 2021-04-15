@@ -193,7 +193,7 @@ class Expression < ApplicationRecord
     Expression.includes(:tag).all.find_in_batches do |group|
       group.each { |expr|
         if expr.tag == nil
-          puts "Nil tag for Expression ##{expr.id} to tag ##{expr.tag_id}"
+          logger.debug "Nil tag for Expression ##{expr.id} to tag ##{expr.tag_id}"
           bad_exprs << expr
         end
       }

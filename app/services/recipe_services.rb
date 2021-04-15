@@ -9,20 +9,20 @@ class RecipeServices
   end
 
   def scrape
-    puts "Recipe # #{@recipe.id}: #{@recipe.title}"
-    puts "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
-    puts "\turl: #{@recipe.url}"
-    puts "\tdescription: #{@recipe.description}"
-    puts "\tpicurl: #{@recipe.picurl}"
-    puts "\tExtractions:"
+    Rails.logger.debug "Recipe # #{@recipe.id}: #{@recipe.title}"
+    Rails.logger.debug "\tsite: #{@recipe.site.name} (#{@recipe.site.home})"
+    Rails.logger.debug "\turl: #{@recipe.url}"
+    Rails.logger.debug "\tdescription: #{@recipe.description}"
+    Rails.logger.debug "\tpicurl: #{@recipe.picurl}"
+    Rails.logger.debug "\tExtractions:"
     begin
       results = FinderServices.glean @recipe.url, @recipe.site
-      results.labels.each { |label| puts "\t\t#{label}: #{results.result_for(label)}" }
+      results.labels.each { |label| Rails.logger.debug "\t\t#{label}: #{results.result_for(label)}" }
     rescue Exception => msg
-      puts '!!! Couldn\'t open the page for analysis!'
+      Rails.logger.debug '!!! Couldn\'t open the page for analysis!'
       errmsg = FinderServices.err_breakdown(@recipe.url, msg)[:msg]
       @recipe.errors.add :url, errmsg
-      puts errmsg
+      Rails.logger.debug errmsg
     end
     results
   end

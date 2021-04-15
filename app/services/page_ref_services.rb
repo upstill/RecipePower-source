@@ -40,29 +40,45 @@ class PageRefServices
   # 3) If its URL is the domain root (has no path), create and return a new site
   # 4) If its kind is :recipe, create and return a new recipe
   # 5) Otherwise, just return the PageRef itself
-  def editable_entity called_for=nil, params={}
-    if called_for.is_a? Hash
-      called_for, params = nil, called_for
+  def editable_entity as_called = nil, params = {}
+    if as_called.is_a? Hash
+      as_called, params = nil, as_called
     end
-    (page_ref unless page_ref.recipe? || page_ref.site?) ||
-        (called_for if called_for.is_a?(Recipe) || called_for.is_a?(Site)) ||
-        (page_ref.id && (Site.find_by(page_ref_id: page_ref.id) || Recipe.find_by(page_ref_id: page_ref.id))) ||
-    begin
+    object, needed =
+        case
+        when page_ref.recipe_page?
+          klass = RecipePage
+          [((as_called if as_called.is_a?(RecipePage)) || page_ref.recipe_page), [ :title, :picurl ] ]
+        when page_ref.recipe?
+          klass = Recipe
+          [((as_called if as_called.is_a?(Recipe)) ||
+              (Recipe.find_by(page_ref_id: page_ref.id) if page_ref.id)), [ :title, :picurl ] ]
+        when page_ref.site?
+          klass = URI(page_ref.url).path.length < 2 ? Site : Recipe
+          (as_called if as_called.is_a?(Site)) ||
+              [(Site.find_by(page_ref_id: page_ref.id) if page_ref.id), [ :title ]]
+        else
+          [page_ref, [ ] ]
+        end
+    if !object
       # Special case: a request for a recipe on a domain (no path) gets diverted to create a site by default
-      klass = page_ref.site? || URI(page_ref.url).path.length < 2 ? Site : Recipe
       # Initialize the recipe from parameters and extractions, as needed
       # defaults = page_ref.decorate.translate_params params[:page_ref], entity
-      defaults = {
-          'Title' => params[:page_ref][:title],
-          'href' => page_ref.url,
-          'Image' => params[:page_ref][:picurl]
-      }
+      defaults = { 'href' => page_ref.url }
+      if prparams = params[:page_ref]
+        defaults['Title'] = prparams[:title]
+        defaults['Image'] = prparams[:picurl]
+      end
       params[:extractions]&.each do |key, value| # Transfer the extractions to the defaults
         defaults[key] = value
       end
       # Produce a set of initializers for the target class
-      CollectibleServices.find_or_build page_ref, defaults, klass
+      object = CollectibleServices.find_or_build page_ref, defaults, klass
     end
+    # Request the needed attributes from the object
+    needed = needed - object.ready_attributes # Don't try to reset existing attributes
+    object.request_attributes *needed if needed.present?
+    object
   end
 
   # Use the attributes of another (presumably b/c a new, identical page_ref is being created)
@@ -100,14 +116,14 @@ class PageRefServices
     # aliases = (page_ref.aliases + other.aliases + [other.url, page_ref.url]).uniq
     if options[:force] || ((page_ref.http_status != 200) && (other.http_status == 200))
       hard_attribs = other.attributes.slice *%w{ errcode http_status error_message url }
-      puts "...taking #{hard_attribs} from other"
+      Rails.logger.debug "...taking #{hard_attribs} from other"
       page_ref.assign_attributes hard_attribs
 
       # Soft attributes are copied only if not already set
       soft_attribs = other.ready_attributes + %w{ link_text }
       soft_attribs.each { |attrname|
         unless page_ref.read_attribute(attrname).present?
-          puts "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
+          Rails.logger.debug "...absorbing #{attrname} = #{other.read_attribute(attrname)}"
           page_ref.send "#{attrname}=", other.send(attrname)
         end
       }
@@ -153,9 +169,9 @@ class PageRefServices
     # Many circumstances under which we go out to check the reference, not nec. for the first time
     if (page_ref.http_status != 200) || !(page_ref.bad? || page_ref.good?) || page_ref.url_changed? || force
       page_ref.bkg_launch priority: 10 # Must be enqueued as a PageRef b/c subclasses aren't recognized by DJ
-      puts "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
+      Rails.logger.debug "Enqueued #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' to get status"
       page_ref.bkg_land
-      puts "...returned"
+      Rails.logger.debug "...returned"
       sentences << "Ran #{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' err_msg #{page_ref.error_message} to get status: now #{page_ref.http_status}"
     else
       sentences << "#{page_ref.class.to_s} ##{page_ref.id} '#{page_ref.url}' is okay: status '#{page_ref.status}' http_status = #{page_ref.http_status}, url #{page_ref.url_changed? ? '' : 'not '} changed."

@@ -77,11 +77,15 @@ class RecipePresenter < CollectiblePresenter
 
   def content_suggestion
     return ''.html_safe unless response_service.admin_view?
-    cs = <<EOF
-          Ingredients, instructions and title are identified using CSS.<br>
-          If the recipe page contains multiple recipes, click #{split_recipe_button @object, 'here'}
-EOF
-    cs.html_safe
+    lines = []
+    unless content_for(:rp_inglist).present? && content_for(:rp_instructions).present?
+      lines << 'This recipe couldn\'t be analyzed for ingredient list and instructions.'
+      lines << 'Ingredients, instructions and title are identified using CSS.'
+      lines << 'Try hitting the Refresh button to the right. If still no joy,'
+      lines << 'click the Edit button and specify CSS selectors to identify the relevant parts.'
+    end
+    lines << "**If this recipe page contains multiple recipes, click #{split_recipe_button @object, 'here'}" if @object.recipe_page.nil?
+    lines.join('<br>').html_safe
   end
 
   # Assemble HTML to represent the DOM subtree denoted by node

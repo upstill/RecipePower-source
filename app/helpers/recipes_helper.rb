@@ -168,15 +168,15 @@ module RecipesHelper
   def content_button_label object
     label =
     case object
-    when PageRef
-      'Trimmed Content'
-    when Recipe
-      'Presentation'
-    when RecipePage
-      'Recipes'
     when Gleaning
-      'Raw Content'
+      'Raw Page Content'
       # when MercuryResult
+    when PageRef
+      'Trimmed Page Content'
+    when Recipe
+      'Recipe As Presented'
+    when RecipePage
+      'Recipe Set'
     else
       object.model_name.human
     end
@@ -195,6 +195,7 @@ module RecipesHelper
     return ''.html_safe unless policy(object).update? && [PageRef, Recipe, RecipePage, MercuryResult, Gleaning].include?(object.class)
 
     page_ref = object.page_ref
+    recipe_page = page_ref.recipe_page
     recipe = object.is_a?(Recipe) ? object : page_ref.recipes.first
 
     buttons = ActiveSupport::SafeBuffer.new
@@ -202,36 +203,32 @@ module RecipesHelper
       buttons += edit_trimmers_button object
       buttons += content_button page_ref.gleaning, object == page_ref.gleaning
       buttons += content_button page_ref, object == page_ref
-      buttons += content_button recipe, object == recipe
+      buttons += content_button(recipe, object == recipe) if recipe
+      buttons += content_button(recipe_page, object == recipe_page) if recipe_page
       buttons += refresh_button object
     end
-    buttons +=
-        button_to_submit('',
-                         edit_recipe_contents_path(recipe),
-                         'glyph-edit-red',
-                         'xl',
-                         mode: :modal,
-                         class: 'action-button annotate-content',
-                         title: 'Annotate Content') if object.is_a?(Recipe)
+
+    # The object may provide an "edit" button
+    if case object
+       when Recipe
+         # A recipe can be annotated
+         edit_path, hoverprompt = edit_recipe_contents_path(recipe), 'Annotate Content'
+       when RecipePage
+         # A recipe page can take directions for dividing the page
+         edit_path, hoverprompt = edit_recipe_page_path(object, topics: :page_recipes), 'Demarcate Recipes'
+       end
+      buttons +=
+          button_to_submit('',
+                           edit_path,
+                           'glyph-edit-red',
+                           'xl',
+                           mode: :modal,
+                           class: 'action-button annotate-content',
+                           title: hoverprompt)
+    end
     content_tag :div, buttons, style: 'font-size: 18px; font-weight: bold;'
   end
-
-# Provide a header which suggests how to improve the content
-  def recipe_content_sugg object
-    dialog_link = edit_trimmers_button object, 'here'
-    sugg =
-        case object
-        # when MercuryResult
-        when RecipePage
-<<EOF
-          This page is supposed to have multiple recipes.<br>
-          Click #{dialog_link} to direct how to demarcate them algorithmically.<br>
-          Click #{edit_recipes_button object, 'here'} to select them directly.
-EOF
-        end
-    return (sugg.if_present || '').html_safe
-  end
-
+  
   def tagjoin tags, enquote = false, before = '', after = '', joiner = ','
     strjoin tags.collect { |tag| link_to (enquote ? "'#{tag.name}'" : tag.name), tag, class: 'rcp_list_element_tag' }, before, after, joiner
   end

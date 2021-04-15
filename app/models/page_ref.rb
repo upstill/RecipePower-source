@@ -16,7 +16,7 @@ class PageRef < ApplicationRecord
   has_many :aliases, :dependent => :destroy
 
   # The associated recipe page maintains the page's content in a parsed form
-  belongs_to :recipe_page, :dependent => :destroy
+  has_one :recipe_page, :dependent => :destroy, :autosave => false
 
   # We track attributes from Gleanings and MercuryResult except URL
   include Trackable
@@ -25,11 +25,11 @@ class PageRef < ApplicationRecord
   # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
     return gleaning.content if gleaning&.content_ready?
-    return mercury_result.content if mercury_result&.content_ready?
   end
 
   def content= val
     gleaning&.accept_attribute :content, val
+    attrib_done :content
   end
 
   # The site specifies material to be removed from the content
@@ -118,11 +118,11 @@ class PageRef < ApplicationRecord
   ######### Trackable overrides ############
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
-  # off dependencies from gleaning and mercury_result
+  # off dependencies from gleaning and mercury_result, IF we need them to do our work
   def request_dependencies 
-    attrib_needed! :content, true if recipe_page_needed?
+    # attrib_needed! :content, true if recipe_page_needed?
     from_gleaning = Gleaning.tracked_attributes & needed_attributes
-    if from_gleaning.present?
+    if either = from_gleaning.present?
       build_gleaning if !gleaning
       gleaning.request_attributes *from_gleaning
     end
@@ -131,19 +131,26 @@ class PageRef < ApplicationRecord
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result
       mercury_result.request_attributes *from_mercury
+      either = true
     end
+    # We need to get attributes from Gleaning and/or Mercury
+    either
   end
 
   # Ask gleaning and mercury_result for attributes
   def adopt_dependencies
     super if defined? super
-    # After everything has settled down, we can extract our attributes
-    accept_attributes gleaning.ready_attribute_values
+    assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
-    accept_attributes mercury_result.ready_attribute_values
+    assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+    if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
+      new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
+      # Create a new alias on this page_ref for every derived alias that isn't already in use
+      (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
+    end
     if recipe_page_needed?
       recipe_page || build_recipe_page
-      accept_attribute :recipe_page, recipe_page
+      self.recipe_page = recipe_page
       # Could do this to get the RecipePage parsing done sooner
       # recipe_page.request_attributes :content
     end
@@ -163,7 +170,7 @@ class PageRef < ApplicationRecord
       # Check the header for the url from the server.
       # If it's a string, the header returned a redirect
       # otherwise, it's an HTTP code
-      puts "Checking direct access of PageRef ##{id} at '#{url}'"
+      logger.debug "Checking direct access of PageRef ##{id} at '#{url}'"
       subject_url = url
       # Loop over the redirects from the link, adding each to the record.
       # Stop when we get to the final page or an error occurs
@@ -175,32 +182,23 @@ class PageRef < ApplicationRecord
           hr = header_result next_url
           break
         end
-        puts "Redirecting from #{subject_url} to #{next_url}"
+        logger.debug "Redirecting from #{subject_url} to #{next_url}"
         alias_for subject_url, true
         subject_url = next_url
       end
-      accept_attribute :url, subject_url
+      self.url = subject_url
       hr # Return the last error code
     end
 
     # Now that we have a url, move on to the mercury_result and the gleaning
     mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
-    if mercury_result.good? # All is well
-      accept_url mercury_result.url if mercury_result.url_ready?
-      if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
-        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
-        # Create a new alias on this page_ref for every derived alias that isn't already in use
-        (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
-      end
-    elsif mercury_result.bad?
+    if mercury_result.bad?
       errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
     end
     self.http_status = mercury_result.http_status
 
     gleaning.ensure_attributes # Block until gleaning has completed and accepted its attributes
-    if gleaning.good?
-      accept_url gleaning.url if gleaning.url_ready?
-    elsif gleaning.bad?
+    if gleaning.bad?
       errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
     end
 
@@ -282,14 +280,19 @@ class PageRef < ApplicationRecord
   # Return a (possibly newly-created) PageRef on the given URL
   # NB Since the derived canonical URL may differ from the given url,
   # the returned record may not have the same url as the request
-  def self.fetch url_or_page_ref
+  def self.fetch url_or_page_ref, initializers={}
     # Enabling "fetch" of existing page_ref
     return url_or_page_ref if url_or_page_ref.is_a?(PageRef)
     # (self.find_by_url(url_or_page_ref) || self.build_by_url(url_or_page_ref)) if url_or_page_ref.present?
     if url_or_page_ref.present?
       standardized_url = PageRef.standardized_url url_or_page_ref
-      self.find_by_url(standardized_url) || self.new(url: standardized_url)
+      unless pr = self.find_by_url(standardized_url)
+        pr = self.new initializers.merge(url: standardized_url)
+        yield pr if block_given?
+        pr.request_attributes :url, force: true  # Redo to finalize url
+      end
     end
+    pr
   end
 
   def self.standardized_url url
@@ -301,6 +304,8 @@ class PageRef < ApplicationRecord
   # * clearing http_status and virginizing the PageRef in anticipation of launching it (when/if saved)
   # * ensuring the existence of virginized MercuryResult and Gleaning associates
   def url= new_url
+    self.url_ready = true
+    self.url_needed = false
     new_url = self.class.standardized_url new_url
     return if new_url == url
     super new_url # Heading for trouble if url wasn't unique
@@ -313,8 +318,6 @@ class PageRef < ApplicationRecord
     self.kind = :site if site&.page_ref == self # Site may have failed to build
     # We trigger the site-adoption process if the existing site doesn't serve the new url
     # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
-    request_attributes :url # Trigger gleaning and mercury_result to validate/modify url
-    attrib_ready! :url # Has been requested but is currently ready
   end
 
   # Before assigning a url and possibly triggering an error, check to see how it will play out
@@ -370,22 +373,6 @@ class PageRef < ApplicationRecord
     # self.write_attribute :url, url
   end
 
-  # Accept attribute values extracted from a page:
-  # 1: hand them off to the gleaning
-  # 2: adopt them back from there
-  def adopt_extractions extraction_params={}
-    if extraction_params.present?
-      build_gleaning unless gleaning
-      # Declare the attributes needed w/o launching to glean
-      # NB: we take ALL proffered attributes, not just those that are priorly needed
-      # gleaning.attribs_needed! *extraction_params.keys
-      gleaning.accept_attributes extraction_params
-
-      # attribs_needed! *extraction_params.keys
-      accept_attributes extraction_params
-    end
-  end
-  
   private
 
 

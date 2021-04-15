@@ -25,9 +25,9 @@ class Lexaur < Object
   # Build a Lexaur tree from the collection of tags in the database
   def self.from_tags *types
     lex = self.new
-    puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
+    # puts "Creating Lexaur from tags of type(s) '" + types.join("', '") + '\'.'
     Tag.of_type(types).each { |tag|
-      puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
+      # puts "#{tag.typename}: (#{tag.id}) #{tag.name}" if Rails.env.test?
       lex.take tag.name, tag.id
     }
     lex

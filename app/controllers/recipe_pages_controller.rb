@@ -56,6 +56,7 @@ class RecipePagesController < CollectibleController
 
     # Only allow a trusted parameter "white list" through.
     def recipe_page_params
-      params.require(:recipe_page).permit(:content, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] ) )
+      # params.require(:recipe_page).permit(:content, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] ) )
+      params.require(:recipe_page).permit RecipePage.mass_assignable_attributes
     end
 end

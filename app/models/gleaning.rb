@@ -34,6 +34,8 @@ class Gleaning < ApplicationRecord
       :picurl
     when "Author Name"
       :author
+    when 'RSS Feed'
+      :rss_feeds
     else
       label.downcase.sub(' ', '_').to_sym
     end
@@ -60,16 +62,19 @@ class Gleaning < ApplicationRecord
   end
 
   def adopt_dependencies
-    return unless good?
+    return if bad? || results.empty?
     results.labels.each do |label|
-      case label
-      when 'RSS Feed'
-        accept_attribute :rss_feeds, results&.results_for('RSS Feed')
-      when 'Tags', 'Author'
-        accept_attribute Gleaning.attribute_for_label(label), results&.results_for(label).uniq.join(', ')
-      else
-        accept_attribute Gleaning.attribute_for_label(label), results&.result_for(label)
-      end
+      next unless (attrname = Gleaning.attribute_for_label(label)) &&
+          attrib_open?(attrname)
+      self.send :"#{attrname}=",
+                case label
+                when 'RSS Feed'
+                  results&.results_for 'RSS Feed'
+                when 'Tags', 'Author'
+                  results&.results_for(label).uniq.join(', ')
+                else
+                  results&.result_for label
+                end
     end
     # Clear the needed bit for all unfound attributes, to forestall more gleaning
     clear_needed_attributes

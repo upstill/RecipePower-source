@@ -433,7 +433,7 @@ class En_wikibooks_org_Scraper < Scraper
     ingredient_links.collect { |link|
       title = link.text
       tagname = title.sub(/^Cookbook:/, '').gsub(/_/,' ').downcase
-      puts "Tag #{tagname} getting associated with #{link}"
+      logger.debug "Tag #{tagname} getting associated with #{link}"
       next unless title.match(/^Cookbook:/) && (URI::decode(link[:href]) == link[:href]) # Easy way to check for diacriticals
       url = absolutize link
       # TagServices.define tagname,
@@ -443,8 +443,8 @@ class En_wikibooks_org_Scraper < Scraper
       registrar.register_tag tagname, :Ingredient, url, :page_kind => :about
       tagname
     }.compact
-    puts "#{tagnames.count} pages pegged: "
-    puts tagnames
+    logger.debug "#{tagnames.count} pages pegged: "
+    logger.debug tagnames
   end
 
 

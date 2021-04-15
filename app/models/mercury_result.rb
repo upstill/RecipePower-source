@@ -4,7 +4,7 @@ class MercuryResult < ApplicationRecord
   backgroundable :status
 
   include Trackable
-  attr_trackable :url, :domain, :title, :date_published, :author, :content, :picurl, :description, :mercury_error, :new_aliases
+  attr_trackable :url, :domain, :title, :date_published, :author, :picurl, :description, :mercury_error, :new_aliases
   # Provide access methods for unpersisted results
   # attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
 
@@ -26,17 +26,13 @@ class MercuryResult < ApplicationRecord
   end
 
   def adopt_dependencies
-    return unless good?
-    # Use the data from Mercury to set all needed keys
+    return if bad? || results.empty?
+    self.attr_trackers = 0
+    # Map the results from Mercury into attributes, if any
     results.each do |result_name, result_val|
-      if attr = MercuryResult.attribute_for_result(result_name.to_sym)
-        if MercuryResult.tracked_attributes.include?(attr)
-          accept_attribute attr, result_val
-        else
-          write_attribute attr, value
-          # self.send (attr.to_s + '=').to_sym, value
-        end
-      end
+      next unless (attrname = MercuryResult.attribute_for_result(result_name.to_sym)) &&
+          attrib_open?(attrname)
+      self.send :"#{attrname}=", result_val
     end
     # Should we really be declaring that no more attributes are needed?
     clear_needed_attributes
@@ -103,7 +99,7 @@ class MercuryResult < ApplicationRecord
                 hr = header_result hr
                 break
               end
-              puts "Redirecting from #{mercury_data['url']} to #{hr}"
+              logger.debug "Redirecting from #{mercury_data['url']} to #{hr}"
               begin
                 new_aliases << (redirected_from = mercury_data['url'])
                 # alias_for((redirected_from = mercury_data['url']), true) # Stash the redirection source in the aliases
@@ -122,7 +118,6 @@ class MercuryResult < ApplicationRecord
             end
             hr.is_a?(String) ? 666 : hr
           end
-      mercury_data['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
       mercury_data['new_aliases'] = new_aliases
       return mercury_data
     rescue Exception => e
@@ -188,9 +183,9 @@ class MercuryResult < ApplicationRecord
     apphome = Rails.env.production? ? ENV['HOME'] : (ENV['HOME']+'/Dev')
     cmd = "node #{apphome}/mercury/fetch.js #{url}"
     logger.debug "Invoking '#{cmd}'"
-    content = `#{cmd}`
-    logger.debug "...got #{content.length} bytes from Mercury, starting with '#{content.truncate 100}'."
-    data = JSON.parse content
+    bytes = `#{cmd}`
+    logger.debug "...got #{bytes.length} bytes from Mercury, starting with '#{bytes.truncate 100}'."
+    data = JSON.parse bytes
     data['url'] = url
     data
   end

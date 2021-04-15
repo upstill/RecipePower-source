@@ -114,16 +114,15 @@ class CollectibleController < ApplicationController
     entity_params = params[response_service.controller_model_name]
     # Get the entity being addressed by the controller
     nominal_entity = response_service.controller_model_class.find_by_id params[:id]
-    case nominal_entity
-      when PageRef
-        @page_ref, prparams = nominal_entity, entity_params
-      when Pagerefable
-        @page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
-      when NilClass
-        prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
-        @page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
-      else
-        return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
+    if nominal_entity.class == PageRef
+      @page_ref, prparams = nominal_entity, entity_params
+    elsif nominal_entity.nil?
+      prparams = params[:page_ref] || entity_params&.delete(:page_ref_attributes)
+      @page_ref = PageRef.find_by id: prparams[:id] # Derive a page_ref if poss.
+    elsif nominal_entity.respond_to?(:page_ref)
+      @page_ref, prparams = nominal_entity.page_ref, entity_params[:page_ref_attributes]
+    else
+      return nominal_entity, entity_params # When no page_ref is involved, keep everything as it was
     end
 
     # The page_ref takes on incoming urls, as possible
@@ -170,14 +169,14 @@ class CollectibleController < ApplicationController
       # #edittable_proxify() sorts all that out, returning an editable model and (for a POST call) parameters for modification
       model, modelparams = edittable_proxy # A page_ref may proxify into the associated Recipe or Site, or another PageRef
       if @page_ref
-        @page_ref.adopt_extractions params[:extractions] if params[:extractions]
+        @page_ref.decorate.adopt_extractions params[:extractions]
         @page_ref.save if (@page_ref != model) && (!@page_ref.persisted? || @page_ref.changed?) # Trigger launch as nec.
-        update_options[:needs] = [ :picurl, :title ]
+        update_options[:needed] = [ :picurl, :title ] # We need these for tagging
       end
       modelname = model.model_name.param_key
       params[modelname] = modelparams
 
-      # The editable tag tokens need to be set through the decorator, since Taggable
+      # The editable tag tokens need to be set through the decorator, since Taggable        
       # doesn't know what tag types pertain.
       # So, first we pull the misc_tag_tokens from the params...
       misc_tag_tokens = params[modelname].delete :editable_misc_tag_tokens
@@ -193,11 +192,12 @@ class CollectibleController < ApplicationController
       if resource_errors_to_flash @decorator, preface: 'Couldn\'t save.'
         render :errors
       else
-        unless request.method == 'GET'
+        if request.method != 'GET'  # POST or PATCH
           flash[:popup] = "#{@decorator.human_name} saved"
+          @decorator.ensure_attributes :content if @presenter.update_items.include?(:content)
           render 'collectible/update.json'
         else
-          response_service.title = @decorator.title.truncate(20) # Get title (or name, etc.) from the entity
+          response_service.title = @decorator.title&.truncate(20) || 'Unknown Title' # Get title (or name, etc.) from the entity
           smartrender
         end
       end
@@ -294,6 +294,7 @@ class CollectibleController < ApplicationController
     # The :refresh parameter triggers regeneration of the entity's content,
     # presumably due to some dependency (like the page_ref or the site changing)
     update_options[:refresh] = [ :content ] if params[:refresh]
+    update_options[:needed] = [ :content ] # Needed whether it's refreshed or not
     update_and_decorate update_options
     response_service.title = @decorator && (@decorator.title || '').truncate(20)
     @nav_current = nil
@@ -343,10 +344,8 @@ class CollectibleController < ApplicationController
           redirect_to default_next_path
         }
         format.json {
-          @data = { onget: [ 'submit.submit_and_process', collection_user_url(current_user, layout: false) ] }
-          response_service.mode = :modal
           flash[:popup] = "'#{@decorator.title}' now appearing in your collection."
-          render :action => 'collect_and_tag', :mode => :modal
+          redirect_to @decorator.object
         }
       end
     else # failure (not a valid collectible) => return to new
@@ -392,9 +391,13 @@ class CollectibleController < ApplicationController
             # By failing to find an existing PageRef on this url, we ensure that the new url is unique
             # What we DON'T know is whether that url redirects to others that are NOT unique.
             # Sorting this out (and possibly merging this new PageRef into an old one) is handled when getting Mercury results
-            page_ref = PageRef.fetch url # build_by_url(url)
+            finders_options = { only: ['Content'] }
+            page_ref = PageRef.fetch url, title: params[:recipe][:title] do |new_pr|
+              # Block called when creating a new page_ref
+              finders_options = {}
+              new_pr.request_attributes :picurl # Launch to derive
+            end
             # We use the initial title for now, until the extractions come in
-            page_ref.title = params[:recipe][:title] if (first_time = page_ref.title.blank?)  # PageRef that existed prior
             page_ref.save # Persist the record, triggering analysis in background
             if page_ref.errors.present?
               msg = page_ref.errors.messages.gsub /\"/, '\''
@@ -411,7 +414,7 @@ class CollectibleController < ApplicationController
 
               @url = tag_page_ref_url page_ref, edit_params
               # finders possible for ["URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"]
-              @finders = FinderServices.js_finders page_ref.site, (first_time ? {} : { only: ['Content'] })
+              @finders = FinderServices.js_finders page_ref.site, finders_options
               render
             end
           end

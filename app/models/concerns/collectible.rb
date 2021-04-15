@@ -25,7 +25,7 @@ module Collectible
         # We want to save rcprefs that need to be saved because they're not part of an association
         # the sign of which is they're persisted and have an entity_id
         # We save the cached refs that are newly created, under the assumption that
-        @cached_refs.values.compact.each { |ref| puts "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
+        @cached_refs.values.compact.each { |ref| logger.debug "Saving Rcpref##{ref.id}" ; ref.save } # unless ref.persisted? && ref.entity_id }
         @cached_refs = {}
       end
     end

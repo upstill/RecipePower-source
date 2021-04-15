@@ -40,6 +40,7 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
     @ingred_tags = %w{
+      all-purpose\ flour
       ground\ turmeric
       ground\ cumin
       ground\ cinnamon
@@ -75,15 +76,17 @@ class ParserTest < ActiveSupport::TestCase
       white\ cauliflower
       cauliflower
       sesame\ tahini
+      sesame\ seeds
       Cointreau
       za'atar
       instant\ dry\ yeast
       active\ dry\ yeast
-      Romanesco\ (green)\ cauliflower}.
+      Romanesco\ (green)\ cauliflower
+      yellow\ onions}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ can inch knob massive\ head ounce g ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup head pound small\ head clove cloves large }.
+    @unit_tags = %w{ can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless sifted finely\ grated }.
+    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated }.
         each { |name| Tag.assert name, :Condition }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF
@@ -241,6 +244,57 @@ EOF
   end
 
   test 'parse ingredient line' do
+
+    html = '¾ cup/180 milliliters lukewarm water'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingspec
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_summed_amt
+    assert ps.success?
+
+    html = '/240 grams'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_alt_amt
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_amt
+    assert ps.success?
+
+    html = '1 ¾ cups all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '4 small yellow onions (about 1 pound; 455g total), ends trimmed but root left intact, peeled, and quartered lengthwise through the root'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 teaspoon toasted sesame seeds'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
     html = 'Salt and black pepper'
     ps = ParserServices.new(content: html, lexaur: @lex)
     ps.parse token: :rp_ingline, context_free: true
@@ -278,7 +332,7 @@ EOF
     assert_equal :rp_ingline, ps.token
     assert_equal 'baking soda', ps.find_value(:rp_ingname)
     assert_equal 'sifted', ps.find_value(:rp_condition)
-    assert_equal 'tsp', ps.find_value(:rp_unit)
+    assert_equal 'tsp.', ps.find_value(:rp_unit)
     assert_not_empty ps.find(:rp_ingspec)
   end
 

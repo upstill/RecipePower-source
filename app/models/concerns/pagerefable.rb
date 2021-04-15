@@ -73,6 +73,7 @@ module Pagerefable
               self.errors.add :url, "can't be used: #{page_ref&.errors&.full_messages}"
             end
           end
+          attrib_done url_attribute if errors[:url].empty? && self.respond_to?(:attrib_done)
           url_or_pr
         end
 
@@ -133,7 +134,7 @@ module Pagerefable
   # One linkable is being merged into another => transfer PageRefs
   def absorb other
     return true if !other.page_ref || (other.id == id)
-    puts "PageRef ##{page_ref ? page_ref.id : '<null>'} absorbing #{other.page_ref ? other.page_ref.id : '<null>'}"
+    logger.debug "PageRef ##{page_ref ? page_ref.id : '<null>'} absorbing #{other.page_ref ? other.page_ref.id : '<null>'}"
     if page_ref
       PageRefServices.new(page_ref).absorb other.page_ref
     else

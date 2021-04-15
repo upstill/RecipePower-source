@@ -1,39 +1,63 @@
 require 'scraping/scanner.rb'
 class RecipePage < ApplicationRecord
   include Pagerefable
+  pagerefable :url
+  include Taggable
+  include Collectible
+  picable :picurl, :picture
   include Backgroundable
   backgroundable
 
   include Trackable
-  attr_trackable :content
+  attr_trackable :content, :picurl, :title
 
-  def self.mass_assignable_attributes
-    (defined?(super) ? super : []) + [ :content ]
-  end
-
-  has_one :page_ref
   accepts_nested_attributes_for :page_ref
+
   has_many :recipes, :through => :page_ref
 
+  def self.mass_assignable_attributes
+    (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
+  end
+  
+  # To be overridden by entities to ensure that attributes are needed
+  def request_for_background
+    # Content is refreshed on first save
+    refresh_attributes :content
+  end
+
   ############# Backgroundable #############
+
+  # In order to make our content, we need content from the PageRef
+  def request_dependencies
+    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title ]) # , :description
+    adopt_dependencies # If the PageRef has already satisfied our needs
+  end
+
+  def adopt_dependencies
+    super if defined? super
+    # Get the available attributes from the PageRef
+    # Translate what the PageRef is offering into our attributes
+    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
+    adopt_dependency :picurl, page_ref
+    adopt_dependency :title, page_ref
+  end
 
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
     # page_ref.ensure_attributes :content
     if content_needed? && page_ref.content_ready?
       # Clear all recipes but the first
-      content = page_ref.trimmed_content
-      if content.present?
-        # rset.each { |rcp| rcp.anchor_path = rcp.focus_path = nil }
-        # parser = ParsingServices.new self
+      parsing_input = page_ref.trimmed_content
+      if parsing_input.present?
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
         # parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
         # The seeker should present the token :rp_recipelist and have several children
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
-        # parser.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
-        ParserServices.parse(entity: self).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
+        ParserServices.parse(entity: self, content: parsing_input).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           xb = sub_parser.xbounds
           rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
         end
@@ -71,12 +95,12 @@ class RecipePage < ApplicationRecord
         end
 
         # Build recipes from any data that hasn't found a home
-        page_ref.recipes.create rcpdata
+        page_ref.recipes.create rcpdata if rcpdata.present?
 
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved
 
-        accept_attribute :content, content
+        self.content = parsing_input
       end
     end
   end

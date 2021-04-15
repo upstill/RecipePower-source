@@ -53,16 +53,6 @@ module Taggable
     filtered_tags tagtype: type_or_types
   end
 
-  # Accept the standardized form of the url only, but only if it's valid
-  def accept_tags tagstring
-    accept_attribute :tags, tagstring { |newstring| accept_tagstring newstring }
-  end
-
-  # Accept the standardized form of the url only, but only if it's valid
-  def accept_author authorstring
-    accept_attribute(:author, authorstring) { |newstring| accept_tagstring newstring, 'Author' }
-  end
-
   # Associate a tag with this entity in the domain of the given user (or the tag's current owner if not given)
   def tag_with tag_or_id, user_id=User.current_id
     assert_tagging tag_or_id, user_id
@@ -123,7 +113,7 @@ module Taggable
         filter_options[:tagtype_x] = tagtype_x.uniq
       end
     rescue Exception => e
-      puts "Parse of #{namesym} failed: #{e}"
+      logger.debug "Parse of #{namesym} failed: #{e}"
     end
     if is_assignment && User.current_id
       nids =
@@ -202,16 +192,5 @@ module Taggable
     taggings.destroy *extant
   end
 
-  private
-
-  # Called in the course of accepting (virtual) tag attributes
-  def accept_tagstring tagstring, tagtype=nil
-    if tagstring.present?
-      ts = TaggingServices.new self
-      tagstring.split(',').map(&:strip).each do |tagname|
-        tagtype ? ts.tag_with(tagname, User.super_id, type: tagtype) : ts.tag_with(tagname, User.super_id)
-      end
-    end
-  end
 
 end

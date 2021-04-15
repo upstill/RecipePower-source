@@ -44,4 +44,24 @@ class PageRefDecorator < CollectibleDecorator
     ([ :Ingredient, :Genre, :Occasion, :Dish, :Process, :Tool, :Course, :Diet ] + super).uniq
   end
 
+  # Accept attribute values extracted from a page:
+  # 1: hand them off to the gleaning
+  # 2: adopt them back from there
+  def adopt_extractions extraction_params={}
+    return unless extraction_params
+    as_attributes = {}
+    extraction_params.keys.each do |key|
+      if attrname = attribute_name_for(key)
+        as_attributes[attrname] = extraction_params[key]
+      end
+    end
+    if as_attributes.present?
+      # Translate the extractions parameters into an attribute hash
+      build_gleaning unless gleaning
+      # Assign all attributes that are either open or untracked
+      gleaning.assign_attributes gleaning.assignable_values(as_attributes)
+      assign_attributes assignable_values(as_attributes)
+    end
+  end
+
 end

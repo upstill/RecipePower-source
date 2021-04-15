@@ -183,7 +183,8 @@ module Backgroundable
             dj.update_attributes djopts.merge(failed_at: nil, run_at: Time.now, payload_object: self) # Need to undo the failed_at lock, if any
             dj.save if dj.changed?
           end
-          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})"
+          needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
+          logger.debug ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
         end
         self.virgin! unless virgin?
       end
@@ -192,7 +193,8 @@ module Backgroundable
         yield if block_given? # Give the caller a chance to do any pre-launch work
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
-        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})"
+        needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
+        logger.debug ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
       end
       self.virgin! unless virgin?
     end
@@ -227,7 +229,8 @@ module Backgroundable
       end
     end
     return true if good? && !force # If done previously and successfully, don't run again unless forced to
-    self.dj_id = nil if dj_id && !dj # In case the job has disappeared 
+    self.dj_id = nil if dj_id && !dj # In case the job has disappeared
+    what_for = respond_to?(:needed_attributes) ? "for #{needed_attributes} " : ''
     if dj_id # Job pending => run it now, as necessary
       # There's an associated job. If it's due (dj.run_at <= Time.now), or never been run (virgin), run it now.
       # If it HAS run, and it's due in the future, that's either because
@@ -236,14 +239,14 @@ module Backgroundable
       # Force execution if it's never been completed, or it's due, or we force the issue
       if virgin? || force || (dj && (dj.run_at <= Time.now))
         dj.payload_object = self # ...ensuring that the two versions don't get out of sync
-        puts ">>>>>>>>>>> bkg_land #{self} with dj #{self.dj}"
+        logger.debug ">>>>>>>>>>> bkg_land #{self} #{what_for}with dj #{self.dj}"
         Delayed::Worker.new.run dj
         # It doesn't do to reload the job b/c it may have been deleted
         self.dj = Delayed::Job.find_by id: dj.id if dj
         # dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
       end
     elsif virgin? || force # No DJ => run it only if not run before, or things have changed (virgin), or it's needed (force)
-      puts ">>>>>>>>>>> bkg_land #{self} (no dj)"
+      logger.debug ">>>>>>>>>>> bkg_land #{self} #{what_for}(no dj)"
       perform_without_dj
     end
     good?
@@ -312,6 +315,7 @@ module Backgroundable
         update_attribute :dj_id, dj&.id
       end
     end
+    super if defined?(super) # Give all modules a shot at the results
   end
 
   # When an unhandled error occurs, record it among the object's errors
@@ -336,7 +340,7 @@ module Backgroundable
   end
 
   def failure job=nil
-    puts "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
+    logger.debug "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
     update_attribute :dj_id, nil
   end
 

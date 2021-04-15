@@ -31,7 +31,7 @@ module ControllerDeference
         when :json
           # Need JSON but not JSON
           url = goto_url to: %Q{"#{speced_path}"} # the redirect#go JSON response will get the client to request page
-          puts "GOTO_URL = #{url}"
+          logger.debug "GOTO_URL = #{url}"
           url
         else
           x=2

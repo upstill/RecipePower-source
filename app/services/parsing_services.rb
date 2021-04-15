@@ -109,10 +109,10 @@ class ParsingServices
   def parse_and_annotate content
     if seeker = parse(content)
       [:rp_ingline].each do |token|
-        puts "-------------- #{token} ---------------"
+        Rails.logger.debug "-------------- #{token} ---------------"
         seekers = seeker.find(token)
         seekers.each { |seeker|
-          puts seeker
+          Rails.logger.debug seeker
         }
       end
       ParsingServices.enclose_results seeker, parser: @parser
