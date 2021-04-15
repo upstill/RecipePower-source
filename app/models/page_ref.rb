@@ -25,7 +25,6 @@ class PageRef < ApplicationRecord
   # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
     return gleaning.content if gleaning&.content_ready?
-    return mercury_result.content if mercury_result&.content_ready?
   end
 
   def content= val

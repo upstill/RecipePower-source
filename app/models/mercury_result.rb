@@ -4,7 +4,7 @@ class MercuryResult < ApplicationRecord
   backgroundable :status
 
   include Trackable
-  attr_trackable :url, :domain, :title, :date_published, :author, :content, :picurl, :description, :mercury_error, :new_aliases
+  attr_trackable :url, :domain, :title, :date_published, :author, :picurl, :description, :mercury_error, :new_aliases
   # Provide access methods for unpersisted results
   # attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
 
@@ -27,6 +27,7 @@ class MercuryResult < ApplicationRecord
 
   def adopt_dependencies
     return if bad? || results.empty?
+    self.attr_trackers = 0
     # Map the results from Mercury into attributes, if any
     results.each do |result_name, result_val|
       next unless (attrname = MercuryResult.attribute_for_result(result_name.to_sym)) &&
@@ -117,7 +118,6 @@ class MercuryResult < ApplicationRecord
             end
             hr.is_a?(String) ? 666 : hr
           end
-      mercury_data['content'] = mercury_data['content']&.tr "\x00", ' ' # Mercury can return strings with null bytes for some reason
       mercury_data['new_aliases'] = new_aliases
       return mercury_data
     rescue Exception => e
