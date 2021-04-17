@@ -140,13 +140,15 @@ class PageRef < ApplicationRecord
   # Ask gleaning and mercury_result for attributes
   def adopt_dependencies
     super if defined? super
-    assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
+    assign_attributes gleaning.ready_attribute_values.slice(*open_attributes) if gleaning
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
-    assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
-    if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
-      new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
-      # Create a new alias on this page_ref for every derived alias that isn't already in use
-      (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
+    if mercury_result
+      assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
+        new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
+        # Create a new alias on this page_ref for every derived alias that isn't already in use
+        (new_aliases - aliases.pluck(:url)).each { |new_alias| alias_for new_alias, true }
+      end
     end
     if recipe_page_needed?
       recipe_page || build_recipe_page
@@ -191,15 +193,19 @@ class PageRef < ApplicationRecord
     end
 
     # Now that we have a url, move on to the mercury_result and the gleaning
-    mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
-    if mercury_result.bad?
-      errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
+    if mercury_result&.needed_attributes.present?
+      mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
+      if mercury_result.bad?
+        errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
+      end
+      self.http_status = mercury_result.http_status
     end
-    self.http_status = mercury_result.http_status
 
-    gleaning.ensure_attributes # Block until gleaning has completed and accepted its attributes
-    if gleaning.bad?
-      errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
+    if gleaning&.needed_attributes.present?
+      gleaning.ensure_attributes # Block until gleaning has completed and accepted its attributes
+      if gleaning.bad?
+        errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
+      end
     end
 
     if errors[:url].present?
