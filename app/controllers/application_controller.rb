@@ -176,8 +176,8 @@ class ApplicationController < ActionController::Base
         # 3) Attributes that should be launched for background acquisition are in options[:request]
         # NB: if an attribute needs to be refreshed AND is needed, it will be validated now
         # If it needs to be refreshed and is NOT needed now, it will be included in the launch
-        needed = options[:needed] || []
-        refresh = options[:refresh] || []
+        needed = (options[:needed] || []) & entity.class.tracked_attributes
+        refresh = (options[:refresh] || []) & entity.class.tracked_attributes
         if (refresh_now = needed & refresh).present?
           entity.refresh_attributes *refresh_now
         end
