@@ -20,27 +20,32 @@ class MercuryResult < ApplicationRecord
       :picurl
     when :excerpt
       :description
+    when :errorMessage
+      :mercury_error
     else
       result_name if self.attribute_names.include?(result_name.to_s)
     end
   end
 
-  def adopt_dependencies
-    return if bad? || results.empty?
-    self.attr_trackers = 0
-    # Map the results from Mercury into attributes, if any
-    results.each do |result_name, result_val|
-      next unless (attrname = MercuryResult.attribute_for_result(result_name.to_sym)) &&
-          attrib_open?(attrname)
-      self.send :"#{attrname}=", result_val
-    end
-    # Should we really be declaring that no more attributes are needed?
-    clear_needed_attributes
+  def relaunch?
+    puts "Relaunching MercuryError##{id} because #{mercury_error}"
+    results['error'] == true
   end
 
   def perform
     self.error_message = nil
     self.results = get_mercury_results
+    if results.present?
+      # self.attr_trackers = 0
+      # Map the results from Mercury into attributes, if any
+      results['errorMessage'] ||= nil # So mercury_error gets set
+      results.each do |result_name, result_val|
+        key = result_name.is_a?(Symbol) ? ":#{result_name}" : "'#{result_name}'"
+        attrname = MercuryResult.attribute_for_result(result_name.to_sym)
+        puts "\t#{key} => #{attrname || '<no attribute>'} = #{result_val.to_s.truncate 100}"
+        self.send :"#{attrname}=", result_val if attrname && attrib_open?(attrname)
+      end
+    end
   end
 
   def method_missing namesym, *args
@@ -76,7 +81,7 @@ class MercuryResult < ApplicationRecord
             # Check the header for the url from the server.
             # If it's a string, the header returned a redirect
             # otherwise, it's an HTTP code
-            puts "Checking direct access of PageRef ##{id} at '#{url}'"
+            puts "Checking direct access of MercuryResult ##{id} at '#{url}'"
             redirected_from = nil
             # Loop over the redirects from the link, adding each to the record.
             # Stop when we get to the final page or an error occurs
@@ -99,7 +104,7 @@ class MercuryResult < ApplicationRecord
                 hr = header_result hr
                 break
               end
-              logger.debug "Redirecting from #{mercury_data['url']} to #{hr}"
+              puts "Redirecting from #{mercury_data['url']} to #{hr}"
               begin
                 new_aliases << (redirected_from = mercury_data['url'])
                 # alias_for((redirected_from = mercury_data['url']), true) # Stash the redirection source in the aliases
@@ -121,10 +126,11 @@ class MercuryResult < ApplicationRecord
       mercury_data['new_aliases'] = new_aliases
       return mercury_data
     rescue Exception => e
-      errors.add :url, "'#{url}' is bad: #{e}"
-      self.http_status = 400
+      return {'error' => true, 'http_status' => 400, 'errorMessage' => "'#{url}' is bad: #{e}" }
     end
   end
+
+  private
 
   # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
@@ -136,10 +142,10 @@ class MercuryResult < ApplicationRecord
     uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
     data['url'] = uri.to_s
     data['domain'] ||= uri.host
-    # Merge different error states into a mercury_error
-    data['mercury_error'] = data['errorMessage'].if_present || (data['message'] if data['error'])
-    data.delete :errorMessage
-    data.delete :error
+    # Merge error states
+    data['errorMessage'] = data['message'] unless data['errorMessage'].present?
+    data.delete 'message'
+    data.delete 'errorMessage' unless data['errorMessage']
     data
   end
 
@@ -182,9 +188,9 @@ class MercuryResult < ApplicationRecord
   def mercury_via_node url
     apphome = Rails.env.production? ? ENV['HOME'] : (ENV['HOME']+'/Dev')
     cmd = "node #{apphome}/mercury/fetch.js #{url}"
-    logger.debug "Invoking '#{cmd}'"
+    puts "Invoking '#{cmd}'"
     bytes = `#{cmd}`
-    logger.debug "...got #{bytes.length} bytes from Mercury, starting with '#{bytes.truncate 100}'."
+    puts "...got #{bytes.length} bytes from Mercury, starting with '#{bytes.truncate 100}'."
     data = JSON.parse bytes
     data['url'] = url
     data

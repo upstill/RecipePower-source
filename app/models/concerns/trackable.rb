@@ -14,6 +14,7 @@ module Trackable
     end
 
     after_save do |entity|
+      # Any attributes that remain unsatisfied will trigger a search for more
       entity.request_attributes  # (re)Launch dj as necessary
     end
   end
@@ -47,7 +48,7 @@ module Trackable
           define_method setter do |val|
             if Rails.env.development?
               printable = val.is_a?(String) ? "'#{val.truncate 100}'" : val.to_s
-              logger.debug "#{self.class} writing #{printable} to #{attrname}"
+              puts "#{self.class} writing #{printable} to #{attrname}"
             end
             # Clear 'needed' bit and set the 'ready' bit
             attrib_done attrname
@@ -63,7 +64,7 @@ module Trackable
 
 =begin    Hell, just use the default reader
           define_method "#{attrname}" do
-            logger.debug "#{self.class} reading #{attrname}"
+            puts "#{self.class} reading #{attrname}"
             super()
           end
 =end
@@ -190,7 +191,7 @@ module Trackable
     }
     request_dependencies # Launch all objects that we depend on
     if attrib_needed?
-      logger.debug "Requesting attributes #{needed_attributes} of #{self} ##{id}"
+      puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
       bkg_launch true
     end
   end
