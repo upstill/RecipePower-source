@@ -184,7 +184,7 @@ module Backgroundable
             dj.save if dj.changed?
           end
           needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
+          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj##{self.dj.id})#{needed}"
           report_due
         end
         self.virgin! unless virgin?
@@ -195,7 +195,7 @@ module Backgroundable
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
         needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-        puts ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
+        puts ">>>>>>>>>>> bkg_launched #{self} (dj##{self.dj.id})#{needed}"
         report_due
       end
       self.virgin! unless virgin?
@@ -261,9 +261,9 @@ module Backgroundable
     if dj
       secs = dj.run_at - Time.now
       secs, rel = secs < 0 ? [-secs, 'ago'] : [ secs, 'from now' ]
-      puts "Job on #{self.class}##(id} set to rerun at #{dj.run_at} (#{secs} seconds #{rel})"
+      puts "Job##{dj.id} on #{self.class}##{id} set to rerun at #{dj.run_at} (#{secs} seconds #{rel})"
     else
-      puts "#{self.class}##(id} is not queued"
+      puts "#{self.class}##{id} is not queued"
     end
   end
 
@@ -316,9 +316,7 @@ module Backgroundable
     # ...could have gone error-free because errors were reported only in the record
     # NB: This is a pretty crude report. For more specific info, the model should throw the error
     # with a proper report, which will then get recorded in errors[:base]
-    if relaunch?
-      raise Exception, self.errors.full_messages # Make sure DJ gets the memo
-    end
+    raise Exception, self.errors.full_messages if relaunch? # Make sure DJ gets the memo
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
     self.dj = nil if good?
     if persisted?
@@ -340,13 +338,11 @@ module Backgroundable
   # NB: THIS IS THE PLACE FOR BACKGROUNDABLES TO RECORD ANY PERSISTENT ERROR STATE beyond :good or :bad status,
   # because, by default, that's all that's left after saving the record
   def error job, exception
-    puts "!!! Failed !!! with#{'out' unless processing?} processing on."
-    if tracetop = exception.backtrace&.first
-      # Extract the file and line # from the stack top
-      tracetop = " at<br>" + tracetop.match(/(.*:[\d]*)/).to_s.if_present || tracetop
-      tracetop.sub! Rails.root.to_s+'/', ''
-      puts "...error raised at #{tracetop}"
-    end
+    tracetop = exception.backtrace&.first
+    # Extract the file and line # from the stack top
+    tracetop = tracetop.match(/(.*:[\d]*)/).to_s.if_present || tracetop
+    tracetop.sub! Rails.root.to_s+'/', ''
+    puts "...error raised at #{tracetop}: #{exception}"
     errors.add :base, exception.to_s+tracetop
     self.status = :bad if processing? # ...thus allowing others to set the status
   end
@@ -354,11 +350,13 @@ module Backgroundable
   # The #after hook is called after #success or #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=dj
+    # puts ">>> Job on #{self.class.to_s}##{id} -> dj##{dj.id} scheduled to run again in #{dj.run_at - Time.now} seconds" if dj
   end
 
   def failure job=nil
-    puts "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
-    update_attribute :dj_id, nil if !dj
+    super if defined?(super)
+    puts ">>> Job on #{self.class.to_s}##{id} -> dj##{dj_id} failed permanently: Removing dj"
+    update_attribute :dj_id, nil # if !dj
   end
 
 end

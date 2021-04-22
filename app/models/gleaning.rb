@@ -80,6 +80,11 @@ class Gleaning < ApplicationRecord
     clear_needed_attributes
   end
 
+  def relaunch?
+    puts "Relaunching Gleaning##{id} because HTTP Status #{http_status}"
+    http_status != 200 || errors.any? || err_msg.present?
+  end
+
   # Execute a gleaning on the page_ref's url
   def perform
     self.err_msg = ''
@@ -94,6 +99,19 @@ class Gleaning < ApplicationRecord
       exc = Exception.new breakdown[:msg]
       exc.set_backtrace msg.backtrace
       raise exc # msg, breakdown[:msg] if dj
+    end
+    results.labels.each do |label|
+      next unless (attrname = Gleaning.attribute_for_label(label)) &&
+          attrib_open?(attrname)
+      self.send :"#{attrname}=",
+                case label
+                when 'RSS Feed'
+                  results&.results_for 'RSS Feed'
+                when 'Tags', 'Author'
+                  results&.results_for(label).uniq.join(', ')
+                else
+                  results&.result_for label
+                end
     end
   end
 

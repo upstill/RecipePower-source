@@ -135,12 +135,14 @@ class Recipe < ApplicationRecord
     save
   end
 
-  ##### Trackable matters #########k
+  ##### Trackable matters #########
   # Request attributes from page_ref as necessary
-  def request_dependencies 
+  def performance_required 
     # If we haven't persisted, then the page_ref has no connection back
     # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title, :description ]) # Those to be got from PageRef
+    return true if page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title, :description ]) # Those to be got from PageRef
+    adopt_dependencies
+    content_needed? # We launch if content is still needed
   end
 
   # Override to acccept values from page_ref
@@ -148,9 +150,6 @@ class Recipe < ApplicationRecord
     super if defined? super
     # Get the available attributes from the PageRef
     # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
     adopt_dependency :description, page_ref
@@ -166,7 +165,9 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :content
+    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present? && !page_ref.bad?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed?
@@ -185,6 +186,8 @@ class Recipe < ApplicationRecord
         self.content_needed = false   # Give up on content until notified otherwise
       end
     end
+
+    # Now, throw an error if we need to relaunch
   end
 
 end

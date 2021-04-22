@@ -211,21 +211,27 @@ class Site < ApplicationRecord
     }
   end
 
-  def request_dependencies 
+  def performance_required 
     build_page_ref unless page_ref
-    page_ref.request_attributes *to_get_from_page_ref(open_attributes)
+    adopt_dependencies # Try to get valid attributes from page_ref
+    page_ref.request_attributes *to_get_from_page_ref(open_attributes) unless page_ref.bad?
   end
 
   # Get the available attributes from the PageRef
   def adopt_dependencies
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
     adopt_dependency :logo, page_ref, :picurl
     adopt_dependency :name, page_ref, :title
     adopt_dependency :description, page_ref, :description
     page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+  end
+
+  def perform
+    # Translate what the PageRef is offering into our attributes
+    if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref  # Block on the page_ref's work
+      # Throw an error to trigger relaunch if the page_ref is still pending
+      raise "Site still awaiting page_ref" if performance_required
+    end
   end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model

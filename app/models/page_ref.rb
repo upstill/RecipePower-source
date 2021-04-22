@@ -108,8 +108,6 @@ class PageRef < ApplicationRecord
 
   after_create { |pr| pr.request_attributes :url } # Need to launch after creation because, somehow, a new url doesn't count as changed
 
-  after_save { |pr| pr.bkg_launch if pr.needed_attributes.present? } # ...because no launching occurred before saving
-
   # All other PageRefables refer to a separate PageRef, but we're our own page_ref
   def page_ref
     self
@@ -119,25 +117,34 @@ class PageRef < ApplicationRecord
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
-  def request_dependencies 
+  def performance_required 
     # attrib_needed! :content, true if recipe_page_needed?
     from_gleaning = Gleaning.tracked_attributes & needed_attributes
-    if either = from_gleaning.present?
+    if from_gleaning.present?
       build_gleaning if !gleaning
-      gleaning.request_attributes *from_gleaning
+      if gleaning.bad?
+        from_gleaning = []
+      else
+        gleaning.request_attributes *from_gleaning
+      end
     end
     from_mercury = MercuryResult.tracked_attributes & needed_attributes
     if from_mercury.present?
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result
-      mercury_result.request_attributes *from_mercury
-      either = true
+      if mercury_result.bad? # Failed permanently
+        from_mercury = []
+      else
+        mercury_result.request_attributes *from_mercury
+      end
     end
     # We need to get attributes from Gleaning and/or Mercury
-    either
+    adopt_dependencies # Try to get attribs from gleaning and mercury as they stand
+    relaunch? if from_mercury.present? || from_gleaning.present?
   end
 
-  # Ask gleaning and mercury_result for attributes
+  # Ask gleaning and mercury_result for attributes.
+  # We assume that both have been settled in the course of #perform
   def adopt_dependencies
     super if defined? super
     assign_attributes gleaning.ready_attribute_values.slice(*open_attributes) if gleaning
@@ -156,6 +163,12 @@ class PageRef < ApplicationRecord
       # Could do this to get the RecipePage parsing done sooner
       # recipe_page.request_attributes :content
     end
+  end
+
+  def relaunch?
+    # Still got unsatisfied attributes? Ready to launch!
+    (MercuryResult.tracked_attributes & needed_attributes) && mercury_result.virgin? ||
+        (Gleaning.tracked_attributes & needed_attributes) && gleaning.virgin?
   end
 
   ############ Backgroundable ###############
@@ -193,28 +206,31 @@ class PageRef < ApplicationRecord
     end
 
     # Now that we have a url, move on to the mercury_result and the gleaning
-    if mercury_result&.needed_attributes.present?
-      mercury_result.ensure_attributes # Block until mercury_result has completed and accepted its attributes
-      if mercury_result.bad?
-        errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
-      end
+
+    # Block until mercury_result has completed and accepted its attributes
+    mercury_result.ensure_attributes unless mercury_result.bad?
+
+    # Block until gleaning has completed and accepted its attributes
+    gleaning.ensure_attributes unless gleaning.bad?
+
+    # If MercuryResult or Gleaning have failed,
+    # AND we want to give them another chance to complete,
+    # AND we're dependent on values from them, then we throw an error to relaunch
+
+    if performance_required # Extract values from mr and gl, returning true if they are still pending
+      gleaning_error = "can\'t be gleaned: #{gleaning.errors[:base]}\n" if gleaning.bad?
+      mercury_error = "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}" if mercury.bad?
       self.http_status = mercury_result.http_status
-    end
-
-    if gleaning&.needed_attributes.present?
-      gleaning.ensure_attributes # Block until gleaning has completed and accepted its attributes
-      if gleaning.bad?
-        errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}"
-      end
-    end
-
-    if errors[:url].present?
-      url_errors = errors[:url].join "\n"
       if relaunch?
-        raise url_errors # ...to include the errors and relaunch
+        raise "#{gleaning_error}#{mercury_error}"
       else
-        errors.add :base, url_errors # ...to simply include the errors in the record
+        # Declare an error to set status to :bad
+        errors.add :url, "#{gleaning_error}#{mercury_error}"
       end
+    else
+      # No point in continuing => clear needed attributes a la Failure
+      needed_attributes.each { |attrib| errors.add attrib, 'couldn\'t be extracted' }
+      # clear_needed_attributes
     end
 
   end
@@ -226,14 +242,16 @@ class PageRef < ApplicationRecord
 
   # We relaunch the job on errors, unless there's a permanent HTTP error
   def relaunch?
-    errors.present? && ![
+    return false if [
         400, # Bad Request
         401, # Unauthorized
         403, # Forbidden
         # 404, Not Found
         414, # URI Too Long
-        # 500 Internal Server Error
+    # 500 Internal Server Error
     ].include?(http_status)
+    return true if mercury_result.nil? || gleaning.nil?
+    return !(mercury_result.bad? && gleaning.bad?)
   end
 
   # The indexing_url is a simplified url, as stored in an Alias

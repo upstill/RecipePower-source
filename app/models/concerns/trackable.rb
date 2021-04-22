@@ -15,7 +15,7 @@ module Trackable
 
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
-      entity.request_attributes  # (re)Launch dj as necessary
+      bkg_launch true if !bad? && performance_required # (re)Launch dj as necessary
     end
   end
 
@@ -149,7 +149,7 @@ module Trackable
   # :except provides a list of attributes NOT to refresh
   # :immediate if true, forces the attribute(s) to update before returning
   # An empty list before the argument hash causes ALL tracked attributes to be refreshed
-  def refresh_attributes *args, except: [], immediate: false
+  def refresh_attributes *args, except: [], immediate: false, force: true
     # No args => update all tracked attributes
     attrs = self.class.tracked_attributes
     attrs &= args.map(&:to_sym) if args.present? # Slyly eliding invalid attributes
@@ -157,18 +157,18 @@ module Trackable
     # Invalidate all given attributes
     attribs_ready! attrs, false
     if immediate
-      ensure_attributes *attrs
+      ensure_attributes *attrs, force: force
     else
-      request_attributes *attrs
+      request_attributes *attrs, force: force
     end
   end
 
   # Ensure that the given attributes have been acquired if at all possible.
   # Calling ensure_attributes with no arguments means that all needed attributes should be acquired
   # NB: needed attributes other than those specified may be acquired as a side effect
-  def ensure_attributes *list_of_attributes
+  def ensure_attributes *list_of_attributes, force: false
     if list_of_attributes.present?
-      request_attributes *list_of_attributes
+      request_attributes *list_of_attributes, force: force
     else
       list_of_attributes = needed_attributes
     end
@@ -180,24 +180,44 @@ module Trackable
 
   # A Trackable winds up its (successful) work by taking any attributes from its dependencies
   def success job=nil
-    super(job) if defined?(super)
+    super if defined?(super)
     adopt_dependencies
   end
+
+  # This is the method called when a DelayedJob job finally fails permanently
+=begin
+  def failure job=nil
+    super if defined?(super)
+    puts "#{self.class}##{id} giving up, clearing needed attributes."
+    clear_needed_attributes
+    save
+  end
+=end
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
   def request_attributes *list_of_attributes, force: false
     list_of_attributes.each { |attrib|
       attrib_needed!(attrib) if !(attrib_ready?(attrib) || attrib_needed?(attrib)) || force
     }
-    request_dependencies # Launch all objects that we depend on
-    if attrib_needed?
+    if persisted?
+      self.status = 'virgin' if force # Remove 'bad' status which would prevent launching
+      save # ... and launch as needed
+    elsif performance_required && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
       puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
       bkg_launch true
+      true
     end
+
   end
 
-  # Stub to be overridden for an object to launch prerequisites to needed attributes
-  def request_dependencies
+  # Stub to be overridden that an object uses to:
+  # 1) hold until prequisites are fulfilled by others
+  # 2) send heavy computing into background.
+  # In either case, return true to launch for background processing
+  # NB: this is an object's chance to extract values without awaiting others, if possible
+  # return: a flag to launch for dependent data
+  def performance_required
+    attrib_needed? # If we get here with attributes still needed, try to get them in background
   end
 
   # Once the entities we depend on have settled, we take on their values

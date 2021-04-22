@@ -28,18 +28,15 @@ class RecipePage < ApplicationRecord
   ############# Backgroundable #############
 
   # In order to make our content, we need content from the PageRef
-  def request_dependencies
-    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title ]) # , :description
+  def performance_required
+    return true if page_ref.request_attributes*(needed_attributes & [ :content, :picurl, :title ])
     adopt_dependencies # If the PageRef has already satisfied our needs
+    content_needed? # Launch iff content needs to be settled
   end
 
   def adopt_dependencies
     super if defined? super
     # Get the available attributes from the PageRef
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
   end
@@ -47,6 +44,10 @@ class RecipePage < ApplicationRecord
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
     # page_ref.ensure_attributes :content
+    # Translate what the PageRef is offering into our attributes
+    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
+      page_ref.ensure_attributes *needed_from_page_ref
+    end
     if content_needed? && page_ref.content_ready?
       # Clear all recipes but the first
       parsing_input = page_ref.trimmed_content
