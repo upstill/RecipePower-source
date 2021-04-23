@@ -28,7 +28,7 @@ class RecipePage < ApplicationRecord
   ############# Backgroundable #############
 
   # In order to make our content, we need content from the PageRef
-  def performance_required
+  def performance_required force: false
     return true if page_ref.request_attributes*(needed_attributes & [ :content, :picurl, :title ])
     adopt_dependencies # If the PageRef has already satisfied our needs
     content_needed? # Launch iff content needs to be settled

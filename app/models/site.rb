@@ -211,7 +211,7 @@ class Site < ApplicationRecord
     }
   end
 
-  def performance_required 
+  def performance_required  force: false
     build_page_ref unless page_ref
     adopt_dependencies # Try to get valid attributes from page_ref
     page_ref.request_attributes *to_get_from_page_ref(open_attributes) unless page_ref.bad?

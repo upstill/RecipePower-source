@@ -137,7 +137,7 @@ class Recipe < ApplicationRecord
 
   ##### Trackable matters #########
   # Request attributes from page_ref as necessary
-  def performance_required 
+  def performance_required force: false
     # If we haven't persisted, then the page_ref has no connection back
     # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     return true if page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title, :description ]) # Those to be got from PageRef

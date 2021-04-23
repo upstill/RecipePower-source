@@ -359,4 +359,14 @@ module Backgroundable
     update_attribute :dj_id, nil # if !dj
   end
 
+  # Raise an interrupt if the other hasn't completed
+  def await other
+    raise "#{self.class}##{id} deferring to #{other.class}##{other.id}" if other.dj
+  end
+
+  # Put job back into queue pending the other job
+  def defer_to other
+    (other.dj.run_at + 0.5.seconds) if other.dj
+  end
+
 end

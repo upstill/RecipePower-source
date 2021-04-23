@@ -200,9 +200,11 @@ module Trackable
       attrib_needed!(attrib) if !(attrib_ready?(attrib) || attrib_needed?(attrib)) || force
     }
     if persisted?
-      self.status = 'virgin' if force # Remove 'bad' status which would prevent launching
-      save # ... and launch as needed
-    elsif performance_required && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
+      if performance_required force: force # Remove 'bad' status which would prevent launching
+        self.status = 'virgin'
+        save # ... and launch as needed
+      end
+    elsif performance_required(force: force) && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
       puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
       bkg_launch true
       true
@@ -216,8 +218,8 @@ module Trackable
   # In either case, return true to launch for background processing
   # NB: this is an object's chance to extract values without awaiting others, if possible
   # return: a flag to launch for dependent data
-  def performance_required
-    attrib_needed? # If we get here with attributes still needed, try to get them in background
+  def performance_required force: false
+    force || attrib_needed? # If we get here with attributes still needed, try to get them in background
   end
 
   # Once the entities we depend on have settled, we take on their values

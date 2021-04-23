@@ -113,29 +113,37 @@ class PageRef < ApplicationRecord
     self
   end
 
+  def need_from_mercury
+    MercuryResult.tracked_attributes & needed_attributes
+  end
+
+  def need_from_gleaning
+    Gleaning.tracked_attributes & needed_attributes
+  end
+
   ######### Trackable overrides ############
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
-  def performance_required 
+  def performance_required force: false
     # attrib_needed! :content, true if recipe_page_needed?
-    from_gleaning = Gleaning.tracked_attributes & needed_attributes
+    from_gleaning = need_from_gleaning
     if from_gleaning.present?
       build_gleaning if !gleaning
-      if gleaning.bad?
+      if gleaning.bad? && !force
         from_gleaning = []
       else
-        gleaning.request_attributes *from_gleaning
+        gleaning.request_attributes *from_gleaning, force: force
       end
     end
-    from_mercury = MercuryResult.tracked_attributes & needed_attributes
+    from_mercury = need_from_mercury
     if from_mercury.present?
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result
-      if mercury_result.bad? # Failed permanently
+      if mercury_result.bad? && !force # Failed permanently
         from_mercury = []
       else
-        mercury_result.request_attributes *from_mercury
+        mercury_result.request_attributes *from_mercury, force: force
       end
     end
     # We need to get attributes from Gleaning and/or Mercury
@@ -208,10 +216,12 @@ class PageRef < ApplicationRecord
     # Now that we have a url, move on to the mercury_result and the gleaning
 
     # Block until mercury_result has completed and accepted its attributes
-    mercury_result.ensure_attributes unless mercury_result.bad?
+    await mercury_result
+    # mercury_result.ensure_attributes unless mercury_result.bad?
 
     # Block until gleaning has completed and accepted its attributes
-    gleaning.ensure_attributes unless gleaning.bad?
+    await gleaning
+    # gleaning.ensure_attributes unless gleaning.bad?
 
     # If MercuryResult or Gleaning have failed,
     # AND we want to give them another chance to complete,
@@ -233,6 +243,13 @@ class PageRef < ApplicationRecord
       # clear_needed_attributes
     end
 
+  end
+
+  # We reschedule for AFTER the completion of jobs (Gleaning or MercuryResult) that we depend on
+  def reschedule_at current_time, attempts
+    md = defer_to(mercury_result) || super
+    gd = defer_to(gleaning) || super
+    md > gd ? md : gd
   end
 
   def after job=nil
