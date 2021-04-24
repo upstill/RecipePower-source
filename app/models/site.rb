@@ -211,14 +211,17 @@ class Site < ApplicationRecord
     }
   end
 
-  def performance_required  force: false
+  def performance_required *list_of_attributes,  force: false
     build_page_ref unless page_ref
     adopt_dependencies # Try to get valid attributes from page_ref
-    page_ref.request_attributes *to_get_from_page_ref(open_attributes) unless page_ref.bad?
+    save if changed?
+    return false if page_ref.bad? && !force
+    needed_from_page_ref = to_get_from_page_ref list_of_attributes
+    needed_from_page_ref.present? && page_ref.request_attributes(*needed_from_page_ref)
   end
 
   # Get the available attributes from the PageRef
-  def adopt_dependencies
+  def adopt_dependencies immediately: false
     adopt_dependency :logo, page_ref, :picurl
     adopt_dependency :name, page_ref, :title
     adopt_dependency :description, page_ref, :description
@@ -230,7 +233,7 @@ class Site < ApplicationRecord
     if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
       page_ref.ensure_attributes *needed_from_page_ref  # Block on the page_ref's work
       # Throw an error to trigger relaunch if the page_ref is still pending
-      raise "Site still awaiting page_ref" if performance_required
+      raise "Site still awaiting page_ref" if performance_required(*needed_attributes)
     end
   end
 

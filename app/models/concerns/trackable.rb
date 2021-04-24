@@ -15,7 +15,8 @@ module Trackable
 
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
-      bkg_launch true if !bad? && performance_required # (re)Launch dj as necessary
+      bkg_launch true if !bad? && performance_required(*needed_attributes)
+      # (re)Launch dj as necessary to gather attributes from MercuryResult and Gleaning
     end
   end
 
@@ -164,7 +165,8 @@ module Trackable
   end
 
   # Ensure that the given attributes have been acquired if at all possible.
-  # Calling ensure_attributes with no arguments means that all needed attributes should be acquired
+  # Calling ensure_attributes with no arguments means that all needed attributes should be acquired.
+  # This may entail forcing the object's delayed job to completion BEFORE RETURNING
   # NB: needed attributes other than those specified may be acquired as a side effect
   def ensure_attributes *list_of_attributes, force: false
     if list_of_attributes.present?
@@ -172,10 +174,10 @@ module Trackable
     else
       list_of_attributes = needed_attributes
     end
-    # Try to acquire attributes from their dependencies without landing
-    adopt_dependencies
+    # Try to acquire attributes from their dependencies, forcing their landing
+    adopt_dependencies immediately: true
     # If any attributes are still needed, call them in via background job
-    bkg_land if (list_of_attributes & needed_attributes).present?
+    bkg_land! true if (list_of_attributes & needed_attributes).present?
   end
 
   # A Trackable winds up its (successful) work by taking any attributes from its dependencies
@@ -200,11 +202,11 @@ module Trackable
       attrib_needed!(attrib) if !(attrib_ready?(attrib) || attrib_needed?(attrib)) || force
     }
     if persisted?
-      if performance_required force: force # Remove 'bad' status which would prevent launching
+      if performance_required *list_of_attributes, force: force # Remove 'bad' status which would prevent launching
         self.status = 'virgin'
         save # ... and launch as needed
       end
-    elsif performance_required(force: force) && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
+    elsif performance_required(*list_of_attributes, force: force) && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
       puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
       bkg_launch true
       true
@@ -218,12 +220,12 @@ module Trackable
   # In either case, return true to launch for background processing
   # NB: this is an object's chance to extract values without awaiting others, if possible
   # return: a flag to launch for dependent data
-  def performance_required force: false
-    force || attrib_needed? # If we get here with attributes still needed, try to get them in background
+  def performance_required *which_attribs, force: false
+    force || (needed_attributes & which_attribs).present?
   end
 
   # Once the entities we depend on have settled, we take on their values
-  def adopt_dependencies
+  def adopt_dependencies immediately: false
     super if defined? super
   end
 

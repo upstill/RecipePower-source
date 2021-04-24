@@ -28,13 +28,14 @@ class RecipePage < ApplicationRecord
   ############# Backgroundable #############
 
   # In order to make our content, we need content from the PageRef
-  def performance_required force: false
-    return true if page_ref.request_attributes*(needed_attributes & [ :content, :picurl, :title ])
+  def performance_required *list_of_attributes, force: false
+    needed_from_pr = list_of_attributes & [ :content, :picurl, :title ]
+    return true if needed_from_pr.present? && page_ref.request_attributes(*needed_from_pr)
     adopt_dependencies # If the PageRef has already satisfied our needs
     content_needed? # Launch iff content needs to be settled
   end
 
-  def adopt_dependencies
+  def adopt_dependencies immediately: false
     super if defined? super
     # Get the available attributes from the PageRef
     adopt_dependency :picurl, page_ref

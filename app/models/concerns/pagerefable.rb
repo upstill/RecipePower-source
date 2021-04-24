@@ -144,7 +144,7 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    page_ref&.gleaning.hit_on_attributes attrhash, site if page_ref&.gleaned? && attrhash
+    page_ref&.gleaning.hit_on_attributes attrhash, site if page_ref&.gleaning&.good? && attrhash
   end
 
 end

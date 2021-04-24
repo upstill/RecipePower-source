@@ -61,10 +61,6 @@ class PageRef < ApplicationRecord
     belongs_to :mercury_result, autosave: true, optional: true, dependent: :destroy
   end
   delegate :results_for, :to => :gleaning
-  
-  def gleaned?
-    gleaning&.good?
-  end
 
   # attr_accessible *@@mercury_attributes, :description, :link_text, :gleaning, :kind,
                   # :error_message, :http_status, :errcode,
@@ -113,52 +109,50 @@ class PageRef < ApplicationRecord
     self
   end
 
-  def need_from_mercury
-    MercuryResult.tracked_attributes & needed_attributes
-  end
-
-  def need_from_gleaning
-    Gleaning.tracked_attributes & needed_attributes
-  end
-
   ######### Trackable overrides ############
   ############## Trackable ############
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
-  def performance_required force: false
+  def performance_required *list_of_attributes, force: false
     # attrib_needed! :content, true if recipe_page_needed?
-    from_gleaning = need_from_gleaning
-    if from_gleaning.present?
+    adopt_dependencies # Try to get attribs from gleaning and mercury as they stand
+    nfg = needed_from_gleaning & list_of_attributes
+    if nfg.present?
       build_gleaning if !gleaning
-      if gleaning.bad? && !force
-        from_gleaning = []
-      else
-        gleaning.request_attributes *from_gleaning, force: force
-      end
+      gleaning.request_attributes *nfg, force: force unless gleaning.bad? && !force
     end
-    from_mercury = need_from_mercury
-    if from_mercury.present?
+    nfm = needed_from_mercury & list_of_attributes
+    if nfm.present?
       # Translate from our needed attributes to those provided by mercury_result
       build_mercury_result if !mercury_result
-      if mercury_result.bad? && !force # Failed permanently
-        from_mercury = []
-      else
-        mercury_result.request_attributes *from_mercury, force: force
-      end
+      mercury_result.request_attributes *nfm, force: force unless mercury_result.bad? && !force # Failed permanently
     end
+    adopt_dependencies # Maybe attributes appeared during creation?
     # We need to get attributes from Gleaning and/or Mercury
-    adopt_dependencies # Try to get attribs from gleaning and mercury as they stand
-    relaunch? if from_mercury.present? || from_gleaning.present?
+    save if changed?
+    relaunch?
   end
 
   # Ask gleaning and mercury_result for attributes.
   # We assume that both have been settled in the course of #perform
-  def adopt_dependencies
+  def adopt_dependencies immediately: false
     super if defined? super
-    assign_attributes gleaning.ready_attribute_values.slice(*open_attributes) if gleaning
+    if gleaning
+      assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
+      # Force the gleaning to completion of its background work
+      if immediately && needed_from_gleaning.present?
+        gleaning.bkg_land! true
+        assign_attributes gleaning.ready_attribute_values.slice(*open_attributes) # Try again
+      end
+    end
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
     if mercury_result
       assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      # Force the mercury_result to completion of its background work
+      if immediately && needed_from_mercury.present?
+        mercury_result.bkg_land! true
+        assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      end
       if mercury_result.new_aliases_ready? && mercury_result.new_aliases.present?
         new_aliases = mercury_result.new_aliases.collect { |url| Alias.indexing_url url }
         # Create a new alias on this page_ref for every derived alias that isn't already in use
@@ -168,15 +162,8 @@ class PageRef < ApplicationRecord
     if recipe_page_needed?
       recipe_page || build_recipe_page
       self.recipe_page = recipe_page
-      # Could do this to get the RecipePage parsing done sooner
-      # recipe_page.request_attributes :content
+      recipe_page.request_attributes :content
     end
-  end
-
-  def relaunch?
-    # Still got unsatisfied attributes? Ready to launch!
-    (MercuryResult.tracked_attributes & needed_attributes) && mercury_result.virgin? ||
-        (Gleaning.tracked_attributes & needed_attributes) && gleaning.virgin?
   end
 
   ############ Backgroundable ###############
@@ -215,19 +202,25 @@ class PageRef < ApplicationRecord
 
     # Now that we have a url, move on to the mercury_result and the gleaning
 
-    # Block until mercury_result has completed and accepted its attributes
-    await mercury_result
-    # mercury_result.ensure_attributes unless mercury_result.bad?
-
-    # Block until gleaning has completed and accepted its attributes
-    await gleaning
-    # gleaning.ensure_attributes unless gleaning.bad?
-
     # If MercuryResult or Gleaning have failed,
     # AND we want to give them another chance to complete,
     # AND we're dependent on values from them, then we throw an error to relaunch
 
-    if performance_required # Extract values from mr and gl, returning true if they are still pending
+    # Block (go back into the queue) until mercury_result has completed and accepted its attributes
+    await mercury_result if needed_from_mercury.present?
+    # mercury_result.ensure_attributes unless mercury_result.bad?
+
+    # Block (go back into the queue) until gleaning has completed and accepted its attributes
+    await gleaning if needed_from_gleaning.present?
+    # gleaning.ensure_attributes unless gleaning.bad?
+
+    # Now get what we can from those.
+    # By the time we get here, the gleaning and the mercury result MUST have final values
+    adopt_dependencies
+    if all_done? # Nothing more to be done. Any attributes still needed are an error
+      # No point in continuing => clear needed attributes a la Failure
+      needed_attributes.each { |attrib| errors.add attrib, 'couldn\'t be extracted' }
+    else
       gleaning_error = "can\'t be gleaned: #{gleaning.errors[:base]}\n" if gleaning.bad?
       mercury_error = "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}" if mercury.bad?
       self.http_status = mercury_result.http_status
@@ -237,19 +230,15 @@ class PageRef < ApplicationRecord
         # Declare an error to set status to :bad
         errors.add :url, "#{gleaning_error}#{mercury_error}"
       end
-    else
-      # No point in continuing => clear needed attributes a la Failure
-      needed_attributes.each { |attrib| errors.add attrib, 'couldn\'t be extracted' }
-      # clear_needed_attributes
     end
 
   end
 
   # We reschedule for AFTER the completion of jobs (Gleaning or MercuryResult) that we depend on
   def reschedule_at current_time, attempts
-    md = defer_to(mercury_result) || super
-    gd = defer_to(gleaning) || super
-    md > gd ? md : gd
+    reschedule_after mercury_result, gleaning { |delayed|
+      super
+    }
   end
 
   def after job=nil
@@ -259,16 +248,15 @@ class PageRef < ApplicationRecord
 
   # We relaunch the job on errors, unless there's a permanent HTTP error
   def relaunch?
-    return false if [
+    ![
         400, # Bad Request
         401, # Unauthorized
         403, # Forbidden
         # 404, Not Found
         414, # URI Too Long
     # 500 Internal Server Error
-    ].include?(http_status)
-    return true if mercury_result.nil? || gleaning.nil?
-    return !(mercury_result.bad? && gleaning.bad?)
+    ].include?(http_status) && # Give up if the file can't be accessed
+    !all_done? # Similarly, relaunch if there's anything to be gotten from mercury or gleaning
   end
 
   # The indexing_url is a simplified url, as stored in an Alias
@@ -416,5 +404,17 @@ class PageRef < ApplicationRecord
 
   private
 
-
+  def needed_from_mercury
+    MercuryResult.tracked_attributes & needed_attributes
   end
+
+  def needed_from_gleaning
+    Gleaning.tracked_attributes & needed_attributes
+  end
+
+  def all_done?
+    (needed_from_mercury.empty? || mercury_result&.bad?) &&
+        (needed_from_gleaning.empty? || gleaning&.bad?)
+  end
+
+end

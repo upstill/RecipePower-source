@@ -269,8 +269,10 @@ module Backgroundable
 
   # Run the job to completion (synchronously) whether it's due or not
   def bkg_land! force=false
-    dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
-    bkg_land force
+    while dj do
+      dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
+      bkg_land force
+    end
   end
 
   # Cancel the job nicely, i.e. if it's running wait till it completes
@@ -359,14 +361,24 @@ module Backgroundable
     update_attribute :dj_id, nil # if !dj
   end
 
-  # Raise an interrupt if the other hasn't completed
+  # Raise an interrupt and wait till later if the other hasn't completed
   def await other
+    dj.attempts = dj.attempts - 1 if dj.attempts > 0
     raise "#{self.class}##{id} deferring to #{other.class}##{other.id}" if other.dj
   end
 
-  # Put job back into queue pending the other job
-  def defer_to other
-    (other.dj.run_at + 0.5.seconds) if other.dj
+  # This is the default rescheduling time, defined here so that Backgroundables can defer to it
+  def reschedule_at current_time, attempts
+    current_time + (attempts**4) + 5
+  end
+
+  # Get a time to reschedule a job so that it waits on others.
+  # We assign a new time just after the conclusion of the others, if any
+  # If not, we fall back on the default, or just wait as usual
+  def reschedule_after *others
+    others.compact.map(&:dj).collect { |other_dj| other_dj.run_at + 0.5.seconds }.max ||
+        (yield if block_given?) ||
+        (Time.now + 0.5.seconds)
   end
 
 end
