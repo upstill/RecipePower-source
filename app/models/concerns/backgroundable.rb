@@ -80,8 +80,8 @@ module Backgroundable
                  :virgin, # Hasn't been executed or queued
                  :obs_pending, # Queued but not executed (Obsolete with dj attribute)
                  :processing, # Set during execution
-                 :good, # Executed successfully
-                 :bad # Executed unsuccessfully
+                 :good, # Finished successfully
+                 :bad # Finished unsuccessfully
              ]
       end
     end
@@ -157,6 +157,11 @@ module Backgroundable
 
   def due?
     (dj && (dj.run_at <= Time.now)) || processing?
+  end
+
+  # Has the job run to completion?
+  def complete?
+    good? || bad?
   end
 
   # bkg_launch(refresh, djopts={}) fires off a DelayedJob job as necessary.
@@ -269,8 +274,12 @@ module Backgroundable
 
   # Run the job to completion (synchronously) whether it's due or not
   def bkg_land! force=false
-    while dj do
-      dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
+    if dj
+      while dj do
+        dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
+        bkg_land force
+      end
+    else
       bkg_land force
     end
   end
@@ -288,7 +297,8 @@ module Backgroundable
     end
   end
 
-  # Run the job, mimicking the hook calls of DJ
+  # Run the job, mimicking the hook calls of DJ.
+  # We rescue errors so that interrupts only declare errors
   def perform_without_dj
     begin
       before
@@ -318,7 +328,12 @@ module Backgroundable
     # ...could have gone error-free because errors were reported only in the record
     # NB: This is a pretty crude report. For more specific info, the model should throw the error
     # with a proper report, which will then get recorded in errors[:base]
-    raise Exception, self.errors.full_messages if relaunch? # Make sure DJ gets the memo
+    super if defined?(super) # Give all modules a shot at the results
+    if relaunch? # Make sure DJ gets the memo
+      raise Exception, self.errors.full_messages
+    elsif errors.any?
+      errors.add :base, self.errors.full_messages
+    end
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
     self.dj = nil if good?
     if persisted?
@@ -330,7 +345,6 @@ module Backgroundable
         update_attribute :dj_id, dj&.id
       end
     end
-    super if defined?(super) # Give all modules a shot at the results
   end
 
   # When an unhandled error occurs, record it among the object's errors
@@ -363,8 +377,19 @@ module Backgroundable
 
   # Raise an interrupt and wait till later if the other hasn't completed
   def await other
-    dj.attempts = dj.attempts - 1 if dj.attempts > 0
-    raise "#{self.class}##{id} deferring to #{other.class}##{other.id}" if other.dj
+    unless other.complete?
+      # What to do next depends on whether we're running in a DelayedJob queue (dj exists) or not
+      if dj
+        # If we have a job queued, throw an interrupt so we go back in the queue
+        dj.attempts = dj.attempts - 1 if dj.attempts > 0
+        raise "#{self.class}##{id} deferring to #{other.class}##{other.id}"
+      else
+        # If there's no DelayedJob associated with the record but it still needs to run, run it manually
+        while !other.complete? do
+          other.bkg_land! true
+        end
+      end
+    end
   end
 
   # This is the default rescheduling time, defined here so that Backgroundables can defer to it
@@ -376,7 +401,7 @@ module Backgroundable
   # We assign a new time just after the conclusion of the others, if any
   # If not, we fall back on the default, or just wait as usual
   def reschedule_after *others
-    others.compact.map(&:dj).collect { |other_dj| other_dj.run_at + 0.5.seconds }.max ||
+    others.compact.map(&:dj).compact.collect { |other_dj| other_dj.run_at + 0.5.seconds }.max ||
         (yield if block_given?) ||
         (Time.now + 0.5.seconds)
   end

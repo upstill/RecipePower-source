@@ -194,7 +194,7 @@ class CollectibleController < ApplicationController
       else
         if request.method != 'GET'  # POST or PATCH
           flash[:popup] = "#{@decorator.human_name} saved"
-          @decorator.ensure_attributes :content if @presenter.update_items.include?(:content)
+          @decorator.ensure_attributes [ :content ] if @presenter.update_items.include?(:content)
           render 'collectible/update.json'
         else
           response_service.title = @decorator.title&.truncate(20) || 'Unknown Title' # Get title (or name, etc.) from the entity
@@ -394,8 +394,7 @@ class CollectibleController < ApplicationController
             finders_options = { only: ['Content'] }
             page_ref = PageRef.fetch url, title: params[:recipe][:title] do |new_pr|
               # Block called when creating a new page_ref
-              finders_options = {}
-              new_pr.request_attributes :picurl # Launch to derive
+              finders_options = {} # Get everything
             end
             # We use the initial title for now, until the extractions come in
             page_ref.save # Persist the record, triggering analysis in background

@@ -98,18 +98,28 @@ module Pagerefable
     page_ref&.site
   end
 
-  # The backgroundable performs its delayed job by forcing the associated page_ref to do its job
-  # (synchronously if necessary)
-  def perform
-    page_ref.ensure_attributes
-    # Do we really want to fail/relaunch if the PageRef fails? Shouldn't that depend on the results?
-=begin
-    if page_ref.bad?
-      err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
-      errors.add :url, err_msg
-      raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
+  # What attributes might we need to acquire from the associated PageRef (in the PageRef's terms)?
+  # This defaults to all needed attributes
+  def attributes_due_from_page_ref minimal_attributes=needed_attributes
+    minimal_attributes
+  end
+
+  def adopt_dependencies synchronous: false
+    if synchronous
+      # Force the page_ref to complete its background work (and that of its dependencies)
+      page_ref.adopt_dependencies synchronous: true
+      page_ref.bkg_land! true if attributes_due_from_page_ref.present?
     end
-=end
+    super if defined? super
+  end
+
+  # The backgroundable performs its delayed job by not proceeding until the associated page_ref has done its job
+  # (synchronously if necessary)
+  # and then performing any other background work.
+  # NB: #await fires an interrupt so that we re-enter the queue if and when the page_ref hasn't finished
+  def perform
+    await page_ref if attributes_due_from_page_ref.present?
+    # page_ref.ensure_attributes attributes_due_from_page_ref
     super if defined?(super)
   end
 

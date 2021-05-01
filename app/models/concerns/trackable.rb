@@ -7,15 +7,11 @@ module Trackable
   extend ActiveSupport::Concern
 
   included do
-    # before_save :request_for_background
-    before_save do |entity|
-      # When first saved, we establish needed attributes for background processing
-      entity.request_for_background if !entity.persisted?
-    end
-
+    # Launch for getting attributes IF they have been declared as needed before saving,
+    # e.g., by an after_initialize callback
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
-      bkg_launch true if !bad? && performance_required(*needed_attributes)
+      bkg_launch true if !bad? && performance_required
       # (re)Launch dj as necessary to gather attributes from MercuryResult and Gleaning
     end
   end
@@ -83,12 +79,6 @@ module Trackable
     base.extend(ClassMethods)
   end
 
-  # Should be overridden by any Trackable model to request attributes to be generated in background
-  # when entity is first saved
-  def request_for_background
-
-  end
-
   # Set and accept the attribute. Action depends on the 'ready' and 'needed' bits
   # !ready, !needed => set
   # !ready, needed => set
@@ -118,21 +108,21 @@ module Trackable
     rtnval
   end
 
-  def clear_needed_attributes
-    needed_attributes.each { |attr_name| attrib_needed! attr_name, false }
-  end
-
   # Handle tracking-related calls. The form is 'attrname_verb', where
   # * attrname is the name of an attribute, possibly but not necessarily tracked
   # * verb indicates what to do with the attribute, i.e.
   #   -- 'accept' means to assign the attribute, clear the associated 'needed' bit and set the 'ready' bit
   #   -- 'if_ready' is for reporting a value. If the corresponding 'ready' bit is true, invoke the passed block with the attribute value
   def method_missing namesym, *args
-    if match = namesym.to_s.match(/(.*)_(accept|if_ready|open\?)$/)
+    if match = namesym.to_s.match(/(.*)_(accept|if_ready|open\?|ready\?|needed!)$/)
       attrname, verb = match[1..2]
       case verb
-      when 'open?'
-        !attrib_ready?(attrname) || attrib_need?(attrname)
+      when 'needed!'
+        attrib_needed! attrname, args.last != false
+      when 'ready?'
+        attrib_ready? attrname
+      when 'open?' # The attribute may be changed if not previously set (ready), OR if explicitly needed
+        !attrib_ready?(attrname) || attrib_needed?(attrname)
       when 'accept'
         accept_attribute attrname, args.first
       when 'if_ready'
@@ -145,22 +135,25 @@ module Trackable
   end
 
   # Invalidate the attribute(s), triggering the request process.
-  # In the absence of attribute arguments, defaults to ALL tracked attributes.
+  # In the absence of specified attribs, defaults to ALL tracked attributes (excepting those specified by :except).
   # The syntax is a (possibly empty) list of attributes to refresh, possibly followed by a hash of flags:
   # :except provides a list of attributes NOT to refresh
-  # :immediate if true, forces the attribute(s) to update before returning
-  # An empty list before the argument hash causes ALL tracked attributes to be refreshed
-  def refresh_attributes *args, except: [], immediate: false, force: true
-    # No args => update all tracked attributes
-    attrs = self.class.tracked_attributes
-    attrs &= args.map(&:to_sym) if args.present? # Slyly eliding invalid attributes
-    attrs -= except.map(&:to_sym)
-    # Invalidate all given attributes
-    attribs_ready! attrs, false
+  # :immediate if true, forces the attribute(s) to update synchronously before returning
+  # :restart forces any dependencies to ALSO be regenerated
+  def refresh_attributes attribs=nil, except: [], immediate: false, restart: true
+    # No attribs => update all tracked attributes
+    attribs ||= self.class.tracked_attributes if except.present?
+    attribs -= except.map &:to_sym
+    return if attribs.blank? # Return if there are no attributes to be refreshed
+    attribs &= attribs.map(&:to_sym)
+    # Invalidate all given attributes and mark them as needed
+    attribs_ready! attribs, false
+    attribs_needed! attribs
+    # Now launch the generation process, either synchronously or asynchronously
     if immediate
-      ensure_attributes *attrs, force: force
+      ensure_attributes attribs, overwrite: true, restart: restart
     else
-      request_attributes *attrs, force: force
+      request_attributes attribs, overwrite: true, restart: restart
     end
   end
 
@@ -168,50 +161,40 @@ module Trackable
   # Calling ensure_attributes with no arguments means that all needed attributes should be acquired.
   # This may entail forcing the object's delayed job to completion BEFORE RETURNING
   # NB: needed attributes other than those specified may be acquired as a side effect
-  def ensure_attributes *list_of_attributes, force: false
-    if list_of_attributes.present?
-      request_attributes *list_of_attributes, force: force
-    else
-      list_of_attributes = needed_attributes
-    end
-    # Try to acquire attributes from their dependencies, forcing their landing
-    adopt_dependencies immediately: true
-    # If any attributes are still needed, call them in via background job
-    bkg_land! true if (list_of_attributes & needed_attributes).present?
+  def ensure_attributes minimal_attributes=needed_attributes, overwrite: false, restart: false
+    request_attributes minimal_attributes, overwrite: overwrite, restart: restart
+    # Try to acquire attributes from their dependencies, forcing them to completion
+    adopt_dependencies synchronous: true
+    # If any attributes are still needed after completing dependencies, drive our background job to completion
+    bkg_land! true if (minimal_attributes & needed_attributes).present?
   end
 
   # A Trackable winds up its (successful) work by taking any attributes from its dependencies
   def success job=nil
-    super if defined?(super)
     adopt_dependencies
-  end
-
-  # This is the method called when a DelayedJob job finally fails permanently
-=begin
-  def failure job=nil
+    # Now, throw an error if any needed attributes remain unfulfilled
+    needed_attributes.each { |attrib| errors.add attrib, 'couldn\'t be extracted' }
     super if defined?(super)
-    puts "#{self.class}##{id} giving up, clearing needed attributes."
-    clear_needed_attributes
-    save
   end
-=end
 
   # Notify the object of a need for certain derived values. They may be derived immediately or in background.
-  def request_attributes *list_of_attributes, force: false
-    list_of_attributes.each { |attrib|
-      attrib_needed!(attrib) if !(attrib_ready?(attrib) || attrib_needed?(attrib)) || force
-    }
+  # A minimal set of attributes may be required at the current time, which may be a subset of all needed attributes
+  def request_attributes minimal_set=nil, overwrite: false, restart: false
+    # Set the :needed flag for those in the list that aren't already needed or ready.
+    # ATTRIBUTES THAT ARE READY ARE NOT DECLARED NEEDED--UNLESS THE OVERWRITE FLAG IS ON
+    minimal_set = minimal_set ? attribs_needed!(minimal_set, overwrite: overwrite) : needed_attributes
     if persisted?
-      if performance_required *list_of_attributes, force: force # Remove 'bad' status which would prevent launching
+      if performance_required minimal_set, overwrite: overwrite, restart: restart # Remove 'bad' status which would prevent launching
         self.status = 'virgin'
-        save # ... and launch as needed
+        save if changed?
+        return true
       end
-    elsif performance_required(*list_of_attributes, force: force) && (force || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
-      puts "Requesting attributes #{needed_attributes} of #{self} ##{id}"
+    elsif performance_required(minimal_set, overwrite: overwrite, restart: restart) && (restart || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
+      puts "Requesting attributes #{minimal_set} of #{self} ##{id}"
       bkg_launch true
-      true
+      return true
     end
-
+    return false
   end
 
   # Stub to be overridden that an object uses to:
@@ -220,12 +203,12 @@ module Trackable
   # In either case, return true to launch for background processing
   # NB: this is an object's chance to extract values without awaiting others, if possible
   # return: a flag to launch for dependent data
-  def performance_required *which_attribs, force: false
-    force || (needed_attributes & which_attribs).present?
+  def performance_required which_attribs=needed_attributes, overwrite: false, restart: false
+    restart || (needed_attributes & (overwrite ? (which_attribs - ready_attributes) : which_attribs)).present?
   end
 
   # Once the entities we depend on have settled, we take on their values
-  def adopt_dependencies immediately: false
+  def adopt_dependencies synchronous: false
     super if defined? super
   end
 
@@ -291,6 +274,14 @@ module Trackable
     attrib_sym.nil? ? needed_attributes.present? : send(:"#{attrib_sym}_needed")
   end
 
+  # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
+  def attrib_needed! attrib_sym, needed_now=true
+    unless attrib_needed?(attrib_sym) == needed_now
+      send :"#{attrib_sym}_needed=", needed_now
+      attrib_sym
+    end
+  end
+
   # Set the 'ready' bit for the attribute and return the attribute_sym iff wasn't ready before
   def attrib_ready! attrib_sym, ready_now=true
     unless attrib_ready?(attrib_sym) == ready_now
@@ -299,20 +290,16 @@ module Trackable
     end
   end
 
-  def attribs_needed! attrib_syms, needed_now=true
-    attrib_syms.each { |attrib_sym| attrib_needed! attrib_sym, needed_now }
+  # Declare the need for a set of attributes
+  # overwrite: flag indicating whether a ready attribute should be declared needed anyway
+  # return: the set of attributes that are actually needed FROM THE GIVEN SET
+  # That is, attributes that are ALREADY needed will only be returned if requested here
+  def attribs_needed! attrib_syms, overwrite:false
+    (overwrite ? (attrib_syms - ready_attributes) : attrib_syms).each { |attrib_sym| attrib_needed! attrib_sym }
   end
 
   def attribs_ready! attrib_syms, ready_now=true
     attrib_syms.each { |attrib_sym| attrib_ready! attrib_sym, ready_now }
-  end
-
-  # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
-  def attrib_needed! attrib_sym, needed_now=true
-    unless attrib_needed?(attrib_sym) == needed_now
-      send :"#{attrib_sym}_needed=", needed_now
-      attrib_sym
-    end
   end
 
 end

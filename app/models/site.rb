@@ -37,6 +37,11 @@ class Site < ApplicationRecord
 
   serialize :trimmers, Array # An array of CSS selectors used to remove extraneous content
 
+  after_initialize do |rp|
+    # The actual launch will occur after_save
+    request_attributes [ :name, :logo ]
+  end
+
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
   def trimmers_str
     trimmers.join "\n"
@@ -152,6 +157,11 @@ class Site < ApplicationRecord
   #...and associate with recipes via the recipe_page_refs that refer back here
   has_many :recipes, :through => :page_refs, :dependent=>:restrict_with_error
 
+  after_initialize do |rp|
+    # The actual launch will occur after_save
+    request_attributes [ :name, :logo ]
+  end
+
   before_validation do |site|
     # If either the root or the home haven't been set, derive one from the other
     if site.attribute_present? :root
@@ -164,10 +174,7 @@ class Site < ApplicationRecord
   # after_initialize :post_init
   validates_uniqueness_of :root
 
-  after_create { |site| site.request_attributes :name, :logo } # Start a job going to extract title, etc. from the home page
-
   after_save do |site|
-    bkg_launch if site.needed_attributes.present?
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
     # Reassign all of our pagerefs as necessary
     if saved_change_to_root? # Root has changed
@@ -192,9 +199,30 @@ class Site < ApplicationRecord
 
   ######### Trackable overrides ############
   ############## Trackable ############
-  # Request attributes of other objects
-  def to_get_from_page_ref attribs
-    attribs.collect { |my_attrib|
+
+  # Using a target list of needed attributes, set dependencies running as necessary
+  # and return a flag for whether THIS object should be launched for background work
+  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+    build_page_ref unless page_ref
+    adopt_dependencies # Try to get valid attributes from page_ref
+    save if changed? && persisted?
+    if (npr = attributes_due_from_page_ref(minimal_attribs)).present? && (!page_ref.complete? || restart)
+      page_ref.request_attributes npr
+    end
+  end
+
+  # Get the available attributes from the PageRef
+  def adopt_dependencies synchronous: false
+    super if defined? super # Force the page_ref to complete its background work
+    adopt_dependency :logo, page_ref, :picurl
+    adopt_dependency :name, page_ref, :title
+    adopt_dependency :description, page_ref, :description
+    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+  end
+
+  # We get all of our tracked attributes from the page_ref
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    (self.class.tracked_attributes & minimal_attribs & needed_attributes).collect { |my_attrib|
       # Provide the attribute that will receive the value for the given PageRef attribute
       case my_attrib
       when :name
@@ -208,34 +236,13 @@ class Site < ApplicationRecord
       else
         my_attrib
       end
-    }
+    } & PageRef.tracked_attributes
   end
 
-  def performance_required *list_of_attributes,  force: false
-    build_page_ref unless page_ref
-    adopt_dependencies # Try to get valid attributes from page_ref
-    save if changed?
-    return false if page_ref.bad? && !force
-    needed_from_page_ref = to_get_from_page_ref list_of_attributes
-    needed_from_page_ref.present? && page_ref.request_attributes(*needed_from_page_ref)
-  end
-
-  # Get the available attributes from the PageRef
-  def adopt_dependencies immediately: false
-    adopt_dependency :logo, page_ref, :picurl
-    adopt_dependency :name, page_ref, :title
-    adopt_dependency :description, page_ref, :description
-    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
-  end
-
+=begin The defaults from PageRefable work fine here: get all needed attributes from the PageRef; no other background work required
   def perform
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref  # Block on the page_ref's work
-      # Throw an error to trigger relaunch if the page_ref is still pending
-      raise "Site still awaiting page_ref" if performance_required(*needed_attributes)
-    end
   end
+=end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model
   def gleaning_attributes= attrhash

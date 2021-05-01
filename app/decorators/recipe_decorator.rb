@@ -39,7 +39,7 @@ class RecipeDecorator < CollectibleDecorator
     either = page_ref.decorate.regenerate_dependent_content || either
     # The recipe needs to be reparsed if the grammar_mods outside :rp_recipelist have changed
     either ||= site.grammar_mods.except(:rp_recipelist) != site.grammar_mods_was.except(:rp_recipelist).deep_symbolize_keys
-    refresh_attributes :content if either
+    refresh_attributes [ :content ] if either
     either
   end
 

@@ -23,15 +23,16 @@ class Recipe < ApplicationRecord
 
   delegate :recipe_page, :to => :page_ref
 
+  after_initialize do |rcp|
+    # The actual launch will occur after_save
+    request_attributes [ :content ] 
+  end
+
   before_save do |recipe|
     # Arm the recipe for launching
-    if recipe.anchor_path_changed? ||
+    recipe.refresh_attributes [ :content ] if recipe.anchor_path_changed? ||
         recipe.focus_path_changed? ||
         (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
-      recipe.content = nil
-      recipe.status = "virgin"
-      recipe.refresh_attributes :content # To be derived via parsing
-    end
     if recipe.content_changed?
       # Set tags according to annotations
       RecipeServices.new(self).inventory do |rpclass, node|
@@ -136,46 +137,48 @@ class Recipe < ApplicationRecord
   end
 
   ##### Trackable matters #########
-  # Request attributes from page_ref as necessary
-  def performance_required *list_of_attributes, force: false
-    # If we haven't persisted, then the page_ref has no connection back
-    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    needed_from_pr = list_of_attributes & [ :content, :picurl, :title, :description ]
-    return true if needed_from_pr.present? && page_ref.request_attributes(*needed_from_pr) # Those to be got from PageRef
-    adopt_dependencies
-    content_needed? # We launch if content is still needed
+
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    PageRef.tracked_attributes & [ :content, :picurl, :title, :description ] & minimal_attribs & needed_attributes
   end
 
-  # Override to acccept values from page_ref
-  def adopt_dependencies immediately: false
-    super if defined? super
-    # Get the available attributes from the PageRef
+  # Request attributes from page_ref as necessary, after record is saved.
+  # Return: boolean indicating need to start background processing
+  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+    # If we haven't persisted, then the page_ref has no connection back
+    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    adopt_dependencies
+    if !page_ref.bad? || restart
+      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
+      adopt_dependencies
+    end
+    save if changed?
+    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed?
+  end
+
+  # Override to acccept values from page_ref, optionally forcing it to completion
+  def adopt_dependencies synchronous: false
+    super if defined? super # Force the page_ref to complete its background work
     # Translate what the PageRef is offering into our attributes
-    adopt_dependency :picurl, page_ref
-    adopt_dependency :title, page_ref
-    adopt_dependency :description, page_ref
+    if page_ref.complete?
+      adopt_dependency :picurl, page_ref
+      adopt_dependency :title, page_ref
+      adopt_dependency :description, page_ref
+      errors.add :url, "not valid in page_ref: #{page_ref.error_message}" if page_ref.http_status != 200
+    end
   end
 
   ##### Backgroundable matters #########
 
-  # Called when first saved, as a hook for (re)generating attributes
-  def request_for_background
-    # Content is refreshed on first save
-    refresh_attributes :content
-  end
-
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present? && !page_ref.bad?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
+    # If the page_ref isn't ready, go back in the queue
+    super if defined?(super) # await page_ref as required
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed?
-      if page_ref.recipe_page_ready?  # Ready to build
-        # reload if persisted? # Possibly the recipe_page changed us
-        recipe_page.ensure_attributes :content # Parse the page into one or more recipes
-      end
+      # If there's an associated RecipePage, then we'll be depending on its content
+      await recipe_page if page_ref.recipe_page_ready?
       content_to_parse =
         (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
@@ -187,8 +190,6 @@ class Recipe < ApplicationRecord
         self.content_needed = false   # Give up on content until notified otherwise
       end
     end
-
-    # Now, throw an error if we need to relaunch
   end
 
 end

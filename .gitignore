@@ -29,3 +29,5 @@ vendor/bundle
 config/ssl/local.recipepower.com.cer
 config/ssl/local.recipepower.com.key
 config/ssl/req.conf
+.yardoc/
+docs/

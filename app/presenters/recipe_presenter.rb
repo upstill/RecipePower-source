@@ -204,7 +204,7 @@ class RecipePresenter < CollectiblePresenter
 
   def proxy_presenter
     return @prpr if @prpr
-    @object.ensure_attributes :content
+    @object.ensure_attributes [ :content ]
     @prpr =
     if @object.content.blank?
       if @object.page_ref&.gleaning.content.blank?

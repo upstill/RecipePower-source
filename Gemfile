@@ -199,3 +199,5 @@ gem 'will_paginate', '~> 3.0'  # https://github.com/mislav/will_paginate
 
 # For redirecting recipepower.com to www.recipepower.com https://github.com/jtrupiano/rack-rewrite
 gem 'rack-rewrite', '~> 1.5.0'
+
+gem 'yard'

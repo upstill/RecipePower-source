@@ -61,7 +61,7 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  def adopt_dependencies immediately: false
+  def adopt_dependencies synchronous: false
     return if bad? || results.empty?
     results.labels.each do |label|
       next unless (attrname = Gleaning.attribute_for_label(label)) &&
@@ -76,8 +76,6 @@ class Gleaning < ApplicationRecord
                   results&.result_for label
                 end
     end
-    # Clear the needed bit for all unfound attributes, to forestall more gleaning
-    clear_needed_attributes
   end
 
   def relaunch?

@@ -18,37 +18,40 @@ class RecipePage < ApplicationRecord
   def self.mass_assignable_attributes
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
-  
-  # To be overridden by entities to ensure that attributes are needed
-  def request_for_background
-    # Content is refreshed on first save
-    refresh_attributes :content
+
+  after_initialize do |rp|
+    # The actual launch will occur after_save
+    request_attributes [ :content ] 
   end
 
-  ############# Backgroundable #############
+  ##### Trackable matters #########
+
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    PageRef.tracked_attributes & [ :content, :picurl, :title ] & minimal_attribs & needed_attributes
+  end
 
   # In order to make our content, we need content from the PageRef
-  def performance_required *list_of_attributes, force: false
-    needed_from_pr = list_of_attributes & [ :content, :picurl, :title ]
-    return true if needed_from_pr.present? && page_ref.request_attributes(*needed_from_pr)
-    adopt_dependencies # If the PageRef has already satisfied our needs
-    content_needed? # Launch iff content needs to be settled
+  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+    if !page_ref.bad? || restart
+      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
+      adopt_dependencies # If the PageRef has already satisfied our needs
+      save if changed?
+    end
+    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed? # Launch iff content needs to be settled
   end
 
-  def adopt_dependencies immediately: false
-    super if defined? super
-    # Get the available attributes from the PageRef
+  def adopt_dependencies synchronous: false
+    super if defined? super # Get the available attributes from the PageRef
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
   end
 
+  ############# Backgroundable #############
+
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
-    # page_ref.ensure_attributes :content
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
+    # Keep failing until the page_ref has completed
+    super if defined?(super) # await page_ref as required
     if content_needed? && page_ref.content_ready?
       # Clear all recipes but the first
       parsing_input = page_ref.trimmed_content

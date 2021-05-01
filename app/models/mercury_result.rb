@@ -75,7 +75,7 @@ class MercuryResult < ApplicationRecord
         mercury_data['url'] = url
       end
       self.http_status =
-          if mercury_data['mercury_error'].blank? # All good from Mercury
+          if mercury_data['errorMessage'].blank? # All good from Mercury
             200
           else
             # Check the header for the url from the server.

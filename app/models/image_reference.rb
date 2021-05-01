@@ -28,10 +28,6 @@ class ImageReference < ApplicationRecord
   has_many :referments, :as => :referee, :dependent => :destroy
   # has_many :referents, :through => :referments
 
-  after_save do |ir|
-    ir.bkg_launch if ir.needed_attributes.present?
-  end # ...because no launching occurred before saving
-
   public
 
   # By default, the reference gives up its url, but may want to use something else, like image data
@@ -98,10 +94,10 @@ class ImageReference < ApplicationRecord
   def relaunch?
     errors.present? && (errcode != 404)
   end
-
+  
   def url= new_url
     super
-    request_attributes :thumbdata if url_changed? && !fake_url?
+    refresh_attributes [:thumbdata] if url_changed? && !fake_url?
   end
 
   # Provide a url that's valid anywhere. It may come direct from the IR or, if there's only thumbdata,
