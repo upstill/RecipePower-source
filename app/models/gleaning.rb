@@ -25,7 +25,7 @@ class Gleaning < ApplicationRecord
   # "URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"
   attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content
 
-  # Define a mapping from Result label to the attribute that reflects it
+  # Define a mapping from Result label to the attribute that takes it on
   def self.attribute_for_label label
     case label
     when "URI"
@@ -64,17 +64,21 @@ class Gleaning < ApplicationRecord
   def adopt_dependencies synchronous: false
     return if bad? || results.empty?
     results.labels.each do |label|
-      next unless (attrname = Gleaning.attribute_for_label(label)) &&
-          attrib_open?(attrname)
-      self.send :"#{attrname}=",
-                case label
-                when 'RSS Feed'
-                  results&.results_for 'RSS Feed'
-                when 'Tags', 'Author'
-                  results&.results_for(label).uniq.join(', ')
-                else
-                  results&.result_for label
-                end
+      next unless attrname = Gleaning.attribute_for_label(label)
+      next unless attrib_open?(attrname)
+      if label != 'RSS Feed' # RSS Feeds are satisfied even without finding anything
+        next if results[label].empty?
+      end
+      value =
+          case label
+          when 'RSS Feed'
+            results&.results_for 'RSS Feed'
+          when 'Tags', 'Author'
+            results&.results_for(label).uniq.join(', ')
+          else
+            results&.result_for label
+          end
+      self.send :"#{attrname}=", value
     end
   end
 
@@ -97,19 +101,6 @@ class Gleaning < ApplicationRecord
       exc = Exception.new breakdown[:msg]
       exc.set_backtrace msg.backtrace
       raise exc # msg, breakdown[:msg] if dj
-    end
-    results.labels.each do |label|
-      next unless (attrname = Gleaning.attribute_for_label(label)) &&
-          attrib_open?(attrname)
-      self.send :"#{attrname}=",
-                case label
-                when 'RSS Feed'
-                  results&.results_for 'RSS Feed'
-                when 'Tags', 'Author'
-                  results&.results_for(label).uniq.join(', ')
-                else
-                  results&.result_for label
-                end
     end
   end
 

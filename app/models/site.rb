@@ -37,11 +37,6 @@ class Site < ApplicationRecord
 
   serialize :trimmers, Array # An array of CSS selectors used to remove extraneous content
 
-  after_initialize do |rp|
-    # The actual launch will occur after_save
-    request_attributes [ :name, :logo ]
-  end
-
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
   def trimmers_str
     trimmers.join "\n"
@@ -159,7 +154,7 @@ class Site < ApplicationRecord
 
   after_initialize do |rp|
     # The actual launch will occur after_save
-    request_attributes [ :name, :logo ]
+    request_attributes [ :name, :logo, :rss_feed ] unless persisted? # Only on initial build
   end
 
   before_validation do |site|
@@ -217,7 +212,6 @@ class Site < ApplicationRecord
     adopt_dependency :logo, page_ref, :picurl
     adopt_dependency :name, page_ref, :title
     adopt_dependency :description, page_ref, :description
-    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
   end
 
   # We get all of our tracked attributes from the page_ref
@@ -239,10 +233,12 @@ class Site < ApplicationRecord
     } & PageRef.tracked_attributes
   end
 
-=begin The defaults from PageRefable work fine here: get all needed attributes from the PageRef; no other background work required
   def perform
+    super if defined? super
+    # Adopt all the rss feeds found in the page_ref
+    page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+    self.rss_feed_needed = false
   end
-=end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model
   def gleaning_attributes= attrhash
@@ -269,17 +265,25 @@ class Site < ApplicationRecord
 
 public
 
+  # Propose a feed for the given url, setting :approved as needed
+  # NB: the rub here is that an RSS feed as found on the site may redirect to, say, a FeedBurner link, which means
+  # 1) the ACTUAL url recorded may differ from that proposed, and
+  # 2) it's possible to introduce url collisions thereby.
+  # So: we fail silently to add the feed if the given URL ultimately conflicts with one already extant
   def assert_feed url, approved=false
     url = normalize_url url
-    feed = (extant = feeds.find_by(url: url)) || Feed.create_with(approved: approved, site: self).find_or_create_by(url: url)
-    if feed&.errors.empty? && !extant
-      if feed.approved != approved
-        feed.approved = approved
-        feed.save
+    unless extant = feeds.to_a.find { |f| f.url == url }
+      f = Feed.new approved: approved, url: url, site: self
+      f.follow_url
+      unless extant = feeds.to_a.find { |extant| extant.url == f.url } # Check for redundancy in the ultimate url
+        self.feeds << f if f.valid?
+        return
       end
-      # Newly created feed => enqueue it and add it to the list
-      Delayed::Job.enqueue feed  # New feeds get updated by default
-      self.feeds << feed unless feeds.exists?(id: feed.id)
+    end
+    # The extant feed may need its :approved flag updated
+    if extant.approved != approved
+      extant.approved = approved
+      extant.update_attribute :approved, approved if extant.persisted?
     end
   end
 

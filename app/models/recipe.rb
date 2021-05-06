@@ -25,7 +25,7 @@ class Recipe < ApplicationRecord
 
   after_initialize do |rcp|
     # The actual launch will occur after_save
-    request_attributes [ :content ] 
+    request_attributes [ :title, :picurl, :content ] unless persisted?
   end
 
   before_save do |recipe|
@@ -65,6 +65,7 @@ class Recipe < ApplicationRecord
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
+
   # private
 
   # has_many :ratings, :dependent => :destroy
@@ -139,7 +140,10 @@ class Recipe < ApplicationRecord
   ##### Trackable matters #########
 
   def attributes_due_from_page_ref minimal_attribs=needed_attributes
-    PageRef.tracked_attributes & [ :content, :picurl, :title, :description ] & minimal_attribs & needed_attributes
+    needed_now = minimal_attribs & needed_attributes
+    # We ask PageRef to provide its recipe_page if possible
+    needed_now << :recipe_page if needed_now.include?(:content)
+    PageRef.tracked_attributes & [ :content, :picurl, :title, :description, :recipe_page ] & needed_now
   end
 
   # Request attributes from page_ref as necessary, after record is saved.
@@ -147,12 +151,13 @@ class Recipe < ApplicationRecord
   def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
     # If we haven't persisted, then the page_ref has no connection back
     # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    return true if !page_ref
     adopt_dependencies
     if !page_ref.bad? || restart
       page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
       adopt_dependencies
     end
-    save if changed?
+    save if changed? && persisted?
     (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed?
   end
 
@@ -160,7 +165,7 @@ class Recipe < ApplicationRecord
   def adopt_dependencies synchronous: false
     super if defined? super # Force the page_ref to complete its background work
     # Translate what the PageRef is offering into our attributes
-    if page_ref.complete?
+    if page_ref&.complete?
       adopt_dependency :picurl, page_ref
       adopt_dependency :title, page_ref
       adopt_dependency :description, page_ref
@@ -182,8 +187,7 @@ class Recipe < ApplicationRecord
       content_to_parse =
         (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
-      return unless content_to_parse.present?
-      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse if content_to_parse.present?
       if new_content.present? # Parsing was a success
         self.content = new_content
       else

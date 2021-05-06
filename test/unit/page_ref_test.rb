@@ -30,11 +30,11 @@ class PageRefTest < ActiveSupport::TestCase
     assert pr.gleaning
     assert pr.mercury_result
     # The Gleaning and MercuryResult should be primed to fetch
-    pr.request_attributes :title
+    pr.request_attributes [:title]
     assert pr.title_needed
     assert pr.gleaning.title_needed
     assert pr.mercury_result.title_needed
-    pr.ensure_attributes :title
+    pr.ensure_attributes [:title]
     # Should have extracted the title
     assert pr.title_ready
     # Should have extracted the description as a side effect
@@ -142,7 +142,7 @@ class PageRefTest < ActiveSupport::TestCase
     mp0.save
     mp = PageRef.find_by(url: 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/')
     assert_not_nil mp
-    mp.ensure_attributes :title
+    mp.ensure_attributes [:title]
     assert (mp.aliases.present? && mp.aliases.first == mp.aliases.last), 'Should have only one alias'
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
   end
@@ -192,7 +192,7 @@ class PageRefTest < ActiveSupport::TestCase
   test "fetch simple page" do
     mp = PageRef.fetch 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/'
     assert_not_nil mp
-    mp.ensure_attributes :title
+    mp.ensure_attributes [:title, :domain]
     assert_equal 'https://www.wired.com/2016/09/ode-rosetta-spacecraft-going-die-comet/', mp.url
     assert_equal "An Ode to the Rosetta Spacecraft As It Plummets To Its Death", mp.title
     assert_equal "https://media.wired.com/photos/5926b676af95806129f50602/191:100/w_1280,c_limit/Rosetta_impact-1.jpg", mp.picurl

@@ -119,8 +119,8 @@ class ImageReferenceServices
     when :url
       self.unpersisted[keyval[:url]]
     when :thumbdata
-      v = self.unpersisted.find { |key, value| value.thumbdata == keyval[:thumbdata] }
-      v&.values&.first
+      v = self.unpersisted.values.find { |value| value.thumbdata == keyval[:thumbdata] }
+      # v&.values&.first
     end || ImageReference.find_by(keyval)
   end
 

@@ -21,7 +21,7 @@ class RecipePage < ApplicationRecord
 
   after_initialize do |rp|
     # The actual launch will occur after_save
-    request_attributes [ :content ] 
+    request_attributes [ :content ] unless persisted? 
   end
 
   ##### Trackable matters #########
@@ -35,7 +35,7 @@ class RecipePage < ApplicationRecord
     if !page_ref.bad? || restart
       page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
       adopt_dependencies # If the PageRef has already satisfied our needs
-      save if changed?
+      save if changed? && persisted?
     end
     (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed? # Launch iff content needs to be settled
   end
@@ -52,7 +52,8 @@ class RecipePage < ApplicationRecord
     # NB: we don't block on the PageRef to avoid circular dependency
     # Keep failing until the page_ref has completed
     super if defined?(super) # await page_ref as required
-    if content_needed? && page_ref.content_ready?
+    if content_needed?
+      await page_ref unless page_ref.content_ready?
       # Clear all recipes but the first
       parsing_input = page_ref.trimmed_content
       if parsing_input.present?
@@ -106,6 +107,8 @@ class RecipePage < ApplicationRecord
         page_ref.recipes.destroy *unresolved
 
         self.content = parsing_input
+      else
+        self.content_needed = false # No need to return
       end
     end
   end

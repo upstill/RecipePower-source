@@ -26,11 +26,12 @@ end
 def load_recipe url_or_recipe, selector, trimmers, grammar_mods={}
   recipe = url_or_recipe.is_a?(Recipe) ? url_or_recipe : Recipe.new(url: url_or_recipe)
   prep_site recipe.site, selector, trimmers, grammar_mods
-  recipe.bkg_launch
-  recipe.bkg_land # Perform all due diligence
+  recipe.ensure_attributes # Perform all due diligence
   assert_equal grammar_mods, recipe.site.grammar_mods
   refute recipe.errors.any?, recipe.errors.full_messages
   assert recipe.good? # Should have loaded and settled down
+
+  recipe.page_ref.content = recipe.page_ref.mercury_result.content
 
   assert recipe.recipe_page
   refute recipe.recipe_page.errors.any?, recipe.recipe_page.errors.full_messages

@@ -1,3 +1,6 @@
+# encoding: UTF-8
+require './lib/uri_utils.rb'
+
 class MercuryResult < ApplicationRecord
   include Backgroundable
 
@@ -74,6 +77,7 @@ class MercuryResult < ApplicationRecord
         # We can't trust answers.com to provide a straight url, so we have to special-case it
         mercury_data['url'] = url
       end
+=begin
       self.http_status =
           if mercury_data['errorMessage'].blank? # All good from Mercury
             200
@@ -124,6 +128,7 @@ class MercuryResult < ApplicationRecord
             hr.is_a?(String) ? 666 : hr
           end
       mercury_data['new_aliases'] = new_aliases
+=end
       return mercury_data
     rescue Exception => e
       return {'error' => true, 'http_status' => 400, 'errorMessage' => "'#{url}' is bad: #{e}" }
@@ -134,18 +139,34 @@ class MercuryResult < ApplicationRecord
 
   # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
-    data = mercury_via_node url
-    # data = Rails.env.development? ? mercury_via_api(url) : mercury_via_node(url)
-
-    # Do QA on the reported URL
-    # Report a URL as extracted by Mercury (if any), or the original URL (if not)
-    uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
-    data['url'] = uri.to_s
-    data['domain'] ||= uri.host
-    # Merge error states
-    data['errorMessage'] = data['message'] unless data['errorMessage'].present?
-    data.delete 'message'
-    data.delete 'errorMessage' unless data['errorMessage']
+    aliases = redirects url
+    result_code = aliases.pop
+    url = aliases.pop
+    uri = nil
+    if result_code == 200
+      data = mercury_via_node url
+      # Do QA on the reported URL
+      # Report a URL as extracted by Mercury (if any), or the original URL (if not)
+      uri = data['url'].present? ? safe_uri_join(url, data['url']) : URI.parse(url) # URL may be relative, in which case parse in light of provided URL
+      # Merge error states
+      data['errorMessage'] = data['message'] unless data['errorMessage'].present?
+      data.delete 'message'
+      data.delete 'errorMessage' unless data['errorMessage'] # No nil message
+    else # Bad access
+      data = {'errorMessage' => "Couldn't access #{url} (HTTP code #{result_code})" }
+      begin
+        uri = URI.parse url
+      rescue Exception => e
+        # Not even sensible to URI
+        data['errorMessage'] << "...can't even be parsed by URI"
+      end
+    end
+    if uri
+      data['url'] = uri.to_s
+      data['domain'] ||= uri.host
+    end
+    data['new_aliases'] = aliases
+    data['http_status'] = result_code
     data
   end
 

@@ -66,6 +66,28 @@ def header_result(link, resource=nil)
   end
 end
 
+# Follow redirects for a url, recording it and those along the way
+# returns: an array of urls that got redirected through, terminated by the one
+# that did NOT produce a redirect, then the result
+# NB: this is NOT a guarantee that said url is accessible, only that it doesn't cause a redirect
+def redirects url
+  results = [ url ]
+  begin
+    while (hr = header_result(results.last)).is_a? String
+      # header_result returns either
+      # an integer result code (final result), or
+      # a string url for redirection
+      hr = safe_uri_join(results.last, hr).to_s unless hr.match(/^http/) # The redirect URL may only be a path
+      results << hr
+    end
+  rescue Exception => e
+    # Bad URL => Remove the last alias
+    hr = 400
+  end
+  return (results << hr)
+end
+
+
 def safe_parse(url)
   begin
     uri = url && URI.parse(url)

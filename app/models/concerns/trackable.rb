@@ -229,10 +229,11 @@ module Trackable
   end
 
   # This is syntactic sugar to test whether an attribute MAY be set, either
+  # 0) because it's not tracked
   # 1) before it's been set, or the ready bit has been otherwise cleared; or
   # 2) it's been asked to refresh (needed bit is true, regardless whether it's ready or not)
   def attrib_open? attrib_sym
-    !send(:"#{attrib_sym}_ready") || send(:"#{attrib_sym}_needed")
+    !self.class.tracked_attributes.include?(attrib_sym) || !send(:"#{attrib_sym}_ready") || send(:"#{attrib_sym}_needed")
   end
 
   # What attributes are now good?

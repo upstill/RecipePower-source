@@ -7,10 +7,8 @@ class MercuryResultTest < ActiveSupport::TestCase
     assert mr.url_ready
     refute mr.url_needed
 
-    mr.ensure_attributes :content
+    mr.ensure_attributes
     assert_empty mr.needed_attributes
-    assert mr.content_ready
-    refute mr.content_needed
 
   end
 

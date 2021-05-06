@@ -6,7 +6,7 @@ class SiteTest < ActiveSupport::TestCase
   fixtures :sites
 
   def land_without_persistence site
-    site.ensure_attributes :name, :logo
+    site.ensure_attributes [ :name, :logo ]
     refute site.persisted?
     assert_not_nil site.page_ref
     refute site.page_ref.persisted?
@@ -17,7 +17,7 @@ class SiteTest < ActiveSupport::TestCase
   end
 
   def land_with_persistence site
-    site.ensure_attributes :name, :logo
+    site.ensure_attributes [ :name, :logo ]
     site.save
     assert site.errors.empty?
     assert site.persisted?
@@ -89,7 +89,7 @@ class SiteTest < ActiveSupport::TestCase
     dpr.kind = 'about'
     dpr.save
     site = dpr.site
-    site.ensure_attributes :name, :logo
+    site.ensure_attributes [ :name, :logo ]
     assert_equal 'www.alcademics.com', site.root
     site.root = 'www.alcademics.com/2012'
     assert_equal 'www.alcademics.com/2012', site.root
@@ -99,7 +99,7 @@ class SiteTest < ActiveSupport::TestCase
   test "site handles multiple pageref types" do
     alcasample = "http://www.alcademics.com/2012/04/a-brilliant-idea-that-didnt-quite-work.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+Alcademics+%28alcademics.com%29"
     site = SiteServices.find_or_build_for alcasample
-    site.ensure_attributes :home, :name
+    site.ensure_attributes
     dpr = PageRef.fetch alcasample
     dpr.kind = 'about'
     dpr.save
@@ -144,7 +144,7 @@ class SiteTest < ActiveSupport::TestCase
     dpr1.kind = 'about'
     dpr1.save
     site1 = dpr1.site
-    site1.ensure_attributes :name
+    site1.ensure_attributes
     assert_equal "dinersjournal.blogs.nytimes.com", site1.root
     assert_equal "https://www.nytimes.com/section/food", site1.home
     assert_includes site1.page_ref.aliases.map(&:url), "www.nytimes.com/pages/dining/index.html"
@@ -157,7 +157,7 @@ class SiteTest < ActiveSupport::TestCase
     dpr1.kind = 'about'
     dpr1.save
     site1 = dpr1.site
-    site1.ensure_attributes :name
+    site1.ensure_attributes [ :name ]
     assert_equal "dinersjournal.blogs.nytimes.com", site1.root
 
     site1.root = "www.nytimes.com/2016"
@@ -296,7 +296,7 @@ class SiteTest < ActiveSupport::TestCase
     # bladebla.com redirects to bladebla.cz; this should be reflected in the site and its PageRef
     site = SiteServices.find_or_build_for "http://bladebla.com/esme"
     land_without_persistence site
-    assert_equal 1, site.page_ref.aliases.to_a.count
+    assert_equal 2, site.page_ref.aliases.to_a.count
     site.page_ref.save
     refute site.page_ref.errors.any?, site.page_ref.errors.full_messages.join("\nand ")
     assert_equal 2, site.page_ref.aliases.count # Should have one for the original and one for the final url
@@ -308,7 +308,7 @@ class SiteTest < ActiveSupport::TestCase
     site2 = SiteServices.find_or_build_for "https://bladebla.cz"
     assert_equal site.page_ref.site, site2
     site = SiteServices.find_or_build_for "http://bladebla.com"
-    site.ensure_attributes :name, :logo
+    site.ensure_attributes [ :name, :logo ]
     site.save
     assert_equal site.page_ref, site2.page_ref # The two sites are aliases of one another
   end
@@ -381,11 +381,12 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "site pageref" do
     pr = PageRef.fetch 'http://barbecuebible.com'
-    assert_equal [:url], pr.needed_attributes
+    assert_equal [:url, :title, :picurl, :http_status], pr.needed_attributes
     refute pr.dj # Should launch on save
     pr.save
     assert pr.dj
     pr.ensure_attributes
+    assert pr.good?
     refute pr.processing?
   end
 
@@ -414,12 +415,14 @@ NB: I don't <think> the slash/no-slash distinction still pertains
   ######## Manipulate grammar_mods
 
   test 'manipulate grammar mods' do
+=begin  Leave this alone until a purpose for recipe_selector= is defined
     s = Site.new
     s.recipe_selector = 'heading h1'
     assert_equal Hash( rp_recipelist: { match: { at_css_match: 'heading h1' } } ), s.grammar_mods
 
     s.recipe_selector = nil
     assert_equal Hash( rp_recipelist: { match: {  } } ), s.grammar_mods
+=end
 
     s = Site.new
     s.ingline_selector = 'li.ingredient'
