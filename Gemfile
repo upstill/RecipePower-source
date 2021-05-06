@@ -4,7 +4,7 @@ ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
 gem 'rails', '~> 5.2.4' # 5.0.7.2' #
-gem 'rdoc'
+gem 'rdoc', '>= 6.3.0'
 
 ###### Rails Extensions
 # Protect attributes from mass-assignment in ActiveRecord models. (No longer supported in Rails 5)
