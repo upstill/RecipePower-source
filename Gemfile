@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 ruby '2.6.6'
 gem 'rack', '2.2.3'
 gem 'bundler', '~> 2.1.4'
-gem 'rails', '~> 5.2.4' # 5.0.7.2' #
+gem 'rails', '~> 5.2.4', '>= 5.2.4.6' # 5.0.7.2' #
 gem 'rdoc'
 
 ###### Rails Extensions
@@ -14,9 +14,9 @@ gem 'counter_culture', '~> 0.1.23' # https://github.com/magnusvk/counter_culture
 # Can't implement categorization via Awesome Nested Set b/c we need a digraph, not exclusive categories
 # gem 'awesome_nested_set' # https://github.com/collectiveidea/awesome_nested_set
 # Forms made easy for Rails!
-gem "simple_form" # , '~> 4.1.0' # https://github.com/plataformatec/simple_form
+gem "simple_form" , ">= 5.0.2" # , '~> 4.1.0' # https://github.com/plataformatec/simple_form
 # Decorators/View-Models for Rails Applications
-gem 'draper' # , '~> 3.0' #, ~> 1.3'
+gem 'draper' , '>= 4.0.1' # , '~> 3.0' #, ~> 1.3'
 # Easily and efficiently make your ActiveRecord models support hierarchies
 gem 'closure_tree', '~> 7.0' # https://github.com/mceachen/closure_tree
 gem 'with_advisory_lock', '~> 4.0'
@@ -51,27 +51,27 @@ gem 'unicorn-rails'
 gem 'thin'
 
 # Activity Notification
-gem 'activity_notification' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
+gem 'activity_notification' , '>= 2.1.2' # , '1.4.4', :path => 'vendor/gems/activity_notification-1.4.4'
 
 ####### JQuery, Coffeescript and Bootstrap
-gem 'jquery-rails', '~> 4.1.0' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
+gem 'jquery-rails', '~> 4.1.1' # '~> 4.2.0' # '~> 4.3.3' # ~> 4.0' # '2.2.1' to get jQuery 1.9.1
 ## gem 'jquery-rails-google-cdn'
-gem 'jquery-ui-rails', '~> 3.0'
-gem 'coffee-rails' # , "~> 4.2"
+gem 'jquery-ui-rails', '~> 3.0', '>= 3.0.1'
+gem 'coffee-rails' , '>= 5.0.0' # , "~> 4.2"
 gem 'uglifier', '>= 1.3.0'
 ## gem 'compass-rails'
-gem 'sass-rails', " ~> 5.0"
+gem 'sass-rails', '~> 5.1', '>= 5.1.0'
 gem 'bootstrap-sass', '~> 3.3.4' # '~> 3.1.1'
 ## gem 'bootstrap-sass', github: 'thomas-mcdonald/bootstrap-sass', branch: '3'
 gem 'autoprefixer-rails'
 # gem 'jquery-migrate-rails' # TODO: remove after jQuery 1.9 is confirmed  https://jquery.com/upgrade-guide/1.9/
-gem 'masonry-rails'
-gem 'jquery-fileupload-rails', '~> 1.0' # '0.4.7'
+gem 'masonry-rails', '>= 0.2.4'
+gem 'jquery-fileupload-rails', '~> 1.0', '>= 1.0.0' # '0.4.7'
 gem 'sassc' # , '~> 1.12' # Version 2.0 requires Ruby 2.3
 
 ###### Authentication and authorization
-gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
-gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
+gem 'devise', '~> 4.7', '>= 4.7.2' # auth, rails generate devise:install, rails generate devise MODEL
+gem 'devise_invitable', '~> 1.7', '>= 1.7.5' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
 gem 'omniauth-twitter'
 gem 'omniauth-facebook', '~> 4.0.0'
@@ -153,7 +153,7 @@ group :test do
   gem 'turn', :require => false
   # gem 'webrat', '~> 0.7.3'
   ### gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
-  gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
+  gem 'factory_bot_rails' , '>= 6.1.0' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
   gem 'poltergeist'
   gem 'rspec-rails', '3.8.1'
@@ -174,7 +174,7 @@ gem 'content_for_in_controllers' # https://github.com/clm-a/content_for_in_contr
 gem 'bourbon' # https://github.com/thoughtbot/bourbon
 
 # CSS styled emails without the hassle.
-gem 'premailer-rails' # https://github.com/fphilipe/premailer-rails
+gem 'premailer-rails' , '>= 1.11.1' # https://github.com/fphilipe/premailer-rails
 
 # EventMachine is an event-driven I/O and lightweight concurrency library for Ruby
 gem 'eventmachine', '~> 1.0.3' # https://github.com/eventmachine/eventmachine
