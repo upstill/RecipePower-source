@@ -62,7 +62,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
     assert_equal 3, recipes.count
     # The recipe now gets parsed based on its selection within the RecipePage
     recipe = recipes.first
-    assert_not_nil? recipe.anchor_path
+    assert_not_nil recipe.anchor_path
     seeker = ParsingServices.new(recipe, lexaur: @lexaur).parse
     assert seeker.success?
   end

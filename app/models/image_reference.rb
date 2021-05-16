@@ -147,6 +147,7 @@ class ImageReference < ApplicationRecord
         end
         thumb.format = 'PNG'
         quality = 80
+        # self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
         accept_attribute :thumbdata, 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
       rescue Exception => e
         self.errcode = -2 # Bad data

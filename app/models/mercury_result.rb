@@ -7,7 +7,7 @@ class MercuryResult < ApplicationRecord
   backgroundable :status
 
   include Trackable
-  attr_trackable :url, :domain, :title, :date_published, :author, :picurl, :description, :mercury_error, :new_aliases
+  attr_trackable :url, :domain, :title, :date_published, :author, :picurl, :description, :mercury_error, :new_aliases, :http_status
   # Provide access methods for unpersisted results
   # attr_accessor :dek, :next_page_url, :word_count, :direction, :total_pages, :rendered_pages
 
@@ -31,8 +31,10 @@ class MercuryResult < ApplicationRecord
   end
 
   def relaunch?
-    puts "Relaunching MercuryError##{id} because #{mercury_error}"
-    results['error'] == true
+    if results['error'] == true
+      puts "Relaunching MercuryResult##{id} because #{mercury_error}"
+      true
+    end
   end
 
   def perform
@@ -72,7 +74,7 @@ class MercuryResult < ApplicationRecord
   def get_mercury_results
     new_aliases = [] # We accumulate URLs that got redirected on the way from the nominal URL to the final one (whether successful or not)
     begin
-      mercury_data = try_mercury(url.if_present || page_ref.url)
+      mercury_data = try_mercury page_ref.url
       if mercury_data['domain'] == 'www.answers.com'
         # We can't trust answers.com to provide a straight url, so we have to special-case it
         mercury_data['url'] = url
@@ -139,6 +141,7 @@ class MercuryResult < ApplicationRecord
 
   # We're using a self-hosted Mercury: https://babakfakhamzadeh.com/replacing-postlights-mercury-scraping-service-with-your-self-hosted-copy/
   def try_mercury url
+    # Follow aliases
     aliases = redirects url
     result_code = aliases.pop
     url = aliases.pop
@@ -165,7 +168,7 @@ class MercuryResult < ApplicationRecord
       data['url'] = uri.to_s
       data['domain'] ||= uri.host
     end
-    data['new_aliases'] = aliases
+    # data['new_aliases'] = aliases
     data['http_status'] = result_code
     data
   end

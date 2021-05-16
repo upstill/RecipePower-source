@@ -70,7 +70,7 @@ class ImageReferenceServices
       self.find_by(thumbdata: url) ||
           begin
             ref = ImageReferenceServices.build url: ImageReference.fake_url
-            ref.accept_attribute :thumbdata, url
+            ref.thumbdata = url # ref.accept_attribute :thumbdata, url
             ref.status = :good
             ref
           end

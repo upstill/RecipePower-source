@@ -23,7 +23,7 @@ class Gleaning < ApplicationRecord
   
   include Trackable
   # "URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"
-  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content
+  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content, :http_status
 
   # Define a mapping from Result label to the attribute that takes it on
   def self.attribute_for_label label
@@ -61,7 +61,7 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     return if bad? || results.empty?
     results.labels.each do |label|
       next unless attrname = Gleaning.attribute_for_label(label)
@@ -80,11 +80,18 @@ class Gleaning < ApplicationRecord
           end
       self.send :"#{attrname}=", value
     end
+    self.content_needed = false # It is a non-fatal error if content can't be extracted
   end
 
   def relaunch?
-    puts "Relaunching Gleaning##{id} because HTTP Status #{http_status}"
-    http_status != 200 || errors.any? || err_msg.present?
+    if (errs = [
+        ("'HTTP Status #{http_status}'" if http_status != 200),
+        ("'#{errors.full_messages}'" if errors.any?),
+        ("'#{err_msg}'" if err_msg.present?)
+    ].compact).present?
+      puts "Relaunching Gleaning##{id} because #{errs.join ' and '}"
+      true
+    end
   end
 
   # Execute a gleaning on the page_ref's url
@@ -109,9 +116,11 @@ class Gleaning < ApplicationRecord
   end
 
   # Access the results by label; singular => return first result, plural => return all
+=begin
   def method_missing namesym, *args
     results&.send namesym, *args
   end
+=end
 
   # Add results (presumably from a new finder) to the results in a Gleaning
   def assimilate_finder_results results_hash

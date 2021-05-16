@@ -25,19 +25,31 @@ end
 # trimmers: CSS selectors for content to be removed from the result
 def load_recipe url_or_recipe, selector, trimmers, grammar_mods={}
   recipe = url_or_recipe.is_a?(Recipe) ? url_or_recipe : Recipe.new(url: url_or_recipe)
+  pr = recipe.page_ref
+  assert_includes pr.recipes.to_a, recipe # Recipe didn't build attached to its page_ref
   prep_site recipe.site, selector, trimmers, grammar_mods
   recipe.ensure_attributes # Perform all due diligence
   assert_equal grammar_mods, recipe.site.grammar_mods
   refute recipe.errors.any?, recipe.errors.full_messages
   assert recipe.good? # Should have loaded and settled down
 
-  recipe.page_ref.content = recipe.page_ref.mercury_result.content
+  # PageRef arrives without recipe_page or viable content
+  assert_nil recipe.page_ref.content
+  refute recipe.recipe_page
+  pr = recipe.page_ref
+  pr.content = pr.mercury_result.content
+  recipe.ensure_attributes [ :content ]
+  refute recipe.recipe_page # Still no recipe page b/c it hasn't been requested
+  assert_not_empty recipe.content # ...but content from the page_ref
 
-  assert recipe.recipe_page
-  refute recipe.recipe_page.errors.any?, recipe.recipe_page.errors.full_messages
-  assert recipe.recipe_page.good?
+  pr.ensure_attributes [ :recipe_page ]
+  assert (rp=recipe.recipe_page)
+  refute rp.errors.any?, rp.errors.full_messages
+  assert rp.virgin?
+  recipe.ensure_attributes [ :content ], overwrite: true
+  
   content = SiteServices.new(recipe.site).trim_recipe recipe.page_ref.content
-  assert_equal content, recipe.recipe_page.content
+  assert_equal content, rp.content
   recipe
 end
 

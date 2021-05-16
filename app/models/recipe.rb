@@ -39,7 +39,7 @@ class Recipe < ApplicationRecord
         # #inventory will call a block on found nodes, once for each token
         case rpclass
         when :rp_title
-          accept_attribute :title, node.text
+          self.title = node.text # accept_attribute :title, node.text
         when :rp_ingline
           x=2
         end
@@ -142,27 +142,18 @@ class Recipe < ApplicationRecord
   def attributes_due_from_page_ref minimal_attribs=needed_attributes
     needed_now = minimal_attribs & needed_attributes
     # We ask PageRef to provide its recipe_page if possible
-    needed_now << :recipe_page if needed_now.include?(:content)
+    # needed_now << :recipe_page if needed_now.include?(:content)
     PageRef.tracked_attributes & [ :content, :picurl, :title, :description, :recipe_page ] & needed_now
   end
 
   # Request attributes from page_ref as necessary, after record is saved.
   # Return: boolean indicating need to start background processing
   def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
-    # If we haven't persisted, then the page_ref has no connection back
-    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    return true if !page_ref
-    adopt_dependencies
-    if !page_ref.bad? || restart
-      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
-      adopt_dependencies
-    end
-    save if changed? && persisted?
-    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed?
+    super || content_needed?
   end
 
   # Override to acccept values from page_ref, optionally forcing it to completion
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     super if defined? super # Force the page_ref to complete its background work
     # Translate what the PageRef is offering into our attributes
     if page_ref&.complete?

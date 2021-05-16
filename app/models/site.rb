@@ -207,7 +207,7 @@ class Site < ApplicationRecord
   end
 
   # Get the available attributes from the PageRef
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     super if defined? super # Force the page_ref to complete its background work
     adopt_dependency :logo, page_ref, :picurl
     adopt_dependency :name, page_ref, :title

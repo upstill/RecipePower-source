@@ -69,7 +69,10 @@ module Pagerefable
             end
           else
             self.page_ref = PageRef.fetch url_or_pr
-            if !page_ref || page_ref.errors.any?
+            if page_ref && !page_ref.errors.any?
+              # Ensure that the page_ref accesses the Pagerefable recipe
+              page_ref.recipes << self if (self.class == Recipe) && !(page_ref.recipes.to_a.include? self)
+            else
               self.errors.add :url, "can't be used: #{page_ref&.errors&.full_messages}"
             end
           end
@@ -104,10 +107,24 @@ module Pagerefable
     minimal_attributes
   end
 
-  def adopt_dependencies synchronous: false
+  # Decide whether background processing is needed on the basis of attributes expected from the page_ref
+  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+    # If we haven't persisted, then the page_ref has no connection back
+    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    return true if !page_ref
+    adopt_dependencies
+    if !page_ref.complete? || restart
+      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
+      adopt_dependencies
+    end
+    save if changed? && persisted?
+    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?)
+  end
+
+  def adopt_dependencies synchronous: false, final: false
     if synchronous
       # Force the page_ref to complete its background work (and that of its dependencies)
-      page_ref.adopt_dependencies synchronous: true
+      page_ref.adopt_dependencies synchronous: true, final: final
       page_ref.bkg_land! true if attributes_due_from_page_ref.present?
     end
     super if defined? super

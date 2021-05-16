@@ -32,15 +32,10 @@ class RecipePage < ApplicationRecord
 
   # In order to make our content, we need content from the PageRef
   def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
-    if !page_ref.bad? || restart
-      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
-      adopt_dependencies # If the PageRef has already satisfied our needs
-      save if changed? && persisted?
-    end
-    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?) || content_needed? # Launch iff content needs to be settled
+    super || content_needed?
   end
 
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     super if defined? super # Get the available attributes from the PageRef
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
@@ -70,7 +65,7 @@ class RecipePage < ApplicationRecord
 
         # Try to match existing recipes on selection, collecting those that don't match
         unresolved = []
-        page_ref.recipes.each do |recipe|
+        page_ref.recipes.to_a.each do |recipe|
           # Keep recipes that can't be matched on path
           if rcpdi = rcpdata.find_index { |rcpdatum| recipe.anchor_path == rcpdatum[:anchor_path] && recipe.focus_path == rcpdatum[:focus_path] }
             rcpdata.delete_at rcpdi
@@ -93,15 +88,17 @@ class RecipePage < ApplicationRecord
         # Assign remaining data to random unresolved recipes
         unresolved.sort_by { |recipe| recipe.collector_pointers.size }
         while rcpdata.present? && unresolved.present? do
-          existing_rcp = unresolved.pop
-          rcpdatum = rcpdata.pop
-          existing_rcp.accept_attribute :title, rcpdatum[:title], true
-          existing_rcp.anchor_path = rcpdatum[:anchor_path]
-          existing_rcp.focus_path = rcpdatum[:focus_path]
+          unresolved.pop.assign_attributes rcpdata.pop
         end
 
         # Build recipes from any data that hasn't found a home
-        page_ref.recipes.create rcpdata if rcpdata.present?
+        if rcpdata.present?
+          if page_ref.persisted?
+            page_ref.recipes.create rcpdata
+          else
+            page_ref.recipes.build rcpdata
+          end
+        end
 
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved

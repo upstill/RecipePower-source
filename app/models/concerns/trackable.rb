@@ -164,14 +164,14 @@ module Trackable
   def ensure_attributes minimal_attributes=needed_attributes, overwrite: false, restart: false
     request_attributes minimal_attributes, overwrite: overwrite, restart: restart
     # Try to acquire attributes from their dependencies, forcing them to completion
-    adopt_dependencies synchronous: true
+    adopt_dependencies synchronous: true 
     # If any attributes are still needed after completing dependencies, drive our background job to completion
     bkg_land! true if (minimal_attributes & needed_attributes).present?
   end
 
   # A Trackable winds up its (successful) work by taking any attributes from its dependencies
   def success job=nil
-    adopt_dependencies
+    adopt_dependencies final: true
     # Now, throw an error if any needed attributes remain unfulfilled
     needed_attributes.each { |attrib| errors.add attrib, 'couldn\'t be extracted' }
     super if defined?(super)
@@ -204,11 +204,12 @@ module Trackable
   # NB: this is an object's chance to extract values without awaiting others, if possible
   # return: a flag to launch for dependent data
   def performance_required which_attribs=needed_attributes, overwrite: false, restart: false
-    restart || (needed_attributes & (overwrite ? (which_attribs - ready_attributes) : which_attribs)).present?
+    needed_by_super = defined?(super) && super
+    restart || needed_by_super || (needed_attributes & (overwrite ? (which_attribs - ready_attributes) : which_attribs)).present?
   end
 
   # Once the entities we depend on have settled, we take on their values
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     super if defined? super
   end
 
@@ -278,7 +279,8 @@ module Trackable
   # Set the 'needed' bit for the attribute and return the attribute_sym iff wasn't needed before
   def attrib_needed! attrib_sym, needed_now=true
     unless attrib_needed?(attrib_sym) == needed_now
-      send :"#{attrib_sym}_needed=", needed_now
+      puts "Declaring #{attrib_sym} needed"
+      self.send :"#{attrib_sym}_needed=", needed_now
       attrib_sym
     end
   end
@@ -286,7 +288,7 @@ module Trackable
   # Set the 'ready' bit for the attribute and return the attribute_sym iff wasn't ready before
   def attrib_ready! attrib_sym, ready_now=true
     unless attrib_ready?(attrib_sym) == ready_now
-      send :"#{attrib_sym}_ready=", ready_now
+      self.send :"#{attrib_sym}_ready=", ready_now
       attrib_sym
     end
   end
@@ -296,7 +298,7 @@ module Trackable
   # return: the set of attributes that are actually needed FROM THE GIVEN SET
   # That is, attributes that are ALREADY needed will only be returned if requested here
   def attribs_needed! attrib_syms, overwrite:false
-    (overwrite ? (attrib_syms - ready_attributes) : attrib_syms).each { |attrib_sym| attrib_needed! attrib_sym }
+    (overwrite ? attrib_syms : (attrib_syms - ready_attributes)).each { |attrib_sym| attrib_needed! attrib_sym }
   end
 
   def attribs_ready! attrib_syms, ready_now=true

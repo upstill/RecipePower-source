@@ -20,7 +20,8 @@ class PageRef < ApplicationRecord
 
   # We track attributes from Gleanings and MercuryResult except URL
   include Trackable
-  attr_trackable :url, :domain, :title, :content, :picurl, :date_published, :author, :description, :rss_feeds, :recipe_page, :new_aliases, :http_status
+  attr_trackable :url, :domain, :title, :content, :picurl, :date_published, :author, :description, :rss_feeds,
+                 :recipe_page, :new_aliases, :http_status, :site
 
   # The associated Gleaning keeps the PageRef's content by default, with backup by MercuryResults
   def content
@@ -28,7 +29,7 @@ class PageRef < ApplicationRecord
   end
 
   def content= val
-    gleaning&.accept_attribute :content, val
+    gleaning.content = val # gleaning&.accept_attribute :content, val
     attrib_done :content
   end
 
@@ -98,11 +99,12 @@ class PageRef < ApplicationRecord
   has_many :referments, :as => :referee, :dependent => :destroy
   has_many :referents, :through => :referments, inverse_of: :page_refs
 
+=begin
   after_initialize do |pr|
-    # The actual launch will occur after_save
-    url_needed! # Get a revised URL from gleaning and mercury
-    request_attributes [ :url, :picurl, :title ] unless persisted?
+    # The actual launch will occur once the url and http_status have settled
+    request_attributes [ :picurl, :title ] unless persisted?
   end
+=end
 
   before_save do |pr|
     alias_for(pr.url, true) if pr.url_changed? # Ensure that a page_ref's url is an alias, too
@@ -119,6 +121,7 @@ class PageRef < ApplicationRecord
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
   def performance_required minimal_attributes=needed_attributes, overwrite: false, restart: false
+    return true if http_status_needed
     adopt_dependencies # Try to get attribs from gleaning and mercury as they stand
     # Filter the minimal attributes for those which are actually still needed
     minimal_attributes = attribs_needed! minimal_attributes, overwrite: overwrite
@@ -136,29 +139,40 @@ class PageRef < ApplicationRecord
 
   # Ask gleaning and mercury_result for attributes.
   # We assume that both have been settled in the course of #perform
-  def adopt_dependencies synchronous: false
+  def adopt_dependencies synchronous: false, final: false
     if gleaning
+      assign_from gleaning
       # Force the gleaning to completion of its background work
-      gleaning.bkg_land! true if synchronous
-      assign_attributes gleaning.ready_attribute_values.slice(*open_attributes)
+      gleaning.bkg_land! true if synchronous && !gleaning.complete? # needed_attributes.present?
+      assign_from gleaning
     end
     # Note that if we got an attribute from the Gleaning, we no longer need it from MercuryResult
     if mercury_result
-      assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      assign_from mercury_result
       # Force the mercury_result to completion of its background work
-      mercury_result.bkg_land! true if synchronous
-      assign_attributes mercury_result.ready_attribute_values.slice(*open_attributes)
+      mercury_result.bkg_land! true if synchronous && !mercury_result.complete? # needed_attributes.present?
+      assign_from mercury_result
     end
     if recipe_page_needed? # Should come to life with :content expected
       attrib_needed! :recipe_page, false
       self.recipe_page ||= build_recipe_page
     end
-    # Report any errors from MercuryResult or Gleaning
-    gleaning_error = "can\'t be gleaned: #{gleaning.errors[:base]}\n" if gleaning&.complete? && (gleaning.http_status != 200)
-    mercury_error = "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}" if mercury_result&.complete? && (mercury_result.http_status != 200)
-    # Declare an error to set status to :bad
-    urlerr = "#{gleaning_error}#{mercury_error}"
-    errors.add :url, urlerr if urlerr.present?
+    if final
+=begin
+      if url_changed? && ![ gleaning&.url, mercury_result&.url ].compact.include?(new_url)
+        refresh_attributes [ :picurl, :title ], restart: true
+      end
+=end
+      # Report any errors from MercuryResult or Gleaning
+      if gleaning&.complete? && (gleaning.http_status != 200)
+        errors.add :url, "can\'t be gleaned: #{gleaning.errors[:base]}\n"
+        self.url_needed = false
+      end
+      if mercury_result&.complete? && (mercury_result.http_status != 200)
+        errors.add :url, "can\'t be accessed by Mercury: #{mercury_result.errors[:base]}"
+        self.url_needed = false
+      end
+    end
     super if defined? super
   end
 
@@ -166,57 +180,9 @@ class PageRef < ApplicationRecord
   # We attempt to drive MercuryResult and Gleaning to completion, then adopt the URLs derived therefrom,
   # in the expectation that other attributes will be extracted from the two separately.
   def perform
-    if http_status_needed?
-      # We need to follow any redirects from the current url.
-      # The final (non-redirected) location will become our URL, and any
-      # URLs that redirected along the way (including the first) become our aliases
-      # NB Only the original URL is guaranteed not to be redundant, either in another page_ref
-      # or an alias. If it's the latter, we capture the alias. If we can't adopt the URL without
-      # clashing with another page_ref, we assign it to MercuryResult and Gleaning and give up.
-      logger.debug "Checking direct access of PageRef ##{id} at '#{url}'"
-      rds = redirects url
-      hstat = rds.pop
-      self.new_aliases = rds # Add new aliases as needed
-      if rds.count > 1
-        new_url = rds.last
-        if PageRef.find_by url: new_url
-          # Non-unique URL bad!
-          self.errors.add :url, "'#{url}' was redirected to '#{new_url}', which is already taken."
-        else
-          self.url = new_url
-          # We leave ourselves open to further urls, but not needing them
-          self.url_needed = false
-          self.url_ready = false
-        end
-      end
-      self.http_status = hstat # Won't need http_status again until url is changed
-=begin
-      subject_url = url
-      
-      # Loop over the redirects from the link, adding each to the record.
-      # Stop when we get to the final page or an error occurs
-      # 
-      # Check the header for the url from the server.
-      # If it's a string, the header returned a redirect
-      # otherwise, it's an HTTP code
-      while (hr = header_result(subject_url)).is_a?(String)  # ...because redirect
-        # header_result returns a string for a redirect
-        next_url = hr.match(/^http/) ? hr : safe_uri_join(subject_url, hr).to_s # The redirect URL may only be a path
-        if !Alias.urleq(subject_url, next_url) && alias_for?(next_url) # Time to give up when the url has been tried (it already appears among the aliases)
-          # Report the error arising from direct access
-          hr = header_result next_url
-          break
-        end
-        logger.debug "Redirecting from #{subject_url} to #{next_url}"
-        alias_for subject_url, true
-        subject_url = next_url
-      end
-      self.url = subject_url
-      self.http_status = hr # Return the last error code
-=end
-    end
+    probe_url if http_status_needed?
 
-    # Now that we have a url, move on to the mercury_result and the gleaning
+    # Now that we have a url and http_status, move on to the mercury_result and the gleaning
 
     # If MercuryResult or Gleaning have failed,
     # AND we want to give them another chance to complete,
@@ -312,7 +278,14 @@ class PageRef < ApplicationRecord
     if url_or_page_ref.present?
       standardized_url = PageRef.standardized_url url_or_page_ref
       unless pr = self.find_by_url(standardized_url)
-        pr = self.new initializers.merge(url: standardized_url)
+        initializers = initializers[:http_status] ?
+                           initializers.merge(url_and_status: [ standardized_url, initializers[:http_status] ]) :
+                           initializers.merge(url: standardized_url)
+        pr = self.new initializers
+        # We didn't find an existing page_ref by the given url, but that doesn't mean
+        # that there isn't one that it redirects to.
+        # HOWEVER, the candidate will return from assigning the url with a redirect chain
+        pr.aliases.to_a.each { |a| }
         yield pr if block_given?
       end
     end
@@ -328,21 +301,34 @@ class PageRef < ApplicationRecord
   # * clearing http_status and virginizing the PageRef in anticipation of launching it (when/if saved)
   # * ensuring the existence of virginized MercuryResult and Gleaning associates
   def url= new_url
-    new_url = self.class.standardized_url new_url
-    return if new_url == url
-    super new_url # Heading for trouble if url wasn't unique
     self.url_ready = true
     self.url_needed = false
+    return unless acceptable_url?(new_url) { |err| errors.add :url, err }
+    super self.class.standardized_url(new_url) # Heading for trouble if url wasn't unique
+
+    # Ensure there's an alias
+    alias_for new_url, true
+
+    # Creating or otherwise building the page ref: Quickly assess the http_status
+    # We refresh the http_status without consulting mercury_result or gleaning
     # When a new url is asserted, we will have to get its http_status UNLESS it's already among our aliases
-    unless alias_for? new_url # Probe access to the page, generating aliases as needed
-      alias_for new_url, true
-      refresh_attributes [ :http_status ]
+    # We'll also have to MercuryResult and Gleaning, so just destroy them now
+    gleaning&.destroy ; self.gleaning = nil
+    mercury_result&.destroy ; self.mercury_result = nil
+    errors.delete :url # Clear pending probe
+    probe_url
+    unless errors[:url].any?  # url was (ultimately) good
+      refresh_attributes [ :picurl, :title ], restart: true unless [ gleaning&.url, mercury_result&.url ].compact.include?(new_url)
+    else
+      self.status = :bad
+      self.error_message = errors.full_messages_for :url
     end
-    # We do NOT build the associated site here, because we may be BUILDING the page_ref for a site, in
+
+      # We do NOT build the associated site here, because we may be BUILDING the page_ref for a site, in
     # which case that site will assign itself to us. Instead, the site attribute is memoized, and if it
     # hasn't been built by the time that it is accessed, THEN we find or build an appropriate site
-    self.site = SiteServices.find_or_build_for self
-    self.kind = :site if site&.page_ref == self # Site may have failed to build
+    # self.site = SiteServices.find_or_build_for self
+    # self.kind = :site if site&.page_ref == self # Site may have failed to build
     # We trigger the site-adoption process if the existing site doesn't serve the new url
     # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
   end
@@ -375,6 +361,33 @@ class PageRef < ApplicationRecord
     end
   end
 
+  # This virtual attribute allows the url and the confirming http_status to be set at once,
+  # eliding the accessibility check that comes from url=
+  def url_and_status= associate_or_twofer
+    # Get url and http_status either via an associate, or directly from a two-element array
+    twofer =
+        case associate_or_twofer
+        when Array
+          associate_or_twofer
+        else
+          [associate_or_twofer.url, associate_or_twofer.http_status]
+        end
+    # The parameter is a url/status pair
+    new_url, self.http_status = self.class.standardized_url(twofer.first), twofer.last
+    self.url_ready = true
+    self.url_needed = false
+    return if (old_url = url) == new_url # No need to proceed further if the url isn't changing
+    # Viable url to be gotten from element => get url and http_status together, without checking for accessibility or other side effects
+    write_attribute :url, new_url
+    alias_for url, true # Ensure the presence of an alias
+    if http_status == 200 # If status is okay, start building the site
+      self.site = SiteServices.find_or_build_for self
+      self.kind = :site if site&.page_ref == self # Site may have failed to build
+      # When getting the url and status from gleaning or mercury_result, we assume that others will launch for attributes as needed
+      refresh_attributes([:picurl, :title], restart: true) if associate_or_twofer.is_a?(Array)
+    end
+  end
+
   # Provide a relation for entities that match a string
   def self.strscopes matcher
     ar = self.arel_table[:domain].matches matcher
@@ -394,13 +407,49 @@ class PageRef < ApplicationRecord
     end
   end
 
-  # Accept the standardized form of the url only, but only if it's valid
-  def accept_url url
-    accept_attribute :url, self.class.standardized_url(url) if url.present? && acceptable_url?(url)
-    # self.write_attribute :url, url
-  end
-
   private
+
+  # Test the url attribute for accessibility,
+  # -- follow any redirects
+  # -- set http_status to the header status of the last redirect
+  # -- if the last redirect fails, invoke mercury_result and gleaning to see if they do any better
+  # -- revise the url attribute as needed
+  def probe_url
+    # We need to follow any redirects from the current url.
+    # The final (non-redirected) location will become our URL, and any
+    # URLs that redirected along the way (including the first) become our aliases
+    # NB Only the original URL is guaranteed not to be redundant, either in another page_ref
+    # or an alias. If it's the latter, we capture the alias. If we can't adopt the URL without
+    # clashing with another page_ref, we assign it to MercuryResult and Gleaning and give up.
+    old_url = url
+    rds = redirects url
+    self.http_status = rds.pop
+    self.new_aliases = rds # Add new aliases as needed
+    new_url = PageRef.standardized_url(rds.pop)
+    if (url != new_url) && PageRef.where(url: new_url).exists? # Proposed new URL clashes with existing
+      # Non-unique URL bad!
+      puts "URL '#{new_url}' already in use!" if Rails.env.test?
+      self.errors.add :url, "'#{url}' was redirected to '#{new_url}', which is already taken."
+      return
+    end
+    if http_status == 200 # Hitting the URL succeeded
+      write_attribute :url, new_url
+      self.site = SiteServices.find_or_build_for self
+      self.kind = :site if site&.page_ref == self # Site may have failed to build
+    else # Bad URL: see if mercury and/or gleaning can do any better
+      # Hopefully we'll pick up a valid URL from one of them
+      ensure_gleaning.ensure_attributes [ :http_status ], overwrite: true, restart: true
+      ensure_mercury_result.ensure_attributes [ :http_status ], overwrite: true, restart: true
+      self.url_needed = self.http_status_needed = true
+      adopt_dependencies final: true
+      self.url_needed = self.http_status_needed = false # Close url and status even if not acquired from associate
+    end
+    if Rails.env.test?
+      puts "Replaced url '#{old_url}'"
+      puts "URL '#{new_url}' yields http_status #{http_status}\n\tAliases:"
+      aliases.to_a.map(&:url).each { |u| puts "\t#{u}" }
+    end
+  end
 
   def ensure_mercury_result
     mercury_result || (self.mercury_result = build_mercury_result)
@@ -416,6 +465,14 @@ class PageRef < ApplicationRecord
 
   def needed_from_gleaning
     Gleaning.tracked_attributes & needed_attributes
+  end
+
+  def assign_from associate
+    to_assign = open_attributes
+    # Assign the url only if the entity's derived http_status is appropriate
+    self.url_and_status = associate if !associate.http_status_needed && associate.http_status == 200 # [400,  401, 403, 404, 414, 500 ].include?(associate.http_status)
+    to_assign = to_assign - [ :url, :http_status ] # Regardless, we don't do mass assignment of url and status
+    assign_attributes associate.ready_attribute_values.slice(*to_assign)
   end
 
   def all_done?
