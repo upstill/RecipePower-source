@@ -17,6 +17,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       @rcp.comment= 'I told you so'
       assert_equal 'I told you so', @rcp.comment
       # Because this is a new rcpref, it gets saved
+      @rcp.save
       @rcp.reload
       assert_equal 'I told you so', @rcp.comment
 

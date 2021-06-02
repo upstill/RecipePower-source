@@ -374,14 +374,15 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     gl = pr.gleaning
     assert_equal gl.page_ref, pr
     gl.save
-    assert gl.dj
+    assert_equal pr.gleaning, gl
+    assert gl.dj  
     gl.bkg_land
     refute gl.processing?
   end
 
   test "site pageref" do
     pr = PageRef.fetch 'http://barbecuebible.com'
-    assert_equal [:url, :title, :picurl, :http_status], pr.needed_attributes
+    assert_equal [:title, :picurl], pr.needed_attributes
     refute pr.dj # Should launch on save
     pr.save
     assert pr.dj
@@ -394,7 +395,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     url = 'http://barbecuebible.com/recipe/grilled-venison-loin-with-honey-juniper-and-black-pepper-glaze/'
     site = SiteServices.find_or_build_for url
     assert_equal url, site.sample
-    assert_equal 'http://barbecuebible.com', site.home
+    assert_equal 'https://barbecuebible.com/', site.home
     assert_equal 'barbecuebible.com', site.root
     # Should have extracted info
     land_without_persistence site

@@ -23,7 +23,7 @@ class GleaningServicesTest < ActiveSupport::TestCase
     assert gleaning.good?
     assert gleaning.page_ref
     refute gleaning.page_ref.persisted?
-    assert_not_empty gleaning.images
+    assert_not_empty gleaning.results_for('Image')
   end
 
   test 'completed gleaning for recipe' do

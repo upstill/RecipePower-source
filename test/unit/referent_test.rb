@@ -409,7 +409,7 @@ class ReferentTest < ActiveSupport::TestCase
   end
 
   test 'PageRef Referee translates between kinds' do
-    pr_before = page_refs :goodpr
+    pr_before = PageRef.new(:kind => 5, :url_and_status => [ 'http://www.recipepower.com/rcp2', 404 ]) # page_refs :goodpr
     assert_equal 'article', pr_before.kind
     pr_after = RefereeServices.new(pr_before).assert_kind 'about'
     assert_equal pr_before, pr_after
@@ -417,7 +417,7 @@ class ReferentTest < ActiveSupport::TestCase
   end
 
   test 'PageRef Referee translates to Recipe' do
-    pr_before = page_refs :goodpr
+    pr_before = PageRef.new(:kind => 5, :url_and_status => [ 'http://www.recipepower.com/rcp2', 404 ])
     assert_equal 'article', pr_before.kind
     pr_after = RefereeServices.new(pr_before).assert_kind 'recipe', promote: true
     assert_equal Recipe, pr_after.class

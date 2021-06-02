@@ -21,7 +21,7 @@ class BackgroundableTest < ActiveSupport::TestCase
     r = Recipe.new url: 'https://patijinich.com/2012/05/creamy-poblano-soup.html'
     r.ensure_attributes
     # Check that an error occurred in ensuring :content and :url attributes
-    assert r.errors[:content].present?
+    # assert r.errors[:content].present?
     assert r.errors[:url].present?
     assert r.bad?
 
@@ -66,6 +66,7 @@ class BackgroundableTest < ActiveSupport::TestCase
     url = 'http://www.mariobatali.com/recipes/focaccia-panzanella/'
     pr = PageRef.fetch url
     refute pr.persisted?
+    pr.status = 'virgin'
     pr.save
     assert pr.dj # Launch on save
     runtime = pr.dj.run_at

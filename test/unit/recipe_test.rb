@@ -62,10 +62,9 @@ class RecipeTest < ActiveSupport::TestCase
   test "mal-formed url rejected" do
     url = "nonsense url"
     recipe = Recipe.new url: url
-    refute recipe.errors[:url].present? # Bogus URL is at least assignable
-    assert_equal url, recipe.url
-    recipe.bkg_land
-    assert recipe.page_ref.bad?
+    assert recipe.errors[:url].present? # Bogus URL throws an error
+    assert_nil recipe.url
+    assert recipe.page_ref.errors[:url].present?
     refute recipe.save
     assert_nil recipe.id
     assert_nil recipe.page_ref.id
@@ -74,23 +73,22 @@ class RecipeTest < ActiveSupport::TestCase
   test "bad--but well-formed--url assigned" do
     url = "http://www.tastenobeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/"
     recipe = Recipe.new url: url
-    assert !recipe.errors.present?
+    assert recipe.errors[:url].present?
     assert_equal url, recipe.url
-    assert recipe.page_ref.virgin?
-    recipe.ensure_attributes :title, :description
+    assert recipe.page_ref.bad?
+    recipe.ensure_attributes [ :title, :description ]
     refute recipe.description_ready
     refute recipe.title_ready
     assert recipe.page_ref.bad?
     refute recipe.save
     assert_nil recipe.id
   end
+
   test "recipe with redirect responds to all aliases" do
     url = "http://www.tasteofbeirut.com/2013/05/eggplant-in-yogurt-sauce-batenjane-be-laban/"
     recipe = Recipe.new url: url
     assert !recipe.errors.present?
-    assert_equal url, recipe.url
-    assert recipe.page_ref.virgin?
-    recipe.ensure_attributes :title, :description
+    recipe.ensure_attributes
     assert recipe.description_ready
     assert recipe.title_ready
     assert recipe.page_ref.good?
@@ -108,6 +106,7 @@ class RecipeTest < ActiveSupport::TestCase
   test "bad url reassigned over good url" do
     good_url = "https://patijinich.com/creamy-poblano-soup/"
     recipe = Recipe.new title: 'some damn thing', url: good_url
+    assert_equal good_url, recipe.url
     assert recipe.errors.empty?
     assert recipe.page_ref.virgin?
     assert_equal good_url, recipe.url
@@ -122,35 +121,40 @@ class RecipeTest < ActiveSupport::TestCase
     bad_url = "https://patijinich.com/2012/05/creamy-poblano-soup.html"
     recipe.url = bad_url
     assert_equal bad_url, recipe.url
-    recipe.save # Should launch the page_ref
-    assert recipe.page_ref.virgin?
-    recipe.page_ref.bkg_land
     assert recipe.page_ref.bad?
     assert recipe.page_ref.error_message.present?
-    assert recipe.errors.empty?
-    recipe.bkg_land
-    assert recipe.bad?
+    assert recipe.errors[:url].present?
+
+    # The recipe should not have been saved, nor its associates
+    # NB: Can't use recipe.reload b/c it doesn't reset errors
+    recipe = Recipe.find recipe.id
+    assert_equal good_url, recipe.url
+    assert_equal 200, recipe.page_ref.http_status
+    recipe.ensure_attributes
+    assert recipe.good?
+    assert recipe.page_ref.good?
   end
 
   test "url reassigned over bad url" do
     bad_url = "https://patijinich.com/2012/05/creamy-poblano-soup.html"
     recipe = Recipe.new title: 'some damn thing', url: bad_url
-    assert recipe.errors.empty?
-    assert recipe.page_ref.virgin?
-    assert_equal bad_url, recipe.url
+    assert_not_empty recipe.errors[:url]
+    assert recipe.page_ref.bad?
     assert_nil recipe.id
     assert_nil recipe.page_ref.id
-    assert recipe.save
+    assert recipe.save  # Can't be saved
+    recipe = Recipe.find recipe.id # Reinitialize it entirely
     assert recipe.errors.empty?
     assert !recipe.page_ref.errors.present?
     assert_not_nil recipe.id
     assert_not_nil recipe.page_ref.id
 
     good_url = "https://patijinich.com/creamy-poblano-soup/"
+    recipe.errors.clear
     recipe.url = good_url
     assert_equal good_url, recipe.url
     assert recipe.errors.empty?
-    recipe.page_ref.bkg_land
+    recipe.ensure_attributes
     assert recipe.page_ref.good?
   end
 end

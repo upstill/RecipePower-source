@@ -10,7 +10,7 @@ class FeedTest < ActiveSupport::TestCase
       f1.save
       assert_equal "Ruhlman", f1.title, "Title not extracted"
       assert_equal "Translating the chef’s craft.", f1.description, "Description not extracted"
-      assert_equal "http://ruhlman.com", f1.site.home, "wrong site extracted"
+      assert_equal "https://ruhlman.com/", f1.site.home, "wrong site extracted"
     end
     
     test "bogus feed fails" do

@@ -11,6 +11,10 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
              [ 'fresh Hong Kong Style Pan-Fried Noodles',
                'soy sauce',
                'sesame oil',
+               'small capers',
+               'black pepper',
+               'Brussels sprouts',
+               'Dijon mustard',
                'Lao Gan Ma spicy black bean sauce',
                'vegetable oil' ]
     add_tags :Unit,[ 'pound' ]
@@ -61,7 +65,7 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingname
-    assert_equal 1, seeker.tag_ids.count
+    assert_not_nil seeker.tagdata[:id]
     assert_equal :rp_ingname, seeker.token
   end
 
@@ -70,7 +74,7 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
     nokoscan = NokoScanner.new ingstr
     is = IngredientsSeeker.seek nokoscan, lexaur: @lex, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
-    assert_equal 3, is.tag_seekers.count, "Didn't find 3 ingredients in #{ingstr}"
+    assert_equal 3, is.find(:rp_ingname).count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
     parser = Parser.new nokoscan, @lex
     seeker = parser.match :rp_ingspec

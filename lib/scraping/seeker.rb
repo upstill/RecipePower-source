@@ -399,7 +399,7 @@ class  TagsSeeker < Seeker
       end
     end
     if children.present?
-      children.sort_by &:pos
+      children = children.sort_by &:pos
       self.new children.first.head_stream, children.last.tail_stream, opts[:token], children, operand: operand
     end
   end

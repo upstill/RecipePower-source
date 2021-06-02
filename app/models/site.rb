@@ -152,9 +152,9 @@ class Site < ApplicationRecord
   #...and associate with recipes via the recipe_page_refs that refer back here
   has_many :recipes, :through => :page_refs, :dependent=>:restrict_with_error
 
-  after_initialize do |rp|
-    # The actual launch will occur after_save
-    request_attributes [ :name, :logo, :rss_feed ] unless persisted? # Only on initial build
+
+  def standard_attributes
+    [ :name, :logo, :rss_feed ]
   end
 
   before_validation do |site|

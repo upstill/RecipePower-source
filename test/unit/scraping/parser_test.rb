@@ -82,11 +82,12 @@ class ParserTest < ActiveSupport::TestCase
       instant\ dry\ yeast
       active\ dry\ yeast
       Romanesco\ (green)\ cauliflower
+      water
       yellow\ onions}.
         each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }.
+    @unit_tags = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }.
         each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated }.
+    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm }.
         each { |name| Tag.assert name, :Condition }
     @lex = Lexaur.from_tags
     @ings_list = <<EOF

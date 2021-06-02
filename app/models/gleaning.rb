@@ -13,6 +13,21 @@ class Gleaning < ApplicationRecord
   accepts_nested_attributes_for :page_ref
   accepts_nested_attributes_for :site
 
+  # These are virtual attributes we can get from the results, as defined by Finders with the corresponding labels.
+  # (Commented vas here have been subsumed into attributes of the Gleaning)
+  delegate :uri, :uris,
+           :titles, # :title,
+           :descriptions, # :description,
+           :image, :images,
+           # :author, :authors,
+           :author_name, :author_names,
+           # :author_link, :author_links,
+           # :tag, :tags,
+           # :site_name, :site_names,
+           :rss_feed, :rss_feeds,
+           # :content, :contents,
+           :to => :results
+
   def self.mass_assignable_attributes
     [ { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }]
   end
@@ -115,8 +130,8 @@ class Gleaning < ApplicationRecord
     (results && results[label]) ? results[label].map(&:out).flatten.uniq : []
   end
 
-  # Access the results by label; singular => return first result, plural => return all
 =begin
+  # Access the results by label; singular => return first result, plural => return all
   def method_missing namesym, *args
     results&.send namesym, *args
   end

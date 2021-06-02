@@ -65,7 +65,12 @@ module Pagerefable
           end
           if page_ref
             if page_ref.acceptable_url?(url_or_pr) { |errmsg| self.errors.add :url, "can't be used: #{errmsg}" }
-              page_ref.url = url_or_pr
+              # Assign the url to the PageRef, which doesn't return until the validity of the link is determined.
+              # The assignment returns the page_ref which holds it, which is normally the existing one. But if
+              # there is a redirect held by another page_ref, the assignment returns that. Either way, (re)assigning
+              # the page_ref gets the appropriate url
+              self.page_ref = page_ref.safe_assign url_or_pr
+              self.errors.add :url, "can't accept '#{url_or_pr}' due to error(s): \n\t'#{page_ref.error_message}'" if page_ref.http_status != 200
             end
           else
             self.page_ref = PageRef.fetch url_or_pr

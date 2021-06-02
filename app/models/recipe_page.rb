@@ -19,9 +19,8 @@ class RecipePage < ApplicationRecord
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
 
-  after_initialize do |rp|
-    # The actual launch will occur after_save
-    request_attributes [ :content ] unless persisted? 
+  def standard_attributes
+    [ :content ]
   end
 
   ##### Trackable matters #########

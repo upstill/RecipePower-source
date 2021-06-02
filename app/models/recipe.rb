@@ -23,9 +23,15 @@ class Recipe < ApplicationRecord
 
   delegate :recipe_page, :to => :page_ref
 
+=begin
   after_initialize do |rcp|
     # The actual launch will occur after_save
     request_attributes [ :title, :picurl, :content ] unless persisted?
+  end
+=end
+
+  def standard_attributes
+    [ :title, :picurl, :content ]
   end
 
   before_save do |recipe|
@@ -115,7 +121,7 @@ class Recipe < ApplicationRecord
 
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
-    self.picture = ImageReferenceServices.find_or_initialize site_service&.resolve(pu)
+    self.picture = ImageReferenceServices.find_or_initialize (site_service ? site_service.resolve(pu) : pu)
   end
 
   # Memoized SiteServices

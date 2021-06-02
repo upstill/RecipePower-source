@@ -108,7 +108,7 @@ Parser.init_grammar(
         atline: true
     },
     rp_serves: {
-        match: [ /^Serv(ing|e)s?:?$/, :rp_amt ],
+        match: [ /^Serv(ing|e)s?:?$/, :rp_num_or_range ],
         atline: true
     },
     rp_instructions: nil,

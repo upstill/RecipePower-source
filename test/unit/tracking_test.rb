@@ -7,11 +7,11 @@ class TrackingTest < ActiveSupport::TestCase
     # The recipe should come to life needing its url to be finalized
     # Add that to :title and :description
     rcp.request_attributes [:title, :description]
-    assert_equal [ :title, :description, :content ], rcp.needed_attributes # Content was declared needed after_build
+    assert_equal [ :title, :description, :content, :picurl ].sort, rcp.needed_attributes.sort # Content was declared needed after_build
 
     rcp.ensure_attributes # Get them all, referring to PageRef as nec.
     assert_equal [ :content ], rcp.needed_attributes  # Can't get content b/c there's no Content finder
-    assert_equal [ :picurl, :title, :description ], rcp.ready_attributes
+    assert_equal [ :picurl, :title, :description ].sort, rcp.ready_attributes.sort
   end
 
   test "basic attributes established in PageRef" do
@@ -19,7 +19,7 @@ class TrackingTest < ActiveSupport::TestCase
     pr = PageRef.fetch url
     # After creation, the :url attribute should be ready but still needed, until Gleaning and MercuryResult are consulted
     assert pr.url_ready?
-    assert pr.url_needed?
+    refute pr.url_needed?
 
     # In the beginning, all tracked attributes are open
     assert_equal PageRef.tracked_attributes, pr.open_attributes
@@ -83,9 +83,9 @@ class TrackingTest < ActiveSupport::TestCase
     assert recipe.title_needed
     refute recipe.title_ready
     # Attributes which NEED to be acquired
-    assert_equal [:title, :content], recipe.needed_attributes
+    assert_equal [ :picurl, :title, :content].sort, recipe.needed_attributes.sort
     # Attributes which MAY be set, if the opportunity presents
-    assert_equal [:picurl, :title, :description, :content], recipe.open_attributes
+    assert_equal [:picurl, :title, :description, :content].sort, recipe.open_attributes.sort
     assert_equal [:url, :title, :content, :picurl, :http_status], recipe.page_ref.needed_attributes
     recipe.title = 'placeholder2' # Set title and flip 'ready' bit
 
@@ -107,8 +107,8 @@ class TrackingTest < ActiveSupport::TestCase
   test "basic attribute tracking" do
     url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
     recipe = Recipe.new url: url
-    assert_equal [:picurl, :title, :description, :content], Recipe.tracked_attributes
-    refute recipe.title_needed
+    assert_equal [:picurl, :title, :description, :content].sort, Recipe.tracked_attributes.sort
+    assert recipe.title_needed
     refute recipe.title_ready
 
     recipe.title = 'placeholder' # Set title and flip 'ready' bit
@@ -116,15 +116,13 @@ class TrackingTest < ActiveSupport::TestCase
     refute recipe.title_needed
     assert_equal 'placeholder', recipe.title
 
-    recipe.request_attributes [:picurl, :title]
-
     recipe.save
     recipe.reload
     assert recipe.title_ready
-    assert recipe.title_needed
+    refute recipe.title_needed
     assert_equal 'placeholder', recipe.title
 
-    recipe.ensure_attributes [:title ]# Extract from page_ref
+    recipe.ensure_attributes [:title ], overwrite: true # Extract from page_ref
     assert recipe.title_ready
     refute recipe.title_needed
     assert_match /^Persian.*Beirut$/, recipe.title

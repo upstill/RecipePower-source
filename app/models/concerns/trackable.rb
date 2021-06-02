@@ -7,6 +7,8 @@ module Trackable
   extend ActiveSupport::Concern
 
   included do
+    # When a Trackable is first built, we let it define attributes that should be requested
+    after_initialize :request_standard_attributes, :if => :new_record?
     # Launch for getting attributes IF they have been declared as needed before saving,
     # e.g., by an after_initialize callback
     after_save do |entity|
@@ -77,6 +79,15 @@ module Trackable
 
   def self.included(base)
     base.extend(ClassMethods)
+  end
+
+  # Called when a Trackable is first initialized
+  def request_standard_attributes
+    request_attributes standard_attributes if standard_attributes.present?
+  end
+
+  def standard_attributes
+    []
   end
 
   # Set and accept the attribute. Action depends on the 'ready' and 'needed' bits

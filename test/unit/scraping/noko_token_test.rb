@@ -123,7 +123,7 @@ class NokoTokenTest < ActiveSupport::TestCase
 
   test 'appropriately enclosing a text element' do
     # The document includes an 'rp_ingname' element, which cannot include an 'rp_ingline'
-    # So the latter tag needs to be removed
+    # So the latter tag needs to be removed when the larger element
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.2.html'
     newtree = @nokotokens.enclose_tokens 10, 12, :tag => :div, :rp_elmt_class => :rp_ingline
     assert_equal 1, @nkdoc.css('div.rp_ingline').count
