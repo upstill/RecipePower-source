@@ -3,6 +3,10 @@ class TagOwnershipTest < ActiveSupport::TestCase
   fixtures :tags
   fixtures :users
 
+  def setup
+    super
+  end
+
   # Admitting user for tag that's already global has no effect
   test "Admitting user for global tag is redundant" do
     superid = users(:super).id

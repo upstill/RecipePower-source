@@ -3,8 +3,9 @@ require 'test_helper'
 class RecipeUserTest < ActiveSupport::TestCase 
     fixtures :users
     fixtures :recipes
-    
+
     def setup
+      super
       @rcp = recipes(:rcp)
       @rcp2 = recipes(:goodpicrcp)
       @thing1 = users(:thing1)

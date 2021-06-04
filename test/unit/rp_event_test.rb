@@ -6,6 +6,7 @@ class EventTest < ActiveSupport::TestCase
   # Called before every test method runs. Can be used
   # to set up fixture information.
   def setup
+    super
     RpEvent.create
   end
 

@@ -22,6 +22,7 @@ class ParseTheguardianTest < ActiveSupport::TestCase
   # -- @trimmers: an array of CSS selectors; elements that answer to those selectors will be removed from the content
   # -- @page: the page used for the test
   def setup
+    super
     # Define all the tags we'll need for the site. (These will need to be extant on RecipePower itself)
     add_tags :Ingredient,
              %w{ lemon\ zest salt sea\ salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves

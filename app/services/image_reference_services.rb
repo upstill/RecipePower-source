@@ -128,6 +128,10 @@ class ImageReferenceServices
     (@@UNPERSISTED ||= {}).keep_if { |url, image_ref| !image_ref.persisted? }
   end
 
+  def self.clear_unpersisted
+    @@UNPERSISTED = {}
+  end
+
   # Build a new ImageReference and add it to the unpersisted set
   def self.build options = {}
     self.unpersisted[options[:url]] = (image_ref = ImageReference.new url: options[:url])

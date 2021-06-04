@@ -13,7 +13,7 @@ module Trackable
     # e.g., by an after_initialize callback
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
-      bkg_launch true if !bad? && performance_required
+      bkg_launch true if !bad? && relaunch?
       # (re)Launch dj as necessary to gather attributes from MercuryResult and Gleaning
     end
   end
@@ -194,18 +194,25 @@ module Trackable
     # Set the :needed flag for those in the list that aren't already needed or ready.
     # ATTRIBUTES THAT ARE READY ARE NOT DECLARED NEEDED--UNLESS THE OVERWRITE FLAG IS ON
     minimal_set = minimal_set ? attribs_needed!(minimal_set, overwrite: overwrite) : needed_attributes
+    launch_needed = drive_dependencies minimal_set, overwrite: overwrite, restart: restart
     if persisted?
-      if performance_required minimal_set, overwrite: overwrite, restart: restart # Remove 'bad' status which would prevent launching
+      if launch_needed # Remove 'bad' status which would prevent launching
         self.status = 'virgin'
         save if changed?
         return true
       end
-    elsif performance_required(minimal_set, overwrite: overwrite, restart: restart) && (restart || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
+    elsif launch_needed && (restart || !bad?) # Launch all objects that we depend on, IFF we haven't failed prior
       puts "Requesting attributes #{minimal_set} of #{self} ##{id}"
       bkg_launch true
       return true
     end
     return false
+  end
+
+  # Once an entity is saved, does it need to be launched for background work?
+  def relaunch?
+    needed_by_super = defined?(super) && super
+    needed_by_super || needed_attributes.present?
   end
 
   # Stub to be overridden that an object uses to:
@@ -214,7 +221,7 @@ module Trackable
   # In either case, return true to launch for background processing
   # NB: this is an object's chance to extract values without awaiting others, if possible
   # return: a flag to launch for dependent data
-  def performance_required which_attribs=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies which_attribs=needed_attributes, overwrite: false, restart: false
     needed_by_super = defined?(super) && super
     restart || needed_by_super || (needed_attributes & (overwrite ? (which_attribs - ready_attributes) : which_attribs)).present?
   end

@@ -5,6 +5,10 @@ require './lib/uri_utils.rb'
 class SiteTest < ActiveSupport::TestCase
   fixtures :sites
 
+  def setup
+    super
+  end
+
   def land_without_persistence site
     site.ensure_attributes [ :name, :logo ]
     refute site.persisted?
@@ -16,9 +20,24 @@ class SiteTest < ActiveSupport::TestCase
     refute site.page_ref.mercury_result.persisted?
   end
 
+  def trapped_save entity
+    # sleep 5  # Allow the database to settle down
+    begin
+      entity.save
+      return
+    rescue Exception => e
+      entity.created_at = entity.updated_at = Time.now
+    end
+    begin
+      entity.save
+    rescue Exception => e
+      raise e
+    end
+  end
+
   def land_with_persistence site
     site.ensure_attributes [ :name, :logo ]
-    site.save
+    trapped_save site
     assert site.errors.empty?
     assert site.persisted?
     assert_not_nil site.page_ref
@@ -111,7 +130,7 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal site, rpr.site
     site.reload
     assert_equal [dpr.id, rpr.id, site.page_ref_id].compact.sort, site.page_ref_ids.sort
-    site.save
+    trapped_save site
     assert_equal [dpr.id, rpr.id, site.page_ref_id].compact.sort, site.page_ref_ids.sort
   end
 
@@ -309,7 +328,7 @@ class SiteTest < ActiveSupport::TestCase
     assert_equal site.page_ref.site, site2
     site = SiteServices.find_or_build_for "http://bladebla.com"
     site.ensure_attributes [ :name, :logo ]
-    site.save
+    trapped_save site
     assert_equal site.page_ref, site2.page_ref # The two sites are aliases of one another
   end
 
@@ -356,7 +375,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
   test "associations" do
     site_count = Site.count
     site = SiteServices.find_or_build_for "http://www.esquire.com/food-drink/"
-    site.save # site.bkg_launch # ...which saves the site
+    trapped_save site 
     assert site.name_needed
     assert site.logo_needed
     site.ensure_attributes
@@ -373,7 +392,7 @@ NB: I don't <think> the slash/no-slash distinction still pertains
     assert pr.gleaning  # Gleaning gets initialized by assigning URL
     gl = pr.gleaning
     assert_equal gl.page_ref, pr
-    gl.save
+    trapped_save gl
     assert_equal pr.gleaning, gl
     assert gl.dj  
     gl.bkg_land

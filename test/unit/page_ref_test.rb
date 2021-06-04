@@ -2,10 +2,15 @@ require 'test_helper'
 # require 'page_ref.rb'
 class PageRefTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   # Called before every test method runs. Can be used
   # to set up fixture information.
 =begin XXX :goodpr as defined (with bad url) won't pass muster in a PageRef now
   def setup
+    super
     prgood = page_refs(:goodpr)
     # Go through the build process
     prgood = PageRef.new prgood.attributes.slice(:id, :url, :title, :picture, :kind)

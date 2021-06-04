@@ -2,6 +2,10 @@ require 'test_helper'
 require 'list'
 class RecipeTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "gleaning does not happen redundantly" do
     url = "http://www.tasteofbeirut.com/persian-cheese-panir/"
     recipe = Recipe.new url: url, title: 'placeholder'

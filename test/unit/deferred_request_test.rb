@@ -2,6 +2,10 @@ require 'test_helper'
 
 class DeferredRequestTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "Returns nil before requests registered" do
     assert_nil DeferredRequest.pending( "abcde")
     assert_nil DeferredRequest.pop( "abcde")

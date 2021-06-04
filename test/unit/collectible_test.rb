@@ -3,6 +3,10 @@ require 'test_helper'
 require 'results_cache'
 
 class CollectibleTest < ActiveSupport::TestCase
+
+  def setup
+    super
+  end
   test "Collecting proceeds" do
     recipe = recipes(:rcp)
     recipe.url = 'http://www.recipepower.com/rcp' # Generate PageRef and Site

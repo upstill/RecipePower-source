@@ -6,6 +6,7 @@ class RecipeTagTest < ActiveSupport::TestCase
     fixtures :recipes
 
     def setup
+      super
       @rcp = recipes(:rcp)
       @user1 = users(:thing1)
       @user2 = users(:thing2)

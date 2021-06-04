@@ -2,6 +2,10 @@ require 'test_helper'
 # require 'page_ref.rb'
 class BackgroundableTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test 'Can run backgroundable tasks without saving records' do
     r = Recipe.new url: "https://patijinich.com/creamy-poblano-soup/"
     r.ensure_attributes [:title] # No saving beforehand

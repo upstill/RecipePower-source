@@ -1,6 +1,10 @@
 require 'test_helper'
 class TrackingTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "basic attributes established in recipe" do
     url = "https://www.theguardian.com/lifeandstyle/2016/mar/12/merguez-recipes-kebab-potato-bake-scotch-egg-yotam-ottolenghi"
     rcp = Recipe.new url: url

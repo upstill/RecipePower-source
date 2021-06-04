@@ -154,7 +154,7 @@ class Recipe < ApplicationRecord
 
   # Request attributes from page_ref as necessary, after record is saved.
   # Return: boolean indicating need to start background processing
-  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
     super || content_needed?
   end
 

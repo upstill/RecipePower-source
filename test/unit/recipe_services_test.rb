@@ -5,6 +5,7 @@ class RecipeServicesTest < ActiveSupport::TestCase
   fixtures :recipes
 
   def setup
+    super
     @test_url = 'http://www.realsimple.com/food-recipes/ingredients-guide/shrimp-00000000039364/index.html'
     @rcp1 = Recipe.new
     @rcp1.url = @test_url

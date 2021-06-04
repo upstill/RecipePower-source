@@ -113,7 +113,7 @@ module Pagerefable
   end
 
   # Decide whether background processing is needed on the basis of attributes expected from the page_ref
-  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
     # If we haven't persisted, then the page_ref has no connection back
     # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
     return true if !page_ref

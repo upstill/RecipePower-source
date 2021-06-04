@@ -30,7 +30,7 @@ class RecipePage < ApplicationRecord
   end
 
   # In order to make our content, we need content from the PageRef
-  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
     super || content_needed?
   end
 

@@ -4,6 +4,10 @@ class RefermentServicesTest < ActiveSupport::TestCase
   fixtures :recipes
   fixtures :tags
 
+  def setup
+    super
+  end
+
   test 'RefermentServices rejects bogus URL' do
     rft = ReferentServices.new(Referent.first).assert_referment 'Recipe', nil
     assert rft.errors.any?

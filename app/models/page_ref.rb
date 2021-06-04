@@ -124,7 +124,7 @@ class PageRef < ApplicationRecord
 
   # In the course of taking a request for newly-needed attributes, fire
   # off dependencies from gleaning and mercury_result, IF we need them to do our work
-  def performance_required minimal_attributes=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies minimal_attributes=needed_attributes, overwrite: false, restart: false
     return true if http_status_needed
     adopt_dependencies # Try to get attribs from gleaning and mercury as they stand
     # Filter the minimal attributes for those which are actually still needed

@@ -1,6 +1,10 @@
 require 'test_helper'
 class GleaningTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "read a file into gleaning" do
     pr = PageRef.new url: "http://www.tasteofbeirut.com/persian-cheese-panir/"
     pr.request_attributes [ :title, :content]

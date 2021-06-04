@@ -4,6 +4,10 @@ class TagTest < ActiveSupport::TestCase
     fixtures :tags
     fixtures :referents
     fixtures :expressions
+
+  def setup
+    super
+  end
     
     # ------------- Data Integrity -----------------
     

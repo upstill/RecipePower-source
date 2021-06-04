@@ -1,6 +1,10 @@
 require 'test_helper'
 class MercuryResultTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "read a file into MercuryResult" do
     mr = MercuryResult.new
     mr.accept_attribute :url, "http://www.tasteofbeirut.com/persian-cheese-panir/"

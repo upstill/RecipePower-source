@@ -2,6 +2,10 @@ require 'test_helper'
 class GleaningServicesTest < ActiveSupport::TestCase
   fixtures :recipes
 
+  def setup
+    super
+  end
+
   test 'completed gleaning for url' do
     url = 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
     gleaning = GleaningServices.completed_gleaning_for(url, 'Image')

@@ -2,6 +2,10 @@
 require 'test_helper'
 class RecipeThumbnailTest < ActiveSupport::TestCase 
   fixtures :recipes
+
+  def setup
+    super
+  end
   
   test "Bad pic URL gets bad_url thumbnail" do
     bpr = recipes(:badpicrcp)

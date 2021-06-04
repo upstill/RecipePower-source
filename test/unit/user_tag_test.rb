@@ -5,6 +5,7 @@ class UserTagTest < ActiveSupport::TestCase
     fixtures :users
 
     def setup
+      super
       @thing1 = users(:thing1)
       @thing2 = users(:thing2)
       @tagee = users(:thing3)

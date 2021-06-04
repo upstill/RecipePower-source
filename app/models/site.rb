@@ -197,7 +197,7 @@ class Site < ApplicationRecord
 
   # Using a target list of needed attributes, set dependencies running as necessary
   # and return a flag for whether THIS object should be launched for background work
-  def performance_required minimal_attribs=needed_attributes, overwrite: false, restart: false
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
     build_page_ref unless page_ref
     adopt_dependencies # Try to get valid attributes from page_ref
     save if changed? && persisted?

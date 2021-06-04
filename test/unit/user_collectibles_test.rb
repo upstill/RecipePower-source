@@ -7,6 +7,11 @@ class UserCollectiblesTest < ActiveSupport::TestCase
   # fixtures :lists
   # fixtures :products
   fixtures :sites
+
+  def setup
+    super
+  end
+
   test "Collectibles access methods defined" do
     user = users(:thing1)
     # feed_entry = feed_entries(:fe1)

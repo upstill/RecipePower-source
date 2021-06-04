@@ -2,6 +2,10 @@ require 'test_helper'
 # require './lib/array_utils'
 class AliasTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "urleq" do
     assert Alias.urleq( 'something.com/', 'something.com' )
     assert Alias.urleq( 'something.com/else', 'something.com/else/' )

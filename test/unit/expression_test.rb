@@ -5,6 +5,10 @@ class ExpressionTest < ActiveSupport::TestCase
   fixtures :tags
   fixtures :expressions
 
+  def setup
+    super
+  end
+
   test "Create expression" do
 
     tagid = tags(:jal).id

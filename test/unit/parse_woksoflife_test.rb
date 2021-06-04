@@ -7,6 +7,7 @@ require 'scraping/parser.rb'
 class ParseWoksoflifeTest < ActiveSupport::TestCase
 
   def setup
+    super
     add_tags :Ingredient,
              [ 'fresh Hong Kong Style Pan-Fried Noodles',
                'soy sauce',

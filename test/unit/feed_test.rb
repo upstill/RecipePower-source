@@ -1,6 +1,10 @@
 # encoding: UTF-8
 require 'test_helper'
 class FeedTest < ActiveSupport::TestCase 
+
+  def setup
+    super
+  end
     
     # @@TypeToSym = [:none, :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary, :recipe]
     # @@TypeToString = ["Untyped Link", "Supplier", "Store Location", "Book", "Blog", "Recipe Site", "Cooking Site", "Other Site", "Video", "Glossary", "Recipe"]

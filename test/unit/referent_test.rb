@@ -8,6 +8,10 @@ class ReferentTest < ActiveSupport::TestCase
   fixtures :recipes
   fixtures :page_refs
 
+  def setup
+    super
+  end
+
   test "Convert empty parents list to tokens and back again" do
     ref = GenreReferent.create
     # Parents list should be empty

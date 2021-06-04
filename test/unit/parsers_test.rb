@@ -18,6 +18,7 @@ class ParsersTest < ActiveSupport::TestCase
   end
 
   def setup
+    super
     @amounts = [
         '1 head',
         '1 1/2 cup',
