@@ -401,9 +401,11 @@ NB: I don't <think> the slash/no-slash distinction still pertains
 
   test "site pageref" do
     pr = PageRef.fetch 'http://barbecuebible.com'
+    assert_equal pr.site.page_ref, pr # The same page_ref should be used for the site
     assert_equal [:title, :picurl], pr.needed_attributes
     refute pr.dj # Should launch on save
     pr.save
+    refute pr.errors.any?, "PageRef can't be saved: #{pr.errors.full_messages}"
     assert pr.dj
     pr.ensure_attributes
     assert pr.good?

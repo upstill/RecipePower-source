@@ -36,14 +36,15 @@ class PageRefTest < ActiveSupport::TestCase
       assert page_ref.gleaning
       assert page_ref.mercury_result
       assert_equal needed.sort, page_ref.needed_attributes.sort
-      assert page_ref.dj
-      if needed.empty?
-        # Nothing more needed => dj is done, so it should be gone
-        refute page_ref.gleaning.dj
-        refute page_ref.mercury_result.dj
-      else
+      if page_ref.launch_on_save?
+        assert page_ref.dj
         assert page_ref.gleaning.dj
         assert page_ref.mercury_result.dj
+      else
+        # Nothing more needed => dj is done, so it should be gone
+        refute page_ref.dj
+        refute page_ref.gleaning.dj
+        refute page_ref.mercury_result.dj
       end
 
       # All background jobs should have been launched, both for the PageRef and its site

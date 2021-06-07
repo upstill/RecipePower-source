@@ -14,7 +14,7 @@ class TrackingTest < ActiveSupport::TestCase
     assert_equal [ :title, :description, :content, :picurl ].sort, rcp.needed_attributes.sort # Content was declared needed after_build
 
     rcp.ensure_attributes # Get them all, referring to PageRef as nec.
-    assert_equal [ :content ], rcp.needed_attributes  # Can't get content b/c there's no Content finder
+    refute rcp.content_ready  # Can't get content b/c there's no Content finder
     assert_equal [ :picurl, :title, :description ].sort, rcp.ready_attributes.sort
   end
 
@@ -26,15 +26,15 @@ class TrackingTest < ActiveSupport::TestCase
     refute pr.url_needed?
 
     # In the beginning, all tracked attributes are open
-    assert_equal PageRef.tracked_attributes, pr.open_attributes
+    assert_equal (PageRef.tracked_attributes - [:http_status, :site, :url]).sort, pr.open_attributes.sort
     # PageRef is build needing url to be defined by Gleaning and MercuryResult
-    assert_equal [ :url, :title, :picurl, :http_status ], pr.needed_attributes
+    assert_equal [ :title, :picurl ].sort, pr.needed_attributes.sort
     # Get the definitive URL from the Gleaning and/or MercuryResult
     pr.ensure_attributes
     # Attributes from gleaning; mercury doesn't provide attributes b/c they weren't asked for
-    assert_equal [ :url, :domain, :title, :picurl, :date_published, :author, :description, :rss_feeds, :http_status ], pr.ready_attributes
+    assert_equal [ :url, :domain, :title, :picurl, :date_published, :author, :description, :rss_feeds, :site, :http_status ].sort, pr.ready_attributes.sort
     pr.ensure_attributes [ :domain ]
-    assert_equal [ :url, :domain, :title, :picurl, :date_published, :author, :description, :rss_feeds, :http_status ], pr.ready_attributes
+    assert_equal [ :url, :domain, :title, :picurl, :date_published, :author, :description, :rss_feeds, :site, :http_status ].sort, pr.ready_attributes.sort
     assert_empty pr.needed_attributes
   end
 
@@ -90,22 +90,22 @@ class TrackingTest < ActiveSupport::TestCase
     assert_equal [ :picurl, :title, :content].sort, recipe.needed_attributes.sort
     # Attributes which MAY be set, if the opportunity presents
     assert_equal [:picurl, :title, :description, :content].sort, recipe.open_attributes.sort
-    assert_equal [:url, :title, :content, :picurl, :http_status], recipe.page_ref.needed_attributes
+    assert_equal [ :title, :content, :picurl ], recipe.page_ref.needed_attributes
     recipe.title = 'placeholder2' # Set title and flip 'ready' bit
 
     # Invalidate all the attributes EXCEPT title
     recipe.refresh_attributes except: [ :title ]
-    assert_equal recipe.needed_attributes, Recipe.tracked_attributes - [:title]
-    assert_equal [:content, :url, :title, :picurl, :description, :http_status].sort, recipe.page_ref.needed_attributes.sort
+    assert_equal recipe.needed_attributes, Recipe.tracked_attributes - [ :url, :http_status, :title ]
+    assert_equal [:content, :title, :picurl, :description].sort, recipe.page_ref.needed_attributes.sort
     # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.mercury_result.needed_attributes.sort
     # assert_equal [:url, :title, :picurl, :description].sort, recipe.page_ref.gleaning.needed_attributes.sort
 
     recipe.ensure_attributes # Get the title, etc.
-    assert_equal [:content], recipe.needed_attributes
+    assert_equal [ ], recipe.needed_attributes
     assert_equal recipe.ready_attributes.sort, (Recipe.tracked_attributes - [:content]).sort
-    assert_equal [:content], recipe.page_ref.needed_attributes
+    assert_equal [ ], recipe.page_ref.needed_attributes
     assert_empty recipe.page_ref.mercury_result.needed_attributes # Got everything
-    assert_equal [:content], recipe.page_ref.gleaning.needed_attributes
+    assert_equal [ ], recipe.page_ref.gleaning.needed_attributes
   end
 
   test "basic attribute tracking" do

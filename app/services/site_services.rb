@@ -37,7 +37,7 @@ class SiteServices
     # to avoid an infinite regress of Site deriving PageRef deriving Site...
     if url_or_page_ref.is_a?(PageRef)
       homelink = host_url (options[:sample] ||= url_or_page_ref.url)
-      if homelink == url_or_page_ref.url
+      if Alias.urleq(homelink, url_or_page_ref.url)
         options[:page_ref] = url_or_page_ref
       else
         options[:home] = homelink
@@ -476,7 +476,10 @@ class SiteServices
 
   def self.unpersisted
     (@@UNPERSISTED ||= {}).keep_if { |root, site| !site.persisted? }
-      # @@UNPERSISTED.each { |root, site| @@UNPERSISTED.delete root if !site.persisted? }
+  end
+
+  def self.clear_unpersisted
+    @@UNPERSISTED = {}
   end
 
   # Build a new Site and add it to the unpersisted set

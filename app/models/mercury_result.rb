@@ -30,11 +30,8 @@ class MercuryResult < ApplicationRecord
     end
   end
 
-  def relaunch?
-    if results['error'] == true
-      puts "Relaunching MercuryResult##{id} because #{mercury_error}"
-      true
-    end
+  def relaunch_on_error?
+    http_status_needed || !permanent_http_error?(http_status)
   end
 
   def perform

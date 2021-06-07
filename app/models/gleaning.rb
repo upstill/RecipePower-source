@@ -98,15 +98,8 @@ class Gleaning < ApplicationRecord
     self.content_needed = false # It is a non-fatal error if content can't be extracted
   end
 
-  def relaunch?
-    if (errs = [
-        ("'HTTP Status #{http_status}'" if http_status != 200),
-        ("'#{errors.full_messages}'" if errors.any?),
-        ("'#{err_msg}'" if err_msg.present?)
-    ].compact).present?
-      puts "Relaunching Gleaning##{id} because #{errs.join ' and '}"
-      true
-    end
+  def relaunch_on_error?
+    http_status_needed || !permanent_http_error?(http_status)
   end
 
   # Execute a gleaning on the page_ref's url

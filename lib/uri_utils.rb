@@ -218,6 +218,17 @@ def normalize_and_test_url(url, href=nil)
   test_url normalized, href
 end
 
+def permanent_http_error? result_code
+  [
+      400, # Bad Request
+      401, # Unauthorized
+      403, # Forbidden
+      404, # Not Found
+      414, # URI Too Long
+      500 # Internal Server Error
+  ].include?(result_code)
+end
+
 # Confirm that a proposed URL (with an optional subpath) actually has content at the other end
 # If the link is badly formed (returns a 400 result from the server) then we return false
 # If the resource has moved (result 301) and the new location works, we return the new link

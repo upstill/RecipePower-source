@@ -138,7 +138,7 @@ class PageRef < ApplicationRecord
     adopt_dependencies if nfm.present? || nfg.present? # Maybe attributes appeared during creation?
     # We need to get attributes from Gleaning and/or Mercury
     save if changed? && persisted? # Save later
-    relaunch?
+    launch_on_save?
   end
 
   # Ask gleaning and mercury_result for attributes.
@@ -216,16 +216,14 @@ class PageRef < ApplicationRecord
   end
 
   # We relaunch the job on errors, unless there's a permanent HTTP error
-  def relaunch?
-    ![
-        400, # Bad Request
-        401, # Unauthorized
-        403, # Forbidden
-        # 404, Not Found
-        414, # URI Too Long
-    # 500 Internal Server Error
-    ].include?(http_status) && # Give up if the file can't be accessed
-    !all_done? # Similarly, relaunch if there's anything to be gotten from mercury or gleaning
+  def launch_on_save?
+    # (Re)launch if there's anything to be gotten from mercury or gleaning
+    (needed_from_mercury.present? && !mercury_result&.complete?) ||
+        (needed_from_gleaning.present? && !gleaning&.complete?)
+  end
+
+  def relaunch_on_error?
+    http_status_needed || !permanent_http_error?(http_status)
   end
 
   # Will this page_ref be found when looking for a page_ref of the given url?
@@ -336,8 +334,8 @@ class PageRef < ApplicationRecord
     # We do NOT build the associated site here, because we may be BUILDING the page_ref for a site, in
     # which case that site will assign itself to us. Instead, the site attribute is memoized, and if it
     # hasn't been built by the time that it is accessed, THEN we find or build an appropriate site
-    self.site = SiteServices.find_or_build_for self
-    self.kind = :site if site&.page_ref == self # Site may have failed to build
+    # self.site = SiteServices.find_or_build_for self
+    # self.kind = :site if site&.page_ref == self # Site may have failed to build
     # We trigger the site-adoption process if the existing site doesn't serve the new url
     # self.site = nil if site&.persisted? && (SiteServices.find_for(url) != site) # Gonna have to find another site
     return self
@@ -455,8 +453,6 @@ class PageRef < ApplicationRecord
     end
     if http_status == 200 # Hitting the URL succeeded
       write_attribute :url, new_url
-      self.site = SiteServices.find_or_build_for self
-      self.kind = :site if site&.page_ref == self # Site may have failed to build
     else # Bad URL: see if mercury and/or gleaning can do any better
       # Hopefully we'll pick up a valid URL from one of them
       ensure_gleaning.ensure_attributes [ :http_status ], overwrite: true, restart: true
@@ -464,6 +460,10 @@ class PageRef < ApplicationRecord
       self.url_needed = self.http_status_needed = true
       adopt_dependencies final: true
       self.url_needed = self.http_status_needed = false # Close url and status even if not acquired from associate
+    end
+    if http_status == 200
+      self.site = SiteServices.find_or_build_for self
+      self.kind = :site if site&.page_ref == self # Site may have failed to build
     end
     if Rails.env.test?
       puts "Replaced url '#{old_url}'"
@@ -495,11 +495,6 @@ class PageRef < ApplicationRecord
     self.url_and_status = associate if !associate.http_status_needed && associate.http_status == 200 # [400,  401, 403, 404, 414, 500 ].include?(associate.http_status)
     to_assign = to_assign - [ :url, :http_status ] # Regardless, we don't do mass assignment of url and status
     assign_attributes associate.ready_attribute_values.slice(*to_assign)
-  end
-
-  def all_done?
-    (needed_from_mercury.empty? || mercury_result&.complete?) &&
-        (needed_from_gleaning.empty? || gleaning&.complete?)
   end
 
 end

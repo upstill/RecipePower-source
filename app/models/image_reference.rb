@@ -9,7 +9,7 @@ class ImageReference < ApplicationRecord
   include Backgroundable
   backgroundable :status
   include Trackable
-  attr_trackable :thumbdata
+  attr_trackable :thumbdata, :errcode
 
   # attr_accessible :type, :url, :filename, :link_text
 
@@ -91,13 +91,13 @@ class ImageReference < ApplicationRecord
     raise err_msg unless errcode == 404
   end
 
-  def relaunch?
-    errors.present? && (errcode != 404)
+  def relaunch_on_error?
+    errcode_needed || !permanent_http_error?(errcode)
   end
-  
+
   def url= new_url
     super
-    refresh_attributes [:thumbdata] if url_changed? && !fake_url?
+    refresh_attributes [:thumbdata, :errcode] if url_changed? && !fake_url?
   end
 
   # Provide a url that's valid anywhere. It may come direct from the IR or, if there's only thumbdata,

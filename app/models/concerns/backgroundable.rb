@@ -297,6 +297,21 @@ module Backgroundable
     end
   end
 
+  # Shut down the background job, leaving the entity in a closed-out state
+  def bkg_cancel good=true
+    if id
+      while self.class.where(id: id).pluck(:dj_id).first == 'processing'
+        sleep 1
+      end
+      if dj
+        Delayed::Job.where(id: dj.id).first&.destroy
+        self.dj = nil
+        update_column :dj_id, nil
+      end
+    end
+    self.status = good ? :good : :bad
+  end
+
   # Run the job, mimicking the hook calls of DJ.
   # We rescue errors so that interrupts only declare errors
   def perform_without_dj
@@ -317,10 +332,10 @@ module Backgroundable
     processing!
   end
 
-  # relaunch? determines whether a job that didn't return an error should be rerun
+  # relaunch_on_error? determines whether a job should be rerun when an error occurs
   # NB: May be overridden for more subtle relaunch criteria
-  def relaunch?
-    errors.present?
+  def relaunch_on_error?
+    true
   end
 
   # We get to success without throwing an error, throw one if appropriate so DJ doesn't think we're cool
@@ -329,10 +344,12 @@ module Backgroundable
     # NB: This is a pretty crude report. For more specific info, the model should throw the error
     # with a proper report, which will then get recorded in errors[:base]
     super if defined?(super) # Give all modules a shot at the results
-    if relaunch? # Make sure DJ gets the memo
-      raise Exception, self.errors.full_messages
-    elsif errors.any?
-      errors.add :base, self.errors.full_messages
+    if errors.any?
+      if relaunch_on_error? # Make sure DJ gets the memo and goes back again
+        raise Exception, self.errors.full_messages
+      else
+        errors.add :base, self.errors.full_messages
+      end
     end
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
     self.dj = nil if good?

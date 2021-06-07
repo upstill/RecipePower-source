@@ -13,7 +13,7 @@ module Trackable
     # e.g., by an after_initialize callback
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
-      bkg_launch true if !bad? && relaunch?
+      bkg_launch true if !bad? && launch_on_save?
       # (re)Launch dj as necessary to gather attributes from MercuryResult and Gleaning
     end
   end
@@ -176,8 +176,12 @@ module Trackable
     request_attributes minimal_attributes, overwrite: overwrite, restart: restart
     # Try to acquire attributes from their dependencies, forcing them to completion
     adopt_dependencies synchronous: true 
-    # If any attributes are still needed after completing dependencies, drive our background job to completion
-    bkg_land! true if (minimal_attributes & needed_attributes).present?
+    if (minimal_attributes & needed_attributes).present?
+      # If any attributes are still needed after completing dependencies, drive our background job to completion
+      bkg_land! true
+    elsif !launch_on_save?
+      bkg_cancel # Tidy up by removing the job handler
+    end
   end
 
   # A Trackable winds up its (successful) work by taking any attributes from its dependencies
@@ -209,10 +213,10 @@ module Trackable
     return false
   end
 
-  # Once an entity is saved, does it need to be launched for background work?
-  def relaunch?
-    needed_by_super = defined?(super) && super
-    needed_by_super || needed_attributes.present?
+  # Now that the entity has been saved, do we launch DelayedJob to provide attributes?
+  # Default: launch if entity has been saved with attributes still needed
+  def launch_on_save?
+    defined?(super) ? super : needed_attributes.present?
   end
 
   # Stub to be overridden that an object uses to:
