@@ -16,6 +16,11 @@ class Seeker
     @tail_stream = tail_stream
     @token = token
     @children = children || []
+=begin
+    if token && (@head_stream.pos != @tail_stream.pos) && Rails.env.test?
+      puts "Seeker for :#{token} matched '#{to_s}'"
+    end
+=end
   end
 
   # Return a Seeker for a failed parsing attempt

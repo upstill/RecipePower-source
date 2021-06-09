@@ -200,6 +200,10 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream
+    if Rails.env.test?
+      puts "Parsing for :#{token} => #{grammar[token]}"
+      grammar.keys.each { |token| puts ":#{token} => #{grammar[token]}" }
+    end
     matched = match_specification stream, grammar[token], token
     matched
   end
@@ -276,6 +280,27 @@ class Parser
   end
 
   private
+
+  def indent
+    @indent ||= 0
+  end
+
+  def puts_indented str
+    puts ("    " * indent) + str
+  end
+
+  def report_enter *args
+    puts_indented args.shift
+    @indent += 1
+    while args.present? do
+      puts_indented args.shift
+    end
+  end
+
+  def report_exit msg
+    @indent -= 1
+    puts_indented msg if msg.present?
+  end
 
   # Match a single specification to the provided stream, whether the spec is given directly in the grammar or included in a list.
   # Return a Seeker for the result that includes:
@@ -437,7 +462,10 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      match_specification scanner, @grammar[spec], spec, context
+      report_enter "Seeking :#{spec} using #{@grammar[spec]} on '#{scanner.to_s.truncate 100}'" if Rails.env.test?
+      returned = match_specification scanner, @grammar[spec], spec, context
+      report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : '') if Rails.env.test?
+      returned
     when String
       StringSeeker.match scanner.past_newline, string: spec, token: token
     when Array
