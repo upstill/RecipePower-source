@@ -317,7 +317,7 @@ EOF
     assert_equal '1 orange slice', nkt.text_from(2,5)
     nkt.enclose_tokens 3, 5, :rp_elmt_class => :rp_ingspec, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_tokens 4, 5, :rp_elmt_class => :rp_ingname, :tag => 'span'
+    nkt.enclose_tokens 4, 5, :rp_elmt_class => :rp_ingredient_tag, :tag => 'span'
     assert_equal '1 orange slice', nkt.text_from(2,5)
   end
 

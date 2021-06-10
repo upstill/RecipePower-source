@@ -57,6 +57,9 @@ require 'scraping/parser.rb'
 #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :on_css_match to the stipulated
 #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
 #       are found. But they eventually get there when the seeker encloses found content.
+#    :inline, :atline: constrains the match to the beginning of a line, as defined by
+#       either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first.
+#       :inline also foreshortens the stream at the next line so defined.
 Parser.init_grammar(
     rp_recipelist: {
         match:
@@ -121,7 +124,7 @@ Parser.init_grammar(
         match: [
             { or: [ '▢', /.*:/, [ /.*/, /from/ ] ], optional: true }, # Discard a colon-terminated label at beginning
             { match: :rp_ingspec, orlist: true },
-            # {optional: :rp_unit},
+            # {optional: :rp_unit_tag},
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
@@ -133,7 +136,7 @@ Parser.init_grammar(
         terminus: "\n"
     }, # NB: matches even if the bound is immediate
     rp_presteps: { tags: 'Condition' }, # There may be one or more presteps (instructions before measuring)
-    rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
+    rp_condition_tag: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_ingspec: {
         match: [
             {optional: [:rp_amt, {optional: 'each'} ] },
@@ -141,7 +144,7 @@ Parser.init_grammar(
             { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
         ]
     },
-    rp_ingname: { tag: 'Ingredient' },
+    rp_ingredient_tag: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is a number followed by a (possibly qualified) unit--only one required
              match: [
@@ -154,7 +157,7 @@ Parser.init_grammar(
              or: true
     },
     # A qualified unit is, e.g., '16-ounce can'
-    rp_qualified_unit: [ { match: :rp_altamt, optional: true }, :rp_unit, { match: :rp_altamt, optional: true } ],
+    rp_unit: [ { match: :rp_altamt, optional: true }, :rp_unit_tag, { match: :rp_altamt, optional: true } ],
     # An altamt may show up to clarify the amount or qualify the unit
     rp_altamt: {
         match: [
@@ -169,7 +172,7 @@ Parser.init_grammar(
     },
     rp_unqualified_amt: {# An Unqualified Amount is a number followed by a unit (only one required)
                          match: [
-                             [:rp_num_or_range, :rp_unit],
+                             [:rp_num_or_range, :rp_unit_tag],
                              { match: FullAmountSeeker }
                          ],
                          or: true
@@ -177,5 +180,5 @@ Parser.init_grammar(
     rp_num_or_range: { or: [ :rp_range, :rp_num ] },
     rp_num: { match: 'NumberSeeker' },
     rp_range: { match: 'RangeSeeker' },
-    rp_unit: { tag: 'Unit' }
+    rp_unit_tag: { tag: 'Unit' }
 )

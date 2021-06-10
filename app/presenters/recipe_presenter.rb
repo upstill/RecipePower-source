@@ -97,11 +97,11 @@ class RecipePresenter < CollectiblePresenter
     # Since a node may have multiple rp classes, it's important to prioritize the possibilities
     if classes.include? :rp_ingline
       return content_tag :li, content, class: classes
-    elsif classes.include? :rp_ingname
+    elsif classes.include? :rp_ingredient_tag
       # Wrap an ingredient tag in a link to that tag in RecipePower
       tag = Tag.find_by name: node['value'], tagtype: Tag.typenum(:Ingredient)
-      return homelink(tag, class: 'rp_ingname', title: node.text) if tag
-    elsif (classes &= %i{ rp_amt rp_presteps rp_condition }).first
+      return homelink(tag, class: 'rp_ingredient_tag', title: node.text) if tag
+    elsif (classes &= %i{ rp_amt rp_presteps rp_condition_tag }).first
       return content_tag :span, content, class: classes.join(' ')
     end
     return content

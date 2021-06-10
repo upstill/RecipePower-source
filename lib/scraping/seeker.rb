@@ -222,14 +222,14 @@ end
 # are also marked with the rp_elmt class
 # TODO: Author, Yield
 # Ingredient list (rp_inglist): rp_ingspec*  An ingredient list is a sequence of ingredient specs
-# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingname | rp_ingalts]+ [rp_ingcomment]?
+# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingredient_tag | rp_ingalts]+ [rp_ingcomment]?
 # Ingredient amount (rp_amount): rp_num | rp_unit | (rp_num rp_unit) [rp_altamt]?
 # Alternate amount (rp_altamt): \(rp_amt\)
 # Steps before measurement (rp_presteps): rp_process [{,'or'} rp_process]*
 # Process (rp_process): <Tag type: :Process>
-# Ingredient name (rp_ingname): <Tag type: :Ingredient>
-# Alternate ingredients (rp_ingalts): rp_ingname [',|or' rp_inglist]+
-# List of ingredients (rp_inglist): rp_ingname [',|and' rp_ingname]+
+# Ingredient name (rp_ingredient_tag): <Tag type: :Ingredient>
+# Alternate ingredients (rp_ingalts): rp_ingredient_tag [',|or' rp_inglist]+
+# List of ingredients (rp_inglist): rp_ingredient_tag [',|and' rp_ingredient_tag]+
 # Ingredient comment (rp_ingcomment): <content to end of line>
 # Amount number (rp_num): defined by NumberSeeker
 # Amount unit (rp_unit): <Tag type: :Unit>
@@ -393,7 +393,7 @@ class  TagsSeeker < Seeker
 
   def self.match stream, opts={}
     children = []
-    rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[Tag.typename opts[:types]]
+    rptype = { 'Ingredient' => :rp_ingredient_tag, 'Condition' => :rp_condition_tag }[Tag.typename opts[:types]]
     scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
     operand = ''
     opts[:lexaur].distribute(stream) do |data, stream_start, stream_end, op|

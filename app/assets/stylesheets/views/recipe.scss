@@ -16,12 +16,12 @@
     // Amount
     color: #5aab7a;
   }
-  span.rp_presteps, span.rp_condition {
+  span.rp_presteps, span.rp_condition_tag {
     // Presteps in grey italic
     color: #9e7536;
     font-style: italic;
   }
-  .rp_ingname, &.rp_ingname {
+  .rp_ingredient_tag, &.rp_ingredient_tag {
     // Ingredients in bold, slightly larger
     color: #1c94c4;
     font-weight: 500;

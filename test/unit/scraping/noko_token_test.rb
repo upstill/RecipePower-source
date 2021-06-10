@@ -41,10 +41,10 @@ class NokoTokenTest < ActiveSupport::TestCase
     initialize_doc '<div>starting<span>text</span><div><p><br><b>more text</b></p></div></div>'
     ted = text_element_data_containing 'more'
     # Go directly to assemble the tree within Nokogiri
-    newtree = assemble_tree_from_nodes ted, ted, :tag => :div, :rp_elmt_class => :rp_ingname
-    # @nokotokens.enclose_by_text_elmt_data ted, ted, tag: 'div', rp_elmt_class: :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    assert_equal 'more text', @nkdoc.css('div.rp_ingname').first.inner_text
+    newtree = assemble_tree_from_nodes ted, ted, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    # @nokotokens.enclose_by_text_elmt_data ted, ted, tag: 'div', rp_elmt_class: :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    assert_equal 'more text', @nkdoc.css('div.rp_ingredient_tag').first.inner_text
   end
 
   test 'initializing TextElmtData object from text element' do
@@ -70,47 +70,47 @@ class NokoTokenTest < ActiveSupport::TestCase
   test 'build a simple node from a single text element' do
     # Enclose the entire element
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 8, 12, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    @nkdoc.css('div.rp_ingname').first == newtree
-    assert_equal 'outside line this is', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 8, 12, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    @nkdoc.css('div.rp_ingredient_tag').first == newtree
+    assert_equal 'outside line this is', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
 
     # Enclose from beginning to middle
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 8, 10, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    @nkdoc.css('div.rp_ingname').first == newtree
-    assert_equal 'outside line', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 8, 10, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    @nkdoc.css('div.rp_ingredient_tag').first == newtree
+    assert_equal 'outside line', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
 
     # Enclose from middle to end
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 10, 12, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    @nkdoc.css('div.rp_ingname').first == newtree
-    assert_equal 'this is', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 10, 12, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    @nkdoc.css('div.rp_ingredient_tag').first == newtree
+    assert_equal 'this is', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
 
     # Enclose a substring
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 9, 11, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    @nkdoc.css('div.rp_ingname').first == newtree
-    assert_equal 'line this', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 9, 11, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    @nkdoc.css('div.rp_ingredient_tag').first == newtree
+    assert_equal 'line this', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
   end
 
   test 'successfully tag an enclosing element from a single text element' do
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.1.html'
-    newtree = @nokotokens.enclose_tokens 5, 7, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    @nkdoc.css('div.rp_ingname').first == newtree
-    assert_equal 'line text', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 5, 7, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    @nkdoc.css('div.rp_ingredient_tag').first == newtree
+    assert_equal 'line text', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
   end
 
   test 'add tokens to a tree embedded within the selection' do
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.2.html'
-    newtree = @nokotokens.enclose_tokens 4, 21, :tag => :div, :rp_elmt_class => :rp_ingname
-    assert_equal 1, @nkdoc.css('div.rp_ingname').count
-    assert_equal newtree, @nkdoc.css('div.rp_ingname').first
-    assert_equal 'text 0 text 1 text 2 text 3 text 4 text 5', @nkdoc.css('div.rp_ingname').inner_text.split.join(' ')
+    newtree = @nokotokens.enclose_tokens 4, 21, :tag => :div, :rp_elmt_class => :rp_ingredient_tag
+    assert_equal 1, @nkdoc.css('div.rp_ingredient_tag').count
+    assert_equal newtree, @nkdoc.css('div.rp_ingredient_tag').first
+    assert_equal 'text 0 text 1 text 2 text 3 text 4 text 5', @nkdoc.css('div.rp_ingredient_tag').inner_text.split.join(' ')
   end
 
   test 'move tokens outside a selected tree' do
@@ -122,8 +122,8 @@ class NokoTokenTest < ActiveSupport::TestCase
   end
 
   test 'appropriately enclosing a text element' do
-    # The document includes an 'rp_ingname' element, which cannot include an 'rp_ingline'
-    # So the latter tag needs to be removed when the larger element
+    # The document includes an 'rp_ingredient_tag' element within an :rp_ingline
+    # Declaring the contents of the former to be an :rp_ingline, the existing enclosures should be removed
     initialize_doc_from_file 'test/unit/scraping/noko_token_test_data.2.html'
     newtree = @nokotokens.enclose_tokens 10, 12, :tag => :div, :rp_elmt_class => :rp_ingline
     assert_equal 1, @nkdoc.css('div.rp_ingline').count

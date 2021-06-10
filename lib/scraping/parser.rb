@@ -34,9 +34,9 @@ class Parser
       :rp_num => '#',
       :rp_unit => 'Unit',
       :rp_presteps => 'Conditions',
-      :rp_condition => 'Condit. Name',
+      :rp_condition_tag => 'Condit. Name',
       :rp_ingspec => 'Ingredients',
-      :rp_ingname => 'Ingred. Name',
+      :rp_ingredient_tag => 'Ingred. Name',
       :rp_instructions => 'Instructions',
   }
 
