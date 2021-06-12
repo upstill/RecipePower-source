@@ -246,24 +246,14 @@ EOF
 
   test 'parse ingredient line' do
 
-    html = '¾ cup/180 milliliters lukewarm water'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
-    assert ps.success?
-
-    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
-    assert ps.success?
-
-    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingspec
-    assert ps.success?
-
     html = '1 ¾ cups plus 2 tablespoons'
     ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_summed_amt
+    ps.parse token: :rp_amt
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingspec
     assert ps.success?
 
     html = '/240 grams'
@@ -274,21 +264,6 @@ EOF
     html = '1 ¾ cups plus 2 tablespoons/240 grams'
     ps = ParserServices.new(content: html, lexaur: @lex)
     ps.parse token: :rp_amt
-    assert ps.success?
-
-    html = '1 ¾ cups all-purpose flour'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
-    assert ps.success?
-
-    html = '1 ¾ cups/240 grams all-purpose flour'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
-    assert ps.success?
-
-    html = '4 small yellow onions (about 1 pound; 455g total), ends trimmed but root left intact, peeled, and quartered lengthwise through the root'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
     assert ps.success?
 
     html = '1 teaspoon toasted sesame seeds'
@@ -317,6 +292,57 @@ EOF
     assert_not_empty ps.find(:rp_ingspec)
     assert_not_empty ps.find(:rp_ing_comment)
 
+    html = '1 ¾ cups all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '¾ cup/180 milliliters lukewarm water'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_summed_amt
+    assert ps.success?
+
+    html = '1 ¾ cups/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingspec
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons/240 grams all-purpose flour'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '¾ cup/180 milliliters lukewarm water'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '4 small yellow onions (about 1 pound; 455g total), ends trimmed but root left intact, peeled, and quartered lengthwise through the root'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_ingline, context_free: true
+    assert ps.success?
+
+    html = '1 ¾ cups plus 2 tablespoons'
+    ps = ParserServices.new(content: html, lexaur: @lex)
+    ps.parse token: :rp_summed_amt
+    assert ps.success?
+
+    html = '1/2 ounce sifted baking soda'
     ps = ParserServices.new content: html, lexaur: @lex
     ps.parse token:  :rp_ingline, context_free: true
     assert ps.success?
@@ -395,8 +421,14 @@ EOF
     assert ps.success?
 
     html = '2 inch knob'
+    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    assert ps.success?
+    refute ps.seeker.tail_stream.more?
+
+    html = '2 inch knob'
     ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
     assert ps.success?
+    refute ps.seeker.tail_stream.more?
 
     html = '2 inch knob of ginger, peeled and thinly sliced'
     ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
@@ -420,6 +452,10 @@ EOF
 
     html = '13-ounce can'
     ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    assert ps.success?
+
+    html = '1 (13-ounce) can'
+    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex, context_free: true
     assert ps.success?
 
     html = '1 (13-ounce) can baking soda'

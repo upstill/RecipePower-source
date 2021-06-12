@@ -116,9 +116,17 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-        :in_css_match => 'ul',
-        :enclose => true
+        or: [ {
+                  match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
+                  :in_css_match => 'ul',
+                  :enclose => true
+              },
+              {
+                  :match => :rp_ingline,
+                  :orlist => :predivide,
+                  :enclose => true
+              }
+        ],
     },
     rp_ingline: {
         match: [
@@ -148,10 +156,9 @@ Parser.init_grammar(
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is a number followed by a (possibly qualified) unit--only one required
              match: [
-                 :rp_qualified_unit,
-                 [:rp_num_or_range, :rp_qualified_unit],
-                 [:rp_summed_amt, {match: :rp_altamt, optional: true } ],
-                 :rp_num_or_range,
+                 [:rp_unqualified_amt, 'plus', :rp_unqualified_amt, {match: :rp_altamt, optional: true } ],
+                 :rp_unit,
+                 [{ or: [ :rp_range, :rp_num ] }, {match: :rp_unit, optional: true}],
                  {match: AmountSeeker}
              ],
              or: true

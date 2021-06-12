@@ -259,12 +259,13 @@ class RangeSeeker < Seeker
     if match1 = NumberSeeker.match(stream, opts)
       ts = match1.tail_stream
       # Check for the token 'to' followed by a second number
-      return match1 unless ts.peek&.match /to/i
-      match2 = NumberSeeker.match ts.rest, opts
-      if match2
-        self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
-      else
-        match1
+      if ts.peek&.match /to/i
+        match2 = NumberSeeker.match ts.rest, opts
+        if match2
+          self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
+        else
+          match1
+        end
       end
     elsif stream.peek&.match '-'
       nums = stream.peek.split '-'
@@ -289,6 +290,15 @@ class NumberSeeker < Seeker
     if result && result.tail_stream.peek&.match(',')
       result.tail_stream = result.tail_stream.rest
     end
+=begin
+    if Rails.env.test?
+      if result
+        puts "NumberSeeker found '#{result}' at '#{stream.to_s.truncate 100}'"
+      else
+        puts "NumberSeeker failed at '#{stream.to_s.truncate 100}'"
+      end
+    end
+=end
     result
   end
 

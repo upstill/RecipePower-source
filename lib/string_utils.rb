@@ -116,6 +116,12 @@ def escape_newlines str
   str.to_s.gsub(/\n/, '\n')
 end
 
+def indent_lines str_or_object, indent="\t"
+  str = str_or_object.is_a?(String) ? str : str_or_object.pretty_inspect
+  indent = ' '*indent if indent.is_a?(Integer)
+  indent+str.split("\n").join("\n"+indent)+"\n"
+end
+
 class String
   # Replace runs of whitespace with a single whitespace character as follows:
   # 1) if the run contains a newline character, replace the run with that

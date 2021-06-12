@@ -68,6 +68,41 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
+  test 'string partitioning' do
+    # Generic comma-delimited list
+    scanner = StrScanner.new 'something, something and something else'
+    scanners = scanner.partition
+    assert_equal 3, scanners.count
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something else', scanners.shift.to_s
+
+    # Handle Oxford comma
+    scanner = StrScanner.new 'something, something, and something else'
+    scanners = scanner.partition
+    assert_equal 3, scanners.count
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something else', scanners.shift.to_s
+
+    # Handle parenthesis
+    scanner = StrScanner.new 'something, something (with noise, fury and other stuff) and something else'
+    scanners = scanner.partition
+    assert_equal 3, scanners.count
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something ( with noise , fury and other stuff )', scanners.shift.to_s
+    assert_equal 'something else', scanners.shift.to_s
+
+    # Handle Oxford comma and parenthesis
+    scanner = StrScanner.new 'something, something, (with noise, fury and other stuff) and something else'
+    scanners = scanner.partition
+    assert_equal 4, scanners.count
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal 'something', scanners.shift.to_s
+    assert_equal '( with noise , fury and other stuff )', scanners.shift.to_s
+    assert_equal 'something else', scanners.shift.to_s
+  end
+
   test 'toline text' do
     str = "first line \n second line \n third line \n"
     scanner = StrScanner.new str
