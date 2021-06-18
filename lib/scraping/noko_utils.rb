@@ -1,5 +1,19 @@
 # Library of methods on Nokogiri documents/nodes
 
+# Ensure that nowhere in the node and its ancestry is there a grammar item that can't contain rp_elmt_class
+# NB: since classes are strictly hierarchical, any ancestor bearing rp_elmt_class will be stripped of it.
+def nknode_clear_classification_context node, rp_elmt_class, parser_evaluator: nil
+  return unless rp_elmt_class
+
+  node.ancestors.each do |ancestor|
+    return if ancestor.fragment?
+    if parser_evaluator && (classes = nknode_rp_classes ancestor).present?
+      legit_classes = classes.find_all { |parent_class| parser_evaluator.can_include?(parent_class, rp_elmt_class) }
+      nknode_rp_classes ancestor, legit_classes if legit_classes != classes
+    end
+  end
+end
+
 # Clean up the HTML of a node
 def nknode_sanitize(node)
   # Turn <p> tags embedded in list tags (illegal) into <li> tags

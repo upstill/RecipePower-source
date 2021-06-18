@@ -227,9 +227,12 @@ class Parser
       key = key.to_sym
       original = @grammar[key]
       cleaned_up = cleanup_entry key, original  # Allows elements to be removed
-      @grammar[key] = (mod = cleanup_entry key, grammar_mods[key]).present? ?
-        merge_entries(cleaned_up, mod) :
-        cleaned_up
+      @grammar[key] =
+          if grammar_mods && (mod = cleanup_entry key, grammar_mods[key]).present?
+            merge_entries cleaned_up, mod
+          else
+            cleaned_up
+          end
       if Rails.env.test?
         if @grammar[key] == original
           puts ":#{key} unchanged"
@@ -609,9 +612,12 @@ class Parser
     # If there's only a single child and no token, just return that child
     # children.compact!
     children = children.compact.map { |child| child.token ? child : child.children }.flatten(1).compact
-    (children.count == 1 && token.nil?) ?
-        children.first :
-        Seeker.new(start_stream, end_stream, token, children)
+    if children.count == 1 && token.nil?
+      children.first.tail_stream = end_stream
+      children.first
+    else
+      Seeker.new(start_stream, end_stream, token, children)
+    end
   end
 
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),

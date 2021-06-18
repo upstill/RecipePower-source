@@ -178,8 +178,8 @@ EOF
       assert seeker.success?
       assert_equal 2, seeker.children.count
       assert_equal :rp_amt, seeker.token
-      assert_equal :rp_num_or_range, seeker.children.first.token
-      assert_equal :rp_qualified_unit, seeker.children.last.token
+      assert_equal :rp_num, seeker.children.first.token
+      assert_equal :rp_unit, seeker.children.last.token
     end
   end
 
@@ -280,7 +280,7 @@ EOF
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
     ps = ParserServices.new(content: html, lexaur: @lex)
     ps.parse token: :rp_ingline
-    assert ps.hard_fail?
+    refute ps.hard_fail?
 
     html = '1/2 ounce sifted baking soda'
     ps.parse token:  :rp_ingline, content: html, context_free: true
@@ -483,7 +483,7 @@ EOF
     assert_equal :rp_ingline, ps.token
     assert_equal 'baking soda', ps.find_value(:rp_ingredient_tag)
     assert_equal 'sifted', ps.find_value(:rp_condition_tag)
-    assert_match /tsp/, ps.find_value(:rp_unit)
+    assert_match /^tsp/, ps.find_value(:rp_unit_tag)
     assert_not_empty ps.find(:rp_ingspec)
   end
 
@@ -495,7 +495,7 @@ EOF
     assert_equal :rp_ingline, seeker.token
     assert_equal 'Cointreau', seeker.found_string(:rp_ingredient_tag)
     assert_equal 'ounce', seeker.found_string(:rp_unit)
-    assert_equal '3/4', seeker.found_string(:rp_range)
+    assert_equal '3/4', seeker.found_string(:rp_num)
     assert_not_empty seeker.find(:rp_ingspec)
   end
 
@@ -543,6 +543,7 @@ EOF
   end
 
   test 'parse Ottolenghi ingredient list' do
+=begin
     html = 'lemon zest and juice'
     ps = ParserServices.parse content: html, token: :rp_ingalts
     assert ps.success?
@@ -552,8 +553,9 @@ EOF
     assert ps.success?
 
     html = '½ tsp each finely grated lemon zest and juice'
-    ps = ParserServices.parse content: html, token: :rp_ingline, context_free: true
+    ps = ParserServices.parse content: html, token: :rp_ingline
     assert ps.success?
+=end
 
     html = <<EOF
   <p><strong>30g each crustless sourdough bread</strong><br>
@@ -760,7 +762,7 @@ EOF
     html = '1 ounce of bourbon, gently warmed'
     nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice }, context_free: true
     assert_equal 'bourbon', nkdoc.css('.rp_ingredient_tag').text.to_s
-    assert_equal '1', nkdoc.css('.rp_num_or_range').text.to_s
+    assert_equal '1', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text.to_s
     assert_equal html, nkdoc.text.to_s
@@ -768,7 +770,7 @@ EOF
     # Should have exactly the same result with content priorly enclosed in span
     html = '<li class="rp_elmt rp_ingline">1 ounce of bourbon, gently warmed</li>'
     nkdoc, seeker = parse html, :rp_ingline, context_free: true
-    assert_equal '1', nkdoc.css('.rp_num_or_range').text.to_s
+    assert_equal '1', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'bourbon', nkdoc.css('.rp_ingredient_tag').text.to_s
     assert_equal ', gently warmed', nkdoc.css('.rp_ing_comment').text.to_s
@@ -776,14 +778,14 @@ EOF
     # Parsing a fully marked-up ingline shouldn't change it
     html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
     nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ simple\ syrup }, context_free: true
-    assert_equal '3/4', nkdoc.css('.rp_num_or_range').text.to_s
+    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
     # assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
 
     html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }, context_free: true
-    assert_equal '3/4', nkdoc.css('.rp_num_or_range').text.to_s
+    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
     # assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
