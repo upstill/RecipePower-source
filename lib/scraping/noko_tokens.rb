@@ -292,6 +292,11 @@ class NokoTokens < Array
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
     common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
+    # Report on situation
+    if Rails.env.test?
+      puts "\n---------------------\nEnclosing from '#{teleft.to_s}' to '#{teright.to_s}' in #{tag}.#{rp_elmt_class} within: ", pretty_indented_html(common_ancestor.to_s)
+    end
+
     # Check that an existing ancestor can be tagged
     if teleft.prior_text.blank? && # no meaningful text before the leftmost mark
         teright.subsq_text.blank? # ...or after the rightmost mark
@@ -306,18 +311,27 @@ class NokoTokens < Array
         # #enclose_to does its own validation
         return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
       elsif teleft.prior_text(within: common_ancestor).blank? && teright.subsq_text(within: common_ancestor).blank?
-        if common_ancestor.fragment?
+        # if common_ancestor.fragment?
           # If we're at the top level, we need to enclose every element under a new element
           children = common_ancestor.children
           newnode = common_ancestor.add_child(html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value).first
           @elmt_bounds.attach_nodes_safely children, newnode
           return newnode
-        else
-          common_ancestor.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
-          @elmt_bounds.attach_node_safely common_ancestor, common_ancestor.next
-          return common_ancestor.parent
-        end
+        #else
+        #  common_ancestor.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
+        #  @elmt_bounds.attach_node_safely common_ancestor.next, common_ancestor
+        #  return common_ancestor.parent
+        #end
       end
+=begin
+      if newnode
+        # Report on situation
+        if Rails.env.test?
+          puts "After enclosure:", pretty_indented_html(common_ancestor.to_s), '--------------------------------------'
+        end
+        return newnode
+      end
+=end
     end
 
     # Remove unselected text from the two text elements and leave remaining text, if any,

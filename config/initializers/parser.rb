@@ -65,7 +65,7 @@ Parser.init_grammar(
         match:
             {
                 match: [ { optional: :rp_title }, nil ],
-                at_css_match: 'h1,h2',
+                at_css_match: 'h1,h2,h3',
                 token: :rp_recipe
             },
         repeating: true
@@ -87,7 +87,7 @@ Parser.init_grammar(
     },
     # Hopefully sites will specify how to find the title in the extracted text
     rp_title: {
-        in_css_match: 'h1,h2'
+        in_css_match: 'h1,h2,h3'
     }, # Match all tokens within an <h1> tag
     rp_author: {
         match: [ /^Author:?$/, nil ],
@@ -116,12 +116,11 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     rp_inglist: {
-        or: [ {
+        or: [ { # A label followed by one or more ingredient lines, or two or more ingredient lines
                   match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-                  :in_css_match => 'ul',
                   :enclose => true
               },
-              {
+              { # Within a line, a comma-separated, conjunction-concluded list of ingredients
                   :match => :rp_ingline,
                   :orlist => :predivide,
                   :enclose => true
@@ -132,11 +131,9 @@ Parser.init_grammar(
         match: [
             { or: [ '▢', /.*:/, [ /.*/, /from/ ] ], optional: true }, # Discard a colon-terminated label at beginning
             { match: :rp_ingspec, orlist: true },
-            # {optional: :rp_unit_tag},
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        in_css_match: 'li'
     },
     rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {

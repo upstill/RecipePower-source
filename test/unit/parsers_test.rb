@@ -181,7 +181,7 @@ EOF
   end
 =end
 
-  test 'parse ing list from modified grammar' do
+  test 'parse ing list from modified grammar using meta-mod' do
     html = <<EOF
 <ul>
   <li>1/2 tsp. baking soda</li>
@@ -190,13 +190,7 @@ EOF
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    parser = Parser.new(html, @lex) do |grammar|
-=begin
-      # Here's our chance to modify the grammar
-      grammar[:rp_inglist][:match] = { repeating: :rp_ingline, :in_css_match => 'li' }
-      grammar[:rp_inglist][:in_css_match] = 'ul'
-=end
-    end
+    parser = Parser.new html, @lex, :gm_inglist => :unordered_list
     seeker = parser.match :rp_inglist
     assert_not_nil seeker
     assert_equal :rp_inglist, seeker.token
@@ -216,7 +210,7 @@ EOF
 
   test 'parse Ottolenghi ingredient list' do
     html = <<EOF
-  <p><strong>30g each crustless sourdough bread</strong><br>
+  <p><strong>30g crustless sourdough bread</strong><br>
     <strong>2 anchovy fillets</strong>, drained and finely chopped<br>
     <strong>Flaked sea salt and black pepper</strong><br>
     <strong>25g unsalted butter</strong><br>
@@ -227,19 +221,25 @@ EOF
     <strong>½ tsp each finely grated lemon zest and juice</strong>
   </p>
 EOF
-    #   <p><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>
     html = html.gsub /\n+\s*/, ''
-    parser = Parser.new(html, @lex) do |grammar|
-      #grammar[:rp_ingline][:match]  = [
-      #:rp_ingredient_tag,
-      #    { optional: :rp_ing_comment } # Anything can come between the ingredient and the end of line
-      #]
-    end
+    parser = Parser.new html, @lex, :gm_inglist => :paragraph
     seeker = parser.match :rp_inglist
     assert seeker
+    assert_equal 9, seeker.children.count
+    seeker.children.each { |child| assert_equal child.token, :rp_ingline }
   end
 
   test 'parse single recipe' do
+    html = <<EOF
+<p>Please don’t be put off by the anchovies in this, even if you don’t like them. There are only two fillets, and they add a wonderfully deep, savoury flavour; there’s nothing fishy about the end product, I promise. If you’re not convinced and would rather leave them out, increase the salt slightly. Serve with meat, fish or as part of a spring meze; or, for a summery starter, with a poached egg.</p>
+EOF
+    parser = Parser.new html, @lex, :gm_inglist => :paragraph
+    seeker = parser.match :rp_ingline
+    refute seeker&.success?
+
+    seeker = parser.match :rp_inglist
+    refute seeker&.success?
+
     html = <<EOF
 <div class="content__article-body from-content-api js-article__body" itemprop="articleBody" data-test-id="article-review-body">
   <p><span class="drop-cap"><span class="drop-cap__inner">M</span></span>ost asparagus dishes are easy to prepare (this is no artichoke or broad bean) and quick to cook (longer cooking makes it go grey and lose its body). The price you pay for this instant veg, though, is that it has to be super-fresh. As Jane Grigson observed: “Asparagus needs to be eaten the day it is picked. Even asparagus by first-class post has lost its finer flavour.” Realistically, most of us don’t live by an asparagus field, so have to extend Grigson’s one-day rule. Even so, the principle is clear: for this delicate vegetable, the fresher the better.</p>
@@ -250,24 +250,21 @@ EOF
   <p>Heat the oven to 220C/425F/gas 7. Blitz the sourdough in a food processor to fine crumbs, then pulse a few times with the pine nuts, anchovies, a generous pinch of flaked sea salt and plenty of pepper, until everything is finely chopped.<br></p>
 </div>
 EOF
-    parser = Parser.new(html, @lex,
-                        :rp_title => { :in_css_match => 'h2'},
-                        :rp_inglist => { :in_css_match => 'p'},
-                        :rp_ingline => { :inline => true, :in_css_match => nil}
-    )
+    parser = Parser.new html, @lex, :gm_inglist => :paragraph
     seeker = parser.match :rp_recipe
     assert seeker
-    assert_equal "10g basil leaves, finely shredded", seeker.find(:rp_ingline).last.to_s
+    assert_equal "½ tsp each finely grated lemon zest and juice", seeker.find(:rp_ingline).last.to_s
     assert_equal :rp_recipe, seeker.token
     assert_equal 11, (seeker.children.first.tail_stream.pos - seeker.children.first.head_stream.pos)
     assert (inglist = seeker.find(:rp_inglist).first), "No ingredient list found"
-    assert_equal 9, inglist.children.count
+    assert_equal 10, inglist.children.count
   end
 
   test 'ingredient list with pine nuts' do
     html = '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>'
     add_tags :Ingredient, %w{ sourdough\ bread pine\ nuts anchovy\ fillets sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
-    parser = Parser.new(html, @lex, :rp_ingline => { :in_css_match => nil, :inline => true }, :rp_inglist => { :in_css_match => 'p' } )
+    parser = Parser.new html, @lex, :gm_inglist => :paragraph
+    # , :rp_ingline => { :in_css_match => nil, :inline => true }, :rp_inglist => { :in_css_match => 'p' } )
     seeker = parser.match :rp_inglist
     assert seeker
     ingline_seeker = seeker.find(:rp_ingline)[2]
@@ -351,28 +348,166 @@ end
                           :rp_ingline,
                           ingredients: %w{ bourbon Frangelico lemon\ juice },
                           grammar_mods: { :gm_inglist => :paragraph_style } # { :rp_ingline => { :in_css_match => nil, :inline => true } }
-    assert_equal %q{<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> of <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="bourbon">bourbon</span></span><span class="rp_elmt rp_ing_comment">, gently warmed</span></span>},
+    assert_equal %q{<li class="rp_elmt rp_ingline">
+<span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">1</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> of <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="bourbon">bourbon</span></span><span class="rp_elmt rp_ing_comment">, gently warmed</span>
+</li>},
                  nkdoc.to_s
+  end
+
+  def assert_invariance input_html, output_nkdoc
+    # input = Nokogiri::XML(html,&:noblanks)
+    input = pretty_indented_html input_html
+    # output = Nokogiri::XML(nkdoc.to_s,&:noblanks)
+    output = pretty_indented_html output_nkdoc.to_s
+    puts "<<< Input:", input, ">>> Output:", output
+    assert_equal input, output, "Nokogiri result differs from input\n<<<< Before:\n#{input}\n<<< After:\n#{output}\n"
+  end
+
+  test "marked-up html remains invariant after parsing and tagging" do
+
+=begin
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+    simple syrup 
+  </li>
+</ul>
+EOF
+    nkdoc, seeker = parse html,
+                          :rp_inglist,
+                          ingredients: %w{ simple\ syrup bourbon Frangelico lemon\ juice }
+    # assert seeker.success?
+    assert_invariance html, nkdoc
+=end
 
     # Parsing a fully marked-up ingline shouldn't change it
-    html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
-    nkdoc, seeker = parse html, :rp_ingline
-    assert_equal html, nkdoc.to_s
+    html = <<EOF
+<li class="rp_elmt rp_ingline">
+  <span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span>
+</li>
+EOF
+    nkdoc, seeker = parse html, :rp_ingline, ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup }
+    assert_invariance html, nkdoc
 
-    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
-    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal html, nkdoc.to_s
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_ingspec">
+      <span class="rp_elmt rp_amt_with_alt rp_amt">
+        <span class="rp_elmt rp_num">3/4</span> 
+        <span class="rp_elmt rp_unit rp_unit_tag">ounce</span>
+      </span> 
+      <span class="rp_elmt rp_ingredient_tag rp_ingalts">simple syrup</span> 
+    </span> 
+    <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
+  </li>
+</ul>
+EOF
+    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup }
+    assert_invariance html, nkdoc
 
-    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div>'
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
+    <span class="rp_elmt rp_amt_with_alt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+    <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
+    <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
+  </span></li>
+</ul>
+EOF
+    nkdoc, seeker = parse html,
+                          :rp_inglist,
+                          ingredients: %w{ simple\ syrup bourbon Frangelico lemon\ juice }
+    # TODO Make sure that parsing a fully marked-up ingredient list returns it unchanged
+    # assert seeker.success?
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+    <span class="rp_elmt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+EOF
+    nkdoc, seeker = parse html, :rp_amt
+    # assert seeker.success?
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
+    <span class="rp_elmt rp_amt_with_alt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+      <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
+  </span></li>
+</ul>
+EOF
+    nkdoc, seeker = parse html,
+                          :rp_inglist,
+                          ingredients: %w{ simple\ syrup bourbon Frangelico lemon\ juice }
+    # TODO Make sure that parsing a fully marked-up ingredient list returns it unchanged
+    # assert seeker.success?
+    assert_invariance html, nkdoc
+    
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_ingspec">
+      <span class="rp_elmt rp_amt">
+        <span class="rp_elmt rp_num">a</span> 
+        <span class="rp_elmt rp_unit_tag rp_unit" value="dash">dash</span>
+      </span> of
+      <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="Angostura">Angostura.</span>
+    </span>
+  </li>
+</ul>
+EOF
     nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
-    assert_equal html.gsub("\n", ''), nkdoc.to_s.gsub("\n", '')
+    # TODO Make sure that parsing a fully marked-up ingredient list returns it unchanged
+    # assert seeker.success?
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_amt_with_alt rp_amt">
+      </span><span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span></span>
+    
+      <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span>
+    <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
+  </li>and
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_ingspec">
+      <span class="rp_elmt rp_amt">
+        <span class="rp_elmt rp_num">a</span> 
+        <span class="rp_elmt rp_unit rp_unit_tag" value="dash">dash</span>
+      </span> of
+      <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="Angostura">Angostura.</span>
+    </span>
+  </li>
+</ul>
+EOF
+    nkdoc, seeker = parse html, :rp_inglist, ingredients: %w{ bourbon Frangelico lemon\ juice }
+    # TODO Make sure that parsing a fully marked-up ingredient list returns it unchanged
+    # assert seeker.success?
+    assert_invariance html, nkdoc
   end
 
   test 'recipe with predeclared ingredient list' do
     nkdoc, seeker = parse '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>',
                           :rp_recipe,
-                          grammar_mods: { :rp_title => { :in_css_match => 'h3'}, :rp_inglist => { :in_css_match => nil } }
-    assert_equal 4, seeker.find(:rp_ingline).count
+                          ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup },
+                          grammar_mods: { :rp_title => { :in_css_match => 'h3'}, :rp_inglist => { :in_css_match => 'div.rp_inglist' } }
+    assert_equal 5, seeker.find(:rp_ingline).count
   end
 
   test 'comma-separated ingredient list' do
@@ -380,9 +515,8 @@ end
     # html = '<p>1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span>  </span>and a dash of Angostura.</p>'
     nkdoc, seeker = parse html,
                           :rp_inglist,
-                          ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup }
-    # grammar_mods: { :rp_ingline => { :in_css_match => nil }}
-                          # grammar_mods: { :gm_inglist => :inline }
+                          ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup },
+                          grammar_mods: { :gm_inglist => :inline }
     assert seeker.success?
     seeker.children.each { |child| assert_equal :rp_ingline, child.token }
   end

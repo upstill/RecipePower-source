@@ -1,5 +1,9 @@
 require 'nokogiri'
 
+def pretty_indented_html html, indent=3
+  Nokogiri::HTML::fragment(html).to_xhtml indent: 3
+end
+
 # Perform whatever processing is needed on the node
 def process_dom html
   nk = Nokogiri::HTML::fragment html

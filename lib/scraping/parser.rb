@@ -175,10 +175,16 @@ class Parser
       return original unless mod && mod != {}
       return mod unless original&.is_a?(Hash)
       mod.each do |key, value|
-        if value.nil?
+        case value
+        when nil?
           original.delete key
+        when Hash
+          original[key] = merge_entries(original[key], value)
+        when Array
+          # Merge the two arrays
+          value.each_index { |ix| original[key][ix] = merge_entries(original[key][ix], value[ix]) }
         else
-          original[key] = value.is_a?(Hash) ? merge_entries(original[key], value) : value
+          original[key] = value
         end
       end
       original
@@ -194,21 +200,23 @@ class Parser
       grammar_mods = {}
       # Copy actual grammar entries
       mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
+      # Apply meta-mods
       mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
         val = mods_plus[key]
         case key
         when :gm_inglist
           case val
+          when :unordered_list
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => 'ul' } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => 'li' }
           when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
             grammar_mods[:rp_inglist] = {
-                :match => :rp_ingline, # Remove the label option
-                :in_css_match => nil,  # Remove the CSS specifier for enclosing the list
+                :match => :rp_ingline, # Remove the label spec
                 :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
             }
-            grammar_mods[:rp_ingline] = { :in_css_match => nil } # Don't expect the ingredient line to match CSS
-          when :paragraph_style
+          when :paragraph
             grammar_mods[:rp_inglist] = { :in_css_match => 'p' }
-            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true }
+            grammar_mods[:rp_ingline] = { :inline => true }
           end
         end
       end
@@ -483,6 +491,7 @@ class Parser
         children = scanner.partition.collect do |subscanner|
           match_specification subscanner, spec, :context_free => true
         end
+        children.keep_if &:success?
       else
         while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
           child = match_specification scanner, spec
