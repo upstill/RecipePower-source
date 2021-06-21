@@ -45,7 +45,7 @@ module Trackable
           osetter = :"o_tkbl_#{attrname}_eq"
           alias_method osetter, setter if public_instance_methods.include?(setter)
           define_method setter do |val|
-            if Rails.env.development?
+            if Rails.env.development? || Rails.env.test?
               printable = val.is_a?(String) ? "'#{val.truncate 100}'" : val.to_s
               puts "#{self.class} writing #{printable} to #{attrname}"
             end

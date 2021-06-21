@@ -1,10 +1,11 @@
 
-def add_tags type, names
+def add_tags type, names, lexaur=nil
   return unless names.present?
   typenum = Tag.typenum(type)
   names.each { |name|
     next if Tag.strmatch(name, tagtype: typenum).present?
     tag = Tag.assert name, typenum
+    @lex&.take tag.name, tag.id
   }
 end
 
@@ -33,11 +34,8 @@ def load_recipe url_or_recipe, selector, trimmers, grammar_mods={}
   refute recipe.errors.any?, recipe.errors.full_messages
   assert recipe.good? # Should have loaded and settled down
 
-  # PageRef arrives without recipe_page or viable content
-  assert_nil recipe.page_ref.content
   refute recipe.recipe_page
   pr = recipe.page_ref
-  pr.content = pr.mercury_result.content
   recipe.ensure_attributes [ :content ]
   refute recipe.recipe_page # Still no recipe page b/c it hasn't been requested
   assert_not_empty recipe.content # ...but content from the page_ref

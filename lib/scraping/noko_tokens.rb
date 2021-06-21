@@ -291,7 +291,8 @@ class NokoTokens < Array
                                     focus_elmt,
                                     tag: tag,
                                     rp_elmt_class: rp_elmt_class,
-                                    value: value)
+                                    value: value,
+                                    parser_evaluator: @parser_evaluator)
       newnode ||= # return newnode if newnode
       if anchor_elmt == focus_elmt
         # #enclose_to does its own validation

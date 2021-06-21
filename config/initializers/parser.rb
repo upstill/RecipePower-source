@@ -65,7 +65,7 @@ Parser.init_grammar(
         match:
             {
                 match: [ { optional: :rp_title }, nil ],
-                at_css_match: 'h1,h2,h3',
+                in_css_match: 'div.wprm-recipe-the-woks-of-life', # at_css_match: 'h1,h2,h3',
                 token: :rp_recipe
             },
         repeating: true

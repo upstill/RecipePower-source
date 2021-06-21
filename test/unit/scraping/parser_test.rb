@@ -2,9 +2,11 @@ require 'test_helper'
 require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
+require 'parse_tester'
 
 # These are tests for the default configuration of the Parser grammar
 class ParserTest < ActiveSupport::TestCase
+  include PTInterface
 
   def add_tags type, names
     return unless names.present?
@@ -28,7 +30,7 @@ class ParserTest < ActiveSupport::TestCase
     @ingred_specs = [
         '2 cloves garlic',
         '2 garlic cloves',
-        'Sea salt',             # Case shouldn't matter
+        'Sea salt', # Case shouldn't matter
         '6 tablespoons butter, softened',
         '2 teaspoons Dijon mustard',
         '1/4 cup drained small capers, rinsed',
@@ -39,7 +41,7 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) white cauliflower',
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
-    @ingred_tags = %w{
+    @ingredient_tags = %w{
       all-purpose\ flour
       ground\ turmeric
       ground\ cumin
@@ -83,13 +85,14 @@ class ParserTest < ActiveSupport::TestCase
       active\ dry\ yeast
       Romanesco\ (green)\ cauliflower
       water
-      yellow\ onions}.
-        each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }.
-        each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm }.
-        each { |name| Tag.assert name, :Condition }
-    @lex = Lexaur.from_tags
+      yellow\ onions} #.
+        # each { |name| Tag.assert name, :Ingredient }
+    @unit_tags = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large } #.
+        # each { |name| Tag.assert name, :Unit }
+    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm } #.
+        # each { |name| Tag.assert name, :Condition }
+    @parse_tester = ParseTester.new ingredients: @ingredient_tags, units: @unit_tags, conditions: @condition_tags # Picks up all the new tags
+    @lex = lexaur
     @ings_list = <<EOF
   <p>#{@ingred_specs.join "<br>\n"}</p>
 EOF
@@ -189,8 +192,8 @@ EOF
     is = TagSeeker.seek nokoscan, lexaur: @lex, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex
-    seeker = parser.match :rp_ingredient_tag
+    pt_apply :rp_ingredient_tag, html: 'Dijon mustard'
+    assert_not_nil seeker, "#{ingstr} doesn't parse"
     assert_equal 'Dijon mustard', seeker.tagdata[:name]
     assert_equal :rp_ingredient_tag, seeker.token
   end
@@ -202,8 +205,7 @@ EOF
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
-    parser = Parser.new nokoscan, @lex
-    seeker = parser.match :rp_ingspec
+    pt_apply :rp_ingspec, html: ingstr
     refute seeker.empty?
     assert_equal :rp_ingspec, seeker.token
     alts = seeker.find(:rp_ingalts)
@@ -215,29 +217,24 @@ EOF
   end
 
   test 'parse list of tags distributing first word' do
-    html = 'instant or active dry yeast'
-    parser = Parser.new html, @lex
-    seeker = parser.match :rp_ingalts
-    assert seeker.success?
+    pt_apply :rp_ingalts,
+             html: 'instant or active dry yeast'
 
-    lex = Lexaur.from_tags
     strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    html = 'ground turmeric, cumin or cinnamon'
-    parser = Parser.new html, @lex
-    seeker = parser.match :rp_ingalts
-    assert seeker.success?
+    pt_apply :rp_ingalts,
+             html: 'ground turmeric, cumin or cinnamon',
+             ingredients: strings
+
     assert_equal :rp_ingalts, seeker.token
     assert_equal 3, seeker.find(:rp_ingredient_tag).count
     assert_equal strings.sort, seeker.find(:rp_ingredient_tag).map(&:value).sort
-    seeker.enclose_all parser: parser
     seeker.head_stream.nkdoc.css('.rp_ingredient_tag').each { |ingnode|
       assert_includes strings, ingnode.attribute('value').to_s
     }
 
-    html = 'ground turmeric, cumin or ground cinnamon'
-    strings = %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
-    ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse token: :rp_ingline, context_free: true
+    pt_apply :rp_ingline,
+             html: 'ground turmeric, cumin or ground cinnamon',
+             ingredients: %w{ ground\ turmeric ground\ cumin ground\ cinnamon }
     assert seeker.success?
     assert_equal :rp_ingline, seeker.token
     assert_equal 3, seeker.find(:rp_ingredient_tag).count
@@ -245,43 +242,42 @@ EOF
   end
 
   test 'parse ingredient line' do
+    pt_apply :rp_amt, html: '1 ¾ cups plus 2 tablespoons'
 
-    html = '1 ¾ cups plus 2 tablespoons'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_amt
-    assert ps.success?
+    pt_apply :rp_ingspec, html: '1 ¾ cups plus 2 tablespoons all-purpose flour'
 
-    html = '1 ¾ cups plus 2 tablespoons all-purpose flour'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingspec
-    assert ps.success?
+    pt_apply :rp_alt_amt, html: '/240 grams'
 
-    html = '/240 grams'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_alt_amt
-    assert ps.success?
+    pt_apply :rp_amt, html: '1 ¾ cups plus 2 tablespoons/240 grams'
 
-    html = '1 ¾ cups plus 2 tablespoons/240 grams'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_amt
-    assert ps.success?
-
-    html = '1 teaspoon toasted sesame seeds'
-    ps = ParserServices.new(content: html, lexaur: @lex)
-    ps.parse token: :rp_ingline, context_free: true
-    assert ps.success?
+    pt_apply :rp_ingline, html: '1 teaspoon toasted sesame seeds'
 
     html = 'Salt and black pepper'
+    pt_apply :rp_ingalts,
+             html: 'Salt and black pepper',
+             ingredients: %w{ Salt black\ pepper }
+    pt_apply :rp_ingline,
+             html: 'Salt and black pepper',
+             ingredients: %w{ Salt black\ pepper }
     ps = ParserServices.new(content: html, lexaur: @lex)
     ps.parse token: :rp_ingline, context_free: true
     assert ps.success?
 
     # Test a failed ingredient line
+    pt_apply :rp_ingline, html: '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
+
     html = '<strong>½ tsp. each finely grated lemon zest and juice</strong>'
     ps = ParserServices.new(content: html, lexaur: @lex)
     ps.parse token: :rp_ingline
     refute ps.hard_fail?
 
+    pt_apply :rp_ingline, html: '1/2 ounce sifted baking soda'
+    assert_equal :rp_ingline, token
+    assert_equal 'baking soda', find_value(:rp_ingredient_tag)
+    assert_equal 'sifted', find_value(:rp_condition_tag)
+    assert_equal '1/2 ounce', seeker.find(:rp_amt).first.to_s
+    assert_not_empty find(:rp_ingspec)
+    assert_not_empty find(:rp_ing_comment)
     html = '1/2 ounce sifted baking soda'
     ps.parse token:  :rp_ingline, content: html, context_free: true
     assert ps.success?
@@ -291,6 +287,14 @@ EOF
     assert_equal '1/2 ounce', ps.seeker.find(:rp_amt).first.to_s
     assert_not_empty ps.find(:rp_ingspec)
     assert_not_empty ps.find(:rp_ing_comment)
+
+    pt_apply :rp_ingline, html: '1/2 ounce sifted baking soda'
+    assert_equal :rp_ingline, token
+    assert_equal 'baking soda', find_value(:rp_ingredient_tag)
+    assert_equal 'sifted', find_value(:rp_condition_tag)
+    assert_equal '1/2 ounce', seeker.find(:rp_amt).first.to_s
+    assert_not_empty find(:rp_ingspec)
+    assert_not_empty find(:rp_ing_comment)
 
     html = '1 ¾ cups all-purpose flour'
     ps = ParserServices.new(content: html, lexaur: @lex)
@@ -370,133 +374,168 @@ EOF
     ps = ParserServices.new content: html, lexaur: @lex
     subscanners = ps.nokoscan.split(',')
     assert_equal 4, subscanners.count
-    
-    seeker = ps.parse token: :rp_inglist, context_free: true
 
-    assert seeker.success?
+    pt_apply :rp_inglist, html: html
     assert_equal 5, seeker.children.count
   end
 
   test 'qualified unit' do
 
     html = 'tsp'
-    ps = ParserServices.parse token: :rp_unit, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_unit, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_unit, html: html
 
     # An unadorned unit should also answer to a qualified unit, since the qualifications are optional
     html = 'tsp'
-    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_qualified_unit, html: html
 
     html = '1 tsp'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '1 tsp baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '1 tsp. baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '1 massive (2 3/4-pound; 1.25kg) head cauliflower'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '1 large (15-oz) can'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '2 tablespoons (30ml) sesame tahini'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = "3/4 ounce (about 1/4 cup; 20g) za'atar, divided"
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '1 teaspoon (5ml) honey or agave nectar'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '2 inch knob'
-    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
-    assert ps.success?
-    refute ps.seeker.tail_stream.more?
+    #ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    #assert ps.success?
+    #refute ps.seeker.tail_stream.more?
+    pt_apply :rp_qualified_unit, html: html
+    refute seeker.tail_stream.more?
 
     html = '2 inch knob'
     ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
-    refute ps.seeker.tail_stream.more?
+    #assert ps.success?
+    #refute ps.seeker.tail_stream.more?
+    pt_apply :rp_amt, html: html
+    refute seeker.tail_stream.more?
 
     html = '2 inch knob of ginger, peeled and thinly sliced'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '2 can (30g) baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '13-ounce'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '(13-ounce)'
-    ps = ParserServices.parse token: :rp_altamt, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_altamt, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_altamt, html: html
 
     html = '(13-ounce) can'
-    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_qualified_unit, html: html
 
     html = '13-ounce can'
-    ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_qualified_unit, content: html, lexaur: @lex
+    #assert ps.success?
+    pt_apply :rp_qualified_unit, html: html
 
     html = '1 (13-ounce) can'
-    ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_amt, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_amt, html: html
 
     html = '1 (13-ounce) can baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '1 (13-ounce; 45g) can baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '1 (13-ounce; 45g) can baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
     html = '1 13-ounce can baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    pt_apply :rp_ingline, html: html
 
   end
 
   test 'tag has terminating period' do
     html = '1/2 tsp. sifted (or lightly sifted) baking soda'
-    ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
-    assert ps.success?
-    assert_equal :rp_ingline, ps.token
-    assert_equal 'baking soda', ps.find_value(:rp_ingredient_tag)
-    assert_equal 'sifted', ps.find_value(:rp_condition_tag)
-    assert_match /^tsp/, ps.find_value(:rp_unit_tag)
-    assert_not_empty ps.find(:rp_ingspec)
+    #ps = ParserServices.parse token: :rp_ingline, content: html, lexaur: @lex, context_free: true
+    #assert ps.success?
+    #assert_equal :rp_ingline, ps.token
+    #assert_equal 'baking soda', ps.find_value(:rp_ingredient_tag)
+    #assert_equal 'sifted', ps.find_value(:rp_condition_tag)
+    #assert_match /^tsp/, ps.find_value(:rp_unit_tag)
+    #assert_not_empty ps.find(:rp_ingspec)
+
+    pt_apply :rp_ingline, html: html
+    assert_equal :rp_ingline, token
+    assert_equal 'baking soda', find_value(:rp_ingredient_tag)
+    assert_equal 'sifted', find_value(:rp_condition_tag)
+    assert_match /^tsp/, find_value(:rp_unit_tag)
+    assert_not_empty find(:rp_ingspec)
   end
 
   test 'simple ingline with fractional number' do
     html = '3/4 ounce Cointreau'
-    ps = ParserServices.new content: html, lexaur: @lex
-    seeker = ps.parse token:  :rp_ingline, context_free: true
-    assert seeker.success?
-    assert_equal :rp_ingline, seeker.token
-    assert_equal 'Cointreau', seeker.found_string(:rp_ingredient_tag)
-    assert_equal 'ounce', seeker.found_string(:rp_unit)
-    assert_equal '3/4', seeker.found_string(:rp_num)
-    assert_not_empty seeker.find(:rp_ingspec)
+    #ps = ParserServices.new content: html, lexaur: @lex
+    #seeker = ps.parse token:  :rp_ingline, context_free: true
+    #assert seeker.success?
+    #assert_equal :rp_ingline, seeker.token
+    #assert_equal 'Cointreau', seeker.found_string(:rp_ingredient_tag)
+    #assert_equal 'ounce', seeker.found_string(:rp_unit)
+    #assert_equal '3/4', seeker.found_string(:rp_num)
+    #assert_not_empty seeker.find(:rp_ingspec)
+
+    pt_apply :rp_ingline, html: html
+    assert_equal :rp_ingline, token, ingredients: %w{ Cointreau }, units: %w{ ounce }
+    assert_equal '3/4', found_string(:rp_num)
+    assert_not_empty find(:rp_ingspec)
   end
 
   test 'parse ing list from modified grammar' do
@@ -508,10 +547,10 @@ EOF
 </ul>
 EOF
     html = html.gsub(/\n+\s*/, '')
-    parser = Parser.new html, @lex,
+    parser = Parser.new html, @lex, :gm_inglist => :unordered_list
                         # Here's our chance to modify the grammar
-                        :rp_inglist => { :in_css_match => 'ul' },
-                        :rp_ingline => { :inline => nil, :in_css_match => 'li' }
+                        # :rp_inglist => { :in_css_match => 'ul' },
+                        # :rp_ingline => { :inline => nil, :in_css_match => 'li' }
 
     seeker = parser.match :rp_inglist
     assert seeker.success?
@@ -520,6 +559,13 @@ EOF
 
     seeker = seeker.children.first
     assert_equal :rp_ingline, seeker.token
+
+    @parse_tester = ParseTester.new grammar_mods: { :rp_inglist => { :in_css_match => 'ul' },
+                                                    :rp_ingline => { :inline => nil, :in_css_match => 'li' } }
+    pt_apply :rp_inglist, html: html,
+             ingredients: %w{ baking\ soda salt sugar },
+             units: %w{ tsp. T. }
+             assert_equal 3, find(:rp_ingline).count
   end
 
   test 'finds title in h1 tag' do

@@ -194,25 +194,17 @@ class ElmtBounds < Array
     find_index { |rcd| rcd.first.object_id.equal? elmt.object_id }
   end
 
-=begin
-      text_elmts = []
-      first_te_ix = nil
-      parent.traverse do |node|
-        if node.text?
-          first_te_ix = child_ix - text_elmts.count if node == as_attached
-          text_elmts.push node
-        end
+  # A debugging function: return an array pairing elements in the Nokogiri doc with elements of our array
+  def correspondence
+    ix = 0
+    result = []
+    @nkdoc.traverse do |node|
+      if node.text?
+        result.push [ self[ix].first, node ]
+        ix += 1
       end
-      text_elmts.each do |te|
-        if self[first_te_ix].first != te
-          if self[first_te_ix].first.text != te.text
-            throw "Attempt to replace @elmt_bounds[#{first_te_ix}] (#{self[first_te_ix].first.text}) with non-matching #{te.text}"
-          end
-          self[first_te_ix][0] = te
-        end
-        first_te_ix += 1
-      end
-      ted = TextElmtData.new(self, self[child_ix].last)
-      ted.valid?
-=end
+    end
+    result
+  end
+
 end

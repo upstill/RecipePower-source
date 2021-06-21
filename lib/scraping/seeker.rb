@@ -74,6 +74,10 @@ class Seeker
     end
   end
 
+  def found_strings token=nil
+    find(token).collect { |f| f.head_stream.except(f.tail_stream).to_s }
+  end
+
   # Root out the value associated with the token
   def find_value token=nil
     find(token).first&.value

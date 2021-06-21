@@ -9,7 +9,7 @@ require 'scraping/noko_utils.rb'
 # text element is blank.
 # We must also take care not to violate the associated grammar hierarchy:
 #   we want to tag the highest compatible node
-def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil
+def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil, parser_evaluator: nil
 
   tag = tag&.to_s || 'span'
   rp_elmt_class ||= ''
@@ -25,7 +25,7 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
     return unless nknode_text_before(first_te, within: anc).blank? && nknode_text_after(last_te, within: anc).blank?
     # Disqualify a node that can't be contained under the requisite class
     if (tag.blank? || anc.name == tag) && (value.nil? || anc['value'].nil?)
-      nknode_clear_classification_context anc, rp_elmt_class
+      nknode_clear_classification_context anc, rp_elmt_class, parser_evaluator: parser_evaluator
       nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
       return anc
     #elsif (incompatible_classes = nknode_rp_classes(anc).delete_if { |cl| @parser_evaluator.can_include? rp_elmt_class, cl }).present?
