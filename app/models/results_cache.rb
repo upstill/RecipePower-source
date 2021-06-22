@@ -320,7 +320,7 @@ module ModelSearch
   # This is a prototypical count_tag method, which digests the itemscope in light of a tag,
   # incrementing the counts appropriately
   def count_tag tag, counts, iscope
-    tagname = tag.normalized_name.if_present || Tag.normalizeName(tag.name)
+    tagname = tag.normalized_name.if_present || Tag.normalize_name(tag.name)
     iscope, sort_key, pluck_key = orderingscope iscope
     pluck_key ||= sort_key
     model = iscope.model
@@ -359,7 +359,7 @@ module CollectibleSearch
   end
 
   def count_tag tag, counts, iscope
-    tagname = tag.normalized_name || Tag.normalizeName(tag.name)
+    tagname = tag.normalized_name || Tag.normalize_name(tag.name)
     iscope, sort_key, pluck_key = orderingscope iscope
     counts.include iscope.matching_comment(tagname), (pluck_key || sort_key)
     super
@@ -414,7 +414,7 @@ module TagSearch
 
   # Tags don't go through Taggings, so we just use/count them directly
   def count_tag tag, counts, iscope
-    nname = tag.normalized_name || Tag.normalizeName(tag.name)
+    nname = tag.normalized_name || Tag.normalize_name(tag.name)
     iscope, sort_key, pluck_key = orderingscope iscope
     pluck_key ||= sort_key
     counts.include iscope.where('normalized_name LIKE ?', "%#{nname}%"), pluck_key

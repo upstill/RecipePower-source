@@ -49,7 +49,7 @@ class Lexaur < Object
   # The input may be a space-separated string which can be split into the array
   def find string_or_strings # Unsplit, unstemmed string is accepted
     strings = split string_or_strings
-    strings = strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
+    strings = strings.map { |str| Tag.normalize_name(str).split('-') }.flatten
     return nil if strings.empty?
     first = strings.shift
     strings.empty? ? terminals[first] : nexts[first]&.find(strings)
@@ -117,7 +117,7 @@ class Lexaur < Object
     end
     if (token = stream.peek).present? && token.is_a?(String) # More in the stream
       # The tree breaks any given token into the substrings found in the normalized name
-      substrs = Tag.normalizeName(token).split '-'
+      substrs = Tag.normalize_name(token).split '-'
       tracker = self
       if substrs.present?
         head = substrs.pop || '' # Save the last substring
@@ -143,7 +143,7 @@ class Lexaur < Object
         else
           block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end
         end
-      else # This token didn't bear anything of relevance to Tag.normalizeName
+      else # This token didn't bear anything of relevance to Tag.normalize_name
         block.call(stream, lexpath[0..-2], strpath) # The block must check for acceptance and return true for the process to end
       end
     end
@@ -154,7 +154,7 @@ class Lexaur < Object
   # Our own #split function which (currently) separates out punctuation
   def split string_or_strings
     strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    strings.map { |str| Tag.normalizeName(str).split('-') }.flatten
+    strings.map { |str| Tag.normalize_name(str).split('-') }.flatten
   end
 
   # Take an opportunity to pass up unwanted/irrelevant tokens

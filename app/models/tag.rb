@@ -72,7 +72,7 @@ class Tag < ApplicationRecord
 
   # Scope for finding tags by name, either exact or embedded
   scope :by_string, -> (str, exact=false) {
-    where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalizeName str}#{'%' unless exact}")
+    where("tags.normalized_name #{exact ? '=' : 'LIKE'} ?", "#{'%' unless exact}#{Tag.normalize_name str}#{'%' unless exact}")
   }
 
   # Scope for the collected synonyms of one or more tags
@@ -143,7 +143,7 @@ class Tag < ApplicationRecord
     if options[:strict]
       constraints[:name] = name
     else
-      constraints[:normalized_name] = normalizeName name
+      constraints[:normalized_name] = normalize_name name
     end
     Tag.exists? constraints.compact
   end
@@ -200,7 +200,7 @@ class Tag < ApplicationRecord
   end
 
   # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
-  def self.normalizeName(str)
+  def self.normalize_name(str)
     str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize # .split('-').join('-')
   end
 
@@ -286,7 +286,7 @@ class Tag < ApplicationRecord
     logger.info "Running 'tagqa'"
     self.name = Tag.tidyName name
     # ...and setting the normalized name
-    self.normalized_name = Tag.normalizeName name
+    self.normalized_name = Tag.normalize_name name
     self.tagtype = 0 unless tagtype
     if clashing_tag?
       # Shouldn't be saved, because either 1) it will violate uniqueness, or 2) an existing untyped tag can be used
@@ -417,7 +417,7 @@ class Tag < ApplicationRecord
     name = name || '' # nil matches anything
     do_fold = opts[:fold]
     # Case-insensitive lookup
-    fuzzyname = Tag.normalizeName name
+    fuzzyname = Tag.normalize_name name
     tags =
     if opts[:matchall] || assert
       if type

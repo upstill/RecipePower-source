@@ -375,7 +375,7 @@ EOF
     assert_equal 4, subscanners.count
   end
 
-  # These Unit tags should be distinct and distinctly available. But the default normalizeName method
+  # These Unit tags should be distinct and distinctly available. But the default normalize_name method
   # fails to distinguish between them.
   test 'abbreviated tags differing in punctuation' do
     Tag.where(tagtype: Tag.typenum(:Unit)).destroy_all
