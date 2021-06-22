@@ -54,7 +54,7 @@ class ParseTester < ActiveSupport::TestCase
               :content, # The finished content resulting from the parse (should == @nkdoc.to_s)
               :lexaur # The current lexaur, which gathers tags on initialization and can be augmented by other tags
   delegate :mercury_result, :gleaning, :site, to: :page_ref
-  delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
+  delegate :'success?', :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
   delegate :nkdoc, :tokens, to: :nokoscan
 
   def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: []
@@ -69,15 +69,32 @@ class ParseTester < ActiveSupport::TestCase
   end
 
   # apply: parse either a file, a string, or an http resource, looking for the given entity (any grammar token)
-  def pt_apply target = :recipe, filename: nil, url: nil, html: nil, ingredients: [], units: [], conditions: []
+  def pt_apply target = :recipe, args={}
+    # filename: nil, url: nil, html: nil, tags
+    filename = args.delete :filename
+    url = args.delete :url
+    html = args.delete :html
+    ingredients = units = conditions = []
+    args.keys.each do |label|
+      # Map from labels to tag type symbol for remaining arguments
+      typename = label.to_s.singularize.capitalize
+      typenum = Tag.typenum typename
+      assert_not_equal 0, typenum, "No such thing as tags of type #{label}"
+      nameset = [args[label]].flatten  # Syntactic sugar: convert a single string into a singular list
+      add_tags typenum, nameset
+      case typename # Save for later comparison with results
+      when 'Ingredient'
+        ingredients = nameset
+      when 'Unit'
+        units = nameset
+      when 'Conditions'
+        conditions = nameset
+      end
+    end
+
     @last_target = target
     # Clear all instance variables that are provided by the parse
     @nokoscan = @seeker = @page_ref = @recipe = @content = nil
-    add_tags :Ingredient, ingredients
-    add_tags :Unit, units
-    add_tags :Condition, conditions
-    # add_tags :Dish,[ 'noodles and pasta' ]
-    # add_tags :Untyped, [ 'pan-fried noodles' ]
     token = case target
             when :recipe
               :rp_recipe
@@ -99,9 +116,9 @@ class ParseTester < ActiveSupport::TestCase
     when url.present?
       apply_to_url url, target: target
     end
-    assert_empty ingredients-found_strings(:rp_ingredient_tag)
-    assert_empty units-found_strings(:rp_unit_tag)
-    assert_empty conditions-found_strings(:rp_conditions_tag)
+    assert_empty ingredients-find_values(:rp_ingredient_tag)
+    assert_empty units-find_values(:rp_unit_tag)
+    assert_empty conditions-find_values(:rp_conditions_tag)
     @seeker&.enclose_all parser: @parser
     @seeker&.success?
   end
@@ -111,12 +128,10 @@ class ParseTester < ActiveSupport::TestCase
 
   end
 
-  private
-
   # Augment the tags table (and the lexaur) with a collection of strings of the given type
-  def add_tags typesym, names
+  def add_tags tagtype, names
     return unless names.present?
-    typenum = Tag.typenum(typesym)
+    typenum = Tag.typenum(tagtype)
     names.each { |name|
       # next if Tag.strmatch(name, tagtype: typenum).present?
       tag = Tag.assert name, typenum
@@ -124,11 +139,13 @@ class ParseTester < ActiveSupport::TestCase
         @lexaur.take tag.name, tag.id
         found = nil
         scanner = StrScanner.new tag.name
-        @lexaur.chunk(scanner) { |data| found = data }
+        @lexaur.chunk(scanner) { |data| found ||= data }
         assert_includes found, tag.id, "Tag '#{tag.name}' is not retrievable through Lexaur"
       end
     }
   end
+
+  private
 
   def prep_site site, selector, trimmers, grammar_mods = {}
     if finder = site.finder_for('Content')
