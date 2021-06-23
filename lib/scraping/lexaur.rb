@@ -162,8 +162,6 @@ class Lexaur < Object
     unskipped = stream
     stream = skipper.call stream
     case stream.peek
-    when '.' # Ignore period
-      unskipped = stream = stream.rest
     when '(' # Elide parenthetical by hunting for matching ')'
       to_match = stream.rest
       while to_match && (to_match.peek != ')') do

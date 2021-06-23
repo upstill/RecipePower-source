@@ -381,22 +381,22 @@ EOF
     Tag.where(tagtype: Tag.typenum(:Unit)).destroy_all
     units = %w{ t T t. T. tsp tsp. }
     add_tags :Unit, units
-    assert_equal 6, Tag.all.count
+    assert_equal 6, Tag.where(tagtype: 5).count
     units.each { |unitstr|
-      pt_apply :rp_unit, html: unitstr, tags: unitstr
-      assert_equal '', nokoscan.rest
+      pt_apply :rp_unit_tag, html: unitstr, units: unitstr
+      refute tail_stream.more?
     }
-  end
-
-  test 'qualified unit' do
 
     pt_apply :rp_unit, html: 'tsp.', units: 'tsp.'
 
-    # An unadorned unit should also answer to a qualified unit, since the qualifications are optional
-    pt_apply :rp_qualified_unit, html: 'tsp', units: 'tsp'
+    # An unadorned unit should also answer to a unit, since the qualifications are optional
+    pt_apply :rp_amt, html: 'tsp', units: 'tsp'
 
     pt_apply :rp_amt, html: '1 tsp'
 
+  end
+
+  test 'qualified unit' do
     pt_apply :rp_ingline, html: '1 tsp baking soda'
 
     pt_apply :rp_ingline, html: '1 tsp. baking soda'

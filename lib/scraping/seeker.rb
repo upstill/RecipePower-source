@@ -57,15 +57,12 @@ class Seeker
   end
 
   # From a seeker tree, find those of the given token
-  def find token=nil, &block
-    results = @children&.map do |child|
-      if block_given? ? block.call(child) : (child.token == token)
-        child
-      else
-        child.find token, &block
-      end
-    end || []
-    results.flatten.compact
+  def find target=nil, &block
+    if block_given? ? block.call(self) : (token == target)
+      [ self ]
+    else
+      @children&.map { |child| child.find target, &block }.flatten.compact || []
+    end
   end
 
   def found_string token=nil

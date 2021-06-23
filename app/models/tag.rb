@@ -199,9 +199,21 @@ class Tag < ApplicationRecord
     str.sub(/^[\s,]*/,'').sub(/[,\s]*$/, '').gsub(/\s+/, ' ')
   end
 
-  # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes
+  # Remove gratuitous characters, diacriticals, punctuation and capitalization for search purposes.
+  # Retain any terminating punctuation.
   def self.normalize_name(str)
-    str.strip.gsub(/[.,'‘’“”'"]+/, '').parameterize # .split('-').join('-')
+    stripped = str.strip.sub /([.,'‘’“”'"]+)$/, ''
+    term = $1 || ''
+    term_plus = term.blank? ? '' : '-'+term
+    stripped.gsub! /[.,'‘’“”'"]+/, ''
+    case stripped.length
+    when 0
+      term
+    when 1
+      stripped + term_plus
+    else
+      stripped.parameterize + term_plus
+    end
   end
 
 =begin

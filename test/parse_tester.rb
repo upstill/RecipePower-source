@@ -30,7 +30,7 @@ module PTInterface
            :recipe, # The Recipe instance resulting from the parse
            :content, # The finished content (html) resulting from the parse (should == @nkdoc.to_s)
            :mercury_result, :gleaning, :site,
-           :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, :found_string, :found_strings,
+           :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :value_for, :xbounds, :found_string, :found_strings,
            :pt_apply,
            to: :parse_tester
 
@@ -54,7 +54,7 @@ class ParseTester < ActiveSupport::TestCase
               :content, # The finished content resulting from the parse (should == @nkdoc.to_s)
               :lexaur # The current lexaur, which gathers tags on initialization and can be augmented by other tags
   delegate :mercury_result, :gleaning, :site, to: :page_ref
-  delegate :'success?', :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
+  delegate :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
   delegate :nkdoc, :tokens, to: :nokoscan
 
   def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: []
@@ -164,7 +164,7 @@ class ParseTester < ActiveSupport::TestCase
     if @seeker = @parser.match(token)
       @seeker.enclose_all parser: @parser
     end
-    assert @seeker&.success?
+    assert_not_nil @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
   end
 
   # Formerly ParseTestHelper#load_recipe

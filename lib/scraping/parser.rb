@@ -264,7 +264,11 @@ class Parser
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream
     puts ">>>>>>>>>>> Entering Parse for :#{token}" if Rails.env.test?
-    matched = match_specification stream, grammar[token], token
+    if grammar[token]
+      matched = match_specification stream, grammar[token], token
+    else
+      matched = Seeker.failed stream, stream, token
+    end
     matched
   end
 
