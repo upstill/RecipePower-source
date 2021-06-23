@@ -10,7 +10,7 @@ require 'test_helper'
 #   grammar_mods: Saved to be applied to sites and, ultimately, a parse
 #   selector: ditto
 #   trimmers: ditto
-# 2) artifacts of the immediate prior parse, which can be examined and tested:
+# 2) outcomes of the immediately prior parse, which can be examined and tested:
 #   content: HTML output from the parse and markup
 #   nokoscan, nkdoc, tokens, seeker: NokoScanner, Nokogiri::HTML, NokoTokens, and Seeker instances generated in parsing
 #   recipe: the instance of Recipe that resulted from a :recipe parse
@@ -161,10 +161,11 @@ class ParseTester < ActiveSupport::TestCase
   def apply_to_string html, token: :rp_recipe
     @nokoscan = NokoScanner.new html
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
-    if @seeker = @parser.match(token)
-      @seeker.enclose_all parser: @parser
-    end
+    assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
+    @seeker = @parser.match token
     assert_not_nil @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
+    assert_equal token, @seeker.token
+    @seeker.enclose_all parser: @parser
   end
 
   # Formerly ParseTestHelper#load_recipe

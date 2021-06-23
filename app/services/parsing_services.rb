@@ -88,11 +88,8 @@ class ParsingServices
     seeker
   end
 
-  def self.parse_from_string input, token, site: nil, lexaur: nil, context_free: false
-    grammar_mods = context_free ?
-                       { token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}} :
-                       { }
-    parser = Parser.new input, lexaur, grammar_mods
+  def self.parse_from_string input, token, site: nil, lexaur: nil
+    parser = Parser.new input, lexaur
     match = parser.match token
     match = second_guess match, parser, token.to_sym # Renegotiate for the contents of the results
     match

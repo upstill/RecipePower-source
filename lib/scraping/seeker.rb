@@ -60,8 +60,10 @@ class Seeker
   def find target=nil, &block
     if block_given? ? block.call(self) : (token == target)
       [ self ]
+    elsif @children
+      @children.map { |child| child.find target, &block }.flatten.compact
     else
-      @children&.map { |child| child.find target, &block }.flatten.compact || []
+      []
     end
   end
 

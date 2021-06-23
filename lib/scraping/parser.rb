@@ -202,7 +202,8 @@ class Parser
       mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
       # Apply meta-mods
       mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
-        val = mods_plus[key]
+        params, val = {}, mods_plus[key]
+        params, val = val, val.delete(:flavor) if val.is_a?(Hash)
         case key
         when :gm_inglist
           case val
@@ -215,7 +216,9 @@ class Parser
                 :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
             }
           when :paragraph
-            grammar_mods[:rp_inglist] = { :in_css_match => 'p' }
+            selector = 'p'
+            selector << '.' + params[:css_class] if params[:css_class]
+            grammar_mods[:rp_inglist] = { :in_css_match => selector }
             grammar_mods[:rp_ingline] = { :inline => true }
           end
         end
@@ -496,7 +499,7 @@ class Parser
       if context[:orlist] == :predivide
         # Rather than let the child delimit the list, pass successive restricted scanners
         children = scanner.partition.collect do |subscanner|
-          match_specification subscanner, spec, :context_free => true
+          match_specification subscanner, spec
         end
         children.keep_if &:success?
       else
@@ -535,13 +538,8 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      if context[:context_free] && @grammar[spec].is_a?(Hash)
-        ge = @grammar[spec].except :in_css_match, :at_css_match
-      else
-        ge = @grammar[spec]
-      end
       report_enter "Seeking :#{spec} on '#{scanner.to_s.truncate 100}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
-      returned = match_specification scanner, ge, spec, context.except(:context_free)
+      returned = match_specification scanner, @grammar[spec], spec, context
       report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : '') if Rails.env.test?
       returned
     when String
