@@ -31,12 +31,17 @@ module PTInterface
            :content, # The finished content (html) resulting from the parse (should == @nkdoc.to_s)
            :mercury_result, :gleaning, :site,
            :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :value_for, :xbounds, :found_string, :found_strings,
-           :pt_apply,
+           :add_tags, :pt_apply, :assert_good,
            to: :parse_tester
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
-    @parse_tester = ParseTester.new
+    @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
+                                    selector: (@selector || ''),
+                                    trimmers: (@trimmers || []),
+                                    ingredients: (@ingredients || []),
+                                    units: (@units || []),
+                                    conditions: (@conditions || [])
   end
 end
 
@@ -62,34 +67,26 @@ class ParseTester < ActiveSupport::TestCase
     @selector = selector
     @trimmers = trimmers
     @grammar_mods = grammar_mods
-    add_tags :Ingredient, ingredients
-    add_tags :Unit, units
-    add_tags :Condition, conditions
+    add_tags :Ingredient, [ingredients].flatten # To support single strings
+    add_tags :Unit, [units].flatten
+    add_tags :Condition, [conditions].flatten
     @lexaur = Lexaur.from_tags
   end
 
   # apply: parse either a file, a string, or an http resource, looking for the given entity (any grammar token)
   def pt_apply target = :recipe, args={}
+    target, args = :recipe, target if target.is_a?(Hash)
     # filename: nil, url: nil, html: nil, tags
     filename = args.delete :filename
     url = args.delete :url
     html = args.delete :html
-    ingredients = units = conditions = []
+    required_tags = {}
     args.keys.each do |label|
       # Map from labels to tag type symbol for remaining arguments
       typename = label.to_s.singularize.capitalize
       typenum = Tag.typenum typename
       assert_not_equal 0, typenum, "No such thing as tags of type #{label}"
-      nameset = [args[label]].flatten  # Syntactic sugar: convert a single string into a singular list
-      add_tags typenum, nameset
-      case typename # Save for later comparison with results
-      when 'Ingredient'
-        ingredients = nameset
-      when 'Unit'
-        units = nameset
-      when 'Conditions'
-        conditions = nameset
-      end
+      add_tags typenum, (required_tags[typename] = [args[label]].flatten)  # Syntactic sugar: convert a single string into a singular list
     end
 
     @last_target = target
@@ -110,15 +107,12 @@ class ParseTester < ActiveSupport::TestCase
 =end
     case
     when filename.present?
-      apply_to_string File.read(filename), token: token
+      apply_to_string File.read(filename), token: token, required_tags: required_tags
     when html.present?
-      apply_to_string html, token: token
+      apply_to_string html, token: token, required_tags: required_tags
     when url.present?
-      apply_to_url url, target: target
+      apply_to_url url, target: target, required_tags: required_tags
     end
-    assert_empty ingredients-find_values(:rp_ingredient_tag)
-    assert_empty units-find_values(:rp_unit_tag)
-    assert_empty conditions-find_values(:rp_conditions_tag)
     @seeker&.enclose_all parser: @parser
     @seeker&.success?
   end
@@ -158,7 +152,7 @@ class ParseTester < ActiveSupport::TestCase
     site.bkg_land # Now the site should be prepared to trim recipes
   end
 
-  def apply_to_string html, token: :rp_recipe
+  def apply_to_string html, token: :rp_recipe, required_tags: {}
     @nokoscan = NokoScanner.new html
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
@@ -166,12 +160,23 @@ class ParseTester < ActiveSupport::TestCase
     assert_not_nil @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
     assert_equal token, @seeker.token
     @seeker.enclose_all parser: @parser
+    check_required_tags(required_tags) do |tagtype, css_class, tagset|
+      missing = tagset - find_values(css_class)
+      assert_empty missing, "#{tagtype}(s) declared but not found: #{missing}"
+    end
+  end
+
+  # Call a block for each of the tag types in tagsets, first translating to the CSS class that encloses it
+  def check_required_tags tagsets = {}
+    tagsets.keys.each do |typename|
+      yield typename, :"rp_#{typename.downcase}_tag", tagsets[typename]
+    end
   end
 
   # Formerly ParseTestHelper#load_recipe
   # Go out to the web, fetch the recipe at 'url', and ensure that all setup has occurred
   # url: the URL to hit
-  def apply_to_url url, target: :recipe
+  def apply_to_url url, target: :recipe, required_tags: {}
     @recipe = Recipe.new url: url
     @page_ref = @recipe.page_ref
     assert_includes @page_ref.recipes.to_a, @recipe # Recipe didn't build attached to its page_ref

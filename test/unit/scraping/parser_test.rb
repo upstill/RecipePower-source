@@ -8,40 +8,8 @@ require 'parse_tester'
 class ParserTest < ActiveSupport::TestCase
   include PTInterface
 
-  def add_tags type, names
-    return unless names.present?
-    typenum = Tag.typenum(type)
-    names.each { |name|
-      next if Tag.strmatch(name, tagtype: typenum).present?
-      tag = Tag.assert name, typenum
-      @lex.take tag.name, tag.id
-    }
-  end
-
   def setup
-    @amounts = [
-        '1 head',
-        '1 1/2 cup',
-        '2 cloves',
-        '1/4 cup',
-        '½ cup',
-        '1 small head'
-    ]
-    @ingred_specs = [
-        '2 cloves garlic',
-        '2 garlic cloves',
-        'Sea salt', # Case shouldn't matter
-        '6 tablespoons butter, softened',
-        '2 teaspoons Dijon mustard',
-        '1/4 cup drained small capers, rinsed',
-        'Grated zest of 1 lemon',
-        '3 tablespoons chopped marjoram',
-        'Black pepper',
-        '1 pound Brussels sprouts',
-        '1 small head (1/2 pound) white cauliflower',
-        '1 small head (1/2 pound) Romanesco (green) cauliflower'
-    ]
-    @ingredient_tags = %w{
+    @ingredients = %w{
       all-purpose\ flour
       ground\ turmeric
       ground\ cumin
@@ -85,14 +53,33 @@ class ParserTest < ActiveSupport::TestCase
       active\ dry\ yeast
       Romanesco\ (green)\ cauliflower
       water
-      yellow\ onions} #.
-        # each { |name| Tag.assert name, :Ingredient }
-    @unit_tags = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large } #.
-        # each { |name| Tag.assert name, :Unit }
-    @condition_tags = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm }
-        # each { |name| Tag.assert name, :Condition }
-    @parse_tester = ParseTester.new ingredients: @ingredient_tags, units: @unit_tags, conditions: @condition_tags # Picks up all the new tags
-    @lex = lexaur
+      yellow\ onions}
+    @units = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }
+    @conditions = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm }
+    super # Set up @parse_tester using @ingredients, @units and @conditions
+
+    @amounts = [
+        '1 head',
+        '1 1/2 cup',
+        '2 cloves',
+        '1/4 cup',
+        '½ cup',
+        '1 small head'
+    ]
+    @ingred_specs = [
+        '2 cloves garlic',
+        '2 garlic cloves',
+        'Sea salt', # Case shouldn't matter
+        '6 tablespoons butter, softened',
+        '2 teaspoons Dijon mustard',
+        '1/4 cup drained small capers, rinsed',
+        'Grated zest of 1 lemon',
+        '3 tablespoons chopped marjoram',
+        'Black pepper',
+        '1 pound Brussels sprouts',
+        '1 small head (1/2 pound) white cauliflower',
+        '1 small head (1/2 pound) Romanesco (green) cauliflower'
+    ]
     @ings_list = <<EOF
   <p>#{@ingred_specs.join "<br>\n"}</p>
 EOF
@@ -122,6 +109,15 @@ EOF
     (%i{ parser seeker grammar_mods entity token content lexaur } - names).each do |ivname|
       assert_nil ps.instance_variable_get("@#{ivname}".to_sym), "Instance Variable #{ivname} was nil"
     end
+  end
+
+  test 'grammar tester' do
+    nokoscan = NokoScanner.new 'a b c'
+    # Should throw an error
+    assert_raises { Parser.new nokoscan,
+                               @lex,
+                               :rp_inglist => {in_css_match: 'li', at_css_match: 'ul', },
+                               :rp_title => {in_css_match: nil, at_css_match: 'ul'} }
   end
 
   test 'parser services management' do
@@ -181,10 +177,12 @@ EOF
 
   test 'parse individual ingredient' do
     ingstr = 'Dijon mustard'
-    is = TagSeeker.seek NokoScanner.new(ingstr), lexaur: @lex, types: 4
+    is = TagSeeker.seek NokoScanner.new(ingstr), lexaur: lexaur, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
     # ...and again using a ParserSeeker
-    pt_apply :rp_ingredient_tag, html: 'Dijon mustard'
+    pt_apply :rp_ingredient_tag,
+             html: 'Dijon mustard',
+             ingredients: 'Dijon mustard'
     assert_not_nil seeker, "#{ingstr} doesn't parse"
     assert_equal 'Dijon mustard', seeker.tagdata[:name]
     assert_equal :rp_ingredient_tag, seeker.token
@@ -192,7 +190,7 @@ EOF
 
   test 'parse alt ingredient' do
     ingstr = 'small capers, black pepper or Brussels sprouts'
-    is = IngredientsSeeker.seek NokoScanner.new(ingstr), lexaur: @lex, types: 'Ingredient'
+    is = IngredientsSeeker.seek NokoScanner.new(ingstr), lexaur: lexaur, types: 'Ingredient'
     assert_not_nil is, "#{ingstr} doesn't parse"
     assert_equal 3, is.children.count, "Didn't find 3 ingredients in #{ingstr}"
     # ...and again using a ParserSeeker
@@ -390,7 +388,7 @@ EOF
     pt_apply :rp_ingline,
              html: '1/2 tsp. sifted (or lightly sifted) baking soda',
              ingredients: 'baking soda',
-             conditions: %w{ sifted lightly\ sifted },
+             conditions: 'sifted',
              units: 'tsp.'
     assert_not_empty find(:rp_ingspec)
   end
@@ -478,8 +476,7 @@ EOF
     pt_apply :rp_ingline,
              html: '<li>1 large cauliflower, rinsed and finely grated (220g net weight)</li>',
              ingredients: 'cauliflower',
-             units: 'large',
-             conditions: %w{ rinsed finely\ grated }
+             units: 'large'
   end
 
   test 'parse single recipe' do
@@ -555,10 +552,9 @@ EOF
     cooking\ chorizo eggs asparagus\ spears ripe\ avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves
     sunflower\ seeds pumpkin\ seeds maple\ syrup kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill
 }.uniq.sort
-    add_tags :Ingredient, ingreds
 
     line = "<strong>asparagus</strong>, woody ends trimmed<strong>"
-    @parse_tester.add_tags  :Ingredient, ingreds
+    add_tags  :Ingredient, ingreds
     pt_apply :rp_ingalts, html: line, ingredients: 'asparagus'
 
     line = "<strong>asparagus</strong>, woody ends trimmed<strong>"
@@ -651,6 +647,125 @@ EOF
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
     # assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
+  end
+
+  def assert_invariance input_html, output_nkdoc
+    # input = Nokogiri::XML(html,&:noblanks)
+    input = pretty_indented_html input_html
+    # output = Nokogiri::XML(nkdoc.to_s,&:noblanks)
+    output = pretty_indented_html output_nkdoc.to_s
+    puts "<<< Input:", input, ">>> Output:", output
+    assert_equal input, output, "Nokogiri result differs from input\n<<<< Before:\n#{input}\n<<< After:\n#{output}\n"
+  end
+
+  test "marked-up html remains invariant after parsing and tagging" do
+
+    # Parsing a fully marked-up ingline shouldn't change it
+    html = <<EOF
+<li class="rp_elmt rp_ingline">
+  <span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span>
+</li>
+EOF
+    pt_apply :rp_ingline, html: html, ingredients: 'simple syrup', units: 'ounce'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">
+    <span class="rp_elmt rp_ingspec">
+      <span class="rp_elmt rp_amt_with_alt rp_amt">
+        <span class="rp_elmt rp_num">3/4</span> 
+        <span class="rp_elmt rp_unit rp_unit_tag">ounce</span>
+      </span> 
+      <span class="rp_elmt rp_ingredient_tag rp_ingalts">simple syrup</span> 
+    </span> 
+    <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
+  </li>
+</ul>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: 'simple syrup', units: 'ounce'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
+    <span class="rp_elmt rp_amt_with_alt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+    <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
+    <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> 
+  </span></li>
+</ul>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: 'simple syrup', units: 'ounce'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+    <span class="rp_elmt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+EOF
+    pt_apply :rp_amt, html: html, units: 'ounce'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline"><span class="rp_elmt rp_ingspec">
+    <span class="rp_elmt rp_amt_with_alt rp_amt">
+      <span class="rp_elmt rp_num">3/4</span> 
+      <span class="rp_elmt rp_unit_tag rp_unit">ounce</span>
+    </span>
+      <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span>
+  </span></li>
+</ul>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: 'simple syrup', units: 'ounce'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">a dash of Angostura.</li>
+</ul>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: 'Angostura', units: 'dash'
+    html = nkdoc.to_s
+    pt_apply :rp_inglist, html: html, ingredients: 'Angostura', units: 'dash'
+    assert_invariance html, nkdoc
+
+    html = <<EOF
+<ul class="rp_elmt rp_inglist">
+  <li class="rp_elmt rp_ingline">3/4 ounce simple syrup (equal parts sugar and hot water)</li>
+  <li class="rp_elmt rp_ingline">a dash of Angostura</li>
+</ul>
+EOF
+
+    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :unordered_list }
+    pt_apply :rp_inglist, html: html, ingredients: %w{ simple\ syrup Angostura }, units: %w{ ounce dash }
+    html = nkdoc.to_s
+    pt_apply :rp_inglist, html: html, ingredients: 'Angostura', units: 'dash'
+    assert_invariance html, nkdoc
+  end
+
+  test 'recipe with predeclared ingredient list' do
+    @parse_tester = ParseTester.new grammar_mods: { :rp_inglist => {:in_css_match => 'div.rp_inglist'} }
+    pt_apply :rp_recipe,
+             html: '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>',
+             ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura },
+             units: 'dash'
+
+    assert_equal 5, seeker.find(:rp_ingline).count
+  end
+
+  test 'comma-separated ingredient list' do
+    html = '<p>1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</p>'
+    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :inline }
+    pt_apply :rp_inglist,
+             html: html,
+             ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura },
+             units: 'dash'
+    assert_equal 5, seeker.find(:rp_ingline).count
   end
 
 end
