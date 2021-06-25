@@ -77,9 +77,10 @@ class ParseTester < ActiveSupport::TestCase
   def pt_apply target = :recipe, args={}
     target, args = :recipe, target if target.is_a?(Hash)
     # filename: nil, url: nil, html: nil, tags
-    filename = args.delete :filename
-    url = args.delete :url
-    html = args.delete :html
+    filename = args.delete :filename  # Parse a local file
+    url = args.delete :url # Create the target (an database object) using the url
+    html = args.delete :html # Parse an html string
+    @fail = args.delete :fail # Flag: expect the parse to fail
     required_tags = {}
     args.keys.each do |label|
       # Map from labels to tag type symbol for remaining arguments
@@ -100,18 +101,14 @@ class ParseTester < ActiveSupport::TestCase
             else
               target
             end
-=begin
-    return (apply_to_string File.read(filename), token: token) if filename.present?
-    return (apply_to_string html, token: token) if html.present?
-    return (apply_to_url url, target: target) if url.present?
-=end
     case
     when filename.present?
       apply_to_string File.read(filename), token: token, required_tags: required_tags
     when html.present?
       apply_to_string html, token: token, required_tags: required_tags
     when url.present?
-      apply_to_url url, target: target, required_tags: required_tags
+      do_recipe url, required_tags: required_tags if token == :rp_recipe
+      do_recipe_page url if token == :rp_recipelist
     end
     @seeker&.enclose_all parser: @parser
     @seeker&.success?
@@ -157,7 +154,11 @@ class ParseTester < ActiveSupport::TestCase
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
     @seeker = @parser.match token
-    assert_not_nil @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
+    if @fail
+      refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
+    else
+      assert @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
+    end
     assert_equal token, @seeker.token
     @seeker.enclose_all parser: @parser
     check_required_tags(required_tags) do |tagtype, css_class, tagset|
@@ -176,15 +177,23 @@ class ParseTester < ActiveSupport::TestCase
   # Formerly ParseTestHelper#load_recipe
   # Go out to the web, fetch the recipe at 'url', and ensure that all setup has occurred
   # url: the URL to hit
-  def apply_to_url url, target: :recipe, required_tags: {}
+  # required_tags: a list of tags that should be created for the recipe
+  def do_recipe url, required_tags: {}
     @recipe = Recipe.new url: url
     @page_ref = @recipe.page_ref
+
     assert_includes @page_ref.recipes.to_a, @recipe # Recipe didn't build attached to its page_ref
-    prep_site @recipe.site, @selector, @trimmers, @grammar_mods
+    refute @recipe.errors.any?, "Recipe build on '#{@recipe.title}' failed:\n#{@recipe.errors.full_messages}"
+
+    assert (@site = @recipe.site), "Recipe '#{@recipe.title}' built without site."
+    prep_site @site, @selector, @trimmers, @grammar_mods
+    check_attributes @site, @site.name, :name, :logo, :description
+
     @recipe.ensure_attributes # Perform all due diligence
-    assert_equal @grammar_mods, @recipe.site.grammar_mods
+    assert_equal @grammar_mods, @site.grammar_mods
     refute @recipe.errors.any?, @recipe.errors.full_messages
     assert @recipe.good? # Should have loaded and settled down
+    check_attributes @recipe, @recipe.title, :title, :picurl, :description, :content
 
     refute @recipe.recipe_page
     assert_equal @page_ref, @recipe.page_ref
@@ -202,5 +211,34 @@ class ParseTester < ActiveSupport::TestCase
     assert_equal content, rp.content
   end
 
+  # Go out to the web, fetch the page at 'url', and ensure that all setup has occurred
+  # url: the URL to hit
+  def do_recipe_page url
+    do_page_ref url, [ :recipe_page ]
 
+    assert (@recipe_page = @page_ref.recipe_page)
+    @recipe_page.ensure_attributes [:content]
+    refute @recipe_page.errors.any?, @recipe_page.errors.full_messages
+    assert @recipe_page.good?
+    assert (@page_ref.recipes.to_a.count > 0) # Need to have parsed at least one recipe out
+    @recipe_page
+  end
+
+  def do_page_ref url, attribs=[]
+    @page_ref = PageRef.fetch url
+    prep_site @page_ref.site, @selector, @trimmers, @grammar_mods
+    assert_equal @grammar_mods, @page_ref.site.grammar_mods
+
+    @page_ref.ensure_attributes attribs
+    refute @page_ref.errors.any?, @page_ref.errors.full_messages
+    assert @page_ref.good? # Should have loaded and settled down
+    assert_not_empty @page_ref.content
+    @page_ref
+  end
+
+  def check_attributes trackable, trackable_name, *attribs
+    attribs.each do |attrib|
+      assert trackable.attrib_ready?(attrib), "'#{trackable_name}' '#{name}' couldn't extract '#{attrib}'"
+    end
+  end
 end

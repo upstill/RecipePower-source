@@ -768,4 +768,11 @@ EOF
     assert_equal 5, seeker.find(:rp_ingline).count
   end
 
+  test 'proper handling of embedded parentheticals' do
+    html = "(or up to four hours, if you want to get ahead).\nWarm"
+    pt_apply :rp_amt,
+             html: html,
+             fail: true
+  end
+
 end

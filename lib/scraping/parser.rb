@@ -538,9 +538,10 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      report_enter "Seeking :#{spec} on '#{scanner.to_s.truncate 100}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
+      str = (scanner.to_s.truncate 100).sub "\n", '\n'
+      report_enter "Seeking :#{spec} on '#{str}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
       returned = match_specification scanner, @grammar[spec], spec, context
-      report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : '') if Rails.env.test?
+      report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
       returned
     when String
       StringSeeker.match scanner.past_newline, string: spec, token: token

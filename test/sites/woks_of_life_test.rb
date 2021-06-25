@@ -4,7 +4,7 @@ require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
-class ParseWoksoflifeTest < ActiveSupport::TestCase
+class WoksOflifeTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
@@ -20,7 +20,9 @@ class ParseWoksoflifeTest < ActiveSupport::TestCase
                     'vegetable oil']
     @units = 'pound'
     @grammar_mods = {
-        rp_title: { in_css_match: 'h2'}
+        rp_title: { in_css_match: 'h2'},
+        rp_recipe: { in_css_match: 'div.wprm-recipe-the-woks-of-life' }
+    
     }
     @selector = 'div.wprm-recipe-the-woks-of-life'
     @trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]

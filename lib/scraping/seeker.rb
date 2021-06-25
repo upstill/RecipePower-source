@@ -460,13 +460,13 @@ class AmountSeeker < Seeker
     @token = :rp_amt
   end
 
-  def self.match stream, opts={}
+  def self.match stream, opts = {}
     stream = stream.rest if stream.peek&.match /about/i
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
-    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(.*)/) &&
-      (($1.present? && $2.present?) || !opts[:full_only])
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
+        (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
       self.new(stream, stream.rest, num, unit) if num.present? && unit
