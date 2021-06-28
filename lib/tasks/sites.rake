@@ -71,4 +71,49 @@ namespace :sites do
         }.join("\n\t"))
     ]
   end
+
+  # Record parsing data from sites in individual files, suitable for checkin
+  task :save_parsing_data => :environment do
+    # Site.where(id: [3667]).includes(:page_ref).each { |site|
+    Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
+      site = finder.site
+      domain = PublicSuffix.parse(URI(site.home).host).domain
+      data = {
+          selector: site.finders.find_by(label: 'Content').selector,
+          trimmers: site.trimmers,
+          grammar_mods: site.grammar_mods
+      }.compact
+      next if data.blank?
+      filename = Rails.root.join("config", "sitedata", domain+'.yml')
+      File.open(filename,"w") do |file|
+        file.write data.to_yaml
+      end
+    }
+  end
+
+  # Get parsing data for sites from YAML files
+  task :restore_parsing_data => :environment do
+    # Site.where(id: [3667]).includes(:page_ref).each { |site|
+    Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
+      site = finder.site
+      domain = PublicSuffix.parse(URI(site.home).host).domain
+      # Get default values from the file indicated by domain
+      filename = Rails.root.join "config", "sitedata", domain + '.yml'
+      data = YAML.load_file(filename) if File.exists? filename
+      # Move the selector into a finder attached to the site
+      if data[:selector]
+        if finder = site.finders.find_by(label: 'Content')
+          if finder.selector != data[:selector]
+            finder.selector = data[:selector]
+            finder.save
+          end
+        else
+          site.finders.create(label: 'Content', selector: data[:selector], attribute_name: 'html')
+        end
+      end
+      site.grammar_mods = data[:grammar_mods]
+      site.trimmers = data[:trimmers]
+      site.save if site.changed?
+    }
+  end
 end

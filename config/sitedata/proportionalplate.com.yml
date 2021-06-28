@@ -1,0 +1,14 @@
+---
+:selector: div.wprm-recipe-container
+:trimmers:
+- div.wprm-container-float-right
+- div.wprm-call-to-action
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul.wprm-recipe-ingredients
+  :rp_ingline:
+    :in_css_match: li.wprm-recipe-ingredient
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match: ul.wprm-recipe-instructions

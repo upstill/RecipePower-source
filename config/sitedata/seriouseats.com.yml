@@ -1,0 +1,17 @@
+---
+:selector: div.entry-header-inner, div.recipe-ingredients, div.recipe-procedures
+:trimmers:
+- div.nav-share
+- div.pubmod-date
+- figure
+- div.author-byline
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: section.entry-container
+  :rp_inglist:
+    :in_css_match: div.recipe-ingredients ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: h1

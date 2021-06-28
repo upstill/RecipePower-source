@@ -1,0 +1,14 @@
+---
+:selector: div.easyrecipe
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: div.ERSName
+  :rp_instructions:
+    :in_css_match: ol

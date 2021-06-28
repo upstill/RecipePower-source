@@ -1,0 +1,9 @@
+---
+:selector: div.js_post-content
+:trimmers:
+- div.img-wrapper
+- div.fIUNXF
+- div.movable-ad
+- div.content-summary__SummaryBox
+- aside.inset--story
+:grammar_mods: {}

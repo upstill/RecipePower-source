@@ -1,0 +1,22 @@
+---
+:selector: div.wprm-recipe
+:trimmers:
+- div.wprm-recipe-notes-container
+- div.wprm-recipe-image
+- div.wprm-call-to-action-text-container
+- a.wprm-recipe-print
+- a.wprm-recipe-pin
+- a.wprm-recipe-jump
+- div.wprm-recipe-rating
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist:
+    :in_css_match: ul.wprm-recipe-ingredients
+  :rp_ingline:
+    :in_css_match: li.wprm-recipe-ingredient
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match: div.wprm-recipe-instruction-text

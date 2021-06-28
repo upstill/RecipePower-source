@@ -1,0 +1,6 @@
+---
+:selector: section.recipe_instructions
+:trimmers:
+- div.social
+- div#recipetoolbar
+:grammar_mods: {}

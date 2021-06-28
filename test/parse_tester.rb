@@ -36,12 +36,17 @@ module PTInterface
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
+    @site_defaults = ParseTester.load_for_page @page, @domain # Get parameters if either of these have been defined
+    @grammar_mods ||= @site_defaults[:grammar_mods]
+    @selector ||= @site_defaults[:selector]
+    @trimmers ||= @site_defaults[:trimmers]
     @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
                                     selector: (@selector || ''),
                                     trimmers: (@trimmers || []),
                                     ingredients: (@ingredients || []),
                                     units: (@units || []),
                                     conditions: (@conditions || [])
+    @parse_tester.save_configs @page, @domain
   end
 end
 
@@ -117,6 +122,28 @@ class ParseTester < ActiveSupport::TestCase
   # Do testing on the results of the last application
   def assert_good
 
+  end
+
+  # Given either a domain or a url, load an appropriate set of configs for the file
+  def self.load_for_page url, domain=nil
+    domain ||= PublicSuffix.parse(URI(url).host).domain if url
+    if domain.present?
+      # Get default values from the file indicated by domain
+      filename = Rails.root.join("config", "sitedata", domain+'.yml')
+      return YAML.load_file(filename) if File.exists? filename
+    end
+    return {}
+  end
+
+  def save_configs url, domain=nil
+    domain ||= PublicSuffix.parse(URI(url).host).domain if url
+    if domain.present?
+      data = { selector: @selector, trimmers: @trimmers, grammar_mods: @grammar_mods }.compact
+      filename = Rails.root.join("config", "sitedata", domain+'.yml')
+      File.open(filename,"w") do |file|
+        file.write data.to_yaml
+      end
+    end
   end
 
   # Augment the tags table (and the lexaur) with a collection of strings of the given type

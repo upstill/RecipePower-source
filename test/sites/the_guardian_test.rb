@@ -23,13 +23,15 @@ class TheGuardianTest < ActiveSupport::TestCase
   # -- @trimmers: an array of CSS selectors; elements that answer to those selectors will be removed from the content
   # -- @page: the page used for the test
   def setup
-    super
     # Define all the tags we'll need for the site. (These will need to be extant on RecipePower itself)
     @ingredient_tags = %w{ lemon\ zest salt sea\ salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves
     cooking\ chorizo eggs asparagus\ spears avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves
     sunflower\ seeds pumpkin\ seeds maple\ syrup Salt kale white-wine\ vinegar wholegrain\ mustard asparagus frozen\ shelled\ edamame tarragon\ leaves dill }
     @unit_tags = %w{ g tbsp tsp large }
     @condition_tags = %w{ crustless ripe }
+=begin
+    # NB: These instance variables are set during development and testing, then removed
+    # to hand off responsibility to git
     @grammar_mods = {
         :rp_recipelist => { match: { at_css_match: 'h2' } },
         :rp_recipe => { at_css_match: 'h2' },
@@ -39,6 +41,7 @@ class TheGuardianTest < ActiveSupport::TestCase
     @selector = 'div.dcr-hujbr5'
     # These selectors remove elements from the page
     @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
+=end
     @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
     super
   end

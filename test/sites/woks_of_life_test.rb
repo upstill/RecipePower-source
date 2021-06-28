@@ -26,6 +26,7 @@ class WoksOflifeTest < ActiveSupport::TestCase
     }
     @selector = 'div.wprm-recipe-the-woks-of-life'
     @trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
+    @page = 'https://thewoksoflife.com/simple-spicy-pan-fried-noodles/'
     super
   end
 
