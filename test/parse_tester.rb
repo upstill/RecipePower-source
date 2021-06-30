@@ -22,6 +22,7 @@ module PTInterface
            :lexaur, # The current lexaur, which gathers tags on initialization and can be augmented by other tags
            :selector, # Used by a site to select content
            :grammar_mods, # Saved to be applied to sites and, ultimately, a parse
+           :grammar, # The state of the grammar
            :trimmers, # Saved to be applied to sites and, ultimately, a parse
            :nokoscan, # A scanner for the parse
            :nkdoc, :tokens, # The Nokogiri doc and Nokotokens
@@ -66,6 +67,7 @@ class ParseTester < ActiveSupport::TestCase
   delegate :mercury_result, :gleaning, :site, to: :page_ref
   delegate :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
   delegate :nkdoc, :tokens, to: :nokoscan
+  delegate :grammar, to: :parser
 
   def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: []
     super if defined?(super)
@@ -76,6 +78,8 @@ class ParseTester < ActiveSupport::TestCase
     add_tags :Unit, [units].flatten
     add_tags :Condition, [conditions].flatten
     @lexaur = Lexaur.from_tags
+    # We define a useless parser to enable checks on the grammar coming out of @grammar_mods
+    @parser = Parser.new 'bogus text', Lexaur.from_tags, @grammar_mods
   end
 
   # apply: parse either a file, a string, or an http resource, looking for the given entity (any grammar token)

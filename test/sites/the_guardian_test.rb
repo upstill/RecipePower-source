@@ -43,6 +43,7 @@ class TheGuardianTest < ActiveSupport::TestCase
     @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
 =end
     @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
+    @title = "Yotam Ottolenghi’s asparagus recipes"
     super
   end
 

@@ -129,7 +129,14 @@ Parser.init_grammar(
     },
     rp_ingline: {
         match: [
-            { or: [ '▢', /.*:/, [ /.*/, /from/ ] ], optional: true }, # Discard a colon-terminated label at beginning
+            { or: [ '▢',
+                    /.*:/,
+                    [
+                        { optional: ConditionsSeeker },
+                        /.*/,
+                        /from|of/
+                    ]
+            ], optional: true }, # Discard a colon-terminated label at beginning
             { match: :rp_ingspec, orlist: true },
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],

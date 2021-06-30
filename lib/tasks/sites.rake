@@ -72,14 +72,56 @@ namespace :sites do
     ]
   end
 
+  # For sites that don't have one, build a test file from test_template.erb
+  task :build_test_templates => :environment do
+    # Acquire the template file from the tests directory
+    template = nil
+    infile = Rails.root.join 'test', 'sites', 'test_template.rb.erb'
+    File.open(infile, 'r') { |f| template = f.read }
+    erb = ERB.new template
+
+    ymls = Dir.entries( Rails.root.join 'config', 'sitedata').find_all { |fname| fname.match /\.yml$/ }
+
+    Site.where(id: 3667).each do |site| # includes(:page_ref).all.each do |site|
+      selector = site.finders.find_by(label: 'Content')&.selector
+      next if site.trimmers.blank? && site.grammar_mods.empty? && selector.blank?
+      base = PublicSuffix.parse(URI(site.home).host).domain.gsub( '.', '_dot_')
+      outfile = Rails.root.join('test', 'sites', base+'_test'+'.rb')
+      next if File.exist? outfile
+
+      @testclass = base.camelcase
+      datahash = { }
+      datahash[:grammar_mods] = struct_to_str(site.grammar_mods, 3) # JSON.pretty_generate(site.grammar_mods).gsub(/"([^"]*)":/, ":\\1 =>").gsub(/\bnull\b/, 'nil') if site.grammar_mods
+      datahash[:trimmers] = site.trimmers.to_s if site.trimmers.present?
+      datahash[:selector] = '"' + selector.to_s + '"' if selector.present?
+      @sitedata = datahash.collect { |key, value|
+        "@#{key} = #{value}"
+      }.join "\n"
+      @page = site.sample # datahash[:sample_url]
+      @title = datahash[:sample_title] || "Title here, please"
+      result = erb.result binding
+      File.open(outfile,"w") do |file|
+        file.write result
+      end
+      puts ">> Created ERB output at: #{outfile} for site #(#{site.id}) '#{site.name}'"
+    end
+  end
+
   # Record parsing data from sites in individual files, suitable for checkin
   task :save_parsing_data => :environment do
-    # Site.where(id: [3667]).includes(:page_ref).each { |site|
-    Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
-      site = finder.site
+    Site.where(id: [3667]).includes(:page_ref).each { |site|
+    # Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
+    # site = finder.site
+      finder = site.finders.find_by(label: 'Content')
       domain = PublicSuffix.parse(URI(site.home).host).domain
+      if pr = PageRef.find_by_url(site.sample)
+        sample_title = pr.recipes.first&.title || pr.title
+      end
       data = {
-          selector: site.finders.find_by(label: 'Content').selector,
+          sample_url: site.sample,
+          sample_title: sample_title,
+          root: site.root,
+          selector: finder.selector,
           trimmers: site.trimmers,
           grammar_mods: site.grammar_mods
       }.compact
@@ -93,9 +135,9 @@ namespace :sites do
 
   # Get parsing data for sites from YAML files
   task :restore_parsing_data => :environment do
-    # Site.where(id: [3667]).includes(:page_ref).each { |site|
-    Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
-      site = finder.site
+    Site.where(id: [3667]).includes(:page_ref).each { |site|
+    #Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
+    #  site = finder.site
       domain = PublicSuffix.parse(URI(site.home).host).domain
       # Get default values from the file indicated by domain
       filename = Rails.root.join "config", "sitedata", domain + '.yml'
@@ -111,6 +153,7 @@ namespace :sites do
           site.finders.create(label: 'Content', selector: data[:selector], attribute_name: 'html')
         end
       end
+      site.sample = data[:sample_url] if data[:sample_url]
       site.grammar_mods = data[:grammar_mods]
       site.trimmers = data[:trimmers]
       site.save if site.changed?

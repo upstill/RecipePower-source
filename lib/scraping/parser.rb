@@ -192,38 +192,7 @@ class Parser
     todo = @grammar.keys.count # 27
     # success on 26, fail on 27
     puts "Finalising #{todo} grammar entries" if Rails.env.test?
-    if mods_plus
-      # Start by mapping high-level modification tags into actual mods
-      # The :gm_* flags in grammar modifications provide high-level modifications for different purpose.
-      # They're effectively macro modifications of the grammar.
-      # Each :gm_* key MAY have a value to parametrize it
-      grammar_mods = {}
-      # Copy actual grammar entries
-      mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
-      # Apply meta-mods
-      mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
-        params, val = {}, mods_plus[key]
-        params, val = val, val.delete(:flavor) if val.is_a?(Hash)
-        case key
-        when :gm_inglist
-          case val
-          when :unordered_list
-            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => 'ul' } ] }
-            grammar_mods[:rp_ingline] = { :in_css_match => 'li' }
-          when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
-            grammar_mods[:rp_inglist] = {
-                :match => :rp_ingline, # Remove the label spec
-                :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
-            }
-          when :paragraph
-            selector = 'p'
-            selector << '.' + params[:css_class] if params[:css_class]
-            grammar_mods[:rp_inglist] = { :in_css_match => selector }
-            grammar_mods[:rp_ingline] = { :inline => true }
-          end
-        end
-      end
-    end
+    grammar_mods = processed_mods mods_plus
     @grammar.keys.each do |key|
       break if todo == 0
       todo -= 1
@@ -347,6 +316,52 @@ class Parser
   end
 
   private
+
+  def processed_mods mods_plus
+    def selector_for tag = '', options={}
+      return options[:selector] if options[:selector].present?
+      if options[:css_class].present?
+        return tag + '.' + options[:css_class]
+      else
+        return tag
+      end
+    end
+    grammar_mods = {}
+    if mods_plus
+      # Start by mapping high-level modification tags into actual mods
+      # The :gm_* flags in grammar modifications provide high-level modifications for different purpose.
+      # They're effectively macro modifications of the grammar.
+      # Each :gm_* key MAY have a value to parametrize it
+      # Copy actual grammar entries
+      mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
+      # Apply meta-mods
+      mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
+        params, val = {}, mods_plus[key]
+        params, val = val, val.delete(:flavor) if val.is_a?(Hash)
+        case key.to_sym
+        when :gm_inglist
+          case val.to_sym
+          when :unordered_list
+            # params:
+            # list_class: css class of the 'ul' tag for an ingredient list
+            # line_class: css class of the 'li' tags for ingredient lines
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('ul', css_class: params[:list_class]) } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => selector_for('li', css_class: params[:line_class]) }
+          when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
+            grammar_mods[:rp_inglist] = {
+                :match => :rp_ingline, # Remove the label spec
+                :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
+            }
+          when :paragraph
+            # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('p', params ) } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true }
+          end
+        end
+      end
+    end
+    grammar_mods
+  end
 
   def indentation
     @indent ||= 0
@@ -738,5 +753,4 @@ class ParserEvaluator
     end
     collected_tokens
   end
-
 end

@@ -69,6 +69,7 @@ class ParsingServices
 
   # After a seeker has come back from parsing with a failure, deploy strategies for re-parsing
   def self.second_guess seeker, parser, token
+    return nil
     # For any given token, assess the result and take any needed steps to correct it.
     grammar_mods = nil
     case token
@@ -181,7 +182,7 @@ private
   def parse_recipe content
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = @parser.match :rp_recipe
-    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
+    @seeker ||= ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
   end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)

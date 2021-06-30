@@ -5,6 +5,12 @@ class StringUtilsTest < ActiveSupport::TestCase
     super
   end
 
+  test "struct to string" do
+    puts struct_to_str( { :a => 'a' } )
+    h =  {:a=>{:d=>"d"}, :b=>"c"}
+    puts struct_to_str(h)
+  end
+
   test 'deflate' do
     before = " a\t   \u00a0\u00a0\u00a0b      c    "
     after = " a\u00a0b c "

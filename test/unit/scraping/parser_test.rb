@@ -11,6 +11,7 @@ class ParserTest < ActiveSupport::TestCase
   def setup
     @ingredients = %w{
       all-purpose\ flour
+      lemon
       ground\ turmeric
       ground\ cumin
       ground\ cinnamon
@@ -51,11 +52,13 @@ class ParserTest < ActiveSupport::TestCase
       za'atar
       instant\ dry\ yeast
       active\ dry\ yeast
-      Romanesco\ (green)\ cauliflower
+      Romanesco\ cauliflower
       water
-      yellow\ onions}
-    @units = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon tsp. tsp cup cups head pound small small\ head clove cloves large }
-    @conditions = %w{ chopped softened rinsed crustless sifted toasted finely\ grated lukewarm }
+      yellow\ onions
+      lime
+}
+    @units = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
+    @conditions = %w{ chopped softened rinsed crustless sifted toasted grated finely\ grated lukewarm drained }
     super # Set up @parse_tester using @ingredients, @units and @conditions
 
     @amounts = [
@@ -67,15 +70,16 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head'
     ]
     @ingred_specs = [
+        'Grated zest of 1 lemon',
         '2 cloves garlic',
         '2 garlic cloves',
         'Sea salt', # Case shouldn't matter
         '6 tablespoons butter, softened',
         '2 teaspoons Dijon mustard',
         '1/4 cup drained small capers, rinsed',
-        'Grated zest of 1 lemon',
         '3 tablespoons chopped marjoram',
         'Black pepper',
+        'Juice of ½ a lime',
         '1 pound Brussels sprouts',
         '1 small head (1/2 pound) white cauliflower',
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
@@ -118,6 +122,14 @@ EOF
                                @lex,
                                :rp_inglist => {in_css_match: 'li', at_css_match: 'ul', },
                                :rp_title => {in_css_match: nil, at_css_match: 'ul'} }
+  end
+
+  test 'predefined ingredient lines' do
+    @ingred_specs.each { |line|
+      parser = Parser.new line, @lex
+      seeker = parser.match :rp_ingline
+      assert seeker.success?, "Couldn't parse out :rp_ingline '#{line}'"
+    }
   end
 
   test 'parser services management' do

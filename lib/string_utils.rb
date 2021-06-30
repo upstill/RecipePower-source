@@ -122,6 +122,32 @@ def indent_lines str_or_object, indent="\t"
   indent+str.split("\n").join("\n"+indent)+"\n"
 end
 
+# Recursively write a simple hash to a string
+def struct_to_str entity, indent_level=1
+  def indent_for_next(level)
+    "\n" + "\t"*level
+  end
+  indent = "\t"*indent_level
+  case entity
+  when Hash
+    lines = entity.keys.collect { |key| indent + (key.is_a?(Symbol) ? ":#{key}" : "\"#{key}\"") + ' => ' + struct_to_str(entity[key], indent_level+1) }
+    lines[0..-2].each { |line| line << ',' }
+    lines << "#{indent[1..-1]}}"
+    "{\n" + lines.join("\n")
+  when Array
+    lines = entity.collect { |val| indent + struct_to_str(val, indent_level+1) }
+    lines[0..-2].each { |line| line << ',' }
+    lines << "#{indent[1..-1]}]"
+    "[\n" + lines.join("\n")
+  when String
+    '"' + entity.gsub( /"/, '\"') + '"'
+  when Symbol
+    ":#{entity}"
+  else
+    entity.to_s
+  end
+end
+
 class String
   # Replace runs of whitespace with a single whitespace character as follows:
   # 1) if the run contains a newline character, replace the run with that
