@@ -37,17 +37,24 @@ module PTInterface
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
-    @site_defaults = ParseTester.load_for_page @page, @domain # Get parameters if either of these have been defined
+    @site_defaults = ParseTester.load_for_page @sample_url, @domain # Get parameters if either of these have been defined
     @grammar_mods ||= @site_defaults[:grammar_mods]
     @selector ||= @site_defaults[:selector]
     @trimmers ||= @site_defaults[:trimmers]
+    @sample_url ||= @site_defaults[:sample_url]
+    @sample_title ||= @site_defaults[:sample_title]
     @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
                                     selector: (@selector || ''),
                                     trimmers: (@trimmers || []),
                                     ingredients: (@ingredients || []),
                                     units: (@units || []),
-                                    conditions: (@conditions || [])
-    @parse_tester.save_configs @page, @domain
+                                    conditions: (@conditions || []),
+                                    sample_url: @sample_url,
+                                    sample_title: @sample_title
+
+    @parse_tester.save_configs @sample_url, @domain
+    @page = @sample_url
+    @title = @sample_title
   end
 end
 
@@ -69,11 +76,13 @@ class ParseTester < ActiveSupport::TestCase
   delegate :nkdoc, :tokens, to: :nokoscan
   delegate :grammar, to: :parser
 
-  def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: []
+  def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: [], sample_url: '', sample_title: ''
     super if defined?(super)
     @selector = selector
     @trimmers = trimmers
     @grammar_mods = grammar_mods
+    @sample_url = sample_url
+    @sample_title = sample_title
     add_tags :Ingredient, [ingredients].flatten # To support single strings
     add_tags :Unit, [units].flatten
     add_tags :Condition, [conditions].flatten
@@ -142,7 +151,13 @@ class ParseTester < ActiveSupport::TestCase
   def save_configs url, domain=nil
     domain ||= PublicSuffix.parse(URI(url).host).domain if url
     if domain.present?
-      data = { selector: @selector, trimmers: @trimmers, grammar_mods: @grammar_mods }.compact
+      data = {
+          selector: @selector,
+          trimmers: @trimmers,
+          grammar_mods: @grammar_mods,
+          sample_url: @sample_url,
+          sample_title: @sample_title
+      }.compact
       filename = Rails.root.join("config", "sitedata", domain+'.yml')
       File.open(filename,"w") do |file|
         file.write data.to_yaml

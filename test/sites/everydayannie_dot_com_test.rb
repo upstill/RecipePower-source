@@ -5,12 +5,11 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class BojonGourmetTest < ActiveSupport::TestCase
+class EverydayannieDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    # All ingredients found on the page
     @ingredients = %w{
       lime
       olive\ oil
@@ -55,7 +54,15 @@ class BojonGourmetTest < ActiveSupport::TestCase
             :flavor => :paragraph,
             :selector => 'div.ingredient-text p'
         }
-    }
+}
+@trimmers = ["div.post-cat", "a.comments-number", "div.step-number"]
+@selector = "div.post-header
+div.recipe-bar
+div#ingredients
+div#directions ul
+"
+    #@grammar_mods = {
+    #}
     #@selector = 'div.wprm-recipe-the-woks-of-life'
     #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
     @page = 'http://everydayannie.com/2013/07/31/ginger-garlic-salmon-with-cabbage-salad/'
@@ -64,6 +71,7 @@ class BojonGourmetTest < ActiveSupport::TestCase
   end
 
   test 'mapping in grammar mods' do
+    # Apply tests to the grammar resulting from the grammar_mods here
     assert_equal @grammar_mods[:gm_inglist][:selector], grammar[:rp_inglist][:match].first[:in_css_match]
     assert_nil grammar[:rp_ingline][:in_css_match]
     assert grammar[:rp_ingline][:inline]

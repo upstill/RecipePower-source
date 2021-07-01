@@ -72,6 +72,22 @@ namespace :sites do
     ]
   end
 
+  def for_configs
+    yml_root = Rails.root.join 'config', 'sitedata'
+    ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
+    ymls = [ 'thewoksoflife.com.yml' ]
+    ymls.each do |filename|
+      filename = yml_root + filename
+      data = YAML.load_file filename
+      pr = PageRef.find_by_url data[:sample_url]
+      if site = pr&.site
+        yield site, data
+      else
+        puts "!!! Can't locate site for sample '#{data[:sample_url]}"
+      end
+    end
+  end
+
   # For sites that don't have one, build a test file from test_template.erb
   task :build_test_templates => :environment do
     # Acquire the template file from the tests directory
@@ -80,25 +96,31 @@ namespace :sites do
     File.open(infile, 'r') { |f| template = f.read }
     erb = ERB.new template
 
-    ymls = Dir.entries( Rails.root.join 'config', 'sitedata').find_all { |fname| fname.match /\.yml$/ }
-
-    Site.where(id: 3667).each do |site| # includes(:page_ref).all.each do |site|
-      selector = site.finders.find_by(label: 'Content')&.selector
-      next if site.trimmers.blank? && site.grammar_mods.empty? && selector.blank?
+    yml_root = Rails.root.join 'config', 'sitedata'
+    ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
+    ymls = [ 'thewoksoflife.com.yml' ]
+    ymls.each do |filename|
+      filename = yml_root + filename
+      data = YAML.load_file filename
+      pr = PageRef.find_by_url data[:sample_url]
+      if !(site = pr&.site)
+        puts "!!! Can't locate site for sample '#{data[:sample_url]}"
+        next
+      end
       base = PublicSuffix.parse(URI(site.home).host).domain.gsub( '.', '_dot_')
       outfile = Rails.root.join('test', 'sites', base+'_test'+'.rb')
       next if File.exist? outfile
 
       @testclass = base.camelcase
       datahash = { }
-      datahash[:grammar_mods] = struct_to_str(site.grammar_mods, 3) # JSON.pretty_generate(site.grammar_mods).gsub(/"([^"]*)":/, ":\\1 =>").gsub(/\bnull\b/, 'nil') if site.grammar_mods
-      datahash[:trimmers] = site.trimmers.to_s if site.trimmers.present?
-      datahash[:selector] = '"' + selector.to_s + '"' if selector.present?
+      datahash[:grammar_mods] = struct_to_str(data[:grammar_mods], 3) if data[:grammar_mods] # JSON.pretty_generate(site.grammar_mods).gsub(/"([^"]*)":/, ":\\1 =>").gsub(/\bnull\b/, 'nil') if site.grammar_mods
+      datahash[:trimmers] = data[:trimmers].to_s if data[:trimmers].present?
+      datahash[:selector] = '"' + data[:selector].to_s + '"' if data[:selector].present?
+      datahash[:sample_url] = "'" + data[:sample_url] + "'" if data[:sample_url].present?
+      datahash[:sample_title] = "'" + (data[:sample_title] || "Title here, please") + "'"
       @sitedata = datahash.collect { |key, value|
-        "@#{key} = #{value}"
+        "\t\t@#{key} = #{value}"
       }.join "\n"
-      @page = site.sample # datahash[:sample_url]
-      @title = datahash[:sample_title] || "Title here, please"
       result = erb.result binding
       File.open(outfile,"w") do |file|
         file.write result
@@ -109,7 +131,7 @@ namespace :sites do
 
   # Record parsing data from sites in individual files, suitable for checkin
   task :save_parsing_data => :environment do
-    Site.where(id: [3667]).includes(:page_ref).each { |site|
+    Site.where(id: [3947]).includes(:page_ref).each { |site|
     # Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
     # site = finder.site
       finder = site.finders.find_by(label: 'Content')
@@ -121,7 +143,7 @@ namespace :sites do
           sample_url: site.sample,
           sample_title: sample_title,
           root: site.root,
-          selector: finder.selector,
+          selector: finder&.selector,
           trimmers: site.trimmers,
           grammar_mods: site.grammar_mods
       }.compact
@@ -135,7 +157,7 @@ namespace :sites do
 
   # Get parsing data for sites from YAML files
   task :restore_parsing_data => :environment do
-    Site.where(id: [3667]).includes(:page_ref).each { |site|
+    Site.where(id: [3947]).includes(:page_ref).each { |site|
     #Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
     #  site = finder.site
       domain = PublicSuffix.parse(URI(site.home).host).domain

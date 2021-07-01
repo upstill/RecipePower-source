@@ -5,16 +5,34 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class <%= @testclass %>Test < ActiveSupport::TestCase
+class ThewoksoflifeDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{  } # All ingredients found on the page
-    @units =  %w{  } # All units
-    @conditions = %w{  } # All conditions
+    @ingredients = ['fresh Hong Kong Style Pan-Fried Noodles',
+                    'soy sauce',
+                    'sesame oil',
+                    'small capers',
+                    'black pepper',
+                    'Brussels sprouts',
+                    'Dijon mustard',
+                    'Lao Gan Ma spicy black bean sauce',
+                    'vegetable oil']
+    @units = 'pound'
     # Grammar mods, css_selector and trimmers that apply to recipes
-    <%= @sitedata %>
+    @grammar_mods = {
+			:gm_recipes => {
+				:in_css_match => "div.wprm-recipe-the-woks-of-life"
+			},
+			:rp_title => {
+				:in_css_match => "h2"
+			}
+		}
+@trimmers = ["div.wprm-entry-footer", "div.social", "div.wprm-container-float-right"]
+@selector = "div.wprm-recipe-the-woks-of-life"
+@sample_url = 'https://thewoksoflife.com/simple-spicy-pan-fried-noodles/'
+@sample_title = 'Simple, Spicy Pan-fried Noodles'
     #@grammar_mods = {
     #}
     #@selector = 'div.wprm-recipe-the-woks-of-life'

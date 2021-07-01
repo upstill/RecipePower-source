@@ -127,7 +127,11 @@ class Parser
                       noko_scanner_or_nkdoc_or_nktokens :
                       NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
-
+  @@ExclusiveOptions = [ # Each group of options is exclusive: at most one from each group can be declared
+      %i{ bound terminus }, # :bound and :terminus are exclusive options
+      %i{ atline inline },  # :atline and :inline are exclusive options
+      %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
+  ]
   # Revise the default grammar by specifying new bindings for tokens
   # 'mods_plus' is a hash:
   # -- keys are :rp_* tokens in the grammar (OR high-level :gm_* instructions for generating mod entries)
@@ -155,11 +159,7 @@ class Parser
       end
       entry[:match] = cleanup_entry :match, entry[:match] if entry[:match]
       keys = entry.keys.map &:to_sym # Ensure all keys are symbols
-      [
-          %i{ bound terminus }, # :bound and :terminus are exclusive options
-          %i{ atline inline },  # :atline and :inline are exclusive options
-          %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
-      ].each do |flagset|
+      @@ExclusiveOptions.each do |flagset|
         # At most one of the flags in the flagset can be non-nil
         setflags = (entry.slice *flagset).compact # Eliminating the nil flags
         if setflags.count > 1
@@ -185,6 +185,10 @@ class Parser
           value.each_index { |ix| original[key][ix] = merge_entries(original[key][ix], value[ix]) }
         else
           original[key] = value
+          # Enforce exclusive options by removing the other members of the set in which the key appears (if any)
+          @@ExclusiveOptions.each { |set|
+            (set - [key]).each { |keyout| original.delete keyout } if set.include? key
+          }
         end
       end
       original
@@ -339,6 +343,11 @@ class Parser
         params, val = {}, mods_plus[key]
         params, val = val, val.delete(:flavor) if val.is_a?(Hash)
         case key.to_sym
+        when :gm_recipes
+          # We match recipes within a list and individual recipes with the same selector
+          # Expecting a hash for the match specifier (i.e., :in_css_match => 'h2' )
+          grammar_mods[:rp_recipelist] = { match: params }
+          grammar_mods[:rp_recipe] = params
         when :gm_inglist
           case val.to_sym
           when :unordered_list
