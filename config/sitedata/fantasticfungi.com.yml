@@ -9,11 +9,7 @@
     :match: {}
   :rp_inglist:
     :in_css_match: div.ingredients ul
-  :rp_ingline:
-    :in_css_match: li
-  :rp_title:
-    :in_css_match: h1,h2
-  :rp_instructions:
-    :in_css_match: div.instructions
+  :rp_ingline: {}
+  :rp_title: {}
 :sample_url: https://fantasticfungi.com/cookbook-recipes/white-bean-and-autumn-mushroom-dip/
 :sample_title: White Bean and Autumn Mushroom Dip

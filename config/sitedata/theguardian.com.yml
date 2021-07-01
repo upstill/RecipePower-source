@@ -15,7 +15,9 @@
   :rp_title:
     :in_css_match: h2
   :rp_ingline:
-    :in_css_match:
+    :in_css_match: 
     :inline: true
+  :rp_instructions:
+    :in_css_match: 
 :sample_url: http://www.theguardian.com/profile/fuchsia-dunlop
 :sample_title: Fuchsia Dunlop | The Guardian

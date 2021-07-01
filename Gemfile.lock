@@ -261,9 +261,6 @@ GEM
     nio4r (2.5.2)
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
-    nokogiri-diff (0.2.0)
-      nokogiri (~> 1.5)
-      tdiff (~> 0.3, >= 0.3.2)
     ntlm-http (0.1.1)
     oauth (0.5.4)
     oauth2 (1.4.4)
@@ -419,7 +416,6 @@ GEM
       net-ssh (>= 2.8.0)
     stackprof (0.2.15)
     swagger-blocks (3.0.0)
-    tdiff (0.3.4)
     thin (1.7.2)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
@@ -509,7 +505,6 @@ DEPENDENCIES
   net-ssh
   nifty-generators
   nokogiri (>= 1.10.8)
-  nokogiri-diff
   omniauth-facebook (~> 4.0.0)
   omniauth-google-oauth2
   omniauth-openid

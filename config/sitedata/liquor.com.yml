@@ -10,10 +10,10 @@
 :grammar_mods:
   :rp_title:
     :in_css_match: h1
-    :inline:
+    :inline: 
   :rp_inglist:
     :in_css_match: ul.ingredient-list
-    :inline:
+    :inline: 
   :rp_ingline:
     :in_css_match: li.ingredient
   :rp_instructions:

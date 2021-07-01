@@ -37,7 +37,6 @@ namespace :parsing do
       keyvals = YAML.load(bfr)
       if object = klass.constantize.find_by(id: id)
         oldvals = object.attributes
-        puts "----------------------------- Assigning for #{klass}##{id}: -----------------------------"
         puts bfr
         keyvals.except(:id).each { |attribute, val|
           oldval = oldvals[attribute.to_s]

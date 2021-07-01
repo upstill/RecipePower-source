@@ -4,11 +4,6 @@
 - section.relatedStories
 - div.inDepth
 - div.articleFooter
-:grammar_mods:
-  :rp_recipelist:
-    :match:
-      :at_css_match: h1,h2
-  :rp_title:
-    :in_css_match: h1,h2
+:grammar_mods: {}
 :sample_url: http://www.sfchronicle.com/recipes/article/Preserving-tradition-with-DIY-tofu-4615283.php
 :sample_title: Preserving tradition with DIY tofu

@@ -5,6 +5,8 @@
 - div.pubmod-date
 - figure
 - div.author-byline
+- div.recipe-procedure-number
+- div.recipe-procedures h2
 :grammar_mods:
   :rp_recipelist:
     :match:
