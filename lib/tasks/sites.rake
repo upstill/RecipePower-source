@@ -76,7 +76,6 @@ namespace :sites do
   def for_configs
     yml_root = Rails.root.join 'config', 'sitedata'
     ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
-    ymls = [ 'thewoksoflife.com.yml' ]
     ymls.each do |filename|
       filename = yml_root + filename
       data = YAML.load_file filename

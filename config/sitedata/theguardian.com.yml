@@ -1,23 +1,15 @@
 ---
-:root: www.theguardian.com
+:selector: div.dcr-hujbr5
 :trimmers:
 - div.meta__extras
 - div.js-ad-slot
-- picture
 - figure[itemprop="associatedMedia image"]
 - div.submeta
 :grammar_mods:
-  :rp_recipelist:
-    :match:
-      :at_css_match: h2
-  :rp_inglist:
-    :in_css_match: p
+  :gm_recipes:
+    :at_css_match: h2
   :rp_title:
     :in_css_match: h2
-  :rp_ingline:
-    :in_css_match: 
-    :inline: true
-  :rp_instructions:
-    :in_css_match: 
-:sample_url: http://www.theguardian.com/profile/fuchsia-dunlop
-:sample_title: Fuchsia Dunlop | The Guardian
+  :gm_inglist: :paragraph
+:sample_url: https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
+:sample_title: Asparagus with pine nut and sourdough crumbs

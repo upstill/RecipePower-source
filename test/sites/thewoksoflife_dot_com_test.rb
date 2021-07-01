@@ -34,14 +34,6 @@ class ThewoksoflifeDotComTest < ActiveSupport::TestCase
 		@sample_url = 'https://thewoksoflife.com/simple-spicy-pan-fried-noodles/'
 		@sample_title = 'Simple, Spicy Pan-fried Noodles'
     
-    #@grammar_mods = {
-    #}
-    #@selector = 'div.wprm-recipe-the-woks-of-life'
-    #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
-    #@sample_url = the site's :sample attribute
-    #@sample_title = the page title of the sample
-    @page = @sample_url
-    @title = @sample_title
     super
   end
 
@@ -58,16 +50,6 @@ class ThewoksoflifeDotComTest < ActiveSupport::TestCase
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
     assert_equal 1, page_ref.recipes.to_a.count
-    # For a page that has multiple recipes, test sorting them out as follows:
-=begin
-    assert_equal 3, page_ref.recipes.to_a.count
-    assert_equal [
-                     "Asparagus with pine nut and sourdough crumbs (pictured above)",
-                     "Soft-boiled egg with avocado, chorizo and asparagus",
-                     "Kale and grilled asparagus salad"
-                 ].sort, page_ref.recipes.map(&:title).sort
-    assert_equal "Yotam Ottolenghi’s asparagus recipes", page_ref.title
-=end
   end
 
   test 'recipe loaded correctly' do

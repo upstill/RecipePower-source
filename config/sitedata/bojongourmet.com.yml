@@ -1,5 +1,5 @@
 ---
-:root: bojongourmet.com
+:selector: div.wprm-recipe
 :trimmers:
 - div.wprm-recipe-notes-container
 - div.wprm-recipe-image
@@ -8,17 +8,17 @@
 - a.wprm-recipe-pin
 - a.wprm-recipe-jump
 - div.wprm-recipe-rating
+- div.wprm-container-float-right
 :grammar_mods:
-  :rp_recipelist:
-    :match:
-      :at_css_match: h2
-  :rp_inglist:
-    :in_css_match: ul.wprm-recipe-ingredients
-  :rp_ingline:
-    :in_css_match: li.wprm-recipe-ingredient
+  :gm_recipes:
+    :at_css_match: h2
   :rp_title:
     :in_css_match: h2
   :rp_instructions:
     :in_css_match: div.wprm-recipe-instruction-text
-:sample_url: http://bojongourmet.com/2014/07/vegan-cashew-sun-dried-tomato-dip/
-:sample_title: "{Vegan} Cashew + Sun-Dried Tomato Dip"
+  :gm_inglist:
+    :flavor: :unordered_list
+    :list_class: wprm-recipe-ingredients
+    :line_class: wprm-recipe-ingredient
+:sample_url: http://bojongourmet.com/2015/12/coffee-cinnamon-muscovado-sugar-flans-the-new-sugar-spice-cookbook/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+BojonGourmet+%28The+Bojon+Gourmet%29
+:sample_title: Coffee, Cinnamon & Muscovado Sugar Flans

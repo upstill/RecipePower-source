@@ -61,11 +61,7 @@ class BojongourmetDotComTest < ActiveSupport::TestCase
     @units = %w{ cup cups teaspoon tablespoons large }
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
-			:rp_recipelist => {
-				:match => {
-					:at_css_match => "h2"
-				}
-			},
+      :gm_recipes => { :at_css_match => "h2" },
 			:rp_title => {
 				:in_css_match => "h2"
 			},
@@ -78,14 +74,14 @@ class BojongourmetDotComTest < ActiveSupport::TestCase
 				:line_class => "wprm-recipe-ingredient"
 			}
 		}
-@trimmers = ["div.wprm-recipe-notes-container", "div.wprm-recipe-image", "div.wprm-call-to-action-text-container", "a.wprm-recipe-print", "a.wprm-recipe-pin", "a.wprm-recipe-jump", "div.wprm-recipe-rating", "div.wprm-container-float-right"]
-@selector = "div.wprm-recipe"
+    @trimmers = ["div.wprm-recipe-notes-container", "div.wprm-recipe-image", "div.wprm-call-to-action-text-container", "a.wprm-recipe-print", "a.wprm-recipe-pin", "a.wprm-recipe-jump", "div.wprm-recipe-rating", "div.wprm-container-float-right"]
+    @selector = "div.wprm-recipe"
+    @sample_url = 'http://bojongourmet.com/2015/12/coffee-cinnamon-muscovado-sugar-flans-the-new-sugar-spice-cookbook/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+BojonGourmet+%28The+Bojon+Gourmet%29'
+    @sample_title = 'Coffee, Cinnamon & Muscovado Sugar Flans'
     #@grammar_mods = {
     #}
     #@selector = 'div.wprm-recipe-the-woks-of-life'
     #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
-    @page = 'http://bojongourmet.com/2015/12/coffee-cinnamon-muscovado-sugar-flans-the-new-sugar-spice-cookbook/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+BojonGourmet+%28The+Bojon+Gourmet%29'
-    @title = 'Coffee, Cinnamon & Muscovado Sugar Flans'
     super
   end
 
@@ -104,22 +100,17 @@ EOF
   end
 
   test 'recipe loaded correctly' do
-    pt_apply url: @page
-    # The ParseTester applies the setup parameters to the recipe
-    assert_good # Run standard tests on the results
-    refute recipe.errors.any?
-
-    assert_equal @title, recipe.title
-  end
-
-  test 'parse single recipe' do
-    pt_apply :recipe,
-             url: @page
 =begin
              ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
              conditions: %w{ crustless },
              units: %w{ g }
 =end
+    assert_not_empty @page, "No page url specified for ParseTester"
+    pt_apply url: @page
+    # The ParseTester applies the setup parameters to the recipe
+    assert_good # Run standard tests on the results
+    refute recipe.errors.any?
+
     assert_equal @title, recipe.title
   end
 

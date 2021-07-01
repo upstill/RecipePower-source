@@ -18,23 +18,16 @@ class TheguardianDotComTest < ActiveSupport::TestCase
     @condition_tags = %w{ crustless ripe }
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
-			:rp_recipelist => {
-				:match => {
-					:at_css_match => "h2"
-				}
-			},
-			:rp_recipe => {
-				:at_css_match => "h2"
-			},
+      :gm_recipes => { :at_css_match => 'h2' },
 			:rp_title => {
 				:in_css_match => "h2"
 			},
 			:gm_inglist => :paragraph
 		}
-@trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
-@selector = "div.dcr-hujbr5"
-    @page = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
-    @title = 'Asparagus with pine nut and sourdough crumbs'
+    @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
+    @selector = "div.dcr-hujbr5"
+    @sample_url = 'https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes'
+    @sample_title = 'Asparagus with pine nut and sourdough crumbs'
     super
   end
 

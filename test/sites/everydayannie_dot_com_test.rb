@@ -61,12 +61,8 @@ div.recipe-bar
 div#ingredients
 div#directions ul
 "
-    #@grammar_mods = {
-    #}
-    #@selector = 'div.wprm-recipe-the-woks-of-life'
-    #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
-    @page = 'http://everydayannie.com/2013/07/31/ginger-garlic-salmon-with-cabbage-salad/'
-    @title = 'Ginger Garlic Salmon with Cabbage Salad'
+    @sample_url = 'http://everydayannie.com/2013/07/31/ginger-garlic-salmon-with-cabbage-salad/'
+    @sample_title = 'Ginger Garlic Salmon with Cabbage Salad'
     super
   end
 
@@ -177,6 +173,12 @@ EOF
   end
 
   test 'recipe loaded correctly' do
+=begin
+             ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
+             conditions: %w{ crustless },
+             units: %w{ g }
+=end
+    assert_not_empty @page, "No page url specified for ParseTester"
     pt_apply url: @page
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results

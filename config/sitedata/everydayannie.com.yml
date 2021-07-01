@@ -1,18 +1,20 @@
 ---
-:root: www.annies-eats.com
+:selector: |
+  div.post-header
+  div.recipe-bar
+  div#ingredients
+  div#directions ul
 :trimmers:
 - div.post-cat
 - a.comments-number
 - div.step-number
 :grammar_mods:
-  :rp_inglist:
-    :in_css_match: div.ingredient-text p
-  :rp_ingline:
-    :in_css_match: 
-    :inline: true
   :rp_title:
     :in_css_match: h1,h2
   :rp_instructions:
-    :in_css_match: 
-:sample_url: http://www.annies-eats.com/2013/01/28/soft-pretzel-bites-three-ways/
-:sample_title: Soft Pretzel Bites, Three Ways | Annie's Eats
+    :in_css_match:
+  :gm_inglist:
+    :flavor: :paragraph
+    :selector: div.ingredient-text p
+:sample_url: http://everydayannie.com/2013/07/31/ginger-garlic-salmon-with-cabbage-salad/
+:sample_title: Ginger Garlic Salmon with Cabbage Salad
