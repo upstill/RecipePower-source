@@ -2,9 +2,13 @@ require 'test_helper'
 # require 'page_ref.rb'
 class BackgroundableTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test 'Can run backgroundable tasks without saving records' do
     r = Recipe.new url: "https://patijinich.com/creamy-poblano-soup/"
-    r.ensure_attributes :title # No saving beforehand
+    r.ensure_attributes [:title] # No saving beforehand
     refute r.persisted?
     assert r.title.present?
 
@@ -19,8 +23,9 @@ class BackgroundableTest < ActiveSupport::TestCase
 
   test "Creating recipe with bad URL gets errors back to recipe" do
     r = Recipe.new url: 'https://patijinich.com/2012/05/creamy-poblano-soup.html'
-    r.bkg_land
-    assert r.errors[:base].present?
+    r.ensure_attributes
+    # Check that an error occurred in ensuring :content and :url attributes
+    # assert r.errors[:content].present?
     assert r.errors[:url].present?
     assert r.bad?
 
@@ -40,7 +45,7 @@ class BackgroundableTest < ActiveSupport::TestCase
 
   test 'HTTP 403 error doesnt get re-queued unless virginized' do
     pr = PageRef.fetch 'http://scrapbook.lacolombe.com/2013/02/14/coffee-caramel-macarons/'
-    pr.bkg_land
+    pr.ensure_attributes
     refute pr.persisted?
     pr.save # Also launches--but doesn't, because it's failed prior
     assert pr.persisted?
@@ -65,6 +70,7 @@ class BackgroundableTest < ActiveSupport::TestCase
     url = 'http://www.mariobatali.com/recipes/focaccia-panzanella/'
     pr = PageRef.fetch url
     refute pr.persisted?
+    pr.status = 'virgin'
     pr.save
     assert pr.dj # Launch on save
     runtime = pr.dj.run_at

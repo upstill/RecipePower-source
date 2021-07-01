@@ -57,12 +57,15 @@ require 'scraping/parser.rb'
 #       Notice that once a page is parsed and tokens marked in the DOM, there is an implicit :on_css_match to the stipulated
 #       token ("div.rp_elmt.#{token}"). Of course, when first parsing an undifferentiated document, no such markers
 #       are found. But they eventually get there when the seeker encloses found content.
+#    :inline, :atline: constrains the match to the beginning of a line, as defined by
+#       either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first.
+#       :inline also foreshortens the stream at the next line so defined.
 Parser.init_grammar(
     rp_recipelist: {
         match:
             {
                 match: [ { optional: :rp_title }, nil ],
-                at_css_match: 'h1,h2',
+                at_css_match: 'h1,h2,h3',
                 token: :rp_recipe
             },
         repeating: true
@@ -84,7 +87,7 @@ Parser.init_grammar(
     },
     # Hopefully sites will specify how to find the title in the extracted text
     rp_title: {
-        in_css_match: 'h1,h2'
+        in_css_match: 'h1,h2,h3'
     }, # Match all tokens within an <h1> tag
     rp_author: {
         match: [ /^Author:?$/, nil ],
@@ -108,24 +111,36 @@ Parser.init_grammar(
         atline: true
     },
     rp_serves: {
-        match: [ /^Serv(ing|e)s?:?$/, :rp_amt ],
+        match: [ /^Serv(ing|e)s?:?$/, :rp_num_or_range ],
         atline: true
     },
     rp_instructions: nil,
     rp_inglist: {
-        match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-        :in_css_match => 'ul',
-        :enclose => true
+        or: [ { # A label followed by one or more ingredient lines, or two or more ingredient lines
+                  match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
+                  :enclose => true
+              },
+              { # Within a line, a comma-separated, conjunction-concluded list of ingredients
+                  :match => :rp_ingline,
+                  :orlist => :predivide,
+                  :enclose => true
+              }
+        ],
     },
     rp_ingline: {
         match: [
-            { or: [ '▢', /.*:/, [ /.*/, /from/ ] ], optional: true }, # Discard a colon-terminated label at beginning
+            { or: [ '▢',
+                    /.*:/,
+                    [
+                        { optional: ConditionsSeeker },
+                        /.*/,
+                        /from|of/
+                    ]
+            ], optional: true }, # Discard a colon-terminated label at beginning
             { match: :rp_ingspec, orlist: true },
-            # {optional: :rp_unit},
             {optional: :rp_ing_comment}, # Anything can come between the ingredient and the end of line
         ],
         enclose: true,
-        in_css_match: 'li'
     },
     rp_inglist_label: { match: nil, inline: true },
     rp_ing_comment: {
@@ -133,7 +148,7 @@ Parser.init_grammar(
         terminus: "\n"
     }, # NB: matches even if the bound is immediate
     rp_presteps: { tags: 'Condition' }, # There may be one or more presteps (instructions before measuring)
-    rp_condition: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
+    rp_condition_tag: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_ingspec: {
         match: [
             {optional: [:rp_amt, {optional: 'each'} ] },
@@ -141,20 +156,19 @@ Parser.init_grammar(
             { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
         ]
     },
-    rp_ingname: { tag: 'Ingredient' },
+    rp_ingredient_tag: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is a number followed by a (possibly qualified) unit--only one required
              match: [
-                 [:rp_summed_amt, {match: :rp_altamt, optional: true } ],
-                 :rp_qualified_unit,
-                 [:rp_num_or_range, :rp_qualified_unit],
-                 :rp_num_or_range,
+                 [:rp_unqualified_amt, 'plus', :rp_unqualified_amt, {match: :rp_altamt, optional: true } ],
+                 :rp_unit,
+                 [{ or: [ :rp_range, :rp_num ] }, {match: :rp_unit, optional: true}],
                  {match: AmountSeeker}
              ],
              or: true
     },
     # A qualified unit is, e.g., '16-ounce can'
-    rp_qualified_unit: [ { match: :rp_altamt, optional: true }, :rp_unit, { match: :rp_altamt, optional: true } ],
+    rp_unit: [ { match: :rp_altamt, optional: true }, :rp_unit_tag, { match: :rp_altamt, optional: true } ],
     # An altamt may show up to clarify the amount or qualify the unit
     rp_altamt: {
         match: [
@@ -169,7 +183,7 @@ Parser.init_grammar(
     },
     rp_unqualified_amt: {# An Unqualified Amount is a number followed by a unit (only one required)
                          match: [
-                             [:rp_num_or_range, :rp_unit],
+                             [:rp_num_or_range, :rp_unit_tag],
                              { match: FullAmountSeeker }
                          ],
                          or: true
@@ -177,5 +191,5 @@ Parser.init_grammar(
     rp_num_or_range: { or: [ :rp_range, :rp_num ] },
     rp_num: { match: 'NumberSeeker' },
     rp_range: { match: 'RangeSeeker' },
-    rp_unit: { tag: 'Unit' }
+    rp_unit_tag: { tag: 'Unit' }
 )

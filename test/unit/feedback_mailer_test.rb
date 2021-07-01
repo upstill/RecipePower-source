@@ -1,6 +1,11 @@
 require File.dirname(__FILE__) + '/../test_helper'
 
 class FeedbackMailerTest < ActionMailer::TestCase
+
+  def setup
+    super
+  end
+
   # replace this with your real tests
   test "the truth" do
     assert true

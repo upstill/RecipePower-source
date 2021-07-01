@@ -261,6 +261,9 @@ GEM
     nio4r (2.5.2)
     nokogiri (1.10.10)
       mini_portile2 (~> 2.4.0)
+    nokogiri-diff (0.2.0)
+      nokogiri (~> 1.5)
+      tdiff (~> 0.3, >= 0.3.2)
     ntlm-http (0.1.1)
     oauth (0.5.4)
     oauth2 (1.4.4)
@@ -296,6 +299,8 @@ GEM
       capybara (>= 2.1, < 4)
       cliver (~> 0.3.1)
       websocket-driver (>= 0.2.0)
+    pp (0.2.0)
+      prettyprint
     premailer (1.12.1)
       addressable
       css_parser (>= 1.6.0)
@@ -303,6 +308,7 @@ GEM
     premailer-rails (1.11.1)
       actionmailer (>= 3)
       premailer (~> 1.7, >= 1.7.9)
+    prettyprint (0.1.0)
     public_suffix (4.0.5)
     pundit (2.1.0)
       activesupport (>= 3.0.0)
@@ -413,6 +419,7 @@ GEM
       net-ssh (>= 2.8.0)
     stackprof (0.2.15)
     swagger-blocks (3.0.0)
+    tdiff (0.3.4)
     thin (1.7.2)
       daemons (~> 1.0, >= 1.0.9)
       eventmachine (~> 1.0, >= 1.0.4)
@@ -451,6 +458,7 @@ GEM
       activerecord (>= 4.2)
     xpath (3.2.0)
       nokogiri (~> 1.8)
+    yard (0.9.26)
     youtube_addy (1.0.4)
 
 PLATFORMS
@@ -501,12 +509,14 @@ DEPENDENCIES
   net-ssh
   nifty-generators
   nokogiri (>= 1.10.8)
+  nokogiri-diff
   omniauth-facebook (~> 4.0.0)
   omniauth-google-oauth2
   omniauth-openid
   omniauth-twitter
   pg (~> 1.0)
   poltergeist
+  pp
   premailer-rails
   pundit
   rack (= 2.2.3)
@@ -536,6 +546,7 @@ DEPENDENCIES
   unicorn-rails
   will_paginate (~> 3.0)
   with_advisory_lock (~> 4.0)
+  yard
   youtube_addy
 
 RUBY VERSION

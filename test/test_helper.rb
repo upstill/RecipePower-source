@@ -15,4 +15,9 @@ class ActiveSupport::TestCase
       assert_equal val, object.send(key.to_sym)
     end
   end
+
+  def setup
+    ImageReferenceServices.clear_unpersisted
+    SiteServices.clear_unpersisted
+  end
 end

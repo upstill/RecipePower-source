@@ -3,8 +3,9 @@ require 'test_helper'
 class RecipeUserTest < ActiveSupport::TestCase 
     fixtures :users
     fixtures :recipes
-    
+
     def setup
+      super
       @rcp = recipes(:rcp)
       @rcp2 = recipes(:goodpicrcp)
       @thing1 = users(:thing1)
@@ -17,6 +18,7 @@ class RecipeUserTest < ActiveSupport::TestCase
       @rcp.comment= 'I told you so'
       assert_equal 'I told you so', @rcp.comment
       # Because this is a new rcpref, it gets saved
+      @rcp.save
       @rcp.reload
       assert_equal 'I told you so', @rcp.comment
 

@@ -5,6 +5,7 @@ require 'test_helper'
 class ListTagTest < ActiveSupport::TestCase
 
   def setup
+    super
     @owner = users(:thing3)
     @lst_name = "Test List"
     @lst = List.assert @lst_name, @owner, create: true

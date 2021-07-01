@@ -1,6 +1,10 @@
 # encoding: UTF-8
 require 'test_helper'
 class FeedTest < ActiveSupport::TestCase 
+
+  def setup
+    super
+  end
     
     # @@TypeToSym = [:none, :vendor, :store, :book, :blog, :rcpsite, :cookingsite, :othersite, :video, :glossary, :recipe]
     # @@TypeToString = ["Untyped Link", "Supplier", "Store Location", "Book", "Blog", "Recipe Site", "Cooking Site", "Other Site", "Video", "Glossary", "Recipe"]
@@ -10,7 +14,7 @@ class FeedTest < ActiveSupport::TestCase
       f1.save
       assert_equal "Ruhlman", f1.title, "Title not extracted"
       assert_equal "Translating the chef’s craft.", f1.description, "Description not extracted"
-      assert_equal "http://ruhlman.com", f1.site.home, "wrong site extracted"
+      assert_equal "https://ruhlman.com/", f1.site.home, "wrong site extracted"
     end
     
     test "bogus feed fails" do

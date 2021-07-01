@@ -3,6 +3,10 @@ require 'test_helper'
 class UserMergeTest < ActiveSupport::TestCase
   fixtures :users
 
+  def setup
+    super
+  end
+
   test 'Correctly definining followers and followees' do
     user1 = users(:thing1)
     user2 = users(:thing2)

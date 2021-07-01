@@ -2,6 +2,10 @@ require 'test_helper'
 class CssUtilsTest < ActiveSupport::TestCase
 require './lib/css_utils.rb'
 
+  def setup
+    super
+  end
+
   test "products work" do
     assert_equal "2.4em", dim_scale("1.2em", 2)
     assert_equal "2.4em", dim_scale("1.2em", 2.0)

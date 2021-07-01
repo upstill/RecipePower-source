@@ -2,6 +2,10 @@
 require 'test_helper'
 class RecipeThumbnailTest < ActiveSupport::TestCase 
   fixtures :recipes
+
+  def setup
+    super
+  end
   
   test "Bad pic URL gets bad_url thumbnail" do
     bpr = recipes(:badpicrcp)
@@ -12,8 +16,8 @@ class RecipeThumbnailTest < ActiveSupport::TestCase
   end
   
   test "Save success with good pic URL" do
-    gpr = recipes(:goodpicrcp)
-    gpr.url = "http://www.recipepower.com/rcp1"
+    gpr = Recipe.new(title: 'Recipe with Good Picture') # recipes(:goodpicrcp)
+    gpr.page_ref = PageRef.new(url_and_status: ["http://www.recipepower.com/rcp1", 404 ] )
     gpr.picurl = 'https://static01.nyt.com/images/2014/06/06/dining/tortilla/tortilla-superJumbo.jpg' # 'assets/MissingLogo.png' # "assets/MissingLogo.png"
     assert_not_nil gpr.picture, "Should have a picture reference for valid URL"
     success = gpr.save

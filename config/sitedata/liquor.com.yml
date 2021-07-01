@@ -1,0 +1,22 @@
+---
+:root: www.liquor.com
+:trimmers:
+- div.inline-video
+- div.feedback-block
+- div.article-intro
+- div.mntl-sc-block-featuredlink
+- div.disqus-block
+- header.section__header
+:grammar_mods:
+  :rp_title:
+    :in_css_match: h1
+    :inline:
+  :rp_inglist:
+    :in_css_match: ul.ingredient-list
+    :inline:
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_instructions:
+    :in_css_match: section.section--instructions
+:sample_url: https://www.liquor.com/recipes/navy-grog/
+:sample_title: Navy Grog Cocktail

@@ -23,22 +23,29 @@ class Recipe < ApplicationRecord
 
   delegate :recipe_page, :to => :page_ref
 
+=begin
+  after_initialize do |rcp|
+    # The actual launch will occur after_save
+    request_attributes [ :title, :picurl, :content ] unless persisted?
+  end
+=end
+
+  def standard_attributes
+    [ :title, :picurl, :content ]
+  end
+
   before_save do |recipe|
     # Arm the recipe for launching
-    if recipe.anchor_path_changed? ||
+    recipe.refresh_attributes [ :content ] if recipe.anchor_path_changed? ||
         recipe.focus_path_changed? ||
         (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
-      recipe.content = nil
-      recipe.status = "virgin"
-      recipe.refresh_attributes :content # To be derived via parsing
-    end
     if recipe.content_changed?
       # Set tags according to annotations
       RecipeServices.new(self).inventory do |rpclass, node|
         # #inventory will call a block on found nodes, once for each token
         case rpclass
         when :rp_title
-          accept_attribute :title, node.text
+          self.title = node.text # accept_attribute :title, node.text
         when :rp_ingline
           x=2
         end
@@ -64,6 +71,7 @@ class Recipe < ApplicationRecord
   #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
+
   # private
 
   # has_many :ratings, :dependent => :destroy
@@ -113,7 +121,7 @@ class Recipe < ApplicationRecord
 
   # Writing the picture URL redirects to acquiring an image reference
   def picurl= pu
-    self.picture = ImageReferenceServices.find_or_initialize site_service&.resolve(pu)
+    self.picture = ImageReferenceServices.find_or_initialize (site_service ? site_service.resolve(pu) : pu)
   end
 
   # Memoized SiteServices
@@ -135,50 +143,48 @@ class Recipe < ApplicationRecord
     save
   end
 
-  ##### Trackable matters #########k
-  # Request attributes from page_ref as necessary
-  def request_dependencies 
-    # If we haven't persisted, then the page_ref has no connection back
-    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
-    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title, :description ]) # Those to be got from PageRef
+  ##### Trackable matters #########
+
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    needed_now = minimal_attribs & needed_attributes
+    # We ask PageRef to provide its recipe_page if possible
+    # needed_now << :recipe_page if needed_now.include?(:content)
+    PageRef.tracked_attributes & [ :content, :picurl, :title, :description, :recipe_page ] & needed_now
   end
 
-  # Override to acccept values from page_ref
-  def adopt_dependencies
-    super if defined? super
-    # Get the available attributes from the PageRef
+  # Request attributes from page_ref as necessary, after record is saved.
+  # Return: boolean indicating need to start background processing
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
+    super || content_needed?
+  end
+
+  # Override to acccept values from page_ref, optionally forcing it to completion
+  def adopt_dependencies synchronous: false, final: false
+    super if defined? super # Force the page_ref to complete its background work
     # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
+    if page_ref&.complete?
+      adopt_dependency :picurl, page_ref
+      adopt_dependency :title, page_ref
+      adopt_dependency :description, page_ref
+      errors.add :url, "not valid in page_ref: #{page_ref.error_message}" if page_ref.http_status != 200
     end
-    adopt_dependency :picurl, page_ref
-    adopt_dependency :title, page_ref
-    adopt_dependency :description, page_ref
   end
 
   ##### Backgroundable matters #########
 
-  # Called when first saved, as a hook for (re)generating attributes
-  def request_for_background
-    # Content is refreshed on first save
-    refresh_attributes :content
-  end
-
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
-    page_ref.ensure_attributes :content
+    # If the page_ref isn't ready, go back in the queue
+    super if defined?(super) # await page_ref as required
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
     if content_needed?
-      if page_ref.recipe_page_ready?  # Ready to build
-        # reload if persisted? # Possibly the recipe_page changed us
-        recipe_page.ensure_attributes :content # Parse the page into one or more recipes
-      end
+      # If there's an associated RecipePage, then we'll be depending on its content
+      await recipe_page if page_ref.recipe_page_ready?
       content_to_parse =
         (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
-      return unless content_to_parse.present?
-      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse
+      new_content = ParsingServices.new(self).parse_and_annotate content_to_parse if content_to_parse.present?
       if new_content.present? # Parsing was a success
         self.content = new_content
       else

@@ -9,7 +9,7 @@ class ImageReference < ApplicationRecord
   include Backgroundable
   backgroundable :status
   include Trackable
-  attr_trackable :thumbdata
+  attr_trackable :thumbdata, :errcode
 
   # attr_accessible :type, :url, :filename, :link_text
 
@@ -27,10 +27,6 @@ class ImageReference < ApplicationRecord
   has_many :users, :foreign_key => :thumbnail_id, :dependent => :nullify
   has_many :referments, :as => :referee, :dependent => :destroy
   # has_many :referents, :through => :referments
-
-  after_save do |ir|
-    ir.bkg_launch if ir.needed_attributes.present?
-  end # ...because no launching occurred before saving
 
   public
 
@@ -95,13 +91,13 @@ class ImageReference < ApplicationRecord
     raise err_msg unless errcode == 404
   end
 
-  def relaunch?
-    errors.present? && (errcode != 404)
+  def relaunch_on_error?
+    errcode_needed || !permanent_http_error?(errcode)
   end
 
   def url= new_url
     super
-    request_attributes :thumbdata if url_changed? && !fake_url?
+    refresh_attributes [:thumbdata, :errcode] if url_changed? && !fake_url?
   end
 
   # Provide a url that's valid anywhere. It may come direct from the IR or, if there's only thumbdata,
@@ -151,6 +147,7 @@ class ImageReference < ApplicationRecord
         end
         thumb.format = 'PNG'
         quality = 80
+        # self.thumbdata = 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
         accept_attribute :thumbdata, 'data:image/png;base64,' + Base64.encode64(thumb.to_blob { self.quality = quality })
       rescue Exception => e
         self.errcode = -2 # Bad data

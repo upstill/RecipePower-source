@@ -80,8 +80,8 @@ module Backgroundable
                  :virgin, # Hasn't been executed or queued
                  :obs_pending, # Queued but not executed (Obsolete with dj attribute)
                  :processing, # Set during execution
-                 :good, # Executed successfully
-                 :bad # Executed unsuccessfully
+                 :good, # Finished successfully
+                 :bad # Finished unsuccessfully
              ]
       end
     end
@@ -159,6 +159,11 @@ module Backgroundable
     (dj && (dj.run_at <= Time.now)) || processing?
   end
 
+  # Has the job run to completion?
+  def complete?
+    good? || bad?
+  end
+
   # bkg_launch(refresh, djopts={}) fires off a DelayedJob job as necessary.
   # NB: MUST NOT BE CALLED ON AN ENTITY WITH UNSAVED CHANGES, as it reloads
   # Return: true if the job is actually queued, false otherwise (useful for launching dependent jobs)
@@ -184,7 +189,8 @@ module Backgroundable
             dj.save if dj.changed?
           end
           needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-          logger.debug ">>>>>>>>>>> bkg_launch relaunched #{self} (dj #{self.dj})#{needed}"
+          puts ">>>>>>>>>>> bkg_launch relaunched #{self} (dj##{self.dj.id})#{needed}"
+          report_due
         end
         self.virgin! unless virgin?
       end
@@ -194,7 +200,8 @@ module Backgroundable
         self.dj = Delayed::Job.enqueue self, djopts
         update_column :dj_id, dj.id
         needed = self.respond_to?(:needed_attributes) ? " for #{needed_attributes}" : ''
-        logger.debug ">>>>>>>>>>> bkg_launched #{self} (dj #{self.dj})#{needed}"
+        puts ">>>>>>>>>>> bkg_launched #{self} (dj##{self.dj.id})#{needed}"
+        report_due
       end
       self.virgin! unless virgin?
     end
@@ -239,23 +246,42 @@ module Backgroundable
       # Force execution if it's never been completed, or it's due, or we force the issue
       if virgin? || force || (dj && (dj.run_at <= Time.now))
         dj.payload_object = self # ...ensuring that the two versions don't get out of sync
-        logger.debug ">>>>>>>>>>> bkg_land #{self} #{what_for}with dj #{self.dj}"
+        puts ">>>>>>>>>>> bkg_land #{self} #{what_for}with dj #{self.dj}"
         Delayed::Worker.new.run dj
         # It doesn't do to reload the job b/c it may have been deleted
         self.dj = Delayed::Job.find_by id: dj.id if dj
+        report_due
         # dj&.reload # If Delayed::Job relaunched the job, this one is stale (specifically, doesn't have updated :run_at)
+      else
+        report_due
       end
     elsif virgin? || force # No DJ => run it only if not run before, or things have changed (virgin), or it's needed (force)
-      logger.debug ">>>>>>>>>>> bkg_land #{self} #{what_for}(no dj)"
+      puts ">>>>>>>>>>> bkg_land #{self} #{what_for}(no dj)"
       perform_without_dj
     end
     good?
   end
 
+  def report_due
+    if dj
+      secs = dj.run_at - Time.now
+      secs, rel = secs < 0 ? [-secs, 'ago'] : [ secs, 'from now' ]
+      puts "Job##{dj.id} on #{self.class}##{id} set to rerun at #{dj.run_at} (#{secs} seconds #{rel})"
+    else
+      puts "#{self.class}##{id} is not queued"
+    end
+  end
+
   # Run the job to completion (synchronously) whether it's due or not
   def bkg_land! force=false
-    dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
-    bkg_land force
+    if dj
+      while dj do
+        dj.update_attribute(:run_at, Time.now) if dj && (dj.run_at > Time.now)
+        bkg_land force
+      end
+    else
+      bkg_land force
+    end
   end
 
   # Cancel the job nicely, i.e. if it's running wait till it completes
@@ -271,7 +297,23 @@ module Backgroundable
     end
   end
 
-  # Run the job, mimicking the hook calls of DJ
+  # Shut down the background job, leaving the entity in a closed-out state
+  def bkg_cancel good=true
+    if id
+      while self.class.where(id: id).pluck(:dj_id).first == 'processing'
+        sleep 1
+      end
+      if dj
+        Delayed::Job.where(id: dj.id).first&.destroy
+        self.dj = nil
+        update_column :dj_id, nil
+      end
+    end
+    self.status = good ? :good : :bad
+  end
+
+  # Run the job, mimicking the hook calls of DJ.
+  # We rescue errors so that interrupts only declare errors
   def perform_without_dj
     begin
       before
@@ -290,10 +332,10 @@ module Backgroundable
     processing!
   end
 
-  # relaunch? determines whether a job that didn't return an error should be rerun
+  # relaunch_on_error? determines whether a job should be rerun when an error occurs
   # NB: May be overridden for more subtle relaunch criteria
-  def relaunch?
-    errors.present?
+  def relaunch_on_error?
+    true
   end
 
   # We get to success without throwing an error, throw one if appropriate so DJ doesn't think we're cool
@@ -301,8 +343,13 @@ module Backgroundable
     # ...could have gone error-free because errors were reported only in the record
     # NB: This is a pretty crude report. For more specific info, the model should throw the error
     # with a proper report, which will then get recorded in errors[:base]
-    if relaunch?
-      raise Exception, self.errors.full_messages # Make sure DJ gets the memo
+    super if defined?(super) # Give all modules a shot at the results
+    if errors.any?
+      if relaunch_on_error? # Make sure DJ gets the memo and goes back again
+        raise Exception, self.errors.full_messages
+      else
+        errors.add :base, self.errors.full_messages
+      end
     end
     self.status = (errors.present? ? :bad : :good) if processing? # ...thus allowing others to set the status
     self.dj = nil if good?
@@ -315,7 +362,6 @@ module Backgroundable
         update_attribute :dj_id, dj&.id
       end
     end
-    super if defined?(super) # Give all modules a shot at the results
   end
 
   # When an unhandled error occurs, record it among the object's errors
@@ -325,11 +371,11 @@ module Backgroundable
   # NB: THIS IS THE PLACE FOR BACKGROUNDABLES TO RECORD ANY PERSISTENT ERROR STATE beyond :good or :bad status,
   # because, by default, that's all that's left after saving the record
   def error job, exception
-    if tracetop = exception.backtrace&.first
-      # Extract the file and line # from the stack top
-      tracetop = " at<br>" + tracetop.match(/(.*:[\d]*)/).to_s.if_present || tracetop
-      tracetop.sub! Rails.root.to_s+'/', ''
-    end
+    tracetop = exception.backtrace&.first
+    # Extract the file and line # from the stack top
+    tracetop = tracetop.match(/(.*:[\d]*)/).to_s.if_present || tracetop
+    tracetop.sub! Rails.root.to_s+'/', ''
+    puts "...error raised at #{tracetop}: #{exception}"
     errors.add :base, exception.to_s+tracetop
     self.status = :bad if processing? # ...thus allowing others to set the status
   end
@@ -337,11 +383,44 @@ module Backgroundable
   # The #after hook is called after #success or #error
   # At this point, the dj record persists iff there was an error (whether thrown by the work itself or by #success)
   def after job=dj
+    # puts ">>> Job on #{self.class.to_s}##{id} -> dj##{dj.id} scheduled to run again in #{dj.run_at - Time.now} seconds" if dj
   end
 
   def failure job=nil
-    logger.debug "Job on #{self.class.to_s}##{id} -> dj##{dj_id} Failed! Removing dj"
-    update_attribute :dj_id, nil
+    super if defined?(super)
+    puts ">>> Job on #{self.class.to_s}##{id} -> dj##{dj_id} failed permanently: Removing dj"
+    update_attribute :dj_id, nil # if !dj
+  end
+
+  # Raise an interrupt and wait till later if the other hasn't completed
+  def await other
+    unless other.complete?
+      # What to do next depends on whether we're running in a DelayedJob queue (dj exists) or not
+      if dj
+        # If we have a job queued, throw an interrupt so we go back in the queue
+        dj.attempts = dj.attempts - 1 if dj.attempts > 0
+        raise "#{self.class}##{id} deferring to #{other.class}##{other.id}"
+      else
+        # If there's no DelayedJob associated with the record but it still needs to run, run it manually
+        while !other.complete? do
+          other.bkg_land! true
+        end
+      end
+    end
+  end
+
+  # This is the default rescheduling time, defined here so that Backgroundables can defer to it
+  def reschedule_at current_time, attempts
+    current_time + (attempts**4) + 5
+  end
+
+  # Get a time to reschedule a job so that it waits on others.
+  # We assign a new time just after the conclusion of the others, if any
+  # If not, we fall back on the default, or just wait as usual
+  def reschedule_after *others
+    others.compact.map(&:dj).compact.collect { |other_dj| other_dj.run_at + 0.5.seconds }.max ||
+        (yield if block_given?) ||
+        (Time.now + 0.5.seconds)
   end
 
 end

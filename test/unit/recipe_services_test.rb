@@ -5,6 +5,7 @@ class RecipeServicesTest < ActiveSupport::TestCase
   fixtures :recipes
 
   def setup
+    super
     @test_url = 'http://www.realsimple.com/food-recipes/ingredients-guide/shrimp-00000000039364/index.html'
     @rcp1 = Recipe.new
     @rcp1.url = @test_url
@@ -20,7 +21,9 @@ class RecipeServicesTest < ActiveSupport::TestCase
     assert_not_nil PageRef.fetch(@test_url)
     rec = Recipe.find_by_url @test_url
     assert_equal @rcp1, rec
-    assert_not_nil rec.site
+    pr = rec.page_ref
+    assert_equal 404, pr.http_status # This is a bogus page => it doesn't get a site
+    assert_nil pr.site
   end
 
   test "lookup recipe with path" do

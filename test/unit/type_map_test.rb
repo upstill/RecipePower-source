@@ -8,6 +8,10 @@ class TypeMapTest < ActiveSupport::TestCase
         na: ["North American", 3],
         fr: ["French",  4]
     }
+
+  def setup
+    super
+  end
     
     test "max_index" do
         tm = TypeMap.new @@TestTbl, "nil entry"

@@ -65,11 +65,19 @@ module Pagerefable
           end
           if page_ref
             if page_ref.acceptable_url?(url_or_pr) { |errmsg| self.errors.add :url, "can't be used: #{errmsg}" }
-              page_ref.url = url_or_pr
+              # Assign the url to the PageRef, which doesn't return until the validity of the link is determined.
+              # The assignment returns the page_ref which holds it, which is normally the existing one. But if
+              # there is a redirect held by another page_ref, the assignment returns that. Either way, (re)assigning
+              # the page_ref gets the appropriate url
+              self.page_ref = page_ref.safe_assign url_or_pr
+              self.errors.add :url, "can't accept '#{url_or_pr}' due to error(s): \n\t'#{page_ref.error_message}'" if page_ref.http_status != 200
             end
           else
             self.page_ref = PageRef.fetch url_or_pr
-            if !page_ref || page_ref.errors.any?
+            if page_ref && !page_ref.errors.any?
+              # Ensure that the page_ref accesses the Pagerefable recipe
+              page_ref.recipes << self if (self.class == Recipe) && !(page_ref.recipes.to_a.include? self)
+            else
               self.errors.add :url, "can't be used: #{page_ref&.errors&.full_messages}"
             end
           end
@@ -98,18 +106,42 @@ module Pagerefable
     page_ref&.site
   end
 
-  # The backgroundable performs its delayed job by forcing the associated page_ref to do its job
-  # (synchronously if necessary)
-  def perform
-    page_ref.ensure_attributes
-    # Do we really want to fail/relaunch if the PageRef fails? Shouldn't that depend on the results?
-=begin
-    if page_ref.bad?
-      err_msg = "Page at '#{page_ref.url}' can't be gleaned: PageRef ##{page_ref.id} sez:\n#{page_ref.error_message}"
-      errors.add :url, err_msg
-      raise err_msg if page_ref.dj # PageRef is ready to try again => so should we be, so restart via Delayed::Job
+  # What attributes might we need to acquire from the associated PageRef (in the PageRef's terms)?
+  # This defaults to all needed attributes
+  def attributes_due_from_page_ref minimal_attributes=needed_attributes
+    minimal_attributes
+  end
+
+  # Decide whether background processing is needed on the basis of attributes expected from the page_ref
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
+    # If we haven't persisted, then the page_ref has no connection back
+    # page_ref.recipes << self unless persisted? || page_ref.recipes.to_a.find { |r| r == self }
+    return true if !page_ref
+    adopt_dependencies
+    if !page_ref.complete? || restart
+      page_ref.request_attributes attributes_due_from_page_ref(minimal_attribs), overwrite: overwrite, restart: restart
+      adopt_dependencies
     end
-=end
+    save if changed? && persisted?
+    (attributes_due_from_page_ref(minimal_attribs).present? && !page_ref.complete?)
+  end
+
+  def adopt_dependencies synchronous: false, final: false
+    if synchronous
+      # Force the page_ref to complete its background work (and that of its dependencies)
+      page_ref.adopt_dependencies synchronous: true, final: final
+      page_ref.bkg_land! true if attributes_due_from_page_ref.present?
+    end
+    super if defined? super
+  end
+
+  # The backgroundable performs its delayed job by not proceeding until the associated page_ref has done its job
+  # (synchronously if necessary)
+  # and then performing any other background work.
+  # NB: #await fires an interrupt so that we re-enter the queue if and when the page_ref hasn't finished
+  def perform
+    await page_ref if attributes_due_from_page_ref.present?
+    # page_ref.ensure_attributes attributes_due_from_page_ref
     super if defined?(super)
   end
 
@@ -144,7 +176,7 @@ module Pagerefable
   end
 
   def gleaning_attributes= attrhash
-    page_ref&.gleaning.hit_on_attributes attrhash, site if page_ref&.gleaned? && attrhash
+    page_ref&.gleaning.hit_on_attributes attrhash, site if page_ref&.gleaning&.good? && attrhash
   end
 
 end

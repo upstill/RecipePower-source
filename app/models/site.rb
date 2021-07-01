@@ -152,6 +152,11 @@ class Site < ApplicationRecord
   #...and associate with recipes via the recipe_page_refs that refer back here
   has_many :recipes, :through => :page_refs, :dependent=>:restrict_with_error
 
+
+  def standard_attributes
+    [ :name, :logo, :rss_feed ]
+  end
+
   before_validation do |site|
     # If either the root or the home haven't been set, derive one from the other
     if site.attribute_present? :root
@@ -164,10 +169,7 @@ class Site < ApplicationRecord
   # after_initialize :post_init
   validates_uniqueness_of :root
 
-  after_create { |site| site.request_attributes :name, :logo } # Start a job going to extract title, etc. from the home page
-
   after_save do |site|
-    bkg_launch if site.needed_attributes.present?
     # After-save task: reassign this site's entities to another site with a shorter root (set in #root=)
     # Reassign all of our pagerefs as necessary
     if saved_change_to_root? # Root has changed
@@ -192,9 +194,29 @@ class Site < ApplicationRecord
 
   ######### Trackable overrides ############
   ############## Trackable ############
-  # Request attributes of other objects
-  def to_get_from_page_ref attribs
-    attribs.collect { |my_attrib|
+
+  # Using a target list of needed attributes, set dependencies running as necessary
+  # and return a flag for whether THIS object should be launched for background work
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
+    build_page_ref unless page_ref
+    adopt_dependencies # Try to get valid attributes from page_ref
+    save if changed? && persisted?
+    if (npr = attributes_due_from_page_ref(minimal_attribs)).present? && (!page_ref.complete? || restart)
+      page_ref.request_attributes npr
+    end
+  end
+
+  # Get the available attributes from the PageRef
+  def adopt_dependencies synchronous: false, final: false
+    super if defined? super # Force the page_ref to complete its background work
+    adopt_dependency :logo, page_ref, :picurl
+    adopt_dependency :name, page_ref, :title
+    adopt_dependency :description, page_ref, :description
+  end
+
+  # We get all of our tracked attributes from the page_ref
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    (self.class.tracked_attributes & minimal_attribs & needed_attributes).collect { |my_attrib|
       # Provide the attribute that will receive the value for the given PageRef attribute
       case my_attrib
       when :name
@@ -208,24 +230,14 @@ class Site < ApplicationRecord
       else
         my_attrib
       end
-    }
+    } & PageRef.tracked_attributes
   end
 
-  def request_dependencies 
-    build_page_ref unless page_ref
-    page_ref.request_attributes *to_get_from_page_ref(open_attributes)
-  end
-
-  # Get the available attributes from the PageRef
-  def adopt_dependencies
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = to_get_from_page_ref needed_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
-    adopt_dependency :logo, page_ref, :picurl
-    adopt_dependency :name, page_ref, :title
-    adopt_dependency :description, page_ref, :description
+  def perform
+    super if defined? super
+    # Adopt all the rss feeds found in the page_ref
     page_ref.rss_feeds.map { |feedstr| assert_feed feedstr } if page_ref.rss_feeds_ready?
+    self.rss_feed_needed = false
   end
 
   # When attributes are selected directly and returned as gleaning attributes, assert them into the model
@@ -253,17 +265,25 @@ class Site < ApplicationRecord
 
 public
 
+  # Propose a feed for the given url, setting :approved as needed
+  # NB: the rub here is that an RSS feed as found on the site may redirect to, say, a FeedBurner link, which means
+  # 1) the ACTUAL url recorded may differ from that proposed, and
+  # 2) it's possible to introduce url collisions thereby.
+  # So: we fail silently to add the feed if the given URL ultimately conflicts with one already extant
   def assert_feed url, approved=false
     url = normalize_url url
-    feed = (extant = feeds.find_by(url: url)) || Feed.create_with(approved: approved, site: self).find_or_create_by(url: url)
-    if feed&.errors.empty? && !extant
-      if feed.approved != approved
-        feed.approved = approved
-        feed.save
+    unless extant = feeds.to_a.find { |f| f.url == url }
+      f = Feed.new approved: approved, url: url, site: self
+      f.follow_url
+      unless extant = feeds.to_a.find { |extant| extant.url == f.url } # Check for redundancy in the ultimate url
+        self.feeds << f if f.valid?
+        return
       end
-      # Newly created feed => enqueue it and add it to the list
-      Delayed::Job.enqueue feed  # New feeds get updated by default
-      self.feeds << feed unless feeds.exists?(id: feed.id)
+    end
+    # The extant feed may need its :approved flag updated
+    if extant.approved != approved
+      extant.approved = approved
+      extant.update_attribute :approved, approved if extant.persisted?
     end
   end
 

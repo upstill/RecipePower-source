@@ -2,6 +2,10 @@ require 'test_helper'
 require './lib/uri_utils'
 class UriUtilsTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "all" do
     assert_equal [], normalize_urls([])
     assert_equal ['http://ganga.com/'], normalize_urls('http://ganga.com')

@@ -13,6 +13,21 @@ class Gleaning < ApplicationRecord
   accepts_nested_attributes_for :page_ref
   accepts_nested_attributes_for :site
 
+  # These are virtual attributes we can get from the results, as defined by Finders with the corresponding labels.
+  # (Commented vas here have been subsumed into attributes of the Gleaning)
+  delegate :uri, :uris,
+           :titles, # :title,
+           :descriptions, # :description,
+           :image, :images,
+           # :author, :authors,
+           :author_name, :author_names,
+           # :author_link, :author_links,
+           # :tag, :tags,
+           # :site_name, :site_names,
+           :rss_feed, :rss_feeds,
+           # :content, :contents,
+           :to => :results
+
   def self.mass_assignable_attributes
     [ { :page_ref_attributes => (PageRef.mass_assignable_attributes << :id ) }]
   end
@@ -23,9 +38,9 @@ class Gleaning < ApplicationRecord
   
   include Trackable
   # "URI", "Image", "Title", "Author Name", "Author Link", "Description", "Tags", "Site Name", "RSS Feed", "Author", "Content"
-  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content
+  attr_trackable :url, :picurl, :title, :author, :author_link, :description, :tags, :site_name, :rss_feeds, :content, :http_status
 
-  # Define a mapping from Result label to the attribute that reflects it
+  # Define a mapping from Result label to the attribute that takes it on
   def self.attribute_for_label label
     case label
     when "URI"
@@ -61,23 +76,30 @@ class Gleaning < ApplicationRecord
     results&.labels || []
   end
 
-  def adopt_dependencies
+  def adopt_dependencies synchronous: false, final: false
     return if bad? || results.empty?
     results.labels.each do |label|
-      next unless (attrname = Gleaning.attribute_for_label(label)) &&
-          attrib_open?(attrname)
-      self.send :"#{attrname}=",
-                case label
-                when 'RSS Feed'
-                  results&.results_for 'RSS Feed'
-                when 'Tags', 'Author'
-                  results&.results_for(label).uniq.join(', ')
-                else
-                  results&.result_for label
-                end
+      next unless attrname = Gleaning.attribute_for_label(label)
+      next unless attrib_open?(attrname)
+      if label != 'RSS Feed' # RSS Feeds are satisfied even without finding anything
+        next if results[label].empty?
+      end
+      value =
+          case label
+          when 'RSS Feed'
+            results&.results_for 'RSS Feed'
+          when 'Tags', 'Author'
+            results&.results_for(label).uniq.join(', ')
+          else
+            results&.result_for label
+          end
+      self.send :"#{attrname}=", value
     end
-    # Clear the needed bit for all unfound attributes, to forestall more gleaning
-    clear_needed_attributes
+    self.content_needed = false # It is a non-fatal error if content can't be extracted
+  end
+
+  def relaunch_on_error?
+    http_status_needed || !permanent_http_error?(http_status)
   end
 
   # Execute a gleaning on the page_ref's url
@@ -101,10 +123,12 @@ class Gleaning < ApplicationRecord
     (results && results[label]) ? results[label].map(&:out).flatten.uniq : []
   end
 
+=begin
   # Access the results by label; singular => return first result, plural => return all
   def method_missing namesym, *args
     results&.send namesym, *args
   end
+=end
 
   # Add results (presumably from a new finder) to the results in a Gleaning
   def assimilate_finder_results results_hash

@@ -4,9 +4,8 @@ require 'recipe_page.rb'
 class ParserServices
   attr_reader :seeker,  # Resulting tree of seeker results (returned by #parse)
               # :parser, # Parser, possibly with modified grammar, to be employed
-              :grammar_mods, # Modifications to be used on the parser beforehand
+              :grammar_mods # Modifications to be used on the parser beforehand
               # :token, # What the last parse requested
-              :context_free # Whether the last parse was context free
   delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, to: :seeker
 
   def initialize(entity: nil, token: nil, content: nil, lexaur: nil, grammar_mods: nil)
@@ -23,7 +22,6 @@ when the entities on which they depend are expressed.
 The dependencies are as follows:
 @seeker
   @token
-  @context_free
   @grammar_mods
   @nokoscan
     @content
@@ -102,13 +100,6 @@ The dependencies are as follows:
     end
   end
 
-  def context_free=b
-    if @context_free != b
-      @context_free = b
-      self.seeker = nil
-    end
-  end
-
   def seeker=s
     if s != @seeker
       @seeker = s
@@ -147,7 +138,7 @@ The dependencies are as follows:
     end
   end
 
-  def ParserServices.parse entity: nil, content: nil, token: nil, lexaur: nil, context_free: nil, grammar_mods: nil
+  def ParserServices.parse entity: nil, content: nil, token: nil, lexaur: nil, grammar_mods: nil
     # There must be EITHER content or an entity specified
     if content.nil? && entity.nil?
       raise "Error in ParserServices.parse: must provide EITHER content or an entity"
@@ -157,7 +148,7 @@ The dependencies are as follows:
       raise "Error in ParserServices.parse: must provide EITHER a token or an entity"
     end
     ps = ParserServices.new entity: entity, token: token, content: content, lexaur: lexaur, grammar_mods: grammar_mods
-    ps.parse context_free: context_free
+    ps.parse
     ps
   end
 
@@ -165,13 +156,13 @@ The dependencies are as follows:
   def chunk_line token: :rp_ingline
     nks = nokoscan # Save for later
     ct = @content
-    results = nks.split(',').collect { |chunk| parse content: chunk, token: token, context_free: true }
+    results = nks.split(',').collect { |chunk| parse content: chunk, token: token }
     # If the last clause contains multiple 'and' tokens, split across each one in turn
     turns = results.last.head_stream.split('and').delete_if &(:blank?)
     pairs = []
     turns[0...-1].each_index do |i|
-      pairs.push [ parse(content: turns[0].encompass(turns[i]), token: token, context_free: true),
-                   parse(content: turns[(i+1)].encompass(turns[-1]), token: token, context_free: true) ]
+      pairs.push [ parse(content: turns[0].encompass(turns[i]), token: token),
+                   parse(content: turns[(i+1)].encompass(turns[-1]), token: token) ]
     end
     if pairs.first&.all? &:'success?'
       results.pop
@@ -184,16 +175,9 @@ The dependencies are as follows:
   # Extract information from an entity (Recipe or RecipePage) or presented content
   def parse options={}
     self.content = options[:content] if options[:content]
-    self.context_free = options[:context_free] if options[:context_free]
     self.token = options[:token] if options[:token]
     parser.stream = nokoscan
-    if @context_free
-      parser.push_grammar token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}
-      @seeker = parser.match token
-      parser.pop_grammar
-    else
-      @seeker = parser.match token
-    end
+    @seeker = parser.match token
 
 =begin
     # Second-guess a failed parse
@@ -275,7 +259,7 @@ The dependencies are as follows:
           yield typenum, tagstr if block_given?
         end
       else
-        parse content: elmt, token: tokens.first, context_free: true
+        parse content: elmt, token: tokens.first
         seeker.enclose_all parser: parser
       end
     end

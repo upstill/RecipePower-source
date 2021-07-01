@@ -5,6 +5,10 @@ class RefermentTest < ActiveSupport::TestCase
     fixtures :recipes
     fixtures :tags
 
+  def setup
+    super
+  end
+
     test "Referent takes Reference" do
       rft = Referent.express tags(:jal)
       assert (rft.class==IngredientReferent), "Couldn't get referent"

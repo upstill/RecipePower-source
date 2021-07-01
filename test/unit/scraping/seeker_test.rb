@@ -97,6 +97,13 @@ class SeekerTest < ActiveSupport::TestCase
     refute ts.tail_stream.more?
   end
 
+  test 'elide parentheses in AmountSeeker' do
+    lex = Lexaur.from_tags
+    scanner = StrScanner.new("(if you want to get ahead).")
+    ts = AmountSeeker.seek scanner, lexaur: lex
+    refute ts&.success?
+  end
+
   test 'match an amount' do
     lex = Lexaur.from_tags
     scanner = StrScanner.new('fourscore and 1/2 cup ago')

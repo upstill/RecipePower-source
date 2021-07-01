@@ -31,6 +31,10 @@ end
 
 require 'test_helper'
 class SearchTest < ActiveSupport::TestCase
+
+  def setup
+    super
+  end
   test "Initialized properly" do
     sn = SearchTestNode.new
     assert_equal 1.0, sn.search_node_weight

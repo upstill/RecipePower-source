@@ -141,7 +141,7 @@ class DomTraversor
       nxt = mark
       mark = mark.parent
       while nxt = nxt.next
-        result.push nxt
+        result.unshift nxt
       end
     end
     result

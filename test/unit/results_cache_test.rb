@@ -3,7 +3,9 @@ require 'test_helper'
 require './lib/uri_utils.rb'
 
 class ResultsCacheTest < ActiveSupport::TestCase
+
   def setup
+    super
     @userid = 4
   end
   # TODO tests for ResultsCache

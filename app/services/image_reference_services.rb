@@ -70,7 +70,7 @@ class ImageReferenceServices
       self.find_by(thumbdata: url) ||
           begin
             ref = ImageReferenceServices.build url: ImageReference.fake_url
-            ref.accept_attribute :thumbdata, url
+            ref.thumbdata = url # ref.accept_attribute :thumbdata, url
             ref.status = :good
             ref
           end
@@ -119,13 +119,17 @@ class ImageReferenceServices
     when :url
       self.unpersisted[keyval[:url]]
     when :thumbdata
-      v = self.unpersisted.find { |key, value| value.thumbdata == keyval[:thumbdata] }
-      v&.values&.first
+      v = self.unpersisted.values.find { |value| value.thumbdata == keyval[:thumbdata] }
+      # v&.values&.first
     end || ImageReference.find_by(keyval)
   end
 
   def self.unpersisted
     (@@UNPERSISTED ||= {}).keep_if { |url, image_ref| !image_ref.persisted? }
+  end
+
+  def self.clear_unpersisted
+    @@UNPERSISTED = {}
   end
 
   # Build a new ImageReference and add it to the unpersisted set

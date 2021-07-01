@@ -23,9 +23,6 @@ class RecipesController < CollectibleController
         pr.kind = 'recipe_page'
         pr.save
       end
-      # Fire up the parser
-      rp.request_attributes :content
-      rp.save
     end
     redirect_to recipe_page_path(rp, { trigger: params['launch_dialog'] }.compact)
   end

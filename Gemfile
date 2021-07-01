@@ -165,6 +165,8 @@ gem 'fast-stemmer', '~> 1.0.2'
 # For beautifying recipe content https://github.com/threedaymonk/htmlbeautifier
 gem 'htmlbeautifier'
 
+gem 'pp' # To enable #pretty_inspect for indented output
+
 ###### TODO are these even being used?
 
 # Enables use of content_for in your controllers
@@ -199,3 +201,5 @@ gem 'will_paginate', '~> 3.0'  # https://github.com/mislav/will_paginate
 
 # For redirecting recipepower.com to www.recipepower.com https://github.com/jtrupiano/rack-rewrite
 gem 'rack-rewrite', '~> 1.5.0'
+
+gem 'yard'

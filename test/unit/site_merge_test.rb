@@ -5,6 +5,10 @@ class SiteMergeTest < ActiveSupport::TestCase
   fixtures :users
   fixtures :tags
 
+  def setup
+    super
+  end
+
   # TODO Need to test for merge:
   # -- user's tags get successfully passed
   test "Successfully creating sites" do

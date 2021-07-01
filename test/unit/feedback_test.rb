@@ -5,6 +5,10 @@ require 'test_helper'
 class FeedbackTest
   ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   def test_should_require_comment
     assert !create_comment(:comment => " ").valid?
   end

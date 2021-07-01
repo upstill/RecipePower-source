@@ -69,6 +69,7 @@ class ParsingServices
 
   # After a seeker has come back from parsing with a failure, deploy strategies for re-parsing
   def self.second_guess seeker, parser, token
+    return nil
     # For any given token, assess the result and take any needed steps to correct it.
     grammar_mods = nil
     case token
@@ -88,11 +89,8 @@ class ParsingServices
     seeker
   end
 
-  def self.parse_from_string input, token, site: nil, lexaur: nil, context_free: false
-    grammar_mods = context_free ?
-                       { token => { :in_css_match => nil, :at_css_match => nil, :after_css_match => nil}} :
-                       { }
-    parser = Parser.new input, lexaur, grammar_mods
+  def self.parse_from_string input, token, site: nil, lexaur: nil
+    parser = Parser.new input, lexaur
     match = parser.match token
     match = second_guess match, parser, token.to_sym # Renegotiate for the contents of the results
     match
@@ -184,7 +182,7 @@ private
   def parse_recipe content
     @parser = Parser.new content, @lexaur, @entity.site.grammar_mods
     @seeker = @parser.match :rp_recipe
-    @seeker = ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
+    @seeker ||= ParsingServices.second_guess @seeker, @parser, :rp_recipe # Renegotiate for the contents of the results
   end
 
   # Execute a query, etc., on a seeker other than the last parsing result (perhaps a subtree)

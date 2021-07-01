@@ -5,6 +5,10 @@ class ReferentServicesTest < ActiveSupport::TestCase
   fixtures :recipes
   fixtures :tags
 
+  def setup
+    super
+  end
+
   test "Semantic parenthood set up correctly" do
     dessert = referents(:dessert)
     pie = referents(:pie)

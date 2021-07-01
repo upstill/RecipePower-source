@@ -1,0 +1,21 @@
+---
+:root: www.foodandwine.com
+:trimmers:
+- div.articleContainer__rail
+- div.docked-sharebar
+- div.lazy-image
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h2
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h2
+  :rp_instructions:
+    :in_css_match:
+:sample_url: http://www.foodandwine.com/recipes/stuffed-kale-with-bulgur-tabbouleh-and-lime-yogurt-dip
+:sample_title: "Stuffed Kale with Bulgur Tabbouleh and Lime Yogurt Dip\n Recipe -
+  \nJean-Georges Vongerichten\n | Food & Wine"

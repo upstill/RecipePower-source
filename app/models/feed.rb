@@ -30,10 +30,10 @@ class Feed < ApplicationRecord
   after_save { |feed|
     if feed.approved_changed?
       site = feed.site
-      site.feeds_count = site.feeds.count
-      site.approved_feeds_count = site.feeds.where(approved: true).count
-      site.save
+      site.update_column :feeds_count, site.feeds.count
+      site.update_column :approved_feeds_count, site.feeds.where(approved: true).count
     end
+    bkg_launch true, run_at: (last_post_date ? 1.week : 1.minute).from_now
   }
 
   belongs_to :site, :autosave => true
@@ -81,8 +81,6 @@ class Feed < ApplicationRecord
       unless @fetched.feed_url.blank? || (url == @fetched.feed_url)
         # When the URL changes, clear and update the feed entries
         self.url = @fetched.feed_url
-        feed_entries.clear
-        FeedEntry.update_from_feed self
       end
     else
       false

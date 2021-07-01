@@ -1,0 +1,16 @@
+---
+:root: shesimmers.com
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match: {}
+  :rp_inglist:
+    :in_css_match: ul
+  :rp_ingline:
+    :in_css_match: li.ingredient
+  :rp_title:
+    :in_css_match: div.ERSName
+  :rp_instructions:
+    :in_css_match: ol
+:sample_url: http://shesimmers.com/2013/01/lotus-in-thai-cooking-culture.html?utm_source=feedburner&utm_medium=feed&utm_campaign=Feed%3A+SheSimmers+%28She+Simmers+...%29
+:sample_title: Lotus in Thai Cuisine and Culture

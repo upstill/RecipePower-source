@@ -34,9 +34,9 @@ class Parser
       :rp_num => '#',
       :rp_unit => 'Unit',
       :rp_presteps => 'Conditions',
-      :rp_condition => 'Condit. Name',
+      :rp_condition_tag => 'Condit. Name',
       :rp_ingspec => 'Ingredients',
-      :rp_ingname => 'Ingred. Name',
+      :rp_ingredient_tag => 'Ingred. Name',
       :rp_instructions => 'Instructions',
   }
 
@@ -105,12 +105,17 @@ class Parser
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
     @grammar = Parser.initialized_grammar
-    modify_grammar YAML.load(grammar_mods.to_yaml) if grammar_mods # Protect them against modification
+    # Nicify the prior grammar and the mods
+    finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
+    end
+    if Rails.env.test?
+      puts ">>>>>>>>>>> Freezing grammar:"
+      @grammar.keys.each { |token| puts ":#{token} =>", indent_lines(@grammar[token]) }
     end
     @grammar.freeze
     @lexaur = lex if lex
@@ -122,24 +127,29 @@ class Parser
                       noko_scanner_or_nkdoc_or_nktokens :
                       NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
-
+  @@ExclusiveOptions = [ # Each group of options is exclusive: at most one from each group can be declared
+      %i{ bound terminus }, # :bound and :terminus are exclusive options
+      %i{ atline inline },  # :atline and :inline are exclusive options
+      %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
+  ]
   # Revise the default grammar by specifying new bindings for tokens
-  # 'gm' is a hash:
-  # -- keys are tokens in the grammar
-  # -- values are hashes to be merged with the existing entries
-  def modify_grammar gm
+  # 'mods_plus' is a hash:
+  # -- keys are :rp_* tokens in the grammar (OR high-level :gm_* instructions for generating mod entries)
+  # -- values are hashes to be merged with the existing entries (OR parameters for the modifier)
+  def finalise_grammar mods_plus
     def cleanup_entry token, entry
       return {} if entry.nil?
       return entry.map { |subentry| cleanup_entry token, subentry } if entry.is_a?(Array)
       # Convert a reference to a Seeker class to the class itself
       return entry.constantize if entry.is_a?(String) && entry.match(/Seeker$/)
+      # return entry if entry.is_a?(String) && entry.match(/Seeker$/)
       return entry unless entry.is_a?(Hash)
       # Syntactic sugar: these flags may specify the actual match. Make this explicit
       [
         :checklist, # All elements must be matched, but the order is unimportant
         :or, # The list is taken as an ordered set of alternatives, any of which will match the list
         :repeating, # The spec will be matched repeatedly until the end of input
-        :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
+        # :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
         :optional # Failure to match is not a failure
       ].each do |flag|
@@ -149,11 +159,7 @@ class Parser
       end
       entry[:match] = cleanup_entry :match, entry[:match] if entry[:match]
       keys = entry.keys.map &:to_sym # Ensure all keys are symbols
-      [
-          %i{ bound terminus }, # :bound and :terminus are exclusive options
-          %i{ atline inline },  # :atline and :inline are exclusive options
-          %i{ in_css_match at_css_match after_css_match } # :in_css_match, :at_css_match and :after_css_match are exclusive options
-      ].each do |flagset|
+      @@ExclusiveOptions.each do |flagset|
         # At most one of the flags in the flagset can be non-nil
         setflags = (entry.slice *flagset).compact # Eliminating the nil flags
         if setflags.count > 1
@@ -169,19 +175,52 @@ class Parser
       return original unless mod && mod != {}
       return mod unless original&.is_a?(Hash)
       mod.each do |key, value|
-        if value.nil?
+        case value
+        when nil?
           original.delete key
+        when Hash
+          original[key] = merge_entries(original[key], value)
+        when Array
+          # Merge the two arrays
+          value.each_index { |ix| original[key][ix] = merge_entries(original[key][ix], value[ix]) }
         else
-          original[key] = value.is_a?(Hash) ? merge_entries(original[key], value) : value
+          original[key] = value
+          # Enforce exclusive options by removing the other members of the set in which the key appears (if any)
+          @@ExclusiveOptions.each { |set|
+            (set - [key]).each { |keyout| original.delete keyout } if set.include? key
+          }
         end
       end
       original
     end
+    todo = @grammar.keys.count # 27
+    # success on 26, fail on 27
+    puts "Finalising #{todo} grammar entries" if Rails.env.test?
+    grammar_mods = processed_mods mods_plus
     @grammar.keys.each do |key|
+      break if todo == 0
+      todo -= 1
       key = key.to_sym
-      entry = cleanup_entry key, @grammar[key]
-      mod = cleanup_entry key, gm[key]
-      @grammar[key] = merge_entries entry, mod # Allows elements to be removed
+      original = @grammar[key]
+      cleaned_up = cleanup_entry key, original  # Allows elements to be removed
+      @grammar[key] =
+          if grammar_mods && (mod = cleanup_entry key, grammar_mods[key]).present?
+            merge_entries cleaned_up, mod
+          else
+            cleaned_up
+          end
+      if Rails.env.test?
+        if @grammar[key] == original
+          puts ":#{key} unchanged"
+        else
+          puts "#{mod.present? ? 'Modifying' : 'Finalising' } grammar entry for :#{key}:", indent_lines(original)
+          if mod.present?
+            puts "  Cleaned:", indent_lines(cleaned_up) if cleaned_up != original
+            puts "  Modifier:", indent_lines(mod)
+          end
+          puts "  Final (#{mod.present? ? 'after' : 'no'} mod): ", indent_lines(@grammar[key])
+        end
+      end
     end
   end
 
@@ -190,7 +229,7 @@ class Parser
     @grammar_stack ||= []
     @grammar_stack.push grammar
     @grammar = YAML.load(grammar.to_yaml) # Clone the grammar for modification
-    modify_grammar YAML.load(mods.to_yaml)
+    finalise_grammar YAML.load(mods.to_yaml)
   end
 
   # Restore the grammar to its prior state
@@ -200,7 +239,12 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream
-    matched = match_specification stream, grammar[token], token
+    puts ">>>>>>>>>>> Entering Parse for :#{token}" if Rails.env.test?
+    if grammar[token]
+      matched = match_specification stream, grammar[token], token
+    else
+      matched = Seeker.failed stream, stream, token
+    end
     matched
   end
 
@@ -276,6 +320,79 @@ class Parser
   end
 
   private
+
+  def processed_mods mods_plus
+    def selector_for tag = '', options={}
+      return options[:selector] if options[:selector].present?
+      if options[:css_class].present?
+        return tag + '.' + options[:css_class]
+      else
+        return tag
+      end
+    end
+    grammar_mods = {}
+    if mods_plus
+      # Start by mapping high-level modification tags into actual mods
+      # The :gm_* flags in grammar modifications provide high-level modifications for different purpose.
+      # They're effectively macro modifications of the grammar.
+      # Each :gm_* key MAY have a value to parametrize it
+      # Copy actual grammar entries
+      mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
+      # Apply meta-mods
+      mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
+        params, val = {}, mods_plus[key]
+        params, val = val, val.delete(:flavor) if val.is_a?(Hash)
+        case key.to_sym
+        when :gm_recipes
+          # We match recipes within a list and individual recipes with the same selector
+          # Expecting a hash for the match specifier (i.e., :in_css_match => 'h2' )
+          grammar_mods[:rp_recipelist] = { match: params }
+          grammar_mods[:rp_recipe] = params
+        when :gm_inglist
+          case val.to_sym
+          when :unordered_list
+            # params:
+            # list_class: css class of the 'ul' tag for an ingredient list
+            # line_class: css class of the 'li' tags for ingredient lines
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('ul', css_class: params[:list_class]) } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => selector_for('li', css_class: params[:line_class]) }
+          when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
+            grammar_mods[:rp_inglist] = {
+                :match => :rp_ingline, # Remove the label spec
+                :orlist => :predivide  # Divide the text up BEFORE passing to the ingredient line match
+            }
+          when :paragraph
+            # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('p', params ) } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true }
+          end
+        end
+      end
+    end
+    grammar_mods
+  end
+
+  def indentation
+    @indent ||= 0
+    "|  " * @indent
+  end
+
+  def puts_indented str
+    puts str.split("\n").collect { |line| indentation+line }.join("\n")
+  end
+
+  def report_enter *args
+    puts_indented args.shift
+    @indent += 1
+    while args.present? do
+      puts_indented args.shift
+    end
+  end
+
+  def report_exit msg
+    @indent -= 1
+    puts_indented msg if msg.present?
+  end
 
   # Match a single specification to the provided stream, whether the spec is given directly in the grammar or included in a list.
   # Return a Seeker for the result that includes:
@@ -403,21 +520,29 @@ class Parser
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
       children = []
       start_scanner = scanner
-      while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
-        child = match_specification scanner, spec
-        break if !child.success?
-        children << child
-        scanner = child.next
-        case scanner.peek
-        when 'and', 'or'
-          # We expect a terminating entity
-          child = match_specification scanner.rest, spec
-          children << child if child.success?
-          break
-        when ','
-          scanner = scanner.rest
-        else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
-          break
+      if context[:orlist] == :predivide
+        # Rather than let the child delimit the list, pass successive restricted scanners
+        children = scanner.partition.collect do |subscanner|
+          match_specification subscanner, spec
+        end
+        children.keep_if &:success?
+      else
+        while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+          child = match_specification scanner, spec
+          break if !child.success?
+          children << child
+          scanner = child.next
+          case scanner.peek
+          when 'and', 'or'
+            # We expect a terminating entity
+            child = match_specification scanner.rest, spec
+            children << child if child.success?
+            break
+          when ','
+            scanner = scanner.rest
+          else # No delimiter subsequent: we're done. This allows for a singular list, but also doesn't require and/or
+            break
+          end
         end
       end
       return case children.count
@@ -437,7 +562,11 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      match_specification scanner, @grammar[spec], spec, context
+      str = (scanner.to_s.truncate 100).sub "\n", '\n'
+      report_enter "Seeking :#{spec} on '#{str}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
+      returned = match_specification scanner, @grammar[spec], spec, context
+      report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
+      returned
     when String
       StringSeeker.match scanner.past_newline, string: spec, token: token
     when Array
@@ -508,10 +637,14 @@ class Parser
       end
     end
     # If there's only a single child and no token, just return that child
-    children.compact!
-    (children.count == 1 && token.nil?) ?
-        children.first :
-        Seeker.new(start_stream, end_stream, token, children)
+    # children.compact!
+    children = children.compact.map { |child| child.token ? child : child.children }.flatten(1).compact
+    if children.count == 1 && token.nil?
+      children.first.tail_stream = end_stream
+      children.first
+    else
+      Seeker.new(start_stream, end_stream, token, children)
+    end
   end
 
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),
@@ -526,7 +659,7 @@ class Parser
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
-                 :orlist, # The item will be repeatedly matched in the form of
+                 # :orlist, # The item will be repeatedly matched in the form of
                  :parenthetical, # Match inside parentheses
                  :optional # Failure to match is not a failure
               ].find { |flag| spec.key?(flag) && spec[flag] != true }
@@ -629,5 +762,4 @@ class ParserEvaluator
     end
     collected_tokens
   end
-
 end

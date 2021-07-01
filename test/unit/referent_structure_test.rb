@@ -3,6 +3,10 @@ require 'test_helper'
 require 'page_ref.rb'
 class ReferentStructureTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "Successfully creating tags" do
     goat_milk_tag = create :ingredient_tag, name: "goat milk"
     assert_not_nil goat_milk_tag, "Goat Milk Tag not created"

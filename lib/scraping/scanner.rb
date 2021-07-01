@@ -9,9 +9,9 @@ require 'scraping/noko_utils.rb'
 # text element is blank.
 # We must also take care not to violate the associated grammar hierarchy:
 #   we want to tag the highest compatible node
-def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil
+def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value: nil, parser_evaluator: nil
 
-  # tag = tag.to_s || 'span'
+  tag = tag&.to_s || 'span'
   rp_elmt_class ||= ''
 
   # The set of nodes to search is the node's ancestors,
@@ -25,13 +25,14 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
     return unless nknode_text_before(first_te, within: anc).blank? && nknode_text_after(last_te, within: anc).blank?
     # Disqualify a node that can't be contained under the requisite class
     if (tag.blank? || anc.name == tag) && (value.nil? || anc['value'].nil?)
-      clear_classification_context anc, rp_elmt_class
+      nknode_clear_classification_context anc, rp_elmt_class, parser_evaluator: parser_evaluator
       nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
       return anc
     #elsif (incompatible_classes = nknode_rp_classes(anc).delete_if { |cl| @parser_evaluator.can_include? rp_elmt_class, cl }).present?
     #  nknode_rp_classes anc, (nknode_rp_classes(anc) - incompatible_classes)
     end
   end
+  return nil
 end
 
 # Minimize the text enclosed by the two text elements, by ignoring empty text
@@ -199,6 +200,10 @@ class Scanner < Object
 
   end
 
+  def more?
+    @pos < @bound # @length
+  end
+
   # Skip any newlines
   def past_newline
     result = self
@@ -217,6 +222,31 @@ class Scanner < Object
   # Provide a string representing the content of the stream from its current position, terminating at the bound
   def to_s limit = @bound
     peek (limit - @pos)
+  end
+
+  # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
+  def partition how: :list, elide_parentheses: true
+    cl = self.rest 0
+    candidate = self
+    depth = 0
+    result = [ ]
+    while cl.more? do
+      case this = cl.peek
+      when '('
+        depth = depth + 1
+      when ')'
+        depth = depth - 1
+      when ',', 'and'
+        # Add the scanner to the list if not within parentheses
+        if depth == 0
+          result << candidate.except(cl) if candidate.pos != cl.pos
+          candidate = cl.rest
+          break unless this == ','
+        end
+      end
+      cl.first
+    end
+    return result + [ candidate ]
   end
 
 end
@@ -262,10 +292,6 @@ class StrScanner < Scanner
   # Return this scanner, exhausted
   def end
     StrScanner.new @strings, @bound, @bound
-  end
-
-  def more?
-    @pos < @bound # @length
   end
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
@@ -374,6 +400,31 @@ class NokoScanner # < Scanner
   # Return this scanner, exhausted
   def end
     NokoScanner.new tokens, @bound, @bound
+  end
+
+  # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
+  def partition how: :list, elide_parentheses: true
+    cl = self.rest 0
+    candidate = self
+    depth = 0
+    result = [ ]
+    while cl.more? do
+      case this = cl.peek
+      when '('
+        depth = depth + 1
+      when ')'
+        depth = depth - 1
+      when ',', 'and', 'or'
+        # Add the scanner to the list if not within parentheses
+        if depth == 0
+          result << candidate.except(cl) if candidate.pos != cl.pos
+          candidate = cl.rest
+          break unless this == ','
+        end
+      end
+      cl.first
+    end
+    return result + [ candidate ]
   end
 
   # Skip any newlines

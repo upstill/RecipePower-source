@@ -5,6 +5,10 @@ class LinkableTest < ActiveSupport::TestCase
   fixtures :tags
   fixtures :recipes
 
+  def setup
+    super
+  end
+
   test "Make New Recipe" do
     rcp = CollectibleServices.find_or_create( url: 'http://www.tasteofbeirut.com/kurdish-bulgur-and-turnip-pilaf-grar-ba-shyallem/', title: "Some title or other" )
     assert rcp.errors.empty?, "Recipe should be initialized successfully"

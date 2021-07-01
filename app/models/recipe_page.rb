@@ -18,36 +18,36 @@ class RecipePage < ApplicationRecord
   def self.mass_assignable_attributes
     (defined?(super) ? super : []) + [ :content, :picurl, :title, :url, :page_ref_attributes => (PageRef.mass_assignable_attributes + [ :id, recipes_attributes: [:title, :id, :anchor_path, :focus_path] ] )  ]
   end
-  
-  # To be overridden by entities to ensure that attributes are needed
-  def request_for_background
-    # Content is refreshed on first save
-    refresh_attributes :content
+
+  def standard_attributes
+    [ :content ]
   end
 
-  ############# Backgroundable #############
+  ##### Trackable matters #########
+
+  def attributes_due_from_page_ref minimal_attribs=needed_attributes
+    PageRef.tracked_attributes & [ :content, :picurl, :title ] & minimal_attribs & needed_attributes
+  end
 
   # In order to make our content, we need content from the PageRef
-  def request_dependencies
-    page_ref.request_attributes *(needed_attributes & [ :content, :picurl, :title ]) # , :description
-    adopt_dependencies # If the PageRef has already satisfied our needs
+  def drive_dependencies minimal_attribs=needed_attributes, overwrite: false, restart: false
+    super || content_needed?
   end
 
-  def adopt_dependencies
-    super if defined? super
-    # Get the available attributes from the PageRef
-    # Translate what the PageRef is offering into our attributes
-    if (needed_from_page_ref = needed_attributes & PageRef.tracked_attributes).present?
-      page_ref.ensure_attributes *needed_from_page_ref
-    end
+  def adopt_dependencies synchronous: false, final: false
+    super if defined? super # Get the available attributes from the PageRef
     adopt_dependency :picurl, page_ref
     adopt_dependency :title, page_ref
   end
 
+  ############# Backgroundable #############
+
   def perform
     # NB: we don't block on the PageRef to avoid circular dependency
-    # page_ref.ensure_attributes :content
-    if content_needed? && page_ref.content_ready?
+    # Keep failing until the page_ref has completed
+    super if defined?(super) # await page_ref as required
+    if content_needed?
+      await page_ref unless page_ref.content_ready?
       # Clear all recipes but the first
       parsing_input = page_ref.trimmed_content
       if parsing_input.present?
@@ -64,7 +64,7 @@ class RecipePage < ApplicationRecord
 
         # Try to match existing recipes on selection, collecting those that don't match
         unresolved = []
-        page_ref.recipes.each do |recipe|
+        page_ref.recipes.to_a.each do |recipe|
           # Keep recipes that can't be matched on path
           if rcpdi = rcpdata.find_index { |rcpdatum| recipe.anchor_path == rcpdatum[:anchor_path] && recipe.focus_path == rcpdatum[:focus_path] }
             rcpdata.delete_at rcpdi
@@ -87,20 +87,24 @@ class RecipePage < ApplicationRecord
         # Assign remaining data to random unresolved recipes
         unresolved.sort_by { |recipe| recipe.collector_pointers.size }
         while rcpdata.present? && unresolved.present? do
-          existing_rcp = unresolved.pop
-          rcpdatum = rcpdata.pop
-          existing_rcp.accept_attribute :title, rcpdatum[:title], true
-          existing_rcp.anchor_path = rcpdatum[:anchor_path]
-          existing_rcp.focus_path = rcpdatum[:focus_path]
+          unresolved.pop.assign_attributes rcpdata.pop
         end
 
         # Build recipes from any data that hasn't found a home
-        page_ref.recipes.create rcpdata if rcpdata.present?
+        if rcpdata.present?
+          if page_ref.persisted?
+            page_ref.recipes.create rcpdata
+          else
+            page_ref.recipes.build rcpdata
+          end
+        end
 
         # Finally, if we've run out of found recipes and there are still some unresolved, destroy them
         page_ref.recipes.destroy *unresolved
 
         self.content = parsing_input
+      else
+        self.content_needed = false # No need to return
       end
     end
   end

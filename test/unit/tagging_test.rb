@@ -5,6 +5,7 @@ class TaggingTest < ActiveSupport::TestCase
   fixtures :taggings
 
   def setup
+    super
     @tagging1 = Tagging.create id: 1, tag_id: 1, user_id: 1, entity_type: 'Recipe', entity_id: 3
     @tagging2 = Tagging.create id: 2, tag_id: 2, user_id: 1, entity_type: 'Recipe', entity_id: 3
   end

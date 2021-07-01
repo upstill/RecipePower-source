@@ -1,0 +1,27 @@
+---
+:root: www.foodnetwork.com
+:trimmers:
+- div.reviewSummary
+- section.o-RecipeLead
+- div.recipeLead
+- div.print-recipe
+- div.o-AssetActions
+- div.o-Ingredients__m-Footer
+- div.recipe-body-footer
+- div#dfp_cartridge
+- div.lookingForSomethingElse
+- section.relatedClasses
+- section.bodyRight-footer
+- div.attribution
+- p.o-Ingredients__a-Ingredient--SelectAll
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: div.o-Ingredients__m-Body
+  :rp_ingline:
+    :in_css_match: p.o-Ingredients__a-Ingredient
+  :rp_title:
+    :in_css_match: h1.o-AssetTitle__a-Headline
+  :rp_instructions:
+    :in_css_match: section.o-Method
+:sample_url: http://www.foodnetwork.com/recipes/food-network-kitchens/pickled-ginger-recipe.html
+:sample_title: 'Pickled Ginger Recipe : : Food Network'

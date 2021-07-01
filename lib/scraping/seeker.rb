@@ -16,6 +16,11 @@ class Seeker
     @tail_stream = tail_stream
     @token = token
     @children = children || []
+=begin
+    if token && (@head_stream.pos != @tail_stream.pos) && Rails.env.test?
+      puts "Seeker for :#{token} matched '#{to_s}'"
+    end
+=end
   end
 
   # Return a Seeker for a failed parsing attempt
@@ -52,21 +57,24 @@ class Seeker
   end
 
   # From a seeker tree, find those of the given token
-  def find token=nil, &block
-    results = @children&.map do |child|
-      if block_given? ? block.call(child) : (child.token == token)
-        child
-      else
-        child.find token, &block
-      end
-    end || []
-    results.flatten.compact
+  def find target=nil, &block
+    if block_given? ? block.call(self) : (token == target)
+      [ self ]
+    elsif @children
+      @children.map { |child| child.find target, &block }.flatten.compact
+    else
+      []
+    end
   end
 
   def found_string token=nil
     if f = find(token).first
       f.head_stream.except(f.tail_stream).to_s
     end
+  end
+
+  def found_strings token=nil
+    find(token).collect { |f| f.head_stream.except(f.tail_stream).to_s }
   end
 
   # Root out the value associated with the token
@@ -217,14 +225,14 @@ end
 # are also marked with the rp_elmt class
 # TODO: Author, Yield
 # Ingredient list (rp_inglist): rp_ingspec*  An ingredient list is a sequence of ingredient specs
-# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingname | rp_ingalts]+ [rp_ingcomment]?
+# Ingredient spec (rp_ingspec): [rp_amount]? [rp_presteps] [rp_ingredient_tag | rp_ingalts]+ [rp_ingcomment]?
 # Ingredient amount (rp_amount): rp_num | rp_unit | (rp_num rp_unit) [rp_altamt]?
 # Alternate amount (rp_altamt): \(rp_amt\)
 # Steps before measurement (rp_presteps): rp_process [{,'or'} rp_process]*
 # Process (rp_process): <Tag type: :Process>
-# Ingredient name (rp_ingname): <Tag type: :Ingredient>
-# Alternate ingredients (rp_ingalts): rp_ingname [',|or' rp_inglist]+
-# List of ingredients (rp_inglist): rp_ingname [',|and' rp_ingname]+
+# Ingredient name (rp_ingredient_tag): <Tag type: :Ingredient>
+# Alternate ingredients (rp_ingalts): rp_ingredient_tag [',|or' rp_inglist]+
+# List of ingredients (rp_inglist): rp_ingredient_tag [',|and' rp_ingredient_tag]+
 # Ingredient comment (rp_ingcomment): <content to end of line>
 # Amount number (rp_num): defined by NumberSeeker
 # Amount unit (rp_unit): <Tag type: :Unit>
@@ -254,12 +262,13 @@ class RangeSeeker < Seeker
     if match1 = NumberSeeker.match(stream, opts)
       ts = match1.tail_stream
       # Check for the token 'to' followed by a second number
-      return match1 unless ts.peek&.match /to/i
-      match2 = NumberSeeker.match ts.rest, opts
-      if match2
-        self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
-      else
-        match1
+      if ts.peek&.match /to/i
+        match2 = NumberSeeker.match ts.rest, opts
+        if match2
+          self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
+        else
+          match1
+        end
       end
     elsif stream.peek&.match '-'
       nums = stream.peek.split '-'
@@ -284,6 +293,15 @@ class NumberSeeker < Seeker
     if result && result.tail_stream.peek&.match(',')
       result.tail_stream = result.tail_stream.rest
     end
+=begin
+    if Rails.env.test?
+      if result
+        puts "NumberSeeker found '#{result}' at '#{stream.to_s.truncate 100}'"
+      else
+        puts "NumberSeeker failed at '#{stream.to_s.truncate 100}'"
+      end
+    end
+=end
     result
   end
 
@@ -388,7 +406,7 @@ class  TagsSeeker < Seeker
 
   def self.match stream, opts={}
     children = []
-    rptype = { 'Ingredient' => :rp_ingname, 'Condition' => :rp_condition }[Tag.typename opts[:types]]
+    rptype = { 'Ingredient' => :rp_ingredient_tag, 'Condition' => :rp_condition_tag }[Tag.typename opts[:types]]
     scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
     operand = ''
     opts[:lexaur].distribute(stream) do |data, stream_start, stream_end, op|
@@ -399,7 +417,7 @@ class  TagsSeeker < Seeker
       end
     end
     if children.present?
-      children.sort_by &:pos
+      children = children.sort_by &:pos
       self.new children.first.head_stream, children.last.tail_stream, opts[:token], children, operand: operand
     end
   end
@@ -442,13 +460,13 @@ class AmountSeeker < Seeker
     @token = :rp_amt
   end
 
-  def self.match stream, opts={}
+  def self.match stream, opts = {}
     stream = stream.rest if stream.peek&.match /about/i
     if num = NumberSeeker.match(stream)
       unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
       self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
-    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(.*)/) &&
-      (($1.present? && $2.present?) || !opts[:full_only])
+    elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
+        (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
       self.new(stream, stream.rest, num, unit) if num.present? && unit

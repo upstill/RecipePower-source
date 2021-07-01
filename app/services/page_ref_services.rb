@@ -75,9 +75,8 @@ class PageRefServices
       # Produce a set of initializers for the target class
       object = CollectibleServices.find_or_build page_ref, defaults, klass
     end
-    # Request the needed attributes from the object
-    needed = needed - object.ready_attributes # Don't try to reset existing attributes
-    object.request_attributes *needed if needed.present?
+    # Request the needed attributes from the object (without forcing them to be rewritten)
+    object.request_attributes needed # - object.ready_attributes
     object
   end
 

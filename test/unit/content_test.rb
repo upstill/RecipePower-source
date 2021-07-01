@@ -2,6 +2,10 @@ require 'test_helper'
 require './lib/html_utils.rb'
 class ContentTest < ActiveSupport::TestCase
 
+  def setup
+    super
+  end
+
   test "rationalize linefeeds in text" do
     str = "\nSome\n\ntext\nwith \nline\n feeds\n"
     assert_equal " Some text with line feeds ", process_dom(str)

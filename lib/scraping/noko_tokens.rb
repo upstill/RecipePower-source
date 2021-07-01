@@ -267,20 +267,6 @@ class NokoTokens < Array
 
   private
 
-  # Ensure that nowhere in the node and its ancestry is there a grammar item that can't contain rp_elmt_class
-  # NB: since classes are strictly hierarchical, any ancestor bearing rp_elmt_class will be stripped of it.
-  def clear_classification_context node, rp_elmt_class
-    return unless rp_elmt_class
-
-    node.ancestors.each do |ancestor|
-      return if ancestor.fragment?
-      if (classes = nknode_rp_classes ancestor).present?
-        legit_classes = classes.find_all { |parent_class| @parser_evaluator.can_include?(parent_class, rp_elmt_class) }
-        nknode_rp_classes ancestor, legit_classes if legit_classes != classes
-      end
-    end
-  end
-
   # This is the main method for rearranging text in the DOM, enclosing
   # the text denoted by TextElmtData entities teleft and teright IN THEIR ENTIRETY.
   def enclose_by_text_elmt_data teleft, teright, rp_elmt_class:, tag: 'span', value: nil
@@ -292,6 +278,11 @@ class NokoTokens < Array
     anchor_elmt, focus_elmt = [teleft, teright].map &:text_element
     common_ancestor = (anchor_elmt.ancestors & focus_elmt.ancestors).first
 
+    # Report on situation
+    if Rails.env.test?
+      puts "\n---------------------\nEnclosing from '#{teleft.to_s}' to '#{teright.to_s}' in #{tag}.#{rp_elmt_class} within: ", pretty_indented_html(common_ancestor.to_s)
+    end
+
     # Check that an existing ancestor can be tagged
     if teleft.prior_text.blank? && # no meaningful text before the leftmost mark
         teright.subsq_text.blank? # ...or after the rightmost mark
@@ -300,23 +291,28 @@ class NokoTokens < Array
                                     focus_elmt,
                                     tag: tag,
                                     rp_elmt_class: rp_elmt_class,
-                                    value: value)
-      return newnode if newnode
+                                    value: value,
+                                    parser_evaluator: @parser_evaluator)
+      newnode ||= # return newnode if newnode
       if anchor_elmt == focus_elmt
         # #enclose_to does its own validation
-        return teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
+        teleft.enclose_to(teright.global_char_offset, tag: tag, rp_elmt_class: rp_elmt_class, value: value)
       elsif teleft.prior_text(within: common_ancestor).blank? && teright.subsq_text(within: common_ancestor).blank?
-        if common_ancestor.fragment?
+        # if common_ancestor.fragment?
           # If we're at the top level, we need to enclose every element under a new element
           children = common_ancestor.children
-          newnode = common_ancestor.add_child(html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value).first
-          @elmt_bounds.attach_nodes_safely children, newnode
-          return newnode
-        else
-          common_ancestor.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
-          @elmt_bounds.attach_node_safely common_ancestor, common_ancestor.next
-          return common_ancestor.parent
-        end
+          nn = common_ancestor.add_child(html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value).first
+          @elmt_bounds.attach_nodes_safely children, nn
+          nn
+        #else
+        #  common_ancestor.next = html_enclosure tag: tag, rp_elmt_class: rp_elmt_class, value: value
+        #  @elmt_bounds.attach_node_safely common_ancestor.next, common_ancestor
+        #  return common_ancestor.parent
+        #end
+      end
+      if newnode
+        puts "After enclosure:", pretty_indented_html(common_ancestor.to_s), '--------------------------------------' if Rails.env.test?
+        return newnode
       end
     end
 
@@ -380,7 +376,7 @@ class NokoTokens < Array
       elmt_bounds.attach_node_safely newtree, common_ancestor, :extend_right # common_ancestor.add_child newtree
     end
     # validate_embedding report_tree('After: ', newtree)
-    clear_classification_context newtree, rp_elmt_class
+    nknode_clear_classification_context newtree, rp_elmt_class, parser_evaluator: @parser_evaluator
     @elmt_bounds.text_element_valid? newtree
     newtree
   end

@@ -1,0 +1,8 @@
+---
+:root: www.bonappetit.com
+:trimmers:
+- div.container.container--body
+- a.page__skip-link
+:grammar_mods: {}
+:sample_url: http://www.bonappetit.com/recipe/shaved-cauliflower-salad
+:sample_title: Shaved Cauliflower Salad

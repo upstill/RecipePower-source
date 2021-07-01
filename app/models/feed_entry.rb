@@ -63,9 +63,7 @@ class FeedEntry < ApplicationRecord
       end
     }.compact.sort.last
     # Update the last_post_date of the feed if there's a new entry
-    if feed.last_post_date.nil? || (last_posted > feed.last_post_date)
-      feed.last_post_date = last_posted
-      feed.save
-    end
+    last_posted ||= Time.now
+    feed.update_column :last_post_date, last_posted if feed.last_post_date.nil? || (last_posted > feed.last_post_date)
   end
 end

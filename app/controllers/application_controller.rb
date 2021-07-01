@@ -178,16 +178,14 @@ class ApplicationController < ActionController::Base
         # If it needs to be refreshed and is NOT needed now, it will be included in the launch
         needed = (options[:needed] || []) & entity.class.tracked_attributes
         refresh = (options[:refresh] || []) & entity.class.tracked_attributes
-        if (refresh_now = needed & refresh).present?
-          entity.refresh_attributes *refresh_now
-        end
-        refresh_later = refresh - refresh_now
+        refresh_now = needed & refresh
+        entity.refresh_attributes refresh_now
         # 'needed' attributes need to be valid before proceeding
         # Now go get 'em (but only as needed)!
-        entity.ensure_attributes *needed if needed.present?
+        entity.ensure_attributes needed
         # At this point, all needed attributes should have been collected.
         # It should be safe to launch in search of further ones
-        entity.refresh_attributes *refresh_later if refresh_later.present?
+        entity.refresh_attributes (refresh - refresh_now)
       elsif entity.is_a?(Backgroundable) && entity.dj && !options[:skip_landing]
         entity.bkg_land
       end

@@ -8,6 +8,7 @@
 # This file is automatically included by javascript_include_tag :defaults
 
 # require jquery-migrate
+# TODO: migrate to rails_ujs https://www.ombulabs.com/blog/learning/javascript/behind-the-scenes-rails-ujs.html
 #= require jquery_ujs
 #= require jquery.ui.widget
 #= require_self

@@ -2,6 +2,10 @@ require 'test_helper'
 class GleaningServicesTest < ActiveSupport::TestCase
   fixtures :recipes
 
+  def setup
+    super
+  end
+
   test 'completed gleaning for url' do
     url = 'https://oaktownspiceshop.com/blogs/recipes/roasted-radicchio-and-squash-salad-with-burrata'
     gleaning = GleaningServices.completed_gleaning_for(url, 'Image')
@@ -23,7 +27,7 @@ class GleaningServicesTest < ActiveSupport::TestCase
     assert gleaning.good?
     assert gleaning.page_ref
     refute gleaning.page_ref.persisted?
-    assert_not_empty gleaning.images
+    assert_not_empty gleaning.results_for('Image')
   end
 
   test 'completed gleaning for recipe' do

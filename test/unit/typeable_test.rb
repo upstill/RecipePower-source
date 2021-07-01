@@ -3,6 +3,10 @@ require 'test_helper'
 class TypeableTest < ActiveSupport::TestCase 
   fixtures :tags
 
+  def setup
+    super
+  end
+
   test "Test Typenum" do
     assert_equal 4, Tag.typenum(4), "Typenum of 4 failed"
     assert_equal 4, Tag.typenum(:Ingredient), "Typenum of :Ingredient failed"

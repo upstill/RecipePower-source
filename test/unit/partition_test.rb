@@ -2,6 +2,11 @@
 require 'test_helper'
 require 'results_cache'
 class PartitionTest < ActiveSupport::TestCase
+
+  def setup
+    super
+  end
+
   # TODO: look into Partition testing
 =begin
   test "Finds the right partition for an index" do

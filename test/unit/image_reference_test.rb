@@ -4,10 +4,14 @@ class ImageReferenceTest < ActiveSupport::TestCase
   fixtures :referents
   fixtures :tags
 
+  def setup
+    super
+  end
+
   test 'image reference gets joined properly' do
     site = SiteServices.find_or_build_for 'http://www.dailybitesblog.com/'
     refute site.dj
-    site.bkg_land
+    site.ensure_attributes
     assert site.good?
     refute site.errors.present?
     # assert gl.good?, 'Gleaning isn\'t born good'

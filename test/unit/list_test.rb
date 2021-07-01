@@ -6,6 +6,7 @@ class ListTest < ActiveSupport::TestCase
   # Called before every test method runs. Can be used
   # to set up fixture information.
   def setup
+    super
     @owner = users(:thing3)
     @lst_name = "Test List" # From tags.yml
     @description = "A list strictly for testing purposes"  # From lists.yml

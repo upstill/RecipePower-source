@@ -1,0 +1,16 @@
+---
+:root: jeffreymorgenthaler.com
+:trimmers:
+- img
+- h3 a
+:grammar_mods:
+  :rp_inglist:
+    :in_css_match: ul.ingredients
+  :rp_ingline:
+    :in_css_match: li
+  :rp_title:
+    :in_css_match: h3
+  :rp_instructions:
+    :in_css_match: ol.instructions
+:sample_url: https://jeffreymorgenthaler.com/lime-cordial/
+:sample_title: Lime Cordial
