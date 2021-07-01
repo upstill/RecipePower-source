@@ -1,5 +1,5 @@
 ---
-:selector: div.wprm-recipe-container
+:root: www.proportionalplate.com
 :trimmers:
 - div.wprm-container-float-right
 - div.wprm-call-to-action
@@ -12,3 +12,5 @@
     :in_css_match: h2
   :rp_instructions:
     :in_css_match: ul.wprm-recipe-instructions
+:sample_url: https://www.proportionalplate.com/sour-cherry-shrub-drinking-vinegar/
+:sample_title: Sour Cherry Shrub

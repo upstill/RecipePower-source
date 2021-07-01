@@ -1,5 +1,5 @@
 ---
-:selector: div.main-content
+:root: fantasticfungi.com
 :trimmers:
 - div.article-gallery
 - h6
@@ -15,3 +15,5 @@
     :in_css_match: h1,h2
   :rp_instructions:
     :in_css_match: div.instructions
+:sample_url: https://fantasticfungi.com/cookbook-recipes/white-bean-and-autumn-mushroom-dip/
+:sample_title: White Bean and Autumn Mushroom Dip

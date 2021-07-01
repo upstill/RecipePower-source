@@ -1,5 +1,5 @@
 ---
-:selector: div.heading, div.chop-content
+:root: www.liquor.com
 :trimmers:
 - div.inline-video
 - div.feedback-block
@@ -18,3 +18,5 @@
     :in_css_match: li.ingredient
   :rp_instructions:
     :in_css_match: section.section--instructions
+:sample_url: https://www.liquor.com/recipes/navy-grog/
+:sample_title: Navy Grog Cocktail

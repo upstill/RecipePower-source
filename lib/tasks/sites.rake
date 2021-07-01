@@ -72,6 +72,7 @@ namespace :sites do
     ]
   end
 
+  # Call a block for each .yml file in the configs/sitedata directory
   def for_configs
     yml_root = Rails.root.join 'config', 'sitedata'
     ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
@@ -96,20 +97,10 @@ namespace :sites do
     File.open(infile, 'r') { |f| template = f.read }
     erb = ERB.new template
 
-    yml_root = Rails.root.join 'config', 'sitedata'
-    ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
-    ymls = [ 'thewoksoflife.com.yml' ]
-    ymls.each do |filename|
-      filename = yml_root + filename
-      data = YAML.load_file filename
-      pr = PageRef.find_by_url data[:sample_url]
-      if !(site = pr&.site)
-        puts "!!! Can't locate site for sample '#{data[:sample_url]}"
-        next
-      end
+    for_configs do |site, data|
       base = PublicSuffix.parse(URI(site.home).host).domain.gsub( '.', '_dot_')
       outfile = Rails.root.join('test', 'sites', base+'_test'+'.rb')
-      next if File.exist? outfile
+      next if File.exist? outfile # New files only, please
 
       @testclass = base.camelcase
       datahash = { }
@@ -121,9 +112,8 @@ namespace :sites do
       @sitedata = datahash.collect { |key, value|
         "\t\t@#{key} = #{value}"
       }.join "\n"
-      result = erb.result binding
       File.open(outfile,"w") do |file|
-        file.write result
+        file.write erb.result(binding)
       end
       puts ">> Created ERB output at: #{outfile} for site #(#{site.id}) '#{site.name}'"
     end
@@ -131,39 +121,41 @@ namespace :sites do
 
   # Record parsing data from sites in individual files, suitable for checkin
   task :save_parsing_data => :environment do
-    Site.where(id: [3947]).includes(:page_ref).each { |site|
-    # Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
-    # site = finder.site
-      finder = site.finders.find_by(label: 'Content')
-      domain = PublicSuffix.parse(URI(site.home).host).domain
-      if pr = PageRef.find_by_url(site.sample)
+    selector_map = []
+    Finder.
+        includes(:site).
+        where(label: 'Content').
+        pluck( :site_id, :selector ).
+        each { |pair| selector_map[pair.first] = pair.last }
+    Site.all.each do |site|
+      next if site.trimmers.empty? && site.grammar_mods.empty? && (selector = selector_map[site.id]).blank?
+      # Get a sample for the site and its title
+      if pr = site.sample.present? && PageRef.find_by_url(site.sample)
         sample_title = pr.recipes.first&.title || pr.title
+      elsif rcp = site.recipes.first
+        site.update_attribute :sample, (site.sample = rcp.url)
+        sample_title = rcp.title
       end
       data = {
-          sample_url: site.sample,
-          sample_title: sample_title,
           root: site.root,
-          selector: finder&.selector,
+          selector: selector,
           trimmers: site.trimmers,
-          grammar_mods: site.grammar_mods
+          grammar_mods: site.grammar_mods,
+          sample_url: site.sample,
+          sample_title: sample_title
       }.compact
       next if data.blank?
-      filename = Rails.root.join("config", "sitedata", domain+'.yml')
-      File.open(filename,"w") do |file|
+      domain = PublicSuffix.parse(URI(site.home).host).domain
+      File.open(Rails.root.join("config", "sitedata", domain + '.yml'), "w") do |file|
         file.write data.to_yaml
       end
-    }
+    end
   end
 
   # Get parsing data for sites from YAML files
   task :restore_parsing_data => :environment do
-    Site.where(id: [3947]).includes(:page_ref).each { |site|
-    #Finder.includes(:site => :page_ref).where(label: "Content").each { |finder|
-    #  site = finder.site
-      domain = PublicSuffix.parse(URI(site.home).host).domain
+    for_configs do |site, data|
       # Get default values from the file indicated by domain
-      filename = Rails.root.join "config", "sitedata", domain + '.yml'
-      data = YAML.load_file(filename) if File.exists? filename
       # Move the selector into a finder attached to the site
       if data[:selector]
         if finder = site.finders.find_by(label: 'Content')
@@ -179,6 +171,6 @@ namespace :sites do
       site.grammar_mods = data[:grammar_mods]
       site.trimmers = data[:trimmers]
       site.save if site.changed?
-    }
+    end
   end
 end

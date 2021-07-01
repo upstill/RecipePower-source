@@ -1,5 +1,5 @@
 ---
-:selector: div.recipe-extras
+:root: jeffreymorgenthaler.com
 :trimmers:
 - img
 - h3 a
@@ -12,3 +12,5 @@
     :in_css_match: h3
   :rp_instructions:
     :in_css_match: ol.instructions
+:sample_url: https://jeffreymorgenthaler.com/lime-cordial/
+:sample_title: Lime Cordial

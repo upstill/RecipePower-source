@@ -1,5 +1,5 @@
 ---
-:selector: div.recipe-callout
+:root: www.simplyrecipes.com
 :trimmers:
 - div.recipe-callout-buttons
 - p.dont-steal
@@ -10,3 +10,5 @@
     :in_css_match: li.ingredient
   :rp_title:
     :in_css_match: h2
+:sample_url: http://www.simplyrecipes.com/recipes/red_lentil_dal/
+:sample_title: Red Lentil Dal Recipe | Simply Recipes

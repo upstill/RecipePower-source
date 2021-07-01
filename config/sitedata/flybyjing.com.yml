@@ -1,5 +1,5 @@
 ---
-:selector: article
+:root: flybyjing.com
 :trimmers:
 - div.page__teeth
 - div.colorful__teeth
@@ -13,3 +13,5 @@
     :in_css_match: h1,h2
   :rp_instructions:
     :in_css_match: ol
+:sample_url: https://flybyjing.com/blog/recipe-the-best-vegan-mapo-tofu/
+:sample_title: 'RECIPE: THE BEST VEGAN MAPO TOFU EVER'

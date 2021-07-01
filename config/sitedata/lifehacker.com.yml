@@ -1,5 +1,5 @@
 ---
-:selector: div.js_post-content
+:root: skillet.lifehacker.com
 :trimmers:
 - div.img-wrapper
 - div.fIUNXF
@@ -7,3 +7,5 @@
 - div.content-summary__SummaryBox
 - aside.inset--story
 :grammar_mods: {}
+:sample_url: https://skillet.lifehacker.com/celebrate-negroni-week-with-this-amaro-heavy-offering-1826676965
+:sample_title: Celebrate Negroni Week With This Amaro-Heavy Offering

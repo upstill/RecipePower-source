@@ -1,16 +1,18 @@
 ---
-:selector: "div.heading\r\ndiv.chop-content\r\ndiv.featured-link-image\r\ndiv.relatedarticle-link"
+:root: www.epicurious.com
 :trimmers:
 - div.mediavoice-native-ad
 - div.additional-info
 :grammar_mods:
   :rp_recipelist:
     :match: {}
+  :rp_inglist:
+    :in_css_match: ul.ingredients
+  :rp_ingline:
+    :in_css_match: li.ingredient
   :rp_title:
     :in_css_match: h1
   :rp_instructions:
     :in_css_match: div.instructions ol
-  :gm_inglist:
-    :flavor: :unordered_list
-    :list_class: ingredients
-    :line_class: ingredient
+:sample_url: http://www.epicurious.com/recipes/food/views/apricot-tart-with-pistachio-almond-frangipane-106662
+:sample_title: Apricot Tart with Pistachio-almond Frangipane Recipe At Epicurious.com

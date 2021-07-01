@@ -1,0 +1,14 @@
+---
+:root: www.nutritionaction.com
+:trimmers: []
+:grammar_mods:
+  :rp_recipelist:
+    :match:
+      :at_css_match: h3
+  :rp_inglist:
+    :in_css_match: p
+  :rp_ingline: {}
+  :rp_title:
+    :in_css_match: h3
+:sample_url: https://www.nutritionaction.com/daily/healthy-recipes/three-vegetable-sides-perfect-for-the-holiday-season/
+:sample_title: Cauliflower with Lemon-Pine Nut Dressing

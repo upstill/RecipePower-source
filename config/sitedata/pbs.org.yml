@@ -1,6 +1,8 @@
 ---
-:selector: section.recipe_instructions
+:root: www.pbs.org/food
 :trimmers:
 - div.social
 - div#recipetoolbar
 :grammar_mods: {}
+:sample_url: http://www.pbs.org/food/recipes/beet-blood-orange-walnut-and-rocket-salad/
+:sample_title: Beet, Blood Orange, Walnut, and Rocket Salad

@@ -1,5 +1,5 @@
 ---
-:selector: div.wprm-recipe
+:root: bojongourmet.com
 :trimmers:
 - div.wprm-recipe-notes-container
 - div.wprm-recipe-image
@@ -8,7 +8,6 @@
 - a.wprm-recipe-pin
 - a.wprm-recipe-jump
 - div.wprm-recipe-rating
-- div.wprm-container-float-right
 :grammar_mods:
   :rp_recipelist:
     :match:
@@ -21,3 +20,5 @@
     :flavor: :unordered_list
     :list_class: wprm-recipe-ingredients
     :line_class: wprm-recipe-ingredient
+:sample_url: http://bojongourmet.com/2014/07/vegan-cashew-sun-dried-tomato-dip/
+:sample_title: "{Vegan} Cashew + Sun-Dried Tomato Dip"

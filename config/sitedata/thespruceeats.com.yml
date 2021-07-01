@@ -1,5 +1,5 @@
 ---
-:selector: article.article div.l-container
+:root: www.thespruceeats.com
 :trimmers:
 - ul.tag-nav__list
 - ul.social-nav__list
@@ -32,3 +32,5 @@
     :in_css_match: h1
   :rp_instructions:
     :in_css_match: div.structured-project__steps ol
+:sample_url: https://www.thespruceeats.com/roasted-cauliflower-with-parmesan-cheese-3052530
+:sample_title: 30 Minutes to Roasted Cauliflower with Parmesan Cheese
