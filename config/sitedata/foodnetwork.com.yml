@@ -1,6 +1,5 @@
 ---
 :root: www.foodnetwork.com
-:selector: section.o-Recipe
 :trimmers:
 - div.reviewSummary
 - section.o-RecipeLead
