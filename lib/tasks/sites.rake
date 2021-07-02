@@ -127,7 +127,8 @@ namespace :sites do
         pluck( :site_id, :selector ).
         each { |pair| selector_map[pair.first] = pair.last }
     Site.all.each do |site|
-      next if site.trimmers.empty? && site.grammar_mods.empty? && (selector = selector_map[site.id]).blank?
+      selector = selector_map[site.id]
+      next if site.trimmers.empty? && site.grammar_mods.empty? && selector.blank?
       # Get a sample for the site and its title
       if pr = site.sample.present? && PageRef.find_by_url(site.sample)
         sample_title = pr.recipes.first&.title || pr.title

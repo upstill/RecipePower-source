@@ -1,5 +1,6 @@
 ---
 :root: www.epicurious.com
+:selector: div.title-source, div.recipe-summary, div.ingredients-info, div.instructions
 :trimmers:
 - div.mediavoice-native-ad
 - div.additional-info

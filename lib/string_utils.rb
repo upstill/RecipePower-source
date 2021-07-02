@@ -143,6 +143,8 @@ def struct_to_str entity, indent_level=1
     '"' + entity.gsub( /"/, '\"') + '"'
   when Symbol
     ":#{entity}"
+  when NilClass
+    "nil"
   else
     entity.to_s
   end

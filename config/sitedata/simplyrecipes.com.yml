@@ -1,5 +1,6 @@
 ---
 :root: www.simplyrecipes.com
+:selector: div.recipe-callout
 :trimmers:
 - div.recipe-callout-buttons
 - p.dont-steal

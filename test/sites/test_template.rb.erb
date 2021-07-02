@@ -15,15 +15,13 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 <%= @sitedata %>
-    
+
     #@grammar_mods = {
     #}
     #@selector = 'div.wprm-recipe-the-woks-of-life'
     #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
     #@sample_url = the site's :sample attribute
     #@sample_title = the page title of the sample
-    @page = @sample_url
-    @title = @sample_title
     super
   end
 

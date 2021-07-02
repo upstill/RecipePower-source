@@ -1,5 +1,6 @@
 ---
 :root: www.pbs.org/food
+:selector: section.recipe_instructions
 :trimmers:
 - div.social
 - div#recipetoolbar

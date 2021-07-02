@@ -1,5 +1,6 @@
 ---
 :root: www.thespruceeats.com
+:selector: article.article div.l-container
 :trimmers:
 - ul.tag-nav__list
 - ul.social-nav__list

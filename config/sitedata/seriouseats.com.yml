@@ -1,5 +1,6 @@
 ---
 :root: www.seriouseats.com
+:selector: div.entry-header-inner, div.recipe-ingredients, div.recipe-procedures
 :trimmers:
 - div.nav-share
 - div.pubmod-date

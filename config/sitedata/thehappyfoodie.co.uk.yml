@@ -1,5 +1,6 @@
 ---
 :root: thehappyfoodie.co.uk
+:selector: article
 :trimmers:
 - div.page__teeth
 - div.colorful__teeth

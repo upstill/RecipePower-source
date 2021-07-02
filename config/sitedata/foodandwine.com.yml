@@ -1,5 +1,6 @@
 ---
 :root: www.foodandwine.com
+:selector: div.articleContainer
 :trimmers:
 - div.articleContainer__rail
 - div.docked-sharebar

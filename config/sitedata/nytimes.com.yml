@@ -1,5 +1,6 @@
 ---
 :root: cooking.nytimes.com
+:selector: "div.title-container\r\ndiv.recipe-instructions"
 :trimmers:
 - div.nutrition-container
 - div.secondary-controls

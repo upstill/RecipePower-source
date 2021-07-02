@@ -1,5 +1,6 @@
 ---
 :root: food52.com
+:selector: "h1.recipe__title\r\ndiv.recipe__list--ingredients\r\ndiv.recipe__list--steps"
 :trimmers: []
 :grammar_mods:
   :rp_recipelist:

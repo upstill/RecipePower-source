@@ -1,15 +1,16 @@
 ---
 :root: www.bonappetit.com
+:selector: "header h1\r\ndiv.recipe__main-content"
 :trimmers:
 - ul.social-icons__list
 :grammar_mods:
   :rp_inglist:
     :in_css_match: div.recipe__ingredient-list div
   :rp_ingline:
-    :in_css_match: 
+    :in_css_match:
   :rp_title:
     :in_css_match: h1,h2
   :rp_instructions:
-    :in_css_match: 
+    :in_css_match:
 :sample_url: http://www.bonappetit.com/recipe/shaved-cauliflower-salad
 :sample_title: Shaved Cauliflower Salad

@@ -1,5 +1,6 @@
 ---
 :root: www.vegkitchen.com
+:selector: div.wprm-recipe-container
 :trimmers:
 - div.wprm-recipe-image
 - div.wprm-recipe-rating
