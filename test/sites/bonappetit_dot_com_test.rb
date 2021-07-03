@@ -17,19 +17,17 @@ pepper cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine fri
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:rp_inglist => {
-				:in_css_match => "div.recipe__ingredient-list div"
+				:in_css_match => 'article.recipe' # div.sc-fYRKEF'
 			},
-			:rp_ingline => {
-				:in_css_match => nil
-			},
+      :gm_recipes => { :at_css_match => 'h1.split-screen-content-header__hed'},
 			:rp_title => {
-				:in_css_match => "h1,h2"
+				:in_css_match => 'h1.split-screen-content-header__hed'
 			},
 			:rp_instructions => {
 				:in_css_match => nil
 			}
 		}
-    @selector = "header h1\r\ndiv.recipe__main-content"
+    @selector = 'article.recipe' # "header h1\r\ndiv.recipe__main-content"
     @trimmers = ["ul.social-icons__list"]
 		@sample_url = 'http://www.bonappetit.com/recipe/shaved-cauliflower-salad'
 		@sample_title = 'Shaved Cauliflower Salad'

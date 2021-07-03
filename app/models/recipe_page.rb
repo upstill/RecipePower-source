@@ -59,7 +59,11 @@ class RecipePage < ApplicationRecord
         rcpdata = []
         ParserServices.parse(entity: self, content: parsing_input).do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
           xb = sub_parser.xbounds
-          rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
+          if (title = sub_parser.value_for :rp_title).present?
+            rcpdata << { title: title, anchor_path: xb.first, focus_path: xb.last }
+          elsif rcpdata.last
+            rcpdata.last[:focus_path] = xb.last # Extend the range to include the bogus recipe
+          end
         end
 
         if Rails.env.test?

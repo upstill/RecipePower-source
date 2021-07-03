@@ -363,7 +363,7 @@ class Parser
             }
           when :paragraph
             # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
-            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('p', params ) } ] }
+            grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
             grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true }
           end
         end

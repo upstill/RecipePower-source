@@ -117,13 +117,13 @@ Parser.init_grammar(
     rp_instructions: nil,
     rp_inglist: {
         or: [ { # A label followed by one or more ingredient lines, or two or more ingredient lines
-                  match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-                  :enclose => true
+                match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
+                :enclose => true
               },
               { # Within a line, a comma-separated, conjunction-concluded list of ingredients
-                  :match => :rp_ingline,
-                  :orlist => :predivide,
-                  :enclose => true
+                :match => :rp_ingline,
+                :orlist => :predivide,
+                :enclose => true
               }
         ],
     },

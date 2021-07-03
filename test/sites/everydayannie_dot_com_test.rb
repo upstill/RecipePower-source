@@ -68,7 +68,7 @@ div#directions ul
 
   test 'mapping in grammar mods' do
     # Apply tests to the grammar resulting from the grammar_mods here
-    assert_equal @grammar_mods[:gm_inglist][:selector], grammar[:rp_inglist][:match].first[:in_css_match]
+    assert_equal @grammar_mods[:gm_inglist][:selector], grammar[:rp_inglist][:in_css_match]
     assert_nil grammar[:rp_ingline][:in_css_match]
     assert grammar[:rp_ingline][:inline]
   end

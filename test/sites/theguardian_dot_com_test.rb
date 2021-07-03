@@ -19,10 +19,8 @@ class TheguardianDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
       :gm_recipes => { :at_css_match => 'h2' },
-			:rp_title => {
-				:in_css_match => "h2"
-			},
-			:gm_inglist => :paragraph
+			:rp_title => { :in_css_match => 'h2' },
+      :gm_inglist => { :flavor => :paragraph, :selector => 'p.dcr-mssdj5' }
 		}
     @trimmers = ["div.meta__extras", "div.js-ad-slot", "figure[itemprop=\"associatedMedia image\"]", "div.submeta"]
     @selector = "div.dcr-hujbr5"
@@ -52,13 +50,14 @@ class TheguardianDotComTest < ActiveSupport::TestCase
   end
 
   test 'parse single recipe' do
-    NestedBenchmark.measure "Parsing '#{@title}'" do
+    time = Benchmark.measure do
       pt_apply :recipe,
                url: @page,
                ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
                conditions: %w{ crustless },
                units: %w{ g }
     end
+    # Unoptimized time: 245 User seconds
     assert_equal "Kale and grilled asparagus salad", recipe.title
   end
 
