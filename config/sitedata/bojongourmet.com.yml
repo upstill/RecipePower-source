@@ -1,5 +1,4 @@
 ---
-:root: bojongourmet.com
 :selector: div.wprm-recipe
 :trimmers:
 - div.wprm-recipe-notes-container
@@ -12,7 +11,7 @@
 - div.wprm-container-float-right
 :grammar_mods:
   :gm_recipes:
-      :at_css_match: h2
+    :at_css_match: h2
   :rp_title:
     :in_css_match: h2
   :rp_instructions:

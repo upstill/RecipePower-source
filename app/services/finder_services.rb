@@ -258,7 +258,7 @@ class FinderServices
   # Return the set of finders that apply to the site (those assigned to the site, then global ones)
   # Optionally filter them with :only and :except options (not both)
   def self.finders_for site = nil, options = {}
-    finders = (site&.finders || []) + @@DefaultFinders
+    finders = (site&.finders.to_a || []) + @@DefaultFinders
     if options[:only].present?
       finders.select {|f| options[:only].include? f.label}
     elsif options[:except].present?

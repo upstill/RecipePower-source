@@ -66,16 +66,7 @@ pepper cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine fri
              url: @page,
              ingredients: @ingredients, units: @units, conditions: @conditions
     assert_equal 1, page_ref.recipes.to_a.count
-    # For a page that has multiple recipes, test sorting them out as follows:
-=begin
-    assert_equal 3, page_ref.recipes.to_a.count
-    assert_equal [
-                     "Asparagus with pine nut and sourdough crumbs (pictured above)",
-                     "Soft-boiled egg with avocado, chorizo and asparagus",
-                     "Kale and grilled asparagus salad"
-                 ].sort, page_ref.recipes.map(&:title).sort
-    assert_equal "Yotam Ottolenghi’s asparagus recipes", page_ref.title
-=end
+    assert_equal @sample_title, page_ref.recipes.to_a.first.title
   end
 
   test 'recipe loaded correctly' do

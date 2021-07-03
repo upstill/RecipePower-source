@@ -52,11 +52,13 @@ class TheguardianDotComTest < ActiveSupport::TestCase
   end
 
   test 'parse single recipe' do
-    pt_apply :recipe,
-             url: @page,
-             ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
-             conditions: %w{ crustless },
-             units: %w{ g }
+    NestedBenchmark.measure "Parsing '#{@title}'" do
+      pt_apply :recipe,
+               url: @page,
+               ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },
+               conditions: %w{ crustless },
+               units: %w{ g }
+    end
     assert_equal "Kale and grilled asparagus salad", recipe.title
   end
 

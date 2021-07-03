@@ -264,6 +264,11 @@ class ParseTester < ActiveSupport::TestCase
 
     assert (@recipe_page = @page_ref.recipe_page)
     @recipe_page.ensure_attributes [:content]
+    if @recipe_page.content.blank?
+      # Error: recipe_page couldn't extract content
+      content_report = @recipe_page.site.finders.where(label: 'Content').exists? ? '.' : ", Perhaps because the site doesn't have a Content finder?"
+      @recipe_page.errors.add :content, "PageRef couldn't find content" + content_report
+    end
     refute @recipe_page.errors.any?, @recipe_page.errors.full_messages
     assert @recipe_page.good?
     assert (@page_ref.recipes.to_a.count > 0) # Need to have parsed at least one recipe out
@@ -275,16 +280,23 @@ class ParseTester < ActiveSupport::TestCase
     prep_site @page_ref.site, @selector, @trimmers, @grammar_mods
     assert_equal @grammar_mods, @page_ref.site.grammar_mods
 
+    # content_needed = (attribs + @page_ref.needed_attributes).include? :content
     @page_ref.ensure_attributes attribs
+    if @page_ref.content.blank? && # content_needed
+      # Error: page ref couldn't extract content
+      content_report = @page_ref.site.finders.where(label: 'Content').exists? ? '.' : ", Perhaps because the site doesn't have a Content finder?"
+      @page_ref.errors.add :content, "PageRef couldn't find content" + content_report
+    end
     refute @page_ref.errors.any?, @page_ref.errors.full_messages
     assert @page_ref.good? # Should have loaded and settled down
+    assert_not_nil @page_ref.content
     assert_not_empty @page_ref.content
     @page_ref
   end
 
   def check_attributes trackable, trackable_name, *attribs
     attribs.each do |attrib|
-      assert trackable.attrib_ready?(attrib), "'#{trackable_name}' '#{name}' couldn't extract '#{attrib}'"
+      assert trackable.attrib_ready?(attrib), "#{trackable.class} '#{trackable_name}' couldn't extract '#{attrib}'"
     end
   end
 end

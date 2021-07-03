@@ -99,6 +99,13 @@ EOF
     pt_apply :rp_inglist, html: html
   end
 
+  test 'recipes parsed out correctly' do
+    # Test that the recipe_page parses out individual recipes (usually only one)
+    pt_apply :recipe_page, url: @page
+    assert_equal 1, page_ref.recipes.to_a.count
+    assert_equal @sample_title, page_ref.recipes.to_a.first.title
+  end
+
   test 'recipe loaded correctly' do
 =begin
              ingredients: %w{ lemon\ zest lemon\ juice sourdough\ bread anchovy\ fillets },

@@ -1,5 +1,4 @@
 ---
-:root: www.bonappetit.com
 :selector: "header h1\r\ndiv.recipe__main-content"
 :trimmers:
 - ul.social-icons__list

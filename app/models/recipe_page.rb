@@ -62,6 +62,11 @@ class RecipePage < ApplicationRecord
           rcpdata << { title: (sub_parser.value_for :rp_title), anchor_path: xb.first, focus_path: xb.last }
         end
 
+        if Rails.env.test?
+          puts "RecipePage found #{rcpdata.count} #{'recipes'.pluralize(rcpdata.count)}:"
+          rcpdata.each { |rcpd| puts "\t#{rcpd[:title]}"}
+        end
+
         # Try to match existing recipes on selection, collecting those that don't match
         unresolved = []
         page_ref.recipes.to_a.each do |recipe|

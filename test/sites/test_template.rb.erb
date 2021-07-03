@@ -34,10 +34,16 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
 =end
   end
 
+  test 'ingredient list' do
+    # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
+    # pt_apply :rp_inglist, html: html
+  end
+
   test 'recipes parsed out correctly' do
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
     assert_equal 1, page_ref.recipes.to_a.count
+    assert_equal @sample_title, page_ref.recipes.to_a.first.title
     # For a page that has multiple recipes, test sorting them out as follows:
 =begin
     assert_equal 3, page_ref.recipes.to_a.count
