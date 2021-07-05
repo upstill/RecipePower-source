@@ -111,7 +111,7 @@ class ParseTester < ActiveSupport::TestCase
     @last_target = target
     # Clear all instance variables that are provided by the parse
     @nokoscan = @seeker = @page_ref = @recipe = @content = nil
-    token = case target
+    @token = case target
             when :recipe
               :rp_recipe
             when :recipe_page
@@ -121,20 +121,38 @@ class ParseTester < ActiveSupport::TestCase
             end
     case
     when filename.present?
-      apply_to_string File.read(filename), token: token, required_tags: required_tags
+      apply_to_string File.read(filename), token: @token, required_tags: required_tags
     when html.present?
-      apply_to_string html, token: token, required_tags: required_tags
+      apply_to_string html, token: @token, required_tags: required_tags
     when url.present?
-      do_recipe url, required_tags: required_tags if token == :rp_recipe
-      do_recipe_page url if token == :rp_recipelist
+      do_recipe url, required_tags: required_tags if @token == :rp_recipe
+      do_recipe_page url if @token == :rp_recipelist
     end
     @seeker&.enclose_all parser: @parser
     @seeker&.success?
   end
 
-  # Do testing on the results of the last application
-  def assert_good
-
+  # Do testing on the results of the last application.
+  # This is a test of minimal results, i.e.,
+  # >= 1 recipe per recipe page
+  # title, ingredient list and at least two ingredients from recipe
+  def assert_good token: @token, counts: {}
+    default_counts = {}
+    case token
+    when :rp_recipe
+      default_counts = {:rp_recipe => 1, :rp_title => 1 }
+      nkd = Nokogiri::HTML.fragment @recipe.content
+    when :rp_recipelist
+      default_counts = {:rp_recipe => 1, :rp_title => 1 }
+      nkd = Nokogiri::HTML.fragment @recipe_page.content
+    else
+      default_counts = { token => 1 } # Expect one instance of the token by default
+      nkd = @nokoscan.nkdoc
+    end
+    default_counts.merge(counts).each do |key, value|
+      nfound = nkd.css(".#{key}").count
+      assert_equal value, nfound, "Expected #{value} :#{key}'s, but only found #{nfound}."
+    end
   end
 
   # Given either a domain or a url, load an appropriate set of configs for the file
@@ -252,6 +270,8 @@ class ParseTester < ActiveSupport::TestCase
     refute rp.errors.any?, rp.errors.full_messages
     assert rp.virgin?
     @recipe.ensure_attributes [:content], overwrite: true
+    # The recipe's request for content should drive the recipe_page parse
+    assert_not_empty rp.content, "No content derived for recipe page"
 
     content = SiteServices.new(@recipe.site).trim_recipe @page_ref.content
     assert_equal content, rp.content

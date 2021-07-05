@@ -245,7 +245,7 @@ class Parser
     else
       matched = Seeker.failed stream, stream, token
     end
-    matched
+    matched if matched.success?
   end
 
   # Scan down the stream, one token at a time, until the block returns true or the stream runs out
@@ -255,8 +255,12 @@ class Parser
     end
     while stream.more?
       mtch = (block_given? ? yield(stream) : match(spec, stream: stream))
-      return mtch if mtch.success?
-      stream = mtch.next
+      if mtch
+        return mtch if mtch.success?
+        stream = mtch.next
+      else
+        stream = stream.rest
+      end
     end
   end
 
@@ -354,8 +358,10 @@ class Parser
             # params:
             # list_class: css class of the 'ul' tag for an ingredient list
             # line_class: css class of the 'li' tags for ingredient lines
-            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => selector_for('ul', css_class: params[:list_class]) } ] }
-            grammar_mods[:rp_ingline] = { :in_css_match => selector_for('li', css_class: params[:line_class]) }
+            list_selector = params[:list_selector] || selector_for('ul', css_class: params[:list_class])
+            line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
+            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => list_selector } ] }
+            grammar_mods[:rp_ingline] = { :in_css_match => line_selector }
           when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
             grammar_mods[:rp_inglist] = {
                 :match => :rp_ingline, # Remove the label spec
@@ -563,6 +569,7 @@ class Parser
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       str = (scanner.to_s.truncate 100).sub "\n", '\n'
+      @break_level ||= 1
       report_enter "Seeking :#{spec} on '#{str}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
       returned = match_specification scanner, @grammar[spec], spec, context
       report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
@@ -603,6 +610,7 @@ class Parser
           best_guess = child if child.enclose? # Save the last child to enclose
           scanner = child.next # Skip past what the child rejected
         end
+        best_guess ||= child
         return best_guess if best_guess&.hard_fail?
         next unless child
         children << child.if_succeeded
@@ -700,7 +708,11 @@ class Parser
     # -- failed lines may represent labels of sublists
     matches.each do |match|
       # Label detection: failed lines that are preceded by two <br> tags get converted to :rp_inglist_label
-      if match.hard_fail? && match_specification(match.head_stream, :rp_amt).hard_fail?
+      next unless match.hard_fail?
+      if (submatch = seek match.head_stream.except(match.tail_stream), :rp_ingredient_tag)&.success?
+        # Can find an ingredient in the line => enclose it within the line
+        (match.children ||= []) << submatch
+      elsif (match.tail_stream.pos - match.head_stream.pos) < 4
         match.token = :rp_inglist_label
       end
     end

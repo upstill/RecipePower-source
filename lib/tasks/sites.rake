@@ -79,11 +79,11 @@ namespace :sites do
     ymls.each do |filename|
       filename = yml_root + filename
       data = YAML.load_file filename
-      pr = PageRef.find_by_url data[:sample_url]
+      pr = PageRef.fetch data[:sample_url]
       if site = pr&.site
         yield site, data
       else
-        puts "!!! Can't locate site for sample '#{data[:sample_url]}"
+        puts "!!! Can't locate site for sample '#{data[:sample_url]}''"
       end
     end
   end
