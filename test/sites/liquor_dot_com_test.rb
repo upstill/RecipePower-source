@@ -5,16 +5,32 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class <%= @testclass %>Test < ActiveSupport::TestCase
+class LiquorDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{  } # All ingredients found on the page
-    @units =  %w{  } # All units
+    @ingredients = [ 'dark Jamaican rum', 'gold demerara rum', 'white Cuban rum', 'Puerto Rican rum',
+                     'honey syrup', 'club soda', 'grapefruit juice', 'lime juice', 'mint sprig', 'lime wheel'
+    ] # All ingredients found on the page
+    @units =  %w{ ounce } # All units
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
-<%= @sitedata %>
+		@grammar_mods = {
+      :gm_recipes => { at_css_match: 'h1' },
+      :gm_inglist => {
+          :flavor => :unordered_list,
+          :list_class => 'ingredient-list',
+          :line_class => 'ingredient'
+      },
+			:rp_instructions => {
+				:in_css_match => "section.section--instructions"
+			}
+		}
+		@trimmers = ["div.inline-video", "div.feedback-block", "div.article-intro", "div.mntl-sc-block-featuredlink", "div.disqus-block", "header.section__header"]
+		@selector = "div.heading, div.chop-content"
+		@sample_url = 'https://www.liquor.com/recipes/navy-grog/'
+		@sample_title = 'Navy Grog'
 
     #@grammar_mods = {
     # :gm_recipes => { at_css_match: 'h1' },
@@ -75,7 +91,7 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
     assert_not_empty @page, "No page url specified for ParseTester"
     pt_apply url: @page
     # The ParseTester applies the setup parameters to the recipe
-    assert_good # Run standard tests on the results
+    nkdoc = assert_good counts: { :rp_ingredient_tag => 10 } # Run standard tests on the results
     refute recipe.errors.any?
 
     assert_equal @title, recipe.title

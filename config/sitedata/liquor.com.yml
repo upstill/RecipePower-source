@@ -1,5 +1,4 @@
 ---
-:root: www.liquor.com
 :selector: div.heading, div.chop-content
 :trimmers:
 - div.inline-video
@@ -9,15 +8,13 @@
 - div.disqus-block
 - header.section__header
 :grammar_mods:
-  :rp_title:
-    :in_css_match: h1
-    :inline:
-  :rp_inglist:
-    :in_css_match: ul.ingredient-list
-    :inline:
-  :rp_ingline:
-    :in_css_match: li.ingredient
+  :gm_recipes:
+    :at_css_match: h1
+  :gm_inglist:
+    :flavor: :unordered_list
+    :list_class: ingredient-list
+    :line_class: ingredient
   :rp_instructions:
     :in_css_match: section.section--instructions
 :sample_url: https://www.liquor.com/recipes/navy-grog/
-:sample_title: Navy Grog Cocktail
+:sample_title: Navy Grog

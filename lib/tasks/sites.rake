@@ -115,6 +115,7 @@ namespace :sites do
         file.write erb.result(binding)
       end
       puts ">> Created ERB output at: #{outfile} for site #(#{site.id}) '#{site.name}'"
+      break
     end
   end
 

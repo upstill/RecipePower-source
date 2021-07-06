@@ -154,6 +154,7 @@ class ParseTester < ActiveSupport::TestCase
       nfound = nkd.css(".#{key}").count
       assert_equal value, nfound, "Expected #{value} :#{key}'s, but only found #{nfound}."
     end
+    nkd
   end
 
   # Given either a domain or a url, load an appropriate set of configs for the file
