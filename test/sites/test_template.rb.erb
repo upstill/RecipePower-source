@@ -42,7 +42,7 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
   test 'recipes parsed out correctly' do
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
-    assert_equal 1, page_ref.recipes.to_a.count
+    assert_good
     assert_equal @sample_title, page_ref.recipes.to_a.first.title
     # For a page that has multiple recipes, test sorting them out as follows:
 =begin

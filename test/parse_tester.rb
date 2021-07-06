@@ -143,7 +143,8 @@ class ParseTester < ActiveSupport::TestCase
       default_counts = {:rp_recipe => 1, :rp_title => 1 }
       nkd = Nokogiri::HTML.fragment @recipe.content
     when :rp_recipelist
-      default_counts = {:rp_recipe => 1, :rp_title => 1 }
+      assert_equal (counts.delete(:rp_recipe) || counts.delete(:rp_title) || 1), @page_ref.recipes.to_a.count
+      counts = counts.except :rp_recipe, :rp_title
       nkd = Nokogiri::HTML.fragment @recipe_page.content
     else
       default_counts = { token => 1 } # Expect one instance of the token by default

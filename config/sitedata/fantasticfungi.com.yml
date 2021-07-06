@@ -1,17 +1,13 @@
 ---
-:root: fantasticfungi.com
 :selector: div.main-content
 :trimmers:
 - div.article-gallery
 - h6
 - a.btn-large
 :grammar_mods:
-  :rp_recipelist:
-    :match: {}
-  :rp_inglist:
-    :in_css_match: div.ingredients ul
-  :rp_ingline:
-    :in_css_match: li
+  :gm_inglist:
+    :flavor: :unordered_list
+    :list_selector: div.ingredients ul
   :rp_title:
     :in_css_match: h1,h2
   :rp_instructions:
