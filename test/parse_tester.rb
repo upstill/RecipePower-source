@@ -306,7 +306,7 @@ class ParseTester < ActiveSupport::TestCase
     @page_ref.ensure_attributes attribs
     if @page_ref.content.blank? && # content_needed
       # Error: page ref couldn't extract content
-      content_report = @page_ref.site.finders.where(label: 'Content').exists? ? '.' : ", Perhaps because the site doesn't have a Content finder?"
+      content_report = @page_ref.site.finders.to_a.keep_if { |f| f.label == 'Content' } ? '.' : ", Perhaps because the site doesn't have a Content finder?"
       @page_ref.errors.add :content, "PageRef couldn't find content" + content_report
     end
     refute @page_ref.errors.any?, @page_ref.errors.full_messages

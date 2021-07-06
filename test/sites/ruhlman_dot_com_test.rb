@@ -5,30 +5,38 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class <%= @testclass %>Test < ActiveSupport::TestCase
+class RuhlmanDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{  } # All ingredients found on the page
-    @units =  %w{  } # All units
+    @ingredients = %w{ gin vodka Lillet\ Blanc orange\ twist } # All ingredients found on the page
+    @units =  %w{ ounces ounce } # All units
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
-<%= @sitedata %>
+		@grammar_mods = {
+			:gm_inglist => :unordered_list,
+			:gm_recipes => { :at_css_match => 'h2' },
+			:rp_instructions => {
+				:in_css_match => nil
+			}
+		}
+		@sample_url = 'https://ruhlman.com/friday-cocktail-hour-the-vesper/'
+		@sample_title = 'The Vesper'
 
     #@grammar_mods = {
     # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
-      #:inline  # Multiple ingredients in a single line, comma-separated
-      #:unordered_list  # <li> within <ul>
-      #{ :flavor => :unordered_list,
-      #  :list_selector => , OR :list_class => ,
-      #  :line_selector => , OR  :line_class
-      #}
-      #:paragraph
-      #{ :flavor => :paragraph, :selector => 'paragraph_selector' OR :css_class => 'paragraph class' }
-      #}
-    #@selector = 'div.wprm-recipe-the-woks-of-life'
+    #:inline  # Multiple ingredients in a single line, comma-separated
+    #:unordered_list  # <li> within <ul>
+    #{ :flavor => :unordered_list,
+    #  :list_selector => , OR :list_class => ,
+    #  :line_selector => , OR  :line_class
+    #}
+    #:paragraph
+    #{ :flavor => :paragraph, :selector => 'paragraph_selector' OR :css_class => 'paragraph class' }
+    #}
+    @selector = 'div.entry-content'
     #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
     #@sample_url = the site's :sample attribute
     #@sample_title = the page title of the sample
@@ -45,8 +53,15 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
   end
 
   test 'ingredient list' do
-    # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
-    # pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
+    html =<<EOF
+<ul>
+  <li>2 ounces gin</li>
+  <li>1 ounce vodka</li>
+  <li>½&nbsp;ounce Lillet Blanc</li>
+  <li>orange twist</li>
+</ul>
+EOF
+    pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units
   end
 
   test 'recipes parsed out correctly' do
@@ -73,7 +88,7 @@ class <%= @testclass %>Test < ActiveSupport::TestCase
              units: %w{ g }
 =end
     assert_not_empty @page, "No page url specified for ParseTester"
-    pt_apply url: @page, ingredients: @ingredients, units: @units, conditions: @conditions
+    pt_apply url: @page, ingredients: @ingredients, units: @units
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results
     refute recipe.errors.any?
