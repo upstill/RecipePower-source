@@ -139,7 +139,7 @@ gem 'exception_notification', git: 'git://github.com/smartinez87/exception_notif
 ## gem 'exception_notification', '~> 4.0.1', :require => 'exception_notifier' # , git: 'git://github.com/alanjds/exception_notification.git'
 
 # Report errors via email
-gem 'letter_opener', :group => [ :development, :staging ]
+gem 'letter_opener', '>= 1.7.0', :group => [ :development, :staging ]
 gem 'letter_opener_web', '~> 1.3.4', :group => :staging
 
 ###### Performance testing   http://railscasts.com/episodes/411-performance-testing?view=asciicast
@@ -155,7 +155,7 @@ group :test do
   ### gem "guard-rspec" # ...for auto-running tests on file save  http://railscasts.com/episodes/264-guard?view=asciicast
   gem 'factory_bot_rails' # 'factory_girl_rails', "~> 4.0"
   gem "mocha"
-  gem 'poltergeist'
+  gem 'poltergeist', '>= 1.18.1'
   gem 'rspec-rails', '3.8.1'
   # gem 'rspec-html-matchers', '0.9.1'
 end
@@ -174,7 +174,7 @@ gem 'content_for_in_controllers' # https://github.com/clm-a/content_for_in_contr
 gem 'bourbon' # https://github.com/thoughtbot/bourbon
 
 # CSS styled emails without the hassle.
-gem 'premailer-rails' # https://github.com/fphilipe/premailer-rails
+gem 'premailer-rails' , '>= 1.11.1' # https://github.com/fphilipe/premailer-rails
 
 # EventMachine is an event-driven I/O and lightweight concurrency library for Ruby
 gem 'eventmachine', '~> 1.0.3' # https://github.com/eventmachine/eventmachine
