@@ -1,14 +1,14 @@
 ---
-:root: umamimart.com
+:selector: article
 :trimmers: []
 :grammar_mods:
-  :rp_recipelist:
-    :match:
-      :at_css_match: h3
+  :gm_recipes:
+    :at_css_match: h1.article--title
   :rp_inglist:
     :in_css_match: p
-  :rp_ingline: {}
+  :rp_ingline:
+    :inline: true
   :rp_title:
-    :in_css_match: h3
+    :in_css_match: h1
 :sample_url: https://umamimart.com/blogs/main/the-pdt-project-aviation
-:sample_title: 'The PDT Project: Aviation – Umami Mart'
+:sample_title: 'The PDT Project: Aviation'
