@@ -164,7 +164,7 @@ class Lexaur < Object
     case stream.peek
     when '(' # Elide parenthetical by hunting for matching ')'
       to_match = stream.rest
-      while to_match && (to_match.peek != ')') do
+      while to_match&.more? && (to_match.peek != ')') do
         to_match = to_match.rest
       end
       stream = to_match.rest if to_match
