@@ -165,7 +165,11 @@ namespace :sites do
             finder.save
           end
         else
-          site.finders.create(label: 'Content', selector: data[:selector], attribute_name: 'html')
+          if site.persisted?
+            site.finders.create label: 'Content', selector: data[:selector], attribute_name: 'html'
+          else
+            site.finders.build label: 'Content', selector: data[:selector], attribute_name: 'html'
+          end
         end
       end
       site.sample = data[:sample_url] if data[:sample_url]
