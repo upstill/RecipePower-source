@@ -195,7 +195,7 @@ The dependencies are as follows:
       parser.pop_grammar
     end
 =end
-    if !@seeker.success?
+    if !@seeker&.success?
       # Try using a line scan for the ingredient list
       case token
       when :rp_inglist

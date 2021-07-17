@@ -170,7 +170,7 @@ Parser.init_grammar(
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is a number followed by a (possibly qualified) unit--only one required
              match: [
-                 [:rp_unqualified_amt, 'plus', :rp_unqualified_amt, {match: :rp_altamt, optional: true } ],
+                 [:rp_unqualified_amt, { optional: 'plus' }, :rp_unqualified_amt, {match: :rp_altamt, optional: true } ],
                  :rp_unit,
                  [{ or: [ :rp_range, :rp_num ] }, {match: :rp_unit, optional: true}],
                  {match: AmountSeeker}
@@ -183,13 +183,17 @@ Parser.init_grammar(
     rp_altamt: {
         match: [
             [ '/', :rp_summed_amt ],
-            [{match: '(', optional: true}, :rp_summed_amt, {match: [';', :rp_summed_amt], optional: true}, {match: ')', optional: true}],
-            [:rp_summed_amt, {match: [';', :rp_summed_amt], optional: true}]
+            [ { optional: '(' }, :rp_summed_amt, {match: [';', :rp_summed_amt], optional: true}, { optional: ')' }],
+            [ :rp_summed_amt, {match: [';', :rp_summed_amt], optional: true}]
         ],
         or: true
     },
-    rp_summed_amt: { # Handling the case of <amt> plus <amt>
-                     match: [ :rp_unqualified_amt, {match: ['plus', :rp_unqualified_amt], optional: true } ]
+    rp_summed_amt: {# Handling the case of <amt> plus <amt>
+                    match: [
+                        :rp_unqualified_amt,
+                        {:optional => 'plus'},
+                        {:optional => :rp_unqualified_amt}
+                    ]
     },
     rp_unqualified_amt: {# An Unqualified Amount is a number followed by a unit (only one required)
                          match: [

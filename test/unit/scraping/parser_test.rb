@@ -10,6 +10,7 @@ class ParserTest < ActiveSupport::TestCase
 
   def setup
     @ingredients = %w{
+      eggplants
       all-purpose\ flour
       lemon
       ground\ turmeric
@@ -57,7 +58,7 @@ class ParserTest < ActiveSupport::TestCase
       yellow\ onions
       lime
 }
-    @units = %w{ milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
+    @units = %w{ pounds ounces milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
     @conditions = %w{ chopped softened rinsed crustless sifted toasted grated finely\ grated lukewarm drained }
     super # Set up @parse_tester using @ingredients, @units and @conditions
 
@@ -69,7 +70,8 @@ class ParserTest < ActiveSupport::TestCase
         '½ cup',
         '1 small head'
     ]
-    @ingred_specs = [
+    @ingred_lines = [
+        '1 pound 5 ounces (600g) eggplants (1–2 large)',
         'Grated zest of 1 lemon',
         '2 cloves garlic',
         '2 garlic cloves',
@@ -85,7 +87,7 @@ class ParserTest < ActiveSupport::TestCase
         '1 small head (1/2 pound) Romanesco (green) cauliflower'
     ]
     @ings_list = <<EOF
-  <p>#{@ingred_specs.join "<br>\n"}</p>
+  <p>#{@ingred_lines.join "<br>\n"}</p>
 EOF
     @recipe = <<EOF
 <div class="entry-content"> 
@@ -125,7 +127,7 @@ EOF
   end
 
   test 'predefined ingredient lines' do
-    @ingred_specs.each { |line|
+    @ingred_lines.each { |line|
       parser = Parser.new line, @lex
       seeker = parser.match :rp_ingline
       assert seeker.success?, "Couldn't parse out :rp_ingline '#{line}'"
@@ -177,6 +179,7 @@ EOF
   end
 
   test 'parse amount specs' do
+    pt_apply :rp_amt, html: '1 pound 5 ounces (600g)'
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
       pt_apply :rp_amt, html: amtstr
