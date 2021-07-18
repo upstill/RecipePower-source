@@ -1,4 +1,5 @@
 ---
+:root: fantasticfungi.com
 :selector: div.main-content
 :trimmers:
 - div.article-gallery

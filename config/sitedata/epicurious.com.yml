@@ -1,4 +1,5 @@
 ---
+:root: www.epicurious.com
 :selector: |-
   div.title-source h1
   div.intro

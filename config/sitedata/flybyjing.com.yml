@@ -1,4 +1,5 @@
 ---
+:root: flybyjing.com
 :selector: article
 :trimmers:
 - div.page__teeth

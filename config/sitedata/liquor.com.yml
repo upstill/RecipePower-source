@@ -1,4 +1,5 @@
 ---
+:root: www.liquor.com
 :selector: div.heading, div.chop-content
 :trimmers:
 - div.inline-video
