@@ -1,4 +1,6 @@
 require 'scraping/seeker.rb'
+require 'scraping/patternista.rb'
+require 'scraping/scan_pattern.rb'
 require 'enumerable_utils.rb'
 
 # TODO: 'orange slice', i.e., ingredient FOLLOWED BY unit
@@ -24,7 +26,7 @@ require 'enumerable_utils.rb'
 # Recipe #15673(public) Fish-Fragrant Eggplants...
 # 1 pound 5 ounces (600g) eggplants (1–2 large)
 class Parser
-  attr_reader :grammar
+  attr_reader :grammar, :patternista
 
   @@TokenTitles = {
       :rp_title => 'Title',
@@ -44,6 +46,10 @@ class Parser
   def self.init_grammar grammar={}
     @@DefaultGrammar = grammar
     @@GrammarYAML = grammar.to_yaml
+  end
+
+  def self.init_triggers *trigger_pattern_pairs
+    @@TriggerPatternPairs = trigger_pattern_pairs
   end
 
   # Provide a copy of the grammar as initialized
@@ -105,11 +111,12 @@ class Parser
   def initialize noko_scanner_or_nkdoc_or_nktokens, lex = nil, grammar_mods={}
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
     @grammar = Parser.initialized_grammar
-    # Nicify the prior grammar and the mods
-    finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
+    # Nicify the prior grammar and the mods, and extract triggers
+    trigger_map = finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
-    @atomic_tokens = Parser.grammar_check(@grammar) { |error| gramerrs << error }
+    # @atomic_tokens =
+    Parser.grammar_check(@grammar) { |error| gramerrs << error }
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
     end
@@ -120,6 +127,21 @@ class Parser
     @grammar.freeze
     @lexaur = lex if lex
     self.stream = noko_scanner_or_nkdoc_or_nktokens
+    # Finally, create the scanning table from the triggers
+    @patternista = Patternista.new @lexaur
+    trigger_map.each do |token, triggerz|
+      # When the trigger is encountered during the scan, seek a match for the grammar entry
+      next if triggerz.blank?
+      @patternista.assert GrammarPattern.new(token, self), triggerz
+    end
+    @@TriggerPatternPairs.each do |trigger_pattern_pair|
+      trigger, pattern = trigger_pattern_pair
+      # NB: currently, only grammar references (tokens) are accepted as patterns,
+      # but there's no reason that a pattern in the same format as a grammar entry
+      # can't be used instead
+      @patternista.assert GrammarPattern.new(pattern, self), trigger
+    end
+    @patternista
   end
 
   def stream=noko_scanner_or_nkdoc_or_nktokens
@@ -151,10 +173,18 @@ class Parser
         :repeating, # The spec will be matched repeatedly until the end of input
         # :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
-        :optional # Failure to match is not a failure
+        :optional, # Failure to match is not a failure
+        :trigger
       ].each do |flag|
         if entry[flag] && entry[flag] != true
-          entry[:match], entry[flag] = entry[flag], true
+          entry[:match] = entry[flag]
+          if flag == :trigger
+            entry.delete :trigger
+            # If the trigger is an array, assume that any member will match
+            entry[:or] = true if entry[:match].is_a?(Array)
+          else
+            entry[flag] = true
+          end
         end
       end
       entry[:match] = cleanup_entry :match, entry[:match] if entry[:match]
@@ -193,23 +223,52 @@ class Parser
       end
       original
     end
-    todo = @grammar.keys.count # 27
-    # success on 26, fail on 27
+    def do_trigger grammar_entry, &block
+      case grammar_entry
+      when Hash
+        if grammar_entry[:trigger]
+          grammar_entry[:trigger] = block.call grammar_entry[:trigger]
+        elsif match = grammar_entry.slice(:match, :checklist, :or, :repeating, :optional).values.first
+          do_trigger match, &block
+        end
+      when Array
+        grammar_entry.find { |elmt| rtnval = do_trigger(elmt, &block); return rtnval if rtnval }
+      end
+    end
+    # We need to augment the triggers found in a grammar entry
+    # with any found in the grammar_mods, while attending to any
+    # explicitly declared in grammar_mods[:triggers]
+    def do_triggers grammar_entry, grammar_mods, triggers, key
+      # do_trigger finds the trigger in a grammar entry (or mod), calling a block to modify it
+      trigger = (triggers[key] if triggers) || []
+      do_trigger(grammar_entry) { |extant_trigger| trigger = [trigger, extant_trigger].flatten }
+      do_trigger(grammar_mods[key]) { |extant_trigger| trigger = [trigger, extant_trigger].flatten }
+      trigger
+    end
+
+    todo = @grammar.keys.count
+
     puts "Finalising #{todo} grammar entries" if Rails.env.test?
     grammar_mods = processed_mods mods_plus
+    trigger_map = {}
     @grammar.keys.each do |key|
       break if todo == 0
       todo -= 1
       key = key.to_sym
       original = @grammar[key]
-      cleaned_up = cleanup_entry key, original  # Allows elements to be removed
+      # Triggers embedded in the grammar need to be:
+      # 1) pulled out for scanning, and
+      # 2) modified to include the declared trigger (if any)
+      trigger = do_triggers original, grammar_mods, mods_plus[:triggers], key
+      trigger_map[key] = trigger if trigger
+      cleaned_up = cleanup_entry key, original # Allows elements to be removed
       @grammar[key] =
           if grammar_mods && (mod = cleanup_entry key, grammar_mods[key]).present?
             merge_entries cleaned_up, mod
           else
             cleaned_up
           end
-      if Rails.env.test?
+      if Rails.env.test? # Report on the grammar before plunging in
         if @grammar[key] == original
           puts ":#{key} unchanged"
         else
@@ -221,7 +280,8 @@ class Parser
           puts "  Final (#{mod.present? ? 'after' : 'no'} mod): ", indent_lines(@grammar[key])
         end
       end
-    end
+    end # @grammar[keys].each do
+    trigger_map
   end
 
   # Save the current grammar and apply mods to it for parsing

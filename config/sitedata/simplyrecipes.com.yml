@@ -1,10 +1,11 @@
 ---
-:root: www.simplyrecipes.com
 :selector: div.recipe-callout
 :trimmers:
 - div.recipe-callout-buttons
 - p.dont-steal
 :grammar_mods:
+  :triggers:
+    :rp_author: Source
   :rp_inglist:
     :in_css_match: ul
   :rp_ingline:

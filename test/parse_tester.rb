@@ -23,6 +23,7 @@ module PTInterface
            :selector, # Used by a site to select content
            :grammar_mods, # Saved to be applied to sites and, ultimately, a parse
            :grammar, # The state of the grammar
+           :patternista, :scan, :scan1, # Pattern matcher
            :trimmers, # Saved to be applied to sites and, ultimately, a parse
            :nokoscan, # A scanner for the parse
            :nkdoc, :tokens, # The Nokogiri doc and Nokotokens
@@ -66,6 +67,7 @@ class ParseTester < ActiveSupport::TestCase
               :parser, # The current parser, with modified grammar according to initialization parameters
               :selector, # Used by a site to select content
               :grammar_mods, # Saved to be applied to sites and, ultimately, a parse
+              :patternista,
               :trimmers, # Saved to be applied to sites and, ultimately, a parse
               :page_ref, # The PageRef generated when the parser was #apply-ed to a url
               :recipe, # The Recipe instance resulting from the parse
@@ -74,7 +76,8 @@ class ParseTester < ActiveSupport::TestCase
   delegate :mercury_result, :gleaning, :site, to: :page_ref
   delegate :'success?', :head_stream, :tail_stream, :find, :hard_fail?, :find_value, :find_values, :value_for, :xbounds, :token, :found_string, :found_strings, to: :seeker
   delegate :nkdoc, :tokens, to: :nokoscan
-  delegate :grammar, to: :parser
+  delegate :grammar, :patternista, to: :parser
+  delegate :scan, :scan1, to: :patternista
 
   def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: [], sample_url: '', sample_title: ''
     super if defined?(super)
@@ -92,10 +95,10 @@ class ParseTester < ActiveSupport::TestCase
   end
 
   # apply: parse either a file, a string, or an http resource, looking for the given entity (any grammar token)
-  def pt_apply target = :recipe, args={}
+  def pt_apply target = :recipe, args = {}
     target, args = :recipe, target if target.is_a?(Hash)
     # filename: nil, url: nil, html: nil, tags
-    filename = args.delete :filename  # Parse a local file
+    filename = args.delete :filename # Parse a local file
     url = args.delete :url # Create the target (an database object) using the url
     html = args.delete :html # Parse an html string
     @fail = args.delete :fail # Flag: expect the parse to fail
@@ -105,20 +108,20 @@ class ParseTester < ActiveSupport::TestCase
       typename = label.to_s.singularize.capitalize
       typenum = Tag.typenum typename
       assert_not_equal 0, typenum, "No such thing as tags of type #{label}"
-      add_tags typenum, (required_tags[typename] = [args[label]].flatten)  # Syntactic sugar: convert a single string into a singular list
+      add_tags typenum, (required_tags[typename] = [args[label]].flatten) # Syntactic sugar: convert a single string into a singular list
     end
 
     @last_target = target
     # Clear all instance variables that are provided by the parse
     @nokoscan = @seeker = @page_ref = @recipe = @content = nil
     @token = case target
-            when :recipe
-              :rp_recipe
-            when :recipe_page
-              :rp_recipelist
-            else
-              target
-            end
+             when :recipe
+               :rp_recipe
+             when :recipe_page
+               :rp_recipelist
+             else
+               target
+             end
     case
     when filename.present?
       apply_to_string File.read(filename), token: @token, required_tags: required_tags
@@ -140,14 +143,14 @@ class ParseTester < ActiveSupport::TestCase
     default_counts = {}
     case token
     when :rp_recipe
-      default_counts = {:rp_recipe => 1, :rp_title => 1 }
+      default_counts = {:rp_recipe => 1, :rp_title => 1}
       nkd = Nokogiri::HTML.fragment @recipe.content
     when :rp_recipelist
       assert_equal (counts.delete(:rp_recipe) || counts.delete(:rp_title) || 1), @page_ref.recipes.to_a.count
       counts = counts.except :rp_recipe, :rp_title
       nkd = Nokogiri::HTML.fragment @recipe_page.content
     else
-      default_counts = { token => 1 } # Expect one instance of the token by default
+      default_counts = {token => 1} # Expect one instance of the token by default
       nkd = @nokoscan.nkdoc
     end
     default_counts.merge(counts).each do |key, value|
@@ -158,17 +161,17 @@ class ParseTester < ActiveSupport::TestCase
   end
 
   # Given either a domain or a url, load an appropriate set of configs for the file
-  def self.load_for_page url, domain=nil
+  def self.load_for_page url, domain = nil
     domain ||= PublicSuffix.parse(URI(url).host).domain if url
     if domain.present?
       # Get default values from the file indicated by domain
-      filename = Rails.root.join("config", "sitedata", domain+'.yml')
+      filename = Rails.root.join("config", "sitedata", domain + '.yml')
       return YAML.load_file(filename) if File.exists? filename
     end
     return {}
   end
 
-  def save_configs url, domain=nil
+  def save_configs url, domain = nil
     domain ||= PublicSuffix.parse(URI(url).host).domain if url
     if domain.present?
       data = {
@@ -178,8 +181,8 @@ class ParseTester < ActiveSupport::TestCase
           sample_url: @sample_url,
           sample_title: @sample_title
       }.compact
-      filename = Rails.root.join("config", "sitedata", domain+'.yml')
-      File.open(filename,"w") do |file|
+      filename = Rails.root.join("config", "sitedata", domain + '.yml')
+      File.open(filename, "w") do |file|
         file.write data.to_yaml
       end
     end
@@ -283,7 +286,7 @@ class ParseTester < ActiveSupport::TestCase
   # Go out to the web, fetch the page at 'url', and ensure that all setup has occurred
   # url: the URL to hit
   def do_recipe_page url
-    do_page_ref url, [ :recipe_page ]
+    do_page_ref url, [:recipe_page]
 
     assert (@recipe_page = @page_ref.recipe_page)
     @recipe_page.ensure_attributes [:content]
@@ -298,7 +301,7 @@ class ParseTester < ActiveSupport::TestCase
     @recipe_page
   end
 
-  def do_page_ref url, attribs=[]
+  def do_page_ref url, attribs = []
     @page_ref = PageRef.fetch url
     prep_site @page_ref.site, @selector, @trimmers, @grammar_mods
     assert_equal @grammar_mods, @page_ref.site.grammar_mods
@@ -306,8 +309,8 @@ class ParseTester < ActiveSupport::TestCase
     # content_needed = (attribs + @page_ref.needed_attributes).include? :content
     @page_ref.ensure_attributes attribs
     if @page_ref.content.blank? && # content_needed
-      # Error: page ref couldn't extract content
-      content_report = @page_ref.site.finders.to_a.keep_if { |f| f.label == 'Content' } ? '.' : ", Perhaps because the site doesn't have a Content finder?"
+        # Error: page ref couldn't extract content
+        content_report = @page_ref.site.finders.to_a.keep_if { |f| f.label == 'Content' } ? '.' : ", Perhaps because the site doesn't have a Content finder?"
       @page_ref.errors.add :content, "PageRef couldn't find content" + content_report
     end
     refute @page_ref.errors.any?, @page_ref.errors.full_messages

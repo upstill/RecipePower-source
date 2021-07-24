@@ -200,6 +200,11 @@ class Scanner < Object
 
   end
 
+  # The stream in its entirety
+  def all
+
+  end
+
   def more?
     @pos < @bound # @length
   end
@@ -292,6 +297,10 @@ class StrScanner < Scanner
   # Return this scanner, exhausted
   def end
     StrScanner.new @strings, @bound, @bound
+  end
+
+  def all
+    StrScanner.new @strings, 0, @bound
   end
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
@@ -400,6 +409,10 @@ class NokoScanner # < Scanner
   # Return this scanner, exhausted
   def end
     NokoScanner.new tokens, @bound, @bound
+  end
+
+  def all
+    NokoScanner.new tokens, 0, @bound
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition

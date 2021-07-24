@@ -90,28 +90,28 @@ Parser.init_grammar(
         in_css_match: 'h1,h2,h3'
     }, # Match all tokens within an <h1> tag
     rp_author: {
-        match: [ /^Author:?$/, nil ],
+        match: [ { :trigger => /^Author:?$/ }, nil ],
         inline: true
     },
     rp_prep_time: {
-        match: [ /^Prep:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Prep:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_cook_time: {
-        match: [ /^Cook:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Cook:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_total_time: {
-        match: [ /^Total:?$/, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Total:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
         atline: true
     },
     rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
     rp_yield: {
-        match: [ /^(Makes|Yield):?$/i, :rp_amt ],
+        match: [ { :trigger => /^(Makes|Yield):?$/i }, :rp_amt ],
         atline: true
     },
     rp_serves: {
-        match: [ /^Serv(ing|e)s?:?$/, :rp_num_or_range ],
+        match: [ { :trigger => /^Serv(ing|e)s?:?$/ }, :rp_num_or_range ],
         atline: true
     },
     rp_instructions: nil,
@@ -206,4 +206,12 @@ Parser.init_grammar(
     rp_num: { match: 'NumberSeeker' },
     rp_range: { match: 'RangeSeeker' },
     rp_unit_tag: { tag: 'Unit' }
+)
+# Each pattern is declared as a pair:
+# first, the trigger for the pattern
+# second, the pattern to be matched when the trigger is found
+Parser.init_triggers([/^\d/, :rp_ingspec], # A digit triggers parsing for :rp_ingspec
+                     [Tag.typenum(:Unit), :rp_ingspec], # ...so does a Unit
+                     [Tag.typenum(:Condition), :rp_ingspec], # ...so does a Condition
+                     [['Makes', 'Yield'], :rp_yield] # Keywords that trigger parsing for Yield
 )
