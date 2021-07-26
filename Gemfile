@@ -106,7 +106,7 @@ gem 'capistrano-rbenv', '~> 2.1.0'
 
 ###### External interfaces
 # Extract Pocket/Readability page data into PageRefs
-gem 'mechanize', '~> 2.7.4', :group => [ :development, :staging ]
+gem 'mechanize', '~> 2.7.7', :group => [ :development, :staging ]
 gem 'youtube_addy' # Embed YouTube videos
 ## gem 'active_model_serializers'
 gem 'aws-sdk', '~> 1' # Keep thumbnails using AWS as CDN
