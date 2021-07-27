@@ -73,7 +73,7 @@ gem 'sassc' # , '~> 1.12' # Version 2.0 requires Ruby 2.3
 gem 'devise', '~> 4.0'                       # auth, rails generate devise:install, rails generate devise MODEL
 gem 'devise_invitable', '~> 1.6' # git: 'git://github.com/scambra/devise_invitable.git'
 gem 'ruby-openid'
-gem 'omniauth-twitter'
+gem 'omniauth-twitter', '>= 1.4.0'
 gem 'omniauth-facebook', '~> 4.0.0'
 gem 'omniauth-google-oauth2'
 gem 'omniauth-openid'
