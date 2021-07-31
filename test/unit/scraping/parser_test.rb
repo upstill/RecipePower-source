@@ -58,17 +58,19 @@ class ParserTest < ActiveSupport::TestCase
       yellow\ onions
       lime
 }
-    @units = %w{ pounds ounces milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
+    @units = %w{ servings pounds ounces milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
     @conditions = %w{ chopped softened rinsed crustless sifted toasted grated finely\ grated lukewarm drained }
     super # Set up @parse_tester using @ingredients, @units and @conditions
 
     @amounts = [
+        '4 -5 servings',
         '1 head',
         '1 1/2 cup',
         '2 cloves',
         '1/4 cup',
         '½ cup',
-        '1 small head'
+        '1 small head',
+        '1 pound 5 ounces (600g)'
     ]
     @ingred_lines = [
         '1 pound 5 ounces (600g) eggplants (1–2 large)',
@@ -178,8 +180,15 @@ EOF
     assert_equal ',', parser.grammar[:rp_ing_comment][:terminus]
   end
 
+  test 'parse numbers and ranges' do
+    range_cases = [ '1-3', '1 to 3', '1-1/2', '1 to 1-1/2', '1-1/2 to 2', '4-5', '4 -5', '4- 5', '1-1/2' ]
+    range_cases.each do |range|
+      pt_apply :rp_num_or_range, html: range
+      assert seeker.success?, "Couldn't parse '#{range}' for :rp_num_or_range"
+    end
+  end
+
   test 'parse amount specs' do
-    pt_apply :rp_amt, html: '1 pound 5 ounces (600g)'
     @amounts.each do |amtstr|
       puts "Parsing '#{amtstr}'"
       pt_apply :rp_amt, html: amtstr

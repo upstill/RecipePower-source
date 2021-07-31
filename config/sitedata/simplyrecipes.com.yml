@@ -6,6 +6,9 @@
 :grammar_mods:
   :triggers:
     :rp_author: Source
+    :rp_yield:
+    - Makes
+    - Yield
   :rp_inglist:
     :in_css_match: ul
   :rp_ingline:

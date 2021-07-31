@@ -573,6 +573,7 @@ class NokoScanner # < Scanner
   # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
+    return nil if selector.blank?
     @tokens.dom_ranges(spec).each do |range|
       # Reject empty ranges for :in_css_match, because
       # 1) it can't be incremented beyond, and

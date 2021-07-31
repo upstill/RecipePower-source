@@ -18,7 +18,8 @@ class SimplyrecipesDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
       :triggers => {
-          :rp_author => 'Source'
+          :rp_author => 'Source',
+          :rp_yield => %w{ Makes Yield }
       },
 			:rp_inglist => {
 				:in_css_match => "ul"

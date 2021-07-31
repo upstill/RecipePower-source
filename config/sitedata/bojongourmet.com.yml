@@ -10,15 +10,11 @@
 - div.wprm-recipe-rating
 - div.wprm-container-float-right
 :grammar_mods:
+  :gm_bundles:
+    :name: :wordpress
   :gm_recipes:
     :at_css_match: h2
   :rp_title:
     :in_css_match: h2
-  :rp_instructions:
-    :in_css_match: div.wprm-recipe-instruction-text
-  :gm_inglist:
-    :flavor: :unordered_list
-    :list_class: wprm-recipe-ingredients
-    :line_class: wprm-recipe-ingredient
 :sample_url: http://bojongourmet.com/2015/12/coffee-cinnamon-muscovado-sugar-flans-the-new-sugar-spice-cookbook/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+BojonGourmet+%28The+Bojon+Gourmet%29
 :sample_title: Coffee, Cinnamon & Muscovado Sugar Flans

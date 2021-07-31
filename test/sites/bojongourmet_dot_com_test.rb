@@ -58,22 +58,15 @@ class BojongourmetDotComTest < ActiveSupport::TestCase
     eggs
     egg\ yolk
     }
-    @units = %w{ cup cups teaspoon tablespoons large }
+    @units = %w{ cup cups teaspoon tablespoons large servings }
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
+      :gm_bundles => { :name => :wordpress },
       :gm_recipes => { :at_css_match => "h2" },
 			:rp_title => {
 				:in_css_match => "h2"
-			},
-			:rp_instructions => {
-				:in_css_match => "div.wprm-recipe-instruction-text"
-			},
-			:gm_inglist => {
-				:flavor => :unordered_list,
-				:list_class => "wprm-recipe-ingredients",
-				:line_class => "wprm-recipe-ingredient"
 			}
-		}
+    }
     @trimmers = ["div.wprm-recipe-notes-container", "div.wprm-recipe-image", "div.wprm-call-to-action-text-container", "a.wprm-recipe-print", "a.wprm-recipe-pin", "a.wprm-recipe-jump", "div.wprm-recipe-rating", "div.wprm-container-float-right"]
     @selector = "div.wprm-recipe"
     @sample_url = 'http://bojongourmet.com/2015/12/coffee-cinnamon-muscovado-sugar-flans-the-new-sugar-spice-cookbook/?utm_source=feedburner&utm_medium=email&utm_campaign=Feed%3A+BojonGourmet+%28The+Bojon+Gourmet%29'
@@ -83,12 +76,6 @@ class BojongourmetDotComTest < ActiveSupport::TestCase
     #@selector = 'div.wprm-recipe-the-woks-of-life'
     #@trimmers = [ 'div.wprm-entry-footer', 'div.social', 'div.wprm-container-float-right' ]
     super
-  end
-
-  test 'mapping in grammar mods' do
-    # Apply tests to the grammar resulting from the grammar_mods here
-    assert_equal 'ul.'+@grammar_mods[:gm_inglist][:list_class], grammar[:rp_inglist][:match].first[:in_css_match]
-    assert_equal 'li.'+@grammar_mods[:gm_inglist][:line_class], grammar[:rp_ingline][:in_css_match]
   end
 
   test 'ingredient list' do
@@ -113,7 +100,7 @@ EOF
              units: %w{ g }
 =end
     assert_not_empty @page, "No page url specified for ParseTester"
-    pt_apply url: @page
+    pt_apply url: @page, :expect => [:rp_prep_time, :rp_cook_time, :rp_total_time, :rp_yield ]
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results
     refute recipe.errors.any?

@@ -102,6 +102,7 @@ class ParseTester < ActiveSupport::TestCase
     url = args.delete :url # Create the target (an database object) using the url
     html = args.delete :html # Parse an html string
     @fail = args.delete :fail # Flag: expect the parse to fail
+    @expect = args.delete :expect # Specifies tokens that should be successfully found
     required_tags = {}
     args.keys.each do |label|
       # Map from labels to tag type symbol for remaining arguments
@@ -128,11 +129,16 @@ class ParseTester < ActiveSupport::TestCase
     when html.present?
       apply_to_string html, token: @token, required_tags: required_tags
     when url.present?
-      do_recipe url, required_tags: required_tags if @token == :rp_recipe
+      do_recipe url, required_tags: required_tags, expect: @expect if @token == :rp_recipe
       do_recipe_page url if @token == :rp_recipelist
     end
-    @seeker&.enclose_all parser: @parser
-    @seeker&.success?
+    if @seeker # Parsed html string or file directly
+      # Verify the successful match on all the tokens in the @expect array
+      check_content @seeker, @expect
+      @seeker.enclose_all parser: @parser
+      check_content @seeker.head_stream.nkdoc, @expect
+      @seeker.success?
+    end
   end
 
   # Do testing on the results of the last application.
@@ -248,7 +254,7 @@ class ParseTester < ActiveSupport::TestCase
   # Go out to the web, fetch the recipe at 'url', and ensure that all setup has occurred
   # url: the URL to hit
   # required_tags: a list of tags that should be created for the recipe
-  def do_recipe url, required_tags: {}
+  def do_recipe url, required_tags: {}, expect: []
     @recipe = Recipe.new url: url
     @page_ref = @recipe.page_ref
 
@@ -264,12 +270,13 @@ class ParseTester < ActiveSupport::TestCase
     refute @recipe.errors.any?, @recipe.errors.full_messages
     assert @recipe.good? # Should have loaded and settled down
     check_attributes @recipe, @recipe.title, :title, :picurl, :description, :content
+    check_content @recipe.content, expect
 
     refute @recipe.recipe_page
     assert_equal @page_ref, @recipe.page_ref
     @recipe.ensure_attributes [:content]
     refute @recipe.recipe_page # Still no @recipe page b/c it hasn't been requested
-    assert_not_empty @recipe.content # ...but content from the page_ref
+    check_content @recipe.content, expect
 
     @page_ref.ensure_attributes [:recipe_page]
     assert (rp = @recipe.recipe_page)
@@ -324,5 +331,20 @@ class ParseTester < ActiveSupport::TestCase
     attribs.each do |attrib|
       assert trackable.attrib_ready?(attrib), "#{trackable.class} '#{trackable_name}' couldn't extract '#{attrib}'"
     end
+  end
+
+  # Examine the content for :rp_* elements given in the expect array
+  # content: either a Seeker, a String, or a Nokogiri fragment
+  def check_content content, expect
+    case content
+    when Seeker
+      [expect].flatten.each { |token| assert content.find(token).present?, "Failure! Couldn't parse out :#{token}." } if expect
+    when String
+      assert_not_empty content, "Recipe has no parsed content"
+      nkdoc = Nokogiri::HTML.fragment content
+    when Nokogiri::HTML::DocumentFragment
+      nkdoc = content
+    end
+    [expect].flatten.each { |token| assert_not_equal 0, nkdoc.css(".#{token}").count, "Can't parse out :#{token} in recipe"} if expect
   end
 end

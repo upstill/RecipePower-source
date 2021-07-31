@@ -402,6 +402,24 @@ class Parser
       # Each :gm_* key MAY have a value to parametrize it
       # Copy actual grammar entries
       mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
+      # Expand :gm_bundle meta-mod(s)
+      if bundles = mods_plus.delete(:gm_bundles)
+        [bundles].flatten.each do |bundle_spec|
+          case bundle_spec[:name]
+          when :wordpress
+            grammar_mods[:rp_instructions] = {:in_css_match => "div.wprm-recipe-instruction-text"}
+            grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}
+            grammar_mods[:rp_cook_time] = {:in_css_match => 'div.wprm-recipe-cook-time-container'}
+            grammar_mods[:rp_total_time] = {:in_css_match => 'div.wprm-recipe-total-time-container'}
+            grammar_mods[:rp_yield] = {:in_css_match => 'div.wprm-recipe-servings-container'}
+            mods_plus[:gm_inglist] = {
+                :flavor => :unordered_list,
+                :list_class => "wprm-recipe-ingredients",
+                :line_class => "wprm-recipe-ingredient"
+            }
+          end
+        end
+      end
       # Apply meta-mods
       mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|
         params, val = {}, mods_plus[key]
@@ -504,6 +522,15 @@ class Parser
       context = context.except :token
     end
     found = nil
+    if (context.keys & [:in_css_match, :at_css_match, :after_css_match ]).present? # Use a stream derived from a CSS match in the Nokogiri DOM
+      subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
+      return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
+
+      match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
+          scanner.past(subscanner)
+      return match.encompass(scanner) # Release the limitation to element bounds
+    end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
       return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
@@ -517,15 +544,6 @@ class Parser
         match = match_specification(inside, spec, token, context.except(:parenthetical))
       end
       return match ? Seeker.new(scanner, after, token, [match]) : Seeker.failed(scanner, after, context)
-    end
-    if context[:in_css_match] || context[:at_css_match] || context[:after_css_match] # Use a stream derived from a CSS match in the Nokogiri DOM
-      subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
-
-      match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
-          scanner.past(subscanner)
-      return match.encompass(scanner) # Release the limitation to element bounds
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])

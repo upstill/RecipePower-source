@@ -259,22 +259,16 @@ end
 
 class RangeSeeker < Seeker
   def self.match stream, opts={}
-    if match1 = NumberSeeker.match(stream, opts)
+    number_opts = opts.merge :token => :rp_num
+    if match1 = NumberSeeker.match(stream, number_opts)
       ts = match1.tail_stream
-      # Check for the token 'to' followed by a second number
-      if ts.peek&.match /to/i
-        match2 = NumberSeeker.match ts.rest, opts
-        if match2
-          self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
-        else
-          match1
-        end
-      end
-    elsif stream.peek&.match '-'
-      nums = stream.peek.split '-'
-      if (match1 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.first)) &&
-         (match2 = NumberSeeker.new stream, stream.rest, opts[:token] if NumberSeeker.num1(nums.last))
-        self.new stream, stream.rest, :rp_range, [ match1, match2 ]
+      # Check for the token 'to' or '-' followed by a second number
+      # If the second number is greater than the first, we've found our range
+      if ts.peek&.match /(-|to)/i
+        sep = $1
+        match2 = NumberSeeker.match ts.rest, number_opts
+        return nil if !match2 || (sep=='-' && match1.value >= match2.value) # Not a range but an integer plus fraction
+        self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
       end
     end
   end
@@ -329,12 +323,21 @@ class NumberSeeker < Seeker
     return if str.blank?
     strs = str.split (/\ /)
     self.whole_num(strs.first) && strs[1] &&
-        ((%q{ and plus }.include?(strs[1]) && self.fraction(strs.last)) ||
+        ((%q{ - and plus }.include?(strs[1]) && self.fraction(strs.last)) ||
           (strs[1] == '.' && self.whole_num(strs.last)))
   end
 
   def self.num_word str
     (@NumWords ||= Hash[%w{ a an one two three four five six seven eight nine ten }.product([true])])[str.downcase]
+  end
+
+  # Convert a NumberSeeker string result to a number
+  def value
+    strs = to_s.split '-'
+    num, denom = strs.pop.split '/'
+    int = strs.present? ? strs.pop.to_i : 0
+    return int+num.to_i if denom.blank?
+    int + num.to_f / denom.to_f
   end
 
 end

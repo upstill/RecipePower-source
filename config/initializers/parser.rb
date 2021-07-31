@@ -72,46 +72,59 @@ Parser.init_grammar(
     },
     rp_recipe: {
         match: [
-            { optional: :rp_title },
-             # Everything after the ingredient list
-            { checklist: [
-                [ { :repeating => :rp_inglist }, :rp_instructions ],
-                { optional: :rp_author },
-                { optional: :rp_prep_time },
-                { optional: :rp_cook_time },
-                { optional: :rp_total_time },
-                { optional: :rp_serves },
-                { optional: :rp_yield }
-            ] },
+            {optional: :rp_title},
+            # Everything after the ingredient list
+            {checklist: [
+                [{:repeating => :rp_inglist}, :rp_instructions],
+                {optional: :rp_author},
+                {optional: :rp_prep_time},
+                {optional: :rp_cook_time},
+                {optional: :rp_total_time},
+                {optional: :rp_serves},
+                {optional: :rp_yield}
+            ]},
         ]
     },
+=begin
+    # Now author, etc. are found by scanning
+    rp_recipe: [
+        {optional: :rp_title},
+        [{:repeating => :rp_inglist}, :rp_instructions]
+    ],
+=end
     # Hopefully sites will specify how to find the title in the extracted text
     rp_title: {
         in_css_match: 'h1,h2,h3'
-    }, # Match all tokens within an <h1> tag
+    }, # Match all tokens within a header tag (by default)
     rp_author: {
         match: [ { :trigger => /^Author:?$/ }, nil ],
-        inline: true
+        in_css_match: nil,
+        atline: true
     },
     rp_prep_time: {
-        match: [ { :trigger => /^Prep:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Prep:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
+        in_css_match: nil,
         atline: true
     },
     rp_cook_time: {
-        match: [ { :trigger => /^Cook:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Cook:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
+        in_css_match: nil,
         atline: true
     },
     rp_total_time: {
-        match: [ { :trigger => /^Total:?$/ }, { match: /^time:?$/, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Total:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
+        in_css_match: nil,
         atline: true
     },
     rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
     rp_yield: {
-        match: [ { :trigger => /^(Makes|Yield):?$/i }, :rp_amt ],
+        match: [ { :trigger => /^(Servings|Makes|Yield):?$/i }, :rp_num_or_range, :rp_unit ], # :rp_amt ],
+        in_css_match: nil,
         atline: true
     },
     rp_serves: {
         match: [ { :trigger => /^Serv(ing|e)s?:?$/ }, :rp_num_or_range ],
+        in_css_match: nil,
         atline: true
     },
     rp_instructions: nil,
@@ -212,6 +225,5 @@ Parser.init_grammar(
 # second, the pattern to be matched when the trigger is found
 Parser.init_triggers([/^\d/, :rp_ingspec], # A digit triggers parsing for :rp_ingspec
                      [Tag.typenum(:Unit), :rp_ingspec], # ...so does a Unit
-                     [Tag.typenum(:Condition), :rp_ingspec], # ...so does a Condition
-                     [['Makes', 'Yield'], :rp_yield] # Keywords that trigger parsing for Yield
+                     [Tag.typenum(:Condition), :rp_ingspec] # ...so does a Condition
 )
