@@ -464,6 +464,11 @@ class NokoScanner # < Scanner
     NokoScanner.new tokens, s2.pos, @bound
   end
 
+  # Advance self past the end of s2
+  def past s2
+    NokoScanner.new tokens, s2.bound, @bound
+  end
+
   # Create a scanner that ends at the given scanner
   def except s2
     return self if !s2 || s2.pos > @bound
@@ -513,7 +518,6 @@ class NokoScanner # < Scanner
     end
   end
 
-=begin
 # Possible function for scanning for a result
   # Call a block with a scanner for each stop in self as controlled by the options:
   # :atline moves the scanner to the first token that begins a line (possibly this one)
@@ -526,25 +530,26 @@ class NokoScanner # < Scanner
   def for_each options={}
     scanner = self
     while scanner.peek do
-      flag, flagval = options.keys.first, options.values.first
+      flag = options.keys.first
       case flag
       when :atline, :inline
-        toline = scanner.toline options[:inline]
-        return unless toline # return Seeker.failed(scanner, context) unless toline
-        match = match_specification(toline, spec, token, context.except(:atline, :inline))
-        match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
-        return match.encompass(scanner)
+        subscanner = scanner.toline options[:inline]
+        break unless subscanner # return Seeker.failed(scanner, context) unless toline
+        #match = match_specification(toline, spec, token, context.except(:atline, :inline))
+        #match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
+        #return match.encompass(scanner)
       when :at_css_match, :in_css_match, :after_css_match
         subscanner = scanner.on_css_match(options)
-        return unless subscanner # return Seeker.failed(scanner, context) unless subscanner
-        match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-        match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
-        return match.encompass(scanner)
+        break unless subscanner # return Seeker.failed(scanner, context) unless subscanner
+        #match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
+        #match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
+        #return match.encompass(scanner)
       end
-      scanner = yield(scanner) || scanner.rest
+      yield subscanner
+      # Now advance the scanner past the subscanner
+      scanner = scanner.past(subscanner)
     end
   end
-=end
 
   # Return a scanner, derived from the instance's Nokogiri DOM, restricted to the given CSS match
   def within_css_match selector_or_node
@@ -570,6 +575,7 @@ class NokoScanner # < Scanner
   # spec: a Hash with one key-value pair. In all cases, the value is a CSS selector
   # -- if the key is :in_css_match, find the first node that matches the css and return a scanner for all and only that node's contents
   # -- if the key is :at_css_match, find the first node that matches the css and return a scanner that starts with that node's contents
+  #   and ends at the next node that matches the css
   # -- if the key is :after_css_match, find the first node that matches the the css and return a scanner that starts after that node
   def on_css_match spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
@@ -581,7 +587,7 @@ class NokoScanner # < Scanner
       # In general, this is an artifact of the ambiguity inherent in expressing ranges as tokens
       next if flag == :in_css_match && range.size < 1
       # Look at the first range that starts after this scanner, and return the part of the match within the scanner's bounds
-      return (scanner_for_range(range, flag) if range.begin <= @bound) if range.begin >= @pos
+      return (scanner_for_range(range, flag) if range.begin < @bound) if range.begin >= @pos
     end
     nil
   end

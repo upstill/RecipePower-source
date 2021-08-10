@@ -37,7 +37,7 @@ class RecipeContentsController < ApplicationController
     redirect_to :show unless rcparams = params[:recipe][:recipeContents]
     @content = rcparams[:content]
     tag if rcparams[:token] == 'tag'
-    ps = ParserServices.new entity: @recipe, content: @content
+    ps = ParserServices.new entity: @recipe, input: @content
     # This is a two-, possibly three-phase process:
     # 1) a selection from the browser directs attention to a range of text, which generates a CSS path for an element to parse
     # 2) this so-called parse_path is attempted to be parsed. If it doesn't work because of a findable tag, a dialog is presented
@@ -50,7 +50,6 @@ class RecipeContentsController < ApplicationController
     elsif @parse_path = rcparams[:parse_path] # Specifying an element of the DOM
       if !(@tagname = rcparams[:tagname])
         logger.debug "Looking for tag at '#{@parse_path}'"
-        # @annotation = ParsingServices.parse_on_path *rcparams.values_at(:content, :parse_path) do |tagtype, tagname|
         @annotation = ps.parse_on_path @parse_path do |tagtype, tagname|
           @tagtype, @tagname = tagtype, tagname
         end

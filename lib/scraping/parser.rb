@@ -93,6 +93,25 @@ class Parser
     @lexaur ||= Lexaur.from_tags *types
   end
 
+  def patternista
+    return @patternista if @patternista
+    @patternista = Patternista.new lexaur
+    @trigger_map.each do |token, triggerz|
+      # When the trigger is encountered during the scan, seek a match for the grammar entry
+      next if triggerz.blank?
+      @patternista.assert GrammarPattern.new(token, self), triggerz
+    end
+    @@TriggerPatternPairs.each do |trigger_patterns|
+      trigger = trigger_patterns.shift
+      # The remainder of the declaration is patterns associated with the trigger
+      trigger_patterns.each { |pattern| @patternista.assert GrammarPattern.new(pattern, self), trigger }
+      # NB: currently, only grammar references (tokens) are accepted as patterns,
+      # but there's no reason that a pattern in the same format as a grammar entry
+      # can't be used instead.
+    end
+    @patternista
+  end
+
   def self.token_to_title token, default: nil
     @@TokenTitles[token] || default || "Unnamed Token #{token.to_s}"
   end
@@ -112,7 +131,7 @@ class Parser
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
     @grammar = Parser.initialized_grammar
     # Nicify the prior grammar and the mods, and extract triggers
-    trigger_map = finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
+    @trigger_map = finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     # @atomic_tokens =
@@ -128,20 +147,6 @@ class Parser
     @lexaur = lex if lex
     self.stream = noko_scanner_or_nkdoc_or_nktokens
     # Finally, create the scanning table from the triggers
-    @patternista = Patternista.new @lexaur
-    trigger_map.each do |token, triggerz|
-      # When the trigger is encountered during the scan, seek a match for the grammar entry
-      next if triggerz.blank?
-      @patternista.assert GrammarPattern.new(token, self), triggerz
-    end
-    @@TriggerPatternPairs.each do |trigger_pattern_pair|
-      trigger, pattern = trigger_pattern_pair
-      # NB: currently, only grammar references (tokens) are accepted as patterns,
-      # but there's no reason that a pattern in the same format as a grammar entry
-      # can't be used instead
-      @patternista.assert GrammarPattern.new(pattern, self), trigger
-    end
-    @patternista
   end
 
   def stream=noko_scanner_or_nkdoc_or_nktokens
@@ -149,6 +154,11 @@ class Parser
                       noko_scanner_or_nkdoc_or_nktokens :
                       NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
+
+  def scan
+    patternista.scan @stream
+  end
+
   @@ExclusiveOptions = [ # Each group of options is exclusive: at most one from each group can be declared
       %i{ bound terminus }, # :bound and :terminus are exclusive options
       %i{ atline inline },  # :atline and :inline are exclusive options
@@ -298,10 +308,11 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream
+  def match token, stream: @stream, in_place: false
     puts ">>>>>>>>>>> Entering Parse for :#{token}" if Rails.env.test?
-    if grammar[token]
-      matched = match_specification stream, grammar[token], token
+    if ge = grammar[token]
+      ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
+      matched = match_specification stream, ge, token
     else
       matched = Seeker.failed stream, stream, token
     end
@@ -428,8 +439,7 @@ class Parser
         when :gm_recipes
           # We match recipes within a list and individual recipes with the same selector
           # Expecting a hash for the match specifier (i.e., :in_css_match => 'h2' )
-          grammar_mods[:rp_recipelist] = { match: params }
-          grammar_mods[:rp_recipe] = params
+          grammar_mods[:rp_recipelist] = grammar_mods[:rp_recipe] = params
         when :gm_inglist
           case val.to_sym
           when :unordered_list
@@ -438,7 +448,7 @@ class Parser
             # line_class: css class of the 'li' tags for ingredient lines
             list_selector = params[:list_selector] || selector_for('ul', css_class: params[:list_class])
             line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
-            grammar_mods[:rp_inglist] = { :or => [ { :in_css_match => list_selector } ] }
+            grammar_mods[:rp_inglist] = { :in_css_match => list_selector } # { :or => [ { :in_css_match => list_selector } ] }
             grammar_mods[:rp_ingline] = { :in_css_match => line_selector }
           when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
             grammar_mods[:rp_inglist] = {
@@ -521,8 +531,8 @@ class Parser
     if !token && (token = context[:token])
       context = context.except :token
     end
-    found = nil
     if (context.keys & [:in_css_match, :at_css_match, :after_css_match ]).present? # Use a stream derived from a CSS match in the Nokogiri DOM
+=begin
       subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
       return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
 
@@ -530,6 +540,18 @@ class Parser
       match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
           scanner.past(subscanner)
       return match.encompass(scanner) # Release the limitation to element bounds
+=end
+      matches = []
+      start_scanner = scanner
+      # Scan repeatedly
+      scanner.for_each(context.slice :in_css_match, :at_css_match, :after_css_match) do |subscanner|
+        match = match_specification subscanner, spec, context.except(:repeating, :keep_if, :in_css_match, :at_css_match, :after_css_match)
+        if match
+          match.tail_stream = match.tail_stream.encompass start_scanner
+          matches << match.if_retain
+        end
+      end
+      return report_matches matches, token, spec, context, scanner, start_scanner
     end
     if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
       toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
@@ -560,14 +582,7 @@ class Parser
     if context[:repeating] # Match the spec repeatedly until EOF
       matches = []
       start_scanner = scanner
-      # Unless working from a css match, scan repeatedly
-=begin
-      scanner.for_each(context.slice :atline, :inline, :in_css_match, :at_css_match, :after_css_match) do |scanner|
-        match = match_specification scanner, spec, context.except(:repeating, :keep_if)
-        matches << match.if_retain
-        match.next
-      end
-=end
+      # Scan repeatedly
       while scanner.peek do # No token except what the spec dictates
         match = match_specification scanner, spec, context.except(:repeating, :keep_if)
         matches << match.if_retain
@@ -575,30 +590,7 @@ class Parser
       end
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
-      matches.compact!
-      if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
-        if matches.all? &:hard_fail?
-          return Seeker.failed matches.first&.head_stream || start_scanner,
-                               matches.last&.tail_stream || scanner, 
-                               token,
-                               context.except(:enclose)
-        end
-      end
-      consolidation = consolidate_matches spec, matches
-      return consolidation if consolidation
-      # Default handling is to delete failed matches, then assess the remainder
-      matches.delete_if &:'hard_fail?'
-      return case matches.count
-             when 0
-               Seeker.failed start_scanner, scanner, token, context
-             when 1
-               match = matches.first
-               token.nil? || token == match.token ?
-                   match :
-                   Seeker.new(match.head_stream, match.tail_stream, token, matches)
-             else
-               Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
-             end
+      return report_matches matches, token, spec, context, scanner, start_scanner
     end
     if context[:orlist]
       # Get a series of zero or more tags of the given type(s), each followed by a comma and terminated with 'and' or 'or'
@@ -779,7 +771,7 @@ class Parser
                          optional: ((context[:optional] || inspec[:optional] || match.soft_fail?) ? true : false))
   end
 
-  def consolidate_matches token, matches
+  def consolidate_inglines token, matches
     return if token != :rp_ingline
     # An ingredient list needs special attention:
     # -- individual lines may have failed but still need to be retained
@@ -794,7 +786,35 @@ class Parser
         match.token = :rp_inglist_label
       end
     end
-    Seeker.new(matches.first.head_stream, matches.last.tail_stream, matches) if matches.count > 1
+    Seeker.new(matches.first.head_stream, matches.last.tail_stream, :rp_inglist, matches) if matches.count > 1
+  end
+
+  # When matches have been generated by a multi-matching directive, resolve the collection here
+  def report_matches matches, token, spec, context, scanner, start_scanner
+    matches.compact!
+    if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
+      if matches.all? &:hard_fail?
+        return Seeker.failed matches.first&.head_stream || start_scanner,
+                             matches.last&.tail_stream || scanner,
+                             token,
+                             context.except(:enclose)
+      end
+    end
+    consolidation = consolidate_inglines spec, matches
+    return consolidation if consolidation
+    # Default handling is to delete failed matches, then assess the remainder
+    matches.delete_if &:'hard_fail?'
+    return case matches.count
+           when 0
+             Seeker.failed start_scanner, scanner, token, context
+           when 1
+             match = matches.first
+             token.nil? || token == match.token ?
+                 match :
+                 Seeker.new(match.head_stream, match.tail_stream, token, matches)
+           else
+             Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+           end
   end
 
 end

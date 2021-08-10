@@ -56,7 +56,7 @@ class Seeker
   def self.match stream, opts={}
   end
 
-  # From a seeker tree, find those of the given token
+  # From a seeker tree, list descendants marked with a given token
   def find target=nil, &block
     if block_given? ? block.call(self) : (token == target)
       [ self ]

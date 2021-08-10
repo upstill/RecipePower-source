@@ -62,20 +62,16 @@ require 'scraping/parser.rb'
 #       :inline also foreshortens the stream at the next line so defined.
 Parser.init_grammar(
     rp_recipelist: {
-        match:
-            {
-                match: [ { optional: :rp_title }, nil ],
-                at_css_match: 'h1,h2,h3',
-                token: :rp_recipe
-            },
-        repeating: true
+        match: [ { optional: :rp_title }, nil ],
+        at_css_match: 'h1,h2,h3',
+        token: :rp_recipe
     },
     rp_recipe: {
         match: [
             {optional: :rp_title},
             # Everything after the ingredient list
             {checklist: [
-                [{:repeating => :rp_inglist}, :rp_instructions],
+                :rp_recipe_section, # [{:repeating => :rp_inglist}, :rp_instructions],
                 {optional: :rp_author},
                 {optional: :rp_prep_time},
                 {optional: :rp_cook_time},
@@ -123,16 +119,29 @@ Parser.init_grammar(
         atline: true
     },
     rp_serves: {
-        match: [ { :trigger => /^Serv(ing|e)s?:?$/ }, :rp_num_or_range ],
+        or: [
+            [ { :trigger => /^Serv(ing|e)s?:?$/i }, :rp_num_or_range ],
+            [ :rp_num_or_range, /^Servings?$/i ]
+        ],
         in_css_match: nil,
         atline: true
     },
     rp_instructions: nil,
-    rp_inglist: {
+    :rp_recipe_section => {
+        :match => [ :rp_inglist, :rp_instructions ],
+        :at_css_match => "div.recipe__ingredient-list div" # Will produce a series of matches, as required
+    },
+    rp_inglist: { # A label followed by one or more ingredient lines, or two or more ingredient lines
+                  # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
+                  match: :rp_ingline,
+                  :enclose => true
+    },
+=begin
         or: [ { # A label followed by one or more ingredient lines, or two or more ingredient lines
                 match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
                 :enclose => true
-              },
+              }
+              ,
               { # Within a line, a comma-separated, conjunction-concluded list of ingredients
                 :match => :rp_ingline,
                 :orlist => :predivide,
@@ -140,6 +149,7 @@ Parser.init_grammar(
               }
         ],
     },
+=end
     rp_ingline: {
         match: [
             {
@@ -223,7 +233,8 @@ Parser.init_grammar(
 # Each pattern is declared as a pair:
 # first, the trigger for the pattern
 # second, the pattern to be matched when the trigger is found
-Parser.init_triggers([/^\d/, :rp_ingspec], # A digit triggers parsing for :rp_ingspec
+Parser.init_triggers([/^\d/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
+                     [ /^\d*$/, :rp_serves], # A full number triggers match for servings
                      [Tag.typenum(:Unit), :rp_ingspec], # ...so does a Unit
                      [Tag.typenum(:Condition), :rp_ingspec] # ...so does a Condition
 )

@@ -44,6 +44,6 @@ class GrammarPattern < ScanPattern
     stream = trigger_match.is_a?(Seeker) ? trigger_match.head_stream : trigger_match
     context ||= stream.all
     # Now the grammar entry at @token will be matched by the @parser from the stream
-    @parser.match @to_match, stream: stream.encompass(context)
+    @parser.match @to_match, stream: stream.encompass(context), in_place: true
   end
 end

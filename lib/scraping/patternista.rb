@@ -32,11 +32,16 @@ class Patternista
   # of the stream at that position
   def scan stream, context = stream.all
     stream = stream.clone
-    while !(result = scan1 stream, context) do
-      break unless stream.more?
-      stream.first
+    results = []
+    while stream.more? do
+      if result = scan1(stream, context)
+        results << result
+        stream = result.tail_stream
+      else
+        stream.first
+      end
     end
-    result
+    Seeker.new(stream, results.last.tail_stream, results) if results.present?
   end
 
   # Heart of pattern matching: For a stream at a given point, compare the content at that point to
@@ -63,15 +68,19 @@ class Patternista
       # onward is the stream AFTER the tags collected at that length
       # NB This block may be called multiple times, for successive tag sets of decreasing length (in tokens)
       seekers += Tag.where(id: tag_ids).to_a.collect { |tag|
-        @tag_patterns[tag.typesym]&.collect { |ptn| ptn.match contents, context }.compact
+        if patterns = @tag_patterns[tag.typesym]
+          patterns.collect { |ptn| ptn.match contents, context }.compact
+        end
       }.compact.flatten
     end
 
     # Match the current stream against the Regexp's used as keys in @re_patterns
     @re_patterns.each do |re, ptns|
-      if stream.peek.match(re)
+      if stream.peek&.match(re)
         contents = stream.except stream.rest # One token only
-        seekers += ptns.collect { |ptn| ptn.match contents, context }.compact
+        seekers += ptns.collect { |ptn|
+          ptn.match contents, context
+        }.compact
       end
     end
 

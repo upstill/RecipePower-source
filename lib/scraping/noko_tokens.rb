@@ -214,11 +214,23 @@ class NokoTokens < Array
   # Do the above but for EVERY match on the DOM. Returns a possibly empty array of values
   def dom_ranges spec
     flag, selector = spec.to_a.first # Fetch the key and value from the spec
-    ranges = nkdoc.search(selector)&.map do |found|
+    ranges_in = nkdoc.search(selector)&.map do |found|
       token_range_for_subtree found
     end || []
-    ranges << token_range_for_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
-    # For :at_css_match, ranges[i] runs to the beginning of ranges[i+1]
+    ranges_in << token_range_for_subtree(nkdoc) if nkdoc.parent && nkdoc.matches?(selector)
+    # For :at_css_match, ranges_in[i] runs to the beginning of ranges_in[i+1]
+    ranges_out = []
+    while range = ranges_in.shift do
+      # First thing, eliminate subsequent overlapping ranges
+      while ranges_in.present? && range.include?(ranges_in.first) do
+        ranges_in.shift
+      end
+      min, max = range.begin, range.end
+      max = (ranges_in.first&.begin || @bound) if flag == :at_css_match
+      while min < @bound && self[min].blank? do min += 1 end
+      ranges_out << (max > min ? min..max : min...min)
+    end
+=begin
     ranges.each_index do |ix|
       min, max = ranges[ix].begin, ranges[ix].end
       # Discard blank tokens at the beginning
@@ -226,7 +238,8 @@ class NokoTokens < Array
       while min < @bound && self[min].blank? do min += 1 end
       ranges[ix] = max > min ? min..max : min...min
     end
-    ranges.compact
+=end
+    ranges_out
   end
 
   # What are the tokens for encompassing the given subtree?

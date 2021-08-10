@@ -57,11 +57,11 @@ class RecipePage < ApplicationRecord
         # The seeker should present the token :rp_recipelist and have several children
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
-        parse = ParserServices.parse(entity: self, content: parsing_input)
-        if parse.seeker
-          parse.do_for(:rp_recipe) do |sub_parser| # Focus on each recipe in turn
-            xb = sub_parser.xbounds
-            if (title = sub_parser.value_for :rp_title).present?
+        ps = ParserServices.new entity: self, input: parsing_input
+        if ps.parse
+          ps.do_for(:rp_recipe) do |subseeker| # Focus on each recipe in turn
+            xb = subseeker.xbounds
+            if (title = subseeker.value_for :rp_title).present?
               rcpdata << { title: title, anchor_path: xb.first, focus_path: xb.last }
             elsif rcpdata.last
               rcpdata.last[:focus_path] = xb.last # Extend the range to include the bogus recipe
@@ -75,7 +75,7 @@ class RecipePage < ApplicationRecord
         end
 
         if Rails.env.test?
-            if parse.seeker
+            if ps.parsed
               puts "RecipePage found #{rcpdata.count} #{'recipes'.pluralize(rcpdata.count)}:"
               rcpdata.each { |rcpd| puts "\t#{rcpd[:title]}"}
             else
