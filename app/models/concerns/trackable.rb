@@ -13,6 +13,8 @@ module Trackable
     # e.g., by an after_initialize callback
     after_save do |entity|
       # Any attributes that remain unsatisfied will trigger a search for more
+      # TODO: set needed_attributes in a way that doesn't trigger #after_save again
+      request_secondary_attributes if secondary_attributes.present?
       bkg_launch true if !bad? && launch_on_save?
       # (re)Launch dj as necessary to gather attributes from MercuryResult and Gleaning
     end
@@ -87,6 +89,24 @@ module Trackable
   end
 
   def standard_attributes
+    []
+  end
+
+  # Called when a Trackable is first initialized
+  def request_standard_attributes
+    request_attributes standard_attributes if standard_attributes.present?
+  end
+
+  def standard_attributes
+    []
+  end
+
+  # Called when the Trackable is saved, to generate in background
+  def request_secondary_attributes
+    request_attributes secondary_attributes if secondary_attributes.present?
+  end
+
+  def secondary_attributes
     []
   end
 

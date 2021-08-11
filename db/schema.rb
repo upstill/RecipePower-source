@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2021_05_23_152210) do
+ActiveRecord::Schema.define(version: 2021_08_10_165031) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -369,16 +369,7 @@ ActiveRecord::Schema.define(version: 2021_05_23_152210) do
     t.datetime "updated_at"
     t.text "description"
     t.integer "picture_id"
-    t.string "prep_time"
-    t.string "cook_time"
-    t.string "total_time"
-    t.integer "prep_time_low", default: 0
-    t.integer "prep_time_high", default: 0
-    t.integer "cook_time_low", default: 0
-    t.integer "cook_time_high", default: 0
-    t.integer "total_time_low", default: 0
-    t.integer "total_time_high", default: 0
-    t.string "yield"
+    t.string "yields"
     t.integer "page_ref_id"
     t.integer "dj_id"
     t.integer "status", default: 0
@@ -386,6 +377,12 @@ ActiveRecord::Schema.define(version: 2021_05_23_152210) do
     t.string "anchor_path"
     t.string "focus_path"
     t.integer "attr_trackers", default: 0
+    t.int4range "prep_time"
+    t.int4range "cook_time"
+    t.int4range "total_time"
+    t.string "instructions"
+    t.string "ingredients"
+    t.int4range "serves"
     t.index ["id"], name: "recipes_index_by_id", unique: true
     t.index ["title"], name: "recipes_index_by_title"
   end

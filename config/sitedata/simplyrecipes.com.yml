@@ -6,7 +6,7 @@
 :grammar_mods:
   :triggers:
     :rp_author: Source
-    :rp_yield:
+    :rp_yields:
     - Makes
     - Yield
   :rp_inglist:

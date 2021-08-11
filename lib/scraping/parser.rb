@@ -422,7 +422,7 @@ class Parser
             grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}
             grammar_mods[:rp_cook_time] = {:in_css_match => 'div.wprm-recipe-cook-time-container'}
             grammar_mods[:rp_total_time] = {:in_css_match => 'div.wprm-recipe-total-time-container'}
-            grammar_mods[:rp_yield] = {:in_css_match => 'div.wprm-recipe-servings-container'}
+            grammar_mods[:rp_yields] = {:in_css_match => 'div.wprm-recipe-servings-container'}
             mods_plus[:gm_inglist] = {
                 :flavor => :unordered_list,
                 :list_class => "wprm-recipe-ingredients",

@@ -125,9 +125,9 @@ The dependencies are as follows:
 
   # Extract information from an entity (Recipe or RecipePage) or presented input
   def parse options={}
-    needed = options[:needed] || [ :rp_title, :rp_inglist, :rp_instructions ]
     self.input = options[:input] if options.keys.include?(:input)
     self.token = options[:token] if options.keys.include?(:token)
+    seeking = options[:seeking] || [ :rp_title, :rp_inglist, :rp_instructions ]
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?
       raise "Error in ParserServices#parse: must provide EITHER input or an entity"
@@ -139,8 +139,8 @@ The dependencies are as follows:
 
     @parsed = parser.match token, stream: nokoscan
 
-    # Perform the scan only if needed elements aren't found in the parse
-    @scanned ||= parser.scan # if needed.any? { |token| !@parsed&.find(token).first }
+    # Perform the scan only if seeking elements aren't found in the parse
+    @scanned ||= parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
 
     @parsed
   end
@@ -210,6 +210,43 @@ The dependencies are as follows:
         block.call seeker, token
       end
     end
+  end
+
+  def found_for token, as: nil
+    return [] if token.nil? || (seekers = @parsed.find(token) + @scanned.find(token)).empty?
+    # Convert the results according to :as specifier
+    return seekers unless as
+    found = seekers.map do |seeker|
+      case as
+      when :amountstring
+        [seeker.find(:rp_num_or_range)&.to_s, seeker.find(:rp_unit)].compact.join ' '
+      when :numrange
+        num_or_range = seeker.find(:rp_num_or_range).first.to_s
+        nums = num_or_range.
+            split(/-|to/).
+            map(&:strip).
+            keep_if { |substr| substr.match /^\d*$/ }.
+            map &:to_i
+        (nums.first)..(nums.last) if nums.present?
+      when :timerangeto_i
+        next unless timestr = seeker.find(:rp_time).first&.to_s
+        secs =
+        if timestr.match(/(\d+)\s+(\w+)/)
+          num = $1.to_i
+          unit = $2
+          case unit
+          when /minute/
+            num * 60
+          when /hour/
+            num * 3600
+          end
+        elsif timestr.match /(\d+):(\d+)/
+          ($1 * 60 + $2) * 60
+        end
+        (secs..secs) if secs
+      end
+    end
+    found.compact
   end
 
   private

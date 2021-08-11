@@ -19,7 +19,7 @@ class SimplyrecipesDotComTest < ActiveSupport::TestCase
 		@grammar_mods = {
       :triggers => {
           :rp_author => 'Source',
-          :rp_yield => %w{ Makes Yield }
+          :rp_yields => %w{ Makes Yield }
       },
 			:rp_inglist => {
 				:in_css_match => "ul"

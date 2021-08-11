@@ -113,7 +113,7 @@ class RecipePresenter < CollectiblePresenter
     case token
     #when :rp_title
     #when :rp_author
-    when :rp_yield, :rp_serves
+    when :rp_yields, :rp_serves
       result_for ".#{token} .rp_amt"
     #when :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_time
     #when :rp_ing_comment

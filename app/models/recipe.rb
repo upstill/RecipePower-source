@@ -19,7 +19,9 @@ class Recipe < ApplicationRecord
   # The picurl attribute is handled by the :picture reference of type ImageReference
   picable :picurl, :picture
   include Trackable
-  attr_trackable :picurl, :title, :description, :content
+  attr_trackable :picurl, :title, :description,
+                 :content, :ingredients, :instructions,
+                 :prep_time, :cook_time, :total_time, :yields, :serves
 
   delegate :recipe_page, :to => :page_ref
 
@@ -30,8 +32,13 @@ class Recipe < ApplicationRecord
   end
 =end
 
+  # TODO: move time-consuming attributes into secondary_attributes
   def standard_attributes
-    [ :title, :picurl, :content ]
+    [ :title, :picurl, :content, :ingredients, :instructions, :prep_time, :cook_time, :total_time, :yields, :serves ]
+  end
+
+  def secondary_attributes
+    [] # [ :ingredients, :instructions, :prep_time, :cook_time, :total_time, :yield ]
   end
 
   before_save do |recipe|
@@ -53,22 +60,10 @@ class Recipe < ApplicationRecord
     end
   end
 
-  # This is kind of smelly, but, given that 1) there is no association that maps between one RecipePage
-  # and many Recipes through a single PageRef, and 2) a recipe doesn't necessarily have either a PageRef
-  # or a RecipePage, this is the only way to do it
-  # after_save { |recipe| recipe.page_ref&.recipe_page&.save if recipe.page_ref&.recipe_page&.changed? }
-
-  # attr_accessible :title, :ratings_attributes, :description, :url,
-                  # :prep_time, :prep_time_low, :prep_time_high,
-                  # :cook_time, :cook_time_low, :cook_time_high,
-                  # :total_time, :total_time_low, :total_time_high,
-                  # :yield, :page_ref_attributes
-
   # For reassigning the kind of the page_ref and/or modifying site's parsing info
   accepts_nested_attributes_for :page_ref
   has_one :site, :through => :page_ref
   accepts_nested_attributes_for :site
-  #, :comment, :private, :tagpane, :status, :alias, :picurl :href, :collection_tokens
 
   validates :title, length: { minimum: 2 }
 
@@ -174,21 +169,61 @@ class Recipe < ApplicationRecord
 
   # Pagerefable manages getting the PageRef to perform and reporting any errors
   def perform
+    def attribute_as_token attrname
+      (attrname == :ingredients) ? :rp_inglist : :"rp_#{attrname}" if attrname != :content
+    end
+    def token_as_attribute token
+      (token == :rp_inglist) ? :ingredients : :"#{token.to_s.sub('rp_', '')}"
+    end
+    def attribute_as_type attrname
+      case attrname
+      when :content
+      when :ingredients
+      when :instructions
+      when :prep_time, :cook_time, :total_time
+        :timerange
+      when :yields
+        :amountstring
+      when :serves
+        :numrange
+      end
+    end
     # If the page_ref isn't ready, go back in the queue
     super if defined?(super) # await page_ref as required
     # The recipe_page will assert path markers and clear our content
     # if changes during page parsing were significant
-    if content_needed?
+    need_now = needed_attributes & [ :content, :ingredients, :instructions, :prep_time, :cook_time, :total_time, :yields, :serves ]
+    if need_now.present?
       # If there's an associated RecipePage, then we'll be depending on its content
       await recipe_page if page_ref.recipe_page_ready?
       content_to_parse =
         (recipe_page&.selected_content(anchor_path, focus_path) if anchor_path.present? && focus_path.present?) ||
         page_ref.trimmed_content
-      if content_to_parse.present?
+      if content_to_parse.present? # Can't proceed w/o something to parse!
+        # Translate the recipe attributes into grammar tokens
+        as_tokens = need_now.collect { |attrname| attribute_as_token attrname }.compact
         ps = ParserServices.new entity: self, input: content_to_parse
-        self.content = ps.annotate if ps.parse # Parsing was a success
+        if ps.parse seeking: as_tokens # No point proceeding if the parse fails
+          # Ideally, all content will have been parsed out and can now be assigned to attributes
+          self.content = ps.annotate if content_needed?
+          need_now.each do |attrname|
+            # Pull each needed attribute value according to token and type
+            token = attribute_as_token attrname
+            next unless (type = attribute_as_type attrname) &&
+                (tr = ps.found_for(token, as: type).first)
+            self.send :"#{attrname}=", tr
+          end
+          if yields&.match /(.*) servings?/i
+            num_or_range = $1
+            num_or_range.match /(\d*)-?(\d*)?$/
+            min = $1.to_i ; max = ($2.present? ? $2.to_i : min)
+            self.serves = min..max
+            self.yields = ''
+          end
+        end
       end
-      self.content_needed = false   # Give up on content until notified otherwise
+      # Clear all immediately-needed attributes, whether parsed out or not, until notified otherwise
+      need_now.each { |attrname| attrib_needed! attrname, false }
     end
   end
 

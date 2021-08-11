@@ -77,7 +77,7 @@ Parser.init_grammar(
                 {optional: :rp_cook_time},
                 {optional: :rp_total_time},
                 {optional: :rp_serves},
-                {optional: :rp_yield}
+                {optional: :rp_yields}
             ]},
         ]
     },
@@ -113,7 +113,7 @@ Parser.init_grammar(
         atline: true
     },
     rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
-    rp_yield: {
+    rp_yields: {
         match: [ { :trigger => /^(Servings|Makes|Yield):?$/i }, :rp_num_or_range, :rp_unit ], # :rp_amt ],
         in_css_match: nil,
         atline: true

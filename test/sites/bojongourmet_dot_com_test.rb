@@ -100,7 +100,7 @@ EOF
              units: %w{ g }
 =end
     assert_not_empty @page, "No page url specified for ParseTester"
-    pt_apply url: @page, :expect => [:rp_prep_time, :rp_cook_time, :rp_total_time, :rp_yield ]
+    pt_apply url: @page, :expect => [:rp_prep_time, :rp_cook_time, :rp_total_time, :rp_yields ]
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results
     refute recipe.errors.any?
