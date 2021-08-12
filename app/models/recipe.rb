@@ -43,21 +43,13 @@ class Recipe < ApplicationRecord
 
   before_save do |recipe|
     # Arm the recipe for launching
-    recipe.refresh_attributes [ :content ] if recipe.anchor_path_changed? ||
+    recipe.refresh_attributes [ :content ] if
+        recipe.anchor_path_changed? ||
         recipe.focus_path_changed? ||
-        (recipe.content.blank? && recipe.anchor_path.present? && recipe.focus_path.present?)
-    if recipe.content_changed?
-      # Set tags according to annotations
-      RecipeServices.new(self).inventory do |rpclass, node|
-        # #inventory will call a block on found nodes, once for each token
-        case rpclass
-        when :rp_title
-          self.title = node.text # accept_attribute :title, node.text
-        when :rp_ingline
-          x=2
-        end
-      end
-    end
+        (recipe.content.blank? &&
+            recipe.anchor_path.present? &&
+            recipe.focus_path.present?
+        )
   end
 
   # For reassigning the kind of the page_ref and/or modifying site's parsing info
@@ -213,12 +205,21 @@ class Recipe < ApplicationRecord
                 (tr = ps.found_for(token, as: type).first)
             self.send :"#{attrname}=", tr
           end
+          # If a Yield appeared as a number of servings, transfer it to the :serves attribute
           if yields&.match /(.*) servings?/i
             num_or_range = $1
             num_or_range.match /(\d*)-?(\d*)?$/
             min = $1.to_i ; max = ($2.present? ? $2.to_i : min)
             self.serves = min..max
             self.yields = ''
+          end
+          # Assert extracted title
+          if found = ps.nkdoc.css('.rp_title').first
+            self.title = found.text
+          end
+          # Assert extracted ingredient tags
+          if tagnames = ps.nkdoc.css('.rp_ingredient_tag').collect { |node| node['value'].if_present || node.text }
+            TaggingServices.new(self).set_tags User.inventory_user_id, :Ingredient => tagnames
           end
         end
       end

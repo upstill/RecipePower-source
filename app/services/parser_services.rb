@@ -149,7 +149,7 @@ The dependencies are as follows:
   def annotate
     @parsed.enclose_all parser: parser if @parsed&.success?
     @scanned.enclose_all parser: parser if @scanned&.success?
-    return nokoscan.nkdoc.to_s
+    return nkdoc.to_s
   end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
