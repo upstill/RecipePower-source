@@ -218,9 +218,8 @@ class Recipe < ApplicationRecord
             self.title = found.text
           end
           # Assert extracted ingredient tags
-          if tagnames = ps.nkdoc.css('.rp_ingredient_tag').collect { |node| node['value'].if_present || node.text }
-            TaggingServices.new(self).set_tags User.inventory_user_id, :Ingredient => tagnames
-          end
+          TaggingServices.new(self).set_tags User.inventory_user_id,
+                                             :Ingredient => ps.nkdoc.css('.rp_ingredient_tag').collect { |node| node['value'].if_present || node.text }
         end
       end
       # Clear all immediately-needed attributes, whether parsed out or not, until notified otherwise

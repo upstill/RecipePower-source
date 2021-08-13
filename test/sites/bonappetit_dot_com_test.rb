@@ -11,7 +11,7 @@ class BonappetitDotComTest < ActiveSupport::TestCase
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
     @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil Kosher\ salt freshly\ ground\ pepper
-pepper cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
+cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
     @units =  %w{ servings teaspoon cup cup ounces tablespoon cups } # All units
     @conditions = %w{ finely\ grated fresh 1-inch-wide\ strips torn } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
@@ -84,7 +84,10 @@ pepper cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine fri
              units: %w{ g }
 =end
     assert_not_empty @page, "No page url specified for ParseTester"
-    pt_apply url: @page, :expect => :rp_serves
+    pt_apply url: @page,
+             ingredients: @ingredients, # Look for tags
+             :expected_tokens => :rp_serves,
+             :expected_attributes => :serves
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results
     refute recipe.errors.any?
