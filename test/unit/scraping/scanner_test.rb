@@ -65,7 +65,7 @@ class ScannerTest < ActiveSupport::TestCase
       scanout << ch
     end
     assert_equal scanout, nokoscan.strings
-    assert_equal scanout.join(' '), nkdoc.inner_text
+      # assert_equal scanout.join(' '), nkdoc.inner_text
   end
 
   test 'string partitioning' do
@@ -145,6 +145,69 @@ class ScannerTest < ActiveSupport::TestCase
     assert_nil scanner.rest.rest.rest.toline true
   end
 
+  test 'for_each' do
+    str = "\n\nfirst line \n second line \n\n\n third line \nfourth line\n\n\n"
+    # What they should come out as
+    lines = [ "first line", "second line", "third line", 'fourth line']
+
+    # Test StrScanner
+    scanner = StrScanner.new str
+    scanners = scanner.for_each(:inline => true) do |ls|
+      assert_equal ls.to_s, (line = lines.shift)
+      ls
+    end
+    assert_equal 4, scanners.count
+
+    # Test NokoScanner
+    scanner = NokoScanner.new str
+    lines = [ "first line", "second line", "third line", 'fourth line']
+    scanners = scanner.for_each(:inline => true) do |ls|
+      assert_equal ls.to_s, (line = lines.shift)
+      ls
+    end
+    assert_equal 4, scanners.count
+
+    html = "<h1>title</h1><br><br><br>some stuff<h1>another title</h1>"
+    scanner = NokoScanner.new html
+    assert_equal %w{title some stuff another title}, scanner.tokens
+    titles = ['title', 'another title']
+    scanner.for_each(:in_css_match => 'h1') do |ls|
+      assert_equal titles.shift, ls.to_s
+    end
+
+    html = "<h1>title</h1><br><br><br>some stuff <h1>another title</h1>"
+    scanner = NokoScanner.new html
+    titles = ['some stuff another title']
+    scanner.for_each(:after_css_match => 'br') do |ls|
+      assert_equal titles.shift, ls.to_s
+    end
+    assert_empty titles, "Failed to find all the strings after <br> in '#{html}'"
+
+    html = "<h1>title</h1><br><br><br>some stuff <h1>another title</h1>"
+    scanner = NokoScanner.new html
+    titles = ['some stuff another title']
+    scanner.for_each(:after_css_match => 'h1') do |ls|
+      assert_equal titles.shift, ls.to_s
+    end
+    assert_empty titles, "Failed to find all the strings after <h1> in '#{html}'"
+
+    html = "<h1>title</h1><h1>another title</h1>"
+    scanner = NokoScanner.new html
+    titles = ['another title']
+    scanner.for_each(:after_css_match => 'h1') do |ls|
+      assert_equal titles.shift, ls.to_s
+    end
+    assert_empty titles, "Failed to find all the strings after <h1> in '#{html}'"
+
+    html = "<h1>title</h1><br><br><br>some stuff<h1>another title</h1>"
+    scanner = NokoScanner.new html
+    titles = ['some stuff another title']
+    scanner.for_each(:at_css_match => 'br') do |ls|
+      assert_equal titles.shift, ls.peek(100)
+    end
+    assert_empty titles, "Failed to find all the strings at <br> in '#{html}'"
+  end
+
   test 'is_at' do
     def test_str html, seeking, spec
       nkdoc = Nokogiri::HTML.fragment html
@@ -180,6 +243,9 @@ class ScannerTest < ActiveSupport::TestCase
       nokoscan = NokoScanner.new nkdoc
       check_integrity nokoscan
       # 'seeking' is an array of strings to match successively
+      nokoscan.for_each((within ? :inline : :atline) => true) do |subscanner|
+        assert_equal seeking.shift, subscanner.to_s
+      end
       seeking.map do |str|
         result = nokoscan.toline(within).to_s
         assert_equal str, result
@@ -188,14 +254,14 @@ class ScannerTest < ActiveSupport::TestCase
     end
     html = "top-level <br>afterbr <span class='rp_elmt rp_text'>within span</span> after\nspan"
     # test_str html, ["top-level afterbr within span after\nspan"]
-    test_str html, ['top-level', "afterbr within span after\n", 'span'], true
+    test_str html, ['top-level', "afterbr within span after", 'span'], true
     # Should get the same result independent of spacing
     html = "top-level <br> afterbr<span class='rp_elmt rp_text'>within span</span>after\nspan"
-    test_str html, ["top-level  afterbrwithin spanafter\nspan"]
-    test_str html, ['top-level', "afterbrwithin spanafter\n", 'span'], true
+    test_str html, ["top-level  afterbrwithin spanafter\nspan", "afterbrwithin spanafter\nspan", "span"]
+    test_str html, ['top-level', "afterbrwithin spanafter", 'span'], true
     html = "top-level <br>afterbr<span class='rp_elmt rp_text'>    within span</span>  after\nspan"
-    test_str html, ["top-level afterbr    within span  after\nspan"]
-    test_str html, ['top-level', "afterbr    within span  after\n", 'span'], true
+    test_str html, ["top-level afterbr    within span  after\nspan", "afterbr    within span  after\nspan", "span"]
+    test_str html, ['top-level', "afterbr    within span  after", 'span'], true
   end
 
   test 'nkscanner with rp_elmt' do

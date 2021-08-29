@@ -103,7 +103,7 @@ Parser.init_grammar(
         atline: true
     },
     rp_cook_time: {
-        match: [ { :trigger => /^Cook:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
+        match: [ { :trigger => /^Cook|Active:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
         in_css_match: nil,
         atline: true
     },

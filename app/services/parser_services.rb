@@ -228,7 +228,7 @@ The dependencies are as follows:
             keep_if { |substr| substr.match /^\d*$/ }.
             map &:to_i
         (nums.first)..(nums.last) if nums.present?
-      when :timerangeto_i
+      when :timerange
         next unless timestr = seeker.find(:rp_time).first&.to_s
         secs =
         if timestr.match(/(\d+)\s+(\w+)/)

@@ -531,16 +531,29 @@ class Parser
     if !token && (token = context[:token])
       context = context.except :token
     end
-    if (context.keys & [:in_css_match, :at_css_match, :after_css_match ]).present? # Use a stream derived from a CSS match in the Nokogiri DOM
+    # If the parse is restricted, enumerate the matches and recur on each
+    restrictions = context.slice  :atline, :inline, :in_css_match, :at_css_match, :after_css_match
+    if restrictions.present?
+      context = context.except *restrictions.keys
+      last_scanner = scanner
+      matches = scanner.for_each(restrictions) do |subscanner|
+        match = match_specification (last_scanner = subscanner), spec, token, context
+        next unless match.retain?
+        # match.tail_stream.encompass scanner
+        return match if context[:first]
+      end
+      return report_matches matches, token, spec, context, last_scanner, scanner
+    end
 =begin
-      subscanner = scanner.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))
-      return Seeker.failed(scanner, scanner.end, context.except(:enclose)) unless subscanner # There is no such match in prospect
-
-      match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-      match.tail_stream = (context[:at_css_match] && subscanner.rest.on_css_match(context.slice(:in_css_match, :at_css_match, :after_css_match))) ||
-          scanner.past(subscanner)
-      return match.encompass(scanner) # Release the limitation to element bounds
-=end
+    if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
+      toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
+      return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
+      return Seeker.failed(toline, toline.end, context) unless toline.more? # Trivial reject for an empty line
+      match = match_specification(toline, spec, token, context.except(:atline, :inline))
+      match.tail_stream = scanner.past(toline) if context[:inline] # Skip past the line
+      return match.encompass(scanner)  # Release the line-end limitation
+    end
+    if (context.keys & [:in_css_match, :at_css_match, :after_css_match ]).present? # Use a stream derived from a CSS match in the Nokogiri DOM
       matches = []
       start_scanner = scanner
       # Scan repeatedly
@@ -553,15 +566,9 @@ class Parser
       end
       return report_matches matches, token, spec, context, scanner, start_scanner
     end
-    if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
-      toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
-      return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
-      return Seeker.failed(toline, toline.end, context) unless toline.more? # Trivial reject for an empty line
-      match = match_specification(toline, spec, token, context.except(:atline, :inline))
-      match.tail_stream = scanner.past(toline) if context[:inline] # Skip past the line
-      return match.encompass(scanner)  # Release the line-end limitation
-    end
+=end
     if context[:parenthetical]
+      match = nil
       after = ParentheticalSeeker.match(scanner) do |inside|
         match = match_specification(inside, spec, token, context.except(:parenthetical))
       end
@@ -638,21 +645,25 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      str = (scanner.to_s.truncate 100).sub "\n", '\n'
-      @break_level ||= 3
-      report_enter "Seeking :#{spec} on '#{str}'" # using\n#{indent_lines@grammar[spec], '  '}" if Rails.env.test?
-      returned = match_specification scanner, @grammar[spec], spec, context
-      report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
-      returned
+      if Rails.env.test?
+        @break_level ||= 3 ; str = ''
+        str = (scanner.to_s.truncate 100).gsub "\n", '\n'
+        report_enter "Seeking :#{spec} on '#{str}'"
+        returned = match_specification scanner, @grammar[spec], spec, context
+        report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
+        returned
+      else
+        match_specification scanner, @grammar[spec], spec, context
+      end
     when String
-      StringSeeker.match scanner.past_newline, string: spec, token: token
+      StringSeeker.match scanner, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Hash
-      match_hash scanner.past_newline, spec, token, context
+      match_hash scanner, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur, parser: self)
+      spec.match scanner, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end

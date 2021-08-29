@@ -419,7 +419,7 @@ EOF
 
   test 'qualified unit' do
 
-    pt_apply :rp_amt, html: '1 massive (2 3/4-pound; 1.25kg) head cauliflower'
+    pt_apply :rp_amt, html: '1 massive (2 3/4-pound; 1.25kg) head'
 
     pt_apply :rp_amt, html: '1 large (15-oz) can'
 

@@ -87,7 +87,7 @@ cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Par
     pt_apply url: @page,
              ingredients: @ingredients, # Look for tags
              :expected_tokens => :rp_serves,
-             :expected_attributes => :serves
+             :expected_attributes => [:serves, :cook_time, :total_time]
     # The ParseTester applies the setup parameters to the recipe
     assert_good # Run standard tests on the results
     refute recipe.errors.any?

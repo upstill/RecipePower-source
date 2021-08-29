@@ -157,7 +157,7 @@ end
 def seekline tokens, within, opos, obound, delimiter = nil
   delimiter = "\n" unless delimiter.is_a?(String)
   if (newpos = opos) > 0 && tokens[newpos] != delimiter
-    while (newpos < obound) && (tokens[newpos - 1] != delimiter) do
+    while (newpos < obound) && (tokens[newpos-1] != delimiter) do
       newpos += 1
     end
   end
@@ -166,7 +166,7 @@ def seekline tokens, within, opos, obound, delimiter = nil
       newbound = newpos
       while newbound < obound do
         newbound += 1
-        break if tokens[newbound - 1] == delimiter
+        break if tokens[newbound-1] == delimiter
       end
     else
       newbound = obound
@@ -209,6 +209,7 @@ class Scanner < Object
     @pos < @bound # @length
   end
 
+=begin
   # Skip any newlines
   def past_newline
     result = self
@@ -217,6 +218,7 @@ class Scanner < Object
     end
     result
   end
+=end
 
   def chunk data
     if (data || (ptr == (head + 1)))
@@ -303,7 +305,7 @@ class StrScanner < Scanner
     StrScanner.new @strings, 0, @bound
   end
 
-  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  # Progress the scanner to precede the next newline character, optionally constraining the result to within a whole line
   def toline within = false, delimiter = "\n"
     seekline @strings, within, @pos, @bound, delimiter do |newpos, newbound|
       StrScanner.new @strings, newpos, newbound
@@ -314,6 +316,37 @@ class StrScanner < Scanner
   def except s2
     return self if !s2 || s2.pos > @bound
     s2 ? StrScanner.new(@strings, @pos, s2.pos) : self
+  end
+
+  # Iterate through a set of scanners organized around EOL
+  # :atline: report the next scanner that starts at a line (excluding empty lines)
+  # :inline: do likewise, except terminate the scanner at the following EOL
+  # It may return nil, in which case the next iteration goes to the subsequent token
+  def for_each options={}, &block
+    options = options.compact # Ignore flags that are set with nil
+    results = []
+    pos = @pos
+    while pos < @bound do
+      # Consume EOL characters at the beginning
+      while (pos < @bound) && @strings[pos] == "\n" do
+        pos += 1
+      end
+      break if pos == @bound # No more material
+      # Otherwise, we know we have at least one non-EOL character
+      # Seek the end of the non-EOL run
+      bound = pos+1
+      # Find the position of the next EOL, or the end of the buffer
+      while (bound < @bound) && @strings[bound] != "\n" do
+        bound += 1
+      end
+      # If :inline, truncate it at the next EOL character
+      subscanner = StrScanner.new @strings, pos, (options[:inline] ? bound : @bound)
+      if result = (block_given? ? yield(subscanner) : subscanner)
+        results << result
+      end
+      pos = bound
+    end
+    results
   end
 
 end
@@ -518,7 +551,7 @@ class NokoScanner # < Scanner
     end
   end
 
-# Possible function for scanning for a result
+# Function for scanning for a result
   # Call a block with a scanner for each stop in self as controlled by the options:
   # :atline moves the scanner to the first token that begins a line (possibly this one)
   # :inline as with :atline, but foreshortens it to a single line
@@ -527,27 +560,12 @@ class NokoScanner # < Scanner
   # :after_css_match goes to the token after the matching element (typically a br tag)
   # The block takes a scanner for the current location, and should return a scanner after consumption
   # It may return nil, in which case the next iteration goes to the subsequent token
-  def for_each options={}
-    scanner = self
-    while scanner.peek do
-      flag = options.keys.first
-      case flag
-      when :atline, :inline
-        subscanner = scanner.toline options[:inline]
-        break unless subscanner # return Seeker.failed(scanner, context) unless toline
-        #match = match_specification(toline, spec, token, context.except(:atline, :inline))
-        #match.tail_stream = scanner.past(toline) if context[:inline] # Send the subsequent scan past the end of the line
-        #return match.encompass(scanner)
-      when :at_css_match, :in_css_match, :after_css_match
-        subscanner = scanner.on_css_match(options)
-        break unless subscanner # return Seeker.failed(scanner, context) unless subscanner
-        #match = match_specification subscanner, spec, token, context.except(:in_css_match, :at_css_match, :after_css_match)
-        #match.tail_stream = scanner.past(subscanner) if context[:in_css_match]
-        #return match.encompass(scanner)
-      end
-      yield subscanner
-      # Now advance the scanner past the subscanner
-      scanner = scanner.past(subscanner)
+  def for_each options={}, &block
+    case options.keys.first
+    when :inline, :atline
+      for_lines options[:inline], &block
+    when :at_css_match, :in_css_match, :after_css_match
+      for_css options, &block
     end
   end
 
@@ -668,5 +686,94 @@ class NokoScanner # < Scanner
       ted = TextElmtData.new elmt_bounds, global_token_offset
     end
     NokoScanner.new tokens, new_pos, @bound
+  end
+
+  protected
+
+  attr_writer :pos, :bound
+
+  private
+
+  # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
+  def for_lines inline, &block
+    results = []
+    pos = @pos
+
+    # Memoize an array of token positions for all <br> directives in the document.
+    # This is used to truncate all lines at <br>
+    @brs ||= nkdoc.search('br').map { |found| @tokens.token_range_for_subtree(found)&.begin }.compact
+    brpos =
+    if brix = binsearch(@brs, pos)
+      brix += 1 if @brs[brix] < pos
+      @brs[brix]
+    else
+      @brs[brix = 0]
+    end
+    # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
+    while pos < @bound do
+      # Consume EOL characters at the beginning
+      while (pos < @bound) && @tokens[pos] == "\n" do
+        pos += 1
+      end
+      break if pos == @bound # No more material
+      # Otherwise, we know we have at least one non-EOL character
+      # Seek the end of the non-EOL run
+      bound = pos+1
+      while brpos && brpos <= bound do
+        brpos = @brs[brix += 1] # Look for the next <br> directive
+      end
+      # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
+      while (bound < @bound) && !(@tokens[bound] == "\n" || bound == brpos) do
+        bound += 1
+      end
+      # If :inline, truncate it at the next EOL character
+      subscanner = NokoScanner.new @tokens, pos, (inline ? bound : @bound)
+      if result = (block_given? ? yield(subscanner) : subscanner)
+        results << result
+      end
+      pos = bound
+    end
+    results
+  end
+
+  # Cycle through CSS matches, calling the block on each match, per directive:
+  # :in_css_match => call the block on a NokoScanner bounded by the CSS match
+  # :at_css_match => call the block on a NokoScanner that begins at the CSS match but is otherwise unbounded
+  # :after_css_match => call the block on a NokoScanner that begins after the CSS match but is otherwise unbounded
+  def for_css options={}, &block
+    # Now we can assume there's a CSS matching directive
+    subscanner = clone
+    results = []
+    directive, selector = options.to_a.first
+    while (subscanner = subscanner.on_css_match(in_css_match: selector) || subscanner.on_css_match(at_css_match: selector)) do
+      # The subscanner's bounds are those of the css match
+      # We need to know where (next_pos) to start the next search
+      case directive
+      when :in_css_match
+        next_pos = subscanner.bound
+      when :at_css_match
+        next_pos = subscanner.pos+1
+        subscanner.bound = @bound
+      when :after_css_match # Remove the bounding constraint on the subscanner
+        subscanner.pos = subscanner.bound
+        next_pos = subscanner.pos+1
+        subscanner.bound = @bound
+      end
+      break unless subscanner.more? # No more content
+      if result = block_given? ? yield(subscanner) : subscanner
+        results << result
+      end
+      subscanner =
+          case directive
+          when :in_css_match
+            NokoScanner.new tokens, next_pos, @bound
+          when :at_css_match
+            subscanner.rest
+          when :after_css_match
+            subscanner.rest
+          end
+    end
+    results
+
   end
 end

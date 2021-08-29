@@ -118,33 +118,32 @@ class LexaurTest < ActiveSupport::TestCase
 
   # Test whether the lex finds the given string, and consumes the entire string
   def assert_finds_tag lex, string
-    scanner = StrScanner.new string
-    tag_ids = nil
-    lex.chunk(scanner) { |data, stream|
-      assert_not_nil data
-      tag_ids = data
-      assert_empty stream.to_s
+    lex.chunk(StrScanner.new string) { |data, stream|
+      assert_not_nil data # Found a tag
+      assert_empty stream.to_s # ...on the complete string
+      tag = Tag.by_string(string).first
+      assert_not_nil data, "Lexaur didn't find any tag by searching for '#{string}'; should have found '#{tag.name}'/'#{tag.normalized_name}'"
+      assert_includes data, tag.id, "Found tag '#{tag.name}'/'#{tag.normalized_name}' doesn't match search on '#{string}'"
+      return
     }
-    tag = Tag.by_string(string).first
-    assert_not_nil tag_ids, "Lexaur didn't find any tag by searching for '#{string}'; should have found '#{tag.name}'/'#{tag.normalized_name}'"
-    assert_includes tag_ids, tag.id, "Found tag '#{tag.name}'/'#{tag.normalized_name}' doesn't match search on '#{string}'"
   end
 
   test 'Lexaur handles two tags with the same normalized name' do
     Tag.assert 'tsp.', :Unit
-    assert_equal Tag.by_string('tsp'), Tag.by_string('Tsp.')
+    assert_equal Tag.by_string('tsp.').first, Tag.by_string('Tsp.').first
 
     lex = Lexaur.from_tags
-    assert_finds_tag(lex, 'Tsp.')
-    assert_finds_tag(lex, 'tsp')
+    assert_finds_tag lex, 'tsp.'
+    assert_finds_tag lex, 'Tsp.'
   end
 
   test 'Lexaur elides punctuation not seen in normalized_name' do
+    Tag.assert '"l"b', :Unit
     Tag.assert 'lb', :Unit
-    assert_equal Tag.by_string('lb'), Tag.by_string('lb.')
+    assert_equal Tag.by_string('"l"b'), Tag.by_string('lb')
 
     lex = Lexaur.from_tags
-    assert_finds_tag(lex, 'lb.')
+    assert_finds_tag(lex, '"l"b')
     assert_finds_tag(lex, 'lb')
   end
 

@@ -174,4 +174,5 @@ flayed:
 tsp:
   id: 29
   name: tsp
+  normalized_name: tsp
   tagtype: 5

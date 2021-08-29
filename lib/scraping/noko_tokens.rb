@@ -33,7 +33,8 @@ class NokoTokens < Array
         # @elmt_bounds.push child, (@processed_text_len + @held_text.length) # @elmt_bounds << [child, (@processed_text_len + @held_text.length)]
         to_tokens child.text
       when child.element?
-        to_tokens if child.name.match(/^(p|br|ul|li)$/)
+        # Flush token except when entering a span
+        to_tokens unless child.name == 'span' # if child.name.match(/^(p|br|ul|li)$/)
         child.children.each { |j| do_child j }
       end
     end
