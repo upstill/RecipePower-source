@@ -10,8 +10,8 @@ class ParserTest < ActiveSupport::TestCase
 
   def setup
     @ingredients = %w{
-      eggplants
       all-purpose\ flour
+      eggplants
       lemon
       ground\ turmeric
       ground\ cumin
@@ -58,38 +58,29 @@ class ParserTest < ActiveSupport::TestCase
       yellow\ onions
       lime
 }
-    @units = %w{ servings pounds ounces milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large }
+    @units = %w{ servings pounds ounces milliliters can inch knob massive\ head ounce g grams ml kg tablespoon tablespoons tbsp T. teaspoon teaspoons tsp. tsp cup cups head pound small small\ head clove cloves large oz }
     @conditions = %w{ chopped softened rinsed crustless sifted toasted grated finely\ grated lukewarm drained }
     super # Set up @parse_tester using @ingredients, @units and @conditions
 
-    @amounts = [
-        '4 -5 servings',
-        '1 head',
-        '1 1/2 cup',
-        '2 cloves',
-        '1/4 cup',
-        '½ cup',
-        '1 small head',
-        '1 pound 5 ounces (600g)'
-    ]
+    # Individual ingredient lines and what their children should be
     @ingred_lines = [
-        '1 pound 5 ounces (600g) eggplants (1–2 large)',
-        'Grated zest of 1 lemon',
-        '2 cloves garlic',
-        '2 garlic cloves',
-        'Sea salt', # Case shouldn't matter
-        '6 tablespoons butter, softened',
-        '2 teaspoons Dijon mustard',
-        '1/4 cup drained small capers, rinsed',
-        '3 tablespoons chopped marjoram',
-        'Black pepper',
-        'Juice of ½ a lime',
-        '1 pound Brussels sprouts',
-        '1 small head (1/2 pound) white cauliflower',
-        '1 small head (1/2 pound) Romanesco (green) cauliflower'
+        '1 pound 5 ounces (600g) eggplants (1–2 large)', [:rp_ingspec, :rp_ing_comment],
+        'Grated zest of 1 lemon', [:rp_condition_tag, :rp_ingspec, :rp_ing_comment],
+        '2 cloves garlic', [:rp_ingspec, :rp_ing_comment],
+        '2 garlic cloves',  [:rp_ingspec, :rp_ing_comment],
+        'Sea salt',  [:rp_ingspec, :rp_ing_comment],# Case shouldn't matter
+        '6 tablespoons butter, softened', [:rp_ingspec, :rp_ing_comment],
+        '2 teaspoons Dijon mustard', [:rp_ingspec, :rp_ing_comment],
+        '1/4 cup drained small capers, rinsed', [:rp_ingspec, :rp_ing_comment],
+        '3 tablespoons chopped marjoram', [:rp_ingspec, :rp_ing_comment],
+        'Black pepper', [:rp_ingspec, :rp_ing_comment],
+        'Juice of ½ a lime', [:rp_ingspec, :rp_ing_comment],
+        '1 pound Brussels sprouts', [:rp_ingspec, :rp_ing_comment],
+        '1 small head (1/2 pound) white cauliflower', [:rp_ingspec, :rp_ing_comment],
+        '1 small head (1/2 pound) Romanesco (green) cauliflower', [:rp_ingspec, :rp_ing_comment]
     ]
     @ings_list = <<EOF
-  <p>#{@ingred_lines.join "<br>\n"}</p>
+  <p>#{@ingred_lines.each_slice(2).map(&:first).join "<br>\n"}</p>
 EOF
     @recipe = <<EOF
 <div class="entry-content"> 
@@ -119,6 +110,19 @@ EOF
     end
   end
 
+  # Test a succession of strings for parsing against an entry in the grammar
+  # -- token: the key for the grammar entry
+  # -- pairs: a series, each pair consisting of a string to test, and a list of tokens for the children of the resulting seeker
+  def tst_grammar_entry token, *pairs
+    while str = pairs.shift do
+      pattern = pairs.shift
+      puts "Parsing '#{str}'"
+      pt_apply token, html: str
+      assert_equal token, seeker.token, "failed to find #{token} parsing '#{str}' for #{token}"
+      assert_equal pattern, seeker.children.collect(&:token), "pattern failure on parsing '#{str}' for :#{token}"
+    end
+  end
+
   test 'grammar tester' do
     nokoscan = NokoScanner.new 'a b c'
     # Should throw an error
@@ -129,21 +133,19 @@ EOF
   end
 
   test 'predefined ingredient lines' do
-    @ingred_lines.each { |line|
-      parser = Parser.new line, @lex
-      seeker = parser.match :rp_ingline
-      assert seeker.success?, "Couldn't parse out :rp_ingline '#{line}'"
-    }
+    tst_grammar_entry :rp_ingline, *@ingred_lines
   end
 
+=begin
   test 'parser services management' do
     assert_raises { ParserServices.parse() }
     assert_raises { ParserServices.parse(content: 'No Intention To Parse This String') }
-    ps = ParserServices.parse(content: 'Dijon mustard', token: :rp_ingredient_tag)
+    ps = ParserServices.new(input: 'Dijon mustard', token: :rp_ingredient_tag)
+    ps.parse
     assert ps.success?
-    check_ivs ps, :content, :nokoscan, :parser, :seeker, :token
+    check_ivs ps, :input, :nokoscan, :parser, :token
     ps.entity = nil
-    check_ivs ps, :content, :nokoscan, :parser, :seeker, :token# Shouldn't change any dependencies, since content is still available
+    check_ivs ps, :input, :nokoscan, :parser, :token# Shouldn't change any dependencies, since content is still available
     assert_raises { ps.content = nil } # Removing content without an entity for backup is an error
     ps.entity = Recipe.new
     check_ivs ps, :entity, :content, :nokoscan, :parser, :token# Shouldn't change any dependencies, since content is still available
@@ -158,6 +160,7 @@ EOF
     check_ivs ps, :content, :parser, :token# Clearing content eliminates the scanner but not the parser
 
   end
+=end
 
   test 'grammar mods' do
     nonsense = 'No Intention To Parse This String'
@@ -181,35 +184,93 @@ EOF
   end
 
   test 'parse numbers and ranges' do
-    range_cases = [ '1-3', '1 to 3', '1-1/2', '1 to 1-1/2', '1-1/2 to 2', '4-5', '4 -5', '4- 5', '1-1/2' ]
-    range_cases.each do |range|
-      pt_apply :rp_num_or_range, html: range
-      assert seeker.success?, "Couldn't parse '#{range}' for :rp_num_or_range"
-    end
+    num_cases = [ '1 ¾', '6', '1/2', '9.2', '1-1/2' ]
+    num_cases.each { |num|
+      tst_grammar_entry :rp_num, num, [ ]
+      tst_grammar_entry :rp_num_or_range, num, [ :rp_num ]
+    }
+
+    range_cases = [ '1-3', '1 to 3', '1 to 1-1/2', '1-1/2 to 2', '4-5', '4 -5', '4- 5' ]
+    range_cases.each { |range| tst_grammar_entry :rp_num_or_range, range, [ :rp_range ] }
   end
 
-  test 'parse amount specs' do
-    @amounts.each do |amtstr|
-      puts "Parsing '#{amtstr}'"
-      pt_apply :rp_amt, html: amtstr
-      assert_equal 2, seeker.children.count
-      assert_equal :rp_amt, seeker.token
-      assert_equal :rp_num, seeker.children.first.token
-      assert_equal :rp_unit, seeker.children.last.token
-    end
+  test 'unqualified amts' do
+    tst_grammar_entry( :rp_unqualified_amt,
+                        '1.25kg', [ :rp_amt ],
+                        '25kg', [ :rp_amt ],
+                        '¾kg', [ :rp_amt ],
+                        '1.25 kg', [ :rp_num_or_range, :rp_unit_tag ],
+                        )
+  end
+
+  test 'alt amts' do
+    tst_grammar_entry( :rp_altamt,
+                       '(2 3/4-pound; 1.25kg)', [ :rp_summed_amt, :rp_summed_amt ],
+    )
+  end
+
+  test 'unit qualifiers' do
+    tst_grammar_entry(:rp_unit_qualifier,
+                       'large (15-oz)', [ :rp_size, :rp_altamt ],
+                       'small', [ :rp_size ],
+                       'large', [ :rp_size ],
+                       'massive', [ :rp_size ],
+                       )
+  end
+
+  test 'qualified units' do
+    tst_grammar_entry(:rp_qualified_unit,
+                       '2 inch knob', [:rp_unit_qualifier, :rp_unit],
+                       'large (15-oz) can', [:rp_unit_qualifier, :rp_unit],
+                       'massive (2 3/4-pound; 1.25kg) head', [:rp_unit_qualifier, :rp_unit],
+                       '15-oz can', [:rp_unit_qualifier, :rp_unit],
+                       'small head', [:rp_unit_qualifier, :rp_unit],
+    )
+
+  end
+
+  test 'parse amounts' do
+    tst_grammar_entry(:rp_amt,
+                       '1 pound 5 ounces', [:rp_summed_amt],
+                       '1 massive (2 3/4-pound; 1.25kg) head', [:rp_num, :rp_qualified_unit],
+                       '1 large (15-oz) can', [:rp_qualified_unit],
+                       '2 tablespoons (30ml)', [:rp_num, :rp_unit],
+                       "3/4 ounce (about 1/4 cup; 20g)", [:rp_num, :rp_unit],
+                       '1 teaspoon (5ml)', [:rp_num, :rp_unit],
+                       '13-ounce', [:rp_num, :rp_unit],
+                       '1 (13-ounce) can', [:rp_num, :rp_qualified_unit],
+                       '2 inch knob', [ :rp_qualified_unit ],
+                       '1 1/2 cup', [:rp_num, :rp_unit],
+                       '1 large (15-oz) can', [:rp_qualified_unit],
+                       '4 -5 servings', [:rp_range, :rp_unit],
+                       '1 head', [:rp_num, :rp_unit],
+                       '2 cloves', [:rp_num, :rp_unit],
+                       '1/4 cup', [:rp_num, :rp_unit],
+                       '½ cup', [:rp_num, :rp_unit],
+                       '1 small head', [:rp_num, :rp_qualified_unit],
+                       '1 massive (2 3/4-pound; 1.25kg) head', [:rp_num, :rp_qualified_unit]
+                       )
+  end
+
+  test 'parse ingspecs' do
+    tst_grammar_entry( :rp_ingspec,
+        '2 tablespoons (30ml) sesame tahini', [ :rp_amt, :rp_ingalts ],
+        "3/4 ounce (about 1/4 cup; 20g) za'atar", [ :rp_amt, :rp_ingalts ],
+        '1 teaspoon (5ml) honey or agave nectar', [ :rp_amt, :rp_ingalts ],
+    )
   end
 
   test 'parse individual ingredient' do
     ingstr = 'Dijon mustard'
     is = TagSeeker.seek NokoScanner.new(ingstr), lexaur: lexaur, types: 4
     assert_not_nil is, "#{ingstr} doesn't parse"
+    tst_grammar_entry( :rp_ingredient_tag,
+                        ingstr, []
+                        )
     # ...and again using a ParserSeeker
     pt_apply :rp_ingredient_tag,
              html: 'Dijon mustard',
              ingredients: 'Dijon mustard'
-    assert_not_nil seeker, "#{ingstr} doesn't parse"
-    assert_equal 'Dijon mustard', seeker.tagdata[:name]
-    assert_equal :rp_ingredient_tag, seeker.token
   end
 
   test 'parse alt ingredient' do
@@ -265,11 +326,26 @@ EOF
 
   end
 
-  test 'parse ingredient line' do
-    pt_apply :rp_amt,
-             html: '1 ¾ cups plus 2 tablespoons',
+  test 'parse summed amounts' do
+    sums = [
+        '1 ¾ cups plus 2 tablespoons', [ :rp_unqualified_amt, :rp_unqualified_amt ]
+    ]
+    tst_grammar_entry :rp_summed_amt, *sums
+    pt_apply :rp_summed_amt,
+             html: sums.first,
              units: %w{ cups tablespoons }
+  end
 
+  test 'parse ingredients' do
+    @ingredients.each do |ingred_name|
+      tst_grammar_entry :rp_ingredient_tag, ingred_name, []
+    end
+  end
+
+  test 'parse ingredient line' do
+
+    tst_grammar_entry :rp_ingredient_tag, 'all-purpose flour', [  ]
+    tst_grammar_entry :rp_ingalts, 'all-purpose flour', [ :rp_ingredient_tag ]
     pt_apply :rp_ingspec,
              html: '1 ¾ cups plus 2 tablespoons all-purpose flour',
              units: %w{ cups tablespoons },
@@ -419,36 +495,30 @@ EOF
 
   test 'qualified unit' do
 
-    pt_apply :rp_amt, html: '1 massive (2 3/4-pound; 1.25kg) head'
+    pt_apply :rp_altamt, html: '(13-ounce)'
 
-    pt_apply :rp_amt, html: '1 large (15-oz) can'
+    pt_apply :rp_altamt, html: '(13-ounce; 45g)' # can baking soda'
+  end
 
-    pt_apply :rp_amt, html: '2 tablespoons (30ml) sesame tahini'
+  test 'ingredient lines' do
 
-    pt_apply :rp_amt, html: "3/4 ounce (about 1/4 cup; 20g) za'atar, divided"
+    pt_apply :rp_ingspec, html: '2 tablespoons (30ml) sesame tahini'
 
-    pt_apply :rp_amt, html: '1 teaspoon (5ml) honey or agave nectar'
-
-    pt_apply :rp_amt, html: '2 inch knob'
-    refute seeker.tail_stream.more?
+    pt_apply :rp_ingline, html: '1 13-ounce can baking soda'
 
     pt_apply :rp_ingline, html: '2 inch knob of ginger, peeled and thinly sliced'
 
+    pt_apply :rp_ingline, html: "3/4 ounce (about 1/4 cup; 20g) za'atar, divided"
+
+    pt_apply :rp_ingline, html: '1 teaspoon (5ml) honey or agave nectar'
+
     pt_apply :rp_ingline, html: '2 can (30g) baking soda'
-
-    pt_apply :rp_amt, html: '13-ounce'
-
-    pt_apply :rp_altamt, html: '(13-ounce)'
-
-    pt_apply :rp_amt, html: '1 (13-ounce) can'
 
     pt_apply :rp_ingline, html: '1 (13-ounce) can baking soda'
 
     pt_apply :rp_ingline, html: '1 (13-ounce; 45g) can baking soda'
 
     pt_apply :rp_ingline, html: '1 (13-ounce; 45g) can baking soda'
-
-    pt_apply :rp_ingline, html: '1 13-ounce can baking soda'
 
   end
 

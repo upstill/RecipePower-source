@@ -112,40 +112,38 @@ class Lexaur < Object
   def chunk1 stream, lexpath = [], strpath = [], block, skipper: -> (stream) { stream }
     lexpath, strpath, block = [], [], lexpath if lexpath.is_a?(Proc)
     lexpath = lexpath + [self]
-    while stream.more? && (stream.peek == "\n") do
+    while stream.more? && (substrs = Tag.normalize_name(stream.peek).split '-').blank? do
       stream = stream.rest
     end
-    if (token = stream.peek).present? && token.is_a?(String) # More in the stream
+    if substrs.present? # (token = stream.peek).present? && token.is_a?(String) # More in the stream
       # The tree breaks any given token into the substrings found in the normalized name
-      substrs = Tag.normalize_name(token).split '-'
+      # substrs = Tag.normalize_name(token).split '-'
       tracker = self
-      if substrs.present?
-        head = substrs.pop || '' # Save the last substring
-        # Descend the tree for each substring, depending on there being a head marker at each step along the way
-        substrs.each do |substr|
-          tracker = tracker.nexts[substr]
-          return if tracker.nil?
-          lexpath.push tracker
-        end
-        # Peek ahead and consume any tokens which are empty in the normalized name
-        onward, unskipped = elide(stream.rest, skipper)
-        # Recursively continue along the stream and down the tree
-        if nxt = tracker.nexts[head]
-          nxt.chunk1(onward, lexpath, strpath + [head], block, skipper: skipper)
-          # Once there are no more matches along/down, we consume the head of the stream.
-          # NB This has the effect of returning the longest match first
-          # Report back the terminals even if absent
-          if tracker.terminals[head]
-            block.call(unskipped, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
-          end
-        elsif tracker.terminals[head]
-          block.call(unskipped, lexpath, strpath + substrs + [head]) # The block must check for acceptance and return true for the process to end
-        else
-          block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end
-        end
-      else # This token didn't bear anything of relevance to Tag.normalize_name
-        block.call(stream, lexpath[0..-2], strpath) # The block must check for acceptance and return true for the process to end
+      head = substrs.pop || '' # Save the last substring
+      # Descend the tree for each substring, depending on there being a head marker at each step along the way
+      substrs.each do |substr|
+        tracker = tracker.nexts[substr]
+        return if tracker.nil?
+        lexpath.push tracker
       end
+      # Peek ahead and consume any tokens which are empty in the normalized name
+      onward, unskipped = elide(stream.rest, skipper)
+      # Recursively continue along the stream and down the tree
+      if nxt = tracker.nexts[head]
+        nxt.chunk1(onward, lexpath, strpath + [head], block, skipper: skipper)
+        # Once there are no more matches along/down, we consume the head of the stream.
+        # NB This has the effect of returning the longest match first
+        # Report back the terminals even if absent
+        if tracker.terminals[head]
+          block.call(unskipped, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
+        end
+      elsif tracker.terminals[head]
+        block.call(unskipped, lexpath, strpath + substrs + [head]) # The block must check for acceptance and return true for the process to end
+      else
+        block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end
+      end
+    #else # This token didn't bear anything of relevance to Tag.normalize_name
+    #  block.call(stream, lexpath[0..-2], strpath) # The block must check for acceptance and return true for the process to end
     end
   end
 

@@ -131,7 +131,7 @@ class Parser
     lex, grammar_mods = nil, lex if lex.is_a?(Hash)
     @grammar = Parser.initialized_grammar
     # Nicify the prior grammar and the mods, and extract triggers
-    @trigger_map = finalise_grammar (YAML.load(grammar_mods.to_yaml) if grammar_mods)
+    @trigger_map = finalise_grammar (grammar_mods ? YAML.load(grammar_mods.to_yaml) : {})
     yield(@grammar) if block_given? # This is the chance to modify the default grammar further
     gramerrs = []
     # @atomic_tokens =
@@ -180,6 +180,7 @@ class Parser
       [
         :checklist, # All elements must be matched, but the order is unimportant
         :or, # The list is taken as an ordered set of alternatives, any of which will match the list
+        :filter, # Like :or, but all matching elements are retained
         :repeating, # The spec will be matched repeatedly until the end of input
         # :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
@@ -238,7 +239,7 @@ class Parser
       when Hash
         if grammar_entry[:trigger]
           grammar_entry[:trigger] = block.call grammar_entry[:trigger]
-        elsif match = grammar_entry.slice(:match, :checklist, :or, :repeating, :optional).values.first
+        elsif match = grammar_entry.slice(:match, :checklist, :or, :filter, :repeating, :optional).values.first
           do_trigger match, &block
         end
       when Array
@@ -541,6 +542,7 @@ class Parser
         next unless match.retain?
         # match.tail_stream.encompass scanner
         return match if context[:first]
+        match
       end
       return report_matches matches, token, spec, context, last_scanner, scanner
     end
@@ -681,7 +683,7 @@ class Parser
     children = []
     end_stream = start_stream
     # Individual elements get the same context as the list as a whole, except for the list-processing options
-    distributed_context = context.except :checklist, :repeating, :or, :optional
+    distributed_context = context.except :checklist, :repeating, :or, :filter, :optional
     case
     when context[:checklist] # All elements must be matched, but the order is unimportant
       list_of_specs.each do |spec|
@@ -704,6 +706,15 @@ class Parser
         children << child.if_succeeded
         end_stream = child.tail_stream # next
       end
+    when context[:filter]
+      list_of_specs.each do |spec|
+        child = match_specification end_stream, spec, distributed_context
+        if child.success?
+          children << child
+          end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
+        end
+      end
+      return Seeker.failed(start_stream, token, context) unless children.present? # TODO: not retaining children discarded along the way
     when context[:or]  # The list is taken as an ordered set of alternatives, any of which will match the list
       list_of_specs.each do |spec|
         child = match_specification start_stream, spec, token, distributed_context
@@ -738,7 +749,7 @@ class Parser
 
   # Extract a specification and options from a hash. We analyze out the target spec (item or list of items to match),
   #   and the remainder of the input spec is context for the matcher.
-  # This is where the option of asserting a list with :checklist, :repeating and :or options is interpreted.
+  # This is where the option of asserting a list with :checklist, :repeating, :or and :filter options is interpreted.
   def match_hash scanner, inspec, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
@@ -748,6 +759,7 @@ class Parser
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
+                 :filter, # Like :or, but all matching elements are retained
                  # :orlist, # The item will be repeatedly matched in the form of
                  :parenthetical, # Match inside parentheses
                  :optional # Failure to match is not a failure

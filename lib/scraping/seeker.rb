@@ -276,16 +276,15 @@ end
 
 # Seek a number at the head of the stream
 class NumberSeeker < Seeker
-
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
     stream = stream.rest if stream.peek&.match /about/i
-    result = (self.new(stream, stream.rest(3), opts[:token]) if self.num3 stream.peek(3)) ||
-      (self.new(stream, stream.rest(2), opts[:token]) if self.num2 stream.peek(2)) ||
-      (self.new(stream, stream.rest, opts[:token]) if self.num1 stream.peek)
-    # Elide gratuitous punctuation after the number
-    if result && result.tail_stream.peek&.match(',')
-      result.tail_stream = result.tail_stream.rest
+    result = (self.new(stream, stream.rest(3), opts[:token]) if self.num3 splitsies(stream, 3)) ||
+      (self.new(stream, stream.rest(2), opts[:token]) if self.num2 splitsies(stream, 2)) ||
+      (self.new(stream, stream.rest, opts[:token]) if self.num1 splitsies(stream, 1))
+    if result
+      yield @@StrAfter if block_given? && @@StrAfter.present?
+      result.tail_stream = result.tail_stream.rest if result.tail_stream.peek&.match(',')
     end
 =begin
     if Rails.env.test?
@@ -315,16 +314,17 @@ class NumberSeeker < Seeker
 
   # Does the string have an integer followed by a fraction?
   def self.num2 str
-    str&.match /^\d*[ -](\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*$/
+    str&.match /^(\d+)[ -]((\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*)$/
   end
 
   # Does the string have an integer followed by a fraction?
-  def self.num3 str
+  def self.num3 str, &block
     return if str.blank?
-    strs = str.split (/\ /)
-    self.whole_num(strs.first) && strs[1] &&
+    strs = str.split /\ /
+    if self.whole_num(strs.first) && (strs.count > 1)
         ((%q{ - and plus }.include?(strs[1]) && self.fraction(strs.last)) ||
-          (strs[1] == '.' && self.whole_num(strs.last)))
+            (strs[1] == '.' && self.whole_num(strs.last)))
+    end
   end
 
   def self.num_word str
@@ -340,6 +340,20 @@ class NumberSeeker < Seeker
     int + num.to_f / denom.to_f
   end
 
+  private
+
+  # Handle the case of, e.g., units attached to numbers (5oz.) by splitting out the non-numeric terminus
+  # and placing it in a holding class variable @@StrAfter
+  def self.splitsies stream, count
+    str = stream.peek(count)
+    if str&.match /^([\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞\s.\/-]+)(.*)$/
+      str = $1
+      @@StrAfter = $2
+    else
+      @@StrAfter = nil
+    end
+    str
+  end
 end
 
 class TagSeeker < Seeker
@@ -465,9 +479,22 @@ class AmountSeeker < Seeker
 
   def self.match stream, opts = {}
     stream = stream.rest if stream.peek&.match /about/i
-    if num = NumberSeeker.match(stream)
-      unit = TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
-      self.new stream, (unit&.tail_stream || num.tail_stream), num, unit
+    unit = unit_tail = nil
+    num = NumberSeeker.match(stream) { |remainder|
+      # A unit may follow the number within the same token
+      unit = TagSeeker.match StrScanner.new([ remainder ]), opts.slice(:lexaur).merge(types: 5)
+    }
+    if num
+      unit_tail =
+      if unit
+        num.tail_stream
+      elsif unit = TagSeeker.match(num.tail_stream, opts.slice(:lexaur).merge(types: 5))
+        unit.tail_stream
+      else
+        return if opts[:full_only]
+        num.tail_stream
+      end
+      self.new stream, unit_tail, num, unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'

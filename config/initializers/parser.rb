@@ -191,15 +191,18 @@ Parser.init_grammar(
     },
     rp_ingredient_tag: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
-    rp_amt: {# An Amount is a number followed by a (possibly qualified) unit--only one required
+    rp_amt: {# An Amount is an optional number followed by an optional--possibly qualified--unit--only one required
              match: [
-                 [:rp_unqualified_amt, { optional: 'plus' }, :rp_unqualified_amt, {match: :rp_altamt, optional: true } ],
-                 :rp_unit,
-                 [{ or: [ :rp_range, :rp_num ] }, {match: :rp_unit, optional: true}],
+                 [{ match: [:rp_unqualified_amt, { optional: 'plus' }, :rp_unqualified_amt], token: :rp_summed_amt }, {match: :rp_altamt, optional: true } ],
+                 :rp_qualified_unit,
+                 [ { or: [ :rp_range, :rp_num ], optional: true }, { or: [ :rp_qualified_unit, :rp_unit ] }],
+                 [{ or: [ :rp_range, :rp_num ] }, { or: [ :rp_qualified_unit, :rp_unit ], optional: true}],
                  {match: AmountSeeker}
              ],
              or: true
     },
+    rp_unit_qualifier: { filter: [ { or: %w{ small large massive}, token: :rp_size }, :rp_altamt ] },
+    rp_qualified_unit: [ :rp_unit_qualifier, :rp_unit ],
     # A qualified unit is, e.g., '16-ounce can'
     rp_unit: [ { match: :rp_altamt, optional: true }, :rp_unit_tag, { match: :rp_altamt, optional: true } ],
     # An altamt may show up to clarify the amount or qualify the unit
@@ -220,7 +223,7 @@ Parser.init_grammar(
     },
     rp_unqualified_amt: {# An Unqualified Amount is a number followed by a unit (only one required)
                          match: [
-                             [:rp_num_or_range, :rp_unit_tag],
+                             [:rp_num_or_range, { optional: '-' }, :rp_unit_tag],
                              { match: FullAmountSeeker }
                          ],
                          or: true

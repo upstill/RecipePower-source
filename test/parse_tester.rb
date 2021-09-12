@@ -235,9 +235,10 @@ class ParseTester < ActiveSupport::TestCase
     @seeker = @parser.match token
     if @fail
       refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
+      return
     else
       assert @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
-      assert @seeker.tail_stream.to_s.blank?, "Stream has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}'" # Should have used up the tokens
+      assert @seeker.tail_stream.to_s.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
     end
     assert_equal token, @seeker.token
     @seeker.enclose_all parser: @parser
