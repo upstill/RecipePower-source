@@ -753,16 +753,6 @@ EOF
 
   test "marked-up html remains invariant after parsing and tagging" do
 
-    # Parsing a fully marked-up ingline shouldn't change it
-    html = <<EOF
-<li class="rp_elmt rp_ingline">
-  <span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span>
-</li>
-EOF
-    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :unordered_list }
-    pt_apply :rp_ingline, html: html, ingredients: 'simple syrup', units: 'ounce'
-    assert_invariance html, nkdoc
-
     html = <<EOF
 <ul class="rp_elmt rp_inglist">
   <li class="rp_elmt rp_ingline">
@@ -778,6 +768,16 @@ EOF
 </ul>
 EOF
     pt_apply :rp_inglist, html: html, ingredients: 'simple syrup', units: 'ounce'
+    assert_invariance html, nkdoc
+
+    # Parsing a fully marked-up ingline shouldn't change it
+    html = <<EOF
+<li class="rp_elmt rp_ingline">
+  <span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span>
+</li>
+EOF
+    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :unordered_list }
+    pt_apply :rp_ingline, html: html, ingredients: 'simple syrup', units: 'ounce'
     assert_invariance html, nkdoc
 
     html = <<EOF
