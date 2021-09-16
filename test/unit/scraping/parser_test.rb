@@ -544,7 +544,7 @@ EOF
     pt_apply :rp_inglist, html: html,
              ingredients: %w{ baking\ soda salt sugar },
              units: %w{ tsp. T. }
-             assert_equal 3, find(:rp_ingline).count
+    assert_equal 3, find(:rp_ingline).count
     assert_equal :rp_inglist, seeker.token
     assert_equal :rp_ingline, seeker.children.first.token
     assert_equal 3, seeker.find(:rp_ingline).count
