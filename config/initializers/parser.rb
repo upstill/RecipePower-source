@@ -62,9 +62,11 @@ require 'scraping/parser.rb'
 #       :inline also foreshortens the stream at the next line so defined.
 Parser.init_grammar(
     rp_recipelist: {
-        match: [ { optional: :rp_title }, nil ],
-        at_css_match: 'h1,h2,h3',
-        token: :rp_recipe
+        # Matching the title anchors each recipe; nil includes all subsequent content.
+        # The repetition mechanism will clip that subsequent content to the next match.
+        # Thus, we get a list of recipes, each of which begins with a title and includes
+        # all content until the next one, labelled with :rp_recipe
+        repeating: { match: [:rp_title, nil], token: :rp_recipe },
     },
     rp_recipe: {
         match: [
@@ -81,13 +83,6 @@ Parser.init_grammar(
             ]},
         ]
     },
-=begin
-    # Now author, etc. are found by scanning
-    rp_recipe: [
-        {optional: :rp_title},
-        [{:repeating => :rp_inglist}, :rp_instructions]
-    ],
-=end
     # Hopefully sites will specify how to find the title in the extracted text
     rp_title: {
         in_css_match: 'h1,h2,h3'
@@ -128,12 +123,12 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     :rp_recipe_section => {
-        :match => [ :rp_inglist, :rp_instructions ],
-        :at_css_match => "div.recipe__ingredient-list div" # Will produce a series of matches, as required
+        :match => [ :rp_inglist, :rp_instructions ]
     },
     rp_inglist: { # A label followed by one or more ingredient lines, or two or more ingredient lines
                   # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
                   match: :rp_ingline,
+                  match_all: true,
                   :enclose => true
     },
 =begin

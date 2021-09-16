@@ -745,6 +745,7 @@ class NokoScanner # < Scanner
     subscanner = clone
     results = []
     directive, selector = options.to_a.first
+    subscanners = []
     while (subscanner = subscanner.on_css_match(in_css_match: selector) || subscanner.on_css_match(at_css_match: selector)) do
       # The subscanner's bounds are those of the css match
       # We need to know where (next_pos) to start the next search
@@ -759,10 +760,8 @@ class NokoScanner # < Scanner
         next_pos = subscanner.pos+1
         subscanner.bound = @bound
       end
+      subscanners << subscanner
       break unless subscanner.more? # No more content
-      if result = block_given? ? yield(subscanner) : subscanner
-        results << result
-      end
       subscanner =
           case directive
           when :in_css_match
@@ -773,7 +772,12 @@ class NokoScanner # < Scanner
             subscanner.rest
           end
     end
-    results
-
+    if directive == :at_css_match
+      # Terminate each subscanner at the beginning of the next
+      subscanners[0..-2].each_index { |ix| subscanners[ix].bound = subscanners[ix+1].pos }
+    end
+    block_given? ?
+      subscanners.each { |ss| yield(ss) } :
+      subscanners
   end
 end

@@ -185,7 +185,7 @@ class ScannerTest < ActiveSupport::TestCase
 
     html = "<h1>title</h1><br><br><br>some stuff <h1>another title</h1>"
     scanner = NokoScanner.new html
-    titles = ['some stuff another title']
+    titles = ['some stuff another title', '']
     scanner.for_each(:after_css_match => 'h1') do |ls|
       assert_equal titles.shift, ls.to_s
     end

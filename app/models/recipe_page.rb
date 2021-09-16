@@ -54,7 +54,7 @@ class RecipePage < ApplicationRecord
         # We expect the recipe page to get parsed out into multiple recipes, but only expect to find the title
         # parser.parse content
         # Apply the results of the parsing by ensuring there are recipes for each section
-        # The seeker should present the token :rp_recipelist and have several children
+        # The seeker should present the token :rp_recipelist and have at least one child
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
         ps = ParserServices.new entity: self, input: parsing_input

@@ -533,42 +533,25 @@ class Parser
       context = context.except :token
     end
     # If the parse is restricted, enumerate the matches and recur on each
-    restrictions = context.slice  :atline, :inline, :in_css_match, :at_css_match, :after_css_match
-    if restrictions.present?
-      context = context.except *restrictions.keys
+    repeater = context.slice( :atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
+    # There should only be one repeater specification
+    if repeater.present?
+      # Hopefully we get a token for enclosing a result collection, in the :under context
+      under = context[:under] || token
+      context = context.except :under, :atline, :inline, :in_css_match, :at_css_match, :after_css_match
       last_scanner = scanner
-      matches = scanner.for_each(restrictions) do |subscanner|
+      matches = []
+      scanner.for_each(repeater) do |subscanner|
         match = match_specification (last_scanner = subscanner), spec, token, context
         next unless match.retain?
-        # match.tail_stream.encompass scanner
-        return match if context[:first]
-        match
+        match.tail_stream.encompass scanner # Remove the subscanner's limitation on the result
+        return match unless context[:match_all]
+        matches << match
       end
-      return report_matches matches, token, spec, context, last_scanner, scanner
+      # End each match's stream at the beginning of the next
+      matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
+      return report_matches matches, under, spec, context, last_scanner, scanner
     end
-=begin
-    if context[:atline] || context[:inline] # Skip to either the next newline character, or beginning of <p> or <li> tags, or after <br> tag--whichever comes first
-      toline = scanner.toline(context[:inline], context[:inline] || context[:atline]) # Go to the next line, possibly limiting the scanner to that line
-      return Seeker.failed(scanner, scanner.end, context) unless toline # No line to be found: skip the whole scanner
-      return Seeker.failed(toline, toline.end, context) unless toline.more? # Trivial reject for an empty line
-      match = match_specification(toline, spec, token, context.except(:atline, :inline))
-      match.tail_stream = scanner.past(toline) if context[:inline] # Skip past the line
-      return match.encompass(scanner)  # Release the line-end limitation
-    end
-    if (context.keys & [:in_css_match, :at_css_match, :after_css_match ]).present? # Use a stream derived from a CSS match in the Nokogiri DOM
-      matches = []
-      start_scanner = scanner
-      # Scan repeatedly
-      scanner.for_each(context.slice :in_css_match, :at_css_match, :after_css_match) do |subscanner|
-        match = match_specification subscanner, spec, context.except(:repeating, :keep_if, :in_css_match, :at_css_match, :after_css_match)
-        if match
-          match.tail_stream = match.tail_stream.encompass start_scanner
-          matches << match.if_retain
-        end
-      end
-      return report_matches matches, token, spec, context, scanner, start_scanner
-    end
-=end
     if context[:parenthetical]
       match = nil
       after = ParentheticalSeeker.match(scanner) do |inside|
@@ -594,9 +577,13 @@ class Parser
       # Scan repeatedly
       while scanner.peek do # No token except what the spec dictates
         match = match_specification scanner, spec, context.except(:repeating, :keep_if)
+        break unless match.retain?
         matches << match.if_retain
-        scanner = (scanner == match.tail_stream) ? match.tail_stream.rest : match.tail_stream # next
+        # Start the next search just after the beginning of this one.
+        scanner = scanner.goto match.head_stream.rest
       end
+      # Clip each match to its successor to prevent overlap
+      matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
       return report_matches matches, token, spec, context, scanner, start_scanner
@@ -647,12 +634,13 @@ class Parser
       Seeker.new scanner, scanner.rest(-1), token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
+      context = context.merge(under: token) if token
       if Rails.env.test?
         @break_level ||= 3 ; str = ''
         str = (scanner.to_s.truncate 100).gsub "\n", '\n'
         report_enter "Seeking :#{spec} on '#{str}'"
         returned = match_specification scanner, @grammar[spec], spec, context
-        report_exit (returned.success? ? "Found '#{returned}' for :#{spec}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
+        report_exit (returned.success? ? "Found '#{returned}' for :#{returned.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
         returned
       else
         match_specification scanner, @grammar[spec], spec, context
@@ -688,6 +676,8 @@ class Parser
     when context[:checklist] # All elements must be matched, but the order is unimportant
       list_of_specs.each do |spec|
         scanner = start_stream
+        child = match_specification scanner, spec, distributed_context
+=begin
         best_guess = nil
         while scanner.more? && !(child = match_specification scanner, spec, distributed_context).success? do
           best_guess = child if child.enclose? # Save the last child to enclose
@@ -696,6 +686,7 @@ class Parser
         best_guess ||= child
         return best_guess if best_guess&.hard_fail?
         next unless child
+=end
         children << child.if_succeeded
         end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
       end
@@ -727,7 +718,7 @@ class Parser
       list_of_specs.each do |spec|
         child = match_specification end_stream, spec, distributed_context
         children << child.if_retain
-        end_stream = child.tail_stream
+        end_stream = child.tail_stream # end_stream.past child.tail_stream
         if child.hard_fail? # && !child.enclose?
           return Seeker.failed((children.first || child).head_stream,
                                end_stream,
@@ -743,7 +734,7 @@ class Parser
       children.first.tail_stream = end_stream
       children.first
     else
-      Seeker.new(start_stream, end_stream, token, children)
+      Seeker.new(children.first.head_stream, end_stream, token, children)
     end
   end
 
@@ -779,7 +770,7 @@ class Parser
     end
     to_match = spec.delete :match if to_match == true # If any of the above appeared as flags, get match from the :match value
     # We've extracted the specification to be matched into 'to_match', and use what's left as context for matching
-    match = match_specification scanner, to_match, token, spec
+    match = match_specification scanner, to_match, token, spec.merge(context.slice :under, :match_all)
     return match if match.success?
     token ||= match.token
     # If not successful, reconcile the spec that was just answered with the provided context
