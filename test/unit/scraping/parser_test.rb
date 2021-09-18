@@ -10,6 +10,7 @@ class ParserTest < ActiveSupport::TestCase
 
   def setup
     @ingredients = %w{
+      simple\ syrup
       all-purpose\ flour
       eggplants
       lemon
@@ -457,7 +458,7 @@ EOF
   test 'parse multiple ingredient lines separated by punctuation' do
     pt_apply :rp_inglist,
              html: "1 pound softened butter, 1 pound brown sugar, 1 pound white sugar, 1 tablespoon ground cinnamon and 1 teaspoon each ground clove and ground nutmeg"
-    assert_equal 5, seeker.children.count
+    assert_equal 5, seeker.find(:rp_ingspec).count
     subscanners = nokoscan.split(',')
     assert_equal 4, subscanners.count
   end
@@ -658,7 +659,6 @@ EOF
     @parse_tester = ParseTester.new ingredients: ingreds,
                                     grammar_mods: {
                                         :gm_inglist => :paragraph,
-                                        rp_recipelist: {repeating: :rp_recipe},
                                         rp_recipe: {at_css_match: 'h2'},
                                         rp_title: {in_css_match: 'h2'},
                                     }
@@ -702,14 +702,23 @@ EOF
     puts rcp_seeker.to_s
     assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
     assert (prep_seeker = parser.seek :rp_prep_time)
-    assert_equal 'Prep 5 min', prep_seeker.to_s
+    assert_equal '5 min', prep_seeker.to_s
     assert (cook_seeker = parser.seek :rp_cook_time)
-    assert_equal 'Cook 20 min', cook_seeker.to_s
+    assert_equal '20 min', cook_seeker.to_s
     assert (servings_seeker = parser.seek :rp_serves)
-    assert_equal "Serves 4", servings_seeker.to_s
+    assert_equal "4", servings_seeker.to_s
   end
 
   test 'parses ingredient list properly' do
+
+    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
+    html = '3/4 ounce simple syrup (equal parts sugar and hot water)'
+    pt_apply :rp_inglist, html: html
+    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
+    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
+    assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
+    # assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
+
     html = '1 ounce of bourbon, gently warmed'
     pt_apply :rp_ingline, html: html, ingredients: %w{ bourbon }, units: %w{ ounce }
     assert_equal 'bourbon', nkdoc.css('.rp_ingredient_tag').text.to_s
@@ -729,13 +738,6 @@ EOF
     # Parsing a fully marked-up ingline shouldn't change it
     html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
     pt_apply :rp_ingline, html: html, ingredients: %w{ simple\ syrup }
-    assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
-    assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
-    assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
-    # assert_equal '(equal parts sugar and hot water)', nkdoc.css('.rp_ing_comment').text.to_s
-
-    html = '<div class="rp_elmt rp_inglist"><span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span></div>'
-    pt_apply :rp_inglist, html: html
     assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
     assert_equal 'simple syrup', nkdoc.css('.rp_ingredient_tag').text.to_s
@@ -767,6 +769,7 @@ EOF
   </li>
 </ul>
 EOF
+    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :unordered_list }
     pt_apply :rp_inglist, html: html, ingredients: 'simple syrup', units: 'ounce'
     assert_invariance html, nkdoc
 
@@ -776,7 +779,6 @@ EOF
   <span class="rp_elmt rp_ingspec"><span class="rp_elmt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit rp_unit_tag" value="ounce">ounce</span></span> <span class="rp_elmt rp_ingalts rp_ingredient_tag" value="simple syrup">simple syrup</span></span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span>
 </li>
 EOF
-    @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :unordered_list }
     pt_apply :rp_ingline, html: html, ingredients: 'simple syrup', units: 'ounce'
     assert_invariance html, nkdoc
 
@@ -843,6 +845,11 @@ EOF
   end
 
   test 'recipe with predeclared ingredient list' do
+    html = 'a dash of Angostura'
+    pt_apply :rp_ingspec,
+             html: html,
+             ingredients: 'Angostura',
+             units: 'dash'
     @parse_tester = ParseTester.new grammar_mods: { :rp_inglist => {:in_css_match => 'div.rp_inglist'} }
     pt_apply :rp_recipe,
              html: '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>',

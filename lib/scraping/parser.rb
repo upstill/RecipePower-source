@@ -185,7 +185,8 @@ class Parser
         # :orlist, # The item will be repeatedly matched in the form of a comma-separated, 'and'/'or' terminated list
         # :accumulate, # Accumulate matches serially in a single child
         :optional, # Failure to match is not a failure
-        :trigger
+        :trigger,
+        :distribute
       ].each do |flag|
         if entry[flag] && entry[flag] != true
           entry[:match] = entry[flag]
@@ -239,7 +240,7 @@ class Parser
       when Hash
         if grammar_entry[:trigger]
           grammar_entry[:trigger] = block.call grammar_entry[:trigger]
-        elsif match = grammar_entry.slice(:match, :checklist, :or, :filter, :repeating, :optional).values.first
+        elsif match = grammar_entry.slice(:match, :checklist, :or, :filter, :repeating, :distribute, :optional).values.first
           do_trigger match, &block
         end
       when Array
@@ -533,7 +534,7 @@ class Parser
       context = context.except :token
     end
     # If the parse is restricted, enumerate the matches and recur on each
-    repeater = context.slice( :atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
+    repeater = context.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
     # There should only be one repeater specification
     if repeater.present?
       # Hopefully we get a token for enclosing a result collection, in the :under context
@@ -551,6 +552,20 @@ class Parser
       # End each match's stream at the beginning of the next
       matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
       return report_matches matches, under, spec, context, last_scanner, scanner
+    end
+    # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking
+    # ALL the matches, not just one.
+    # :match_all outside the context of a repeater causes a repetitive match, each starting after the prior success
+    if context.delete :match_all
+      matches = []
+      first_scanner = scanner
+      while scanner.more? do
+        match = match_specification scanner, spec, token, context
+        break unless match.success?
+        scanner = match.tail_stream # Remove the subscanner's limitation on the result
+        matches << match
+      end
+      return report_matches matches, token, spec, context, first_scanner, scanner
     end
     if context[:parenthetical]
       match = nil
@@ -651,9 +666,9 @@ class Parser
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Hash
-      match_hash scanner, spec, token, context
+      match_hash scanner.past_newline, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner, context.merge(token: token, lexaur: lexaur, parser: self)
+      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
@@ -671,7 +686,7 @@ class Parser
     children = []
     end_stream = start_stream
     # Individual elements get the same context as the list as a whole, except for the list-processing options
-    distributed_context = context.except :checklist, :repeating, :or, :filter, :optional
+    distributed_context = context.except :checklist, :repeating, :or, :filter, :optional, :distribute
     case
     when context[:checklist] # All elements must be matched, but the order is unimportant
       list_of_specs.each do |spec|
@@ -690,6 +705,38 @@ class Parser
         children << child.if_succeeded
         end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
       end
+    when context[:distribute] # The list will be matched repeatedly until the end of input
+      # Rather than applying the list as a whole repeatedly, :distribute
+      # applies the first repeatedly, then the second, etc., each time constraining
+      # the next search to the following result. This allows [ :rp_title, nil ]
+      # to match a title, followed by all content up to the next title.
+      spec = list_of_specs.first
+      end_stream = scanner
+      new_children = []
+      while end_stream.more? &&
+        (match = match_specification end_stream, spec, context.except(:distribute)).success? do
+        new_children.push match
+        end_stream = match.tail_stream
+      end
+      children = [ new_children.compact ]
+      # Now we have a collection of children due to the first spec
+      list_of_specs[1..-1].each do |spec|
+        new_children = []
+        old_children = children.last
+        old_children.each_index do |ix|
+          child = old_children[ix]
+          scanner = child.tail_stream.except old_children[ix+1]&.head_stream
+          new_children.push match_specification( scanner, spec, context.except(:distribute)).if_succeeded
+        end
+        children.push new_children
+      end
+      # Now children is an array of arrays
+      # Turn the array structure
+      collections = Array.new(children.first.count) { children.map &:shift }
+      children = collections.map { |list|
+        end_stream = list.last.tail_stream
+        Seeker.new(list.first.head_stream, end_stream, context[:under] || token, list)
+      }
     when context[:repeating] # The list will be matched repeatedly until the end of input
       # Note: If there's no bound, the list will consume the entire stream
       while end_stream.more? do
@@ -706,7 +753,7 @@ class Parser
         end
       end
       return Seeker.failed(start_stream, token, context) unless children.present? # TODO: not retaining children discarded along the way
-    when context[:or]  # The list is taken as an ordered set of alternatives, any of which will match the list
+    when context[:or] # The list is taken as an ordered set of alternatives, any of which will match the list
       list_of_specs.each do |spec|
         child = match_specification start_stream, spec, token, distributed_context
         if child.success?
@@ -723,7 +770,7 @@ class Parser
           return Seeker.failed((children.first || child).head_stream,
                                end_stream,
                                token,
-                               child.retain? ? context.merge(children: children.keep_if(&:'retain?')+[child]) : context)
+                               child.retain? ? context.merge(children: children.keep_if(&:'retain?') + [child]) : context)
         end
       end
     end
@@ -753,7 +800,8 @@ class Parser
                  :filter, # Like :or, but all matching elements are retained
                  # :orlist, # The item will be repeatedly matched in the form of
                  :parenthetical, # Match inside parentheses
-                 :optional # Failure to match is not a failure
+                 :optional, # Failure to match is not a failure
+                 :distribute # Execute search across list "in parallel"
               ].find { |flag| spec.key?(flag) && spec[flag] != true }
             to_match, spec[flag] = spec[flag], true
     elsif to_match = spec[:tag] || spec[:tags] # Special processing for :tag specifier

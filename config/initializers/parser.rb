@@ -63,17 +63,20 @@ require 'scraping/parser.rb'
 Parser.init_grammar(
     rp_recipelist: {
         # Matching the title anchors each recipe; nil includes all subsequent content.
-        # The repetition mechanism will clip that subsequent content to the next match.
+        # The distribution mechanism will clip that subsequent content to the next match.
         # Thus, we get a list of recipes, each of which begins with a title and includes
         # all content until the next one, labelled with :rp_recipe
-        repeating: { match: [:rp_title, nil], token: :rp_recipe },
+        distribute: [:rp_title, nil],
+        under: :rp_recipe
     },
     rp_recipe: {
         match: [
             {optional: :rp_title},
             # Everything after the ingredient list
             {checklist: [
-                :rp_recipe_section, # [{:repeating => :rp_inglist}, :rp_instructions],
+                { distribute: [ :rp_inglist, :rp_instructions ],
+                  under: :rp_recipe_section },
+                # :rp_recipe_section, # [{:repeating => :rp_inglist}, :rp_instructions],
                 {optional: :rp_author},
                 {optional: :rp_prep_time},
                 {optional: :rp_cook_time},
