@@ -619,6 +619,14 @@ class Parser
           break if !child.success?
           children << child
           scanner = child.next
+          if scanner.peek == '('
+            # Discard parenthetical comments
+            to_match = scanner.rest
+            while to_match.more? && to_match.peek != ')' do
+              to_match = to_match.rest
+            end
+            scanner = to_match.rest if to_match
+          end
           case scanner.peek
           when 'and', 'or'
             # We expect a terminating entity

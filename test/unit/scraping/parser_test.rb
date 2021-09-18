@@ -856,7 +856,7 @@ EOF
              ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura },
              units: 'dash'
 
-    assert_equal 5, seeker.find(:rp_ingline).count
+    assert_equal 5, seeker.find(:rp_ingspec).count
   end
 
   test 'comma-separated ingredient list' do
