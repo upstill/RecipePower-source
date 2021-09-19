@@ -232,20 +232,29 @@ class ParseTester < ActiveSupport::TestCase
     @nokoscan = NokoScanner.new html
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
-    @seeker = @parser.match token
-    if @fail
-      refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
-      return
-    else
-      assert @seeker&.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
-      assert @seeker.tail_stream.to_s.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+    missing = {}
+    if @seeker = @parser.match(token)
+      if @fail # The parse is expected to fail
+        refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
+        return
+      else
+        assert @seeker.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
+        assert @seeker.tail_stream.to_s.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+      end
+      assert_equal token, @seeker.token
+      @seeker.enclose_all parser: @parser
+      check_required_tags(required_tags) do |tagtype, css_class, tagset|
+        missing[tagtype] = tagset - find_values(css_class)
+      end
+      return if missing.all? &:empty? # No tags unfound
     end
-    assert_equal token, @seeker.token
-    @seeker.enclose_all parser: @parser
-    check_required_tags(required_tags) do |tagtype, css_class, tagset|
-      missing = tagset - find_values(css_class)
-      assert_empty missing, "#{tagtype}(s) declared but not found: #{missing}"
+    if @seeker = @parser.scan
+      # The scan may turn up the requisite element
+      check_required_tags(required_tags) do |tagtype, css_class, tagset|
+        missing[tagtype] = (missing[tagtype] || tagset) - find_values(css_class)
+      end
     end
+    missing.each { |tagtype, missed| assert_empty missed, "#{tagtype}(s) declared but not found: #{missed}"}
   end
 
   # Call a block for each of the tag types in tagsets, first translating to the CSS class that encloses it

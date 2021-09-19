@@ -234,7 +234,7 @@ Parser.init_grammar(
 # Each pattern is declared as a pair:
 # first, the trigger for the pattern
 # second, the pattern to be matched when the trigger is found
-Parser.init_triggers([/^\d/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
+Parser.init_triggers([/^\d*\/{1}\d*(\.\d*)?$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
                      [ /^\d*$/, :rp_serves], # A full number triggers match for servings
                      [Tag.typenum(:Unit), :rp_ingspec], # ...so does a Unit
                      [Tag.typenum(:Condition), :rp_ingspec] # ...so does a Condition

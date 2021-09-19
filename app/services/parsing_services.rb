@@ -1,5 +1,6 @@
 require 'recipe.rb'
 require 'recipe_page.rb'
+# TODO: this module is now defunct
 class ParsingServices
   attr_accessor :entity, # The entity in question
                 :parsed, # Results after parsing
@@ -11,7 +12,7 @@ class ParsingServices
 
   # Employ the parser to generate the results:
   # @parsed is from a top-down parse starting with a grammar entry denoted by token.
-  # @results is from a scan of the content, looking for tokens that don't appear in the parsed results (as needed).
+  # @scanned is from a scan of the content, looking for tokens that don't appear in the parsed results (as needed).
   # Return: @parsed, which is nil if the parse failed
   def parse content: nil, needed: [:rp_title, :rp_inglist, :rp_serves]
     self.content = content if content.present?

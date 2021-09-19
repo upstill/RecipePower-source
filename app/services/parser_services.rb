@@ -125,8 +125,8 @@ The dependencies are as follows:
 
   # Extract information from an entity (Recipe or RecipePage) or presented input
   def parse options={}
-    self.input = options[:input] if options.keys.include?(:input)
-    self.token = options[:token] if options.keys.include?(:token)
+    self.input = options[:input] if options.key?(:input)
+    self.token = options[:token] if options.key?(:token)
     seeking = options[:seeking] || [ :rp_title, :rp_inglist, :rp_instructions ]
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?

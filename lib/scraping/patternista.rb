@@ -36,7 +36,7 @@ class Patternista
     while stream.more? do
       if result = scan1(stream, context)
         results << result
-        stream = result.tail_stream
+        stream = stream.goto result.tail_stream
       else
         stream.first
       end
