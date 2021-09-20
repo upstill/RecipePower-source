@@ -172,6 +172,14 @@ def nknode_descends_from? node, tag: nil, token: nil
   end
 end
 
+# What :rp_* classes have been applied to the tree containing this node?
+def nknode_enclosing_classes node
+  node.ancestors.collect { |ancestor|
+    next unless (classes = ancestor['class']&.split)&.include? 'rp_elmt'
+    classes.grep /^rp_/
+  }.flatten.compact.map(&:to_sym).uniq
+end
+
 # Split the common ancestor of the two nodes in two, moving each node between them up to the parent's parent
 def nknode_split_ancestor_of first, last
   #meta_ancestry = first.ancestors & last.ancestors

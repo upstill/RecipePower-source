@@ -658,6 +658,11 @@ class NokoScanner # < Scanner
     nknode_descends_from? text_elmt_data.text_element, tag: tag, token: token if text_elmt_data
   end
 
+  # What :rp_* classes have been used on the ancestors of the current text element?
+  def enclosing_classes
+    @tokens.enclosing_classes_at @pos
+  end
+
   # Get a scanner whose position is past the end of the given nokonode or nokoscanner,
   # aka the end of the nokonode's last text element
   def past nokonode_or_nokoscanner

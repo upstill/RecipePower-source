@@ -103,7 +103,7 @@ class ParseTester < ActiveSupport::TestCase
     html = args.delete :html # Parse an html string
     @fail = args.delete :fail # Flag: expect the parse to fail
     @expected_tokens = args.delete :expected_tokens # Specifies tokens that should be successfully found
-    @expected_attributes = [args.delete(:expected_attributes)].flatten # Specifies tokens that should be successfully found
+    @expected_attributes = [args.delete(:expected_attributes)].flatten.compact # Specifies tokens that should be successfully found
     required_tags = {}
     args.keys.each do |label|
       # Map from labels to tag type symbol for remaining arguments

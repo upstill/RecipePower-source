@@ -309,10 +309,17 @@ class Parser
     @grammar = YAML.load(@grammar_stack.pop.to_yaml)
   end
 
+  # Can a token validly be parsed out at the current position of the stream?
+  def valid_to_match? token, stream
+    return true if (enclosing_classes = stream.enclosing_classes).empty?
+    return false if (token != :rp_title) && enclosing_classes.include?(token)
+    true
+  end
+
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream, in_place: false
     puts ">>>>>>>>>>> Entering Parse for :#{token}" if Rails.env.test?
-    if ge = grammar[token]
+    if valid_to_match?(token, stream) && (ge = grammar[token])
       ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
       matched = match_specification stream, ge, token
     else
@@ -783,13 +790,15 @@ class Parser
       end
     end
     # If there's only a single child and no token, just return that child
-    # children.compact!
     children = children.compact.map { |child| child.token ? child : child.children }.flatten(1).compact
     if children.count == 1 && token.nil?
-      children.first.tail_stream = end_stream
+      # If only one child, and no token is being asserted, simply promote the child
+      # children.first.tail_stream = end_stream
       children.first
+    elsif children.present?
+      Seeker.new children.first.head_stream, end_stream, token, children
     else
-      Seeker.new(children.first.head_stream, end_stream, token, children)
+      Seeker.failed start_stream, end_stream, token
     end
   end
 

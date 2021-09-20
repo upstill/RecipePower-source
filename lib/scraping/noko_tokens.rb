@@ -54,6 +54,7 @@ class NokoTokens < Array
     @bound = count
     @parser_evaluator = ParserEvaluator.new
     @parser_evaluator.can_include :rp_instructions, :rp_inglist
+    @caches = [ { text_element: nil, enclosing_classes: nil } ]
     self.freeze
   end
 
@@ -202,6 +203,15 @@ class NokoTokens < Array
   # Extract the text element data for the character "at" the given global position.
   def text_elmt_data token_index
     TextElmtData.new @elmt_bounds, character_position_at_token(token_index)
+  end
+
+  # Extract all :rp_* classes that have been applied to ancestors of the text element at token 'token_index'
+  def enclosing_classes_at token_index
+    # We cache the vts array for a given text element, in the expectation of being called more than once
+    return [] unless (ted = text_elmt_data(token_index)) && (text_element = ted.text_element)
+    cache = @caches.first
+    return cache[:enclosing_classes] if text_element == cache[:text_element]
+    cache[:enclosing_classes] = nknode_enclosing_classes (cache[:text_element] = text_element)
   end
 
   # Provide the token range enclosed by the CSS selector

@@ -104,7 +104,8 @@ The dependencies are as follows:
         end
   end
 
-  # Divide a line by commas and 'and', parsing the sections into
+=begin
+  # Divide a line by commas and 'and', parsing the sections into instances of the token
   def chunk_line token: :rp_ingline
     nks = nokoscan # Save for later
     results = nks.split(',').collect { |chunk| parse input: chunk, token: token }
@@ -122,11 +123,13 @@ The dependencies are as follows:
     self.input = nks
     @parsed = Seeker.new nks, results.last.tail_stream, token, results
   end
+=end
 
   # Extract information from an entity (Recipe or RecipePage) or presented input
   def parse options={}
     self.input = options[:input] if options.key?(:input)
     self.token = options[:token] if options.key?(:token)
+    annotate = options.delete :annotate
     seeking = options[:seeking] || [ :rp_title, :rp_inglist, :rp_instructions ]
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?
@@ -138,19 +141,28 @@ The dependencies are as follows:
     end
 
     @parsed = parser.match token, stream: nokoscan
+    @parsed.enclose_all parser: parser if annotate && @parsed&.success?
 
     # Perform the scan only if seeking elements aren't found in the parse
-    @scanned ||= parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
+    @scanned = parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
+    @scanned.enclose_all parser: parser if annotate && @scanned&.success?
 
-    @parsed
+    @parsed&.success? || @scanned&.success?
+  end
+
+  def content
+    nkdoc&.to_s
   end
 
   # Put the input through the mill, annotate it with the parsing results, and return HTML for the whole thing
+=begin
+annotate is now an option to #parse
   def annotate
     @parsed.enclose_all parser: parser if @parsed&.success?
     @scanned.enclose_all parser: parser if @scanned&.success?
     return nkdoc.to_s
   end
+=end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
     # Do QA on the parameters
