@@ -218,7 +218,7 @@ annotate is now an option to #parse
   def do_for *tokens, &block
     return unless @parsed || @scanned
     glean_tokens(tokens).each do |token|  # For each specified token
-      (@parsed.find(token) + @scanned.find(token)).each do |seeker| # For each result under that token
+      ((@parsed&.find(token) || []) + (@scanned&.find(token) || [])).each do |seeker| # For each result under that token
         block.call seeker, token
       end
     end
