@@ -13,6 +13,7 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
 
   tag = tag&.to_s || 'span'
   rp_elmt_class ||= ''
+  tags = tag.split ',' # The tag may specify multiple comma-separated tags
 
   # The set of nodes to search is the node's ancestors,
   # including the node but excluding the top-level fragment,
@@ -24,7 +25,7 @@ def tag_ancestor_safely node, first_te, last_te, rp_elmt_class:, tag: nil, value
   each do |anc|
     return unless nknode_text_before(first_te, within: anc).blank? && nknode_text_after(last_te, within: anc).blank?
     # Disqualify a node that can't be contained under the requisite class
-    if (tag.blank? || anc.name == tag) && (value.nil? || anc['value'].nil?)
+    if (tag.blank? || tags.include?(anc.name)) && (value.nil? || anc['value'].nil?)
       nknode_clear_classification_context anc, rp_elmt_class, parser_evaluator: parser_evaluator
       nknode_apply anc, rp_elmt_class: rp_elmt_class, value: value
       return anc
