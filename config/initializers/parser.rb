@@ -191,7 +191,7 @@ Parser.init_grammar(
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is an optional number followed by an optional--possibly qualified--unit--only one required
              match: [
-                 [{ match: [:rp_unqualified_amt, { optional: 'plus' }, :rp_unqualified_amt], token: :rp_summed_amt }, {match: :rp_altamt, optional: true } ],
+                 [{ match: [:rp_unqualified_amt, { or: ['+', 'plus'], optional: true }, :rp_unqualified_amt], token: :rp_summed_amt }, {match: :rp_altamt, optional: true } ],
                  :rp_qualified_unit,
                  [ { or: [ :rp_range, :rp_num ], optional: true }, { or: [ :rp_qualified_unit, :rp_unit ] }],
                  [{ or: [ :rp_range, :rp_num ] }, { or: [ :rp_qualified_unit, :rp_unit ], optional: true}],

@@ -311,9 +311,10 @@ class Parser
 
   # Can a token validly be parsed out at the current position of the stream?
   def valid_to_match? token, stream
-    return true if (enclosing_classes = stream.enclosing_classes).empty?
-    return false if (token != :rp_title) && enclosing_classes.include?(token)
-    true
+    return true if token == :rp_title ||
+        token == :rp_recipe ||
+        (enclosing_classes = stream.enclosing_classes).empty?
+    !enclosing_classes.include?(token)
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
@@ -546,7 +547,7 @@ class Parser
     if repeater.present?
       # Hopefully we get a token for enclosing a result collection, in the :under context
       under = context[:under] || token
-      context = context.except :under, :atline, :inline, :in_css_match, :at_css_match, :after_css_match
+      context = context.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
       last_scanner = scanner
       matches = []
       scanner.for_each(repeater) do |subscanner|

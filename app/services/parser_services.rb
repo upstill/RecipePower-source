@@ -231,7 +231,7 @@ annotate is now an option to #parse
     found = seekers.map do |seeker|
       case as
       when :amountstring
-        [seeker.find(:rp_num_or_range)&.to_s, seeker.find(:rp_unit)].compact.join ' '
+        [seeker.find(:rp_num_or_range).first&.to_s, seeker.find(:rp_unit_tag).first&.value].compact.join ' '
       when :numrange
         num_or_range = seeker.find(:rp_num_or_range).first.to_s
         nums = num_or_range.
@@ -258,7 +258,7 @@ annotate is now an option to #parse
         (secs..secs) if secs
       end
     end
-    found.compact
+    found.compact.uniq
   end
 
   private
