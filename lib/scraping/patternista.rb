@@ -29,7 +29,8 @@ class Patternista
 
   # Look for the patterns that match the given stream.
   # At each position in the stream, apply one or more patterns whose trigger matches the contents
-  # of the stream at that position
+  # of the stream at that position.
+  # Return an array of found seekers
   def scan stream, context = stream.all
     stream = stream.clone
     results = []
@@ -41,7 +42,7 @@ class Patternista
         stream.first
       end
     end
-    Seeker.new(stream, results.last.tail_stream, results) if results.present?
+    results # Seeker.new(results.first.head_stream, results.last.tail_stream, results) if results.present?
   end
 
   # Heart of pattern matching: For a stream at a given point, compare the content at that point to

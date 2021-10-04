@@ -12,7 +12,7 @@ class BonappetitDotComTest < ActiveSupport::TestCase
   def setup
     @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil Kosher\ salt freshly\ ground\ pepper
 cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
-    @units =  %w{ servings teaspoon cup cup ounces tablespoon cups } # All units
+    @units =  %w{ teaspoon cup cup ounces tablespoon cups } # All units
     @conditions = %w{ finely\ grated fresh 1-inch-wide\ strips torn } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
@@ -22,9 +22,9 @@ cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Par
         :rp_inglist => {
             :at_css_match => 'p'
         },
-        :gm_recipes => {:at_css_match => 'h1.split-screen-content-header__hed'},
+        :gm_recipes => {:at_css_match => 'h1.SplitScreenContentHeaderHed-fyuCol'},
         :rp_title => {
-            :in_css_match => 'h1.split-screen-content-header__hed'
+            :in_css_match => 'h1.SplitScreenContentHeaderHed-fyuCol'
         },
         :rp_instructions => {
             :in_css_match => 'div.recipe__instruction-list div'
@@ -53,9 +53,10 @@ cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Par
 =end
   end
 
+  # Should find the yield string as preceded in noise
   test 'scan for yield' do
     html = 'blah de blah 2 servings'
-    seeker = scan NokoScanner.new(html)
+    seeker = scan(NokoScanner.new(html)).first
     assert_not_nil seeker, "No :rp_serves found in scanning '#{html}'"
     assert_equal :rp_serves, seeker.token
   end

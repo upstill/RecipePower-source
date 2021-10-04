@@ -355,7 +355,7 @@ end
 class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
-  delegate :elmt_bounds, :token_starts, :token_index_for,
+  delegate :elmt_bounds, :token_starts, :token_index_for, :token_range_for_subtree,
            :enclose_tokens, :enclose_selection, to: :tokens
 
   # To initialize the scanner, we build:
@@ -577,10 +577,10 @@ class NokoScanner # < Scanner
     end
   end
 
-  def scanner_for_range range, how
+  def scanner_for_range range, how=nil
     if range.begin >= @pos
       case how
-      when :in_css_match
+      when :in_css_match, nil
         NokoScanner.new @tokens, range.begin, range.end if range.end > range.begin
       when :at_css_match
         range == (@pos..@bound) ? self : NokoScanner.new(@tokens, range.begin, range.end)
@@ -649,6 +649,10 @@ class NokoScanner # < Scanner
   # Provide the text element data for the current character position
   def text_elmt_data pos = @pos
     @tokens.text_elmt_data(pos) if pos < @bound
+  end
+
+  def text_element pos = @pos
+    text_elmt_data(pos)&.text_element
   end
 
   def parent_tagged_with token

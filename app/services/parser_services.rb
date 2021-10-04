@@ -1,6 +1,7 @@
 require 'recipe.rb'
 require 'scraping/parser.rb'
 require 'recipe_page.rb'
+
 class ParserServices
   attr_reader :parsed, :scanned, # Trees of seeker results resulting from parsing and scanning, respectively
               :grammar_mods, # Modifications to be used on the parser beforehand
@@ -141,28 +142,58 @@ The dependencies are as follows:
     end
 
     @parsed = parser.match token, stream: nokoscan
-    @parsed.enclose_all parser: parser if annotate && @parsed&.success?
 
-    # Perform the scan only if seeking elements aren't found in the parse
-    @scanned = parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
-    @scanned.enclose_all parser: parser if annotate && @scanned&.success?
+    # Perform the scan only if sought elements aren't found in the parse
+    @scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
 
-    @parsed&.success? || @scanned&.success?
+    if annotate
+      @parsed.enclose_all parser: parser if @parsed&.success?
+      @scanned.select(&:success?).each { |seeker| seeker.enclose_all parser: parser }
+    end
+
+    @parsed&.success? || @scanned.any?(&:success?)
   end
 
   def content
     nkdoc&.to_s
   end
 
-  # Put the input through the mill, annotate it with the parsing results, and return HTML for the whole thing
-=begin
-annotate is now an option to #parse
-  def annotate
-    @parsed.enclose_all parser: parser if @parsed&.success?
-    @scanned.enclose_all parser: parser if @scanned&.success?
-    return nkdoc.to_s
+  # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
+  def group seekers
+    inglines = []
+    others = []
+    # Sort the seekers into ingredient lines and others
+    seekers.each do |seeker|
+      if [:rp_ingspec, :rp_ingline].include? seeker.token
+        inglines << seeker
+      else
+        others << seeker
+      end
+    end
+    return seekers unless inglines.present?
+
+    bc = BinCount.new
+    inglines.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
+    nkdoc.traverse do |node|
+      if (adj = bc[node] - 1 ) > 0
+        node.ancestors.each { |anc| bc[anc] -= adj }
+      end
+    end
+    inglists = []
+    while (max = bc.max) && (max.count > 2) do
+      puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
+      # Declare a result for the found collection, including all text elements under it
+      range = nokoscan.token_range_for_subtree max.object
+      head = nokoscan.scanner_for_range range
+      children = inglines.select { |line| range.include?(line.head_stream.pos) && range.include?(line.tail_stream.pos) }
+      inglists << Seeker.new( head, nokoscan.past(head), :rp_inglist, children)
+      # Remove this tree from consideration for higher-level inglists
+      max.object.ancestors.each { |anc| bc[anc] -= 1 }
+      bc.delete max.object
+    end
+
+    others + inglists
   end
-=end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
     # Do QA on the parameters
@@ -216,16 +247,16 @@ annotate is now an option to #parse
   end
 
   def do_for *tokens, &block
-    return unless @parsed || @scanned
+    return unless @parsed || @scanned.present?
     glean_tokens(tokens).each do |token|  # For each specified token
-      ((@parsed&.find(token) || []) + (@scanned&.find(token) || [])).each do |seeker| # For each result under that token
+      ((@parsed&.find(token) || []) + (@scanned.collect { |seeker| seeker.find(token) }.flatten.compact)).each do |seeker| # For each result under that token
         block.call seeker, token
       end
     end
   end
 
   def found_for token, as: nil
-    return [] if token.nil? || (seekers = @parsed.find(token) + @scanned.find(token)).empty?
+    return [] if token.nil? || (seekers = @parsed.find(token) + @scanned.collect { |seeker| seeker.find(token) }.flatten.compact).empty?
     # Convert the results according to :as specifier
     return seekers unless as
     found = seekers.map do |seeker|

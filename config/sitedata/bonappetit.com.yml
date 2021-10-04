@@ -6,9 +6,9 @@
   :rp_inglist:
     :at_css_match: p
   :gm_recipes:
-    :at_css_match: h1.split-screen-content-header__hed
+    :at_css_match: h1.SplitScreenContentHeaderHed-fyuCol
   :rp_title:
-    :in_css_match: h1.split-screen-content-header__hed
+    :in_css_match: h1.SplitScreenContentHeaderHed-fyuCol
   :rp_instructions:
     :in_css_match: div.recipe__instruction-list div
 :sample_url: http://www.bonappetit.com/recipe/shaved-cauliflower-salad

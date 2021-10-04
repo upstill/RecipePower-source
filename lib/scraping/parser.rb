@@ -791,7 +791,7 @@ class Parser
       end
     end
     # If there's only a single child and no token, just return that child
-    children = children.compact.map { |child| child.token ? child : child.children }.flatten(1).compact
+    children = children.compact.map { |child| (child.token || child.children.empty?) ? child : child.children }.flatten(1).compact
     if children.count == 1 && token.nil?
       # If only one child, and no token is being asserted, simply promote the child
       # children.first.tail_stream = end_stream

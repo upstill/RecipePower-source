@@ -248,7 +248,7 @@ class ParseTester < ActiveSupport::TestCase
       end
       return if missing.all? &:empty? # No tags unfound
     end
-    if @seeker = @parser.scan
+    if @seeker = @parser.scan.first
       # The scan may turn up the requisite element
       check_required_tags(required_tags) do |tagtype, css_class, tagset|
         missing[tagtype] = (missing[tagtype] || tagset) - find_values(css_class)

@@ -112,14 +112,14 @@ Parser.init_grammar(
     },
     rp_time: [ :rp_num, /^(mins?\.?|minutes?)?$/ ],
     rp_yields: {
-        match: [ { :trigger => /^(Servings|Makes|Yield):?$/i }, :rp_num_or_range, :rp_unit ], # :rp_amt ],
+        match: [ { :trigger => /^(Servings|Makes|Yield):$/i }, :rp_num_or_range, :rp_unit ], # :rp_amt ],
         in_css_match: nil,
         atline: true
     },
     rp_serves: {
         or: [
-            [ { :trigger => /^Serv(ing|e)s?:?$/i }, :rp_num_or_range ],
-            [ :rp_num_or_range, /^Servings?$/i ]
+            [ { :trigger => /^Serv(ing|e)s?:$/i }, :rp_num_or_range ],
+            [ { :trigger => /^\d+$/ }, { optional: [ /-|to/, /^\d+$/ ] }, /^Servings?$/i ]
         ],
         in_css_match: nil,
         atline: true
