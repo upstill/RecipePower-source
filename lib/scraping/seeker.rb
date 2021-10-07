@@ -67,6 +67,11 @@ class Seeker
     end
   end
 
+  # Provide the range of token indices encompassed by the Seeker
+  def token_range
+    pos...tail_stream.pos
+  end
+
   def found_string token=nil
     if f = find(token).first
       f.head_stream.except(f.tail_stream).to_s
@@ -189,6 +194,43 @@ class Seeker
   def xbounds
     [ head_stream.xpath, tail_stream.xpath(true) ]
   end
+
+  def encompass_position newpos
+    if newpos < head_stream.pos
+      head_stream.move_to newpos
+    elsif newpos > tail_stream.pos
+      tail_stream.move_to newpos
+    end
+  end
+
+  # Equality operator: is the given seeker redundant wrt us?
+  def matches? seeker
+    seeker.token == token &&
+        seeker.tail_stream.pos >= head_stream.pos && # It ends after we begin...
+        seeker.head_stream.pos < tail_stream.pos # ...and begins before we end
+  end
+
+  # Insert the given seeker at an appropriate place in our tree
+  def insert to_insert
+    seeker_range = to_insert.token_range
+    return true if token_range.cover?(seeker_range) && token == to_insert.token
+    # First, expand our bounds to include its bounds
+    @head_stream.pos = seeker_range.min if seeker_range.min < pos
+    @tail_stream.pos = seeker_range.max+1 if seeker_range.max >= @tail_stream.pos
+    place = -1
+    overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
+      child_range = child.token_range
+      place += 1 if seeker_range.begin < child_range.begin
+      # Remember the child if its range overlaps with the seeker
+      seeker_range.min < child_range.end && seeker_range.max > child_range.begin
+    end
+    if overlaps.empty?
+      @children.insert place, to_insert
+    else
+      overlaps.first.insert to_insert # WHAT IF MORE THAN ONE OVERLAPS?
+    end
+  end
+
 end
 
 # An Empty Seeker does nothing, and does not advance the stream

@@ -516,6 +516,10 @@ class NokoScanner # < Scanner
     self
   end
 
+  def move_to newpos
+    @pos = [[0, newpos].max, @bound].min
+  end
+
   # Test certain conditions about the current token. According to key on h, test
   #   after_elmt: token is immediately preceded by a tag that matches(nominally <br>)
   #   within_elmt: token is the first non-blank content within the element

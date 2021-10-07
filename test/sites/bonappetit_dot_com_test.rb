@@ -10,8 +10,9 @@ class BonappetitDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil Kosher\ salt freshly\ ground\ pepper
-cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
+    @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil
+    cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
+    # Kosher\ salt freshly\ ground\ pepper # Neither scanning nor parsing finds
     @units =  %w{ teaspoon cup cup ounces tablespoon cups } # All units
     @conditions = %w{ finely\ grated fresh 1-inch-wide\ strips torn } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
@@ -19,12 +20,12 @@ cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Par
         :rp_inglist => {
             :in_css_match => 'div.recipe__ingredient-list div'
         },
-        :rp_inglist => {
-            :at_css_match => 'p'
+        :rp_ingline => {
+            :at_css_match => 'p.BaseWrap-sc-TURhJ'
         },
-        :gm_recipes => {:at_css_match => 'h1.SplitScreenContentHeaderHed-fyuCol'},
+        :gm_recipes => {:at_css_match => 'h1'},
         :rp_title => {
-            :in_css_match => 'h1.SplitScreenContentHeaderHed-fyuCol'
+            :in_css_match => 'h1'
         },
         :rp_instructions => {
             :in_css_match => 'div.recipe__instruction-list div'

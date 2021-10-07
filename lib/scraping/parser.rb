@@ -189,12 +189,13 @@ class Parser
         :distribute
       ].each do |flag|
         if entry[flag] && entry[flag] != true
-          entry[:match] = entry[flag]
           if flag == :trigger
+            entry[:match] ||= entry[:trigger] # The trigger is assumed to be the match unless otherwise specified
             entry.delete :trigger
             # If the trigger is an array, assume that any member will match
             entry[:or] = true if entry[:match].is_a?(Array)
           else
+            entry[:match] = entry[flag]
             entry[flag] = true
           end
         end
@@ -244,7 +245,7 @@ class Parser
           do_trigger match, &block
         end
       when Array
-        grammar_entry.find { |elmt| rtnval = do_trigger(elmt, &block); return rtnval if rtnval }
+        grammar_entry.find_all { |elmt| do_trigger(elmt, &block) } # rtnval = do_trigger(elmt, &block); return rtnval if rtnval }
       end
     end
     # We need to augment the triggers found in a grammar entry
@@ -326,6 +327,12 @@ class Parser
     else
       matched = Seeker.failed stream, stream, token
     end
+    matched if matched.success?
+  end
+
+  # TODO: What we really want is to unbundle the match token from the grammar entry being modified
+  def match_on_mod token, stream, mods={}
+    matched = match_specification stream, @grammar[token].clone.merge(mods), token
     matched if matched.success?
   end
 

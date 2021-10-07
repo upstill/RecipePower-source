@@ -4,11 +4,13 @@
 - ul.social-icons__list
 :grammar_mods:
   :rp_inglist:
-    :at_css_match: p
+    :in_css_match: div.recipe__ingredient-list div
+  :rp_ingline:
+    :at_css_match: p.BaseWrap-sc-TURhJ
   :gm_recipes:
-    :at_css_match: h1.SplitScreenContentHeaderHed-fyuCol
+    :at_css_match: h1
   :rp_title:
-    :in_css_match: h1.SplitScreenContentHeaderHed-fyuCol
+    :in_css_match: h1
   :rp_instructions:
     :in_css_match: div.recipe__instruction-list div
 :sample_url: http://www.bonappetit.com/recipe/shaved-cauliflower-salad

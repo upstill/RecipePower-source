@@ -146,12 +146,55 @@ The dependencies are as follows:
     # Perform the scan only if sought elements aren't found in the parse
     @scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
 
-    if annotate
-      @parsed.enclose_all parser: parser if @parsed&.success?
-      @scanned.select(&:success?).each { |seeker| seeker.enclose_all parser: parser }
-    end
+    if @parsed
+      # Now we need to reconcile parsed results with scanned.
+      ils = @parsed.find(:rp_inglist)
+      @scanned.keep_if do |scanned|
+        # In this step, we eliminate scanned elements that have a parsed equivalent
+        if scanned.token == :rp_inglist
+          selector = ingline_selector scanned
+          revised_inglist = parser.match_on_mod :rp_inglist, scanned.head_stream, at_css_match: selector
+          # Special processing for inglists: merge their children into the parsed equivalent, as possible
+          # First, adjust the parsed ingredient-list boundaries to the scanned item
+          ils.each do |inglist|
+            if scanned.token_range.include? inglist.pos
+              # Expand the inglist token_range to include the scanned version,
+              # but not so far as to encroach on other parsed elements
+              inglist.encompass_position (ils.filter { |il| il.pos < inglist.pos }.map(&:bound) << scanned.pos).max
+            end
+            if scanned.token_range.include? inglist.bound
+              inglist.encompass_position (ils.filter { |il| il.bound > inglist.bound }.map(&:pos) << scanned.bound).min
+            end
+          end
+          true
+        else
+          !@parsed.find(scanned.token).any? { |parsed| parsed.matches? scanned }
+        end
+      end
 
-    @parsed&.success? || @scanned.any?(&:success?)
+      # Now @scanned is a list of elements that still need to be included in the parse tree
+      @scanned.each do |scanned|
+        if scanned.token == :rp_inglist
+          scanned.children.keep_if { |ingline| !ils.any? { |inglist| inglist.insert ingline } }
+          next if scanned.children.empty?
+        end
+        @parsed.insert scanned
+      end
+    else # No parsed content: just use the @scanned results by enclosing them
+      @parsed =
+      if @scanned.present?
+        scanned_ranges = @scanned.map(&:token_range)
+        Seeker.new scanned_ranges.map(&:min).min, scanned_ranges.map(&:max).max+1, token, @scanned
+      else
+        Seeker.failed @nokoscan, @nokoscan, token
+      end
+    end
+    # Now all scanned entries appear under @parsed, one way or another
+
+    @parsed.enclose_all parser: parser if @parsed&.success? && annotate
+    # @scanned.select(&:success?).each { |seeker| seeker.enclose_all parser: parser }
+
+    @parsed&.success? # || @scanned.any?(&:success?)
   end
 
   def content
@@ -193,6 +236,31 @@ The dependencies are as follows:
     end
 
     others + inglists
+  end
+
+  # Given an ingredient list with a collection of items, infer an
+  # enclosing HTML/CSS context, returning a CSS selector for it
+  def ingline_selector inglist
+    # The inglist denotes the lowest common node between the elements
+    # For each child, we examine each parent of the leading text element for commonality
+    teds = inglist.children.map(&:head_stream).map &:text_elmt_data
+    # We assume that the nokogiri node associated with the inglist is the common ancestor of two children
+    inglist_nknode = (teds.first.ancestors.to_a & teds.last.ancestors.to_a).first
+    descendant_ix = -(inglist_nknode.ancestors.count+2) # This indexes the first ancestor of a text element that is a child of the inglist
+    first_descendants = teds.map { |ted| ted.text_element.ancestors[descendant_ix] }
+    survivors = nil
+    first_descendants.each do |child_nknode|
+      this = { tag: child_nknode.name, classes: child_nknode['class'].split }
+      if survivors
+        survivors.delete :tag if this[:tag] != survivors[:tag]
+        survivors[:classes] &= this[:classes]
+      else
+        survivors = this
+      end
+    end
+    classes = survivors[:classes].join '.'
+    selector = "#{survivors[:tag]}#{('.'+classes) if classes.present?}"
+    selector
   end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
