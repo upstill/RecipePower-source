@@ -120,8 +120,8 @@ Parser.init_grammar(
         or: [
             #[ /^Serv(ing|e)s?:$/i, :rp_num_or_range ],
             #[ :rp_num_or_range, /^Servings?$/i ],
-             [ { :trigger => /^Serv(ing|e)s?:$/i }, :rp_num_or_range ],
-             [ { :trigger => /^\d+$/, match: :rp_num_or_range }, /^Servings?$/i ],
+            [ { :trigger => /^Serv(ing|e)s?:?$/i }, :rp_num_or_range ],
+            [ { :trigger => /^\d+$/, match: :rp_num_or_range }, /^Servings?$/i ],
         ],
         in_css_match: nil,
         atline: true

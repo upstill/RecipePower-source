@@ -240,7 +240,8 @@ class Parser
       case grammar_entry
       when Hash
         if grammar_entry[:trigger]
-          grammar_entry[:trigger] = block.call grammar_entry[:trigger]
+          grammar_entry[:match] ||= grammar_entry[:trigger]
+          block.call grammar_entry.delete(:trigger)
         elsif match = grammar_entry.slice(:match, :checklist, :or, :filter, :repeating, :distribute, :optional).values.first
           do_trigger match, &block
         end
@@ -320,12 +321,13 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream, in_place: false
-    puts ">>>>>>>>>>> Entering Parse for :#{token}" if Rails.env.test?
-    if valid_to_match?(token, stream) && (ge = grammar[token])
+    puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s.truncate 100}'" if Rails.env.test?
+    safe_stream = stream.clone
+    if valid_to_match?(token, safe_stream) && (ge = grammar[token])
       ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
-      matched = match_specification stream, ge, token
+      matched = match_specification safe_stream, ge, token
     else
-      matched = Seeker.failed stream, stream, token
+      matched = Seeker.failed safe_stream, token: token
     end
     matched if matched.success?
   end
@@ -342,7 +344,7 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      mtch = (block_given? ? yield(stream) : match(spec, stream: stream))
+      mtch = (block_given? ? yield(stream) : match(spec, stream: stream, in_place: true))
       if mtch
         return mtch if mtch.success?
         stream = mtch.next
@@ -466,7 +468,7 @@ class Parser
             list_selector = params[:list_selector] || selector_for('ul', css_class: params[:list_class])
             line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
             grammar_mods[:rp_inglist] = { :in_css_match => list_selector } # { :or => [ { :in_css_match => list_selector } ] }
-            grammar_mods[:rp_ingline] = { :in_css_match => line_selector }
+            grammar_mods[:rp_ingline] = { :in_css_match => line_selector, :match_all => true }
           when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
             grammar_mods[:rp_inglist] = {
                 :match => :rp_ingline, # Remove the label spec
@@ -560,22 +562,19 @@ class Parser
       scanner.for_each(repeater) do |subscanner|
         match = match_specification (last_scanner = subscanner), spec, token, context
         next unless match.retain?
-        match.tail_stream.encompass scanner # Remove the subscanner's limitation on the result
-        return match unless context[:match_all]
+        return match.with_stream(scanner) unless context[:match_all]
         matches << match
       end
-      # End each match's stream at the beginning of the next
-      matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
       return report_matches matches, under, spec, context, last_scanner, scanner
     end
     # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking
     # ALL the matches, not just one.
     # :match_all outside the context of a repeater causes a repetitive match, each starting after the prior success
-    if context.delete :match_all
+    if context[:match_all]
       matches = []
       first_scanner = scanner
       while scanner.more? do
-        match = match_specification scanner, spec, token, context
+        match = match_specification scanner, spec, token, context.except(:match_all)
         break unless match.success?
         scanner = match.tail_stream # Remove the subscanner's limitation on the result
         matches << match
@@ -587,7 +586,7 @@ class Parser
       after = ParentheticalSeeker.match(scanner) do |inside|
         match = match_specification(inside, spec, token, context.except(:parenthetical))
       end
-      return match ? Seeker.new(scanner, after, token, [match]) : Seeker.failed(scanner, after, context)
+      return match ? Seeker.new(stream: scanner, children: [match], bound: after.pos, token: token) : Seeker.failed(scanner, context)
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
@@ -657,11 +656,11 @@ class Parser
       end
       return case children.count
       when 0
-        Seeker.failed(start_scanner, token, context)
+        Seeker.failed(start_scanner, context.merge(token: token))
       when 1 # Don't create a new node with just one child
         children.first
       else
-        Seeker.new(start_scanner, children.last.tail_stream.rest, token, children)
+        Seeker.new stream: start_scanner, children: children, token: token
       end
     end
 
@@ -669,7 +668,7 @@ class Parser
     found =
     case spec
     when nil # nil spec means to match the full contents
-      Seeker.new scanner, scanner.rest(-1), token
+      Seeker.new stream: scanner, token: token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       context = context.merge(under: token) if token
@@ -696,7 +695,7 @@ class Parser
       RegexpSeeker.match scanner, regexp: spec, token: token
     end
     # Return an empty seeker if no match was found. (Some Seekers may return nil)
-    found || Seeker.failed(scanner, token, context) # Leave an empty result for optional if not found
+    found || Seeker.failed(scanner, context.merge(token: token)) # Leave an empty result for optional if not found
   end
 
   # Take an array of specifications and match them according to the context :checklist, :repeating, or :or. If no option,
@@ -737,7 +736,7 @@ class Parser
       end_stream = scanner
       new_children = []
       while end_stream.more? &&
-        (match = match_specification end_stream, spec, context.except(:distribute)).success? do
+        (match = match_specification end_stream, spec, context.except(:distribute, :under)).success? do
         new_children.push match
         end_stream = match.tail_stream
       end
@@ -757,8 +756,7 @@ class Parser
       # Turn the array structure
       collections = Array.new(children.first.count) { children.map &:shift }
       children = collections.map { |list|
-        end_stream = list.last.tail_stream
-        Seeker.new(list.first.head_stream, end_stream, context[:under] || token, list)
+        Seeker.new children: list, token: context[:under] || token
       }
     when context[:repeating] # The list will be matched repeatedly until the end of input
       # Note: If there's no bound, the list will consume the entire stream
@@ -775,25 +773,25 @@ class Parser
           end_stream = child.tail_stream if child.tail_stream.pos > end_stream.pos # We'll set the scan after the last item
         end
       end
-      return Seeker.failed(start_stream, token, context) unless children.present? # TODO: not retaining children discarded along the way
+      return Seeker.failed(start_stream, context.merge(token: token)) unless children.present? # TODO: not retaining children discarded along the way
     when context[:or] # The list is taken as an ordered set of alternatives, any of which will match the list
       list_of_specs.each do |spec|
         child = match_specification start_stream, spec, token, distributed_context
         if child.success?
-          return (token.nil? || child.token == token) ? child : Seeker.new(start_stream, child.tail_stream, token, [child])
+          return (token.nil? || child.token == token) ?
+                     child :
+                     Seeker.new(stream: start_stream, children: [child], token: token, pos: start_stream.pos)
         end
       end
-      return Seeker.failed(start_stream, token, context) # TODO: not retaining children discarded along the way
+      return Seeker.failed(start_stream, context.merge(token: token)) # TODO: not retaining children discarded along the way
     else # The default case: an ordered list of items to match
       list_of_specs.each do |spec|
         child = match_specification end_stream, spec, distributed_context
         children << child.if_retain
         end_stream = child.tail_stream # end_stream.past child.tail_stream
         if child.hard_fail? # && !child.enclose?
-          return Seeker.failed((children.first || child).head_stream,
-                               end_stream,
-                               token,
-                               child.retain? ? context.merge(children: children.keep_if(&:'retain?') + [child]) : context)
+          context = context.merge(children: children.keep_if(&:'retain?') + [child]) if child.retain?
+          return Seeker.failed((children.first || child).head_stream, context.merge(token: token))
         end
       end
     end
@@ -804,9 +802,9 @@ class Parser
       # children.first.tail_stream = end_stream
       children.first
     elsif children.present?
-      Seeker.new children.first.head_stream, end_stream, token, children
+      Seeker.new stream: start_stream, children: children, token: token
     else
-      Seeker.failed start_stream, end_stream, token
+      Seeker.failed start_stream, token: token
     end
   end
 
@@ -835,7 +833,7 @@ class Parser
       klass = spec[:tag] ? TagSeeker : TagsSeeker
       # Important: the :repeating option will have been applied at a higher level
       return klass.match(scanner, lexaur: lexaur, token: token, types: to_match) ||
-          Seeker.failed(scanner, token, spec)
+          Seeker.failed(scanner, spec.merge(token: token))
     elsif to_match = spec[:regexp]
       to_match = Regexp.new to_match
     else
@@ -851,29 +849,29 @@ class Parser
       really_enclose = match.children&.all?(:hard_fail?)
     end
     really_enclose ||= match.enclose? && (match.tail_stream != match.head_stream)
-    return Seeker.failed(match.head_stream,
-                         match.tail_stream,
-                         token,
+    return Seeker.failed(scanner, # match.head_stream,
+                         range: match.range, # match.tail_stream.token_range,
+                         token: token,
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || inspec[:optional] || match.soft_fail?) ? true : false))
   end
 
-  def consolidate_inglines token, matches
+  def consolidate_inglines token, seekers
     return if token != :rp_ingline
     # An ingredient list needs special attention:
     # -- individual lines may have failed but still need to be retained
     # -- failed lines may represent labels of sublists
-    matches.each do |match|
+    seekers.each do |match|
       # Label detection: failed lines that are preceded by two <br> tags get converted to :rp_inglist_label
       next unless match.hard_fail?
-      if (submatch = seek match.head_stream.except(match.tail_stream), :rp_ingredient_tag)&.success?
+      if (submatch = seek match.scanner_within, :rp_ingredient_tag)&.success?
         # Can find an ingredient in the line => enclose it within the line
         (match.children ||= []) << submatch
       elsif (match.tail_stream.pos - match.head_stream.pos) < 4
         match.token = :rp_inglist_label
       end
     end
-    Seeker.new(matches.first.head_stream, matches.last.tail_stream, :rp_inglist, matches) if matches.count > 1
+    Seeker.new(children: seekers, token: :rp_inglist) if seekers.count > 1
   end
 
   # When matches have been generated by a multi-matching directive, resolve the collection here
@@ -881,10 +879,12 @@ class Parser
     matches.compact!
     if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
       if matches.all? &:hard_fail?
+        failed_range = (matches.last&.tail_stream || scanner).token_range
         return Seeker.failed matches.first&.head_stream || start_scanner,
-                             matches.last&.tail_stream || scanner,
-                             token,
-                             context.except(:enclose)
+                             context.
+                                 except(:enclose).
+                                 merge(token: token,
+                                       range: failed_range)
       end
     end
     consolidation = consolidate_inglines spec, matches
@@ -893,14 +893,17 @@ class Parser
     matches.delete_if &:'hard_fail?'
     return case matches.count
            when 0
-             Seeker.failed start_scanner, scanner, token, context
+             Seeker.failed start_scanner, context.merge(range: scanner.token_range, token: token)
            when 1
-             match = matches.first
-             token.nil? || token == match.token ?
-                 match :
-                 Seeker.new(match.head_stream, match.tail_stream, token, matches)
+             first_match = matches.first
+             if token.nil? || token == first_match.token
+               first_match.stream = start_scanner
+               first_match
+             else
+               Seeker.new stream: start_scanner, children: matches, token: token
+             end
            else
-             Seeker.new(matches.first.head_stream, matches.last.tail_stream, token, matches) # Token only applied to the top level
+             Seeker.new stream: start_scanner, children: matches, token: token # Token only applied to the top level
            end
   end
 

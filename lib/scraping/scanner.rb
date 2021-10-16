@@ -228,8 +228,12 @@ class Scanner < Object
   end
 
   # Provide a string representing the content of the stream from its current position, terminating at the bound
-  def to_s limit = @bound
-    peek (limit - @pos)
+  def to_s limit = nil
+    peek ((limit || @bound) - @pos)
+  end
+
+  def token_range
+    @pos...@bound
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
@@ -257,6 +261,11 @@ class Scanner < Object
     return result + [ candidate ]
   end
 
+  # Return a scanner for the given range of tokens
+  def slice range
+
+  end
+
 end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
@@ -269,6 +278,11 @@ class StrScanner < Scanner
     @pos = pos
     # @length = @strings.count
     @bound = bound || @strings.count
+  end
+
+  def to_s limit_or_range = @bound
+    range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
+    @strings[range].join(' ')
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
@@ -304,6 +318,16 @@ class StrScanner < Scanner
 
   def all
     StrScanner.new @strings, 0, @bound
+  end
+
+  # Take a slice of the scanner's range. If a Fixnum is given, return the natural range beginning at that point
+  def slice fixnum_or_range
+    case fixnum_or_range
+    when Integer
+      StrScanner.new @strings, fixnum_or_range, @bound
+    when Range
+      StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
+    end
   end
 
   # Progress the scanner to precede the next newline character, optionally constraining the result to within a whole line
@@ -376,6 +400,9 @@ class NokoScanner # < Scanner
     end
     @bound = bound || @tokens.length
     @pos = (pos <= @bound) ? pos : @bound
+    # Memoize an array of token positions for all <br> directives in the document.
+    # This is used to truncate all lines at <br>
+    @brs ||= nkdoc.search('br').map { |found| @tokens.token_range_for_subtree(found)&.begin }.compact
   end
 
   # Return the stream of tokens as an array of strings
@@ -394,9 +421,14 @@ class NokoScanner # < Scanner
   end
 
   # Output version of #peek: the original text, rather than a joined set of tokens
-  def to_s limit = @bound
+  def to_s limit_or_range = @bound
+    range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
     # peek limit-@pos      Gives tokens joined by a space: not quite the same thing
-    tokens.text_from @pos, limit
+    tokens.text_from range.begin, range.end # @pos, limit
+  end
+
+  def token_range
+    @pos...@bound
   end
 
   # Report the token no matter if the position is beyond the bound
@@ -447,6 +479,11 @@ class NokoScanner # < Scanner
 
   def all
     NokoScanner.new tokens, 0, @bound
+  end
+
+  def slice range_or_start
+    range = range_or_start.is_a?(Range) ? range_or_start : range_or_start...@bound
+    NokoScanner.new tokens, range.begin, range.end
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
@@ -713,9 +750,7 @@ class NokoScanner # < Scanner
     results = []
     pos = @pos
 
-    # Memoize an array of token positions for all <br> directives in the document.
-    # This is used to truncate all lines at <br>
-    @brs ||= nkdoc.search('br').map { |found| @tokens.token_range_for_subtree(found)&.begin }.compact
+    # @brs is a memoized list of locations of linebreaks
     brpos =
     if brix = binsearch(@brs, pos)
       brix += 1 if @brs[brix] < pos

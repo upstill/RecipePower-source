@@ -6,7 +6,7 @@ class SeekerTest < ActiveSupport::TestCase
     scanner = StrScanner.new "Fourscore and seven years ago"
     ns = NullSeeker.match scanner
     subsq_scanner = ns.tail_stream
-    assert_equal ns.head_stream, scanner
+    assert_equal ns.stream, scanner
     assert_equal 0, ns.head_stream.pos
     assert_equal 1, subsq_scanner.pos
   end
@@ -24,38 +24,45 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'find a number in a stream' do
     scanner = StrScanner.new "Fourscore and seven years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal 'seven', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and 7 years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '7', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and 7 1/2 years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '7 1/2', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 4, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and 7/2 years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '7/2', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and ⅐ years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '⅐', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and 7⅐ years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '7⅐', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 3, ns.tail_stream.pos
     scanner = StrScanner.new "Fourscore and 7 ⅐ years ago "
-    ns = NumberSeeker.seek(scanner)
+    ns = NumberSeeker.seek scanner
     assert_not_nil ns
+    assert_equal '7 ⅐', ns.to_s
     assert_equal 2, ns.head_stream.pos
     assert_equal 4, ns.tail_stream.pos
   end
@@ -67,7 +74,7 @@ class SeekerTest < ActiveSupport::TestCase
     while ns = NullSeeker.match(scanner)
       assert_equal pos, scanner.pos
       pos += 1
-      assert_equal ns.head_stream, scanner
+      assert_equal ns.head_stream.to_s, scanner.to_s
       results << ns
       break unless (scanner = ns.tail_stream).more?
       assert_equal (ns.head_stream.pos+1), ns.tail_stream.pos

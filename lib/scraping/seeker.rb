@@ -1,23 +1,38 @@
 require 'scraping/scanner.rb'
 require 'scraping/lexaur.rb'
 
-# A Seeker is an abstract class for a subclass which looks for a given item in the given stream
+# A Seeker is an abstract class for a subclass which presents a given item as a subrange of tokens from the given stream
 class Seeker
-  attr_accessor :head_stream, :tail_stream, :token, :children
-  attr_reader :value
-  delegate :pos, to: :head_stream
-  delegate :bound, to: :tail_stream
+  attr_accessor :stream, :token, :children
+  attr_reader :range, :value
+  # delegate :pos, to: :stream
+  # delegate :bound, to: :tail_stream
 
-  def initialize(head_stream, tail_stream, token = nil, children=[])
-    if token.is_a?(Array)
-      token, children = nil, token
+  def initialize(stream: nil, children: [],
+                 range: nil,
+                 pos: nil,
+                 bound: nil,
+                 token: nil)
+    if stream ||= children.first.stream
+      @stream = stream
+    else
+      # It is an error to provide neither a stream nor children
+      raise "Error initializing Seeker: no stream provided, either directly or via children"
     end
-    @head_stream = head_stream
-    @tail_stream = tail_stream
+
+    @range =
+        if range
+          range
+        else
+          pos ||= children.map(&:pos).min || stream.pos
+          bound ||= children.map(&:bound).max || stream.bound
+          pos...bound
+        end
     @token = token
-    @children = children || []
+    @children = children
+    @stream.freeze
 =begin
-    if token && (@head_stream.pos != @tail_stream.pos) && Rails.env.test?
+    if token && (head_stream.pos != tail_stream.pos) && Rails.env.test?
       puts "Seeker for :#{token} matched '#{to_s}'"
     end
 =end
@@ -25,19 +40,54 @@ class Seeker
 
   # Return a Seeker for a failed parsing attempt
   # The head_stream and tail_stream will denote the range scanned
-  def self.failed head_stream, tail_stream=nil, token= nil, options={}
-    if tail_stream.is_a? Hash
-      tail_stream, token, options = nil, nil, tail_stream
-    elsif tail_stream.is_a? Symbol
-      tail_stream, token, options = nil, tail_stream, token
-    end
-    token, options = nil, token if token.is_a? Hash
-    skr = self.new head_stream, (tail_stream || head_stream), token
+  # options:
+  # :pos, :bound -- the places within the stream represented by the failed seeker
+  # :range -- if given, overrides :pos and :bound
+  # :optional, :enclose, :children -- flags for instance variables on the failed seeker
+  def self.failed head_stream, options={}
+  # def self.failed head_stream, tail_stream=nil, token= nil, options={}
+    skr = self.new stream: head_stream,
+                   children: options[:children] || [],
+                   range: options[:range],
+                   pos: options[:pos] || head_stream.pos,
+                   bound: options[:bound] || head_stream.pos
     skr.instance_variable_set :@failed, true
     skr.instance_variable_set :@optional, options[:optional]
     skr.instance_variable_set :@enclose, options[:enclose]
-    skr.children = options[:children]
     skr
+  end
+
+  def self.bracket_children *children
+    ranges = children.flatten.compact.collect &:range
+    (ranges.collect(&:begin).min)...(ranges.collect(&:end).max)
+  end
+
+  # Open a seeker to a wider context
+  def with_stream stream
+    self.stream = stream
+    self
+  end
+
+  def head_stream
+    @stream.slice pos
+      # NokoScanner.new @stream.tokens, pos, bound
+  end
+
+  # The tail_stream is what comes after the content in the head stream
+  def tail_stream
+    @stream.slice bound
+      # NokoScanner.new @stream.tokens, bound, @stream.bound
+  end
+
+  alias_method :scanner_beyond, :tail_stream
+  alias_method :scanner_within, :head_stream
+
+  def pos
+    @range.begin
+  end
+
+  def bound
+    @range.end
   end
 
   # Find a place in the stream where we can match
@@ -93,22 +143,22 @@ class Seeker
 
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
   def to_s
-    head_stream.to_s tail_stream.pos
+    stream.to_s range
   end
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
-    (@head_stream == @tail_stream) && @children&.empty?
+    (head_stream == tail_stream) && @children&.empty?
   end
 
   def consumed?
     # Did the result consume any tokens?
-    @tail_stream.pos > @head_stream.pos
+    tail_stream.pos > head_stream.pos
   end
 
   def encompass scanner
-    @head_stream.encompass scanner
-    @tail_stream.encompass scanner
+    head_stream.encompass scanner
+    tail_stream.encompass scanner
     self
   end
 
@@ -124,7 +174,7 @@ class Seeker
     return unless @token
     # Check that some ancestor doesn't already have the tag
     if !head_stream.descends_from?(token: @token)
-      @head_stream.enclose_to @tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
+      head_stream.enclose_to tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
     end
   end
 
@@ -170,18 +220,14 @@ class Seeker
   alias_method :if_retain, :'retain?'
 
   # What's the next token to try? Three possibilities:
-  # * The match succeeded: the next token is just after the match, i.e. @tail_stream
-  # * the match failed: the next token is the successor of the present token, i.e. @head_stream.rest
-  # * the match was optional: the tokens are consumed anyway: @head_stream.rest at a minimum, possibly @tail_stream
+  # * The match succeeded: the next token is just after the match, i.e. tail_stream
+  # * the match failed: the next token is the successor of the present token, i.e. head_stream.rest
+  # * the match was optional: the tokens are consumed anyway: head_stream.rest at a minimum, possibly tail_stream
   def next context=nil
     subsq = if @failed
-              # if @optional # For some reason I thought it was a good idea to increment past a non-optional failure
-                @tail_stream.pos > @head_stream.pos ? @tail_stream : @head_stream.rest
-              # else
-                # @head_stream.rest
-              # end
+              tail_stream.pos > head_stream.pos ? tail_stream : head_stream.rest
             else # Success!
-              @tail_stream
+              tail_stream
             end
     context ? subsq.encompass(context) : subsq
   end
@@ -215,8 +261,7 @@ class Seeker
     seeker_range = to_insert.token_range
     return true if token_range.cover?(seeker_range) && token == to_insert.token
     # First, expand our bounds to include its bounds
-    @head_stream.pos = seeker_range.min if seeker_range.min < pos
-    @tail_stream.pos = seeker_range.max+1 if seeker_range.max >= @tail_stream.pos
+    @range = ([seeker_range.first, @range.first].min)...([seeker_range.last, @range.last].max)
     place = -1
     overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
       child_range = child.token_range
@@ -236,27 +281,27 @@ end
 # An Empty Seeker does nothing, and does not advance the stream
 class EmptySeeker < Seeker
   def self.match stream, opts={}
-    self.new stream, stream
+    self.new stream: stream
   end
 end
 
 # A Null Seeker simply accepts the next string in the stream and advances past it
 class NullSeeker < Seeker
   def self.match stream, opts={}
-    self.new stream, stream.rest
+    self.new stream: stream, bound: stream.pos+1
   end
 end
 
 class StringSeeker < Seeker
   def self.match stream, options={}
     # TODO: the string should be tokenized according to tokenization rules and matched against a series of tokens
-    self.new stream, stream.rest, options[:token] if stream.peek == options[:string]
+    self.new stream: stream, bound: stream.pos+1, token: options[:token] if stream.peek == options[:string]
   end
 end
 
 class RegexpSeeker < Seeker
   def self.match stream, options={}
-    self.new stream, stream.rest, options[:token] if stream.peek&.match options[:regexp]
+    self.new stream: stream, bound: stream.pos+1, token: options[:token] if stream.peek&.match options[:regexp]
   end
 end
 
@@ -310,7 +355,7 @@ class RangeSeeker < Seeker
         sep = $1
         match2 = NumberSeeker.match ts.rest, number_opts
         return nil if !match2 || (sep=='-' && match1.value >= match2.value) # Not a range but an integer plus fraction
-        self.new stream, match2.tail_stream, :rp_range, [ match1, match2 ]
+        self.new stream: stream, children: [ match1, match2 ], token: :rp_range
       end
     end
   end
@@ -321,12 +366,18 @@ class NumberSeeker < Seeker
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
     stream = stream.rest if stream.peek&.match /about/i
-    result = (self.new(stream, stream.rest(3), opts[:token]) if self.num3 splitsies(stream, 3)) ||
-      (self.new(stream, stream.rest(2), opts[:token]) if self.num2 splitsies(stream, 2)) ||
-      (self.new(stream, stream.rest, opts[:token]) if self.num1 splitsies(stream, 1))
-    if result
+    len = case
+          when self.num3(splitsies(stream, 3))
+            3
+          when self.num2(splitsies(stream, 2))
+            2
+          when self.num1(splitsies(stream, 1))
+            1
+          end
+    if len
+      result = self.new stream: stream, bound: stream.pos+len, token: opts[:token]
       yield @@StrAfter if block_given? && @@StrAfter.present?
-      result.tail_stream = result.tail_stream.rest if result.tail_stream.peek&.match(',')
+      # result.tail_stream = result.tail_stream.rest if result.tail_stream.peek&.match(',')
     end
 =begin
     if Rails.env.test?
@@ -401,8 +452,8 @@ end
 class TagSeeker < Seeker
   attr_reader :tagdata, :value
 
-  def initialize(stream, next_stream, tagdata, token=nil)
-    super stream, next_stream, token
+  def initialize stream, range, tagdata, token=nil
+    super stream: stream, range: range, token: token
     @value = tagdata[:name] if (@tagdata = tagdata).present?
   end
 
@@ -412,7 +463,7 @@ class TagSeeker < Seeker
       scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
       return unless tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
       tagdata = [:id, :name].zip(tagdata).to_h
-      return self.new(stream, next_stream, tagdata, opts[:token])
+      return self.new(stream, stream.pos...next_stream.pos, tagdata, opts[:token])
     }
     nil
   end
@@ -455,11 +506,11 @@ class UnitSeeker < TagSeeker
 end
 
 # Conditions are a list of { process, }*. Similarly for Ingredients
-class  TagsSeeker < Seeker
+class TagsSeeker < Seeker
   attr_accessor :operand
 
-  def initialize head_stream, tail_stream, token = nil, children=[], operand: nil
-    super head_stream, tail_stream, token, children
+  def initialize head_stream, token = nil, children=[], operand: nil
+    super stream: head_stream, children: children, token: token
     @operand = operand
   end
 
@@ -472,12 +523,12 @@ class  TagsSeeker < Seeker
       operand = op if op != ','
       # The Lexaur provides the data at sequence end, and the post-consumption stream
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        children << TagSeeker.new(stream_start, stream_end, [:id, :name].zip(tagdata).to_h, rptype)
+        children << TagSeeker.new(stream_start, stream_start.pos...stream_end.pos, [:id, :name].zip(tagdata).to_h, rptype)
       end
     end
     if children.present?
       children = children.sort_by &:pos
-      self.new children.first.head_stream, children.last.tail_stream, opts[:token], children, operand: operand
+      self.new children.first.head_stream, opts[:token], children, operand: operand
     end
   end
 
@@ -512,36 +563,36 @@ class AmountSeeker < Seeker
 
   attr_reader :num, :unit, :alt_num, :alt_unit
 
-  def initialize stream, next_stream, num, unit
-    super stream, next_stream
+  def initialize stream, num, unit
+    super stream: stream, range: Seeker.bracket_children((num if num.is_a?(Seeker)), unit)
     @num = num
     @unit = unit
     @token = :rp_amt
   end
 
   def self.match stream, opts = {}
+    original_stream = stream.clone
     stream = stream.rest if stream.peek&.match /about/i
+    pos = stream.pos
     unit = unit_tail = nil
     num = NumberSeeker.match(stream) { |remainder|
       # A unit may follow the number within the same token
       unit = TagSeeker.match StrScanner.new([ remainder ]), opts.slice(:lexaur).merge(types: 5)
     }
     if num
-      unit_tail =
-      if unit
-        num.tail_stream
-      elsif unit = TagSeeker.match(num.tail_stream, opts.slice(:lexaur).merge(types: 5))
-        unit.tail_stream
+      bound =
+      if unit ||= TagSeeker.match(num.tail_stream, opts.slice(:lexaur).merge(types: 5))
+        unit.bound
       else
         return if opts[:full_only]
-        num.tail_stream
+        num.bound
       end
-      self.new stream, unit_tail, num, unit
+      self.new original_stream, num, unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
-      self.new(stream, stream.rest, num, unit) if num.present? && unit
+      self.new(original_stream, num, unit) if num.present? && unit
     end
   end
 end
@@ -604,13 +655,13 @@ end
 class IngredientSpecSeeker < Seeker
   attr_reader :amount, :condits, :ingreds
 
-  def initialize stream, tail_stream, amount, condits, ingreds
-    super stream, tail_stream
+  def initialize stream, range, amount, condits, ingreds
+    super stream: stream, range: range
     @amount, @condits, @ingreds = amount, condits, ingreds
   end
 
   def self.match stream, opts={}
-    original_stream = stream
+    original_stream = stream.clone
     if amount = AmountSeeker.match(stream, opts)
       puts "Found amount #{amount.num} #{amount.unit}" if Rails.env.test?
       stream = amount.tail_stream
@@ -619,7 +670,7 @@ class IngredientSpecSeeker < Seeker
       stream = condits.tail_stream
     end
     if ingreds = IngredientsSeeker.seek(stream, opts)
-      self.new original_stream, ingreds.tail_stream, amount, condits, ingreds
+      self.new original_stream, ingreds.range, amount, condits, ingreds
     end
   end
 end

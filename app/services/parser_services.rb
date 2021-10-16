@@ -183,10 +183,9 @@ The dependencies are as follows:
     else # No parsed content: just use the @scanned results by enclosing them
       @parsed =
       if @scanned.present?
-        scanned_ranges = @scanned.map(&:token_range)
-        Seeker.new scanned_ranges.map(&:min).min, scanned_ranges.map(&:max).max+1, token, @scanned
+        Seeker.new stream: @nokoscan, children: @scanned, token: token
       else
-        Seeker.failed @nokoscan, @nokoscan, token
+        Seeker.failed @nokoscan, token: token
       end
     end
     # Now all scanned entries appear under @parsed, one way or another
@@ -227,9 +226,8 @@ The dependencies are as follows:
       puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
       # Declare a result for the found collection, including all text elements under it
       range = nokoscan.token_range_for_subtree max.object
-      head = nokoscan.scanner_for_range range
-      children = inglines.select { |line| range.include?(line.head_stream.pos) && range.include?(line.tail_stream.pos) }
-      inglists << Seeker.new( head, nokoscan.past(head), :rp_inglist, children)
+      children = inglines.select { |line| range.include?(line.pos) && range.include?(line.bound) }
+      inglists << Seeker.new(stream: nokoscan, children: children, range: range, token: :rp_inglist)
       # Remove this tree from consideration for higher-level inglists
       max.object.ancestors.each { |anc| bc[anc] -= 1 }
       bc.delete max.object
