@@ -140,7 +140,7 @@ class ParseTester < ActiveSupport::TestCase
       # Verify the successful match on all the tokens in the @expected_tokens array
       check_content @seeker, @expected_tokens
       @seeker.enclose_all parser: @parser
-      check_content @seeker.head_stream.nkdoc, @expected_tokens
+      check_content @seeker.stream.nkdoc, @expected_tokens
       @seeker.success?
     end
   end

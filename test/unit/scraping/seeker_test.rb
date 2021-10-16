@@ -7,7 +7,7 @@ class SeekerTest < ActiveSupport::TestCase
     ns = NullSeeker.match scanner
     subsq_scanner = ns.tail_stream
     assert_equal ns.stream, scanner
-    assert_equal 0, ns.head_stream.pos
+    assert_equal 0, ns.pos
     assert_equal 1, subsq_scanner.pos
   end
 
@@ -27,44 +27,44 @@ class SeekerTest < ActiveSupport::TestCase
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal 'seven', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 3, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '7', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 3, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7 1/2 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '7 1/2', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 4, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 4, ns.bound
     scanner = StrScanner.new "Fourscore and 7/2 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '7/2', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 3, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and ⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '⅐', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 3, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '7⅐', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 3, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7 ⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
     assert_equal '7 ⅐', ns.to_s
-    assert_equal 2, ns.head_stream.pos
-    assert_equal 4, ns.tail_stream.pos
+    assert_equal 2, ns.pos
+    assert_equal 4, ns.bound
   end
 
   test 'check validity of NullSeeker results' do
@@ -77,7 +77,7 @@ class SeekerTest < ActiveSupport::TestCase
       assert_equal ns.head_stream.to_s, scanner.to_s
       results << ns
       break unless (scanner = ns.tail_stream).more?
-      assert_equal (ns.head_stream.pos+1), ns.tail_stream.pos
+      assert_equal (ns.pos+1), ns.bound
     end
     assert_equal 5, results.count
     assert_equal NullSeeker, results.first.class
@@ -139,8 +139,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 1, cs.children.count
-    assert_equal 0, cs.head_stream.pos
-    assert_equal 1, cs.tail_stream.pos
+    assert_equal 0, cs.pos
+    assert_equal 1, cs.bound
     scanner = StrScanner.new('1/2 cup peeled tomatoes')
     cs = ConditionsSeeker.seek scanner, lexaur: lex
     assert_not_nil cs
@@ -148,8 +148,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_equal 1, cs.children.count
     assert_instance_of TagSeeker, ts
-    assert_equal 2, cs.head_stream.pos
-    assert_equal 3, cs.tail_stream.pos
+    assert_equal 2, cs.pos
+    assert_equal 3, cs.bound
   end
 
   test 'match two conditions joined with and' do
@@ -161,8 +161,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 2, cs.children.count
-    assert_equal 0, cs.head_stream.pos
-    assert_equal 3, cs.tail_stream.pos
+    assert_equal 0, cs.pos
+    assert_equal 3, cs.bound
 
     scanner = StrScanner.new('1/2 cup peeled and seeded tomatoes')
     cs = ConditionsSeeker.seek scanner, lexaur: lex
@@ -171,8 +171,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 2, cs.children.count
-    assert_equal 2, cs.head_stream.pos
-    assert_equal 5, cs.tail_stream.pos
+    assert_equal 2, cs.pos
+    assert_equal 5, cs.bound
   end
 
   test 'match a series of three conditions' do
@@ -184,8 +184,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 3, cs.children.count
-    assert_equal 0, cs.head_stream.pos
-    assert_equal 5, cs.tail_stream.pos
+    assert_equal 0, cs.pos
+    assert_equal 5, cs.bound
 
     scanner = StrScanner.new('1/2 cup peeled, seeded and chopped tomatoes')
     cs = ConditionsSeeker.seek scanner, lexaur: lex
@@ -194,8 +194,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 3, cs.children.count
-    assert_equal 2, cs.head_stream.pos
-    assert_equal 7, cs.tail_stream.pos
+    assert_equal 2, cs.pos
+    assert_equal 7, cs.bound
   end
 
   test 'match a series of two ingredients' do
@@ -207,8 +207,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 2, cs.children.count
-    assert_equal 0, cs.head_stream.pos
-    assert_equal 5, cs.tail_stream.pos
+    assert_equal 0, cs.pos
+    assert_equal 5, cs.bound
   end
 
   test 'match a series of three ingredients' do
@@ -220,8 +220,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 3, cs.children.count
-    assert_equal 0, cs.head_stream.pos
-    assert_equal 7, cs.tail_stream.pos
+    assert_equal 0, cs.pos
+    assert_equal 7, cs.bound
   end
 
   test 'match a series of three ingredients embedded in noise' do
@@ -233,8 +233,8 @@ class SeekerTest < ActiveSupport::TestCase
     ts = cs.children.first
     assert_instance_of TagSeeker, ts
     assert_equal 3, cs.children.count
-    assert_equal 3, cs.head_stream.pos
-    assert_equal 10, cs.tail_stream.pos
+    assert_equal 3, cs.pos
+    assert_equal 10, cs.bound
   end
 
   test 'recognize a full ingredient spec' do
@@ -246,7 +246,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_nil ils.amount
     assert_nil ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
-    assert_equal 1, ils.tail_stream.pos
+    assert_equal 1, ils.bound
 
     scanner = StrScanner.new('peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientSpecSeeker.seek scanner, lexaur: lex
@@ -255,7 +255,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_nil ils.amount
     assert_instance_of ConditionsSeeker, ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
-    assert_equal 6, ils.tail_stream.pos
+    assert_equal 6, ils.bound
 
     scanner = StrScanner.new('1/2 cup cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientSpecSeeker.seek scanner, lexaur: lex
@@ -264,7 +264,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of AmountSeeker, ils.amount
     assert_nil ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
-    assert_equal 3, ils.tail_stream.pos
+    assert_equal 3, ils.bound
 
     scanner = StrScanner.new('1/2 cup  peeled, seeded and chopped cilantro sifted chili bean, cilantro and jalapeño peppers -- refined')
     ils = IngredientSpecSeeker.seek scanner, lexaur: lex
@@ -273,7 +273,7 @@ class SeekerTest < ActiveSupport::TestCase
     assert_instance_of AmountSeeker, ils.amount
     assert_instance_of ConditionsSeeker, ils.condits
     assert_instance_of IngredientsSeeker, ils.ingreds
-    assert_equal 8, ils.tail_stream.pos
+    assert_equal 8, ils.bound
   end
 
   test 'parenthetical seeker' do

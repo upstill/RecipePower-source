@@ -5,6 +5,8 @@ require 'scraping/lexaur.rb'
 class Seeker
   attr_accessor :stream, :token, :children
   attr_reader :range, :value
+  delegate :size, to: :range
+  alias_method :length, :size # Number of tokens in the stream
   # delegate :pos, to: :stream
   # delegate :bound, to: :tail_stream
 
@@ -90,6 +92,10 @@ class Seeker
     @range.end
   end
 
+  def bound=p
+    @range = @range.first...p
+  end
+
   # Find a place in the stream where we can match
   def self.seek stream, opts={}
     while stream.more?
@@ -123,13 +129,11 @@ class Seeker
   end
 
   def found_string token=nil
-    if f = find(token).first
-      f.head_stream.except(f.tail_stream).to_s
-    end
+    find(token).first&.to_s
   end
 
   def found_strings token=nil
-    find(token).collect { |f| f.head_stream.except(f.tail_stream).to_s }
+    find(token).collect &:to_s
   end
 
   # Root out the value associated with the token
@@ -247,13 +251,14 @@ class Seeker
     elsif newpos > tail_stream.pos
       tail_stream.move_to newpos
     end
+=end
   end
 
   # Equality operator: is the given seeker redundant wrt us?
-  def matches? seeker
-    seeker.token == token &&
-        seeker.tail_stream.pos >= head_stream.pos && # It ends after we begin...
-        seeker.head_stream.pos < tail_stream.pos # ...and begins before we end
+  def matches? other
+    other.token == token &&
+        other.bound >= pos && # It ends after we begin...
+        other.pos < bound # ...and begins before we end
   end
 
   # Insert the given seeker at an appropriate place in our tree
@@ -528,7 +533,7 @@ class TagsSeeker < Seeker
     end
     if children.present?
       children = children.sort_by &:pos
-      self.new children.first.head_stream, opts[:token], children, operand: operand
+      self.new stream, opts[:token], children, operand: operand
     end
   end
 

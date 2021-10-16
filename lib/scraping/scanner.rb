@@ -530,9 +530,12 @@ class NokoScanner # < Scanner
     @pos < @bound # @length
   end
 
-  # Create a scanner that starts where the given scanner starts
-  def goto s2
-    NokoScanner.new tokens, s2.pos, @bound
+  # Create a scanner that starts where the given scanner (or an Integer position) starts
+  def goto scanner_or_position
+    newpos = scanner_or_position.is_a?(Integer) ?
+                 scanner_or_position :
+                 scanner_or_position.pos
+    NokoScanner.new tokens, newpos, @bound
   end
 
   # Advance self past the end of s2

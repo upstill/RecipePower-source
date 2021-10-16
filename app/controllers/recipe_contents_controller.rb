@@ -1,4 +1,3 @@
-require 'parsing_services.rb'
 class RecipeContentsController < ApplicationController
   before_action :set_recipe, only: [:show, :edit, :update, :destroy, :annotate, :tag]
   before_action :login_required

@@ -153,7 +153,6 @@ The dependencies are as follows:
         # In this step, we eliminate scanned elements that have a parsed equivalent
         if scanned.token == :rp_inglist
           selector = ingline_selector scanned
-          revised_inglist = parser.match_on_mod :rp_inglist, scanned.head_stream, at_css_match: selector
           # Special processing for inglists: merge their children into the parsed equivalent, as possible
           # First, adjust the parsed ingredient-list boundaries to the scanned item
           ils.each do |inglist|

@@ -304,7 +304,7 @@ EOF
     assert_equal :rp_ingalts, seeker.token
     assert_equal 3, seeker.find(:rp_ingredient_tag).count
     assert_equal strings.sort, seeker.find(:rp_ingredient_tag).map(&:value).sort
-    seeker.head_stream.nkdoc.css('.rp_ingredient_tag').each { |ingnode|
+    seeker.stream.nkdoc.css('.rp_ingredient_tag').each { |ingnode|
       assert_includes strings, ingnode.attribute('value').to_s
     }
 

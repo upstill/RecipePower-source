@@ -332,12 +332,6 @@ class Parser
     matched if matched.success?
   end
 
-  # TODO: What we really want is to unbundle the match token from the grammar entry being modified
-  def match_on_mod token, stream, mods={}
-    matched = match_specification stream, @grammar[token].clone.merge(mods), token
-    matched if matched.success?
-  end
-
   # Scan down the stream, one token at a time, until the block returns true or the stream runs out
   def seek stream=@stream, spec={}
     unless stream.is_a?(NokoScanner)
@@ -609,10 +603,11 @@ class Parser
         break unless match.retain?
         matches << match.if_retain
         # Start the next search just after the beginning of this one.
-        scanner = scanner.goto match.head_stream.rest
+        scanner = scanner.goto match.bound
       end
       # Clip each match to its successor to prevent overlap
-      matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
+      starts = matches.map &:pos
+      matches[0..-2].each_index { |ix| matches[ix].bound = starts[ix+1] if starts[ix+1] < bound } # matches[0..-2].each_index { |ix| matches[ix].tail_stream = matches[ix].tail_stream.except matches[ix+1].head_stream }
       # In order to preserve the current stream placement while recording the found stream placement,
       # we return a single seeker with no token and matching children
       return report_matches matches, token, spec, context, scanner, start_scanner
@@ -848,7 +843,7 @@ class Parser
     if (really_enclose = context[:enclose]) == :non_empty
       really_enclose = match.children&.all?(:hard_fail?)
     end
-    really_enclose ||= match.enclose? && (match.tail_stream != match.head_stream)
+    really_enclose ||= match.enclose? && (match.size > 0)
     return Seeker.failed(scanner, # match.head_stream,
                          range: match.range, # match.tail_stream.token_range,
                          token: token,
@@ -867,7 +862,7 @@ class Parser
       if (submatch = seek match.scanner_within, :rp_ingredient_tag)&.success?
         # Can find an ingredient in the line => enclose it within the line
         (match.children ||= []) << submatch
-      elsif (match.tail_stream.pos - match.head_stream.pos) < 4
+      elsif match.size < 4 # (match.tail_stream.pos - match.head_stream.pos) < 4
         match.token = :rp_inglist_label
       end
     end
@@ -880,11 +875,10 @@ class Parser
     if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
       if matches.all? &:hard_fail?
         failed_range = (matches.last&.tail_stream || scanner).token_range
-        return Seeker.failed matches.first&.head_stream || start_scanner,
+        return Seeker.failed start_scanner,
                              context.
                                  except(:enclose).
-                                 merge(token: token,
-                                       range: failed_range)
+                                 merge(token: token, range: failed_range)
       end
     end
     consolidation = consolidate_inglines spec, matches
