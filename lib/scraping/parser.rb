@@ -325,7 +325,20 @@ class Parser
     safe_stream = stream.clone
     if valid_to_match?(token, safe_stream) && (ge = grammar[token])
       ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
-      matched = match_specification safe_stream, ge, token
+      if @caching_on # Run the matcher twice, once with caching on, and report results
+        # @cache = SeekerCache.new
+        # begin timing
+        # matched = match_specification safe_stream, ge, token
+        # end timing
+        # @cache = nil
+        # begin timing
+        # safe_stream = stream.clone
+        matched = match_specification safe_stream, ge, token
+        # end timing
+        # Report timing
+      else
+        matched = match_specification safe_stream, ge, token
+      end
     else
       matched = Seeker.failed safe_stream, token: token
     end
@@ -501,6 +514,20 @@ class Parser
     puts_indented msg if msg.present?
   end
 
+  # Cache support: results from #match_specification are cached on the
+  # requested grammar entry (spec) and the location in the stream at which
+  # the request takes place.
+
+  # Add the seeker to the cache
+  def cache seeker
+    @cache&.insert seeker
+  end
+
+  # Check the cache
+  def cache_fetch *args
+    @cache&.fetch *args
+  end
+
   # Match a single specification to the provided stream, whether the spec is given directly in the grammar or included in a list.
   # Return a Seeker for the result that includes:
   # -- the beginning stream,
@@ -539,6 +566,9 @@ class Parser
   def match_specification scanner, spec, token=nil, context={}
     if token.is_a?(Hash)
       token, context = nil, token
+    end
+    if @cache && spec.is_a?(Symbol) && (cached = cache_fetch scanner, spec, token, context )
+      return cached
     end
     # Get the token from the context if necessary
     if !token && (token = context[:token])

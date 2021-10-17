@@ -157,6 +157,10 @@ class Seeker
     stream.to_s @range
   end
 
+  def done?
+    bound >= stream.bound
+  end
+
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
     #(head_stream == tail_stream) &&
@@ -186,13 +190,6 @@ class Seeker
     elsif newpos > bound
       self.bound = newpos
     end
-=begin
-    if newpos < head_stream.pos
-      head_stream.move_to newpos
-    elsif newpos > tail_stream.pos
-      tail_stream.move_to newpos
-    end
-=end
   end
 
   def traverse &block
@@ -207,7 +204,7 @@ class Seeker
     return unless @token
     # Check that some ancestor doesn't already have the tag
     if !head_stream.descends_from?(token: @token)
-      head_stream.enclose_to tail_stream.pos, rp_elmt_class: @token, tag: tag, value: @value
+      head_stream.enclose_to bound, rp_elmt_class: @token, tag: tag, value: @value
     end
   end
 

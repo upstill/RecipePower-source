@@ -346,7 +346,6 @@ EOF
 
   test 'parse ingredient line' do
 
-=begin
     tst_grammar_entry :rp_ingredient_tag, 'all-purpose flour', [  ]
     tst_grammar_entry :rp_ingalts, 'all-purpose flour', [ :rp_ingredient_tag ]
     pt_apply :rp_ingspec,
@@ -448,7 +447,6 @@ EOF
     assert_equal :rp_ingline, token
     assert_not_empty find(:rp_ingspec)
     assert_not_empty find(:rp_ing_comment)
-=end
 
     pt_apply :rp_ingline,
              html: '1/2 tsp. sifted (or lightly sifted) baking soda',

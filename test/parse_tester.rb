@@ -230,6 +230,20 @@ class ParseTester < ActiveSupport::TestCase
 
   def apply_to_string html, token: :rp_recipe, required_tags: {}
     @nokoscan = NokoScanner.new html
+
+=begin
+    ps = ParserServices.new input: @nokoscan,
+                            token: token,
+                            lexaur: @lexaur,
+                            grammar_mods: @grammar_mods
+    
+    assert_not_nil (@parser = ps.parser), "No parser from ParserServices"
+    assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
+
+    assert ps.parse(seeking: [token]), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
+    assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
+=end
+
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
     missing = {}
@@ -239,7 +253,7 @@ class ParseTester < ActiveSupport::TestCase
         return
       else
         assert @seeker.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
-        assert @seeker.tail_stream.to_s.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+        assert @seeker.done?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
       end
       assert_equal token, @seeker.token
       @seeker.enclose_all parser: @parser
@@ -248,6 +262,7 @@ class ParseTester < ActiveSupport::TestCase
       end
       return if missing.all? &:empty? # No tags unfound
     end
+=begin
     if scanned = @parser.scan.first
       # The scan may turn up the requisite element
       @seeker = scanned
@@ -255,6 +270,7 @@ class ParseTester < ActiveSupport::TestCase
         missing[tagtype] = (missing[tagtype] || tagset) - find_values(css_class)
       end
     end
+=end
     missing.each { |tagtype, missed| assert_empty missed, "#{tagtype}(s) declared but not found: #{missed}"}
   end
 

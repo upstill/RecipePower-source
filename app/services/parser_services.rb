@@ -3,7 +3,7 @@ require 'scraping/parser.rb'
 require 'recipe_page.rb'
 
 class ParserServices
-  attr_reader :parsed, :scanned, # Trees of seeker results resulting from parsing and scanning, respectively
+  attr_reader :parsed, # Trees of seeker results resulting from parsing and scanning, respectively
               :grammar_mods, # Modifications to be used on the parser beforehand
               :input,
               :nokoscan # The scanner associated with the current input
@@ -11,10 +11,12 @@ class ParserServices
   delegate :nkdoc, to: :nokoscan
   delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, to: :parsed
 
-  def initialize entity: nil, token: nil, input: nil
+  def initialize entity: nil, token: nil, input: nil, lexaur: nil, grammar_mods: nil
     self.entity = entity # Object (ie., Recipe or RecipePage) to be parsed
     self.token = token
     self.input = input
+    self.lexaur = lexaur
+    self.grammar_mods = grammar_mods
   end
 
 =begin
@@ -38,10 +40,7 @@ The dependencies are as follows:
   end
 
   def parser=p
-    if p != @parser
-      @parsed = nil
-      @scanned = nil # New parser invalidates :parsed and :scanned
-    end
+    @parsed = nil if p != @parser  # New parser invalidates :parsed
     @parser = p
   end
 
@@ -87,7 +86,7 @@ The dependencies are as follows:
   end
 
   def token=tk
-    @parsed = @scanned = nil if tk != @token || tk.nil?
+    @parsed = nil if tk != @token || tk.nil?
     @token = tk
   end
 
@@ -144,12 +143,12 @@ The dependencies are as follows:
     @parsed = parser.match token, stream: nokoscan
 
     # Perform the scan only if sought elements aren't found in the parse
-    @scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
+    scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
 
     if @parsed
       # Now we need to reconcile parsed results with scanned.
       ils = @parsed.find(:rp_inglist)
-      @scanned.keep_if do |scanned|
+      scanned.keep_if do |scanned|
         # In this step, we eliminate scanned elements that have a parsed equivalent
         if scanned.token == :rp_inglist
           selector = ingline_selector scanned
@@ -171,28 +170,24 @@ The dependencies are as follows:
         end
       end
 
-      # Now @scanned is a list of elements that still need to be included in the parse tree
-      @scanned.each do |scanned|
+      # Now scanned is a list of elements that still need to be included in the parse tree
+      scanned.each do |scanned|
         if scanned.token == :rp_inglist
           scanned.children.keep_if { |ingline| !ils.any? { |inglist| inglist.insert ingline } }
           next if scanned.children.empty?
         end
         @parsed.insert scanned
       end
-    else # No parsed content: just use the @scanned results by enclosing them
-      @parsed =
-      if @scanned.present?
-        Seeker.new stream: @nokoscan, children: @scanned, token: token
-      else
-        Seeker.failed @nokoscan, token: token
-      end
+    else # No parsed content: just use the scanned results by enclosing them
+      @parsed = scanned.present? ?
+        Seeker.new(stream: @nokoscan, children: scanned, token: token) :
+        Seeker.failed(@nokoscan, token: token)
     end
     # Now all scanned entries appear under @parsed, one way or another
 
     @parsed.enclose_all parser: parser if @parsed&.success? && annotate
-    # @scanned.select(&:success?).each { |seeker| seeker.enclose_all parser: parser }
 
-    @parsed&.success? # || @scanned.any?(&:success?)
+    @parsed&.success?
   end
 
   def content
@@ -312,16 +307,15 @@ The dependencies are as follows:
   end
 
   def do_for *tokens, &block
-    return unless @parsed || @scanned.present?
+    return unless @parsed
     glean_tokens(tokens).each do |token|  # For each specified token
-      ((@parsed&.find(token) || []) + (@scanned.collect { |seeker| seeker.find(token) }.flatten.compact)).each do |seeker| # For each result under that token
-        block.call seeker, token
-      end
+      # For each result under that token
+      @parsed.find(token).each { |seeker| block.call seeker, token }
     end
   end
 
   def found_for token, as: nil
-    return [] if token.nil? || (seekers = @parsed.find(token) + @scanned.collect { |seeker| seeker.find(token) }.flatten.compact).empty?
+    return [] if token.nil? || (seekers = @parsed.find token).empty?
     # Convert the results according to :as specifier
     return seekers unless as
     found = seekers.map do |seeker|
