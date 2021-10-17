@@ -592,7 +592,7 @@ class Parser
       scannable = match&.success? ?
                       scanner.except( context[:bound] ? match.head_stream : match.tail_stream ) :
                       scanner
-      return match_specification(scannable, spec, token, context.except(:bound, :terminus)).encompass(scanner)
+      return match_specification(scannable, spec, token, context.except(:bound, :terminus)).bounded_by(scanner)
     end
     if context[:repeating] # Match the spec repeatedly until EOF
       matches = []

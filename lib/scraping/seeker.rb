@@ -5,10 +5,11 @@ require 'scraping/lexaur.rb'
 class Seeker
   attr_accessor :stream, :token, :children
   attr_reader :range, :value
-  delegate :size, to: :range
+  delegate :size, :count, to: :range
   alias_method :length, :size # Number of tokens in the stream
-  # delegate :pos, to: :stream
-  # delegate :bound, to: :tail_stream
+  # Now #length, #size, and #count provide the number of tokens captured by this seeker
+
+  delegate :nkdoc, to: :stream
 
   def initialize(stream: nil, children: [],
                  range: nil,
@@ -88,12 +89,18 @@ class Seeker
     @range.begin
   end
 
+  def pos=p
+    p = 0 if p < 0
+    @range = p...@range.end
+  end
+
   def bound
     @range.end
   end
 
-  def bound=p
-    @range = @range.first...p
+  def bound=b
+    b = stream.bound if b > stream.bound
+    @range = @range.first...b
   end
 
   # Find a place in the stream where we can match
@@ -147,23 +154,45 @@ class Seeker
 
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
   def to_s
-    stream.to_s range
+    stream.to_s @range
   end
 
   # Judge the success of a seeker by its consumption of tokens AND the presence of children
   def empty?
-    (head_stream == tail_stream) && @children&.empty?
+    #(head_stream == tail_stream) &&
+    (range.count == 0) &&
+        @children&.empty?
   end
 
   def consumed?
     # Did the result consume any tokens?
-    tail_stream.pos > head_stream.pos
+    range.count > 0 # tail_stream.pos > head_stream.pos
   end
 
-  def encompass scanner
-    head_stream.encompass scanner
-    tail_stream.encompass scanner
+  # Expand the range to encompass another scanner's range
+  def bounded_by scanner_or_bound_or_range
+    #head_stream.encompass scanner
+    # tail_stream.encompass scanner
+    newbound = scanner_or_bound_or_range.is_a?(Integer) ?
+                   scanner_or_bound_or_range :
+                   scanner_or_bound_or_range.bound
+    self.bound = newbound if newbound > bound
     self
+  end
+
+  def encompass_position newpos
+    if newpos < pos
+      self.pos = newpos
+    elsif newpos > bound
+      self.bound = newpos
+    end
+=begin
+    if newpos < head_stream.pos
+      head_stream.move_to newpos
+    elsif newpos > tail_stream.pos
+      tail_stream.move_to newpos
+    end
+=end
   end
 
   def traverse &block
@@ -243,15 +272,6 @@ class Seeker
   # Provide a path and offset in the Nokogiri doc for the results of the parse
   def xbounds
     [ head_stream.xpath, tail_stream.xpath(true) ]
-  end
-
-  def encompass_position newpos
-    if newpos < head_stream.pos
-      head_stream.move_to newpos
-    elsif newpos > tail_stream.pos
-      tail_stream.move_to newpos
-    end
-=end
   end
 
   # Equality operator: is the given seeker redundant wrt us?
