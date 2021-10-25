@@ -140,7 +140,7 @@ The dependencies are as follows:
       raise "Error in ParserServices#parse: must provide EITHER a token or an entity"
     end
 
-    @parsed = parser.match token, stream: nokoscan
+    @parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
 
     # Perform the scan only if sought elements aren't found in the parse
     scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
@@ -150,7 +150,8 @@ The dependencies are as follows:
       ils = @parsed.find(:rp_inglist)
       scanned.keep_if do |scanned|
         # In this step, we eliminate scanned elements that have a parsed equivalent
-        if scanned.token == :rp_inglist
+        case scanned.token
+        when :rp_inglist
           selector = ingline_selector scanned
           # Special processing for inglists: merge their children into the parsed equivalent, as possible
           # First, adjust the parsed ingredient-list boundaries to the scanned item
@@ -165,6 +166,7 @@ The dependencies are as follows:
             end
           end
           true
+        when :rp_parenthetical
         else
           !@parsed.find(scanned.token).any? { |parsed| parsed.matches? scanned }
         end
@@ -178,14 +180,19 @@ The dependencies are as follows:
         end
         @parsed.insert scanned
       end
+      @parsed.enclose_all parser: parser if @parsed&.success? && annotate
     else # No parsed content: just use the scanned results by enclosing them
-      @parsed = scanned.present? ?
-        Seeker.new(stream: @nokoscan, children: scanned, token: token) :
-        Seeker.failed(@nokoscan, token: token)
+      @parsed =
+      case scanned.count
+      when 0
+        Seeker.failed @nokoscan, token: token
+      when 1
+        scanned.first
+      else
+        Seeker.new(stream: @nokoscan, children: scanned, token: token)
+      end
+      @parsed.enclose_all parser: parser if @parsed&.success? && annotate
     end
-    # Now all scanned entries appear under @parsed, one way or another
-
-    @parsed.enclose_all parser: parser if @parsed&.success? && annotate
 
     @parsed&.success?
   end

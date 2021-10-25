@@ -641,8 +641,7 @@ class ParentheticalSeeker < Seeker
   def self.match stream, opts={}
     if match = ParentheticalSeeker.matcher(stream.peek)
       stack = []
-      instart = stream
-      rest = stream.rest
+      rest = stream.clone.rest
       # Consume the opening paren
       # Look for the closing paren
       while ch = rest.peek do
@@ -653,7 +652,7 @@ class ParentheticalSeeker < Seeker
           if (match = stack.pop).nil?
             # Done!
             yield(stream.rest.except rest) if block_given?
-            return rest.rest
+            return self.new stream: stream, token: :rp_parenthetical, bound: rest.pos+1
           end
         end
         rest.first

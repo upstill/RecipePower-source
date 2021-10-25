@@ -229,9 +229,8 @@ class ParseTester < ActiveSupport::TestCase
   end
 
   def apply_to_string html, token: :rp_recipe, required_tags: {}
-    @nokoscan = NokoScanner.new html
 
-=begin
+    @nokoscan = NokoScanner.new html
     ps = ParserServices.new input: @nokoscan,
                             token: token,
                             lexaur: @lexaur,
@@ -240,20 +239,25 @@ class ParseTester < ActiveSupport::TestCase
     assert_not_nil (@parser = ps.parser), "No parser from ParserServices"
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
 
-    assert ps.parse(seeking: [token]), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
+    assert ps.parse(seeking: [token], in_place: true), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
     assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
-=end
 
+=begin
+    @nokoscan = NokoScanner.new html
     @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
+    assert_not_nil (@seeker = @parser.match token ), "No seeker results from parsing '#{html.truncate 100}'"
+=end
+
     missing = {}
-    if @seeker = @parser.match(token)
+    if @seeker
       if @fail # The parse is expected to fail
         refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
         return
       else
         assert @seeker.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
-        assert @seeker.done?, "Stream '#{html.truncate 200}' has data remaining: '#{@seeker.tail_stream.to_s.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+        unparsed = @seeker.tail_stream.to_s # Unconsumed content from the stream
+        assert unparsed.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
       end
       assert_equal token, @seeker.token
       @seeker.enclose_all parser: @parser

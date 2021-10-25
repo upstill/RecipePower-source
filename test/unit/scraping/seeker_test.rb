@@ -283,7 +283,7 @@ class SeekerTest < ActiveSupport::TestCase
     after = ParentheticalSeeker.match(scanner) do |inside|
       assert_equal 'a parenthetical thought', inside.to_s
     end
-    assert_equal 'and the rest of it', after.to_s
+    assert_equal 'and the rest of it', after.tail_stream.to_s
 
     scanner = StrScanner.new "Here's ( a (doubly) parenthetical thought) and the rest of it "
     assert_nil ParentheticalSeeker.match(scanner)
@@ -291,7 +291,7 @@ class SeekerTest < ActiveSupport::TestCase
     after = ParentheticalSeeker.match(scanner) do |inside|
       assert_equal 'a ( doubly ) parenthetical thought', inside.to_s
     end
-    assert_equal 'and the rest of it', after.to_s
+    assert_equal 'and the rest of it', after.tail_stream.to_s
   end
 
 end

@@ -231,7 +231,8 @@ Parser.init_grammar(
     rp_num_or_range: { or: [ :rp_range, :rp_num ] },
     rp_num: { match: 'NumberSeeker' },
     rp_range: { match: 'RangeSeeker' },
-    rp_unit_tag: { tag: 'Unit' }
+    rp_unit_tag: { tag: 'Unit' },
+    rp_parenthetical: { trigger: '(', match: ParentheticalSeeker }
 )
 # Each pattern is declared as a pair:
 # first, the trigger for the pattern

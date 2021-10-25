@@ -555,8 +555,8 @@ EOF
 
   test 'finds title in h1 tag' do
     html = "irrelevant noise <h1>Title Goes Here</h1>"
-    pt_apply :rp_title, html: html
-    assert_equal 'Title Goes Here', seeker.to_s
+    pt_apply :rp_recipelist, html: html
+    assert_equal 'Title Goes Here', seeker.find( :rp_title).first.to_s
   end
 
   test 'various ingredient lines' do
@@ -691,9 +691,8 @@ EOF
     # Parsing for a recipe list breaks out recipes as a series of titles
     pt_apply :rp_recipelist, html: html
     assert_equal :rp_recipelist, seeker.token
-    assert_equal 3, seeker.children.count
-    seeker.children.each { |child| assert_equal :rp_recipe, child.token }
-    
+    assert_equal 3, seeker.find(:rp_recipe).count
+
     #ingred_seekers = seeker.find :rp_ingredient_tag
     #ingreds_found = ingred_seekers.map(&:value).uniq
     #assert_empty (ingreds_found - ingreds), "Ingredients found but not included"
@@ -741,6 +740,7 @@ EOF
 
     # Parsing a fully marked-up ingline shouldn't change it
     html = '<span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>'
+    html = '3/4 ounce simple syrup (equal parts sugar and hot water)'
     pt_apply :rp_ingline, html: html, ingredients: %w{ simple\ syrup }
     assert_equal '3/4', nkdoc.css('.rp_num').text.to_s
     assert_equal 'ounce', nkdoc.css('.rp_unit').text.to_s
@@ -873,11 +873,15 @@ EOF
     assert_equal 5, seeker.find(:rp_ingline).count
   end
 
-  test 'proper handling of embedded parentheticals' do
-    html = "(or up to four hours, if you want to get ahead).\nWarm"
-    pt_apply :rp_amt,
-             html: html,
-             fail: true
+  test 'parenthetical hides embedded match' do
+    html = "Prep time: 5 minutes"
+    pt_apply :rp_prep_time,
+             html: html
+
+    html = "(Prep time: 5 minutes)"
+    pt_apply :rp_parenthetical,
+             html: html
+    assert_empty seeker.find(:rp_prep_time)
   end
 
 end

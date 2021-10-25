@@ -323,8 +323,8 @@ class Parser
   def match token, stream: @stream, in_place: false
     puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s.truncate 100}'" if Rails.env.test?
     safe_stream = stream.clone
-    if valid_to_match?(token, safe_stream) && (ge = grammar[token])
-      ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
+    if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
+      ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
       if @caching_on # Run the matcher twice, once with caching on, and report results
         # @cache = SeekerCache.new
         # begin timing
@@ -610,7 +610,7 @@ class Parser
       after = ParentheticalSeeker.match(scanner) do |inside|
         match = match_specification(inside, spec, token, context.except(:parenthetical))
       end
-      return match ? Seeker.new(stream: scanner, children: [match], bound: after.pos, token: token) : Seeker.failed(scanner, context)
+      return match ? Seeker.new(stream: scanner, children: [match], bound: after.bound, token: token) : Seeker.failed(scanner, context)
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])

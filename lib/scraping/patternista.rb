@@ -28,14 +28,15 @@ class Patternista
   end
 
   # Look for the patterns that match the given stream.
+  # If 'token' is specified, match only that token
   # At each position in the stream, apply one or more patterns whose trigger matches the contents
   # of the stream at that position.
   # Return an array of found seekers
-  def scan stream, context = stream.all
+  def scan stream
     stream = stream.clone
     results = []
     while stream.more? do
-      if result = scan1(stream, context)
+      if result = scan1(stream, stream.all)
         results << result
         stream = stream.goto result.tail_stream
       else
@@ -84,6 +85,8 @@ class Patternista
         }.compact
       end
     end
+
+    # Now there's a collection of patterns; probe the stream with each pattern in turn
 
     # Now seekers is a collection of Seeker objects, one for each pattern matched
     # First, check the token for each match as a trigger in a metamatch
