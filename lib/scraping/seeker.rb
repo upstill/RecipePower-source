@@ -11,7 +11,8 @@ class Seeker
 
   delegate :nkdoc, to: :stream
 
-  def initialize(stream: nil, children: [],
+  def initialize(stream = nil,
+                 children: [],
                  range: nil,
                  pos: nil,
                  bound: nil,
@@ -49,7 +50,7 @@ class Seeker
   # :optional, :enclose, :children -- flags for instance variables on the failed seeker
   def self.failed head_stream, options={}
   # def self.failed head_stream, tail_stream=nil, token= nil, options={}
-    skr = self.new stream: head_stream,
+    skr = self.new head_stream,
                    children: options[:children] || [],
                    range: options[:range],
                    pos: options[:pos] || head_stream.pos,
@@ -303,27 +304,27 @@ end
 # An Empty Seeker does nothing, and does not advance the stream
 class EmptySeeker < Seeker
   def self.match stream, opts={}
-    self.new stream: stream
+    self.new stream
   end
 end
 
 # A Null Seeker simply accepts the next string in the stream and advances past it
 class NullSeeker < Seeker
   def self.match stream, opts={}
-    self.new stream: stream, bound: stream.pos+1
+    self.new stream, bound: stream.pos+1
   end
 end
 
 class StringSeeker < Seeker
   def self.match stream, options={}
     # TODO: the string should be tokenized according to tokenization rules and matched against a series of tokens
-    self.new stream: stream, bound: stream.pos+1, token: options[:token] if stream.peek == options[:string]
+    self.new stream, bound: stream.pos+1, token: options[:token] if stream.peek == options[:string]
   end
 end
 
 class RegexpSeeker < Seeker
   def self.match stream, options={}
-    self.new stream: stream, bound: stream.pos+1, token: options[:token] if stream.peek&.match options[:regexp]
+    self.new stream, bound: stream.pos+1, token: options[:token] if stream.peek&.match options[:regexp]
   end
 end
 
@@ -377,7 +378,7 @@ class RangeSeeker < Seeker
         sep = $1
         match2 = NumberSeeker.match ts.rest, number_opts
         return nil if !match2 || (sep=='-' && match1.value >= match2.value) # Not a range but an integer plus fraction
-        self.new stream: stream, children: [ match1, match2 ], token: :rp_range
+        self.new stream, children: [ match1, match2 ], token: :rp_range
       end
     end
   end
@@ -397,7 +398,7 @@ class NumberSeeker < Seeker
             1
           end
     if len
-      result = self.new stream: stream, bound: stream.pos+len, token: opts[:token]
+      result = self.new stream, bound: stream.pos+len, token: opts[:token]
       yield @@StrAfter if block_given? && @@StrAfter.present?
       # result.tail_stream = result.tail_stream.rest if result.tail_stream.peek&.match(',')
     end
@@ -475,7 +476,7 @@ class TagSeeker < Seeker
   attr_reader :tagdata, :value
 
   def initialize stream, range, tagdata, token=nil
-    super stream: stream, range: range, token: token
+    super stream, range: range, token: token
     @value = tagdata[:name] if (@tagdata = tagdata).present?
   end
 
@@ -532,7 +533,7 @@ class TagsSeeker < Seeker
   attr_accessor :operand
 
   def initialize head_stream, token = nil, children=[], operand: nil
-    super stream: head_stream, children: children, token: token
+    super head_stream, children: children, token: token
     @operand = operand
   end
 
@@ -586,7 +587,7 @@ class AmountSeeker < Seeker
   attr_reader :num, :unit, :alt_num, :alt_unit
 
   def initialize stream, num, unit
-    super stream: stream, range: Seeker.bracket_children((num if num.is_a?(Seeker)), unit)
+    super stream, range: Seeker.bracket_children((num if num.is_a?(Seeker)), unit)
     @num = num
     @unit = unit
     @token = :rp_amt
@@ -652,7 +653,7 @@ class ParentheticalSeeker < Seeker
           if (match = stack.pop).nil?
             # Done!
             yield(stream.rest.except rest) if block_given?
-            return self.new stream: stream, token: :rp_parenthetical, bound: rest.pos+1
+            return self.new stream, token: :rp_parenthetical, bound: rest.pos+1
           end
         end
         rest.first
@@ -677,7 +678,7 @@ class IngredientSpecSeeker < Seeker
   attr_reader :amount, :condits, :ingreds
 
   def initialize stream, range, amount, condits, ingreds
-    super stream: stream, range: range
+    super stream, range: range
     @amount, @condits, @ingreds = amount, condits, ingreds
   end
 

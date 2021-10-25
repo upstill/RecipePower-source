@@ -189,7 +189,7 @@ The dependencies are as follows:
       when 1
         scanned.first
       else
-        Seeker.new(stream: @nokoscan, children: scanned, token: token)
+        Seeker.new @nokoscan, children: scanned, token: token
       end
       @parsed.enclose_all parser: parser if @parsed&.success? && annotate
     end
@@ -228,7 +228,7 @@ The dependencies are as follows:
       # Declare a result for the found collection, including all text elements under it
       range = nokoscan.token_range_for_subtree max.object
       children = inglines.select { |line| range.include?(line.pos) && range.include?(line.bound) }
-      inglists << Seeker.new(stream: nokoscan, children: children, range: range, token: :rp_inglist)
+      inglists << Seeker.new(nokoscan, children: children, range: range, token: :rp_inglist)
       # Remove this tree from consideration for higher-level inglists
       max.object.ancestors.each { |anc| bc[anc] -= 1 }
       bc.delete max.object

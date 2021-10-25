@@ -146,7 +146,7 @@ class Parser
     @grammar.freeze
     @lexaur = lex if lex
     self.stream = noko_scanner_or_nkdoc_or_nktokens
-    # Finally, create the scanning table from the triggers
+    # @caching_on = true
   end
 
   def stream=noko_scanner_or_nkdoc_or_nktokens
@@ -326,16 +326,16 @@ class Parser
     if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
       ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
       if @caching_on # Run the matcher twice, once with caching on, and report results
-        # @cache = SeekerCache.new
-        # begin timing
-        # matched = match_specification safe_stream, ge, token
-        # end timing
-        # @cache = nil
-        # begin timing
-        # safe_stream = stream.clone
-        matched = match_specification safe_stream, ge, token
-        # end timing
-        # Report timing
+        @cache = SeekerCache.new
+        NestedBenchmark.measure("Matched with parser cache ON") do
+          matched = match_specification safe_stream, ge, token
+        end
+
+        @cache = nil
+        safe_stream = stream.clone
+        NestedBenchmark.measure("Matched with parser cache OFF") do
+          matched = match_specification safe_stream, ge, token
+        end
       else
         matched = match_specification safe_stream, ge, token
       end
@@ -610,7 +610,7 @@ class Parser
       after = ParentheticalSeeker.match(scanner) do |inside|
         match = match_specification(inside, spec, token, context.except(:parenthetical))
       end
-      return match ? Seeker.new(stream: scanner, children: [match], bound: after.bound, token: token) : Seeker.failed(scanner, context)
+      return match ? Seeker.new(scanner, children: [match], bound: after.bound, token: token) : Seeker.failed(scanner, context)
     end
     # The general case of a bounded search: foreshorten the stream to the boundary
     if terminator = (context[:bound] || context[:terminus])
@@ -685,7 +685,7 @@ class Parser
       when 1 # Don't create a new node with just one child
         children.first
       else
-        Seeker.new stream: start_scanner, children: children, token: token
+        Seeker.new start_scanner, children: children, token: token
       end
     end
 
@@ -693,7 +693,7 @@ class Parser
     found =
     case spec
     when nil # nil spec means to match the full contents
-      Seeker.new stream: scanner, token: token
+      Seeker.new scanner, token: token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       context = context.merge(under: token) if token
@@ -805,7 +805,7 @@ class Parser
         if child.success?
           return (token.nil? || child.token == token) ?
                      child :
-                     Seeker.new(stream: start_stream, children: [child], token: token, pos: start_stream.pos)
+                     Seeker.new( start_stream, children: [child], token: token, pos: start_stream.pos)
         end
       end
       return Seeker.failed(start_stream, context.merge(token: token)) # TODO: not retaining children discarded along the way
@@ -827,7 +827,7 @@ class Parser
       # children.first.tail_stream = end_stream
       children.first
     elsif children.present?
-      Seeker.new stream: start_stream, children: children, token: token
+      Seeker.new start_stream, children: children, token: token
     else
       Seeker.failed start_stream, token: token
     end
@@ -924,10 +924,10 @@ class Parser
                first_match.stream = start_scanner
                first_match
              else
-               Seeker.new stream: start_scanner, children: matches, token: token
+               Seeker.new start_scanner, children: matches, token: token
              end
            else
-             Seeker.new stream: start_scanner, children: matches, token: token # Token only applied to the top level
+             Seeker.new start_scanner, children: matches, token: token # Token only applied to the top level
            end
   end
 
