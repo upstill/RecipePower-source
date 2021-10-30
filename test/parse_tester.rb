@@ -26,6 +26,7 @@ module PTInterface
            :patternista, :scan, :scan1, # Pattern matcher
            :trimmers, # Saved to be applied to sites and, ultimately, a parse
            :nokoscan, # A scanner for the parse
+           :benchmark, :benchmarks,
            :nkdoc, :tokens, # The Nokogiri doc and Nokotokens
            :seeker, :token, # The output of the last parse and the resulting token
            :page_ref, # The PageRef generated when the parser was #apply-ed to a url
@@ -57,6 +58,11 @@ module PTInterface
     @page = @sample_url
     @title = @sample_title
   end
+  
+  def teardown
+    report = ParserServices.benchmark_formatted @parse_tester.benchmarks
+    report.each { |key, value| puts value}
+  end
 end
 
 # This class defines a test bed for parsing in the context of site data, i.e. Finders, trimmers and content selectors
@@ -68,6 +74,7 @@ class ParseTester < ActiveSupport::TestCase
               :selector, # Used by a site to select content
               :grammar_mods, # Saved to be applied to sites and, ultimately, a parse
               :patternista,
+              :benchmark, :benchmarks,
               :trimmers, # Saved to be applied to sites and, ultimately, a parse
               :page_ref, # The PageRef generated when the parser was #apply-ed to a url
               :recipe, # The Recipe instance resulting from the parse
@@ -241,6 +248,13 @@ class ParseTester < ActiveSupport::TestCase
 
     assert ps.parse(seeking: [token], in_place: true), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
     assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
+
+    if Rails.env.test?
+      @benchmark = ps.match_benchmarks # State of benchmarks after the last run
+      @benchmarks = parser.benchmark_sum @benchmarks, @benchmark # Keep a running total across all tests
+      report = ParserServices.benchmark_formatted @benchmark
+      [:on, :off, :net].each { |key| puts report[key]}
+    end
 
 =begin
     @nokoscan = NokoScanner.new html

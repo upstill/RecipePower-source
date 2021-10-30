@@ -2,6 +2,10 @@ class NestedBenchmark
   @indent = 0
   @@DOLOG=false # No benchmarking unless set
 
+  def self.last_times
+    @@LAST_TIMES
+  end
+
   def self.do_log
     @@DOLOG
   end
@@ -35,6 +39,7 @@ class NestedBenchmark
       end
     }
     @indent -= 4
+    @@LAST_TIMES = vals
     # log self.at_left(msg, @indent) + vals.to_s
     log self.at_right(msg, vals.to_s)
     log self.at_right('', ' End Benchmarking ------ user system user+system (total elapsed)', '>')+"\n" if @indent == 0

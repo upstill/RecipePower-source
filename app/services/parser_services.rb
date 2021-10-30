@@ -6,6 +6,7 @@ class ParserServices
   attr_reader :parsed, # Trees of seeker results resulting from parsing and scanning, respectively
               :grammar_mods, # Modifications to be used on the parser beforehand
               :input,
+              :match_benchmarks, # Retains the benchmarks for the last parse
               :nokoscan # The scanner associated with the current input
 
   delegate :nkdoc, to: :nokoscan
@@ -104,6 +105,26 @@ The dependencies are as follows:
         end
   end
 
+  def self.benchmark_formatted bm = @match_benchmarks
+    vals = bm[:cache_on]
+
+    vals_on = vals.slice(:utime, :stime, :total, :real).values
+    strs = vals_on.collect { |val| "%3.3f" % val }
+    str_on = ("Cache On:  %9s + %9s = %9s (real %s); " % strs) +
+        " | tries: %4d, hits: %4d, misses: %4d" % [vals[:tries], vals[:hits], vals[:misses]]
+
+    vals = bm[:cache_off]
+
+    vals_off = vals.slice(:utime, :stime, :total, :real).values
+    strs = vals_off.collect { |val| "%3.3f" % val }
+    str_off = ("Cache Off: %9s + %9s = %9s (real %s); " % strs) +
+        " | tries: %4d, hits: %4d, misses: %4d" % [vals[:tries], vals[:hits], vals[:misses]]
+
+    strs = vals_on.zip(vals_off).collect { |on, off| "%3.2f" % (100 * (1.0 - on / off)) }
+    str_pct = " %% faster: %8s%% + %8s%% = %8s%% (real %8s%%); " % strs
+    { on: str_on, off: str_off, net: str_pct }
+  end
+
 =begin
   # Divide a line by commas and 'and', parsing the sections into instances of the token
   def chunk_line token: :rp_ingline
@@ -126,11 +147,11 @@ The dependencies are as follows:
 =end
 
   # Extract information from an entity (Recipe or RecipePage) or presented input
-  def parse options={}
+  def parse options = {}
     self.input = options[:input] if options.key?(:input)
     self.token = options[:token] if options.key?(:token)
     annotate = options.delete :annotate
-    seeking = options[:seeking] || [ :rp_title, :rp_inglist, :rp_instructions ]
+    seeking = options[:seeking] || [:rp_title, :rp_inglist, :rp_instructions]
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?
       raise "Error in ParserServices#parse: must provide EITHER input or an entity"
@@ -140,10 +161,17 @@ The dependencies are as follows:
       raise "Error in ParserServices#parse: must provide EITHER a token or an entity"
     end
 
+    parser.cache_init
+    parser.benchmarks_init
     @parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
-
+    # Provide the benchmarks from the last parse as a hash of hashes, each with the following values:
+    # :tries, :hits, :misses: cache report (Integer)
+    # :utime, :stime, :total, :real: timings results (Float)
     # Perform the scan only if sought elements aren't found in the parse
     scanned = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
+    
+    # Take the benchmark report from the parser when all is said and done
+    @match_benchmarks = parser.benchmark_sum @match_benchmarks
 
     if @parsed
       # Now we need to reconcile parsed results with scanned.
@@ -183,14 +211,14 @@ The dependencies are as follows:
       @parsed.enclose_all parser: parser if @parsed&.success? && annotate
     else # No parsed content: just use the scanned results by enclosing them
       @parsed =
-      case scanned.count
-      when 0
-        Seeker.failed @nokoscan, token: token
-      when 1
-        scanned.first
-      else
-        Seeker.new @nokoscan, children: scanned, token: token
-      end
+          case scanned.count
+          when 0
+            Seeker.failed @nokoscan, token: token
+          when 1
+            scanned.first
+          else
+            Seeker.new @nokoscan, children: scanned, token: token
+          end
       @parsed.enclose_all parser: parser if @parsed&.success? && annotate
     end
 

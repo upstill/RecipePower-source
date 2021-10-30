@@ -26,7 +26,7 @@ require 'enumerable_utils.rb'
 # Recipe #15673(public) Fish-Fragrant Eggplants...
 # 1 pound 5 ounces (600g) eggplants (1–2 large)
 class Parser
-  attr_reader :grammar, :patternista
+  attr_reader :grammar, :patternista, :benchmarks
 
   @@TokenTitles = {
       :rp_title => 'Title',
@@ -146,7 +146,18 @@ class Parser
     @grammar.freeze
     @lexaur = lex if lex
     self.stream = noko_scanner_or_nkdoc_or_nktokens
-    # @caching_on = true
+  end
+
+  def cache_init
+    @cache = Hash.new
+    @cache_tries = 0
+    @cache_hits = 0
+    @cache_misses = 0
+    cache_on = true
+  end
+
+  def benchmarks_init
+    @benchmarks = {}
   end
 
   def stream=noko_scanner_or_nkdoc_or_nktokens
@@ -323,19 +334,34 @@ class Parser
   def match token, stream: @stream, in_place: false
     puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s.truncate 100}'" if Rails.env.test?
     safe_stream = stream.clone
+    matched = nil
     if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
-      ge = ge.except( :at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
-      if @caching_on # Run the matcher twice, once with caching on, and report results
-        @cache = SeekerCache.new
+      ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
+      if @benchmarks
+        @cache_tries = @cache_hits = @cache_misses = 0
+        cache_on = true
+        NestedBenchmark.do_log = true
         NestedBenchmark.measure("Matched with parser cache ON") do
-          matched = match_specification safe_stream, ge, token
+          match_specification safe_stream, ge, token
         end
+        times = NestedBenchmark.last_times
+        benchmark = {
+            cache_on: {
+                tries: @cache_tries, hits: @cache_hits, misses: @cache_misses}.
+                merge(utime: times.utime, stime: times.stime, total: times.total, real: times.real)
+        }
 
-        @cache = nil
+        @cache_tries = @cache_hits = @cache_misses = 0
         safe_stream = stream.clone
+        cache_on = false
         NestedBenchmark.measure("Matched with parser cache OFF") do
           matched = match_specification safe_stream, ge, token
         end
+        times = NestedBenchmark.last_times
+        benchmark[:cache_off] = {tries: @cache_tries, hits: @cache_hits, misses: @cache_misses}.
+            merge utime: times.utime, stime: times.stime, total: times.total, real: times.real
+        # Add the times and counts to any ongoing benchmark, if any
+        @benchmarks = benchmark_sum @benchmarks, benchmark
       else
         matched = match_specification safe_stream, ge, token
       end
@@ -343,6 +369,32 @@ class Parser
       matched = Seeker.failed safe_stream, token: token
     end
     matched if matched.success?
+  end
+
+  # Return the sum of the two benchmarks, leaving the operands untouched
+  def benchmark_sum op1, op2=benchmarks
+    rtnval = {}
+    op1 ||= {}
+    if op2.nil?
+      # Simply copy op1 to the result
+      op1&.each { |status, results| rtnval[status] = results.clone }
+      return rtnval
+    end
+    op2.each do |status, results|
+      if results.empty?
+        rtnval[status] = op1[status]&.clone || {}
+        next
+      end
+      if op1[status].present?
+        rtnval[status] = {}
+        results.each { |key, value|
+          rtnval[status][key] = (v1 = op1[status][key]) ? v1+value : value
+        }
+      else
+        rtnval[status] = results.clone
+      end
+    end
+    rtnval
   end
 
   # Scan down the stream, one token at a time, until the block returns true or the stream runs out
@@ -519,13 +571,29 @@ class Parser
   # the request takes place.
 
   # Add the seeker to the cache
-  def cache seeker
-    @cache&.insert seeker
+  def cache seeker, key
+    @cache_on ? (@cache[key] = seeker.freeze) : seeker
   end
 
   # Check the cache
-  def cache_fetch *args
-    @cache&.fetch *args
+  def cache_fetch key
+    if @cache_on
+      @cache_tries += 1
+      if cached = @cache[key]
+        @cache_hits += 1
+      else
+        @cache_misses += 1
+      end
+      cached
+    end
+  end
+
+  def cache_key_for stream, spec:, token:, context:
+    (context || {}).merge(range: stream.pos...stream.bound, token: token, spec: spec).hash
+  end
+
+  def cache_report
+    return { tries: @cache_tries, hits: @cache_hits, misses: @cache_misses } if @cache_on
   end
 
   # Match a single specification to the provided stream, whether the spec is given directly in the grammar or included in a list.
@@ -567,12 +635,17 @@ class Parser
     if token.is_a?(Hash)
       token, context = nil, token
     end
-    if @cache && spec.is_a?(Symbol) && (cached = cache_fetch scanner, spec, token, context )
-      return cached
-    end
     # Get the token from the context if necessary
     if !token && (token = context[:token])
       context = context.except :token
+    end
+
+    @cache_tries += 1
+    # Check the cache, if any
+    if @cache_on &&
+        (cache_key = cache_key_for scanner, spec: spec, token: token, context: context) &&
+        (cached = cache_fetch(cache_key))
+      return cached
     end
     # If the parse is restricted, enumerate the matches and recur on each
     repeater = context.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
@@ -703,9 +776,9 @@ class Parser
         report_enter "Seeking :#{spec} on '#{str}'"
         returned = match_specification scanner, @grammar[spec], spec, context
         report_exit (returned.success? ? "Found '#{returned}' for :#{returned.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
-        returned
+        cache returned, cache_key
       else
-        match_specification scanner, @grammar[spec], spec, context
+        cache match_specification(scanner, @grammar[spec], spec, context), cache_key
       end
     when String
       StringSeeker.match scanner, string: spec, token: token
