@@ -86,7 +86,7 @@ class NokoTokens < Array
     # The iterator produces a series of nodes, which we add to relative_to, after processing
     iterator.walk do |node|
       next if node == relative_to
-      processed_children(node) { |descendant|
+      processed_children(node, reversed: attach == :extend_left) { |descendant|
         enclosing_classes.blank? || @parser_evaluator.can_include?(enclosing_classes.first, nknode_rp_classes(descendant).first)
       }.each do |descendant|
         elmt_bounds.attach_node_safely descendant, relative_to, attach

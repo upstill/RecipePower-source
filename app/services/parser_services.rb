@@ -106,7 +106,7 @@ The dependencies are as follows:
   end
 
   def self.benchmark_formatted bm = @match_benchmarks
-    vals = bm[:cache_on]
+    return {} unless (bm && vals = bm[:cache_on])
 
     vals_on = vals.slice(:utime, :stime, :total, :real).values
     strs = vals_on.collect { |val| "%3.3f" % val }
@@ -161,8 +161,8 @@ The dependencies are as follows:
       raise "Error in ParserServices#parse: must provide EITHER a token or an entity"
     end
 
-    parser.cache_init
-    parser.benchmarks_init
+    # parser.cache_init
+    # parser.benchmarks_init
     @parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
     # Provide the benchmarks from the last parse as a hash of hashes, each with the following values:
     # :tries, :hits, :misses: cache report (Integer)
@@ -277,7 +277,7 @@ The dependencies are as follows:
     first_descendants = teds.map { |ted| ted.text_element.ancestors[descendant_ix] }
     survivors = nil
     first_descendants.each do |child_nknode|
-      this = { tag: child_nknode.name, classes: child_nknode['class'].split }
+      this = { tag: child_nknode.name, classes: child_nknode['class']&.split || [] }
       if survivors
         survivors.delete :tag if this[:tag] != survivors[:tag]
         survivors[:classes] &= this[:classes]

@@ -570,6 +570,10 @@ class Parser
   # requested grammar entry (spec) and the location in the stream at which
   # the request takes place.
 
+  def cache_on=yes
+    @cache_on = yes
+  end
+
   # Add the seeker to the cache
   def cache seeker, key
     @cache_on ? (@cache[key] = seeker.freeze) : seeker
@@ -640,12 +644,13 @@ class Parser
       context = context.except :token
     end
 
-    @cache_tries += 1
     # Check the cache, if any
-    if @cache_on &&
-        (cache_key = cache_key_for scanner, spec: spec, token: token, context: context) &&
+    if @cache_on
+      @cache_tries += 1
+      if (cache_key = cache_key_for scanner, spec: spec, token: token, context: context) &&
         (cached = cache_fetch(cache_key))
-      return cached
+        return cached
+      end
     end
     # If the parse is restricted, enumerate the matches and recur on each
     repeater = context.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs

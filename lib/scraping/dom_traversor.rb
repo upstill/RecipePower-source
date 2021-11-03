@@ -151,7 +151,7 @@ end
 ####### Utility functions #####################
 
 # Break up a node's children as necessary to avoid subtrees that fail a test (implemented as a block)
-def processed_children node, &block
+def processed_children node, reversed: false, &block
   # Recursively examine the node, returning an array of valid descendants or, if they are all valid, the node itself
   def do_children node, &block
     return [ node ] if node.text?
@@ -166,5 +166,6 @@ def processed_children node, &block
     collected.flatten
   end
   # For each potential new child, look into expanding it and/or approving it by calling the block
-  do_children node, &block
+  list = do_children node, &block
+  reversed ? list.reverse : list
 end
