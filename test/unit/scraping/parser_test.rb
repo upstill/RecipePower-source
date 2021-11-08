@@ -556,7 +556,7 @@ EOF
   test 'finds title in h1 tag' do
     html = "irrelevant noise <h1>Title Goes Here</h1>"
     pt_apply :rp_recipelist, html: html
-    assert_equal 'Title Goes Here', seeker.find( :rp_title).first.to_s
+    assert_equal 'Title Goes Here', seeker.find( :rp_title).first.text
   end
 
   test 'various ingredient lines' do
@@ -601,7 +601,7 @@ EOF
     @parse_tester = ParseTester.new grammar_mods: { :gm_inglist => :paragraph }
     pt_apply :rp_inglist, html: '<p><strong>30g crustless sourdough bread</strong><br><strong>30g pine nuts</strong><br><strong>2 anchovy fillets</strong>, drained and finely chopped<br><strong>Flaked sea salt and black pepper</strong><br><strong>25g unsalted butter</strong><br><strong>400g asparagus</strong>, woody ends trimmed<strong> </strong><br><strong>1 tbsp olive oil</strong><br><strong>1 garlic clove</strong>, peeled and crushed<br><strong>10g basil leaves</strong>, finely shredded<br><strong>½ tsp each finely grated lemon zest and juice</strong></p>',
              :ingredients => %w{ sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves }
-    assert_equal '2 anchovy fillets, drained and finely chopped', seeker.find(:rp_ingline)[2].to_s
+    assert_equal '2 anchovy fillets, drained and finely chopped', seeker.find(:rp_ingline)[2].text
   end
 
   test 'identifies multiple recipes in a page' do # From https://www.theguardian.com/lifeandstyle/2018/may/05/yotam-ottolenghi-asparagus-recipes
@@ -636,7 +636,7 @@ EOF
     seeker.children.each { |child| assert_equal :rp_recipe, child.token }
     assert (rcp_seeker = seeker.find(:rp_recipe).first)
     assert (ttl_seeker = rcp_seeker.find(:rp_title).first)
-    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
+    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.text
   end
 
   test 'parses multiple recipes in a page' do
@@ -700,14 +700,14 @@ EOF
 
     assert (rcp_seeker = seeker.find(:rp_recipe).first)
     assert (ttl_seeker = rcp_seeker.find(:rp_title).first)
-    puts rcp_seeker.to_s
-    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.to_s
+    puts rcp_seeker.text
+    assert_equal 'Asparagus with pine nut and sourdough crumbs (pictured above)', ttl_seeker.text
     assert (prep_seeker = parser.seek :rp_prep_time)
-    assert_equal 'Prep 5 min', prep_seeker.to_s
+    assert_equal 'Prep 5 min', prep_seeker.text
     assert (cook_seeker = parser.seek :rp_cook_time)
-    assert_equal 'Cook 20 min', cook_seeker.to_s
+    assert_equal 'Cook 20 min', cook_seeker.text
     assert (servings_seeker = parser.seek :rp_serves)
-    assert_equal "Serves 4", servings_seeker.to_s
+    assert_equal "Serves 4", servings_seeker.text
   end
 
   test 'parses ingredient list properly' do
@@ -854,9 +854,16 @@ EOF
              html: html,
              ingredients: 'Angostura',
              units: 'dash'
-    @parse_tester = ParseTester.new grammar_mods: { :rp_inglist => {:in_css_match => 'div.rp_inglist'} }
+
+    # html = 'Some irrelevant nonsense followed by 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, 3/4 ounce simple syrup (equal parts sugar and hot water) and a dash of Angostura.'
+    html = '1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.'
+    pt_apply :rp_embedded_inglist,
+             html: html,
+             ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura }
+
+    # @parse_tester = ParseTester.new grammar_mods: { :rp_inglist => {:in_css_match => 'div.rp_inglist'} }
     pt_apply :rp_recipe,
-             html: '<div class="rp_elmt rp_recipe"> <h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> <div class="rp_elmt rp_inglist">1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.</div> </div>',
+             html: '<h3><strong>Intermediate: Frangelico Sour</strong></h3> <p>Like its cousin the Amaretto Sour.</p> <p><em>Instructions: </em>In a cocktail shaker <em>without </em>ice, combine </p> 1 ounce of bourbon, 1 ounce of Frangelico, 3/4 ounce lemon juice, <span class="rp_elmt rp_ingline"><span class="rp_elmt rp_amt_with_alt rp_amt"><span class="rp_elmt rp_num">3/4</span> <span class="rp_elmt rp_unit">ounce</span></span> <span class="rp_elmt rp_ingredient_tag rp_ingspec">simple syrup</span> <span class="rp_elmt rp_ing_comment">(equal parts sugar and hot water)</span> </span>and a dash of Angostura.',
              ingredients: %w{ bourbon Frangelico lemon\ juice simple\ syrup Angostura },
              units: 'dash'
 

@@ -25,11 +25,16 @@ class ScanPattern
     context ||= stream.all
   end
 
+  def eq? other
+    @trigger == other.trigger
+  end
+
 end
 
 # A GrammarPattern applies an entry from the grammar in lieu of an explicit pattern.
 # When invoked, it attempts to match the grammar entry
 class GrammarPattern < ScanPattern
+  attr_reader :to_match, :parser
 
   def initialize token, parser
     @to_match = token
@@ -45,5 +50,10 @@ class GrammarPattern < ScanPattern
     context ||= stream.all
     # Now the grammar entry at @token will be matched by the @parser from the stream
     @parser.match @to_match, stream: stream.encompass(context), in_place: true
+  end
+
+  def eq? other
+    @to_match == other.to_match &&
+    @parser == other.parser
   end
 end

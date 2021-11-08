@@ -71,7 +71,7 @@ Parser.init_grammar(
     },
     rp_recipe: {
         match: [
-            {optional: :rp_title},
+            :rp_title, # {optional: :rp_title},
             # Everything after the ingredient list
             {checklist: [
                 { distribute: [ :rp_inglist, :rp_instructions ],
@@ -150,12 +150,17 @@ Parser.init_grammar(
         ],
     },
 =end
+    rp_embedded_inglist: {
+        match: :rp_ingline,
+        orlist: :predivide,
+        token: :rp_inglist
+    },
     rp_ingline: {
         match: [
             {
                 or: [
                     # If the ingspec fails, try to match noise words at the beginning of the line
-                    { match: :rp_ingspec, orlist: true },
+                :rp_ingspec, # { match: :rp_ingspec, orlist: true },
                     {
                         match: [
                             {or: ['▢',
@@ -239,6 +244,7 @@ Parser.init_grammar(
 # second, the pattern to be matched when the trigger is found
 Parser.init_triggers([/^\d*\/{1}\d*\.\d+$|^\d+[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
                      [ /^\d+$/, :rp_serves], # A full number triggers match for servings
-                     [Tag.typenum(:Unit), :rp_ingspec], # ...so does a Unit
-                     [Tag.typenum(:Condition), :rp_ingspec] # ...so does a Condition
+                     [ /^\d+$/, :rp_embedded_inglist], # A full number may also start an embedded ingredient list
+                     [Tag.typenum(:Unit), :rp_ingline], # ...so does a Unit
+                     [Tag.typenum(:Condition), :rp_ingline] # ...so does a Condition
 )

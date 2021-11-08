@@ -137,11 +137,11 @@ class Seeker
   end
 
   def found_string token=nil
-    find(token).first&.to_s
+    find(token).first&.text
   end
 
   def found_strings token=nil
-    find(token).collect &:to_s
+    find(token).collect &:text
   end
 
   # Root out the value associated with the token
@@ -153,9 +153,14 @@ class Seeker
     find(token).map &:value
   end
 
+  def text range=@range
+    stream.to_s range
+  end
+
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
   def to_s
-    stream.to_s @range
+    s = text
+    @token ? "[:#{@token}]#{s}" : s
   end
 
   def done?
@@ -264,7 +269,7 @@ class Seeker
   end
 
   def value_for token
-    find(token).first&.to_s
+    find(token).first&.text
   end
 
   # Provide a path and offset in the Nokogiri doc for the results of the parse
@@ -449,7 +454,7 @@ class NumberSeeker < Seeker
 
   # Convert a NumberSeeker string result to a number
   def value
-    strs = to_s.split '-'
+    strs = text.split '-'
     num, denom = strs.pop.split '/'
     int = strs.present? ? strs.pop.to_i : 0
     return int+num.to_i if denom.blank?

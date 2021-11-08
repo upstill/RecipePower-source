@@ -12,19 +12,30 @@ class Patternista
 
   # Include the given pattern among available matchers; test it when the trigger appears
   def assert pattern, trigger=pattern.trigger
+    list =
     case trigger
     when String # String to match
       @string_lex.take trigger, pattern
+      return
     when Array  # ...for collection of triggers, record the pattern as a response to each
       trigger.each { |tr| assert pattern, tr }
+      return
     when Integer # ...for type of Tag
       typesym = Tag.typesym trigger
-      (@tag_patterns[typesym] ||= []) << pattern
+      # @tag_patterns[typesym] = @tag_patterns[typesym] ? (@tag_patterns[typesym] | [pattern]) : [pattern]
+      # (@tag_patterns[typesym] ||= []) |= [pattern]
+      @tag_patterns[typesym] ||= []
     when Regexp # Regular Expression to match on stream
-      (@re_patterns[trigger] ||= []) << pattern
+      # @re_patterns[trigger] = @re_patterns[trigger] ? (@re_patterns[trigger] | [pattern]) : [pattern]
+      # (@re_patterns[trigger] ||= []) |= [pattern]
+      @re_patterns[trigger] ||= []
     when Symbol # Token to be a match against the grammar, triggered when that grammar entry is matched
-      (@metapatterns[trigger] ||= []) << pattern
+      # @metapatterns[trigger] = @metapatterns[trigger] ? (@metapatterns[trigger] | [pattern]) : [pattern]
+      # (@metapatterns[trigger] ||= []) |= [pattern]
+      @metapatterns[trigger] ||= []
     end
+    # Don't accept a redundant pattern
+    list << pattern unless list.find { |member| member.eq? pattern }
   end
 
   # Look for the patterns that match the given stream.
@@ -100,10 +111,10 @@ class Patternista
 
     if block_given?
       # Call the block with all the matches, longest to shortest
-      seekers.sort { |m1, m2| m2.bound <=> m1.bound }.each { |match| yield match }
+      seekers.sort_by(&:bound).each { |match| yield match }
     else
       # Finally, pick the match with the longest extent
-      seekers.max { |m1, m2| m1.bound <=> m2.bound }
+      seekers.max_by &:bound
     end
   end
 end

@@ -102,9 +102,9 @@ class Parser
       @patternista.assert GrammarPattern.new(token, self), triggerz
     end
     @@TriggerPatternPairs.each do |trigger_patterns|
-      trigger = trigger_patterns.shift
+      trigger = trigger_patterns.first
       # The remainder of the declaration is patterns associated with the trigger
-      trigger_patterns.each { |pattern| @patternista.assert GrammarPattern.new(pattern, self), trigger }
+      trigger_patterns[1..-1].each { |pattern| @patternista.assert GrammarPattern.new(pattern, self), trigger }
       # NB: currently, only grammar references (tokens) are accepted as patterns,
       # but there's no reason that a pattern in the same format as a grammar entry
       # can't be used instead.
@@ -166,8 +166,8 @@ class Parser
                       NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
   end
 
-  def scan
-    patternista.scan @stream
+  def scan stream=@stream
+    patternista.scan stream
   end
 
   @@ExclusiveOptions = [ # Each group of options is exclusive: at most one from each group can be declared
@@ -337,6 +337,7 @@ class Parser
     matched = nil
     if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
       ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
+      token = ge.delete(:token) || token
       if @benchmarks
         @cache_tries = @cache_hits = @cache_misses = 0
         cache_on = true

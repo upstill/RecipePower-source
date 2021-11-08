@@ -273,7 +273,9 @@ class ParseTester < ActiveSupport::TestCase
         unparsed = @seeker.tail_stream.to_s # Unconsumed content from the stream
         assert unparsed.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
       end
-      assert_equal token, @seeker.token
+
+      ge = @parser.grammar[token]
+      assert_equal (ge[:token] if ge.is_a?(Hash)) || token, @seeker.token
       @seeker.enclose_all parser: @parser
       check_required_tags(required_tags) do |tagtype, css_class, tagset|
         missing[tagtype] = tagset - find_values(css_class)
