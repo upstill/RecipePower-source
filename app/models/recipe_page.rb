@@ -58,7 +58,7 @@ class RecipePage < ApplicationRecord
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
         ps = ParserServices.new entity: self, input: parsing_input
-        if ps.parse
+        if ps.go
           ps.do_for(:rp_recipe) do |subseeker| # Focus on each recipe in turn
             xb = subseeker.xbounds
             if (title = subseeker.value_for :rp_title).present?

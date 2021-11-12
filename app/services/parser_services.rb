@@ -105,6 +105,10 @@ The dependencies are as follows:
         end
   end
 
+  def content
+    nkdoc&.to_s
+  end
+
   def self.benchmark_formatted bm = @match_benchmarks
     return {} unless (bm && vals = bm[:cache_on])
 
@@ -147,7 +151,12 @@ The dependencies are as follows:
 =end
 
   # Extract information from an entity (Recipe or RecipePage) or presented input
-  def parse options = {}
+  # Options:
+  # :input -- HTML to be parsed
+  # :token -- token denoting what we're seeking (:rp_recipe, :rp_recipe_list, or any other token in the grammar)
+  # :in_place -- flag to parser#match to parse the input as though CSS selectors and line constraints have already been matched
+  # :annotate -- Once the input is parsed, annotate the results with HTML entities
+  def go options = {}
     self.input = options[:input] if options.key?(:input)
     self.token = options[:token] if options.key?(:token)
     seeking = options[:seeking] || [:rp_title, :rp_inglist, :rp_instructions]
@@ -168,9 +177,13 @@ The dependencies are as follows:
       # Place our fate in the hands of #parse_recipe
       [parse_recipe(options.slice(:in_place, :annotate)), []]
     when :rp_recipelist
-      parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
-      # Group the items found in scanning under the appropriate recipe
-      [parsed, parsed.find(:rp_recipe).collect { |recipe| group parser.scan(recipe.stream.slice recipe.range) }.flatten]
+      # First break up the document into recipes, then parse each one separately
+      @parsed = parser.match :rp_recipelist, stream: nokoscan, in_place: options.delete(:in_place)
+      @parsed.traverse do |node|
+        node.children.map! { |child|
+          (child.token == :rp_recipe && parse_recipe(nokoscan.slice(child.range), options)&.if_succeeded) || child
+        }
+      end
     else
       annotate = options.delete :annotate
       parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
@@ -408,7 +421,7 @@ The dependencies are as follows:
           yield typenum, tagstr if block_given?
         end
       else
-        parse input: elmt, token: tokens.first
+        go input: elmt, token: tokens.first
         parsed.enclose_all parser: parser
       end
     end

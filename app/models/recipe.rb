@@ -195,7 +195,7 @@ class Recipe < ApplicationRecord
         # Translate the recipe attributes into grammar tokens
         as_tokens = need_now.collect { |attrname| attribute_as_token attrname }.compact
         ps = ParserServices.new entity: self, input: content_to_parse
-        if ps.parse seeking: as_tokens, annotate: true # No point proceeding if the parse fails
+        if ps.go seeking: as_tokens, annotate: true # No point proceeding if the parse fails
           # Ideally, all content will have been parsed out and can now be assigned to attributes
           self.content = ps.content if content_needed?
           need_now.each do |attrname|
