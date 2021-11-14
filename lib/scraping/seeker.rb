@@ -72,15 +72,19 @@ class Seeker
     self
   end
 
+  # Contents starting at the beginning
   def head_stream
     @stream.slice pos
-      # NokoScanner.new @stream.tokens, pos, bound
+  end
+
+  # Contents between beginning and end
+  def result_stream
+    @stream.slice range
   end
 
   # The tail_stream is what comes after the content in the head stream
   def tail_stream
     @stream.slice bound
-      # NokoScanner.new @stream.tokens, bound, @stream.bound
   end
 
   alias_method :scanner_beyond, :tail_stream
@@ -129,11 +133,6 @@ class Seeker
     else
       []
     end
-  end
-
-  # Provide the range of token indices encompassed by the Seeker
-  def token_range
-    pos...tail_stream.pos
   end
 
   def found_string token=nil
@@ -286,13 +285,13 @@ class Seeker
 
   # Insert the given seeker at an appropriate place in our tree
   def insert to_insert
-    seeker_range = to_insert.token_range
-    return true if token_range.cover?(seeker_range) && token == to_insert.token
+    seeker_range = to_insert.range
+    return true if range.cover?(seeker_range) && token == to_insert.token
     # First, expand our bounds to include its bounds
     @range = ([seeker_range.first, @range.first].min)...([seeker_range.last, @range.last].max)
     place = -1
     overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
-      child_range = child.token_range
+      child_range = child.range
       place += 1 if seeker_range.begin < child_range.begin
       # Remember the child if its range overlaps with the seeker
       seeker_range.min < child_range.end && seeker_range.max > child_range.begin

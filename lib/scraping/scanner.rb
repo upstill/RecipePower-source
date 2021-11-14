@@ -232,7 +232,7 @@ class Scanner < Object
     peek ((limit || @bound) - @pos)
   end
 
-  def token_range
+  def range
     @pos...@bound
   end
 
@@ -427,10 +427,6 @@ class NokoScanner # < Scanner
     tokens.text_from range.begin, range.end # @pos, limit
   end
 
-  def token_range
-    @pos...@bound
-  end
-
   # Report the token no matter if the position is beyond the bound
   def token_at
     tokens[@pos]
@@ -484,6 +480,10 @@ class NokoScanner # < Scanner
   def slice range_or_start
     range = range_or_start.is_a?(Range) ? range_or_start : range_or_start...@bound
     NokoScanner.new tokens, range.begin, range.end
+  end
+
+  def range
+    @pos...@bound
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition

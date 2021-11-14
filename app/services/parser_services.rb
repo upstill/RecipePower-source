@@ -159,7 +159,7 @@ The dependencies are as follows:
   def go options = {}
     self.input = options[:input] if options.key?(:input)
     self.token = options[:token] if options.key?(:token)
-    seeking = options[:seeking] || [:rp_title, :rp_inglist, :rp_instructions]
+
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?
       raise "Error in ParserServices#parse: must provide EITHER input or an entity"
@@ -171,210 +171,18 @@ The dependencies are as follows:
 
     # parser.cache_init
     # parser.benchmarks_init
-    parsed, scanned_seekers =
-    case token
-    when :rp_recipe
-      # Place our fate in the hands of #parse_recipe
-      [parse_recipe(options.slice(:in_place, :annotate)), []]
-    when :rp_recipelist
-      # First break up the document into recipes, then parse each one separately
-      @parsed = parser.match :rp_recipelist, stream: nokoscan, in_place: options.delete(:in_place)
-      @parsed.traverse do |node|
-        node.children.map! { |child|
-          (child.token == :rp_recipe && parse_recipe(nokoscan.slice(child.range), options)&.if_succeeded) || child
-        }
-      end
-    else
-      annotate = options.delete :annotate
-      parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
-      # Perform the scan only if sought elements aren't found in the parse
-      [parsed, group(parser.scan)] # if seeking.any? { |token| !parsed&.find(token).first }
-    end
-    # Take the benchmark report from the parser when all is said and done
-    @match_benchmarks = parser.benchmark_sum @match_benchmarks
 
-    if parsed
-      # Now we need to reconcile parsed results with scanned.
-      ils = parsed.find(:rp_inglist)
-      scanned_seekers.keep_if do |scanned_seeker|
-        # In this step, we eliminate scanned elements that have a parsed equivalent
-        case scanned_seeker.token
-        when :rp_inglist
-          selector = ingline_selector scanned_seeker
-          # Special processing for inglists: merge their children into the parsed equivalent, as possible
-          # First, adjust the parsed ingredient-list boundaries to the scanned_seeker item
-          ils.each do |inglist|
-            if scanned_seeker.token_range.include? inglist.pos
-              # Expand the inglist token_range to include the scanned version,
-              # but not so far as to encroach on other parsed elements
-              inglist.encompass_position (ils.filter { |il| il.pos < inglist.pos }.map(&:bound) << scanned_seeker.pos).max
-            end
-            if scanned_seeker.token_range.include? inglist.bound
-              inglist.encompass_position (ils.filter { |il| il.bound > inglist.bound }.map(&:pos) << scanned_seeker.bound).min
-            end
-          end
-          true
-        when :rp_parenthetical
-        else
-          !parsed.find(scanned_seeker.token).any? { |parsed| parsed.matches? scanned_seeker }
-        end
-      end
-
-      # Now scanned_seekers is a list of elements that still need to be included in the parse tree
-      scanned_seekers.each do |scanned_seeker|
-        if scanned_seeker.token == :rp_inglist
-          scanned_seeker.children.keep_if { |ingline| !ils.any? { |inglist| inglist.insert ingline } }
-          next if scanned_seeker.children.empty?
-        end
-        parsed.insert scanned_seeker
-      end
-    else # No parsed content: just use the scanned results by enclosing them
-      parsed =
-          case scanned_seekers.count
-          when 0
-            Seeker.failed @nokoscan, token: token
-          when 1
-            scanned_seekers.first
-          else
-            Seeker.new @nokoscan, children: scanned_seekers, token: token
-          end
-    end
-
-    parsed.enclose_all parser: parser if parsed&.success? && annotate
-
-    (@parsed = parsed)&.success?
-  end
-
-  # Special handling for recipes: try a straight parse, then a scan to get other attributes.
-  # Merge the results into a single Seeker with appropriate children
-  def parse_recipe options={}
-
-    @parsed = parser.match token, stream: nokoscan, in_place: options.delete(:in_place)
-
-    # Perform the scan only if sought elements aren't found in the parse
-    scanned_seekers = group parser.scan # if seeking.any? { |token| !@parsed&.find(token).first }
+    # Recipe parsing includes a Patternista scan of the document and integration of the results
+    @parsed = (token == :rp_recipe) ?
+                  parse_recipe( options.slice(:in_place, :annotate)) :
+                  parser.match( token, stream: nokoscan, in_place: options.delete(:in_place))
 
     # Take the benchmark report from the parser when all is said and done
     @match_benchmarks = parser.benchmark_sum @match_benchmarks
 
-    # Natural parsing of the recipe failed, so extract a title and subsequent material,
-    # up to the next title, if any
-    if !@parsed
-      # Extract a title
-      rcps = parser.match :rp_recipelist, stream: nokoscan
-      return nil unless @parsed = rcps&.children&.first
-
-      @parsed.children.last.token = :rp_instructions
-    end
-    children = @parsed.children
-    # Whether parsed directly or as above, the recipe will have a title followed by instructions
-    children.sort_by &:pos # Ensure that the elements are sorted by position
-
-    # Take each scanned_seekers element and insert it by position,
-    # clipping the items before and after to its bounds
-    scanned_seekers.each do |to_insert|
-      # Split any :rp_instructions child that encompasses the element
-      after = nil
-      children.find_index { |child|
-        if child.token == :rp_instructions && child.range.include?(to_insert.pos)
-          if child.text(child.pos...to_insert.pos).blank?
-            # No text before the inserted node => reposition the child afterward
-            child.pos = to_insert.bound
-          elsif child.text(to_insert.bound...child.bound).blank?
-            child.bound = to_insert.pos
-          else
-            after = child.clone
-            child.bound, after.pos = to_insert.pos, to_insert.bound
-          end
-        end
-      }
-      insert_before = (binsearch(children, to_insert.pos, &:pos) || 0) + 1
-      children.insert insert_before, after if after
-      children.insert insert_before, to_insert
-    end
+    @parsed.enclose_all parser: parser if @parsed&.success? && options[:annotate]
 
     @parsed&.success?
-  end
-
-  def content
-    nkdoc&.to_s
-  end
-
-  # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
-  def group seekers
-    inglines = []
-    others = []
-    # Sort the seekers into ingredient lines and others
-    seekers.each do |seeker|
-      if [:rp_ingspec, :rp_ingline].include? seeker.token
-        inglines << seeker
-      else
-        others << seeker
-      end
-    end
-    return seekers unless inglines.present?
-
-    # We aggregate a collection of ingredient lines as follows:
-    # The idea is to
-    # * Each node in the Nokogiri ancestry of each ingline gets a point for being on the path to that node
-    # * We derive a "branching factor" for each such ancestor: the count of its children which lead to an ingline
-    # * i.e., if an ancestor has five children which each lead to inglines, its branching factor is five,
-    # * but its parent's branching factor is only one
-    # Thus, the most likely candidates to be an ingredient-list node are those with the highest b.f.
-
-    # A BinCount is a hash where the keys are Nokogiri nodes and the values are the count for that node.
-    bc = BinCount.new
-    # Initialize the bincount by looping across each ingline and incrementing all of its ancestors
-    inglines.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
-    # Here's the tricky bit: get the b.f. for each node by DECREMENTING the count of its parent
-    # by N-1, where N is its initial count, i.e., the number of its children leading to an ingnode.
-    # The following loop works only because, once a node is decremented, N-1 becomes 0, so it
-    # doesn't matter how many times or in what order the nodes in the tree are visited.
-    nkdoc.traverse do |node|
-      if (adj = bc[node] - 1 ) > 0
-        node.ancestors.each { |anc| bc[anc] -= adj }
-      end
-    end
-    # Remove the root (the document fragment) from consideration
-    bc.delete nkdoc
-    inglists = []
-    while (max = bc.max) && (max.count > 2) do
-      puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
-      # Declare a result for the found collection, including all text elements under it
-      range = nokoscan.token_range_for_subtree max.object
-      children = inglines.select { |line| range.include?(line.pos) && range.include?(line.bound) }
-      inglists << Seeker.new(nokoscan, children: children, range: range, token: :rp_inglist)
-      # Remove this tree from consideration for higher-level inglists
-      max.object.ancestors.each { |anc| bc[anc] -= 1 }
-      bc.delete max.object
-    end
-
-    others + inglists
-  end
-
-  # Given an ingredient list with a collection of items, infer an
-  # enclosing HTML/CSS context, returning a CSS selector for it
-  def ingline_selector inglist
-    # The inglist denotes the lowest common node between the elements
-    # For each child, we examine each parent of the leading text element for commonality
-    teds = inglist.children.map(&:head_stream).map &:text_elmt_data
-    # We assume that the nokogiri node associated with the inglist is the common ancestor of two children
-    inglist_nknode = (teds.first.ancestors.to_a & teds.last.ancestors.to_a).first
-    descendant_ix = -(inglist_nknode.ancestors.count+2) # This indexes the first ancestor of a text element that is a child of the inglist
-    first_descendants = teds.map { |ted| ted.text_element.ancestors[descendant_ix] }
-    survivors = nil
-    first_descendants.each do |child_nknode|
-      this = { tag: child_nknode.name, classes: child_nknode['class']&.split || [] }
-      if survivors
-        survivors.delete :tag if this[:tag] != survivors[:tag]
-        survivors[:classes] &= this[:classes]
-      else
-        survivors = this
-      end
-    end
-    classes = survivors[:classes].join '.'
-    selector = "#{survivors[:tag]}#{('.'+classes) if classes.present?}"
-    selector
   end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
@@ -474,6 +282,156 @@ The dependencies are as follows:
   end
 
   private
+
+  # Special handling for recipes: try a straight parse, then a scan to get other attributes.
+  # Merge the results into a single Seeker with appropriate children
+  def parse_recipe scanner=nokoscan, options={}
+    scanner, options = nokoscan, scanner if scanner.is_a?(Hash)
+
+    @parsed = parser.match :rp_recipe, stream: scanner, in_place: options.delete(:in_place)
+
+    # Natural parsing of the recipe failed, so extract a title and subsequent material,
+    # up to the next title, if any
+    if !@parsed
+      rlist = go options.merge(token: :rp_recipelist) # Parse the same content for a recipe list
+      return @parsed = Seeker.failed(nokoscan, token: :rp_recipe) unless (rlist&.success? && rp = rlist.find(:rp_recipe).first)
+      @parsed = parser.match(:rp_recipe, stream: rp.result_stream, in_place: options.delete(:in_place))&.if_succeeded || rp
+    end
+
+    # Perform the scan only if sought elements aren't found in the parse
+    scanned_seekers = group parser.scan(scanner)
+
+    children = @parsed.children
+    # Whether parsed directly or as above, the recipe will have a title followed by instructions
+    children.sort_by &:pos # Ensure that the elements are sorted by position
+
+    # Insert each of scanned_seekers by position,
+    # clipping the items before and after to its bounds
+    scanned_seekers.each do |to_insert|
+      # Split any :rp_instructions child that encompasses the element
+      case to_insert.token
+      when :rp_parenthetical
+        next
+      when :rp_inglist
+        # Find an overlapping ingredient list to merge with
+        extant_il = @parsed.
+            find(:rp_inglist).
+            find { |il| il.range.overlaps? to_insert.range }
+        if extant_il
+          # Merge the overlapping lists by merging all of to_insert's children into extant_il
+          to_insert.children.each { |child| extant_il.insert child }
+          next
+        else
+          to_insert = Seeker.new scanner, children: [ to_insert ], token: :rp_inglist
+        end
+      when :rp_ingline
+        # Find an overlapping or adjacent ingredient list to move into.
+        # If none, create one and insert it
+      end
+      after = nil
+      children.find_index { |child|
+        if child.token == :rp_instructions && child.range.include?(to_insert.pos)
+          if child.text(child.pos...to_insert.pos).blank?
+            # No text before the inserted node => reposition the child afterward
+            child.pos = to_insert.bound
+          elsif child.text(to_insert.bound...child.bound).blank?
+            child.bound = to_insert.pos
+          else
+            after = child.clone
+            child.bound, after.pos = to_insert.pos, to_insert.bound
+          end
+        end
+      }
+      # Forestall redundancy by rejecting any scanned elements that match existing children
+      # in token and range
+      next if children.any? { |child|
+        child.token == to_insert.token &&
+            (child.range.include?(to_insert.range) || to_insert.range.include?(child.range))
+      }
+      insert_before = (binsearch(children, to_insert.pos, &:pos) || -1) + 1
+      children.insert insert_before, after if after
+      children.insert insert_before, to_insert
+    end
+
+    @parsed&.success?
+  end
+
+  # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
+  def group seekers
+    inglines = []
+    others = []
+    # Sort the seekers into ingredient lines and others
+    seekers.each do |seeker|
+      if [:rp_ingspec, :rp_ingline].include? seeker.token
+        inglines << seeker
+      else
+        others << seeker
+      end
+    end
+    return seekers unless inglines.present?
+
+    # We aggregate a collection of ingredient lines as follows:
+    # The idea is to
+    # * Each node in the Nokogiri ancestry of each ingline gets a point for being on the path to that node
+    # * We derive a "branching factor" for each such ancestor: the count of its children which lead to an ingline
+    # * i.e., if an ancestor has five children which each lead to inglines, its branching factor is five,
+    # * but its parent's branching factor is only one
+    # Thus, the most likely candidates to be an ingredient-list node are those with the highest b.f.
+
+    # A BinCount is a hash where the keys are Nokogiri nodes and the values are the count for that node.
+    bc = BinCount.new
+    # Initialize the bincount by looping across each ingline and incrementing all of its ancestors
+    inglines.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
+    # Here's the tricky bit: get the b.f. for each node by DECREMENTING the count of its parent
+    # by N-1, where N is its initial count, i.e., the number of its children leading to an ingnode.
+    # The following loop works only because, once a node is decremented, N-1 becomes 0, so it
+    # doesn't matter how many times or in what order the nodes in the tree are visited.
+    nkdoc.traverse do |node|
+      if (adj = bc[node] - 1 ) > 0
+        node.ancestors.each { |anc| bc[anc] -= adj }
+      end
+    end
+    # Remove the root (the document fragment) from consideration
+    bc.delete nkdoc
+    inglists = []
+    while (max = bc.max) && (max.count > 2) do
+      puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
+      # Declare a result for the found collection, including all text elements under it
+      range = nokoscan.token_range_for_subtree max.object
+      children = inglines.select { |line| range.include?(line.pos) && range.include?(line.bound) }
+      inglists << Seeker.new(nokoscan, children: children, range: range, token: :rp_inglist)
+      # Remove this tree from consideration for higher-level inglists
+      max.object.ancestors.each { |anc| bc[anc] -= 1 }
+      bc.delete max.object
+    end
+
+    others + inglists
+  end
+
+  # Given an ingredient list with a collection of items, infer an
+  # enclosing HTML/CSS context, returning a CSS selector for it
+  def ingline_selector inglist
+    # The inglist denotes the lowest common node between the elements
+    # For each child, we examine each parent of the leading text element for commonality
+    teds = inglist.children.map(&:head_stream).map &:text_elmt_data
+    # We assume that the nokogiri node associated with the inglist is the common ancestor of two children
+    inglist_nknode = (teds.first.ancestors.to_a & teds.last.ancestors.to_a).first
+    descendant_ix = -(inglist_nknode.ancestors.count+2) # This indexes the first ancestor of a text element that is a child of the inglist
+    first_descendants = teds.map { |ted| ted.text_element.ancestors[descendant_ix] }
+    survivors = nil
+    first_descendants.each do |child_nknode|
+      this = { tag: child_nknode.name, classes: child_nknode['class']&.split || [] }
+      if survivors
+        survivors.delete :tag if this[:tag] != survivors[:tag]
+        survivors[:classes] &= this[:classes]
+      else
+        survivors = this
+      end
+    end
+    classes = survivors[:classes].join '.'
+    selector = "#{survivors[:tag]}#{('.'+classes) if classes.present?}"
+    selector
+  end
 
   def glean_tokens token_list
     exceptions =

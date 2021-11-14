@@ -536,8 +536,8 @@ class Parser
             }
           when :paragraph
             # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
-            grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
-            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true }
+            grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ), :enclose => false }
+            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true, :enclose => false }
           end
         end
       end
@@ -954,7 +954,7 @@ class Parser
     end
     really_enclose ||= match.enclose? && (match.size > 0)
     return Seeker.failed(scanner, # match.head_stream,
-                         range: match.range, # match.tail_stream.token_range,
+                         range: match.range, 
                          token: token,
                          enclose: (really_enclose ? true : false),
                          optional: ((context[:optional] || inspec[:optional] || match.soft_fail?) ? true : false))
@@ -983,7 +983,7 @@ class Parser
     matches.compact!
     if context[:enclose] == :non_empty # Consider whether to keep a repeater that turns up nothing
       if matches.all? &:hard_fail?
-        failed_range = (matches.last&.tail_stream || scanner).token_range
+        failed_range = (matches.last&.tail_stream || scanner).range
         return Seeker.failed start_scanner,
                              context.
                                  except(:enclose).
@@ -996,7 +996,7 @@ class Parser
     matches.delete_if &:'hard_fail?'
     return case matches.count
            when 0
-             Seeker.failed start_scanner, context.merge(range: scanner.token_range, token: token)
+             Seeker.failed start_scanner, context.merge(range: scanner.range, token: token)
            when 1
              first_match = matches.first
              if token.nil? || token == first_match.token
