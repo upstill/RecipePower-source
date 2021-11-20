@@ -57,7 +57,7 @@ class RecipePage < ApplicationRecord
         # The seeker should present the token :rp_recipelist and have at least one child
         # We assume that any existing recipes match the parsed-out recipes in creation (id) order
         rcpdata = []
-        ps = ParserServices.new entity: self, input: parsing_input
+        ps = ParserServices.new entity: self, input: parsing_input, grammar_mods: site.grammar_mods
         if ps.go
           ps.do_for(:rp_recipe) do |subseeker| # Focus on each recipe in turn
             xb = subseeker.xbounds

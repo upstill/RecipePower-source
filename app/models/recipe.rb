@@ -194,7 +194,7 @@ class Recipe < ApplicationRecord
       if content_to_parse.present? # Can't proceed w/o something to parse!
         # Translate the recipe attributes into grammar tokens
         as_tokens = need_now.collect { |attrname| attribute_as_token attrname }.compact
-        ps = ParserServices.new entity: self, input: content_to_parse
+        ps = ParserServices.new entity: self, input: content_to_parse, grammar_mods: site.grammar_mods
         if ps.go seeking: as_tokens, annotate: true # No point proceeding if the parse fails
           # Ideally, all content will have been parsed out and can now be assigned to attributes
           self.content = ps.content if content_needed?

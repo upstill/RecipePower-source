@@ -118,26 +118,26 @@ class Lexaur < Object
     if substrs.present? # (token = stream.peek).present? && token.is_a?(String) # More in the stream
       # The tree breaks any given token into the substrings found in the normalized name
       # substrs = Tag.normalize_name(token).split '-'
-      tracker = self
+      trkr = self
       head = substrs.pop || '' # Save the last substring
       # Descend the tree for each substring, depending on there being a head marker at each step along the way
       substrs.each do |substr|
-        tracker = tracker.nexts[substr]
-        return if tracker.nil?
-        lexpath.push tracker
+        trkr = trkr.nexts[substr]
+        return if trkr.nil?
+        lexpath.push trkr
       end
       # Peek ahead and consume any tokens which are empty in the normalized name
       onward, unskipped = elide(stream.rest, skipper)
       # Recursively continue along the stream and down the tree
-      if nxt = tracker.nexts[head]
+      if nxt = trkr.nexts[head]
         nxt.chunk1(onward, lexpath, strpath + [head], block, skipper: skipper)
         # Once there are no more matches along/down, we consume the head of the stream.
         # NB This has the effect of returning the longest match first
         # Report back the terminals even if absent
-        if tracker.terminals[head]
+        if trkr.terminals[head]
           block.call(unskipped, lexpath, strpath + [head]) # The block must check for acceptance and return true for the process to end
         end
-      elsif tracker.terminals[head]
+      elsif trkr.terminals[head]
         block.call(unskipped, lexpath, strpath + substrs + [head]) # The block must check for acceptance and return true for the process to end
       else
         block.call(elide(stream, skipper).first, lexpath[0...strpath.length], strpath) # The block must check for acceptance and return true for the process to end

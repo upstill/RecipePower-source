@@ -101,7 +101,7 @@ Parser.init_grammar(
         atline: true
     },
     rp_cook_time: {
-        match: [ { :trigger => /^Cook|Active:?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
+        match: [ { :trigger => /^(Cook|Active):?$/i }, { match: /^time:?$/i, optional: true }, :rp_time ],
         in_css_match: nil,
         atline: true
     },
@@ -242,7 +242,7 @@ Parser.init_grammar(
 # Each pattern is declared as a pair:
 # first, the trigger for the pattern
 # second, the pattern to be matched when the trigger is found
-Parser.init_triggers([/^\d*\/{1}\d*\.\d+$|^\d+[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
+Parser.init_triggers([/^\d*(\/{1}\d*|\.\d+)$|^\d+[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
                      [ /^\d+$/, :rp_serves], # A full number triggers match for servings
                      [ /^\d+$/, :rp_embedded_inglist], # A full number may also start an embedded ingredient list
                      [Tag.typenum(:Unit), :rp_ingline], # ...so does a Unit

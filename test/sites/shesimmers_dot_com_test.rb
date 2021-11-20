@@ -29,7 +29,7 @@ class ShesimmersDotComTest < ActiveSupport::TestCase
 		}
 		@selector = "div.easyrecipe"
 		@sample_url = 'http://shesimmers.com/2013/02/baked-salmon-in-lime-coconut-cream-sauce-%e0%b8%9b%e0%b8%a5%e0%b8%b2%e0%b9%81%e0%b8%8b%e0%b8%a5%e0%b8%a1%e0%b8%ad%e0%b8%99%e0%b8%ad%e0%b8%9a%e0%b8%81%e0%b8%b0%e0%b8%97%e0%b8%b4.html'
-		@sample_title = 'Baked Salmon in Lime-Coconut Cream Sauce (ปลาแซลมอนอบกะทิ)'
+		@sample_title = 'Baked Salmon in Lime-Coconut Cream Sauce'
 
     #@grammar_mods = {
     # :gm_recipes => { at_css_match: 'h1' },

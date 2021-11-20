@@ -153,7 +153,7 @@ class Parser
     @cache_tries = 0
     @cache_hits = 0
     @cache_misses = 0
-    cache_on = true
+    @cache_on = true
   end
 
   def benchmarks_init
@@ -331,12 +331,18 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream, in_place: false
-    puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s.truncate 100}'" if Rails.env.test?
+  def match token, stream: @stream, in_place: false, singular: false
+    if Rails.env.test?
+      summ = stream.to_s.truncate(100).gsub "\n", '\n'
+      puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{summ}'"
+    end
     safe_stream = stream.clone
     matched = nil
     if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
-      ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place && ge.is_a?(Hash)
+      if ge.is_a?(Hash)
+        ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
+        ge = ge.except :match_all if singular
+      end
       token = ge.delete(:token) || token
       if @benchmarks
         @cache_tries = @cache_hits = @cache_misses = 0

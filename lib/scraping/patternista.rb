@@ -70,7 +70,9 @@ class Patternista
       # patterns is the collection of patterns that were triggered
       # onward is the stream AFTER the trigger thus matched
       # NB This block may be called multiple times, for successive triggers of decreasing length (in tokens)
-      seekers += patterns.collect { |pattern| pattern.match contents, context }.compact
+      seekers += patterns.collect { |pattern|
+        pattern.match contents, context
+      }.compact
     end
 
     # Check for tag matches
@@ -82,7 +84,9 @@ class Patternista
       # NB This block may be called multiple times, for successive tag sets of decreasing length (in tokens)
       seekers += Tag.where(id: tag_ids).to_a.collect { |tag|
         if patterns = @tag_patterns[tag.typesym]
-          patterns.collect { |ptn| ptn.match contents, context }.compact
+          patterns.collect { |ptn|
+            ptn.match contents, context
+          }.compact
         end
       }.compact.flatten
     end

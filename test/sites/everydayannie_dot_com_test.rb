@@ -90,9 +90,9 @@ some irrelevant HTML
 ¼ cup olive oil<br>
 1 tsp. sesame oil<br>
 </p></div>
-Following irrelevant html
 EOF
-    pt_apply :rp_inglist, html: html
+    remainder = "Following irrelevant html"
+    pt_apply :rp_inglist, html: html+remainder, remainder: remainder
 
     # Slightly less simple ingredient list
     html =<<EOF
@@ -103,9 +103,8 @@ Juice of&nbsp;½ a lime<br>
 ¼ cup olive oil<br>
 1 tsp. sesame oil<br>
 </p></div>
-Following irrelevant html
 EOF
-    pt_apply :rp_inglist, html: html
+    pt_apply :rp_inglist, html: html+remainder, remainder: remainder
 
     html =<<EOF
 some irrelevant HTML

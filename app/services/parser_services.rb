@@ -169,7 +169,7 @@ The dependencies are as follows:
       raise "Error in ParserServices#parse: must provide EITHER a token or an entity"
     end
 
-    # parser.cache_init
+    parser.cache_init
     # parser.benchmarks_init
 
     # Recipe parsing includes a Patternista scan of the document and integration of the results
@@ -358,30 +358,22 @@ The dependencies are as follows:
 
   # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
   def group seekers
-    inglines = []
-    others = []
-    # Sort the seekers into ingredient lines and others
-    seekers.each do |seeker|
-      if [:rp_ingspec, :rp_ingline].include? seeker.token
-        inglines << seeker
-      else
-        others << seeker
-      end
-    end
-    return seekers unless inglines.present?
+    # Sort the seekers into ingredient lines and specs
+    ingspecs = seekers.collect { |seeker| seeker.find :rp_ingspec }.flatten
+    return seekers unless ingspecs.present?
 
     # We aggregate a collection of ingredient lines as follows:
     # The idea is to
     # * Each node in the Nokogiri ancestry of each ingline gets a point for being on the path to that node
     # * We derive a "branching factor" for each such ancestor: the count of its children which lead to an ingline
-    # * i.e., if an ancestor has five children which each lead to inglines, its branching factor is five,
+    # * i.e., if an ancestor has five children which each lead to ingspecs, its branching factor is five,
     # * but its parent's branching factor is only one
     # Thus, the most likely candidates to be an ingredient-list node are those with the highest b.f.
 
     # A BinCount is a hash where the keys are Nokogiri nodes and the values are the count for that node.
     bc = BinCount.new
     # Initialize the bincount by looping across each ingline and incrementing all of its ancestors
-    inglines.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
+    ingspecs.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
     # Here's the tricky bit: get the b.f. for each node by DECREMENTING the count of its parent
     # by N-1, where N is its initial count, i.e., the number of its children leading to an ingnode.
     # The following loop works only because, once a node is decremented, N-1 becomes 0, so it
@@ -398,14 +390,41 @@ The dependencies are as follows:
       puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
       # Declare a result for the found collection, including all text elements under it
       range = nokoscan.token_range_for_subtree max.object
-      children = inglines.select { |line| range.include?(line.pos) && range.include?(line.bound) }
-      inglists << Seeker.new(nokoscan, children: children, range: range, token: :rp_inglist)
+      children = ingspecs.select { |line| range.include?(line.pos) && range.include?(line.bound) }
+      inglines = []
+      children.each_index { |ix|
+        child, succ = children[ix..(ix+1)]
+        # Scan the material from the end of child to the beginning of succ for other ingspecs
+        intervening = succ ? (child.tail_stream.except succ.head_stream) : child.tail_stream.within(range)
+        next_spec = parser.seek intervening, :rp_ingspec
+        while intervening.to_s.present? && next_spec do
+          noise = intervening.except(next_spec.stream)
+          comm = noise.to_s.strip.present? ? Seeker.new(noise, token: :ing_comment) : nil
+          newline = Seeker.new(token: :rp_ingline, children: [child, comm].compact )
+          inglines << newline
+          child = next_spec
+          intervening = succ ? (child.tail_stream.except succ.head_stream) : child.tail_stream.within(range)
+          while intervening.peek == "\n" do
+            intervening.first
+          end
+          next_spec = parser.match :rp_ingspec, stream: intervening, in_place: true, singular: true
+        end
+        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), in_place: true, singular: true ) || child
+        ps = if comment = extracted.find(:rp_ing_comment).first
+          parser.scan comment.head_stream.except(succ&.head_stream)
+        end
+        inglines << extracted
+        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), in_place: true, singular: true ) do
+          inglines << extracted
+        end
+      }
+      inglists << Seeker.new(nokoscan, children: inglines, range: range, token: :rp_inglist)
       # Remove this tree from consideration for higher-level inglists
       max.object.ancestors.each { |anc| bc[anc] -= 1 }
       bc.delete max.object
     end
 
-    others + inglists
+    inglists + seekers.keep_if { |item| ![:rp_parenthetical, :rp_inglist, :rp_ingline, :rp_ingspec ].include? item.token}
   end
 
   # Given an ingredient list with a collection of items, infer an

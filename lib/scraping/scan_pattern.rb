@@ -47,9 +47,21 @@ class GrammarPattern < ScanPattern
   # return: if the match was found, a Seeker delimiting the tokens of the match, labelled with @token
   def match trigger_match, context = nil
     stream = trigger_match.is_a?(Seeker) ? trigger_match.head_stream : trigger_match
-    context ||= stream.all
+    stream = stream.encompass(context || stream.all)
     # Now the grammar entry at @token will be matched by the @parser from the stream
-    @parser.match @to_match, stream: stream.encompass(context), in_place: true
+    report(stream) { @parser.match(@to_match, stream: stream, in_place: true) }
+  end
+
+  def report stream
+    return yield unless Rails.env.test?
+    summ = stream.to_s.truncate(100).gsub "\n", '\n'
+    puts "PATTERNISTA seeking to match :#{@to_match} on '#{summ}'"
+    if result = yield
+      puts "PATTERNISTA got match #{result} on '#{summ}'"
+    else
+      puts "PATTERNISTA didn't match :#{@to_match} on '#{summ}'"
+    end
+    result
   end
 
   def eq? other

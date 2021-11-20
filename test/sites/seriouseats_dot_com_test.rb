@@ -15,7 +15,7 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
       Chinkiang\ vinegar scallion\ greens
      } # All ingredients found on the page
     @units =  %w{ g pound ounces tablespoons tablespoon teaspoons teaspoon ml } # All units
-    @conditions = %w{ finely\ chopped hot } # All conditions
+    @conditions = %w{ finely\ chopped hot thinly\ sliced cold } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
       :gm_inglist => {

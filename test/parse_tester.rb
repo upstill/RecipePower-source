@@ -108,6 +108,7 @@ class ParseTester < ActiveSupport::TestCase
     filename = args.delete :filename # Parse a local file
     url = args.delete :url # Create the target (an database object) using the url
     html = args.delete :html # Parse an html string
+    remainder = args.delete(:remainder) || ''
     @fail = args.delete :fail # Flag: expect the parse to fail
     @expected_tokens = args.delete :expected_tokens # Specifies tokens that should be successfully found
     @expected_attributes = [args.delete(:expected_attributes)].flatten.compact # Specifies tokens that should be successfully found
@@ -135,7 +136,7 @@ class ParseTester < ActiveSupport::TestCase
     when filename.present?
       apply_to_string File.read(filename), token: @token, required_tags: required_tags
     when html.present?
-      apply_to_string html, token: @token, required_tags: required_tags
+      apply_to_string html, token: @token, required_tags: required_tags, remainder: remainder
     when url.present?
       do_recipe url,
                 required_tags: required_tags,
@@ -235,7 +236,7 @@ class ParseTester < ActiveSupport::TestCase
     site.bkg_land # Now the site should be prepared to trim recipes
   end
 
-  def apply_to_string html, token: :rp_recipe, required_tags: {}
+  def apply_to_string html, token: :rp_recipe, required_tags: {}, remainder: ''
 
     @nokoscan = NokoScanner.new html
     ps = ParserServices.new input: @nokoscan,
@@ -270,8 +271,8 @@ class ParseTester < ActiveSupport::TestCase
         return
       else
         assert @seeker.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
-        unparsed = @seeker.tail_stream.to_s # Unconsumed content from the stream
-        assert unparsed.blank?, "Stream '#{html.truncate 200}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+        unparsed = @seeker.tail_stream.to_s.strip # Unconsumed content from the stream
+        assert_equal remainder, unparsed, "Stream '#{html.truncate 200}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
       end
 
       ge = @parser.grammar[token]

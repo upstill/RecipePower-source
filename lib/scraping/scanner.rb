@@ -556,6 +556,16 @@ class NokoScanner # < Scanner
     self
   end
 
+  # Return a stream whose boundaries are clipped to another stream
+  def within s2_or_range
+    range = s2_or_range.is_a?(Range) ? s2_or_range : s2_or_range.range
+    if range.first < @bound && range.last > @pos
+      NokoScanner.new tokens, [@pos, range.first].max, [@bound, range.last].min
+    else
+      NokoScanner.new tokens, @pos, @pos
+    end
+  end
+
   def move_to newpos
     @pos = [[0, newpos].max, @bound].min
   end

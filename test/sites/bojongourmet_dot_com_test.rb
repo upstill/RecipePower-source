@@ -62,9 +62,9 @@ class BojongourmetDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
       :gm_bundles => { :name => :wordpress },
-      :gm_recipes => { :at_css_match => "h2" },
+      # :gm_recipes => { :at_css_match => "h1" },
 			:rp_title => {
-				:in_css_match => "h2"
+				:in_css_match => "h2.wprm-recipe-name"
 			}
     }
     @trimmers = ["div.wprm-recipe-notes-container", "div.wprm-recipe-image", "div.wprm-call-to-action-text-container", "a.wprm-recipe-print", "a.wprm-recipe-pin", "a.wprm-recipe-jump", "div.wprm-recipe-rating", "div.wprm-container-float-right"]
