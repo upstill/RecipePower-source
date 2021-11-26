@@ -14,19 +14,26 @@ class EpicuriousDotComTest < ActiveSupport::TestCase
 egg\ yolk natural\ unsalted\ pistachios slivered\ almonds sugar egg vanilla\ extract almond\ extract
 apricots apricot\ jam water pistachios
 } # All ingredients found on the page
-    @units =  %w{ teapoons cup large stick large tablespoons teaspoon tablespoons } # All units
+    @units =  %w{ teaspoons cup large stick large tablespoons teaspoon tablespoons } # All units
     @conditions = %w{ chopped chilled shelled } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:gm_recipes => { :at_css_match => 'h1' },
-			:rp_inglist => {
-				:in_css_match => "li.ingredient-group"
-			},
-			:rp_ingline => {
-				:in_css_match => "li.ingredient"
-			},
+=begin
+			:gm_inglist => {
+					:flavor => :unordered_list,
+					:list_class => 'ingredient-group',
+					:line_class => 'ingredient'
+		},
+=end
 			:rp_title => {
 				:in_css_match => "h1"
+			},
+			:rp_inglist => {
+					:in_css_match => 'div.gPuEKn'
+			},
+			:rp_ingline => {
+					:in_css_match => 'div.eftAc'
 			},
 			:rp_instructions => {
 				:in_css_match => "div.instructions ol"
@@ -35,7 +42,7 @@ apricots apricot\ jam water pistachios
 		@trimmers = ["div.mediavoice-native-ad", "div.additional-info"]
 		@selector = "div.title-source h1
 div.intro
-div.recipe-content"
+div.page--recipe"
 		@sample_url = 'http://www.epicurious.com/recipes/food/views/apricot-tart-with-pistachio-almond-frangipane-106662'
 		@sample_title = 'Apricot Tart with Pistachio-Almond Frangipane'
     super
@@ -51,16 +58,16 @@ div.recipe-content"
 	end
 
 	test 'ingredient list' do
-		html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
+		html = '<div class="ingredient-group"><strong>Crust</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1 1/2 cups all purpose flour</div><div class="eftAc" itemprop="ingredients">3 tablespoons sugar</div><div class="eftAc" itemprop="ingredients">1/4 teaspoon salt</div><div class="eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="eftAc" itemprop="ingredients">2 tablespoons chilled whipping cream</div><div class="eftAc" itemprop="ingredients">1 large egg yolk</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<li class="ingredient-group"><strong>Filling</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1/2 cup shelled natural unsalted pistachios (about 2 ounces)</li><li class="ingredient" itemprop="ingredients">1/2 cup slivered almonds (about 2 ounces)</li><li class="ingredient" itemprop="ingredients">1/2 cup sugar</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">1 large egg</li><li class="ingredient" itemprop="ingredients">1 teaspoon vanilla extract</li><li class="ingredient" itemprop="ingredients">1/2 teaspoon almond extract</li></ul></li>'
+		html = '<div class="ingredient-group"><strong>Filling</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1/2 cup shelled natural unsalted pistachios (about 2 ounces)</div><div class="eftAc" itemprop="ingredients">1/2 cup slivered almonds (about 2 ounces)</div><div class="eftAc" itemprop="ingredients">1/2 cup sugar</div><div class="eftAc" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</div><div class="eftAc" itemprop="ingredients">1 large egg</div><div class="eftAc" itemprop="ingredients">1 teaspoon vanilla extract</div><div class="eftAc" itemprop="ingredients">1/2 teaspoon almond extract</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<li class="ingredient-group"><ul class="ingredients"><li class="ingredient" itemprop="ingredients">9 large apricots, halved, pitted</li></ul></li>'
+		html = '<div class="ingredient-group"><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">9 large apricots, halved, pitted</div></div></div>'
 		pt_apply :rp_inglist, html: html
 
-		html = '<li class="ingredient-group"><strong>Glaze</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1/3 cup apricot jam</li><li class="ingredient" itemprop="ingredients">2 teaspoons water</li><li class="ingredient" itemprop="ingredients">Chopped pistachios</li></ul></li>'
+		html = '<div class="ingredient-group"><strong>Glaze</strong><div class="gPuEKn"><div class="eftAc" itemprop="ingredients">1/3 cup apricot jam</div><div class="eftAc" itemprop="ingredients">2 teaspoons water</div><div class="eftAc" itemprop="ingredients">Chopped pistachios</div></div></div>'
 		pt_apply :rp_inglist, html: html
 	end
 

@@ -189,11 +189,13 @@ Parser.init_grammar(
     rp_condition_tag: { tag: 'Condition' }, # There may be one or more presteps (instructions before measuring)
     rp_ingspec: {
         match: [
-            {optional: [:rp_amt, {optional: 'each'} ] },
+            {optional: [:rp_amt, {optional: 'each'}]},
             {optional: 'of'},
-            { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
+            { or: [:rp_ingalts, :rp_prepped_ings ] }
+        # { or: [ :rp_ingalts, [:rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_ingalts ] ] }
         ]
     },
+    rp_prepped_ings: { or: [ :rp_ingalts, [ :rp_presteps, { match: nil, parenthetical: true, optional: true }, :rp_prepped_ings ] ] },
     rp_ingredient_tag: { tag: 'Ingredient' },
     rp_ingalts: { tags: 'Ingredient' }, # ...an ingredient list of the form 'tag1, tag2, ... and/or tagN'
     rp_amt: {# An Amount is an optional number followed by an optional--possibly qualified--unit--only one required

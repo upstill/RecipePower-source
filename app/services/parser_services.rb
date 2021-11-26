@@ -154,7 +154,7 @@ The dependencies are as follows:
   # Options:
   # :input -- HTML to be parsed
   # :token -- token denoting what we're seeking (:rp_recipe, :rp_recipe_list, or any other token in the grammar)
-  # :in_place -- flag to parser#match to parse the input as though CSS selectors and line constraints have already been matched
+  # :as_stream -- flag to parser#match to parse the input as though CSS selectors and line constraints have already been matched
   # :annotate -- Once the input is parsed, annotate the results with HTML entities
   def go options = {}
     self.input = options[:input] if options.key?(:input)
@@ -174,15 +174,30 @@ The dependencies are as follows:
 
     # Recipe parsing includes a Patternista scan of the document and integration of the results
     @parsed = (token == :rp_recipe) ?
-                  parse_recipe( options.slice(:in_place, :annotate)) :
-                  parser.match( token, stream: nokoscan, in_place: options.delete(:in_place))
+                  parse_recipe( options.slice(:as_stream, :annotate)) :
+                  parser.match( token, stream: nokoscan, as_stream: options.delete(:as_stream))
+
+    # A little sugar: check ingredient line comments for stray ingredient specs
+    @parsed.find(:rp_ing_comment).each do |comment|
+      next if comment.result_stream.to_s.blank?
+      # Scan the comments from ingredient lines for stray ingspecs
+      if (scanned = parser.scan(comment.result_stream)&.keep_if { |sc| sc.token == :rp_ingspec }).present?
+        comment.children.concat scanned
+      end
+    end if @parsed
 
     # Take the benchmark report from the parser when all is said and done
     @match_benchmarks = parser.benchmark_sum @match_benchmarks
 
-    @parsed.enclose_all parser: parser if @parsed&.success? && options[:annotate]
-
-    @parsed&.success?
+    if @parsed&.success?
+      @parsed.enclose_all parser: parser if options[:annotate]
+      if Rails.env.test?
+        # Report the parsing results
+        puts "+++++++++ Final parsing result for :#{token}:"
+        report_results @parsed
+      end
+      @parsed
+    end
   end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
@@ -283,23 +298,49 @@ The dependencies are as follows:
 
   private
 
+  def report_results *result_seekers
+    result_seekers.each do |result_seeker|
+      [:rp_title, :rp_ingspec, :rp_author, :rp_prep_time, :rp_cook_time, :rp_total_time, :rp_yields, :rp_serve ].each do |sym|
+        to_report = result_seeker.find(sym)
+        to_report.unshift result_seeker if result_seeker.token == sym
+        to_report.each do |seeker|
+          puts seeker.to_s.gsub("\n", '\n')
+          if seeker.token == :rp_ingspec
+            puts "\t" + seeker.find(:rp_ingredient_tag).map { |ingred| "'#{ingred.value}'"}.join(', ')
+          end
+        end
+      end
+    end
+    x=2
+  end
+
   # Special handling for recipes: try a straight parse, then a scan to get other attributes.
   # Merge the results into a single Seeker with appropriate children
   def parse_recipe scanner=nokoscan, options={}
     scanner, options = nokoscan, scanner if scanner.is_a?(Hash)
 
-    @parsed = parser.match :rp_recipe, stream: scanner, in_place: options.delete(:in_place)
+    @parsed = parser.match :rp_recipe, stream: scanner, as_stream: options.delete(:as_stream)
 
     # Natural parsing of the recipe failed, so extract a title and subsequent material,
     # up to the next title, if any
     if !@parsed
       rlist = go options.merge(token: :rp_recipelist) # Parse the same content for a recipe list
       return @parsed = Seeker.failed(nokoscan, token: :rp_recipe) unless (rlist&.success? && rp = rlist.find(:rp_recipe).first)
-      @parsed = parser.match(:rp_recipe, stream: rp.result_stream, in_place: options.delete(:in_place))&.if_succeeded || rp
+      @parsed = parser.match(:rp_recipe, stream: rp.result_stream, as_stream: options.delete(:as_stream))&.if_succeeded || rp
+    end
+    if Rails.env.test?
+      # Report the parsing results
+      puts "+++++++++ Standard parsing result for :rp_recipe:"
+      report_results @parsed
     end
 
-    # Perform the scan only if sought elements aren't found in the parse
-    scanned_seekers = group parser.scan(scanner)
+    # Scan the input for triggered patterns, and group ingspecs thus found into lines
+    scanned_seekers = group parser.scan(scanner), @parsed.find(:rp_inglist)
+    if Rails.env.test?
+      # Report the parsing results
+      puts "+++++++++ Scanned parsing result for :rp_recipe:"
+      report_results *scanned_seekers
+    end
 
     children = @parsed.children
     # Whether parsed directly or as above, the recipe will have a title followed by instructions
@@ -357,10 +398,19 @@ The dependencies are as follows:
   end
 
   # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
-  def group seekers
+  def group seekers, extant_ils
     # Sort the seekers into ingredient lines and specs
-    ingspecs = seekers.collect { |seeker| seeker.find :rp_ingspec }.flatten
-    return seekers unless ingspecs.present?
+    # Any ingredient lists that were scanned out separately are preserved
+    seekers.delete_if do |seeker|
+      [:rp_inglist, :rp_ingline, :rp_ingspec].include?(seeker.token) &&
+          extant_ils.any? { |extant_il| extant_il.range.include? seeker.range }
+    end
+    inglists = seekers.find_all { |seeker| seeker.token == :rp_inglist }
+    seekers -= inglists
+    ingspecs = seekers.collect { |seeker| seeker.find :rp_ingspec }.
+        flatten.
+        delete_if { |ingspec| extant_ils.any? { |extant_il| extant_il.range.include? ingspec.range } }
+    return (seekers+inglists) unless ingspecs.present?
 
     # We aggregate a collection of ingredient lines as follows:
     # The idea is to
@@ -373,7 +423,9 @@ The dependencies are as follows:
     # A BinCount is a hash where the keys are Nokogiri nodes and the values are the count for that node.
     bc = BinCount.new
     # Initialize the bincount by looping across each ingline and incrementing all of its ancestors
-    ingspecs.each { |seeker| bc.increment *seeker.head_stream.text_element.ancestors.to_a }
+    ingspecs.each do |seeker|
+      bc.increment *seeker.head_stream.text_element.ancestors.to_a
+    end
     # Here's the tricky bit: get the b.f. for each node by DECREMENTING the count of its parent
     # by N-1, where N is its initial count, i.e., the number of its children leading to an ingnode.
     # The following loop works only because, once a node is decremented, N-1 becomes 0, so it
@@ -385,7 +437,7 @@ The dependencies are as follows:
     end
     # Remove the root (the document fragment) from consideration
     bc.delete nkdoc
-    inglists = []
+    # inglists = []
     while (max = bc.max) && (max.count > 2) do
       puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
       # Declare a result for the found collection, including all text elements under it
@@ -407,14 +459,15 @@ The dependencies are as follows:
           while intervening.peek == "\n" do
             intervening.first
           end
-          next_spec = parser.match :rp_ingspec, stream: intervening, in_place: true, singular: true
+          next_spec = parser.seek intervening, :rp_ingspec
+          # next_spec = parser.match :rp_ingspec, stream: intervening, as_stream: true, singular: true
         end
-        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), in_place: true, singular: true ) || child
+        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), as_stream: true, singular: true ) || child
         ps = if comment = extracted.find(:rp_ing_comment).first
           parser.scan comment.head_stream.except(succ&.head_stream)
         end
         inglines << extracted
-        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), in_place: true, singular: true ) do
+        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), as_stream: true, singular: true ) do
           inglines << extracted
         end
       }

@@ -109,6 +109,8 @@ class ParseTester < ActiveSupport::TestCase
     url = args.delete :url # Create the target (an database object) using the url
     html = args.delete :html # Parse an html string
     remainder = args.delete(:remainder) || ''
+    as_stream = args.delete :as_stream
+    as_stream = true if as_stream.nil? # The default is that a stream is parsed without regard to CSS
     @fail = args.delete :fail # Flag: expect the parse to fail
     @expected_tokens = args.delete :expected_tokens # Specifies tokens that should be successfully found
     @expected_attributes = [args.delete(:expected_attributes)].flatten.compact # Specifies tokens that should be successfully found
@@ -134,9 +136,9 @@ class ParseTester < ActiveSupport::TestCase
              end
     case
     when filename.present?
-      apply_to_string File.read(filename), token: @token, required_tags: required_tags
+      apply_to_string File.read(filename), token: @token, required_tags: required_tags, as_stream: as_stream
     when html.present?
-      apply_to_string html, token: @token, required_tags: required_tags, remainder: remainder
+      apply_to_string html, token: @token, required_tags: required_tags, remainder: remainder, as_stream: as_stream
     when url.present?
       do_recipe url,
                 required_tags: required_tags,
@@ -236,7 +238,7 @@ class ParseTester < ActiveSupport::TestCase
     site.bkg_land # Now the site should be prepared to trim recipes
   end
 
-  def apply_to_string html, token: :rp_recipe, required_tags: {}, remainder: ''
+  def apply_to_string html, token: :rp_recipe, required_tags: {}, remainder: '', as_stream: true
 
     @nokoscan = NokoScanner.new html
     ps = ParserServices.new input: @nokoscan,
@@ -247,7 +249,7 @@ class ParseTester < ActiveSupport::TestCase
     assert_not_nil (@parser = ps.parser), "No parser from ParserServices"
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
 
-    assert ps.go(seeking: [token], in_place: true), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
+    assert ps.go(seeking: [token], as_stream: as_stream), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
     assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
 
     if Rails.env.test?

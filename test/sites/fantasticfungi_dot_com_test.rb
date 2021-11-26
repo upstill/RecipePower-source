@@ -10,10 +10,10 @@ class FantasticfungiDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ white\ beans sage\ leaves fresh\ rosemary garlic\ clove
+    @ingredients = %w{ sage\ leaves garlic\ clove
 Extra\ Virgin\ Olive\ Oil autumn\ mushrooms virgin\ coconut\ oil sherry\ vinegar
 Salt pepper } # All ingredients found on the page
-    @units = %w{ ounce can medium-sized small Tablespoons cups teaspoon  } # All units
+    @units = %w{ medium-sized small Tablespoons cups teaspoon  } # All units
     @conditions = %w{ diced  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
@@ -71,7 +71,7 @@ Salt pepper } # All ingredients found on the page
 </div>
 EOF
     pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
-    assert_good counts: { :rp_ingline => 9 } # Run standard tests on the results
+    assert_good counts: { :rp_ingline => 7 } # Run standard tests on the results
   end
 
   test 'recipes parsed out correctly' do

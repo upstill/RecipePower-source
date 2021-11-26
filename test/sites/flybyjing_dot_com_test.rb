@@ -10,7 +10,7 @@ class FlybyjingDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ tofu dried\ shiitake\ mushrooms garlic\ cloves ginger Doubanjiang
+    @ingredients = %w{ tofu dried\ shiitake\ mushrooms garlic\ cloves ginger Doubanjiang cornstarch Sichuan\ pepper  whole\ Sichuan\ pepper
 Sichuan\ Chili\ Crisp chili\ oil fermented\ black\ beans stock bone\ broth Sichuan\ pepper scallions } # All ingredients found on the page
     @units =  %w{ g ounce tsp tbsp cup pinch } # All units
     @conditions = %w{ minced ground roasted } # All conditions

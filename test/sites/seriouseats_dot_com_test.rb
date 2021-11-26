@@ -12,7 +12,7 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
   def setup
     @ingredients = %w{ eggplants Salt Cooking\ oil Sichuan\ chile\ bean\ paste
       garlic ginger stock water superfine\ sugar Chinese\ light\ soy\ sauce potato\ starch
-      Chinkiang\ vinegar scallion\ greens
+      Chinkiang\ vinegar scallion\ greens water
      } # All ingredients found on the page
     @units =  %w{ g pound ounces tablespoons tablespoon teaspoons teaspoon ml } # All units
     @conditions = %w{ finely\ chopped hot thinly\ sliced cold } # All conditions

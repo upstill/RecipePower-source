@@ -62,9 +62,9 @@ class SimplyrecipesDotComTest < ActiveSupport::TestCase
     assert_equal :rp_ingspec, seeker.token
 
     html = 'some garbage followed by 2 teaspoons vegetable oil'
-    seeker = scan NokoScanner.new(html)
-    assert_not_nil seeker, "Nothing found in scanning '#{html}'"
-    assert_equal :rp_ingspec, seeker.token
+    seekers = scan NokoScanner.new(html)
+    assert_not_empty seekers, "Nothing found in scanning '#{html}'"
+    assert_equal :rp_ingspec, seekers.first.token
   end
 
   test 'mapping in grammar mods' do

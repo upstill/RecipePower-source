@@ -331,16 +331,16 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream, in_place: false, singular: false
+  def match token, stream: @stream, as_stream: false, singular: false
     if Rails.env.test?
       summ = stream.to_s.truncate(100).gsub "\n", '\n'
       puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{summ}'"
     end
     safe_stream = stream.clone
     matched = nil
-    if (in_place || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
+    if (as_stream || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
       if ge.is_a?(Hash)
-        ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if in_place
+        ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if as_stream
         ge = ge.except :match_all if singular
       end
       token = ge.delete(:token) || token
@@ -410,7 +410,7 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      mtch = (block_given? ? yield(stream) : match(spec, stream: stream, in_place: true))
+      mtch = (block_given? ? yield(stream) : match(spec, stream: stream, as_stream: true))
       if mtch
         return mtch if mtch.success?
         stream = mtch.next
@@ -583,7 +583,7 @@ class Parser
 
   # Add the seeker to the cache
   def cache seeker, key
-    @cache_on ? (@cache[key] = seeker.freeze) : seeker
+    @cache_on ? (@cache[key] = seeker.clone) : seeker
   end
 
   # Check the cache
@@ -866,7 +866,7 @@ class Parser
       # Turn the array structure
       collections = Array.new(children.first.count) { children.map &:shift }
       children = collections.map { |list|
-        Seeker.new children: list, token: context[:under] || token
+        Seeker.new children: list.delete_if(&:nil?), token: context[:under] || token
       }
     when context[:repeating] # The list will be matched repeatedly until the end of input
       # Note: If there's no bound, the list will consume the entire stream

@@ -12,7 +12,7 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
   def setup
     @ingredients = %w{ cauliflower extra\ virgin\ olive\ oil garlic kosher\ salt black\ pepper Parmesan\ cheese } # All ingredients found on the page
     @units =  %w{ medium\ head cup teaspoons teaspoon } # All units
-    @conditions = %w{ finely\ grated ground crushed } # All conditions
+    @conditions = %w{ finely\ grated crushed freshly\ ground } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:gm_recipes => { :at_css_match => 'h1' },
@@ -73,7 +73,7 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
 <p><span data-ingredient-quantity="true">1</span> <span data-ingredient-unit="true">teaspoon</span> <span data-ingredient-name="true">kosher salt</span></p>
 </li>
 <li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1/2</span> <span data-ingredient-unit="true">teaspoon</span> <span data-ingredient-name="true">ground black pepper</span></p>
+<p><span data-ingredient-quantity="true">1/2</span> <span data-ingredient-unit="true">teaspoon</span> <span data-ingredient-name="true">freshly ground black pepper</span></p>
 </li>
 <li class="structured-ingredients__list-item">
 <p><span data-ingredient-quantity="true">1/2</span> <span data-ingredient-unit="true">cup</span> finely <span data-ingredient-name="true">grated </span><a href="https://www.thespruceeats.com/parmesan-cheese-substitutes-591333" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1"><span data-ingredient-name="true">Parmesan cheese</span></a></p>

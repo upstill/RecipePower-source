@@ -17,6 +17,7 @@ class Seeker
                  pos: nil,
                  bound: nil,
                  token: nil)
+    children.delete_if &:nil?
     if stream ||= children.first.stream
       @stream = stream
     else
@@ -601,27 +602,28 @@ class AmountSeeker < Seeker
     original_stream = stream.clone
     stream = stream.rest if stream.peek&.match /about/i
     pos = stream.pos
-    unit = unit_tail = nil
+    unit = nil
     num = NumberSeeker.match(stream) { |remainder|
       # A unit may follow the number within the same token
-      unit = TagSeeker.match StrScanner.new([ remainder ]), opts.slice(:lexaur).merge(types: 5)
+      if unit = TagSeeker.match(StrScanner.new([ remainder ]), opts.slice(:lexaur).merge(types: 5))
+        unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
+      end
     }
     if num
-      bound =
-      if unit ||= TagSeeker.match(num.tail_stream, opts.slice(:lexaur).merge(types: 5))
-        unit.bound
-      else
-        return if opts[:full_only]
-        num.bound
-      end
-      self.new original_stream, num, unit
+      unit ||= TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
+      return if opts[:full_only] && !unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
       unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
-      self.new(original_stream, num, unit) if num.present? && unit
+      return unless unit
+      unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
+    else
+      return
     end
+    self.new original_stream, num, unit
   end
+
 end
 
 # A FullAmountSeeker requires BOTH number and unit
