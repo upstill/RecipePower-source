@@ -151,7 +151,7 @@ Parser.init_grammar(
     },
 =end
     rp_embedded_inglist: {
-        match: :rp_ingline,
+        match: :rp_ingspec,
         orlist: :predivide,
         token: :rp_inglist
     },

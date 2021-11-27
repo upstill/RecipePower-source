@@ -20,8 +20,8 @@ class LiquorDotComTest < ActiveSupport::TestCase
       :gm_recipes => { at_css_match: 'h1' },
       :gm_inglist => {
           :flavor => :unordered_list,
-          :list_class => 'ingredient-list',
-          :line_class => 'ingredient'
+          :list_class => 'structured-ingredients__list',
+          :line_class => 'structured-ingredients__list-item'
       },
 			:rp_instructions => {
 				:in_css_match => "section.section--instructions"

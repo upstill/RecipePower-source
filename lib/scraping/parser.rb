@@ -766,7 +766,7 @@ class Parser
       end
       return case children.count
       when 0
-        Seeker.failed(start_scanner, context.merge(token: token))
+        Seeker.failed start_scanner, context.merge(token: token)
       when 1 # Don't create a new node with just one child
         children.first
       else

@@ -399,22 +399,59 @@ The dependencies are as follows:
 
   # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
   def group seekers, extant_ils
+    # Search one or more seekers for a token, returning found items across them all, or the results of calling a block
+    def find_for *args, &block
+      token = args.shift if args.first.is_a?(Symbol)
+      seekers = token ? args.collect { |seeker| seeker.find(token) }.flatten(1) : args
+      block_given? ?
+          seekers.collect { |seeker| block.call seeker }.compact :
+          seekers
+    end
+
     # Sort the seekers into ingredient lines and specs
-    # Any ingredient lists that were scanned out separately are preserved
+    # Any ingredient lists that were scanned out separately are preserved,
+    # and seekers that turned up in the scan are ignored if they're contained in the list.
+    extant_ranges = find_for *extant_ils, &:range
     seekers.delete_if do |seeker|
       [:rp_inglist, :rp_ingline, :rp_ingspec].include?(seeker.token) &&
-          extant_ils.any? { |extant_il| extant_il.range.include? seeker.range }
+          extant_ranges.any? { |extant_range| extant_range.include? seeker.range }
     end
+    # Separate out the ingredient lists from the remaining scanned seekers
     inglists = seekers.find_all { |seeker| seeker.token == :rp_inglist }
     seekers -= inglists
+    # ...and finally, extract ingspecs that are embedded in scanned seekers
     ingspecs = seekers.collect { |seeker| seeker.find :rp_ingspec }.
         flatten.
         delete_if { |ingspec| extant_ils.any? { |extant_il| extant_il.range.include? ingspec.range } }
-    return (seekers+inglists) unless ingspecs.present?
+    ingspecs = find_for(:rp_ingspec, *seekers) { |ingspec| ingspec unless extant_ranges.any? { |extant_range| extant_range.include? ingspec.range }}
+    # First, remove children of the scanned inglist(s) that are redundant wrt extant ingredient lists.
+    # This means 1) is the child w/in the bounds of the extant list, or 2) its tag already appears there
+    extant_ingred_ids = find_for(:rp_ingredient_tag, *extant_ils) { |tag| tag.tagdata[:id] }.uniq
+    inglists.keep_if do |inglist|
+      # Remove redundant children, i.e., those whose tag(s) already appear on an extant ingredient list
+      inglist.children.delete_if { |ingchild|
+        extant_ranges.any? { |extant_range| extant_range.include? ingchild.range } ||
+            (find_for(:rp_ingredient_tag, ingchild) { |tag| tag.tagdata[:id] }.flatten - extant_ingred_ids).empty?
+      }
+      #
+      if inglist.children.count > 1
+        inglist.pos = inglist.children.first.pos
+        inglist.bound = inglist.children.last.bound
+      end
+    end
+
+    return (seekers + inglists) unless ingspecs.present? || inglists.present?
+
+    extant_il_ancestors = extant_ils.
+        collect { |extant_il|
+          extant_il.result_stream.text_element.ancestors.to_a
+        }.
+        flatten.
+        uniq
 
     # We aggregate a collection of ingredient lines as follows:
-    # The idea is to
-    # * Each node in the Nokogiri ancestry of each ingline gets a point for being on the path to that node
+    # The idea is to nominate one or more ancestors of the ingredient specs as an ingredient list(s)
+    # * Each node in the Nokogiri ancestry of each ingspec gets a point for being on the path to that node
     # * We derive a "branching factor" for each such ancestor: the count of its children which lead to an ingline
     # * i.e., if an ancestor has five children which each lead to ingspecs, its branching factor is five,
     # * but its parent's branching factor is only one
@@ -424,15 +461,17 @@ The dependencies are as follows:
     bc = BinCount.new
     # Initialize the bincount by looping across each ingline and incrementing all of its ancestors
     ingspecs.each do |seeker|
-      bc.increment *seeker.head_stream.text_element.ancestors.to_a
+      bc.increment *(seeker.head_stream.text_element.ancestors.to_a - extant_il_ancestors)
     end
     # Here's the tricky bit: get the b.f. for each node by DECREMENTING the count of its parent
     # by N-1, where N is its initial count, i.e., the number of its children leading to an ingnode.
     # The following loop works only because, once a node is decremented, N-1 becomes 0, so it
     # doesn't matter how many times or in what order the nodes in the tree are visited.
     nkdoc.traverse do |node|
-      if (adj = bc[node] - 1 ) > 0
-        node.ancestors.each { |anc| bc[anc] -= adj }
+      if (adj = bc[node] - 1) > 0
+        node.ancestors.each { |anc|
+          break if extant_il_ancestors.include?(anc)
+          bc[anc] -= adj }
       end
     end
     # Remove the root (the document fragment) from consideration
@@ -445,14 +484,14 @@ The dependencies are as follows:
       children = ingspecs.select { |line| range.include?(line.pos) && range.include?(line.bound) }
       inglines = []
       children.each_index { |ix|
-        child, succ = children[ix..(ix+1)]
+        child, succ = children[ix..(ix + 1)]
         # Scan the material from the end of child to the beginning of succ for other ingspecs
         intervening = succ ? (child.tail_stream.except succ.head_stream) : child.tail_stream.within(range)
         next_spec = parser.seek intervening, :rp_ingspec
         while intervening.to_s.present? && next_spec do
           noise = intervening.except(next_spec.stream)
           comm = noise.to_s.strip.present? ? Seeker.new(noise, token: :ing_comment) : nil
-          newline = Seeker.new(token: :rp_ingline, children: [child, comm].compact )
+          newline = Seeker.new(token: :rp_ingline, children: [child, comm].compact)
           inglines << newline
           child = next_spec
           intervening = succ ? (child.tail_stream.except succ.head_stream) : child.tail_stream.within(range)
@@ -462,12 +501,12 @@ The dependencies are as follows:
           next_spec = parser.seek intervening, :rp_ingspec
           # next_spec = parser.match :rp_ingspec, stream: intervening, as_stream: true, singular: true
         end
-        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), as_stream: true, singular: true ) || child
+        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), as_stream: true, singular: true) || child
         ps = if comment = extracted.find(:rp_ing_comment).first
-          parser.scan comment.head_stream.except(succ&.head_stream)
-        end
+               parser.scan comment.head_stream.except(succ&.head_stream)
+             end
         inglines << extracted
-        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), as_stream: true, singular: true ) do
+        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), as_stream: true, singular: true) do
           inglines << extracted
         end
       }
@@ -477,7 +516,7 @@ The dependencies are as follows:
       bc.delete max.object
     end
 
-    inglists + seekers.keep_if { |item| ![:rp_parenthetical, :rp_inglist, :rp_ingline, :rp_ingspec ].include? item.token}
+    inglists + seekers.keep_if { |item| ![:rp_parenthetical, :rp_inglist, :rp_ingline, :rp_ingspec].include? item.token }
   end
 
   # Given an ingredient list with a collection of items, infer an
