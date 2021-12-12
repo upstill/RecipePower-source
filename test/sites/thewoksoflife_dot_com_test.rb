@@ -22,12 +22,8 @@ class ThewoksoflifeDotComTest < ActiveSupport::TestCase
     @units = 'pound'
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:gm_recipes => {
-				:in_css_match => "div.wprm-recipe-the-woks-of-life"
-			},
-			:rp_title => {
-				:in_css_match => "h2"
-			}
+			:gm_recipes => { :in_css_match => "div.wprm-recipe-the-woks-of-life" },
+			:rp_title => { :in_css_match => "h2" }
 		}
 		@trimmers = ["div.wprm-entry-footer", "div.social", "div.wprm-container-float-right"]
 		@selector = "div.wprm-recipe-the-woks-of-life"

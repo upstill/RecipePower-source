@@ -1,30 +1,15 @@
 ---
-:root: www.seriouseats.com
 :selector: div.article__container
 :trimmers:
 - div.nav-share
 - div.pubmod-date
-- div.mntl-chop
-- div.mntl-sc-block-adslot
-- div.feedback-block
-- div.project-meta-content
-- div#shop-button
-- div.recipe-decision__header
-- div.ads-config
-- div#ad-group-1_1-0
-- div#article-meta__feedback-container_1-0
-- button#relish-save_2-0
-- div#social-share-wrapper_1-0
-- div.article-byline
-- nav.social-nav
-- nav.tag-nav
 - figure
 - div.author-byline
 :grammar_mods:
   :gm_inglist:
     :flavor: :unordered_list
-    :list_class: ingredient-list
-    :line_class: ingredient
+    :list_class: structured-ingredients__list
+    :line_class: structured-ingredients__list-item
   :rp_title:
     :in_css_match: h1.heading__title
 :sample_url: http://www.seriouseats.com/recipes/2010/04/fish-fragrant-eggplant-recipe-fuchsia-dunlop.html

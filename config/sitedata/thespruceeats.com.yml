@@ -19,8 +19,6 @@
 - div.featured-link
 - div.sources
 :grammar_mods:
-  :gm_recipes:
-    :at_css_match: h1
   :gm_inglist:
     :flavor: :unordered_list
     :list_class: structured-ingredients__list

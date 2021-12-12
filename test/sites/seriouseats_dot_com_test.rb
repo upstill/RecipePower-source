@@ -20,8 +20,8 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
 		@grammar_mods = {
       :gm_inglist => {
           :flavor => :unordered_list,
-          :list_class => 'ingredient-list',
-          :line_class => 'ingredient'
+          :list_class => 'structured-ingredients__list',
+          :line_class => 'structured-ingredients__list-item'
       },
 			:rp_title => {
 				:in_css_match => "h1.heading__title"
@@ -62,51 +62,51 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
 
   test 'ingredient list' do
 
-    html = '<li class="ingredient"> 1 pound 5 ounces (600g) eggplants (1–2 large) </li>'
+    html = '<li class="structured-ingredients__list-item"> 1 pound 5 ounces (600g) eggplants (1–2 large) </li>'
     pt_apply :rp_ingline, html: html, ingredients: 'eggplants', units: %w{ pound ounces }
 
-    html = '<li class="ingredient"> 10 tablespoons (150ml) hot stock or water </li>'
+    html = '<li class="structured-ingredients__list-item"> 10 tablespoons (150ml) hot stock or water </li>'
     pt_apply :rp_ingline, html: html, ingredients: %w{ stock water }, units: %w{ tablespoons }, conditions: 'hot'
 
     html = '1 pound 5 ounces (600g)'
     pt_apply :rp_amt, html: html, units: %w{ pound ounces }
 
     html =<<EOF
-<ul id="ingredient-list_1-0" class="comp ingredient-list simple-list simple-list--circle ">
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<ul id="ingredient-list_1-0" class="comp structured-ingredients__list simple-list simple-list--circle ">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 pound 5 ounces (600g) eggplants (1–2 large)
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 Salt
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 Cooking oil, for deep-frying
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 1/2 tablespoons Sichuan chile bean paste (see note)
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 1/2 tablespoons finely chopped garlic
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 tablespoon finely chopped ginger
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 10 tablespoons (150ml) hot stock or water
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 4 teaspoons superfine sugar
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 teaspoon Chinese light soy sauce
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 3/4 teaspoon potato starch, mixed with 1 tablespoon cold water
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 1 tablespoon Chinkiang vinegar (see note)
 </li>
-<li class="simple-list__item js-checkbox-trigger ingredient text-passage">
+<li class="structured-ingredients__list-item js-checkbox-trigger ingredient text-passage">
 6 tablespoons thinly sliced scallion greens
 </li>
 </ul>

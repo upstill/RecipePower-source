@@ -332,10 +332,7 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream, as_stream: false, singular: false
-    if Rails.env.test?
-      summ = stream.to_s.truncate(100).gsub "\n", '\n'
-      puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{summ}'"
-    end
+    puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if Rails.env.test?
     safe_stream = stream.clone
     matched = nil
     if (as_stream || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
@@ -673,6 +670,12 @@ class Parser
         next unless match.retain?
         return match.with_stream(scanner) unless context[:match_all]
         matches << match
+        #match = match.clone_with token: token, range: subscanner.range
+        #if context[:match_all]
+        #  matches << match
+        #else
+        #  return match
+        #end
       end
       return report_matches matches, under, spec, context, last_scanner, scanner
     end
@@ -783,12 +786,12 @@ class Parser
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       context = context.merge(under: token) if token
       if Rails.env.test?
-        @break_level ||= 3 ; str = ''
-        str = (scanner.to_s.truncate 100).gsub "\n", '\n'
+        @break_level ||= 3
+        str = scanner.to_s trunc: 100, nltr: true
         report_enter "Seeking :#{spec} on '#{str}'"
         returned = match_specification scanner, @grammar[spec], spec, context
-        report_exit (returned.success? ? "Found '#{returned}' for :#{returned.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
-        cache returned, cache_key
+        report_exit (returned.success? ? "Found '#{returned.to_s trunc: 200}' for :#{returned.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
+        cache returned, cache_key   
       else
         cache match_specification(scanner, @grammar[spec], spec, context), cache_key
       end
@@ -856,9 +859,8 @@ class Parser
         new_children = []
         old_children = children.last
         old_children.each_index do |ix|
-          child = old_children[ix]
-          scanner = child.tail_stream.except old_children[ix+1]&.head_stream
-          new_children.push match_specification( scanner, spec, context.except(:distribute)).if_succeeded
+          intervening = scanner.between old_children[ix].result_stream, old_children[ix+1]&.result_stream
+          new_children.push match_specification( intervening, spec, context.except(:distribute)).if_succeeded
         end
         children.push new_children
       end
@@ -1039,15 +1041,18 @@ class ParserEvaluator
 
 # Evaluate whether child_token can appear as a child of parent_token.
   def can_include? parent_token, child_token, transitive = true
-    def refers_to? supe, sub, transitive=true
+    # Does supe refer to sub in the grammar?
+    # If stack is not nil, it is an array used to avoid circular recursion.
+    def refers_to? supe, sub, stack=nil
       return unless (inclusions = @grammar_inclusions[supe])
+      puts "Can :#{supe} include :#{sub}?"
       inclusions.include?(sub) ||
-          transitive && inclusions.find { |inner| refers_to? inner, sub }
+          stack && (stack.include?(sub) || inclusions.find { |inner| refers_to? inner, sub, stack+[sub] })
     end
 
     parent_token.nil? ||
         child_token.nil? ||
-        refers_to?(parent_token.to_sym, child_token.to_sym, transitive)
+        refers_to?(parent_token.to_sym, child_token.to_sym, ([parent_token.to_sym] if transitive))
   end
 
   private

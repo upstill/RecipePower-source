@@ -1,14 +1,12 @@
 ---
-:selector: article.recipe
+:selector: article
 :trimmers:
 - ul.social-icons__list
 :grammar_mods:
   :rp_inglist:
-    :in_css_match: div.recipe__ingredient-list div
+    :in_css_match: div.List-XYTyX
   :rp_ingline:
     :at_css_match: p.BaseWrap-sc-TURhJ
-  :gm_recipes:
-    :at_css_match: h1
   :rp_title:
     :in_css_match: h1
   :rp_instructions:

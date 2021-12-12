@@ -15,7 +15,7 @@ class UmamimartDotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:gm_recipes => { :at_css_match => 'h1.article--title' },
+			# :gm_recipes => { :at_css_match => 'h1.article--title' },
       :rp_inglist => { :in_css_match => 'p' },
 			:rp_ingline => { :inline => true },
 			:rp_title => { :in_css_match => 'h1' }

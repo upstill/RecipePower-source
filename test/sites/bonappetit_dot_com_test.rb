@@ -10,7 +10,7 @@ class BonappetitDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil
+    @ingredients = %w{ lime\ zest lime\ juice Dijon\ mustard honey olive\ oil Kosher\ salt freshly\ ground\ pepper
     cauliflower\ florets nutritional\ yeast lollo\ rosso\ lettuce romaine frisee Parmesan } # All ingredients found on the page
     # Kosher\ salt freshly\ ground\ pepper # Neither scanning nor parsing finds
     @units =  %w{ teaspoon cup cup ounces tablespoon cups } # All units
@@ -18,12 +18,12 @@ class BonappetitDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
         :rp_inglist => {
-            :in_css_match => 'div.recipe__ingredient-list div'
+            :in_css_match => 'div.List-XYTyX',
         },
         :rp_ingline => {
             :at_css_match => 'p.BaseWrap-sc-TURhJ'
         },
-        :gm_recipes => {:at_css_match => 'h1'},
+        # :gm_recipes => {:at_css_match => 'h1'},
         :rp_title => {
             :in_css_match => 'h1'
         },
@@ -31,7 +31,7 @@ class BonappetitDotComTest < ActiveSupport::TestCase
             :in_css_match => 'div.recipe__instruction-list div'
         }
     }
-    @selector = 'article.recipe' # "header h1\r\ndiv.recipe__main-content"
+    @selector = 'article' # "header h1\r\ndiv.recipe__main-content"
     @trimmers = ["ul.social-icons__list"]
 		@sample_url = 'http://www.bonappetit.com/recipe/shaved-cauliflower-salad'
 		@sample_title = 'Shaved Cauliflower Salad'

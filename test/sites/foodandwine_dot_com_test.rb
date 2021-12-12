@@ -17,7 +17,7 @@ class FoodandwineDotComTest < ActiveSupport::TestCase
     @conditions = %w{ finely\ grated chopped  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
-        :gm_recipes => {:at_css_match => 'h1'},
+        # :gm_recipes => {:at_css_match => 'h1'},
         :gm_inglist => {
             :flavor => :unordered_list,
             :list_class => 'ingredients-section',

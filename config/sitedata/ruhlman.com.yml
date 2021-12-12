@@ -1,11 +1,8 @@
 ---
-:root: ruhlman.com
 :selector: div.entry-content
 :trimmers: []
 :grammar_mods:
   :gm_inglist: :unordered_list
-  :gm_recipes:
-    :at_css_match: h2
   :rp_instructions:
     :in_css_match:
 :sample_url: https://ruhlman.com/friday-cocktail-hour-the-vesper/

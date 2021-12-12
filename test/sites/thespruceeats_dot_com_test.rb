@@ -15,7 +15,7 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
     @conditions = %w{ finely\ grated crushed freshly\ ground } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:gm_recipes => { :at_css_match => 'h1' },
+			# :gm_recipes => { :at_css_match => 'h1' },
 			:gm_inglist => {
 					:flavor => :unordered_list,
 					:list_class => 'structured-ingredients__list',

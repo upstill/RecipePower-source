@@ -266,9 +266,9 @@ The dependencies are as follows:
     found = seekers.map do |seeker|
       case as
       when :amountstring
-        [seeker.find(:rp_num_or_range).first&.to_s, seeker.find(:rp_unit_tag).first&.value].compact.join ' '
+        [seeker.find(:rp_num_or_range).first&.text, seeker.find(:rp_unit_tag).first&.value].compact.join ' '
       when :numrange
-        num_or_range = seeker.find(:rp_num_or_range).first.to_s
+        num_or_range = seeker.find(:rp_num_or_range).first.text
         nums = num_or_range.
             split(/-|to/).
             map(&:strip).
@@ -276,7 +276,7 @@ The dependencies are as follows:
             map &:to_i
         (nums.first)..(nums.last) if nums.present?
       when :timerange
-        next unless timestr = seeker.find(:rp_time).first&.to_s
+        next unless timestr = seeker.find(:rp_time).first&.text
         secs =
         if timestr.match(/(\d+)\s+(\w+)/)
           num = $1.to_i
@@ -319,6 +319,7 @@ The dependencies are as follows:
   def parse_recipe scanner=nokoscan, options={}
     scanner, options = nokoscan, scanner if scanner.is_a?(Hash)
 
+    # First, use the grammar directly
     @parsed = parser.match :rp_recipe, stream: scanner, as_stream: options.delete(:as_stream)
 
     # Natural parsing of the recipe failed, so extract a title and subsequent material,
@@ -334,67 +335,154 @@ The dependencies are as follows:
       report_results @parsed
     end
 
-    # Scan the input for triggered patterns, and group ingspecs thus found into lines
-    scanned_seekers = group parser.scan(scanner), @parsed.find(:rp_inglist)
+    # Handle the special case of seekers whose children all have the same token by promoting the children
+    # in place of the parent.
+    @parsed.traverse do |seeker|
+      to_delete = []
+      seeker.children.each_index { |child_ix|
+        child = seeker.children[child_ix]
+        next unless child.children.present? && child.children.all? { |grandchild| grandchild.token == child.token }
+        to_delete << child_ix
+      }
+      while child_ix = to_delete.pop do
+        child = seeker.children.delete_at child_ix
+        seeker.insert *child.children
+      end
+    end
+    @parsed.children.sort_by! &:pos
+
+    # scanned_seekers = group parser.scan(@parsed.find(:rp_recipe).first&.result_stream || scanner), @parsed.find(:rp_inglist)
+    # Now scan the remainder of the recipe--excepting already-found title and ingredient list(s)--for triggered patterns.
+    # NB we only scan the first recipe found.
+    recipe_seeker = @parsed.find(:rp_recipe).first
+    scanned_seekers, pred = [], nil
+    parsed_seekers = (recipe_seeker.find(:rp_title) + recipe_seeker.find(:rp_inglist)).sort_by &:pos
+    parsed_seekers.each do |parsed_seeker|
+      scanned_seekers += parser.scan(@parsed.result_stream.between pred&.result_stream, parsed_seeker.result_stream)
+      # scanned_seekers << parsed_seeker
+      pred = parsed_seeker
+    end
+    scanned_seekers += parser.scan(@parsed.result_stream.between pred, nil)
+
+    # Group results identified as above, e.g., assemble lines into lists
+    scanned_seekers = group scanned_seekers, @parsed.find(:rp_inglist)
     if Rails.env.test?
       # Report the parsing results
       puts "+++++++++ Scanned parsing result for :rp_recipe:"
       report_results *scanned_seekers
     end
 
-    children = @parsed.children
-    # Whether parsed directly or as above, the recipe will have a title followed by instructions
-    children.sort_by &:pos # Ensure that the elements are sorted by position
-
+    # Now to reconcile the seekers extracted via scanning with the parsed result:
+    # -- any overlapping ingredient lists are merged
     # Insert each of scanned_seekers by position,
     # clipping the items before and after to its bounds
-    scanned_seekers.each do |to_insert|
+    scanned_seekers.each do |scanned_seeker_to_insert|
+      # Forestall redundancy by rejecting any scanned elements that match existing children
+      # in token and range.
+      scanned_range = scanned_seeker_to_insert.range
+      next if @parsed.find(scanned_seeker_to_insert.token).map(&:range).any? { |parsed_range|
+        parsed_range.include?(scanned_range) || scanned_range.include?(parsed_range)
+      }
       # Split any :rp_instructions child that encompasses the element
-      case to_insert.token
+      case scanned_seeker_to_insert.token
       when :rp_parenthetical
         next
       when :rp_inglist
         # Find an overlapping ingredient list to merge with
         extant_il = @parsed.
             find(:rp_inglist).
-            find { |il| il.range.overlaps? to_insert.range }
+            find { |il| il.range.overlaps? scanned_seeker_to_insert.range }
         if extant_il
-          # Merge the overlapping lists by merging all of to_insert's children into extant_il
-          to_insert.children.each { |child| extant_il.insert child }
+          # Merge the overlapping lists by merging all of scanned_seeker_to_insert's children into extant_il
+          scanned_seeker_to_insert.children.each { |child| extant_il.insert child }
           next
         else
-          to_insert = Seeker.new scanner, children: [ to_insert ], token: :rp_inglist
+          scanned_seeker_to_insert = Seeker.new scanner, children: [ scanned_seeker_to_insert ], token: :rp_inglist
         end
       when :rp_ingline
         # Find an overlapping or adjacent ingredient list to move into.
         # If none, create one and insert it
       end
-      after = nil
-      children.find_index { |child|
-        if child.token == :rp_instructions && child.range.include?(to_insert.pos)
-          if child.text(child.pos...to_insert.pos).blank?
-            # No text before the inserted node => reposition the child afterward
-            child.pos = to_insert.bound
-          elsif child.text(to_insert.bound...child.bound).blank?
-            child.bound = to_insert.pos
+
+      parsed_parent, after = @parsed, nil # The parent that will receive the scanned seeker
+      # Look for any :rp_instructions result that encloses the scanned seeker, and split it as necessary
+      @parsed.traverse do |parent|
+        if child_ix = parent.children.find_index { |child| child.token == :rp_instructions && child.range.include?(scanned_range.begin) }
+          instructions = parent.children[child_ix]
+          parsed_parent = parent # Mark this for later modification
+          parsed_parent.children.sort_by &:pos
+          # Clear any elements found inside an :rp_instructions section by splitting the latter
+          if instructions.text(instructions.pos...scanned_range.begin).blank?
+            # No text before the inserted node => reposition the instructions afterward
+            instructions.pos = scanned_range.end
+          elsif instructions.text(scanned_range.end...instructions.bound).blank?
+            instructions.bound = scanned_range.begin
           else
-            after = child.clone
-            child.bound, after.pos = to_insert.pos, to_insert.bound
+            after = instructions.clone
+            instructions.bound, after.pos = scanned_range.begin, scanned_range.end
           end
         end
-      }
-      # Forestall redundancy by rejecting any scanned elements that match existing children
-      # in token and range
-      next if children.any? { |child|
-        child.token == to_insert.token &&
-            (child.range.include?(to_insert.range) || to_insert.range.include?(child.range))
-      }
-      insert_before = (binsearch(children, to_insert.pos, &:pos) || -1) + 1
-      children.insert insert_before, after if after
-      children.insert insert_before, to_insert
+      end
+      insert_before = (binsearch(parsed_parent.children, scanned_range.begin, &:pos) || -1) + 1
+      parsed_parent.children.insert insert_before, after if after
+      parsed_parent.children.insert insert_before, scanned_seeker_to_insert
     end
 
+    # Now a beauty pass: examine the space between each :ingspec found for stray material
+    @parsed.find(:rp_inglist).each do |inglist|
+      inspecs = inglist.find(:rp_ingspec).sort_by(&:pos)
+      il_stream = inglist.result_stream
+      intervening = il_stream.between nil, inspecs.first.result_stream
+      outspecs = ingspecs_in intervening
+      inspecs.each_index do |ix|
+        child, succ = inspecs[ix..(ix + 1)]
+        outspecs << child
+        # Scan the material from the end of child to the beginning of succ for other ingspecs
+        intervening = il_stream.between child.result_stream, succ&.result_stream
+        outspecs += ingspecs_in intervening
+      end
+      # Now we have a definitive, sorted collection of ingredient specs in the list.
+      # Build them into ingredient lines and set the list's children to those.
+      outlines = []
+      outspecs.each_index do |ix|
+        child, succ = outspecs[ix..(ix + 1)]
+        intervening = il_stream.between child.result_stream, succ&.result_stream
+        comm = Seeker.new(intervening, token: :rp_comment)
+        outlines << Seeker.new( inglist.stream, children: [child, comm], token: :rp_ingline)
+      end
+      inglist.children = outlines
+    end
+
+    # Finally, intersperse :rp_instructions between the ingredient lists
+    instrs = []
+    @parsed.children.each_index do |child_ix|
+      if (child_il = @parsed.children[child_ix]).token == :rp_inglist
+        next_child_il = @parsed.children[child_ix+1..-1].find { |subsq| subsq.token == :rp_inglist }
+        intervening = @parsed.result_stream.between child_il.result_stream, next_child_il&.result_stream
+        instrs << Seeker.new(intervening, token: :rp_instructions) if intervening.to_s.present?
+      end
+    end
+    @parsed.insert *instrs
+
     @parsed&.success?
+  end
+
+  def ingspecs_in stream
+    streams = []
+    while (stream = stream.past_newline).to_s.present? && (spec = parser.seek stream, :rp_parenthetical )
+      streams << (stream.except spec.head_stream)
+      stream = stream.past spec.result_stream
+    end
+    streams << stream
+    results = []
+    streams.each do |stream|
+      while (stream = stream.past_newline).to_s.present? &&
+          (spec = parser.seek(stream, :rp_ingspec)) do
+        results << spec if spec.find(:rp_amt).present? || spec.find(:rp_presteps).present?
+        stream = stream.except spec.stream
+      end
+    end
+    results
   end
 
   # Gather a set of seekers under larger headers, e.g. gather ingredients into an ingredient list
@@ -411,7 +499,8 @@ The dependencies are as follows:
     # Sort the seekers into ingredient lines and specs
     # Any ingredient lists that were scanned out separately are preserved,
     # and seekers that turned up in the scan are ignored if they're contained in the list.
-    extant_ranges = find_for *extant_ils, &:range
+    extant_ils.first&.open_range
+    extant_ranges = find_for(*extant_ils) { |il| il.open_range }
     seekers.delete_if do |seeker|
       [:rp_inglist, :rp_ingline, :rp_ingspec].include?(seeker.token) &&
           extant_ranges.any? { |extant_range| extant_range.include? seeker.range }
@@ -420,9 +509,6 @@ The dependencies are as follows:
     inglists = seekers.find_all { |seeker| seeker.token == :rp_inglist }
     seekers -= inglists
     # ...and finally, extract ingspecs that are embedded in scanned seekers
-    ingspecs = seekers.collect { |seeker| seeker.find :rp_ingspec }.
-        flatten.
-        delete_if { |ingspec| extant_ils.any? { |extant_il| extant_il.range.include? ingspec.range } }
     ingspecs = find_for(:rp_ingspec, *seekers) { |ingspec| ingspec unless extant_ranges.any? { |extant_range| extant_range.include? ingspec.range }}
     # First, remove children of the scanned inglist(s) that are redundant wrt extant ingredient lists.
     # This means 1) is the child w/in the bounds of the extant list, or 2) its tag already appears there
@@ -449,7 +535,7 @@ The dependencies are as follows:
         flatten.
         uniq
 
-    # We aggregate a collection of ingredient lines as follows:
+    # We aggregate a collection of ingredient lines that haven't been reconciled with an extant ingredient list into lists as follows:
     # The idea is to nominate one or more ancestors of the ingredient specs as an ingredient list(s)
     # * Each node in the Nokogiri ancestry of each ingspec gets a point for being on the path to that node
     # * We derive a "branching factor" for each such ancestor: the count of its children which lead to an ingline

@@ -18,7 +18,7 @@ apricots apricot\ jam water pistachios
     @conditions = %w{ chopped chilled shelled } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:gm_recipes => { :at_css_match => 'h1' },
+				# :gm_recipes => { :at_css_match => 'h1' },
 =begin
 			:gm_inglist => {
 					:flavor => :unordered_list,
@@ -33,16 +33,18 @@ apricots apricot\ jam water pistachios
 					:in_css_match => 'div.gPuEKn'
 			},
 			:rp_ingline => {
-					:in_css_match => 'div.eftAc'
+					:in_css_match => 'div.eftAc',
+					:match_all => true
 			},
 			:rp_instructions => {
 				:in_css_match => "div.instructions ol"
 			}
 		}
 		@trimmers = ["div.mediavoice-native-ad", "div.additional-info"]
-		@selector = "div.title-source h1
-div.intro
-div.page--recipe"
+		@selector = "h1
+div.body
+div[data-testid=IngredientList]
+div[data-testid=InstructionsWrapper]"
 		@sample_url = 'http://www.epicurious.com/recipes/food/views/apricot-tart-with-pistachio-almond-frangipane-106662'
 		@sample_title = 'Apricot Tart with Pistachio-Almond Frangipane'
     super

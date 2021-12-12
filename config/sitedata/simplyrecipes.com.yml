@@ -1,5 +1,5 @@
 ---
-:selector: div.recipe-callout
+:selector: div.article__content
 :trimmers:
 - div.recipe-callout-buttons
 - p.dont-steal
@@ -9,11 +9,11 @@
     :rp_yields:
     - Makes
     - Yield
-  :rp_inglist:
-    :in_css_match: ul
-  :rp_ingline:
-    :in_css_match: li.ingredient
+  :gm_inglist:
+    :flavor: :unordered_list
+    :list_class: structured-ingredients__list
+    :line_class: structured-ingredients__list-item
   :rp_title:
-    :in_css_match: h2
+    :in_css_match: h2.recipe-block__header
 :sample_url: http://www.simplyrecipes.com/recipes/red_lentil_dal/
-:sample_title: Red Lentil Dal Recipe | Simply Recipes
+:sample_title: Red Lentil Dal

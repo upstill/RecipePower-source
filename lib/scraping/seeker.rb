@@ -43,6 +43,14 @@ class Seeker
 =end
   end
 
+  def clone_with attrvals={}
+    rtnval = clone
+    attrvals.each do |key, val|
+      rtnval.instance_variable_set :"@#{key}", val
+    end
+    rtnval
+  end
+
   # Return a Seeker for a failed parsing attempt
   # The head_stream and tail_stream will denote the range scanned
   # options:
@@ -153,14 +161,16 @@ class Seeker
     find(token).map &:value
   end
 
-  def text range=@range
-    stream.to_s range
+  # Provide straight-up text of a seeker, with display options
+  def text range=@range, nltr: false, trunc: nil, labelled: false
+    str = stream.to_s range, nltr: nltr, trunc: trunc
+    labelled ? ("[:#{@token}]" + str) : str
   end
 
   # Return all the text enclosed by the scanner i.e., from the starting point of head_stream to the beginning of tail_stream
-  def to_s
-    s = text
-    @token ? "[:#{@token}]#{s}" : s
+  def to_s nltr: true, trunc: nil, labelled: true
+    str = stream.to_s @range, nltr: nltr, trunc: trunc
+    labelled ? ("[:#{@token}]" + str) : str
   end
 
   def done?
@@ -284,24 +294,38 @@ class Seeker
         other.pos < bound # ...and begins before we end
   end
 
-  # Insert the given seeker at an appropriate place in our tree
-  def insert to_insert
-    seeker_range = to_insert.range
-    return true if range.cover?(seeker_range) && token == to_insert.token
-    # First, expand our bounds to include its bounds
-    @range = ([seeker_range.first, @range.first].min)...([seeker_range.last, @range.last].max)
-    place = -1
-    overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
-      child_range = child.range
-      place += 1 if seeker_range.begin < child_range.begin
-      # Remember the child if its range overlaps with the seeker
-      seeker_range.min < child_range.end && seeker_range.max > child_range.begin
+  # Insert the given seeker(s) at an appropriate place in our tree
+  def insert *insertions
+    insertions.each do |to_insert|
+      seeker_range = to_insert.range
+      return true if range.cover?(seeker_range) && token == to_insert.token
+      # First, expand our bounds to include its bounds
+      @range = ([seeker_range.first, @range.first].min)...([seeker_range.last, @range.last].max)
+      place = -1
+      overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
+        child_range = child.range
+        place += 1 if seeker_range.begin < child_range.begin
+        # Remember the child if its range overlaps with the seeker
+        seeker_range.min < child_range.end && seeker_range.max > child_range.begin
+      end
+      if overlaps.empty?
+        @children.insert place, to_insert
+      else
+        overlaps.first.insert to_insert # WHAT IF MORE THAN ONE OVERLAPS?
+      end
     end
-    if overlaps.empty?
-      @children.insert place, to_insert
-    else
-      overlaps.first.insert to_insert # WHAT IF MORE THAN ONE OVERLAPS?
+  end
+
+  # Expand the range of the seeker to include prior and subsequent newlines (for maximum enclosure)
+  def open_range
+    pos, bound = range.begin, range.end
+    while pos > 0 && stream.tokens[pos-1] == "\n" do
+      pos = pos - 1
     end
+    while bound < stream.bound && stream.tokens[bound] == "\n" do
+      bound = bound + 1
+    end
+    pos...bound
   end
 
 end
@@ -410,9 +434,9 @@ class NumberSeeker < Seeker
 =begin
     if Rails.env.test?
       if result
-        puts "NumberSeeker found '#{result}' at '#{stream.to_s.truncate 100}'"
+        puts "NumberSeeker found '#{result}' at '#{stream.to_s 100}'"
       else
-        puts "NumberSeeker failed at '#{stream.to_s.truncate 100}'"
+        puts "NumberSeeker failed at '#{stream.to_s 100}'"
       end
     end
 =end

@@ -45,7 +45,7 @@ class EverydayannieDotComTest < ActiveSupport::TestCase
       inch
       knob
  } # All units
-    @conditions = %w{  } # All conditions
+    @conditions = %w{ boneless } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
         :rp_title => {:in_css_match => "h1,h2"},

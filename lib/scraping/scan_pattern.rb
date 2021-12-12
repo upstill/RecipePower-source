@@ -54,12 +54,11 @@ class GrammarPattern < ScanPattern
 
   def report stream
     return yield unless Rails.env.test?
-    summ = stream.to_s.truncate(100).gsub "\n", '\n'
-    puts "PATTERNISTA seeking to match :#{@to_match} on '#{summ}'"
+    puts "PATTERNISTA seeking to match :#{@to_match} on '#{stream.to_s nltr: true, trunc: 100}'"
     if result = yield
-      puts "PATTERNISTA got match #{result} on '#{summ}'"
+      puts "PATTERNISTA got match #{result} on '#{stream.to_s nltr: true, trunc: 100}'"
     else
-      puts "PATTERNISTA didn't match :#{@to_match} on '#{summ}'"
+      puts "PATTERNISTA didn't match :#{@to_match} on '#{stream.to_s nltr: true, trunc: 100}'"
     end
     result
   end

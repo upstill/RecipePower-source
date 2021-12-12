@@ -10,23 +10,16 @@ class FantasticfungiDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ sage\ leaves garlic\ clove
+    @ingredients = %w{ sage\ leaves garlic\ clove fresh\ rosemary white\ beans
 Extra\ Virgin\ Olive\ Oil autumn\ mushrooms virgin\ coconut\ oil sherry\ vinegar
 Salt pepper } # All ingredients found on the page
-    @units = %w{ medium-sized small Tablespoons cups teaspoon  } # All units
+    @units = %w{ medium-sized small Tablespoons cups teaspoon inch section ounce can  } # All units
     @conditions = %w{ diced  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
-        :gm_inglist => {
-            :flavor => :unordered_list,
-            :list_selector => 'div.ingredients ul'
-        },
-        :rp_title => {
-            :in_css_match => "h1,h2"
-        },
-        :rp_instructions => {
-            :in_css_match => "div.instructions"
-        }
+        :gm_inglist => { :flavor => :unordered_list },
+        :rp_title => { :in_css_match => "h1,h2" },
+        :rp_instructions => { :in_css_match => "div.instructions" }
     }
     @trimmers = ["div.article-gallery", "h6", "a.btn-large"]
     @selector = "div.main-content"
@@ -51,10 +44,22 @@ Salt pepper } # All ingredients found on the page
 =end
   end
 
+  test 'ingredient spec' do
+    html = '15-ounce can of white beans'
+    pt_apply :rp_ingspec, html: html, ingredients: %w{ white\ beans }, units: [ 'ounce', 'can' ]
+
+    html = '15 ounce can of white beans'
+    pt_apply :rp_ingspec, html: html, ingredients: %w{ white\ beans }, units: [ 'ounce', 'can' ]
+
+    html = '6-inch section of fresh rosemary'
+    pt_apply :rp_ingspec, html: html, ingredients: %w{ fresh\ rosemary }, units: [ 'inch', 'section' ]
+  end
+
   test 'ingredient list' do
     # TODO: Pass this test (Needles from one, 6-inch section of fresh rosemary)
-    #html = '<li class="list"><p>Needles from one, 6-inch section of fresh rosemary </p></li>'
-    #pt_apply :rp_ingline, html: html, ingredients: %w{ fresh rosemary }, conditions: 'Needles'
+    # html = '<li class="list"><p>Needles from one, 6-inch section of fresh rosemary </p></li>'
+    html = '<li class="list"><p>6-inch section of fresh rosemary </p></li>'
+    pt_apply :rp_ingline, html: html, ingredients: %w{ fresh\ rosemary }, units: [ 'inch', 'section' ]
     html =<<EOF
 <div class="ingredients">
   <ul>
@@ -70,7 +75,9 @@ Salt pepper } # All ingredients found on the page
    </ul>
 </div>
 EOF
-    pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
+    handicapped_ingredients = @ingredients - %w{ fresh\ rosemary white\ beans }
+    handicapped_units = @units - %w{ inch section ounce can }
+    pt_apply :rp_inglist, html: html, ingredients: handicapped_ingredients, units: handicapped_units, conditions: @conditions
     assert_good counts: { :rp_ingline => 7 } # Run standard tests on the results
   end
 

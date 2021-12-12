@@ -132,8 +132,8 @@ Parser.init_grammar(
     },
     rp_inglist: { # A label followed by one or more ingredient lines, or two or more ingredient lines
                   # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],
-                  match: :rp_ingline,
-                  match_all: true,
+                  :match => :rp_ingline,
+                  :match_all => true,
                   :enclose => true
     },
 =begin
@@ -244,9 +244,9 @@ Parser.init_grammar(
 # Each pattern is declared as a pair:
 # first, the trigger for the pattern
 # second, the pattern to be matched when the trigger is found
-Parser.init_triggers([/^\d*(\/{1}\d*|\.\d+)$|^\d+[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]$/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
+Parser.init_triggers([/^\d*(\/{1}\d*|\.\d+)$|^\d+[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?$|^[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]/, :rp_ingspec ], # A digit triggers parsing for :rp_ingspec
                      [ /^\d+$/, :rp_serves], # A full number triggers match for servings
-                     [ /^\d+$/, :rp_embedded_inglist], # A full number may also start an embedded ingredient list
+                     [ /^\d+/, :rp_embedded_inglist], # A full number may also start an embedded ingredient list
                      [Tag.typenum(:Unit), :rp_ingline], # ...so does a Unit
                      [Tag.typenum(:Condition), :rp_ingline] # ...so does a Condition
 )

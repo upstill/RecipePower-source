@@ -16,7 +16,7 @@ class RuhlmanDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:gm_inglist => :unordered_list,
-			:gm_recipes => { :at_css_match => 'h2' },
+			# :gm_recipes => { :at_css_match => 'h2' },
 			:rp_instructions => {
 				:in_css_match => nil
 			}

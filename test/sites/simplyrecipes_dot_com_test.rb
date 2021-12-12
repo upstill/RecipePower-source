@@ -10,10 +10,10 @@ class SimplyrecipesDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ red\ lentils water tomatoes vegetable\ oil white\ onion
+    @ingredients = %w{ red\ lentils water plum\ tomatoes vegetable\ oil white\ onion
       yellow\ onion garlic Bengali\ five\ spice\ mix bay\ leaf turmeric kosher\ salt
       lime cilantro Cooked\ basmati\ rice } # All ingredients found on the page
-    @units =  %w{ sprigs teaspoon teaspoons medium\ clove cup cups } # All units
+    @units =  %w{ sprigs teaspoon teaspoons medium\ cloves cup cups } # All units
     @conditions = %w{ finely\ chopped } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
@@ -21,20 +21,19 @@ class SimplyrecipesDotComTest < ActiveSupport::TestCase
           :rp_author => 'Source',
           :rp_yields => %w{ Makes Yield }
       },
-			:rp_inglist => {
-				:in_css_match => "ul"
-			},
-			:rp_ingline => {
-				:in_css_match => "li.ingredient"
-			},
+      :gm_inglist => {
+          flavor: :unordered_list,
+          list_class: 'structured-ingredients__list',
+          line_class: 'structured-ingredients__list-item'
+      },
 			:rp_title => {
-				:in_css_match => "h2"
+				:in_css_match => "h2.recipe-block__header"
 			}
 		}
 		@trimmers = ["div.recipe-callout-buttons", "p.dont-steal"]
-		@selector = "div.recipe-callout"
+		@selector = "div.article__content"
 		@sample_url = 'http://www.simplyrecipes.com/recipes/red_lentil_dal/'
-		@sample_title = 'Red Lentil Dal Recipe | Simply Recipes'
+		@sample_title = 'Red Lentil Dal'
 
     #@grammar_mods = {
     # :gm_recipes => { at_css_match: 'h1' },

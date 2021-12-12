@@ -1,13 +1,10 @@
 ---
-:root: www.foodandwine.com
 :selector: div.content
 :trimmers:
 - div.articleContainer__rail
 - div.docked-sharebar
 - div.lazy-image
 :grammar_mods:
-  :gm_recipes:
-    :at_css_match: h1
   :gm_inglist:
     :flavor: :unordered_list
     :list_class: ingredients-section

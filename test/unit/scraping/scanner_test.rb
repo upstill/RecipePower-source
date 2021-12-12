@@ -15,6 +15,10 @@ class ScannerTest < ActiveSupport::TestCase
   end
 
   test 'tokenize' do
+    # Break on em-dash
+    assert_equal ['kwjer', '—', 'ekjrke'], tokenize('kwjer—ekjrke')
+    # Break on dash
+    assert_equal ['kwjer', '-', 'ekjrke'], tokenize('kwjer-ekjrke')
     assert_equal [], tokenize('')
     assert_equal [], tokenize(' ')
     assert_equal [ '('], tokenize('(')

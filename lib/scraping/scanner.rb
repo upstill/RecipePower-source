@@ -421,10 +421,13 @@ class NokoScanner # < Scanner
   end
 
   # Output version of #peek: the original text, rather than a joined set of tokens
-  def to_s limit_or_range = @bound
+  def to_s limit_or_range = @bound, nltr: false, trunc: nil
     range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
     # peek limit-@pos      Gives tokens joined by a space: not quite the same thing
-    tokens.text_from range.begin, range.end # @pos, limit
+    str = tokens.text_from range.begin, range.end # @pos, limit
+    str = str.truncate trunc if trunc
+    str = str.gsub "\n", '\n' if nltr
+    str
   end
 
   # Report the token no matter if the position is beyond the bound
@@ -547,6 +550,11 @@ class NokoScanner # < Scanner
   def except s2
     return self if !s2 || s2.pos > @bound
     s2 ? NokoScanner.new(tokens, @pos, s2.pos) : self
+  end
+
+  # Return a stream from the end of the first scanner to the beginning of the second.
+  def between first, second
+    NokoScanner.new tokens, first&.bound || @pos, second&.pos || @bound
   end
 
   # Make the end of the stream coincident with another stream
@@ -807,8 +815,9 @@ class NokoScanner # < Scanner
     subscanner = clone
     results = []
     directive, selector = options.to_a.first
+    (matcher = Hash.new)[((directive == :after_css_match) ? :in_css_match : directive)] = selector
     subscanners = []
-    while (subscanner = subscanner.on_css_match(in_css_match: selector) || subscanner.on_css_match(at_css_match: selector)) do
+    while (subscanner = subscanner.on_css_match(matcher)) do # || subscanner.on_css_match(at_css_match: selector)) do
       # The subscanner's bounds are those of the css match
       # We need to know where (next_pos) to start the next search
       case directive

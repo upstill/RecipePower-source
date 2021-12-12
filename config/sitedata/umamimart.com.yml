@@ -2,8 +2,6 @@
 :selector: article
 :trimmers: []
 :grammar_mods:
-  :gm_recipes:
-    :at_css_match: h1.article--title
   :rp_inglist:
     :in_css_match: p
   :rp_ingline:
