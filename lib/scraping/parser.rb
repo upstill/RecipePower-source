@@ -664,20 +664,16 @@ class Parser
       under = context[:under] || token
       context = context.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
       last_scanner = scanner
-      matches = []
+      matches =
       scanner.for_each(repeater) do |subscanner|
         match = match_specification (last_scanner = subscanner), spec, token, context
         next unless match.retain?
         return match.with_stream(scanner) unless context[:match_all]
-        matches << match
+        match
+        #matches << match.clone_with(token: token, range: subscanner.range)
         #match = match.clone_with token: token, range: subscanner.range
-        #if context[:match_all]
-        #  matches << match
-        #else
-        #  return match
-        #end
       end
-      return report_matches matches, under, spec, context, last_scanner, scanner
+      return report_matches matches.compact, under, spec, context, last_scanner, scanner
     end
     # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking
     # ALL the matches, not just one.
@@ -800,8 +796,6 @@ class Parser
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
-    when Hash
-      match_hash scanner.past_newline, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
       spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp

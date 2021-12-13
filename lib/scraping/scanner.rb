@@ -847,8 +847,7 @@ class NokoScanner # < Scanner
       # Terminate each subscanner at the beginning of the next
       subscanners[0..-2].each_index { |ix| subscanners[ix].bound = subscanners[ix+1].pos }
     end
-    block_given? ?
-      subscanners.each { |ss| yield(ss) } :
-      subscanners
+    result = block_given? ? subscanners.collect { |ss| yield(ss) } : subscanners
+    result
   end
 end
