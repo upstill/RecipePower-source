@@ -10,6 +10,6 @@
   :rp_title:
     :in_css_match: h1
   :rp_instructions:
-    :in_css_match: div.recipe__instruction-list div
+    :in_css_match: div.InstructionsWrapper-guTAnx div
 :sample_url: http://www.bonappetit.com/recipe/shaved-cauliflower-salad
 :sample_title: Shaved Cauliflower Salad

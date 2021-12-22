@@ -431,8 +431,13 @@ The dependencies are as follows:
     # Now a beauty pass: examine the space between each :ingspec found for stray material
     @parsed.find(:rp_inglist).each do |inglist|
       inspecs = inglist.find(:rp_ingspec).sort_by(&:pos)
+      if inspecs.empty?
+        # Trivial reject of parsed ingredient lists that don't have a single ingredient spec
+        @parsed.delete inglist, recur: true
+        next
+      end
       il_stream = inglist.result_stream
-      intervening = il_stream.between nil, inspecs.first.result_stream
+      intervening = il_stream.between nil, inspecs.first&.result_stream
       outspecs = ingspecs_in intervening
       inspecs.each_index do |ix|
         child, succ = inspecs[ix..(ix + 1)]

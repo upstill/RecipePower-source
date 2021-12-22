@@ -78,7 +78,7 @@ EOF
     handicapped_ingredients = @ingredients - %w{ fresh\ rosemary white\ beans }
     handicapped_units = @units - %w{ inch section ounce can }
     pt_apply :rp_inglist, html: html, ingredients: handicapped_ingredients, units: handicapped_units, conditions: @conditions
-    assert_good counts: { :rp_ingline => 7 } # Run standard tests on the results
+    assert_good counts: { :rp_ingspec => 7 } # Run standard tests on the results
   end
 
   test 'recipes parsed out correctly' do

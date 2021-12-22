@@ -531,7 +531,7 @@ class Parser
             list_selector = params[:list_selector] || selector_for('ul', css_class: params[:list_class])
             line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
             grammar_mods[:rp_inglist] = { :in_css_match => list_selector } # { :or => [ { :in_css_match => list_selector } ] }
-            grammar_mods[:rp_ingline] = { :in_css_match => line_selector, :match_all => true }
+            grammar_mods[:rp_ingline] = { :in_css_match => line_selector }
           when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
             grammar_mods[:rp_inglist] = {
                 :match => :rp_ingline, # Remove the label spec
@@ -540,7 +540,7 @@ class Parser
           when :paragraph
             # grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ) }
             grammar_mods[:rp_inglist] = { :in_css_match => selector_for('p', params ), :enclose => false }
-            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true, :enclose => false }
+            grammar_mods[:rp_ingline] = { :in_css_match => nil, :inline => true } # , :enclose => false }
           end
         end
       end
@@ -656,39 +656,6 @@ class Parser
         return cached
       end
     end
-    # If the parse is restricted, enumerate the matches and recur on each
-    repeater = context.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
-    # There should only be one repeater specification
-    if repeater.present?
-      # Hopefully we get a token for enclosing a result collection, in the :under context
-      under = context[:under] || token
-      context = context.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
-      last_scanner = scanner
-      matches =
-      scanner.for_each(repeater) do |subscanner|
-        match = match_specification (last_scanner = subscanner), spec, token, context
-        next unless match.retain?
-        return match.with_stream(scanner) unless context[:match_all]
-        match
-        #matches << match.clone_with(token: token, range: subscanner.range)
-        #match = match.clone_with token: token, range: subscanner.range
-      end
-      return report_matches matches.compact, under, spec, context, last_scanner, scanner
-    end
-    # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking
-    # ALL the matches, not just one.
-    # :match_all outside the context of a repeater causes a repetitive match, each starting after the prior success
-    if context[:match_all]
-      matches = []
-      first_scanner = scanner
-      while scanner.more? do
-        match = match_specification scanner, spec, token, context.except(:match_all)
-        break unless match.success?
-        scanner = match.tail_stream # Remove the subscanner's limitation on the result
-        matches << match
-      end
-      return report_matches matches, token, spec, context, first_scanner, scanner
-    end
     if context[:parenthetical]
       match = nil
       after = ParentheticalSeeker.match(scanner) do |inside|
@@ -780,17 +747,20 @@ class Parser
       Seeker.new scanner, token: token
     when Symbol
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
-      context = context.merge(under: token) if token
+      hash = @grammar[spec]
+      to_return = nil
       if Rails.env.test?
         @break_level ||= 3
         str = scanner.to_s trunc: 100, nltr: true
         report_enter "Seeking :#{spec} on '#{str}'"
-        returned = match_specification scanner, @grammar[spec], spec, context
-        report_exit (returned.success? ? "Found '#{returned.to_s trunc: 200}' for :#{returned.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
-        cache returned, cache_key   
+        to_return = match_specification scanner, hash, spec, context
+        report_exit (to_return.success? ? "Found '#{to_return.to_s trunc: 200}' for :#{to_return.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
       else
-        cache match_specification(scanner, @grammar[spec], spec, context), cache_key
+        to_return = match_specification scanner, hash, spec, context
       end
+      cache to_return, cache_key
+    when Hash
+      match_hash scanner.past_newline, spec, token, context
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array
@@ -922,7 +892,6 @@ class Parser
       token, context = nil, token
     end
     spec = inspec.clone
-    # Check for an array to match
     if flag = [  :checklist, # All elements must be matched, but the order is unimportant
                  :repeating, # The spec will be matched repeatedly until the end of input
                  :or, # The list is taken as an ordered set of alternatives, any of which will match the list
@@ -930,6 +899,7 @@ class Parser
                  # :orlist, # The item will be repeatedly matched in the form of
                  :parenthetical, # Match inside parentheses
                  :optional, # Failure to match is not a failure
+                 :match_all,
                  :distribute # Execute search across list "in parallel"
               ].find { |flag| spec.key?(flag) && spec[flag] != true }
             to_match, spec[flag] = spec[flag], true
@@ -947,7 +917,59 @@ class Parser
     end
     to_match = spec.delete :match if to_match == true # If any of the above appeared as flags, get match from the :match value
     # We've extracted the specification to be matched into 'to_match', and use what's left as context for matching
-    match = match_specification scanner, to_match, token, spec.merge(context.slice :under, :match_all)
+    # If the parse is restricted, enumerate the matches and recur on each
+    repeater = spec.slice(:atline, :inline, :in_css_match, :at_css_match, :after_css_match).compact # Discard any nil repeater specs
+    # A repeater provides its own engine for repetition (e.g., a CSS match), in which case :match_all is a flag for taking every match
+    # There should only be one repeater specification
+    if repeater.present?
+      # Hopefully we get a token for enclosing a result collection, in the :under spec
+      spec = spec.except :atline, :inline, :in_css_match, :at_css_match, :after_css_match
+      # Whether to enclose a failed result does not get passed down
+      enclose = spec.delete :enclose
+      last_scanner = scanner
+      matches =
+          scanner.for_each(repeater) do |subscanner|
+            match = match_specification (last_scanner = subscanner), to_match, token, spec
+            if match.success? || enclose
+              # Keeping this match
+              if context[:match_all]
+                # If repeating, collect and carry on
+                # match
+                (repeater[:inline] || repeater[:in_css_match]) ?
+                    match.clone_with(token: token, range: subscanner.range, enclose: enclose) :
+                    match.clone_with(enclose: enclose)
+              else
+                # Singular match: just return
+                return match.clone_with(stream: scanner, range: subscanner.range)
+              end
+            else
+              # Match not to be retained, whether failed or not => continue cycling
+              next
+            end
+            #matches << match.clone_with(token: token, range: subscanner.range)
+            #match = match.clone_with token: token, range: subscanner.range
+          end
+      return report_matches matches.compact,
+                            (context[:under] || token),
+                            spec,
+                            spec.merge(enclose: enclose),
+                            last_scanner,
+                            scanner
+    elsif context[:match_all]
+      # ALL the matches, not just one.
+      matches = []
+      first_scanner = scanner
+      while scanner.more? do
+        match = match_specification scanner, to_match, token, spec.except(:enclose)
+        break unless match.success?
+        scanner = match.tail_stream # Release the subscanner's constraint on the result
+        matches << match
+      end
+      match = report_matches matches, (context[:under] || token), to_match, inspec, first_scanner, scanner
+    else
+      # NB: a :retain directive is passed down
+      match = match_specification scanner, to_match, token, spec
+    end
     return match if match.success?
     token ||= match.token
     # If not successful, reconcile the spec that was just answered with the provided context
@@ -995,7 +1017,7 @@ class Parser
     consolidation = consolidate_inglines spec, matches
     return consolidation if consolidation
     # Default handling is to delete failed matches, then assess the remainder
-    matches.delete_if &:'hard_fail?'
+    matches.keep_if &:retain?
     return case matches.count
            when 0
              Seeker.failed start_scanner, context.merge(range: scanner.range, token: token)

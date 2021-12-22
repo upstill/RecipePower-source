@@ -67,6 +67,7 @@ class Seeker
     skr.instance_variable_set :@failed, true
     skr.instance_variable_set :@optional, options[:optional]
     skr.instance_variable_set :@enclose, options[:enclose]
+    skr.instance_variable_set :@token, options[:token] if options[:token]
     skr
   end
 
@@ -210,7 +211,7 @@ class Seeker
 
   def traverse &block
     block.call self
-    children && children.each do |child|
+    children&.each do |child|
       child.traverse &block
     end
   end
@@ -313,6 +314,15 @@ class Seeker
       else
         overlaps.first.insert to_insert # WHAT IF MORE THAN ONE OVERLAPS?
       end
+    end
+  end
+
+  # Delete a child or descendant
+  def delete child_or_descendant, recur: false
+    if delix = children&.find_index { |child| child == child_or_descendant }
+      children.delete_at delix
+    elsif recur
+      children&.each { |descendant| descendant.delete child_or_descendant, recur: true }
     end
   end
 

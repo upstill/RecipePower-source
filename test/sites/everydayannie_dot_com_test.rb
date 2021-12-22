@@ -92,7 +92,7 @@ some irrelevant HTML
 </p></div>
 EOF
     remainder = "Following irrelevant html"
-    pt_apply :rp_inglist, html: html+remainder, remainder: remainder
+    pt_apply :rp_inglist, html: html+remainder, remainder: remainder, :as_stream => false
 
     # Slightly less simple ingredient list
     html =<<EOF
@@ -104,7 +104,7 @@ Juice of&nbsp;½ a lime<br>
 1 tsp. sesame oil<br>
 </p></div>
 EOF
-    pt_apply :rp_inglist, html: html+remainder, remainder: remainder
+    pt_apply :rp_inglist, html: html+remainder, remainder: remainder, :as_stream => false
 
     html =<<EOF
 some irrelevant HTML
@@ -136,7 +136,7 @@ Sriracha, to taste<br>
 Coarse salt and pepper, to taste</p><div id="AdThrive_Content_2_desktop" class="adthrive-ad adthrive-content adthrive-content-1" data-google-query-id="CMTovbv6uvECFT4B-QAdU38NOw"><div id="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0" title="3rd party ad content" name="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="23" style="border: 0px; vertical-align: bottom;" data-integralas-id-da6a2a28-8590-ee7c-41ab-371b34c459c4="" data-integralas-id-d5ba8816-31d6-6986-5138-81824de134c2="" data-integralas-id-e619f685-f9b2-843b-d789-b4e2ad27779f="" data-load-complete="true"></iframe></div></div>
 							</div>
 EOF
-    pt_apply :rp_inglist, html: html
+    pt_apply :rp_inglist, html: html, :as_stream => false
 
     html =<<EOF
 some irrelevant HTML
@@ -168,7 +168,7 @@ Sriracha, to taste<br>
 Coarse salt and pepper, to taste</p><div id="AdThrive_Content_2_desktop" class="adthrive-ad adthrive-content adthrive-content-1" data-google-query-id="CMTovbv6uvECFT4B-QAdU38NOw"><div id="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0__container__" style="border: 0pt none;"><iframe id="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0" title="3rd party ad content" name="google_ads_iframe_/18190176/AdThrive_Content_2/540753cf3467ce8320843965_0" width="300" height="250" scrolling="no" marginwidth="0" marginheight="0" frameborder="0" data-google-container-id="23" style="border: 0px; vertical-align: bottom;" data-integralas-id-da6a2a28-8590-ee7c-41ab-371b34c459c4="" data-integralas-id-d5ba8816-31d6-6986-5138-81824de134c2="" data-integralas-id-e619f685-f9b2-843b-d789-b4e2ad27779f="" data-load-complete="true"></iframe></div></div>
 							</div>
 EOF
-    pt_apply :rp_inglist, html: html
+    pt_apply :rp_inglist, html: html, :as_stream => false
   end
 
   test 'recipe loaded correctly' do

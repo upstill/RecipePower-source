@@ -28,7 +28,7 @@ class BonappetitDotComTest < ActiveSupport::TestCase
             :in_css_match => 'h1'
         },
         :rp_instructions => {
-            :in_css_match => 'div.recipe__instruction-list div'
+            :in_css_match => 'div.InstructionsWrapper-guTAnx div'
         }
     }
     @selector = 'article' # "header h1\r\ndiv.recipe__main-content"
