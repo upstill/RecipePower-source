@@ -128,7 +128,7 @@ Parser.init_grammar(
     },
     rp_instructions: nil,
     :rp_recipe_section => {
-        :match => [ :rp_inglist, :rp_instructions ]
+        :distribute => [ :rp_inglist, :rp_instructions ]
     },
     rp_inglist: { # A label followed by one or more ingredient lines, or two or more ingredient lines
                   # match: [ { or: [:rp_ingline, :rp_inglist_label], enclose: :non_empty }, { match: :rp_ingline, repeating: true, enclose: :non_empty } ],

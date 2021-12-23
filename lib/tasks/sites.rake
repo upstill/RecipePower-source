@@ -1,3 +1,16 @@
+# Recipes for maintaining sites:
+# :purge -
+# :elide_slash -
+# :lookup_url - Confirm that a site can be looked up via its PageRef's url
+# :reports -
+#
+# Three tasks to link the parsing data of sites to:
+# 1) a config file (in config/sitedata) that expresses the data, to keep it under source control
+# 2) a test file (in test/sites) which tests said data on a sample file from the site
+# :build_test_templates - For sites that don't have one, build a test file from test/sites/test_template.erb
+# :save_parsing_data - Pull parsing data from the database into config files, one for each site
+# :restore_parsing_data - Restore parsing data from config files into the database
+# THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
 namespace :sites do
   desc "TODO"
   task :purge => :environment do
@@ -88,7 +101,8 @@ namespace :sites do
     end
   end
 
-  # For sites that don't have one, build a test file from test_template.erb
+  # For sites that don't have one, build a test file from test/sites/test_template.erb     
+  # WILL NOT OVERWRITE EXISTING TEST FILES
   task :build_test_templates => :environment do
     # Acquire the template file from the tests directory
     template = nil
@@ -96,6 +110,7 @@ namespace :sites do
     File.open(infile, 'r') { |f| template = f.read }
     erb = ERB.new template
 
+    # For all extant config files, construct the test template
     for_configs do |site, data|
       base = PublicSuffix.parse(URI(site.home).host).domain.gsub( '.', '_dot_')
       outfile = Rails.root.join('test', 'sites', base+'_test'+'.rb')
@@ -120,7 +135,9 @@ namespace :sites do
   end
 
   # Record parsing data from sites in individual files, suitable for checkin
+  # site => config/sitedata/<site.url>.yml for all sites that have Content
   task :save_parsing_data => :environment do
+    # Compile a map from site IDs to selector
     selector_map = []
     Finder.
         includes(:site).
@@ -154,6 +171,8 @@ namespace :sites do
   end
 
   # Get parsing data for sites from YAML files
+  # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
+  # config/sitedata/<url>.yml => Site.fetch(url: url) for *.yml
   task :restore_parsing_data => :environment do
     for_configs do |site, data|
       # Get default values from the file indicated by domain
