@@ -1,0 +1,9 @@
+---
+:selector: div.wprm-recipe
+:trimmers:
+- div.wprm-template-chic-buttons
+:grammar_mods:
+  :gm_bundles:
+    :name: :wordpress
+:sample_url: https://www.moodymixologist.com/blog/the-saturn-a-tiki-cocktail-with-gin
+:sample_title: The Saturn – Gin Tiki Cocktail
