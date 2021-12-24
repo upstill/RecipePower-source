@@ -86,12 +86,26 @@ namespace :sites do
   end
 
   # Call a block for each .yml file in the configs/sitedata directory
-  def for_configs
+  def for_configs sitename=nil
     yml_root = Rails.root.join 'config', 'sitedata'
-    ymls = Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
+    ymls =
+        if sitename
+          [ (sitename+'.yml') ]
+        else
+          Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
+        end
     ymls.each do |filename|
       filename = yml_root + filename
+      if !File.exist? filename
+        puts "Error: Can't load YAML file '#{filename}': no such file"
+        return
+      end
       data = YAML.load_file filename
+      if !(data && data[:sample_url])
+        err = data ? "No :sample_url to be found in YAML" : "YAML failed on"
+        puts "ERROR: #{err} file '#{filename}'"
+        next
+      end
       pr = PageRef.fetch data[:sample_url]
       if site = pr&.site
         yield site, data
@@ -130,7 +144,6 @@ namespace :sites do
         file.write erb.result(binding)
       end
       puts ">> Created ERB output at: #{outfile} for site #(#{site.id}) '#{site.name}'"
-      break
     end
   end
 
@@ -173,8 +186,10 @@ namespace :sites do
   # Get parsing data for sites from YAML files
   # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
   # config/sitedata/<url>.yml => Site.fetch(url: url) for *.yml
-  task :restore_parsing_data => :environment do
-    for_configs do |site, data|
+  task :restore_parsing_data, [:arg] => :environment do |t, args|
+    sitename = args[:arg]
+    puts "Restore parsing data for: '#{args[:arg]}'"
+    for_configs(sitename) do |site, data|
       # Get default values from the file indicated by domain
       # Move the selector into a finder attached to the site
       if data[:selector]
@@ -197,4 +212,11 @@ namespace :sites do
       site.save if site.changed?
     end
   end
+
+  task :my_task, [:arg1, :arg2] do |t, args|
+    puts "Args were: #{args} of class #{args.class}"
+    puts "arg1 was: '#{args[:arg1]}' of class #{args[:arg1].class}"
+    puts "arg2 was: '#{args[:arg2]}' of class #{args[:arg2].class}"
+  end
+
 end
