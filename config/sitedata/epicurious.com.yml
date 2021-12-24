@@ -1,4 +1,5 @@
 ---
+:root: www.epicurious.com
 :selector: |-
   h1
   div.body

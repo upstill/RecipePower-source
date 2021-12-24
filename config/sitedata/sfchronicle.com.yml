@@ -1,6 +1,5 @@
 ---
 :root: www.sfchronicle.com
-:selector: "header h1\r\ndiv.content-wrapper"
 :trimmers:
 - section.relatedStories
 - div.inDepth

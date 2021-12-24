@@ -1,4 +1,5 @@
 ---
+:root: ruhlman.com
 :selector: div.entry-content
 :trimmers: []
 :grammar_mods:
