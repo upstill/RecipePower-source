@@ -1,4 +1,5 @@
 ---
+:root: www.moodymixologist.com
 :selector: div.wprm-recipe
 :trimmers:
 - div.wprm-template-chic-buttons
