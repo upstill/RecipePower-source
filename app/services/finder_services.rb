@@ -68,7 +68,7 @@ class FinderServices
   end
 
   # Follow redirects to get a Nokogiri view on a page
-  def self.open_noko url
+  def self.open_noko url, &block
 
     nkdoc = nil
     loop do
@@ -111,6 +111,14 @@ class FinderServices
       end
       break
     end
+    # A block may be provided to check whether dynamic page content has settled
+    if block_given? && !yield(nkdoc)
+      browser = Watir::Browser.new :chrome, headless: true
+      browser.goto url
+      browser.wait_until do |b|
+        yield(nkdoc = Nokogiri::HTML.parse(b.html))
+      end
+    end
     nkdoc
   end
 
@@ -129,7 +137,18 @@ class FinderServices
 
     uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
-    nkdoc = NestedBenchmark.measure('making Nokogiri request') { self.open_noko url }
+    nkdoc = NestedBenchmark.measure('making Nokogiri request') do
+      # Extract a Nokogiri document from the page.
+      # If we're looking for content, don't give up loading until the page has settled.
+      if content_finder = finders.find { |finder| finder.label == 'Content' }
+        self.open_noko(url) { |nkd|  # Wait until the content appears
+          selector = content_finder.selector.split(/\s*\n/).join(', ')
+          nkd.css(selector).count > 0
+        }
+      else
+        self.open_noko url # No check for content
+      end
+    end
     # Delete all <script> tags up front
     nkdoc.css('script').remove # No scripts allowed!
 

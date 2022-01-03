@@ -84,6 +84,7 @@ gem 'pundit'
 gem "rmagick", "~> 2.16.0"
 gem "feedjira", '~> 1.6' #:git => 'git://github.com/pauldix/feedzirra.git'
 gem 'nokogiri', ">= 1.10.8" # "~> 1.5.3"
+gem 'watir'
 gem 'truncato' # ,  '0.7.8' # Truncates HTML strings, respecting tags https://github.com/jorgemanrubia/truncato
 # Redcarpet is a Ruby library for Markdown processing that smells like butterflies and popcorn.
 gem 'redcarpet' # https://github.com/vmg/redcarpet

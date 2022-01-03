@@ -1,3 +1,4 @@
+require 'scraping/site_util.rb'
 # Recipes for maintaining sites:
 # :purge -
 # :elide_slash -
@@ -85,52 +86,37 @@ namespace :sites do
     ]
   end
 
-  # Call a block for each .yml file in the configs/sitedata directory
-  def for_configs sitename=nil
-    yml_root = Rails.root.join 'config', 'sitedata'
-    ymls =
-        if sitename
-          [ (sitename+'.yml') ]
-        else
-          Dir.entries( yml_root ).find_all { |fname| fname.match /\.yml$/ }
-        end
-    ymls.each do |filename|
-      filename = yml_root + filename
-      if !File.exist? filename
-        puts "Error: Can't load YAML file '#{filename}': no such file"
-        return
-      end
-      data = YAML.load_file filename
-      if !(data && data[:sample_url])
-        err = data ? "No :sample_url to be found in YAML" : "YAML failed on"
-        puts "ERROR: #{err} file '#{filename}'"
-        next
-      end
-      pr = PageRef.fetch data[:sample_url]
-      if site = pr&.site
-        yield site, data
-      else
-        puts "!!! Can't locate site for sample '#{data[:sample_url]}''"
-      end
-    end
-  end
-
   # For sites that don't have one, build a test file from test/sites/test_template.erb     
   # WILL NOT OVERWRITE EXISTING TEST FILES
-  task :build_test_templates => :environment do
+  task :build_test_templates, [:arg] => :environment do  |t, args|
     # Acquire the template file from the tests directory
     template = nil
-    infile = Rails.root.join 'test', 'sites', 'test_template.rb.erb'
+    infile = Rails.root.join test_dir, 'test_template.rb.erb'
     File.open(infile, 'r') { |f| template = f.read }
     erb = ERB.new template
 
-    # For all extant config files, construct the test template
-    for_configs do |site, data|
-      base = PublicSuffix.parse(URI(site.home).host).domain.gsub( '.', '_dot_')
-      outfile = Rails.root.join('test', 'sites', base+'_test'+'.rb')
-      next if File.exist? outfile # New files only, please
+    if (sitename = site_root(args[:arg])) && !File.exist?(config_file_for(sitename)) # Site name specified
+      sitename.sub! /^www\./, ''
+      if !(Site.where(root: sitename).exists? || Site.where(root: 'www.'+sitename).exists?)
+        candidates = Site.where 'root ILIKE ?', "%#{sitename}%"
+        # No such site => Report error and suggest candidate roots
+        err = "No site matches '#{sitename}'."
+        names = candidates.pluck(:root)
+        list = names[0..-2].join("', '") + "' or '#{names[-1]}"
+        err << "\nPerhaps you meant '#{list}'?" if candidates.present?
+        raise err
+      end
+    end
 
-      @testclass = base.camelcase
+    # For all extant config files, construct the test template
+    for_configs(sitename) do |site, data|
+      testfile = test_file_for site
+      if File.exist? testfile # New files only, please
+        puts "Test file '#{testfile}' already exists for '#{sitename}'" if sitename
+        next
+      end
+
+      @testclass = (test_file_for site, base_only: true).camelcase
       datahash = { }
       datahash[:grammar_mods] = struct_to_str(data[:grammar_mods], 3) if data[:grammar_mods] # JSON.pretty_generate(site.grammar_mods).gsub(/"([^"]*)":/, ":\\1 =>").gsub(/\bnull\b/, 'nil') if site.grammar_mods
       datahash[:trimmers] = data[:trimmers].to_s if data[:trimmers].present?
@@ -140,44 +126,47 @@ namespace :sites do
       @sitedata = datahash.collect { |key, value|
         "\t\t@#{key} = #{value}"
       }.join "\n"
-      File.open(outfile,"w") do |file|
+      File.open(testfile,"w") do |file|
         file.write erb.result(binding)
       end
-      puts ">> Created ERB output at: #{outfile} for site #(#{site.id}) '#{site.name}'"
+      puts ">> Created ERB output at: #{testfile} for site #(#{site.id}) '#{site.name}'"
     end
   end
 
   # Record parsing data from sites in individual files, suitable for checkin
-  # site => config/sitedata/<site.url>.yml for all sites that have Content
-  task :save_parsing_data => :environment do
-    # Compile a map from site IDs to selector
-    selector_map = []
-    Finder.
-        includes(:site).
-        where(label: 'Content').
-        pluck( :site_id, :selector ).
-        each { |pair| selector_map[pair.first] = pair.last }
-    Site.all.each do |site|
+  # site => config/sitedata/<site.url>.yml for all sites that have Content (or one, as specified by :arg)
+  task :save_parsing_data, [:arg] => :environment do  |t, args|
+    # Derive an array of sites to process. If one is given in :arg, use that. Otherwise, go through all sites
+    siteroot = args[:arg]
+    sites = []
+    if siteroot
+      site = Site.find_by(root: siteroot) || Site.find_by(root: 'www.'+siteroot)
+      raise "ERROR: there is no site with root #{siteroot}" if !site
+      puts "Save parsing data for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
+      sites << site
+    end
+    sites = Site.all if sites.empty?
+    
+    # Prefetch all the Content selectors for all sites into a hash indexed by site id
+    selector_map = Hash[Finder.includes(:site).where(label: 'Content').pluck( :site_id, :selector )]
+    sites.each do |site|
       selector = selector_map[site.id]
       next if site.trimmers.empty? && site.grammar_mods.empty? && selector.blank?
-      # Get a sample for the site and its title
-      if pr = site.sample.present? && PageRef.find_by_url(site.sample)
-        sample_title = pr.recipes.first&.title || pr.title
-      elsif rcp = site.recipes.first
-        site.update_attribute :sample, (site.sample = rcp.url)
-        sample_title = rcp.title
-      end
       data = {
           root: site.root,
           selector: selector,
           trimmers: site.trimmers,
-          grammar_mods: site.grammar_mods,
           sample_url: site.sample,
-          sample_title: sample_title
+          sample_title: '',
+          grammar_mods: site.grammar_mods
       }.compact
       next if data.blank?
-      domain = PublicSuffix.parse(URI(site.home).host).domain
-      File.open(Rails.root.join("config", "sitedata", domain + '.yml'), "w") do |file|
+      # Get the sample for the site and its title from the config file, if any
+      for_configs(site) do |site, config_data|
+        data[:sample_url] = config_data[:sample_url]
+        data[:sample_title] = config_data[:sample_title]
+      end
+      File.open(config_file_for(site), "w") do |file|
         file.write data.to_yaml
       end
     end
@@ -185,11 +174,11 @@ namespace :sites do
 
   # Get parsing data for sites from YAML files
   # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
-  # config/sitedata/<url>.yml => Site.fetch(url: url) for *.yml
+  # config/sitedata/<url>.yml => Site.fetch(root: data[:root]) for *.yml
   task :restore_parsing_data, [:arg] => :environment do |t, args|
     sitename = args[:arg]
-    puts "Restore parsing data for: '#{args[:arg]}'"
     for_configs(sitename) do |site, data|
+      puts "Restore parsing data for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
       # Get default values from the file indicated by domain
       # Move the selector into a finder attached to the site
       if data[:selector]

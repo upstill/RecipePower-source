@@ -1,5 +1,4 @@
 ---
-:root: jeffreymorgenthaler.com
 :selector: div.recipe-extras
 :trimmers:
 - img
