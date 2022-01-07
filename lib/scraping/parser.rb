@@ -337,7 +337,12 @@ class Parser
     matched = nil
     if (as_stream || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
       if ge.is_a?(Hash)
-        ge = ge.except(:at_css_match, :in_css_match, :after_css_match, :atline, :inline) if as_stream
+        if as_stream
+          if (ge[:atline] || ge[:inline]) && !safe_stream.atline?
+            return nil # Seeker.failed safe_stream, token: token
+          end
+          ge = ge.except :at_css_match, :in_css_match, :after_css_match, :atline, :inline
+        end
         ge = ge.except :match_all if singular
       end
       token = ge.delete(:token) || token

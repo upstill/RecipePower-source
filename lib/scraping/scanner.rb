@@ -456,6 +456,12 @@ class NokoScanner # < Scanner
     result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
 
+  # Is the token stream at position pos immediately follow a newline?
+  def atline?
+    return true if @pos == 0
+    NokoScanner.new(tokens, @pos-1, @bound).toline.pos == @pos
+  end
+
   # first: return the string in the current "read position" after advancing to the 'next' position
   def first ntokens = 1
     if str = peek(ntokens)
