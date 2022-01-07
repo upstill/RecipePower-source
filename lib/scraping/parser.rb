@@ -940,7 +940,9 @@ class Parser
                     match.clone_with(enclose: enclose)
               else
                 # Singular match: just return
-                return match.clone_with(stream: scanner, range: subscanner.range)
+                return match.clone_with(stream: scanner)
+                # return match.clone_with(stream: scanner, range: subscanner.range)
+                # return repeater[:atline] ? match : match.clone_with(stream: scanner, range: subscanner.range)
               end
             else
               # Match not to be retained, whether failed or not => continue cycling

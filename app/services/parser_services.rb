@@ -337,12 +337,28 @@ The dependencies are as follows:
 
     # Handle the special case of seekers whose children all have the same token by promoting the children
     # in place of the parent.
-    @parsed.traverse do |seeker|
+    @parsed.traverse(depth_first: true) do |seeker|
       to_delete = []
+      seeker.children.sort_by! &:pos # Regularize the order so grandchildren are properly inserted
       seeker.children.each_index { |child_ix|
         child = seeker.children[child_ix]
-        next unless child.children.present? && child.children.all? { |grandchild| grandchild.token == child.token }
-        to_delete << child_ix
+        case child.token
+        when :rp_inglist
+          to_keep = child.children.count { |grandchild| grandchild.success? } > 1
+          child.children = [] unless to_keep # Without the enclosing inglist, delete all children
+        when :rp_instructions
+          to_keep = child.text.present?
+        when :rp_recipe_section
+          # Keep a recipe section iff it has both ingredients and instructions
+          valid_ingredients = child.children.any? { |grandchild| [:rp_inglist, :rp_ingline].include? grandchild.token }
+          valid_instructions = child.children.any? { |grandchild| grandchild.token == :rp_instructions }
+          to_keep = valid_ingredients && valid_instructions
+          child.children = [] unless valid_ingredients # Without the enclosing inglist, delete all children
+        else
+          next unless child.children.present? && child.children.all? { |grandchild| grandchild.token == child.token }
+          to_keep = false
+        end
+        to_delete << child_ix unless to_keep
       }
       while child_ix = to_delete.pop do
         child = seeker.children.delete_at child_ix

@@ -209,11 +209,12 @@ class Seeker
     end
   end
 
-  def traverse &block
-    block.call self
+  def traverse depth_first: false, &block
+    block.call self unless depth_first
     children&.each do |child|
-      child.traverse &block
+      child.traverse depth_first: depth_first, &block
     end
+    block.call self if depth_first
   end
 
   # Enclose the tokens of the seeker, from beginning to end, in a tag with the given class
@@ -302,10 +303,10 @@ class Seeker
       return true if range.cover?(seeker_range) && token == to_insert.token
       # First, expand our bounds to include its bounds
       @range = ([seeker_range.first, @range.first].min)...([seeker_range.last, @range.last].max)
-      place = -1
+      place = 0
       overlaps = @children.sort_by!(&:pos).select do |child| # Ensure that the children are ordered by position
         child_range = child.range
-        place += 1 if seeker_range.begin < child_range.begin
+        place += 1 if to_insert.pos > child.pos
         # Remember the child if its range overlaps with the seeker
         seeker_range.min < child_range.end && seeker_range.max > child_range.begin
       end
