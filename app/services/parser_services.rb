@@ -478,7 +478,7 @@ The dependencies are as follows:
     instrs = []
     @parsed.children.each_index do |child_ix|
       if (child_il = @parsed.children[child_ix]).token == :rp_inglist
-        next_child_il = @parsed.children[child_ix+1..-1].find { |subsq| subsq.token == :rp_inglist }
+        next_child_il = @parsed.children[child_ix+1] # ..-1].find { |subsq| subsq.token == :rp_inglist }
         intervening = @parsed.result_stream.between child_il.result_stream, next_child_il&.result_stream
         instrs << Seeker.new(intervening, token: :rp_instructions) if intervening.to_s.present?
       end
