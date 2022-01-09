@@ -155,10 +155,21 @@ def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
+# Find the location of the next line (boundary between nl and non-nl).
+# NB: skips over multiple nls;
+# returns the input if opos is already at a boundary (the better to identify the first line in the stream)
 def seekline tokens, within, opos, obound, delimiter = nil
   delimiter = "\n" unless delimiter.is_a?(String)
-  if (newpos = opos) > 0 && tokens[newpos] != delimiter
-    while (newpos < obound) && (tokens[newpos-1] != delimiter) do
+  if (newpos = opos) == 0
+    # Skip past initial newlines, if any
+    while (newpos < obound) &&
+        (tokens[newpos] == delimiter) do
+      newpos += 1
+    end
+  else
+    while newpos < obound &&
+        !(tokens[newpos-1] == delimiter &&
+            tokens[newpos] != delimiter) do
       newpos += 1
     end
   end
@@ -337,6 +348,11 @@ class StrScanner < Scanner
     end
   end
 
+  # Advance self past the end of s2
+  def past s2
+    StrScanner.new @strings, s2.bound, @bound
+  end
+
   # return a version of self that ends where s2 begins
   def except s2
     return self if !s2 || s2.pos > @bound
@@ -459,7 +475,7 @@ class NokoScanner # < Scanner
   # Is the token stream at position pos immediately follow a newline?
   def atline?
     return true if @pos == 0
-    NokoScanner.new(tokens, @pos-1, @bound).toline.pos == @pos
+    NokoScanner.new(tokens, @pos-1, @bound).toline&.pos == @pos
   end
 
   # first: return the string in the current "read position" after advancing to the 'next' position

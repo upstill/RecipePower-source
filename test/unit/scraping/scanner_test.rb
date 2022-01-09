@@ -107,7 +107,49 @@ class ScannerTest < ActiveSupport::TestCase
     assert_equal 'something else', scanners.shift.to_s
   end
 
+  def trstr str
+    str.gsub! "\n", '\n'
+    '\'' + str + '\''
+  end
+
+  # Test a scanner for properly delimiting lines
+  def check_lines start_scanner, *lines
+    ls = lines.collect { |line| trstr line }.join ', '
+    puts "Checking #{trstr start_scanner.to_s} against #{ls}"
+    # Once more, without enclosing the line
+    scanner = start_scanner
+    lines.each do |line|
+      assert (scanner = scanner.toline), "...scanner ran out lacking #{trstr line}"
+      assert scanner.to_s.strip.match(/^#{line}/), "...stumbled on #{trstr line}"
+      scanner.first
+    end
+    refute scanner.toline, "scanner #{trstr start_scanner.to_s} had #{trstr scanner.to_s} left." # Should have exhausted the stream
+
+    scanner = start_scanner
+    lines.each do |line|
+      scanner = scanner.toline true
+      assert_equal line, scanner.to_s.strip, "...stumbled on #{trstr line}"
+      scanner = start_scanner.past scanner
+    end
+    refute scanner.toline, "scanner #{trstr start_scanner.to_s} had #{trstr scanner.to_s} left." # Should have exhausted the stream
+  end
+
   test 'toline text' do
+
+    lines = [ 'blah de blah', '2 servings' ]
+
+    html = "<br>blah de blah<br><br>2 servings<br><br>"
+    check_lines NokoScanner.new(html), *lines
+
+    text = "\nblah de blah\n\n2 servings\n\n"
+    check_lines StrScanner.new(text), *lines
+
+    text = "blah de blah\n2 servings"
+    check_lines StrScanner.new(text), *lines
+
+    html = "blah de blah<br>2 servings"
+    check_lines NokoScanner.new(html), *lines
+
     str = "first line \n second line \n third line \n"
     scanner = StrScanner.new str
     line1 = scanner.toline
@@ -124,6 +166,7 @@ class ScannerTest < ActiveSupport::TestCase
     line2 = scanner.rest.toline true
     assert_equal "second line \n", line2.to_s
 
+=begin
     scanner = StrScanner.new "\n\n\n" # Should produce three blank lines
     line1 = scanner.toline
     assert_equal "\n \n \n", line1.to_s
@@ -147,6 +190,7 @@ class ScannerTest < ActiveSupport::TestCase
     line3 = scanner.rest.rest.toline true
     assert_equal "\n", line3.to_s
     assert_nil scanner.rest.rest.rest.toline true
+=end
   end
 
   test 'for_each' do
@@ -182,7 +226,7 @@ class ScannerTest < ActiveSupport::TestCase
     html = "<h1>title</h1><br><br><br>some stuff <h1>another title</h1>"
     scanner = NokoScanner.new html
     titles = ['some stuff another title']
-    scanner.for_each(:after_css_match => 'br') do |ls|
+    scanner.for_each(:at_css_match => 'br') do |ls|
       assert_equal titles.shift, ls.to_s
     end
     assert_empty titles, "Failed to find all the strings after <br> in '#{html}'"
