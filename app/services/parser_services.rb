@@ -20,6 +20,21 @@ class ParserServices
     self.grammar_mods = grammar_mods
   end
 
+  # Return an array of CSS selectors to be applied to parsing content from the given site.
+  # These are used to check completion when accessing a dynamic site, and all must
+  # be matched before giving up.
+  def self.selectors_for site
+    return [] unless site
+    grammar = Parser.finalized_grammar mods_plus: site.grammar_mods
+    # Require content for title, ingredient list and ingredient line
+    selectors = grammar.collect do |key, value|
+      if value.is_a?(Hash) && [:rp_title, :rp_inglist, :rp_ingline].include?(key)
+        value.slice(:in_css_match, :at_css_match, :after_css_match).values.compact.first
+      end
+    end
+    selectors.compact
+  end
+
 =begin
 Here is where all dependencies in the parser are expressed: dependent variables are cleared
 when the entities on which they depend are expressed.

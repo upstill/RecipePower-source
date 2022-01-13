@@ -113,10 +113,21 @@ class FinderServices
     end
     # A block may be provided to check whether dynamic page content has settled
     if block_given? && !yield(nkdoc)
-      browser = Watir::Browser.new :chrome, headless: true
-      browser.goto url
-      browser.wait_until do |b|
-        yield(nkdoc = Nokogiri::HTML.parse(b.html))
+      # If the doc doesn't include requisite items straightaway,
+      # get Watir to treat it as a dynamic site and wait until the items appear
+      begin
+        browser = Watir::Browser.new :chrome, headless: true
+        browser.goto url
+        browser.wait_until do |b|
+          yield(nkdoc = Nokogiri::HTML.parse(b.html))
+        end
+      rescue Exception => e
+        # If the analysis failed for any reason, including timeout after
+        # waiting in vain, just fall back on the document
+        return nkdoc
+        # Unable to find chromedriver. Please download the server from
+        # https://chromedriver.storage.googleapis.com/index.html and place it somewhere on your PATH.
+        # More info at https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver.
       end
     end
     nkdoc
@@ -140,14 +151,12 @@ class FinderServices
     nkdoc = NestedBenchmark.measure('making Nokogiri request') do
       # Extract a Nokogiri document from the page.
       # If we're looking for content, don't give up loading until the page has settled.
-      if content_finder = finders.find { |finder| finder.label == 'Content' }
-        self.open_noko(url) { |nkd|  # Wait until the content appears
-          selector = content_finder.selector.split(/\s*\n/).join(', ')
-          nkd.css(selector).count > 0
-        }
-      else
-        self.open_noko url # No check for content
-      end
+      # ...meaning the content finder is satisfied AND all CSS matches required by ParserServices
+      selectors = ((finders.find { |finder| finder.label == 'Content' }&.selector || '').split(/\s*\n/)) +
+          ParserServices.selectors_for(site)
+      self.open_noko(url) { |nkd|  # Wait until the content appears
+        selectors.all? { |selector| nkd.css(selector).count > 0 }
+      }
     end
     # Delete all <script> tags up front
     nkdoc.css('script').remove # No scripts allowed!
