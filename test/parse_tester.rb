@@ -46,7 +46,7 @@ module PTInterface
     @sample_url ||= @site_defaults[:sample_url]
     @sample_title ||= @site_defaults[:sample_title]
     @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
-                                    selector: (@selector || ''),
+                                    selector: @selector, # It is an error if the selector isn't set
                                     trimmers: (@trimmers || []),
                                     ingredients: (@ingredients || []),
                                     units: (@units || []),
@@ -228,6 +228,7 @@ class ParseTester < ActiveSupport::TestCase
   private
 
   def prep_site site, selector, trimmers, grammar_mods = {}
+    assert_not_empty selector, "@selector must be specified to get content."
     if finder = site.finder_for('Content')
       finder.selector = selector
     else
@@ -371,17 +372,17 @@ class ParseTester < ActiveSupport::TestCase
     prep_site @page_ref.site, @selector, @trimmers, @grammar_mods
     assert_equal @grammar_mods, @page_ref.site.grammar_mods
 
-    # content_needed = (attribs + @page_ref.needed_attributes).include? :content
     @page_ref.ensure_attributes attribs
-    if @page_ref.content.blank? && # content_needed
-        # Error: page ref couldn't extract content
-        content_report = @page_ref.site.finders.to_a.keep_if { |f| f.label == 'Content' } ? '.' : ", Perhaps because the site doesn't have a Content finder?"
-      @page_ref.errors.add :content, "PageRef couldn't find content" + content_report
+    if @page_ref.content.blank?
+      # Error: page ref couldn't extract content
+      content_selector = @page_ref.site.finders.to_a.find { |f| f.label == 'Content' }&.selector
+      content_report = content_selector.present? ? " using CSS selector '#{content_selector}'." : ", perhaps because the site doesn't have a Content selector?"
+      @page_ref.errors.add :content, "not findable for PageRef" + content_report
     end
     refute @page_ref.errors.any?, @page_ref.errors.full_messages
     assert @page_ref.good? # Should have loaded and settled down
-    assert_not_nil @page_ref.content
-    assert_not_empty @page_ref.content
+    refute_nil @page_ref.content
+    refute_empty @page_ref.content
     @page_ref
   end
 

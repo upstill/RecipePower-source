@@ -152,10 +152,10 @@ class FinderServices
       # Extract a Nokogiri document from the page.
       # If we're looking for content, don't give up loading until the page has settled.
       # ...meaning the content finder is satisfied AND all CSS matches required by ParserServices
-      selectors = ((finders.find { |finder| finder.label == 'Content' }&.selector || '').split(/\s*\n/)) +
+      selectors = ((finders.find { |finder| finder.label == 'Content' }&.selector || '').split(/\n/)) +
           ParserServices.selectors_for(site)
       self.open_noko(url) { |nkd|  # Wait until the content appears
-        selectors.all? { |selector| nkd.css(selector).count > 0 }
+        (url == site&.home) || selectors.all? { |selector| nkd.css(selector).count > 0 }
       }
     end
     # Delete all <script> tags up front
@@ -166,7 +166,7 @@ class FinderServices
     NestedBenchmark.measure('filtering for results with Nokogiri') do
       finders.each do |finder|
         label = finder.label
-        next unless (selector = finder.selector.split(/\s*\n/).join(', ')) &&
+        next unless (selector = finder.selector.split(/\n/).join(', ')) &&
             (labels.blank? || labels.include?(label))
         # Filter for specified labels, if any
         begin
