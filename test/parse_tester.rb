@@ -39,12 +39,14 @@ module PTInterface
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
+=begin
     @site_defaults = ParseTester.load_for_page @sample_url, @domain # Get parameters if either of these have been defined
     @grammar_mods ||= @site_defaults[:grammar_mods]
     @selector ||= @site_defaults[:selector]
     @trimmers ||= @site_defaults[:trimmers]
     @sample_url ||= @site_defaults[:sample_url]
     @sample_title ||= @site_defaults[:sample_title]
+=end
     @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
                                     selector: @selector, # It is an error if the selector isn't set
                                     trimmers: (@trimmers || []),
@@ -180,6 +182,7 @@ class ParseTester < ActiveSupport::TestCase
     nkd
   end
 
+=begin
   # Given either a domain or a url, load an appropriate set of configs for the file
   def self.load_for_page url, domain = nil
     domain ||= PublicSuffix.parse(URI(url).host).domain if url
@@ -190,6 +193,7 @@ class ParseTester < ActiveSupport::TestCase
     end
     return {}
   end
+=end
 
   def save_configs url, domain = nil
     domain ||= PublicSuffix.parse(URI(url).host).domain if url
@@ -228,7 +232,9 @@ class ParseTester < ActiveSupport::TestCase
   private
 
   def prep_site site, selector, trimmers, grammar_mods = {}
-    assert_not_empty selector, "@selector must be specified to get content."
+    assert defined?(selector), "@selector not declared! Must be specified in #setup to get content."
+    refute selector.blank?, "@selector is blank! Must be specified in #setup to get content."
+
     if finder = site.finder_for('Content')
       finder.selector = selector
     else

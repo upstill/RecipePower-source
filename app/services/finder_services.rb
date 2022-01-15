@@ -150,13 +150,18 @@ class FinderServices
     pagehome = "#{uri.scheme}://#{uri.host}"
     nkdoc = NestedBenchmark.measure('making Nokogiri request') do
       # Extract a Nokogiri document from the page.
-      # If we're looking for content, don't give up loading until the page has settled.
-      # ...meaning the content finder is satisfied AND all CSS matches required by ParserServices
-      selectors = ((finders.find { |finder| finder.label == 'Content' }&.selector || '').split(/\n/)) +
-          ParserServices.selectors_for(site)
-      self.open_noko(url) { |nkd|  # Wait until the content appears
-        (url == site&.home) || selectors.all? { |selector| nkd.css(selector).count > 0 }
-      }
+      if url == site&.home
+        # Just take the Nokogiri document without waiting
+        self.open_noko url
+      else
+        # If we're looking for content, don't give up loading until the page has settled.
+        # ...meaning the content finder is satisfied AND all CSS matches required by ParserServices
+        selectors = (finders.find { |finder| finder.label == 'Content' }&.selectors || []) +
+                    ParserServices.selectors_for(site)
+        self.open_noko(url) { |nkd|  # Wait until the content appears
+          selectors.all? { |selector| nkd.css(selector).count > 0 }
+        }
+      end
     end
     # Delete all <script> tags up front
     nkdoc.css('script').remove # No scripts allowed!
@@ -166,7 +171,7 @@ class FinderServices
     NestedBenchmark.measure('filtering for results with Nokogiri') do
       finders.each do |finder|
         label = finder.label
-        next unless (selector = finder.selector.split(/\n/).join(', ')) &&
+        next unless (selector = finder.selectors.join(', ')) &&
             (labels.blank? || labels.include?(label))
         # Filter for specified labels, if any
         begin

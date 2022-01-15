@@ -17,4 +17,9 @@ class Finder < ApplicationRecord
   def what
     (label == 'RSS Feed') ? :feeds : label.underscore.pluralize
   end
+
+  # Return the list of newline-separated selectors denoted by the selector
+  def selectors
+    selector.split /\n/
+  end
 end
