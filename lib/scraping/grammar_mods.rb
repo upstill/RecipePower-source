@@ -38,7 +38,7 @@ module GrammarMods
             [bundles].flatten.each do |bundle_spec|
               case bundle_spec[:name]
               when :wordpress
-                grammar_mods[:rp_instructions] = {:in_css_match => "div.wprm-recipe-instruction-text"}
+                grammar_mods[:rp_instructions] = {:in_css_match => "div.wprm-recipe-instruction-group"} 
                 grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}
                 grammar_mods[:rp_cook_time] = {:in_css_match => 'div.wprm-recipe-cook-time-container'}
                 grammar_mods[:rp_total_time] = {:in_css_match => 'div.wprm-recipe-total-time-container'}

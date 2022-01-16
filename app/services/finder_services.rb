@@ -145,6 +145,7 @@ class FinderServices
         finders_or_labels.first.is_a?(Finder) ?
             [finders_or_labels, []] :
             [self.finders_for(site), finders_or_labels]
+    expected_selectors = []
 
     uri = URI url
     pagehome = "#{uri.scheme}://#{uri.host}"
@@ -156,15 +157,21 @@ class FinderServices
       else
         # If we're looking for content, don't give up loading until the page has settled.
         # ...meaning the content finder is satisfied AND all CSS matches required by ParserServices
-        selectors = (finders.find { |finder| finder.label == 'Content' }&.selectors || []) +
+        expected_selectors = (finders.find { |finder| finder.label == 'Content' }&.selectors || []) +
                     ParserServices.selectors_for(site)
         self.open_noko(url) { |nkd|  # Wait until the content appears
-          selectors.all? { |selector| nkd.css(selector).count > 0 }
+          expected_selectors.all? { |selector| nkd.css(selector).present? }
         }
       end
     end
     # Delete all <script> tags up front
     nkdoc.css('script').remove # No scripts allowed!
+    if Rails.env.test?
+      # Report failed selectors during testing
+      expected_selectors.each do |selector|
+        puts "Selector '#selector' failed in '#{url}'" if nkdoc.css(selector).blank?
+      end
+    end
 
     # Initialize the results
     results = Results.new *finders.map(&:label)
@@ -175,7 +182,7 @@ class FinderServices
             (labels.blank? || labels.include?(label))
         # Filter for specified labels, if any
         begin
-          next unless (matches = nkdoc.css(selector)).count > 0
+          next if (matches = nkdoc.css(selector)).blank?
         rescue Exception => exc
           raise exc, "CSS Selector (#{selector}) caused an error"
         end
