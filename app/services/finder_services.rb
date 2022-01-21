@@ -169,7 +169,7 @@ class FinderServices
     if Rails.env.test?
       # Report failed selectors during testing
       expected_selectors.each do |selector|
-        puts "Selector '#selector' failed in '#{url}'" if nkdoc.css(selector).blank?
+        puts "Selector '#{selector}' failed in '#{url}'" if nkdoc.css(selector).blank?
       end
     end
 

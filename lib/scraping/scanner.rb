@@ -396,7 +396,7 @@ class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_range_for_subtree,
-           :enclose_tokens, :enclose_selection, to: :tokens
+           :enclose_tokens, :enclose_selection, :brs, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -416,9 +416,6 @@ class NokoScanner # < Scanner
     end
     @bound = bound || @tokens.length
     @pos = (pos <= @bound) ? pos : @bound
-    # Memoize an array of token positions for all <br> directives in the document.
-    # This is used to truncate all lines at <br>
-    @brs ||= nkdoc.search('br').map { |found| @tokens.token_range_for_subtree(found)&.begin }.compact
   end
 
   # Return the stream of tokens as an array of strings
@@ -795,13 +792,13 @@ class NokoScanner # < Scanner
 
     # @brs is a memoized list of locations of linebreaks
     brpos =
-    if brix = binsearch(@brs, pos)
-      brix += 1 if @brs[brix] < pos
-      @brs[brix]
+    if brix = binsearch(brs, pos)
+      brix += 1 if brs[brix] < pos
+      brs[brix]
     else
-      @brs[brix = 0]
+      brs[brix = 0]
     end
-    # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
+    # Now brix denotes the index in the brs array of the token position (brpos) of the next <br>
     while pos < @bound do
       # Consume EOL characters at the beginning
       while (pos < @bound) && @tokens[pos] == "\n" do
@@ -811,8 +808,8 @@ class NokoScanner # < Scanner
       # Otherwise, we know we have at least one non-EOL character
       # Seek the end of the non-EOL run
       bound = pos+1
-      while brpos && brpos <= bound do
-        brpos = @brs[brix += 1] # Look for the next <br> directive
+      while brpos && brpos < bound do
+        brpos = brs[brix += 1] # Look for the next <br> directive
       end
       # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
       while (bound < @bound) && !(@tokens[bound] == "\n" || bound == brpos) do

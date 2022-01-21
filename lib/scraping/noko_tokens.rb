@@ -6,7 +6,7 @@ require 'scraping/elmt_bounds.rb'
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
-  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
+  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound, :brs # :length
   delegate :pp, :to => :nkdoc
   def initialize nkdoc
     def to_tokens newtext = nil
@@ -17,7 +17,12 @@ class NokoTokens < Array
         held_len = @held_text.length
       end
       @held_text = tokenize((newtext || @held_text), newtext == nil) { |token, offset|
-        unless (token == "\n") && (last == token) # No repetitive EOLs, please
+        # Newlines are reported as tokens, but we put them into the brs map instead of the token array
+        if token == "\n" # && (last == token)
+          next if last == "\n" # No repetitive EOLs, please
+          # Instead of pushing the newline as a token, add it to @brs
+          @brs.push @token_starts.length
+        else
           push token
           @token_starts.push @processed_text_len + offset
         end
@@ -35,6 +40,7 @@ class NokoTokens < Array
       when child.element?
         # Flush token except when entering a span
         to_tokens unless child.name == 'span' # if child.name.match(/^(p|br|ul|li)$/)
+        @brs.push @token_starts.length if child.name == 'br'
         child.children.each { |j| do_child j }
       end
     end
@@ -43,6 +49,7 @@ class NokoTokens < Array
     @nkdoc = nkdoc.is_a?(String) ? Nokogiri::HTML.fragment(nkdoc) : nkdoc
     @elmt_bounds = ElmtBounds.new nkdoc
     @token_starts = []
+    @brs = []
     @processed_text_len = 0
     @held_text = ''
     @nkdoc.children.each { |j| do_child j }
@@ -50,6 +57,7 @@ class NokoTokens < Array
 
     # Make this data immutable! No transforms to the tree should affect any token
     @token_starts.freeze
+    @brs.freeze
     self.map &:freeze
     @bound = count
     @parser_evaluator = ParserEvaluator.new

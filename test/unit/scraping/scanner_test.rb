@@ -286,30 +286,31 @@ class ScannerTest < ActiveSupport::TestCase
   test 'toline tag' do
     # test_str takes an html string, and an array of strings that should be found in that html on a line-by-line basis.
     # 'within' is a flag indicating whether the strings should be confined to individual lines, or just begin
-    def test_str html, seeking, within=false
+    def test_str html, lines: [], within: false, tokens: []
       nkdoc = Nokogiri::HTML.fragment html
       nokoscan = NokoScanner.new nkdoc
       check_integrity nokoscan
-      # 'seeking' is an array of strings to match successively
+      # 'lines' is an array of strings to match successively
       nokoscan.for_each((within ? :inline : :atline) => true) do |subscanner|
-        assert_equal seeking.shift, subscanner.to_s
+        assert_equal lines.shift, subscanner.to_s
       end
-      seeking.map do |str|
+      lines.map do |str|
         result = nokoscan.toline(within).to_s
         assert_equal str, result
         nokoscan = nokoscan.rest
       end
     end
-    html = "top-level <br>afterbr <span class='rp_elmt rp_text'>within span</span> after\nspan"
-    # test_str html, ["top-level afterbr within span after\nspan"]
-    test_str html, ['top-level', "afterbr within span after", 'span'], true
+    html = "top-level <br>afterbr <span class='rp_elmt rp_text'>\nwithin span</span> after\n\nspan\n"
+    test_str html, lines: ['top-level', 'afterbr', 'within span after', 'span'],
+             within: true,
+             tokens: [ 'top', '-', 'level', 'afterbr', 'within', 'span', 'after', 'span']
     # Should get the same result independent of spacing
     html = "top-level <br> afterbr<span class='rp_elmt rp_text'>within span</span>after\nspan"
-    test_str html, ["top-level  afterbrwithin spanafter\nspan", "afterbrwithin spanafter\nspan", "span"]
-    test_str html, ['top-level', "afterbrwithin spanafter", 'span'], true
+    test_str html, lines: ["top-level  afterbrwithin spanafter\nspan", "afterbrwithin spanafter\nspan", "span"]
+    test_str html, lines: ['top-level', "afterbrwithin spanafter", 'span'], within: true
     html = "top-level <br>afterbr<span class='rp_elmt rp_text'>    within span</span>  after\nspan"
-    test_str html, ["top-level afterbr    within span  after\nspan", "afterbr    within span  after\nspan", "span"]
-    test_str html, ['top-level', "afterbr    within span  after", 'span'], true
+    test_str html, lines: ["top-level afterbr    within span  after\nspan", "afterbr    within span  after\nspan", "span"]
+    test_str html, lines: ['top-level', "afterbr    within span  after", 'span'], within: true
   end
 
   test 'nkscanner with rp_elmt' do
@@ -463,11 +464,11 @@ EOF
     nokoscan = NokoScanner.new nkdoc
     nkt = nokoscan.tokens
     check_integrity nokoscan
-    assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_tokens 3, 5, :rp_elmt_class => :rp_ingspec, :tag => 'span'
-    assert_equal '1 orange slice', nkt.text_from(2,5)
-    nkt.enclose_tokens 4, 5, :rp_elmt_class => :rp_ingredient_tag, :tag => 'span'
-    assert_equal '1 orange slice', nkt.text_from(2,5)
+    assert_equal '1 orange slice', nkt.text_from(1,4)
+    nkt.enclose_tokens 2, 4, :rp_elmt_class => :rp_ingspec, :tag => 'span'
+    assert_equal '1 orange slice', nkt.text_from(1,4)
+    nkt.enclose_tokens 3, 4, :rp_elmt_class => :rp_ingredient_tag, :tag => 'span'
+    assert_equal '1 orange slice', nkt.text_from(1,4)
   end
 
   test "Find token positions by DOM selector" do
