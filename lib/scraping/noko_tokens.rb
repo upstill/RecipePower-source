@@ -6,7 +6,7 @@ require 'scraping/elmt_bounds.rb'
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
-  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound, :brs # :length
+  attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
   delegate :pp, :to => :nkdoc
   def initialize nkdoc
     def to_tokens newtext = nil
@@ -295,6 +295,46 @@ class NokoTokens < Array
     else
       first_token_index...first_token_index
     end
+  end
+
+  # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
+  def for_lines range: nil, inline: true, &block
+    results = []
+    pos = range.begin # @pos
+
+    # @brs is a memoized list of locations of linebreaks (either <br> elements or newlines)
+    brpos =
+        if brix = binsearch(@brs, pos)
+          brix += 1 if @brs[brix] < pos
+          @brs[brix]
+        else
+          @brs[brix = 0]
+        end
+    # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
+    while pos < range.end do
+      # Consume EOL characters at the beginning
+      while (pos < range.end) && self[pos] == "\n" do
+        pos += 1
+      end
+      break if pos == range.end # No more material
+      # Otherwise, we know we have at least one non-EOL character
+      # Seek the end of the non-EOL run
+      bound = pos+1
+      while brpos && brpos < bound do
+        brpos = @brs[brix += 1] # Look for the next <br> directive
+      end
+      # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
+      while (bound < range.end) && !(self[bound] == "\n" || bound == brpos) do
+        bound += 1
+      end
+      # If :inline, truncate it at the next EOL character
+      subscanner = NokoScanner.new self, pos, (inline ? bound : range.end)
+      if result = (block_given? ? yield(subscanner) : subscanner)
+        results << result
+      end
+      pos = bound
+    end
+    results
   end
 
   private

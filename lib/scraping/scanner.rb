@@ -396,7 +396,7 @@ class NokoScanner # < Scanner
   attr_reader :nkdoc, :pos, :bound, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_range_for_subtree,
-           :enclose_tokens, :enclose_selection, :brs, to: :tokens
+           :enclose_tokens, :enclose_selection, to: :tokens
 
   # To initialize the scanner, we build:
   # - an array of tokens, each either a string or an rp_elmt node
@@ -645,7 +645,7 @@ class NokoScanner # < Scanner
   def for_each options={}, &block
     case options.keys.first
     when :inline, :atline
-      for_lines options[:inline], &block
+      @tokens.for_lines range: @pos...@bound, inline: options[:inline], &block
     when :at_css_match, :in_css_match, :after_css_match
       for_css options, &block
     end
@@ -784,46 +784,6 @@ class NokoScanner # < Scanner
   attr_writer :pos, :bound
 
   private
-
-  # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
-  def for_lines inline, &block
-    results = []
-    pos = @pos
-
-    # @brs is a memoized list of locations of linebreaks
-    brpos =
-    if brix = binsearch(brs, pos)
-      brix += 1 if brs[brix] < pos
-      brs[brix]
-    else
-      brs[brix = 0]
-    end
-    # Now brix denotes the index in the brs array of the token position (brpos) of the next <br>
-    while pos < @bound do
-      # Consume EOL characters at the beginning
-      while (pos < @bound) && @tokens[pos] == "\n" do
-        pos += 1
-      end
-      break if pos == @bound # No more material
-      # Otherwise, we know we have at least one non-EOL character
-      # Seek the end of the non-EOL run
-      bound = pos+1
-      while brpos && brpos < bound do
-        brpos = brs[brix += 1] # Look for the next <br> directive
-      end
-      # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
-      while (bound < @bound) && !(@tokens[bound] == "\n" || bound == brpos) do
-        bound += 1
-      end
-      # If :inline, truncate it at the next EOL character
-      subscanner = NokoScanner.new @tokens, pos, (inline ? bound : @bound)
-      if result = (block_given? ? yield(subscanner) : subscanner)
-        results << result
-      end
-      pos = bound
-    end
-    results
-  end
 
   # Cycle through CSS matches, calling the block on each match, per directive:
   # :in_css_match => call the block on a NokoScanner bounded by the CSS match
