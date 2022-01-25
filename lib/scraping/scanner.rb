@@ -283,11 +283,13 @@ end
 class StrScanner < Scanner
   attr_reader :strings, :pos, :bound # :length
 
+  # StrScanner provides reading services for a succession of tokens. Initialized with either
+  # -- a String, which will be tokenized
+  # -- an Array of strings
   def initialize string_or_strings, pos = 0, bound = nil
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
     @strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
     @pos = pos
-    # @length = @strings.count
     @bound = bound || @strings.count
   end
 
@@ -645,7 +647,7 @@ class NokoScanner # < Scanner
   def for_each options={}, &block
     case options.keys.first
     when :inline, :atline
-      @tokens.for_lines range: @pos...@bound, inline: options[:inline], &block
+      @tokens.for_lines range: @pos...@bound, inline: options[:inline] { |pos, bound| yield(NokoScanner.new @tokens, pos, bound) }
     when :at_css_match, :in_css_match, :after_css_match
       for_css options, &block
     end

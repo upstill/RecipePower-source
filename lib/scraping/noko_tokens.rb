@@ -49,7 +49,8 @@ class NokoTokens < Array
     @nkdoc = nkdoc.is_a?(String) ? Nokogiri::HTML.fragment(nkdoc) : nkdoc
     @elmt_bounds = ElmtBounds.new nkdoc
     @token_starts = []
-    @brs = []
+    # @brs gives the token location of effective EOLs (newlines or <br> elements)
+    @brs = [0] # There's an implicit one at the stream's beginning
     @processed_text_len = 0
     @held_text = ''
     @nkdoc.children.each { |j| do_child j }
@@ -57,7 +58,8 @@ class NokoTokens < Array
 
     # Make this data immutable! No transforms to the tree should affect any token
     @token_starts.freeze
-    @brs.freeze
+    @brs.push @token_starts.length # There's an implicit linebreak at the end of the token stream
+    @brs.uniq!.freeze
     self.map &:freeze
     @bound = count
     @parser_evaluator = ParserEvaluator.new
@@ -298,41 +300,25 @@ class NokoTokens < Array
   end
 
   # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
+  # range brackets the relevant tokens
   def for_lines range: nil, inline: true, &block
     results = []
-    pos = range.begin # @pos
 
+    pos, bound = range.begin, range.end
     # @brs is a memoized list of locations of linebreaks (either <br> elements or newlines)
-    brpos =
-        if brix = binsearch(@brs, pos)
-          brix += 1 if @brs[brix] < pos
-          @brs[brix]
-        else
-          @brs[brix = 0]
-        end
+    brix = binsearch @brs, pos
     # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
     while pos < range.end do
-      # Consume EOL characters at the beginning
-      while (pos < range.end) && self[pos] == "\n" do
-        pos += 1
-      end
-      break if pos == range.end # No more material
       # Otherwise, we know we have at least one non-EOL character
-      # Seek the end of the non-EOL run
-      bound = pos+1
-      while brpos && brpos < bound do
-        brpos = @brs[brix += 1] # Look for the next <br> directive
-      end
       # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
-      while (bound < range.end) && !(self[bound] == "\n" || bound == brpos) do
-        bound += 1
-      end
+      bound = @brs[brix + 1] if inline
+      yield pos, bound
       # If :inline, truncate it at the next EOL character
-      subscanner = NokoScanner.new self, pos, (inline ? bound : range.end)
-      if result = (block_given? ? yield(subscanner) : subscanner)
-        results << result
-      end
-      pos = bound
+=begin
+      subscanner = NokoScanner.new self, pos, bound
+      results << subscanner if result = (block_given? ? yield(subscanner) : subscanner)
+=end
+      pos = @brs[brix += 1]
     end
     results
   end

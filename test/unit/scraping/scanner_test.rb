@@ -132,17 +132,25 @@ class ScannerTest < ActiveSupport::TestCase
       scanner = start_scanner.past scanner
     end
     refute scanner.toline, "scanner #{trstr start_scanner.to_s} had #{trstr scanner.to_s} left." # Should have exhausted the stream
+
+    # Confirm that starting one token past the beginning advances to the second line
+    # scanner = start_scanner
+    # scanner.first
+    # line = lines[1]
+    # scanline = scanner.toline(true).to_s.strip
+    # puts "Does '#{scanline}' match '#{line}'?"
+    # assert_equal lines[1], scanline, "scanner #{trstr start_scanner.to_s} didn't find second line '#{trstr line}' when advanced initially."
   end
 
   test 'toline text' do
 
     lines = [ 'blah de blah', '2 servings' ]
 
-    html = "<br>blah de blah<br><br>2 servings<br><br>"
-    check_lines NokoScanner.new(html), *lines
-
     text = "\nblah de blah\n\n2 servings\n\n"
     check_lines StrScanner.new(text), *lines
+
+    html = "<br>blah de blah<br><br>2 servings<br><br>"
+    check_lines NokoScanner.new(html), *lines
 
     text = "blah de blah\n2 servings"
     check_lines StrScanner.new(text), *lines
