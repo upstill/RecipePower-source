@@ -119,7 +119,8 @@ class ScannerTest < ActiveSupport::TestCase
     # Once more, without enclosing the line
     scanner = start_scanner
     lines.each do |line|
-      assert (scanner = scanner.toline), "...scanner ran out lacking #{trstr line}"
+      scanner = scanner.toline
+      assert scanner, "...scanner ran out lacking #{trstr line}"
       assert scanner.to_s.strip.match(/^#{line}/), "...stumbled on #{trstr line}"
       scanner.first
     end
@@ -161,18 +162,18 @@ class ScannerTest < ActiveSupport::TestCase
     str = "first line \n second line \n third line \n"
     scanner = StrScanner.new str
     line1 = scanner.toline
-    assert_equal str, line1.to_s
+    assert_equal "first line second line third line", line1.to_s
     line2 = line1.rest.toline
-    assert_equal "second line \n third line \n", line2.to_s
+    assert_equal "second line third line", line2.to_s
     line3 = line2.rest.toline
-    assert_equal "third line \n", line3.to_s
+    assert_equal "third line", line3.to_s
     line4 = line3.rest.toline
     assert_nil line4
 
     line1 = scanner.toline true
-    assert_equal "first line \n", line1.to_s
+    assert_equal "first line", line1.to_s
     line2 = scanner.rest.toline true
-    assert_equal "second line \n", line2.to_s
+    assert_equal "second line", line2.to_s
 
 =begin
     scanner = StrScanner.new "\n\n\n" # Should produce three blank lines
@@ -212,16 +213,16 @@ class ScannerTest < ActiveSupport::TestCase
       assert_equal ls.to_s, (line = lines.shift)
       ls
     end
-    assert_equal 4, scanners.count
+    assert_equal 0, lines.count
 
     # Test NokoScanner
     scanner = NokoScanner.new str
     lines = [ "first line", "second line", "third line", 'fourth line']
-    scanners = scanner.for_each(:inline => true) do |ls|
+    scanner.for_each(:inline => true) do |ls|
       assert_equal ls.to_s, (line = lines.shift)
       ls
     end
-    assert_equal 4, scanners.count
+    assert_equal 0, lines.count
 
     html = "<h1>title</h1><br><br><br>some stuff<h1>another title</h1>"
     scanner = NokoScanner.new html

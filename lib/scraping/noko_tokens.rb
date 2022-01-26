@@ -2,10 +2,59 @@ require 'binsearch.rb'
 require 'scraping/text_elmt_data.rb'
 require 'scraping/dom_traversor.rb'
 require 'scraping/elmt_bounds.rb'
+module Bracket
+
+  # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
+  # range brackets the relevant tokens
+  def for_lines range: nil, inline: true, &block
+    bound = range.end
+    # @brs is a memoized list of locations of linebreaks (either <br> elements or newlines)
+    brix = binsearch @brs, range.begin # This is the bin containing the current pos
+    brix += 1 unless @brs[brix] == range.begin
+    # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
+    while (pos = @brs[brix]) < range.end do
+      # Otherwise, we know we have at least one non-EOL character
+      # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
+      # If :inline, truncate at the next EOL character
+      bound = @brs[brix + 1] if inline
+      yield pos, bound
+      brix += 1
+    end
+  end
+end
+
+class StringTokens < Array
+  include Bracket
+  def initialize text
+    @token_starts = []
+    # @brs gives the token location of effective EOLs (newlines or <br> elements)
+    @brs = [0] # There's an implicit one at the stream's beginning
+    tokenize(text, true) { |token, offset|
+      # Newlines are reported as tokens, but we put them into the brs map instead of the token array
+      if token == "\n"
+        next if last == "\n" # No repetitive EOLs, please
+        # Instead of pushing the newline as a token, add it to @brs
+        @brs.push length
+      else
+        push token
+      end
+    }
+    @brs.push length # There's an implicit linebreak at the end of the token stream
+    @bound = count
+
+    # Make this data immutable! No transforms to the tree should affect any token
+    @brs.uniq!.freeze # Freeze the brs array
+    self.map &:freeze # Freeze each string
+    self.freeze
+  end
+
+end
 
 # This class analyzes and represents tokens within a Nokogiri doc.
 # Once defined, it (but not the doc) is immutable
 class NokoTokens < Array
+  include Bracket  # Extend with #for_lines method
+
   attr_reader :nkdoc, :elmt_bounds, :token_starts, :bound # :length
   delegate :pp, :to => :nkdoc
   def initialize nkdoc
@@ -297,30 +346,6 @@ class NokoTokens < Array
     else
       first_token_index...first_token_index
     end
-  end
-
-  # Cycle through the lines in a document, defined as non-empty streams of tokens bounded by newline, <br> or EOF
-  # range brackets the relevant tokens
-  def for_lines range: nil, inline: true, &block
-    results = []
-
-    pos, bound = range.begin, range.end
-    # @brs is a memoized list of locations of linebreaks (either <br> elements or newlines)
-    brix = binsearch @brs, pos
-    # Now brix denotes the index in the @brs array of the token position (brpos) of the next <br>
-    while pos < range.end do
-      # Otherwise, we know we have at least one non-EOL character
-      # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
-      bound = @brs[brix + 1] if inline
-      yield pos, bound
-      # If :inline, truncate it at the next EOL character
-=begin
-      subscanner = NokoScanner.new self, pos, bound
-      results << subscanner if result = (block_given? ? yield(subscanner) : subscanner)
-=end
-      pos = @brs[brix += 1]
-    end
-    results
   end
 
   private

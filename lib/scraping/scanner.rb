@@ -155,38 +155,6 @@ def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
-# Find the location of the next line (boundary between nl and non-nl).
-# NB: skips over multiple nls;
-# returns the input if opos is already at a boundary (the better to identify the first line in the stream)
-def seekline tokens, within, opos, obound, delimiter = nil
-  delimiter = "\n" unless delimiter.is_a?(String)
-  if (newpos = opos) == 0
-    # Skip past initial newlines, if any
-    while (newpos < obound) &&
-        (tokens[newpos] == delimiter) do
-      newpos += 1
-    end
-  else
-    while newpos < obound &&
-        !(tokens[newpos-1] == delimiter &&
-            tokens[newpos] != delimiter) do
-      newpos += 1
-    end
-  end
-  if newpos < obound # Should we really be returning an empty scanner once we hit the end?
-    if within
-      newbound = newpos
-      while newbound < obound do
-        newbound += 1
-        break if tokens[newbound-1] == delimiter
-      end
-    else
-      newbound = obound
-    end
-    yield newpos, newbound
-  end
-end
-
 # A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
 # This is an "abstract" class for defining what methods the Scanner provides
 class Scanner < Object
@@ -288,9 +256,9 @@ class StrScanner < Scanner
   # -- an Array of strings
   def initialize string_or_strings, pos = 0, bound = nil
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
-    @strings = string_or_strings.is_a?(String) ? tokenize(string_or_strings) : string_or_strings
-    @pos = pos
-    @bound = bound || @strings.count
+    @strings = string_or_strings.is_a?(String) ? StringTokens.new(string_or_strings) : string_or_strings
+    @bound = bound || @strings.length
+    @pos = (pos < @bound) ? pos : @bound
   end
 
   def to_s limit_or_range = @bound
@@ -343,13 +311,6 @@ class StrScanner < Scanner
     end
   end
 
-  # Progress the scanner to precede the next newline character, optionally constraining the result to within a whole line
-  def toline within = false, delimiter = "\n"
-    seekline @strings, within, @pos, @bound, delimiter do |newpos, newbound|
-      StrScanner.new @strings, newpos, newbound
-    end
-  end
-
   # Advance self past the end of s2
   def past s2
     StrScanner.new @strings, s2.bound, @bound
@@ -361,35 +322,20 @@ class StrScanner < Scanner
     s2 ? StrScanner.new(@strings, @pos, s2.pos) : self
   end
 
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within = false
+    @strings.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
+      return StrScanner.new(@strings, newpos, newbound)
+    end
+  end
+
   # Iterate through a set of scanners organized around EOL
   # :atline: report the next scanner that starts at a line (excluding empty lines)
   # :inline: do likewise, except terminate the scanner at the following EOL
   # It may return nil, in which case the next iteration goes to the subsequent token
   def for_each options={}, &block
     options = options.compact # Ignore flags that are set with nil
-    results = []
-    pos = @pos
-    while pos < @bound do
-      # Consume EOL characters at the beginning
-      while (pos < @bound) && @strings[pos] == "\n" do
-        pos += 1
-      end
-      break if pos == @bound # No more material
-      # Otherwise, we know we have at least one non-EOL character
-      # Seek the end of the non-EOL run
-      bound = pos+1
-      # Find the position of the next EOL, or the end of the buffer
-      while (bound < @bound) && @strings[bound] != "\n" do
-        bound += 1
-      end
-      # If :inline, truncate it at the next EOL character
-      subscanner = StrScanner.new @strings, pos, (options[:inline] ? bound : @bound)
-      if result = (block_given? ? yield(subscanner) : subscanner)
-        results << result
-      end
-      pos = bound
-    end
-    results
+    @strings.for_lines(range: @pos...@bound, inline: options[:inline]) { |pos, bound| yield(StrScanner.new @strings, pos, bound) }
   end
 
 end
@@ -451,11 +397,17 @@ class NokoScanner # < Scanner
   end
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
-  def toline within = false, delimiter = "\n"
-    # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
-    s1 = seekline(@tokens, within, @pos, @bound, delimiter) do |newpos, newbound|
-      NokoScanner.new @tokens, newpos, newbound
+  def toline within = false
+    # Find the location of the next line (boundary between nl and non-nl).
+    # NB: skips over multiple nls;
+    # returns the input if opos is already at a boundary (the better to identify the first line in the stream)
+    def seekline within, opos, obound
+      @tokens.for_lines(range: opos...obound, inline: within) do |newpos, newbound|
+        return NokoScanner.new(@tokens, newpos, newbound)
+      end
     end
+    # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
+    s1 = seekline within, @pos, @bound
     s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
     s3 = on_css_match(:after_css_match => 'br')
     inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
@@ -464,9 +416,7 @@ class NokoScanner # < Scanner
     return result unless within
     # Need to find an end at the next line
     s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
-    s5 = seekline(@tokens, false, result.pos + 1, @bound, delimiter) do |newpos, newbound|
-      NokoScanner.new @tokens, newpos, newbound
-    end
+    s5 = seekline false, result.pos + 1, @bound
     # Constrain the result to the beginning of the next node, if any
     result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
@@ -647,7 +597,7 @@ class NokoScanner # < Scanner
   def for_each options={}, &block
     case options.keys.first
     when :inline, :atline
-      @tokens.for_lines range: @pos...@bound, inline: options[:inline] { |pos, bound| yield(NokoScanner.new @tokens, pos, bound) }
+      @tokens.for_lines(range: @pos...@bound, inline: options[:inline]) { |pos, bound| yield(NokoScanner.new @tokens, pos, bound) }
     when :at_css_match, :in_css_match, :after_css_match
       for_css options, &block
     end

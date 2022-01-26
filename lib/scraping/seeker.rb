@@ -640,7 +640,7 @@ class AmountSeeker < Seeker
     unit = nil
     num = NumberSeeker.match(stream) { |remainder|
       # A unit may follow the number within the same token
-      if unit = TagSeeker.match(StrScanner.new([ remainder ]), opts.slice(:lexaur).merge(types: 5))
+      if unit = TagSeeker.match(StrScanner.new(remainder), opts.slice(:lexaur).merge(types: 5))
         unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
       end
     }
@@ -650,7 +650,7 @@ class AmountSeeker < Seeker
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
-      unit = TagSeeker.match StrScanner.new([$2]), opts.slice(:lexaur).merge(types: 5)
+      unit = TagSeeker.match StrScanner.new($2), opts.slice(:lexaur).merge(types: 5)
       return unless unit
       unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
     else
