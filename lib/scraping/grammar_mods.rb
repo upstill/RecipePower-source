@@ -56,10 +56,6 @@ module GrammarMods
             params, val = {}, mods_plus[key]
             params, val = val, val.delete(:flavor) if val.is_a?(Hash)
             case key.to_sym
-            when :gm_recipes
-              # We match recipes within a list and individual recipes with the same selector
-              # Expecting a hash for the match specifier (i.e., :in_css_match => 'h2' )
-              grammar_mods[:rp_recipelist] = grammar_mods[:rp_recipe] = params
             when :gm_inglist
               case val.to_sym
               when :unordered_list

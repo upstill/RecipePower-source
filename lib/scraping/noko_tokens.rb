@@ -8,6 +8,7 @@ module Bracket
   # range brackets the relevant tokens
   def for_lines range: nil, inline: true, &block
     bound = range.end
+    results = []
     # @brs is a memoized list of locations of linebreaks (either <br> elements or newlines)
     brix = binsearch @brs, range.begin # This is the bin containing the current pos
     brix += 1 unless @brs[brix] == range.begin
@@ -17,9 +18,10 @@ module Bracket
       # Find the position of the next EOL, or the end of the buffer, or the position of the next <br> directive
       # If :inline, truncate at the next EOL character
       bound = @brs[brix + 1] if inline
-      yield pos, bound
+      results << yield(pos, bound)
       brix += 1
     end
+      results
   end
 end
 

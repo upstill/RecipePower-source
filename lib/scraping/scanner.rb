@@ -405,6 +405,7 @@ class NokoScanner # < Scanner
       @tokens.for_lines(range: opos...obound, inline: within) do |newpos, newbound|
         return NokoScanner.new(@tokens, newpos, newbound)
       end
+      nil
     end
     # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
     s1 = seekline within, @pos, @bound
