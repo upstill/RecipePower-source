@@ -9,7 +9,7 @@ class TheguardianDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
-  def setup
+  def setup # TODO: writes theguardian.com.yml, not theguardian.com_slash_lifeandstyle.yml
     # Define all the tags we'll need for the site. (These will need to be extant on RecipePower itself)
     @ingredients = %w{ lemon\ zest salt sea\ salt sourdough\ bread pine\ nuts anchovy\ fillets flaked\ sea\ salt black\ pepper unsalted\ butter asparagus olive\ oil garlic\ clove basil\ leaves
     cooking\ chorizo eggs asparagus\ spears avocados olive\ oil lemon\ juice Greek-style\ yoghurt parsley\ leaves

@@ -1,6 +1,5 @@
 ---
-:root: cooking.nytimes.com
-:selector: "div.post-header\r\ndiv.recipe-bar\r\ndiv#ingredients\r\ndiv#directions"
+:selector: article.recipe-detail-card
 :trimmers:
 - div.nutrition-container
 - div.secondary-controls
@@ -14,4 +13,4 @@
   :rp_instructions:
     :in_css_match:
 :sample_url: http://cooking.nytimes.com/recipes/1016062-red-lentil-soup-with-lemon
-:sample_title: Red Lentil Soup With Lemon Recipe
+:sample_title: Red Lentil Soup With Lemon

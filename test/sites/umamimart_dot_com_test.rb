@@ -15,7 +15,6 @@ class UmamimartDotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			# :gm_recipes => { :at_css_match => 'h1.article--title' },
       :rp_inglist => { :in_css_match => 'p' },
 			:rp_ingline => { :inline => true },
 			:rp_title => { :in_css_match => 'h1' }
@@ -25,7 +24,6 @@ class UmamimartDotComTest < ActiveSupport::TestCase
     @selector = 'article'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

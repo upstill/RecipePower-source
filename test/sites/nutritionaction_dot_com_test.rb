@@ -25,7 +25,6 @@ lemon\ juice flat-leaf\ parsley cauliflower\ florets kosher\ salt } # All ingred
 		@sample_title = 'Cauliflower with Lemon-Pine Nut Dressing'
 
     @grammar_mods = {
-        # :gm_recipes => { at_css_match: 'h3' },
      :gm_inglist => :paragraph
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

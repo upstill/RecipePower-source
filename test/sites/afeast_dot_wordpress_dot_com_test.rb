@@ -9,7 +9,7 @@ class WordpressDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
-  def setup
+  def setup # TODO: writes wordpress.com.yml, not afeast.wordpress.com.yml
     @ingredients = %w{ carrots lemon\ juice sugar olive\ oil orange\ flower\ water salt } # All ingredients found on the page
     @units =  %w{ TBS pound tsp pinch } # All units
     @conditions = %w{  } # All conditions

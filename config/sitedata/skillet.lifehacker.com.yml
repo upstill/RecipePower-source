@@ -1,6 +1,7 @@
 ---
-:root: skillet.lifehacker.com
-:selector: "div.js_post-content\r\nheader h1"
+:selector: |-
+  div.js_post-content
+  header h1
 :trimmers:
 - div.img-wrapper
 - div.fIUNXF

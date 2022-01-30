@@ -5,34 +5,22 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class JeffreymorgenthalerDotComTest < ActiveSupport::TestCase
+class SkilletDotLifehackerDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
-  def setup
-    @ingredients = %w{ sugar hot\ water fresh\ lime\ juice
-      lime\ peel citric\ acid } # All ingredients found on the page
-    @units =  %w{ oz ml } # All units
-    @conditions = %w{ freshly\ grated } # All conditions
+  def setup # TODO: writes lifehacker.com.yml, not skillet.lifehacker.com.yml
+    @ingredients = %w{  } # All ingredients found on the page
+    @units =  %w{  } # All units
+    @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:rp_inglist => {
-				:in_css_match => "ul.ingredients"
-			},
-			:rp_ingline => {
-				:in_css_match => "li"
-			},
-			:rp_title => {
-				:in_css_match => "h3"
-			},
-			:rp_instructions => {
-				:in_css_match => "ol.instructions"
-			}
 		}
-		@trimmers = ["img", "h3 a"]
-		@selector = "div.recipe-extras"
-		@sample_url = 'https://jeffreymorgenthaler.com/lime-cordial/'
-		@sample_title = 'Lime Cordial'
+		@trimmers = ["div.img-wrapper", "div.fIUNXF", "div.movable-ad", "div.content-summary__SummaryBox", "aside.inset--story"]
+		@selector = "div.js_post-content
+header h1"
+		@sample_url = 'https://skillet.lifehacker.com/celebrate-negroni-week-with-this-amaro-heavy-offering-1826676965'
+		@sample_title = 'Celebrate Negroni Week With This Amaro-Heavy Offering'
 
     #@grammar_mods = {
     # :gm_inglist =>
@@ -70,7 +58,7 @@ class JeffreymorgenthalerDotComTest < ActiveSupport::TestCase
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
     assert_good
-    assert_equal @sample_title.strip, page_ref.recipes.to_a.first.title.strip
+    assert_equal @sample_title, page_ref.recipes.to_a.first.title
     # For a page that has multiple recipes, test sorting them out as follows:
 =begin
     assert_equal 3, page_ref.recipes.to_a.count

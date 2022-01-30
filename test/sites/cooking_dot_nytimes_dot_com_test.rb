@@ -9,7 +9,7 @@ class CookingDotNytimesDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
-  def setup
+  def setup # TODO: writes nytimes.com.yml, not cooking.nytimes.com.yml
     @ingredients = %w{ olive\ oil onion garlic\ cloves tomato\ paste cumin kosher\ salt
       black\ pepper chile\ powder cayenne chicken\ broth vegetable\ broth water red\ lentils
       carrot lemon fresh\ cilantro
