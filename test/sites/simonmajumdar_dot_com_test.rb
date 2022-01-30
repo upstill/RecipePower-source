@@ -18,7 +18,6 @@ class SimonmajumdarDotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-        :gm_recipes => { in_css_match: "div[data-testid='mesh-container-content']" },
         :rp_title => { in_css_match: 'div#comp-inhsovx8 h1'},
         :gm_inglist => :unordered_list
 		}
@@ -27,7 +26,6 @@ class SimonmajumdarDotComTest < ActiveSupport::TestCase
 		@sample_title = 'Fiery Hot Lime Pickle'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

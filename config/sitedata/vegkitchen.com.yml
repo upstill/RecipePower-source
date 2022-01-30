@@ -1,11 +1,6 @@
 ---
-:root: www.vegkitchen.com
-:selector: div.wprm-recipe-container
-:trimmers:
-- div.wprm-recipe-image
-- div.wprm-recipe-rating
-- a.wprm-recipe-link
-- h3.wprm-recipe-header
+:selector: article.entry
+:trimmers: []
 :grammar_mods:
   :rp_inglist:
     :in_css_match: ul.wprm-recipe-ingredients

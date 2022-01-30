@@ -17,7 +17,6 @@ class FoodandwineDotComTest < ActiveSupport::TestCase
     @conditions = %w{ finely\ grated chopped  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
     @grammar_mods = {
-        # :gm_recipes => {:at_css_match => 'h1'},
         :gm_inglist => {
             :flavor => :unordered_list,
             :list_class => 'ingredients-section',
@@ -32,7 +31,6 @@ class FoodandwineDotComTest < ActiveSupport::TestCase
     @sample_title = 'Stuffed Kale with Bulgur Tabbouleh and Lime Yogurt Dip'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

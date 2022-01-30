@@ -5,28 +5,21 @@ require 'scraping/lexaur.rb'
 require 'scraping/parser.rb'
 
 # This is the template for parse testers on individual sites
-class ThespruceeatsDotComTest < ActiveSupport::TestCase
+class ThemediterraneandishDotComTest < ActiveSupport::TestCase
   include PTInterface
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{ cauliflower extra\ virgin\ olive\ oil garlic kosher\ salt black\ pepper Parmesan\ cheese } # All ingredients found on the page
-    @units =  %w{ medium\ head cup teaspoons teaspoon } # All units
-    @conditions = %w{ finely\ grated crushed freshly\ ground } # All conditions
+    @ingredients = %w{  } # All ingredients found on the page
+    @units =  %w{  } # All units
+    @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:gm_inglist => {
-					:flavor => :unordered_list,
-					:list_class => 'structured-ingredients__list',
-					:line_class => 'structured-ingredients__list-item'
-			},
-			:rp_title => { :in_css_match => 'h1' },
-			:rp_instructions => { :in_css_match => 'div.structured-project__steps ol' }
+        :rp_title => { :in_css_match => 'h2.tasty-recipes-title'}
 		}
-		@trimmers = ["ul.tag-nav__list", "ul.social-nav__list", "div.figure__media", "div.aggregate-star-rating", "figure", "div.section-header", "div.nutrition-info", "div.decision-block__feedback", "div.article-header__media", "div.mntl-bio-tooltip__bottom", "div.mntl-bio-tooltip__top", "div.article-updated-date", "div.feedback-block", "div.inline-block", "div.inline-video", "div.featured-link", "div.sources"]
-		@selector = "article.article div.l-container"
-		@sample_url = 'https://www.thespruceeats.com/roasted-cauliflower-with-parmesan-cheese-3052530'
-		@sample_title = 'Parmesan-Roasted Cauliflower'
+		@selector = "div.tasty-recipes"
+		@sample_url = 'https://www.themediterraneandish.com/vegetarian-moussaka-recipe/print/33043/'
+		@sample_title = 'BEST Vegetarian Moussaka Recipe'
 
     #@grammar_mods = {
     # :gm_inglist =>
@@ -56,30 +49,8 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
   end
 
   test 'ingredient list' do
-		html =<<EOF
-<ul class="structured-ingredients__list text-passage">
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1 </span><span data-ingredient-unit="true">medium</span><span data-ingredient-name="true"> head of&nbsp;cauliflower, </span> cut into bite-size florets</p>
-</li>
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1/4</span> <span data-ingredient-unit="true">cup</span> <a href="https://www.thespruceeats.com/types-of-olive-oil-virgin-extra-virgin-and-refined-3054061" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1"><span data-ingredient-name="true">extra virgin olive oil</span></a></p>
-</li>
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">2</span> <span data-ingredient-unit="true">teaspoons</span> crushed <span data-ingredient-name="true">garlic</span></p>
-</li>
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1</span> <span data-ingredient-unit="true">teaspoon</span> <span data-ingredient-name="true">kosher salt</span></p>
-</li>
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1/2</span> <span data-ingredient-unit="true">teaspoon</span> <span data-ingredient-name="true">freshly ground black pepper</span></p>
-</li>
-<li class="structured-ingredients__list-item">
-<p><span data-ingredient-quantity="true">1/2</span> <span data-ingredient-unit="true">cup</span> finely <span data-ingredient-name="true">grated </span><a href="https://www.thespruceeats.com/parmesan-cheese-substitutes-591333" data-component="link" data-source="inlineLink" data-type="internalLink" data-ordinal="1"><span data-ingredient-name="true">Parmesan cheese</span></a></p>
-</li>
-</ul>
-EOF
     # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
-    pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
+    # pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
   end
 
   test 'recipes parsed out correctly' do

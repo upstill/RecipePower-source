@@ -1,17 +1,17 @@
 ---
-:root: food52.com
-:selector: "h1.recipe__title\r\ndiv.recipe__list--ingredients\r\ndiv.recipe__list--steps"
+:selector: |-
+  header.recipe__header
+  div.recipe__list--ingredients
+  div.recipe__list--steps
 :trimmers: []
 :grammar_mods:
-  :rp_recipelist:
-    :match: {}
-  :rp_inglist:
-    :in_css_match: div.recipe__list ul
-  :rp_ingline:
-    :in_css_match: li
   :rp_title:
     :in_css_match: h1.recipe__title
+  :rp_inglist:
+    :in_css_match: div.recipe__list--ingredients ul
+  :rp_ingline:
+    :in_css_match: li
   :rp_instructions:
     :in_css_match: div.recipe__list--steps ol
-:sample_url: http://food52.com/blog/3743_ignacio_mattoss_grilled_favas
-:sample_title: Ignacio Mattos’s Grilled Favas
+:sample_url: https://food52.com/recipes/18008-ignacio-mattos-grilled-favas
+:sample_title: Ignacio Mattos’ Grilled Favas

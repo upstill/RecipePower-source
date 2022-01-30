@@ -1,13 +1,13 @@
 ---
-:root: thewoksoflife.com
 :selector: div.wprm-recipe-the-woks-of-life
 :trimmers:
 - div.wprm-entry-footer
 - div.social
 - div.wprm-container-float-right
+- label.wprm-checkbox-label
 :grammar_mods:
-  :gm_recipes:
-    :in_css_match: div.wprm-recipe-the-woks-of-life
+  :gm_bundles:
+    :name: :wordpress
   :rp_title:
     :in_css_match: h2
 :sample_url: https://thewoksoflife.com/simple-spicy-pan-fried-noodles/

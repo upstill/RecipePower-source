@@ -1,6 +1,5 @@
 ---
-:root: www.liquor.com
-:selector: div.heading, div.chop-content
+:selector: div.heading, div.article__content
 :trimmers:
 - div.inline-video
 - div.feedback-block

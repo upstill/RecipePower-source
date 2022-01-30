@@ -15,31 +15,26 @@ class Food52DotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-			:rp_recipelist => {
-				:match => {
-				}
-			},
+      :rp_title => {
+        :in_css_match => 'h1.recipe__title' # "h1.content__title"
+      },
 			:rp_inglist => {
-				:in_css_match => "div.recipe__list ul"
+				:in_css_match => "div.recipe__list--ingredients ul"
 			},
 			:rp_ingline => {
 				:in_css_match => "li"
-			},
-			:rp_title => {
-				:in_css_match => "h1.recipe__title"
 			},
 			:rp_instructions => {
 				:in_css_match => "div.recipe__list--steps ol"
 			}
 		}
-		@selector = "h1.recipe__title
+		@selector = "header.recipe__header
 div.recipe__list--ingredients
 div.recipe__list--steps"
-		@sample_url = 'http://food52.com/blog/3743_ignacio_mattoss_grilled_favas'
-		@sample_title = 'Ignacio Mattos’s Grilled Favas'
+		@sample_url = 'https://food52.com/recipes/18008-ignacio-mattos-grilled-favas'
+		@sample_title = "Ignacio Mattos’ Grilled Favas"
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

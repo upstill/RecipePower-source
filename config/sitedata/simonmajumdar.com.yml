@@ -1,10 +1,7 @@
 ---
-:root: www.simonmajumdar.com
 :selector: div[data-testid='mesh-container-content']
 :trimmers: []
 :grammar_mods:
-  :gm_recipes:
-    :in_css_match: div[data-testid='mesh-container-content']
   :rp_title:
     :in_css_match: div#comp-inhsovx8 h1
   :gm_inglist: :unordered_list

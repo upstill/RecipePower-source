@@ -18,7 +18,6 @@ apricots apricot\ jam water pistachios
     @conditions = %w{ chopped chilled shelled } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-				# :gm_recipes => { :at_css_match => 'h1' },
 =begin
 			:gm_inglist => {
 					:flavor => :unordered_list,

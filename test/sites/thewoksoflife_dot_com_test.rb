@@ -21,11 +21,11 @@ class ThewoksoflifeDotComTest < ActiveSupport::TestCase
                     'vegetable oil']
     @units = 'pound'
     # Grammar mods, css_selector and trimmers that apply to recipes
-		@grammar_mods = {
-			:gm_recipes => { :in_css_match => "div.wprm-recipe-the-woks-of-life" },
-			:rp_title => { :in_css_match => "h2" }
-		}
-		@trimmers = ["div.wprm-entry-footer", "div.social", "div.wprm-container-float-right"]
+    @grammar_mods = {
+        :gm_bundles => {:name => :wordpress},
+        :rp_title => {:in_css_match => "h2"}
+    }
+    @trimmers = ["div.wprm-entry-footer", "div.social", "div.wprm-container-float-right", "label.wprm-checkbox-label"]
 		@selector = "div.wprm-recipe-the-woks-of-life"
 		@sample_url = 'https://thewoksoflife.com/simple-spicy-pan-fried-noodles/'
 		@sample_title = 'Simple, Spicy Pan-fried Noodles'

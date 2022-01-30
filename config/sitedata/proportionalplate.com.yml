@@ -1,5 +1,4 @@
 ---
-:root: www.proportionalplate.com
 :selector: div.wprm-recipe-container
 :trimmers:
 - div.wprm-container-float-right

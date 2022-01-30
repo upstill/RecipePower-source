@@ -33,7 +33,6 @@ class SeriouseatsDotComTest < ActiveSupport::TestCase
 		@sample_title = 'Fish-Fragrant Eggplants (Sichuan Braised Eggplant With Garlic, Ginger, and Chiles) Recipe'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

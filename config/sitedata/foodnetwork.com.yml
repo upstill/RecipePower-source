@@ -1,5 +1,7 @@
 ---
-:root: www.foodnetwork.com
+:selector: |-
+  section.o-Recipe div.recipe-lead
+  section.o-Recipe div.recipe-body
 :trimmers:
 - div.reviewSummary
 - section.o-RecipeLead
@@ -24,4 +26,4 @@
   :rp_instructions:
     :in_css_match: section.o-Method
 :sample_url: http://www.foodnetwork.com/recipes/food-network-kitchens/pickled-ginger-recipe.html
-:sample_title: 'Pickled Ginger Recipe : : Food Network'
+:sample_title: Pickled Ginger

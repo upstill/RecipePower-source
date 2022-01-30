@@ -1,5 +1,4 @@
 ---
-:root: bojongourmet.com
 :selector: div.wprm-recipe
 :trimmers:
 - div.wprm-recipe-notes-container

@@ -23,7 +23,6 @@ class BonappetitDotComTest < ActiveSupport::TestCase
         :rp_ingline => {
             :at_css_match => 'p.BaseWrap-sc-TURhJ'
         },
-        # :gm_recipes => {:at_css_match => 'h1'},
         :rp_title => {
             :in_css_match => 'h1'
         },
@@ -56,7 +55,12 @@ class BonappetitDotComTest < ActiveSupport::TestCase
 
   # Should find the yield string as preceded in noise
   test 'scan for yield' do
-    html = 'blah de blah 2 servings'
+    html = "blah de blah<br>2 servings"
+    seeker = scan(NokoScanner.new(html)).first
+    assert_not_nil seeker, "No :rp_serves found in scanning '#{html}'"
+    assert_equal :rp_serves, seeker.token
+
+    html = "blah de blah\n2 servings"
     seeker = scan(NokoScanner.new(html)).first
     assert_not_nil seeker, "No :rp_serves found in scanning '#{html}'"
     assert_equal :rp_serves, seeker.token

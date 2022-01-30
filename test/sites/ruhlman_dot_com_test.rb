@@ -16,7 +16,6 @@ class RuhlmanDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
 			:gm_inglist => :unordered_list,
-			# :gm_recipes => { :at_css_match => 'h2' },
 			:rp_instructions => {
 				:in_css_match => nil
 			}
@@ -25,7 +24,6 @@ class RuhlmanDotComTest < ActiveSupport::TestCase
 		@sample_title = 'The Vesper'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
     #:inline  # Multiple ingredients in a single line, comma-separated
     #:unordered_list  # <li> within <ul>

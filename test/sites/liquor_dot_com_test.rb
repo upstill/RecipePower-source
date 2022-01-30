@@ -17,7 +17,6 @@ class LiquorDotComTest < ActiveSupport::TestCase
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
-      # :gm_recipes => { at_css_match: 'h1' },
       :gm_inglist => {
           :flavor => :unordered_list,
           :list_class => 'structured-ingredients__list',
@@ -28,12 +27,11 @@ class LiquorDotComTest < ActiveSupport::TestCase
 			}
 		}
 		@trimmers = ["div.inline-video", "div.feedback-block", "div.article-intro", "div.mntl-sc-block-featuredlink", "div.disqus-block", "header.section__header"]
-		@selector = "div.heading, div.chop-content"
+		@selector = "div.heading, div.article__content"
 		@sample_url = 'https://www.liquor.com/recipes/navy-grog/'
 		@sample_title = 'Navy Grog'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
     #:inline  # Multiple ingredients in a single line, comma-separated
     #:unordered_list  # <li> within <ul>

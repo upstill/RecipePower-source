@@ -28,12 +28,12 @@ class FoodnetworkDotComTest < ActiveSupport::TestCase
 				:in_css_match => "section.o-Method"
 			}
 		}
+    @selector = "section.o-Recipe div.recipe-lead\nsection.o-Recipe div.recipe-body"
 		@trimmers = ["div.reviewSummary", "section.o-RecipeLead", "div.recipeLead", "div.print-recipe", "div.o-AssetActions", "div.o-Ingredients__m-Footer", "div.recipe-body-footer", "div#dfp_cartridge", "div.lookingForSomethingElse", "section.relatedClasses", "section.bodyRight-footer", "div.attribution", "p.o-Ingredients__a-Ingredient--SelectAll"]
 		@sample_url = 'http://www.foodnetwork.com/recipes/food-network-kitchens/pickled-ginger-recipe.html'
-		@sample_title = 'Pickled Ginger Recipe : : Food Network'
+		@sample_title = 'Pickled Ginger'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>
@@ -69,7 +69,7 @@ class FoodnetworkDotComTest < ActiveSupport::TestCase
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
     assert_good
-    assert_equal @sample_title, page_ref.recipes.to_a.first.title
+    assert_equal @sample_title, page_ref.recipes.to_a.first.title.strip
     # For a page that has multiple recipes, test sorting them out as follows:
 =begin
     assert_equal 3, page_ref.recipes.to_a.count

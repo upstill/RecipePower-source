@@ -1,7 +1,8 @@
 ---
-:root: www.themediterraneandish.com
-:selector: div#comp-inhsovxx
+:selector: div.tasty-recipes
 :trimmers: []
-:grammar_mods: {}
+:grammar_mods:
+  :rp_title:
+    :in_css_match: h2.tasty-recipes-title
 :sample_url: https://www.themediterraneandish.com/vegetarian-moussaka-recipe/print/33043/
-:sample_title: BEST Vegetarian Moussaka Recipe | The Mediterranean Dish
+:sample_title: BEST Vegetarian Moussaka Recipe

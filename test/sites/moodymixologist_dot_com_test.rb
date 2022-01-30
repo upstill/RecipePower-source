@@ -16,14 +16,14 @@ class MoodymixologistDotComTest < ActiveSupport::TestCase
     # Grammar mods, css_selector and trimmers that apply to recipes
 		@grammar_mods = {
         :gm_bundles => { :name => :wordpress },
+        :rp_title => { :in_css_match => 'h2.wprm-recipe-name' }
 		}
 		@trimmers = ["div.wprm-template-chic-buttons"]
-		@selector = "div.wprm-recipe"
+		@selector = "ul.wprm-recipe-ingredients\ndiv.wprm-recipe"
 		@sample_url = 'https://www.moodymixologist.com/blog/the-saturn-a-tiki-cocktail-with-gin'
 		@sample_title = 'The Saturn – Gin Tiki Cocktail'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>

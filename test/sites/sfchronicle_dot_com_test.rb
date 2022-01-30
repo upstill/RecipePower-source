@@ -10,26 +10,20 @@ class SfgateDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
-    @ingredients = %w{  } # All ingredients found on the page
-    @units =  %w{  } # All units
+    @ingredients = %w{ soybeans food-grade\ gypsum nigari muslin\ cloth } # All ingredients found on the page
+    @units =  %w{ ounces teaspoons piece } # All units
     @conditions = %w{  } # All conditions
     # Grammar mods, css_selector and trimmers that apply to recipes
-		@grammar_mods = {
-			:rp_recipelist => {
-				:match => {
-					:at_css_match => "h1,h2"
-				}
-			},
-			:rp_title => {
-				:in_css_match => "h1,h2"
-			}
-		}
+    @grammar_mods = {
+        :gm_inglist => :unordered_list,
+        :rp_title => { :in_css_match => "div.recipe h3" }
+    }
+    @selector = 'article.article--content'
 		@trimmers = ["section.relatedStories", "div.inDepth", "div.articleFooter"]
 		@sample_url = 'http://www.sfchronicle.com/recipes/article/Preserving-tradition-with-DIY-tofu-4615283.php'
-		@sample_title = 'Preserving tradition with DIY tofu'
+		@sample_title = 'Homemade Block Tofu'
 
     #@grammar_mods = {
-    # :gm_recipes => { at_css_match: 'h1' },
     # :gm_inglist =>
       #:inline  # Multiple ingredients in a single line, comma-separated
       #:unordered_list  # <li> within <ul>
@@ -64,7 +58,7 @@ class SfgateDotComTest < ActiveSupport::TestCase
   test 'recipes parsed out correctly' do
     # Test that the recipe_page parses out individual recipes (usually only one)
     pt_apply :recipe_page, url: @page
-    assert_good
+    assert_good counts: { rp_recipe: 4 }
     assert_equal @sample_title, page_ref.recipes.to_a.first.title
     # For a page that has multiple recipes, test sorting them out as follows:
 =begin

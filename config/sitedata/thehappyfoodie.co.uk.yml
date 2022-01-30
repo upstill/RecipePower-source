@@ -1,18 +1,17 @@
 ---
-:root: thehappyfoodie.co.uk
-:selector: article
+:selector: div.hf-col-main
 :trimmers:
 - div.page__teeth
 - div.colorful__teeth
 - picture
 :grammar_mods:
   :rp_inglist:
-    :in_css_match: ul
+    :in_css_match: div.hf-ingredients__container table tbody
   :rp_ingline:
-    :in_css_match: li
+    :in_css_match: tr
   :rp_title:
-    :in_css_match: h1,h2
+    :in_css_match: section.hf-title h1
   :rp_instructions:
-    :in_css_match: ol
+    :in_css_match: div.hf-method__text
 :sample_url: https://thehappyfoodie.co.uk/recipes/ottolenghis-brussels-sprouts-with-burnt-butter-and-black-garlic
-:sample_title: Ottolenghi Brussels Sprouts Recipe | Saturday Kitchen
+:sample_title: Ottolenghi’s Brussels Sprouts with Burnt Butter and Black Garlic
