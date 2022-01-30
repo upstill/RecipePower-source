@@ -745,8 +745,23 @@ class NokoScanner # < Scanner
   def for_css options={}, &block
     # Now we can assume there's a CSS matching directive
     subscanner = clone
-    results = []
     directive, selector = options.to_a.first
+    begin # Confirm the validity of the selector
+      sample = nkdoc.at_css(selector)
+    rescue Exception => err
+      return []
+    end
+    # If the whole selector provides no results, try a terminating subpath
+    while !sample && selector.sub!(/.*\s+/, '') do
+      begin # Confirm the validity of the selector
+        sample = nkdoc.at_css(selector)
+      rescue Exception => err
+        # Try the next subpath on error
+        sample = nil
+      end
+    end
+    return [] unless sample # Give up unless at least one match found
+
     (matcher = Hash.new)[((directive == :after_css_match) ? :in_css_match : directive)] = selector
     subscanners = []
     while (subscanner = subscanner.on_css_match(matcher)) do # || subscanner.on_css_match(at_css_match: selector)) do
