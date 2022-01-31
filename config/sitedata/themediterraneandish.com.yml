@@ -1,4 +1,5 @@
 ---
+:root: www.themediterraneandish.com
 :selector: div.tasty-recipes
 :trimmers: []
 :grammar_mods:

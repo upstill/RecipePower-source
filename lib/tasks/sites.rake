@@ -167,7 +167,8 @@ namespace :sites do
         data[:sample_title] = config_data[:sample_title]
       end
       File.open(config_file_for(site), "w") do |file|
-        file.write data.to_yaml
+        file.write data.except(:sample_url, :sample_title).to_yaml
+        file.write data.slice(:sample_url, :sample_title).to_yaml.sub("---\n",'')
       end
     end
   end

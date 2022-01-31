@@ -1,4 +1,5 @@
 ---
+:root: www.moodymixologist.com
 :selector: |-
   ul.wprm-recipe-ingredients
   div.wprm-recipe

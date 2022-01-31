@@ -1,4 +1,5 @@
 ---
+:root: skillet.lifehacker.com
 :selector: |-
   div.js_post-content
   header h1

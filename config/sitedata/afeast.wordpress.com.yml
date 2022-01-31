@@ -1,4 +1,5 @@
 ---
+:root: afeast.wordpress.com
 :selector: div.post-content
 :trimmers:
 - div#jp-post-flair

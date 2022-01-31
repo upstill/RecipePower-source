@@ -1,4 +1,5 @@
 ---
+:root: food52.com
 :selector: |-
   header.recipe__header
   div.recipe__list--ingredients

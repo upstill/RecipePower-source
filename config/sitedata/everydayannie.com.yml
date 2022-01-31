@@ -1,4 +1,5 @@
 ---
+:root: everydayannie.com
 :selector: |
   div.post-header
   div.recipe-bar

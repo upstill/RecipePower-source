@@ -1,4 +1,5 @@
 ---
+:root: www.simonmajumdar.com
 :selector: div[data-testid='mesh-container-content']
 :trimmers: []
 :grammar_mods:

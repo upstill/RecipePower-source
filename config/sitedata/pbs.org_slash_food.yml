@@ -1,4 +1,5 @@
 ---
+:root: www.pbs.org/food
 :selector: div.recipe_instructions
 :trimmers:
 - div.social

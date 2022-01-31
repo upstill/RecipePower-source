@@ -1,4 +1,5 @@
 ---
+:root: www.vegkitchen.com
 :selector: article.entry
 :trimmers: []
 :grammar_mods:

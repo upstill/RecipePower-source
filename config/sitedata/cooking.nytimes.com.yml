@@ -1,4 +1,5 @@
 ---
+:root: cooking.nytimes.com
 :selector: article.recipe-detail-card
 :trimmers:
 - div.nutrition-container
