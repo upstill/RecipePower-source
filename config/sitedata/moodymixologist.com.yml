@@ -5,6 +5,11 @@
   div.wprm-recipe
 :trimmers:
 - div.wprm-template-chic-buttons
+- div.wprm-recipe-adjustable-servings-container
+- div.wprm-icon-shortcode
+- div.wprm-call-to-action
+- div.wprm-recipe-rating
+- div.wprm-recipe-image
 :grammar_mods:
   :gm_bundles:
     :name: :wordpress
