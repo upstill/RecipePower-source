@@ -9,8 +9,8 @@ require 'scraping/site_util.rb'
 # 1) a config file (in config/sitedata) that expresses the data, to keep it under source control
 # 2) a test file (in test/sites) which tests said data on a sample file from the site
 # :build_test_templates - For sites that don't have one, build a test file from test/sites/test_template.erb
-# :save_parsing_data - Pull parsing data from the database into config files, one for each site
-# :restore_parsing_data - Restore parsing data from config files into the database
+# :extract_parsing_data - Pull parsing data from the database into config files, one for each site
+# :assert_parsing_data - Restore parsing data from config files into the database
 # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
 namespace :sites do
   desc "TODO"
@@ -148,7 +148,7 @@ namespace :sites do
 
   # Record parsing data from sites in individual files, suitable for checkin
   # site => config/sitedata/<site.url>.yml for all sites that have Content (or one, as specified by :arg)
-  task :save_parsing_data, [:arg] => :environment do  |t, args|
+  task :extract_parsing_data, [:arg] => :environment do  |t, args|
     # Derive an array of sites to process. If one is given in :arg, use that. Otherwise, go through all sites
     siteroot = args[:arg]
     sites = []
@@ -166,7 +166,7 @@ namespace :sites do
       selector = selector_map[site.id]
       next if site.trimmers.empty? && site.grammar_mods.empty? && selector.blank?
       data = {
-          root: site.root,
+          root: site.root.sub(/^www./,''),
           selector: selector,
           trimmers: site.trimmers,
           sample_url: site.sample,
@@ -189,7 +189,7 @@ namespace :sites do
   # Get parsing data for sites from YAML files
   # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
   # config/sitedata/<url>.yml => Site.fetch(root: data[:root]) for *.yml
-  task :restore_parsing_data, [:arg] => :environment do |t, args|
+  task :assert_parsing_data, [:arg] => :environment do |t, args|
     sitename = args[:arg]
     for_configs(sitename) do |site, data|
       puts "Restore parsing data for Site##{site.id}, root '#{site.root}': '#{site.sample}'"
