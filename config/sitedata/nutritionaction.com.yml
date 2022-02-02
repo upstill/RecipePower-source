@@ -1,5 +1,5 @@
 ---
-:root: www.nutritionaction.com
+:root: nutritionaction.com
 :selector: div.entry-content
 :trimmers:
 - div.wprm-entry-footer

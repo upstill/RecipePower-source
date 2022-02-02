@@ -10,7 +10,7 @@ def site_root site_or_root_or_id
   when String
     site_or_root_or_id
   when Integer
-    Site.find( site_or_root_or_id).root
+    Site.find(site_or_root_or_id).root
   when nil
     nil
   else
@@ -33,6 +33,20 @@ def config_file_for site_or_root_or_id
   Rails.root.join config_dir, root + '.yml'
 end
 
+# Fetch a site based on the root, meanwhile confirming that the given sample leads to that site
+def confirm_site root, sample_url
+  pr = PageRef.fetch sample_url
+  if !(site = pr&.site)
+    raise "Can't locate site for sample '#{sample_url}'"
+  elsif !root ||
+      !(rootsite = Site.find_by(root: root) || Site.find_by(root: 'www.'+root))
+    raise "No site associated with root '#{root || 'nil'}'"
+  elsif (rootsite != site) # The site from the sample url is not the same as the site with the root
+    raise "Site ##{site.id} associated with sample '#{sample_url}' is not the same as site #{rootsite.id} with root '#{rootsite.root}'"
+  end
+  site
+end
+
 # Call a block for each .yml file in the configs/sitedata directory, or a single site as specified
 def for_configs site_or_root_or_id=nil
   ymls =
@@ -48,17 +62,12 @@ def for_configs site_or_root_or_id=nil
       return
     end
     data = YAML.load_file filename
-    if !(data && data[:sample_url])
+    if !(data && (sample_url = data[:sample_url]))
       err = data ? "No :sample_url to be found in YAML" : "YAML failed on"
-      puts "ERROR: #{err} file '#{filename}'"
+      raise "ERROR: #{err} file '#{filename}'"
       next
     end
-    pr = PageRef.fetch data[:sample_url]
-    if site = pr&.site
-      yield site, data
-    else
-      puts "!!! Can't locate site for sample '#{data[:sample_url]}''"
-    end
+    yield confirm_site(data[:root], sample_url), data
   end
 end
 

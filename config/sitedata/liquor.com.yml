@@ -1,5 +1,5 @@
 ---
-:root: www.liquor.com
+:root: liquor.com
 :selector: div.heading, div.article__content
 :trimmers:
 - div.inline-video

@@ -1,5 +1,5 @@
 ---
-:root: www.simplyrecipes.com
+:root: simplyrecipes.com
 :selector: div.article__content
 :trimmers:
 - div.recipe-callout-buttons

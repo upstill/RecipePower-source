@@ -1,4 +1,5 @@
 require 'test_helper'
+require 'scraping/site_util.rb'
 
 # A test harness for parsing functionality.
 # Manages parsing of local files, strings of html, and remote pages
@@ -56,7 +57,11 @@ module PTInterface
                                     sample_url: @sample_url,
                                     sample_title: @sample_title
 
-    @parse_tester.save_configs @sample_url, @domain
+    # The .yml file is derived from the test file that's being run
+    # We find a 'test/sites/*.rb' file in the current stack trace
+    Kernel.caller.find { |file| file.match(/test\/sites\/(.*)_test\.rb:/ ) }
+    # Turn the file name into a site root
+    @parse_tester.save_configs $1.gsub( '_slash_', '/').gsub('_dot_', '.')
     @page = @sample_url
     @title = @sample_title
   end
@@ -195,20 +200,18 @@ class ParseTester < ActiveSupport::TestCase
   end
 =end
 
-  def save_configs url, domain = nil
-    domain ||= PublicSuffix.parse(URI(url).host).domain if url
-    if domain.present?
-      data = {
-          selector: @selector,
-          trimmers: @trimmers,
-          grammar_mods: @grammar_mods,
-          sample_url: @sample_url,
-          sample_title: @sample_title
-      }.compact
-      filename = Rails.root.join("config", "sitedata", domain + '.yml')
-      File.open(filename, "w") do |file|
-        file.write data.to_yaml
-      end
+  def save_configs root
+    data = {
+        root: root,
+        selector: @selector,
+        trimmers: @trimmers,
+        grammar_mods: @grammar_mods,
+        sample_url: @sample_url,
+        sample_title: @sample_title
+    }.compact
+    filename = config_file_for(root)
+    File.open(filename, "w") do |file|
+      file.write data.to_yaml
     end
   end
 

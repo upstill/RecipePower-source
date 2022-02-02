@@ -1,5 +1,5 @@
 ---
-:root: www.seriouseats.com
+:root: seriouseats.com
 :selector: div.article__container
 :trimmers:
 - div.nav-share

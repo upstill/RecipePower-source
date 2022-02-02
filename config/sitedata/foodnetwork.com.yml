@@ -1,5 +1,5 @@
 ---
-:root: www.foodnetwork.com
+:root: foodnetwork.com
 :selector: |-
   section.o-Recipe div.recipe-lead
   section.o-Recipe div.recipe-body

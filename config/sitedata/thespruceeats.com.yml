@@ -1,5 +1,5 @@
 ---
-:root: www.thespruceeats.com
+:root: thespruceeats.com
 :selector: article.article div.l-container
 :trimmers:
 - ul.tag-nav__list

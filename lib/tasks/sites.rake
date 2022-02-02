@@ -14,6 +14,13 @@ require 'scraping/site_util.rb'
 # THIS SHOULD BE DONE AFTER A ROUND OF TESTING, IN PREPARATION FOR MOVING BETWEEN DEVELOPMENT AND PRODUCTION
 namespace :sites do
   desc "TODO"
+
+  # We need to be able to assume that the sample page for a site
+  # actually has that site for its home. Throw an error if it doesn't.
+  def check_sample_against_site sample_url, site
+
+  end
+
   task :purge => :environment do
     s = Site.first
     p = PageRef.first
@@ -95,8 +102,9 @@ namespace :sites do
     File.open(infile, 'r') { |f| template = f.read }
     erb = ERB.new template
 
-    if (sitename = site_root(args[:arg])) && !File.exist?(config_file_for(sitename)) # Site name specified
-      sitename.sub! /^www\./, ''
+    # Confirm that the provided sitename represents an extant site.
+    # If not, throw an error
+    if (sitename = site_root args[:arg]) && !File.exist?(config_file_for(sitename)) # Site name specified
       if !(Site.where(root: sitename).exists? || Site.where(root: 'www.'+sitename).exists?)
         candidates = Site.where 'root ILIKE ?', "%#{sitename}%"
         # No such site => Report error and suggest candidate roots
@@ -108,10 +116,12 @@ namespace :sites do
       end
     end
 
-    # For all extant config files, construct the test template
+    # For all extant config files (or just that for the given sitename), construct the test template
     for_configs(sitename) do |site, data|
       testfile = test_file_for site
-      if File.exist? testfile # New files only, please
+
+      # New test files only, please
+      if File.exist? testfile
         puts "Test file '#{testfile}' already exists for '#{sitename}'" if sitename
         next
       end
@@ -123,6 +133,9 @@ namespace :sites do
       datahash[:selector] = '"' + data[:selector].to_s + '"' if data[:selector].present?
       datahash[:sample_url] = "'" + data[:sample_url] + "'" if data[:sample_url].present?
       datahash[:sample_title] = "'" + (data[:sample_title] || "Title here, please") + "'"
+
+      check_sample_against_site datahash[:sample_url], site
+
       @sitedata = datahash.collect { |key, value|
         "\t\t@#{key} = #{value}"
       }.join "\n"

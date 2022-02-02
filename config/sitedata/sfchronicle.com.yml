@@ -1,4 +1,5 @@
 ---
+:root: sfchronicle.com
 :selector: article.article--content
 :trimmers:
 - section.relatedStories

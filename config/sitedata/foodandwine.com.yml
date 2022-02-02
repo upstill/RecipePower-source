@@ -1,5 +1,5 @@
 ---
-:root: www.foodandwine.com
+:root: foodandwine.com
 :selector: div.content
 :trimmers:
 - div.articleContainer__rail

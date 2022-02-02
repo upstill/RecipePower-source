@@ -1,5 +1,5 @@
 ---
-:root: www.bonappetit.com
+:root: bonappetit.com
 :selector: article
 :trimmers:
 - ul.social-icons__list
