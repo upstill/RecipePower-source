@@ -461,7 +461,11 @@ The dependencies are as follows:
 
     # Now a beauty pass: examine the space between each :ingspec found for stray material
     @parsed.find(:rp_inglist).each do |inglist|
-      inspecs = inglist.find(:rp_ingspec).sort_by(&:pos)
+      # Collect ingredient lines from the ingredient list, plus ingredient specs that aren't in a line
+      inglines = inglist.find(:rp_ingline)
+      inspecs = (inglist.find(:rp_ingspec) -
+          inglines.collect { |ingline| ingline.find(:rp_ingspec) }.flatten +
+          inglines).sort_by(&:pos)
       if inspecs.empty?
         # Trivial reject of parsed ingredient lists that don't have a single ingredient spec
         @parsed.delete inglist, recur: true
@@ -483,8 +487,24 @@ The dependencies are as follows:
       outspecs.each_index do |ix|
         child, succ = outspecs[ix..(ix + 1)]
         intervening = il_stream.between child.result_stream, succ&.result_stream
-        comm = Seeker.new(intervening, token: :rp_comment)
-        outlines << Seeker.new( inglist.stream, children: [child, comm], token: :rp_ingline)
+        if intervening.length > 0
+          comm = Seeker.new(intervening, token: :rp_comment)
+          # If child is a line, create/extend its comment with the intervening content
+          # If the child is an ingspec, create a line with the intervening content as comment
+          case child.token
+          when :rp_ingline
+            # Replace the line's comment with intervening and extend the line
+            if ix = child.children.find_index { |grandchild| grandchild.token == :rp_comment }
+              child.children[ix] = comm
+            else
+              child.children << comm
+            end
+            child.bound = comm.bound
+          when :rp_ingspec
+            child = Seeker.new inglist.stream, children: [child, comm], token: :rp_ingline
+          end
+        end
+        outlines << child
       end
       inglist.children = outlines
     end
