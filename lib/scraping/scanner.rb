@@ -174,22 +174,6 @@ class Scanner < Object
     str
   end
 
-  # Move past the current string, adjusting 'next' and returning a stream for the remainder
-  def rest nchars = 1
-  end
-
-  # Move past the end, returning an exhausted stream
-  def end
-  end
-
-  # The stream in its entirety
-  def all
-  end
-
-  def more?
-    @pos < @bound # @length
-  end
-
   # Provide a string representing the content of the stream from its current position, terminating at the bound
   def to_s limit = nil
     peek ((limit || @bound) - @pos)
@@ -201,6 +185,80 @@ class Scanner < Object
 
   def length
     @bound - @pos
+  end
+
+  def more?
+    @pos < @bound
+  end
+
+  # Move past the current string, adjusting '@pos' and returning a stream for the remainder
+  def rest nchars = 1
+    clone_for pos: [(@pos+nchars), @bound].min
+  end
+
+  # Return this scanner, exhausted
+  def end
+    clone_for pos: @bound
+  end
+
+  def all
+    clone_for pos: 0
+  end
+
+  # Create a scanner that starts where the given scanner (or an Integer position) starts
+  def goto scanner_or_position
+    clone_for pos: (scanner_or_position.is_a?(Integer) ? scanner_or_position : scanner_or_position.pos)
+  end
+
+  # Take a slice of the scanner's range. If a Fixnum is given, return the natural range beginning at that point
+  def slice fixnum_or_range
+    case fixnum_or_range
+    when Integer
+      # StrScanner.new @strings, fixnum_or_range, @bound
+      clone_for pos: fixnum_or_range
+    when Range
+      # StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
+      clone_for pos: fixnum_or_range.begin, bound: fixnum_or_range.end
+    end
+  end
+
+  # Advance self past the end of s2
+  def past s2
+    clone_for pos: s2.bound
+  end
+
+  # return a version of self that ends where s2 begins
+  def except s2
+    return self if !s2 || s2.pos > @bound
+    clone_for bound: s2.pos
+  end
+
+  # Return a stream from the end of the first scanner to the beginning of the second.
+  def between first, second
+    # NokoScanner.new tokens, first&.bound || @pos, second&.pos || @bound
+    clone_for pos: first&.bound, bound: second&.pos
+  end
+
+  # Make the end of the stream coincident with another stream
+  def encompass s2
+    @bound = s2.bound if s2.bound > @bound
+    self
+  end
+
+  # Return a stream whose boundaries are clipped to another stream
+  def within s2_or_range
+    range = s2_or_range.is_a?(Range) ? s2_or_range : s2_or_range.range
+    if range.first < @bound && range.last > @pos
+      # NokoScanner.new tokens, [@pos, range.first].max, [@bound, range.last].min
+      clone_for pos: [@pos, range.first].max, bound: [@bound, range.last].min
+    else
+      # NokoScanner.new tokens, @pos, @pos
+      clone_for bound: @pos
+    end
+  end
+
+  def move_to newpos
+    @pos = [[0, newpos].max, @bound].min
   end
 
 end
@@ -264,49 +322,6 @@ class StrScanner < Scanner
     end
   end
 
-  # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest nchars = 1
-    clone_for pos: [(@pos+nchars), @bound].min
-  end
-
-  # Return this scanner, exhausted
-  def end
-    clone_for pos: @bound
-  end
-
-  def all
-    clone_for pos: 0
-  end
-
-  # Take a slice of the scanner's range. If a Fixnum is given, return the natural range beginning at that point
-  def slice fixnum_or_range
-    case fixnum_or_range
-    when Integer
-      # StrScanner.new @strings, fixnum_or_range, @bound
-      clone_for pos: fixnum_or_range
-    when Range
-      # StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
-      clone_for pos: fixnum_or_range.begin, bound: fixnum_or_range.end
-    end
-  end
-
-  # Advance self past the end of s2
-  def past s2
-    # StrScanner.new @strings, s2.bound, @bound
-    clone_for pos: s2.bound
-  end
-
-  # return a version of self that ends where s2 begins
-  def except s2
-    return self if !s2 || s2.pos > @bound
-    # StrScanner.new(@strings, @pos, s2.pos)
-    clone_for bound: s2.pos
-  end
-
-  def length
-    @bound - @pos
-  end
-
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
   def toline within = false
     @strings.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
@@ -328,10 +343,12 @@ class StrScanner < Scanner
     end
   end
 
-  private
+  protected
 
   # Replicate a scanner for a new range, optionally constrained to the existing bounds
-  def clone_for pos: @pos, bound: @bound, constrained: false
+  def clone_for pos: nil, bound: nil, constrained: false
+    pos ||= @pos # In the event that nil is passed
+    bound ||= @bound
     if constrained
       StrScanner.new @strings, [pos, @pos].max, [bound, @bound].min
     else
@@ -418,38 +435,10 @@ class NokoScanner < Scanner
     result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
   end
 
-  # Is the token stream at position pos immediately follow a newline?
+  # Is the token stream at position pos immediately following a newline?
   def atline?
     return true if @pos == 0
     NokoScanner.new(tokens, @pos-1, @bound).toline&.pos == @pos
-  end
-
-  # Move past the current string, adjusting '@pos' and returning a stream for the remainder
-  def rest ntokens = 1
-    newpos = (ntokens < 0) ? @bound : (@pos + ntokens)
-    NokoScanner.new tokens, (newpos > @bound ? @bound : newpos), @bound # (newpos > @length ? @length : newpos), @length
-  end
-
-  # Return this scanner, exhausted
-  def end
-    NokoScanner.new tokens, @bound, @bound
-  end
-
-  def all
-    NokoScanner.new tokens, 0, @bound
-  end
-
-  def slice range_or_start
-    range = range_or_start.is_a?(Range) ? range_or_start : range_or_start...@bound
-    NokoScanner.new tokens, range.begin, range.end
-  end
-
-  def range
-    @pos...@bound
-  end
-
-  def length
-    @bound - @pos
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
@@ -490,55 +479,6 @@ class NokoScanner < Scanner
     if (data || (ptr == (head + 1)))
       head = ptr
     end
-  end
-
-  def more?
-    @pos < @bound # @length
-  end
-
-  # Create a scanner that starts where the given scanner (or an Integer position) starts
-  def goto scanner_or_position
-    newpos = scanner_or_position.is_a?(Integer) ?
-                 scanner_or_position :
-                 scanner_or_position.pos
-    NokoScanner.new tokens, newpos, @bound
-  end
-
-  # Advance self past the end of s2
-  def past s2
-    NokoScanner.new tokens, s2.bound, @bound
-  end
-
-  # Create a scanner that ends at the given scanner
-  def except s2
-    return self if !s2 || s2.pos > @bound
-    s2 ? NokoScanner.new(tokens, @pos, s2.pos) : self
-  end
-
-  # Return a stream from the end of the first scanner to the beginning of the second.
-  def between first, second
-    NokoScanner.new tokens, first&.bound || @pos, second&.pos || @bound
-  end
-
-  # Make the end of the stream coincident with another stream
-  def encompass s2
-    # @length = s2.length
-    @bound = s2.bound if s2.bound > @bound
-    self
-  end
-
-  # Return a stream whose boundaries are clipped to another stream
-  def within s2_or_range
-    range = s2_or_range.is_a?(Range) ? s2_or_range : s2_or_range.range
-    if range.first < @bound && range.last > @pos
-      NokoScanner.new tokens, [@pos, range.first].max, [@bound, range.last].min
-    else
-      NokoScanner.new tokens, @pos, @pos
-    end
-  end
-
-  def move_to newpos
-    @pos = [[0, newpos].max, @bound].min
   end
 
   # Test certain conditions about the current token. According to key on h, test
@@ -726,6 +666,17 @@ class NokoScanner < Scanner
   protected
 
   attr_writer :pos, :bound
+
+  # Replicate a scanner for a new range, optionally constrained to the existing bounds
+  def clone_for pos: nil, bound: nil, constrained: false
+    pos ||= @pos # In the event that nil is passed
+    bound ||= @bound
+    if constrained
+      NokoScanner.new tokens, [pos, @pos].max, [bound, @bound].min
+    else
+      NokoScanner.new tokens, [pos, 0].max, [bound, tokens.count].min
+    end
+  end
 
   private
 

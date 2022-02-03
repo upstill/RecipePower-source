@@ -193,13 +193,28 @@ The dependencies are as follows:
                   parser.match( token, stream: nokoscan, as_stream: options.delete(:as_stream))
 
     # A little sugar: check ingredient line comments for stray ingredient specs
-    @parsed.find(:rp_ing_comment).each do |comment|
-      next if comment.result_stream.to_s.blank?
-      # Scan the comments from ingredient lines for stray ingspecs
-      if (scanned = parser.scan(comment.result_stream)&.keep_if { |sc| sc.token == :rp_ingspec }).present?
-        comment.children.concat scanned
+    if @parsed
+      @parsed.find(:rp_ing_comment).each do |comment|
+        next if comment.result_stream.to_s.blank?
+        # Scan the comments from ingredient lines for stray ingspecs
+        if (scanned = parser.scan(comment.result_stream)&.keep_if { |sc| sc.token == :rp_ingspec }).present?
+          comment.children.concat scanned
+        end
       end
-    end if @parsed
+      # Now scan failed inglines for an embedded ingspec, and replace the line if successful
+      @parsed.find(:rp_inglist).each do |inglist|
+        inglist.children.each_index do |ix|
+          line = inglist.children[ix]
+          next if line.success? || line.result_stream.to_s.blank?
+          if (scanned = parser.scan(line.result_stream)&.find { |sc| sc.token == :rp_ingspec })
+            children = [scanned]
+            comm = line.result_stream.past scanned.result_stream
+            children << Seeker.new(comm, token: :rp_comment) if comm.more?
+            inglist.children[ix] = Seeker.new line.result_stream, children: children, token: :rp_ingline # line.children.concat scanned
+          end
+        end
+      end
+    end
 
     # Take the benchmark report from the parser when all is said and done
     @match_benchmarks = parser.benchmark_sum @match_benchmarks
