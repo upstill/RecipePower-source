@@ -155,55 +155,39 @@ def html_enclosure tag: 'div', rp_elmt_class:'', value: nil
   "<#{tag} class='#{class_str}' #{valuestr}></#{tag}>" # For constructing the new node
 end
 
-# A Scanner object provides a stream of input strings, tokens, previously-parsed entities, and delimiters
-# This is an "abstract" class for defining what methods the Scanner provides
+# Define methods that all scanners must implement
 class Scanner < Object
-  attr_reader :pos
+  attr_reader :pos, :bound
 
-  # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
+  # peek: return the token (if ntokens == 1) or tokens (space-separated) in the current read position without advancing
   def peek ntokens = 1
-
   end
 
-  # first: return the string in the current "read position" after advancing to the 'next' position
-  def first
+  # first: return the token in the current read position and advance to the position
 
+  # first: return the string in the current "read position" after advancing to the 'next' position
+  def first ntokens = 1
+    if str = peek(ntokens)
+      @pos += ntokens
+      @pos = @bound if @pos > @bound
+    end
+    str
   end
 
   # Move past the current string, adjusting 'next' and returning a stream for the remainder
   def rest nchars = 1
-
   end
 
   # Move past the end, returning an exhausted stream
   def end
-
   end
 
   # The stream in its entirety
   def all
-
   end
 
   def more?
     @pos < @bound # @length
-  end
-
-=begin
-  # Skip any newlines
-  def past_newline
-    result = self
-    while result.peek == "\n"
-      result = result.rest
-    end
-    result
-  end
-=end
-
-  def chunk data
-    if (data || (ptr == (head + 1)))
-      head = ptr
-    end
   end
 
   # Provide a string representing the content of the stream from its current position, terminating at the bound
@@ -213,6 +197,32 @@ class Scanner < Object
 
   def range
     @pos...@bound
+  end
+
+  def length
+    @bound - @pos
+  end
+
+end
+
+# Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
+class StrScanner < Scanner
+  attr_reader :strings # :length
+
+  # StrScanner provides reading services for a succession of tokens. Initialized with either
+  # -- a String, which will be tokenized
+  # -- an Array of strings
+  def initialize string_or_strings, pos = 0, bound = nil
+    # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
+    @strings = string_or_strings.is_a?(String) ? StringTokens.new(string_or_strings) : string_or_strings
+    @bound = bound || @strings.length
+    @pos = (pos < @bound) ? pos : @bound
+  end
+
+  def chunk data
+    if (data || (ptr == (head + 1)))
+      head = ptr
+    end
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
@@ -240,27 +250,6 @@ class Scanner < Object
     return result + [ candidate ]
   end
 
-  # Return a scanner for the given range of tokens
-  def slice range
-
-  end
-
-end
-
-# Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
-class StrScanner < Scanner
-  attr_reader :strings, :pos, :bound # :length
-
-  # StrScanner provides reading services for a succession of tokens. Initialized with either
-  # -- a String, which will be tokenized
-  # -- an Array of strings
-  def initialize string_or_strings, pos = 0, bound = nil
-    # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
-    @strings = string_or_strings.is_a?(String) ? StringTokens.new(string_or_strings) : string_or_strings
-    @bound = bound || @strings.length
-    @pos = (pos < @bound) ? pos : @bound
-  end
-
   def to_s limit_or_range = @bound
     range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
     @strings[range].join(' ')
@@ -275,58 +264,56 @@ class StrScanner < Scanner
     end
   end
 
-  # first: return the string in the current "read position" after advancing to the 'next' position
-  def first nchars = 1
-    if @pos < @bound # @length
-      f = @strings[@pos...(@pos + nchars)]&.join(' ')
-      @pos += nchars
-      @pos = @bound if @pos > @bound # @length if @pos > @length
-      f
-    end
-  end
-
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest nchars = 1
-    newpos = @pos + nchars
-    # StrScanner.new(@strings, (newpos > @length ? @length : newpos))
-    StrScanner.new @strings, (newpos > @bound ? @bound : newpos), @bound
+    clone_for pos: [(@pos+nchars), @bound].min
   end
 
   # Return this scanner, exhausted
   def end
-    StrScanner.new @strings, @bound, @bound
+    clone_for pos: @bound
   end
 
   def all
-    StrScanner.new @strings, 0, @bound
+    clone_for pos: 0
   end
 
   # Take a slice of the scanner's range. If a Fixnum is given, return the natural range beginning at that point
   def slice fixnum_or_range
     case fixnum_or_range
     when Integer
-      StrScanner.new @strings, fixnum_or_range, @bound
+      # StrScanner.new @strings, fixnum_or_range, @bound
+      clone_for pos: fixnum_or_range
     when Range
-      StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
+      # StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
+      clone_for pos: fixnum_or_range.begin, bound: fixnum_or_range.end
     end
   end
 
   # Advance self past the end of s2
   def past s2
-    StrScanner.new @strings, s2.bound, @bound
+    # StrScanner.new @strings, s2.bound, @bound
+    clone_for pos: s2.bound
   end
 
   # return a version of self that ends where s2 begins
   def except s2
     return self if !s2 || s2.pos > @bound
-    s2 ? StrScanner.new(@strings, @pos, s2.pos) : self
+    # StrScanner.new(@strings, @pos, s2.pos)
+    clone_for bound: s2.pos
+  end
+
+  def length
+    @bound - @pos
   end
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
   def toline within = false
     @strings.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
-      return StrScanner.new(@strings, newpos, newbound)
+      # return StrScanner.new(@strings, newpos, newbound)
+      return clone_for(pos: newpos, bound: newbound)
     end
+    nil
   end
 
   # Iterate through a set of scanners organized around EOL
@@ -335,13 +322,27 @@ class StrScanner < Scanner
   # It may return nil, in which case the next iteration goes to the subsequent token
   def for_each options={}, &block
     options = options.compact # Ignore flags that are set with nil
-    @strings.for_lines(range: @pos...@bound, inline: options[:inline]) { |pos, bound| yield(StrScanner.new @strings, pos, bound) }
+    @strings.for_lines(range: @pos...@bound, inline: options[:inline]) do |pos, bound|
+      # yield(StrScanner.new @strings, pos, bound)
+      yield(clone_for pos: pos, bound: bound)
+    end
+  end
+
+  private
+
+  # Replicate a scanner for a new range, optionally constrained to the existing bounds
+  def clone_for pos: @pos, bound: @bound, constrained: false
+    if constrained
+      StrScanner.new @strings, [pos, @pos].max, [bound, @bound].min
+    else
+      StrScanner.new @strings, [pos, 0].max, [bound, @strings.count].min
+    end
   end
 
 end
 
-class NokoScanner # < Scanner
-  attr_reader :nkdoc, :pos, :bound, :tokens
+class NokoScanner < Scanner
+  attr_reader :nkdoc, :tokens
   delegate :pp, to: :nkdoc
   delegate :elmt_bounds, :token_starts, :token_index_for, :token_range_for_subtree,
            :enclose_tokens, :enclose_selection, to: :tokens
@@ -391,11 +392,6 @@ class NokoScanner # < Scanner
     str
   end
 
-  # Report the token no matter if the position is beyond the bound
-  def token_at
-    tokens[@pos]
-  end
-
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
   def toline within = false
     # Find the location of the next line (boundary between nl and non-nl).
@@ -428,15 +424,6 @@ class NokoScanner # < Scanner
     NokoScanner.new(tokens, @pos-1, @bound).toline&.pos == @pos
   end
 
-  # first: return the string in the current "read position" after advancing to the 'next' position
-  def first ntokens = 1
-    if str = peek(ntokens)
-      @pos += ntokens
-      @pos = @bound if @pos > @bound # @length if @pos > @length
-    end
-    str
-  end
-
   # Move past the current string, adjusting '@pos' and returning a stream for the remainder
   def rest ntokens = 1
     newpos = (ntokens < 0) ? @bound : (@pos + ntokens)
@@ -459,6 +446,10 @@ class NokoScanner # < Scanner
 
   def range
     @pos...@bound
+  end
+
+  def length
+    @bound - @pos
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
