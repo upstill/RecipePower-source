@@ -540,14 +540,14 @@ The dependencies are as follows:
 
   def ingspecs_in stream
     streams = []
-    while (stream = stream.past_newline).to_s.present? && (spec = parser.seek stream, :rp_parenthetical )
+    while stream.to_s.present? && (spec = parser.seek stream, :rp_parenthetical )
       streams << (stream.except spec.head_stream)
       stream = stream.past spec.result_stream
     end
     streams << stream
     results = []
     streams.each do |stream|
-      while (stream = stream.past_newline).to_s.present? &&
+      while stream.to_s.present? &&
           (spec = parser.seek(stream, :rp_ingspec)) do
         results << spec if spec.find(:rp_amt).present? || spec.find(:rp_presteps).present?
         stream = stream.except spec.stream

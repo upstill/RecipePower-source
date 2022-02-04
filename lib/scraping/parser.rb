@@ -186,7 +186,7 @@ class Parser
     puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if Rails.env.test?
     safe_stream = stream.clone
     matched = nil
-    if (as_stream || valid_to_match?(token, safe_stream.past_newline)) && (ge = grammar[token])
+    if (as_stream || valid_to_match?(token, safe_stream)) && (ge = grammar[token])
       if ge.is_a?(Hash)
         if as_stream
           if (ge[:atline] || ge[:inline]) && !safe_stream.atline?
@@ -546,14 +546,14 @@ class Parser
       end
       cache to_return, cache_key
     when Hash
-      match_hash scanner.past_newline, spec, token, context
+      match_hash scanner, spec, token, context
     when String
       StringSeeker.match scanner, string: spec, token: token
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
-      spec.match scanner.past_newline, context.merge(token: token, lexaur: lexaur, parser: self)
+      spec.match scanner, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp
       RegexpSeeker.match scanner, regexp: spec, token: token
     end

@@ -214,10 +214,10 @@ class Scanner < Object
   def slice fixnum_or_range
     case fixnum_or_range
     when Integer
-      # StrScanner.new @strings, fixnum_or_range, @bound
+      # StrScanner.new @tokens, fixnum_or_range, @bound
       clone_for pos: fixnum_or_range
     when Range
-      # StrScanner.new @strings, fixnum_or_range.begin, fixnum_or_range.end
+      # StrScanner.new @tokens, fixnum_or_range.begin, fixnum_or_range.end
       clone_for pos: fixnum_or_range.begin, bound: fixnum_or_range.end
     end
   end
@@ -265,15 +265,15 @@ end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
 class StrScanner < Scanner
-  attr_reader :strings # :length
+  attr_reader :tokens # :length
 
   # StrScanner provides reading services for a succession of tokens. Initialized with either
   # -- a String, which will be tokenized
   # -- an Array of strings
   def initialize string_or_strings, pos = 0, bound = nil
     # We include punctuation and delimiters as a separate string per https://stackoverflow.com/questions/32037300/splitting-a-string-into-words-and-punctuation-with-ruby
-    @strings = string_or_strings.is_a?(String) ? StringTokens.new(string_or_strings) : string_or_strings
-    @bound = bound || @strings.length
+    @tokens = string_or_strings.is_a?(String) ? StringTokens.new(string_or_strings) : string_or_strings
+    @bound = bound || @tokens.length
     @pos = (pos < @bound) ? pos : @bound
   end
 
@@ -310,13 +310,13 @@ class StrScanner < Scanner
 
   def to_s limit_or_range = @bound
     range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
-    @strings[range].join(' ')
+    @tokens[range].join(' ')
   end
 
   # peek: return the string (one or more words, space-separated) in the current "read position" without advancing
   def peek nchars = 1
     if @pos < @bound # @length
-      (nchars == 1) ? @strings[@pos] : @strings[@pos...(@pos + nchars)].join(' ')
+      (nchars == 1) ? @tokens[@pos] : @tokens[@pos...(@pos + nchars)].join(' ')
     else
       ''
     end
@@ -324,8 +324,8 @@ class StrScanner < Scanner
 
   # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
   def toline within = false
-    @strings.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
-      # return StrScanner.new(@strings, newpos, newbound)
+    @tokens.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
+      # return StrScanner.new(@tokens, newpos, newbound)
       return clone_for(pos: newpos, bound: newbound)
     end
     nil
@@ -337,8 +337,8 @@ class StrScanner < Scanner
   # It may return nil, in which case the next iteration goes to the subsequent token
   def for_each options={}, &block
     options = options.compact # Ignore flags that are set with nil
-    @strings.for_lines(range: @pos...@bound, inline: options[:inline]) do |pos, bound|
-      # yield(StrScanner.new @strings, pos, bound)
+    @tokens.for_lines(range: @pos...@bound, inline: options[:inline]) do |pos, bound|
+      # yield(StrScanner.new @tokens, pos, bound)
       yield(clone_for pos: pos, bound: bound)
     end
   end
@@ -350,9 +350,9 @@ class StrScanner < Scanner
     pos ||= @pos # In the event that nil is passed
     bound ||= @bound
     if constrained
-      StrScanner.new @strings, [pos, @pos].max, [bound, @bound].min
+      StrScanner.new @tokens, [pos, @pos].max, [bound, @bound].min
     else
-      StrScanner.new @strings, [pos, 0].max, [bound, @strings.count].min
+      StrScanner.new @tokens, [pos, 0].max, [bound, @tokens.count].min
     end
   end
 
@@ -464,15 +464,6 @@ class NokoScanner < Scanner
       cl.first
     end
     return result + [ candidate ]
-  end
-
-  # Skip any newlines
-  def past_newline
-    result = self
-    while result.peek == "\n"
-      result = result.rest
-    end
-    result
   end
 
   def chunk data
