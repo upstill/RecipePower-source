@@ -32,7 +32,7 @@ class Food52DotComTest < ActiveSupport::TestCase
 div.recipe__list--ingredients
 div.recipe__list--steps"
 		@sample_url = 'https://food52.com/recipes/18008-ignacio-mattos-grilled-favas'
-		@sample_title = "Ignacio Mattos’ Grilled Favas"
+		@sample_title = "Ignacio Mattosâ GrilledÂ Favas"
 
     #@grammar_mods = {
     # :gm_inglist =>

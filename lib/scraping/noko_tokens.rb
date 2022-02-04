@@ -21,7 +21,7 @@ module Bracket
       results << yield(pos, bound)
       brix += 1
     end
-      results
+    results
   end
 end
 

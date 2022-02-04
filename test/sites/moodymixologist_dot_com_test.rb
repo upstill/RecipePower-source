@@ -18,7 +18,14 @@ class MoodymixologistDotComTest < ActiveSupport::TestCase
         :gm_bundles => { :name => :wordpress },
         :rp_title => { :in_css_match => 'h2.wprm-recipe-name' }
 		}
-		@trimmers = ["div.wprm-template-chic-buttons"]
+		@trimmers = [
+        "div.wprm-template-chic-buttons",
+        "div.wprm-recipe-adjustable-servings-container",
+        "div.wprm-icon-shortcode",
+        "div.wprm-call-to-action",
+        "div.wprm-recipe-rating",
+        "div.wprm-recipe-image"
+    ]
 		@selector = "ul.wprm-recipe-ingredients\ndiv.wprm-recipe"
 		@sample_url = 'https://www.moodymixologist.com/blog/the-saturn-a-tiki-cocktail-with-gin'
 		@sample_title = 'The Saturn – Gin Tiki Cocktail'

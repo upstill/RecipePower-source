@@ -530,7 +530,7 @@ The dependencies are as follows:
       if (child_il = @parsed.children[child_ix]).token == :rp_inglist
         next_child_il = @parsed.children[child_ix+1] # ..-1].find { |subsq| subsq.token == :rp_inglist }
         intervening = @parsed.result_stream.between child_il.result_stream, next_child_il&.result_stream
-        instrs << Seeker.new(intervening, token: :rp_instructions) if intervening.to_s.present?
+        instrs << Seeker.new(intervening, token: :rp_instructions) if intervening.more?
       end
     end
     @parsed.insert *instrs
@@ -540,14 +540,14 @@ The dependencies are as follows:
 
   def ingspecs_in stream
     streams = []
-    while stream.to_s.present? && (spec = parser.seek stream, :rp_parenthetical )
+    while stream.more? && (spec = parser.seek stream, :rp_parenthetical )
       streams << (stream.except spec.head_stream)
       stream = stream.past spec.result_stream
     end
     streams << stream
     results = []
     streams.each do |stream|
-      while stream.to_s.present? &&
+      while stream.more? &&
           (spec = parser.seek(stream, :rp_ingspec)) do
         results << spec if spec.find(:rp_amt).present? || spec.find(:rp_presteps).present?
         stream = stream.except spec.stream
@@ -645,7 +645,7 @@ The dependencies are as follows:
         # Scan the material from the end of child to the beginning of succ for other ingspecs
         intervening = succ ? (child.tail_stream.except succ.head_stream) : child.tail_stream.within(range)
         next_spec = parser.seek intervening, :rp_ingspec
-        while intervening.to_s.present? && next_spec do
+        while intervening.more? && next_spec do
           noise = intervening.except(next_spec.stream)
           comm = noise.to_s.strip.present? ? Seeker.new(noise, token: :ing_comment) : nil
           newline = Seeker.new(token: :rp_ingline, children: [child, comm].compact)

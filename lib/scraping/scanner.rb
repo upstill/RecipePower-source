@@ -187,6 +187,7 @@ class Scanner < Object
     @bound - @pos
   end
 
+  # Does the stream have more content?
   def more?
     @pos < @bound
   end
@@ -261,6 +262,19 @@ class Scanner < Object
     @pos = [[0, newpos].max, @bound].min
   end
 
+  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
+  def toline within = false, pos: @pos, bound: @bound
+    @tokens.for_lines(range: pos...bound, inline: within) do |newpos, newbound|
+      return clone_for(pos: newpos, bound: newbound)
+    end
+    nil
+  end
+
+  # Is the token stream at position pos immediately following a newline?
+  def atline?
+    @pos == 0 || toline(pos:@pos-1)&.pos == @pos
+  end
+
 end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false
@@ -320,15 +334,6 @@ class StrScanner < Scanner
     else
       ''
     end
-  end
-
-  # Progress the scanner to follow the next newline character, optionally constraining the result to within a whole line
-  def toline within = false
-    @tokens.for_lines(range: @pos...@bound, inline: within) do |newpos, newbound|
-      # return StrScanner.new(@tokens, newpos, newbound)
-      return clone_for(pos: newpos, bound: newbound)
-    end
-    nil
   end
 
   # Iterate through a set of scanners organized around EOL
@@ -414,14 +419,8 @@ class NokoScanner < Scanner
     # Find the location of the next line (boundary between nl and non-nl).
     # NB: skips over multiple nls;
     # returns the input if opos is already at a boundary (the better to identify the first line in the stream)
-    def seekline within, opos, obound
-      @tokens.for_lines(range: opos...obound, inline: within) do |newpos, newbound|
-        return NokoScanner.new(@tokens, newpos, newbound)
-      end
-      nil
-    end
     # We give preference to "newline" status via CSS: at the beginning of <p> or <li> tags, or after <br>
-    s1 = seekline within, @pos, @bound
+    s1 = super # Consult the tokens for linebreaks
     s2 = on_css_match((within ? :in_css_match : :at_css_match) => 'p,li')
     s3 = on_css_match(:after_css_match => 'br')
     inorder = [s1, s2, s3].compact.sort { |sc1, sc2| sc1.pos <=> sc2.pos }
@@ -430,15 +429,9 @@ class NokoScanner < Scanner
     return result unless within
     # Need to find an end at the next line
     s4 = result.rest.on_css_match :at_css_match => 'p,li,br'
-    s5 = seekline false, result.pos + 1, @bound
+    s5 = super( false, pos: result.pos+1)
     # Constrain the result to the beginning of the next node, if any
     result.except (s4 && s5) ? (s4.pos < s5.pos ? s4 : s5) : (s4 || s5)
-  end
-
-  # Is the token stream at position pos immediately following a newline?
-  def atline?
-    return true if @pos == 0
-    NokoScanner.new(tokens, @pos-1, @bound).toline&.pos == @pos
   end
 
   # Divide the stream according to a comma-separated list and return an array of scanners, one for each partition
