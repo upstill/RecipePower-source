@@ -6,49 +6,44 @@ require './lib/html_utils.rb'
 
 class FinderServices
   attr_accessor :finder
-  
-  @@DefaultFinders =
-      if !Rails.env.test?
-        Finder.where(site_id: nil).to_a
-      else
-        [
-            {:label => 'URI', :selector => 'meta[property=\'og:url\']', :attribute_name => 'content'},
-            {:label => 'URI', :selector => 'link[rel=\'canonical\']', :attribute_name => 'href'},
-            {:label => 'URI', :selector => 'div.post a[rel=\'bookmark\']', :attribute_name => 'href'},
-            {:label => 'URI', :selector => '.title a', :attribute_name => 'href'},
-            {:label => 'URI', :selector => 'a.permalink', :attribute_name => 'href'},
-            {:label => 'Image', :selector => 'meta[itemprop=\'image\']', :attribute_name => 'content'},
-            {:label => 'Image', :selector => 'meta[property=\'og:image\']', :attribute_name => 'content'},
-            {:label => 'Image', :selector => 'img.recipe_image', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'img.mainIMG', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'div.entry-content img', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'div.post-body img', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'img[itemprop=\'image\']', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'link[itemprop=\'image\']', :attribute_name => 'href'},
-            {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
-            {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
-            {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
-            {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
-            {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
-            {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
-            {:label => 'Title', :selector => "meta[property='og:title']", :attribute_name => 'content'},
-            {:label => 'Title', :selector => "meta[property='dc:title']", :attribute_name => 'content'},
-            {:label => 'Title', :selector => 'title'},
-            {:label => 'Author', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
-            {:label => 'Author', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
-            {:label => 'Author', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
-            {:label => 'Author', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
-            {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
-            {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
-            {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},
-            {:label => 'Description', :selector => 'meta[property=\'description\']', :attribute_name => 'content'},
-            {:label => 'Description', :selector => 'meta[itemprop=\'description\']', :attribute_name => 'content'},
-            {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
-            {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
-            {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
-            {:label => 'RSS Feed', :selector => 'link[type="application/rss+xml"]', :attribute_name => 'href'}
-        ].collect { |attrs| Finder.new attrs }
-      end
+
+  @@DefaultFinders = [
+      {:label => 'URI', :selector => 'meta[property=\'og:url\']', :attribute_name => 'content'},
+      {:label => 'URI', :selector => 'link[rel=\'canonical\']', :attribute_name => 'href'},
+      {:label => 'URI', :selector => 'div.post a[rel=\'bookmark\']', :attribute_name => 'href'},
+      {:label => 'URI', :selector => '.title a', :attribute_name => 'href'},
+      {:label => 'URI', :selector => 'a.permalink', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'meta[itemprop=\'image\']', :attribute_name => 'content'},
+      {:label => 'Image', :selector => 'meta[property=\'og:image\']', :attribute_name => 'content'},
+      {:label => 'Image', :selector => 'img.recipe_image', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img.mainIMG', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'div.entry-content img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'div.post-body img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img[itemprop=\'image\']', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'link[itemprop=\'image\']', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'link[rel=\'image_src\']', :attribute_name => 'href'},
+      {:label => 'Image', :selector => 'img[itemprop=\'photo\']', :attribute_name => 'src'},
+      {:label => 'Image', :selector => '.entry img', :attribute_name => 'src'},
+      {:label => 'Image', :selector => 'img', :attribute_name => 'src'},
+      {:label => 'Title', :selector => "meta[name='title']", :attribute_name => 'content'},
+      {:label => 'Title', :selector => "meta[name='fb_title']", :attribute_name => 'content'},
+      {:label => 'Title', :selector => "meta[property='og:title']", :attribute_name => 'content'},
+      {:label => 'Title', :selector => "meta[property='dc:title']", :attribute_name => 'content'},
+      {:label => 'Title', :selector => 'title'},
+      {:label => 'Author', :selector => 'meta[name=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[itemprop=\'author\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[name=\'author.name\']', :attribute_name => 'content'},
+      {:label => 'Author', :selector => 'meta[name=\'article.author\']', :attribute_name => 'content'},
+      {:label => 'Author Link', :selector => 'link[rel=\'author\']', :attribute_name => 'href'},
+      {:label => 'Description', :selector => 'meta[name=\'description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[property=\'og:description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[property=\'description\']', :attribute_name => 'content'},
+      {:label => 'Description', :selector => 'meta[itemprop=\'description\']', :attribute_name => 'content'},
+      {:label => 'Tags', :selector => 'meta[name=\'keywords\']', :attribute_name => 'content'},
+      {:label => 'Site Name', :selector => 'meta[property=\'og:site_name\']', :attribute_name => 'content'},
+      {:label => 'Site Name', :selector => 'meta[name=\'application_name\']', :attribute_name => 'content'},
+      {:label => 'RSS Feed', :selector => 'link[type="application/rss+xml"]', :attribute_name => 'href'}
+  ].collect { |attrs| Finder.new attrs }
 
   def initialize finder=nil
     @finder = finder
