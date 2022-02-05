@@ -40,28 +40,18 @@ module PTInterface
 
   # Needs to be called as super from setup in parser test, with the following instance variables set (or not)
   def setup
-=begin
-    @site_defaults = ParseTester.load_for_page @sample_url, @domain # Get parameters if either of these have been defined
-    @grammar_mods ||= @site_defaults[:grammar_mods]
-    @selector ||= @site_defaults[:selector]
-    @trimmers ||= @site_defaults[:trimmers]
-    @sample_url ||= @site_defaults[:sample_url]
-    @sample_title ||= @site_defaults[:sample_title]
-=end
-    @parse_tester = ParseTester.new grammar_mods: (@grammar_mods || {}),
-                                    selector: @selector, # It is an error if the selector isn't set
-                                    trimmers: (@trimmers || []),
-                                    ingredients: (@ingredients || []),
-                                    units: (@units || []),
-                                    conditions: (@conditions || []),
-                                    sample_url: @sample_url,
-                                    sample_title: @sample_title
-
     # The .yml file is derived from the test file that's being run
     # We find a 'test/sites/*.rb' file in the current stack trace
     Kernel.caller.find { |file| file.match(/test\/sites\/(.*)_test\.rb:/ ) }
     # Turn the file name into a site root
-    @parse_tester.save_configs $1.gsub( '_slash_', '/').gsub('_dot_', '.')
+    root = $1.gsub '_dot_','.' # Convert file stub to site root
+
+    # Get sample url and title, selector, trimmers and grammar mods from config file
+    for_configs root, fetch_site: false do |site, data|
+      defaults = { ingredients: @ingredients || [], units: @units || [], conditions: @conditions || [] }
+      @parse_tester = ParseTester.new defaults.merge(data)
+    end
+
     @page = @sample_url
     @title = @sample_title
   end
@@ -93,16 +83,16 @@ class ParseTester < ActiveSupport::TestCase
   delegate :grammar, :patternista, to: :parser
   delegate :scan, :scan1, to: :patternista
 
-  def initialize selector: '', trimmers: [], grammar_mods: {}, ingredients: [], units: [], conditions: [], sample_url: '', sample_title: ''
+  def initialize params={}
     super if defined?(super)
-    @selector = selector
-    @trimmers = trimmers
-    @grammar_mods = grammar_mods
-    @sample_url = sample_url
-    @sample_title = sample_title
-    add_tags :Ingredient, [ingredients].flatten # To support single strings
-    add_tags :Unit, [units].flatten
-    add_tags :Condition, [conditions].flatten
+    @selector = params[:selector]
+    @trimmers = params[:trimmers]
+    @grammar_mods = params[:grammar_mods]
+    @sample_url = params[:sample_url]
+    @sample_title = params[:sample_title]
+    add_tags :Ingredient, params[:ingredients] # To support single strings
+    add_tags :Unit, params[:units]
+    add_tags :Condition, params[:conditions]
     @lexaur = Lexaur.from_tags
     # We define a useless parser to enable checks on the grammar coming out of @grammar_mods
     @parser = Parser.new 'bogus text', Lexaur.from_tags, @grammar_mods
@@ -185,34 +175,6 @@ class ParseTester < ActiveSupport::TestCase
       assert_equal value, nfound, "Expected #{value} :#{key}'s, but only found #{nfound}."
     end
     nkd
-  end
-
-=begin
-  # Given either a domain or a url, load an appropriate set of configs for the file
-  def self.load_for_page url, domain = nil
-    domain ||= PublicSuffix.parse(URI(url).host).domain if url
-    if domain.present?
-      # Get default values from the file indicated by domain
-      filename = Rails.root.join("config", "sitedata", domain + '.yml')
-      return YAML.load_file(filename) if File.exists? filename
-    end
-    return {}
-  end
-=end
-
-  def save_configs root
-    data = {
-        root: root,
-        selector: @selector,
-        trimmers: @trimmers,
-        grammar_mods: @grammar_mods,
-        sample_url: @sample_url,
-        sample_title: @sample_title
-    }.compact
-    filename = config_file_for(root)
-    File.open(filename, "w") do |file|
-      file.write data.to_yaml
-    end
   end
 
   # Augment the tags table (and the lexaur) with a collection of strings of the given type

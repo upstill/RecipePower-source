@@ -48,7 +48,9 @@ def confirm_site root, sample_url
 end
 
 # Call a block for each .yml file in the configs/sitedata directory, or a single site as specified
-def for_configs site_or_root_or_id=nil
+# Optionally (and by default) fetch the associated site(s) from the database
+# Call a block with each site and its configs
+def for_configs site_or_root_or_id=nil, fetch_site: true
   ymls =
       if site_or_root_or_id
         [ config_file_for(site_or_root_or_id) ]
@@ -67,7 +69,8 @@ def for_configs site_or_root_or_id=nil
       raise "ERROR: #{err} file '#{filename}'"
       next
     end
-    yield confirm_site(data[:root], sample_url), data
+    site = confirm_site(data[:root], sample_url) if fetch_site
+    yield site, data
   end
 end
 
