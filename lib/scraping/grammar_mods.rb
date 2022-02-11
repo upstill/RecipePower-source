@@ -20,7 +20,8 @@ module GrammarMods
         def self.selector_for tag = '', options={}
           return options[:selector] if options[:selector].present?
           if options[:css_class].present?
-            return tag + '.' + options[:css_class]
+            # We allow ','-separated classes which should be independently expressed, each with the tag
+            return options[:css_class].split(/,\s/).collect { |cl| tag + '.' + cl }.join ', '
           else
             return tag
           end

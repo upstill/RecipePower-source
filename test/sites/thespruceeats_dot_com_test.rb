@@ -17,8 +17,8 @@ class ThespruceeatsDotComTest < ActiveSupport::TestCase
 		@grammar_mods = {
 			:gm_inglist => {
 					:flavor => :unordered_list,
-					:list_class => 'structured-ingredients__list',
-					:line_class => 'structured-ingredients__list-item'
+					:list_class => 'ingredient-list, structured-ingredients__list',
+					:line_class => 'ingredient, structured-ingredients__list-item'
 			},
 			:rp_title => { :in_css_match => 'h1' },
 			:rp_instructions => { :in_css_match => 'div.structured-project__steps ol' }

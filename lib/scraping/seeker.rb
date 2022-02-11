@@ -36,6 +36,7 @@ class Seeker
     @token = token
     @children = children
     @stream.freeze
+    yield self if block_given?
 =begin
     if token && (head_stream.pos != tail_stream.pos) && Rails.env.test?
       puts "Seeker for :#{token} matched '#{to_s}'"
@@ -426,32 +427,26 @@ end
 
 # Seek a number at the head of the stream
 class NumberSeeker < Seeker
+  attr_accessor :string
+
   # A number can be a non-negative integer, a fraction, or the two in sequence
   def self.match stream, opts={}
     stream = stream.rest if stream.peek&.match /about/i
     len = case
-          when self.num3(splitsies(stream, 3))
+          when self.num3(str_before = splitsies(stream, 3))
             3
-          when self.num2(splitsies(stream, 2))
+          when self.num2(str_before = splitsies(stream, 2))
             2
-          when self.num1(splitsies(stream, 1))
+          when self.num1(str_before = splitsies(stream, 1))
             1
           end
     if len
-      result = self.new stream, bound: stream.pos+len, token: opts[:token]
-      yield @@StrAfter if block_given? && @@StrAfter.present?
-      # result.tail_stream = result.tail_stream.rest if result.tail_stream.peek&.match(',')
-    end
-=begin
-    if Rails.env.test?
-      if result
-        puts "NumberSeeker found '#{result}' at '#{stream.to_s 100}'"
-      else
-        puts "NumberSeeker failed at '#{stream.to_s 100}'"
+      if @@StrAfter.present?
+        return nil unless block_given? # If there's a tail, return a result only if there's a way to process it (i.e., in AmountSeeker)
+        yield @@StrAfter
       end
+      self.new(stream, bound: stream.pos+len, token: opts[:token]) { |seeker| seeker.string = str_before }
     end
-=end
-    result
   end
 
   # Is the string either an integer or a fraction?
@@ -470,7 +465,7 @@ class NumberSeeker < Seeker
 
   # Does the string have an integer followed by a fraction?
   def self.num2 str
-    str&.match /^(\d+)[ -]((\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*)$/
+    str&.match /^(\d+)[ -]?((\d*\/{1}\d*|[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞])$|^\d*)$/
   end
 
   # Does the string have an integer followed by a fraction?
@@ -502,8 +497,12 @@ class NumberSeeker < Seeker
   # and placing it in a holding class variable @@StrAfter
   def self.splitsies stream, count
     str = stream.peek(count)
-    if str&.match /^([\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞\s.\/-]+)(.*)$/
-      str = $1
+    # There may be spaces in the string. We're looking for a final token which goes from
+    # a "permitted" number character to a following string of non-number characters
+    # WITHOUT AN INTERVENING SPACE
+    if str&.match /^([\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞\s.\/-]*[\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞.\/-])([^\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞\s.\/-]+)$/
+      # if str&.match /^([\d¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞\s.\/-]+)(.*)$/
+      str = $1.strip
       @@StrAfter = $2
     else
       @@StrAfter = nil

@@ -191,7 +191,7 @@ class CollectibleController < ApplicationController
       @decorator.send @decorator.misc_tags_name_expanded('editable_misc_tag_tokens='), misc_tag_tokens if misc_tag_tokens
       if resource_errors_to_flash @decorator, preface: 'Couldn\'t save.'
         render :errors
-      else
+      else  
         if request.method != 'GET'  # POST or PATCH
           flash[:popup] = "#{@decorator.human_name} saved"
           @decorator.ensure_attributes [ :content ] if @presenter.update_items.include?(:content)

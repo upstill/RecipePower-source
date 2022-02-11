@@ -26,43 +26,44 @@ class SeekerTest < ActiveSupport::TestCase
     scanner = StrScanner.new "Fourscore and seven years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal 'seven', ns.to_s
+    assert_equal 'seven', ns.text
     assert_equal 2, ns.pos
     assert_equal 3, ns.bound
+
     scanner = StrScanner.new "Fourscore and 7 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '7', ns.to_s
+    assert_equal '7', ns.text
     assert_equal 2, ns.pos
     assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7 1/2 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '7 1/2', ns.to_s
+    assert_equal '7 1/2', ns.text
     assert_equal 2, ns.pos
     assert_equal 4, ns.bound
     scanner = StrScanner.new "Fourscore and 7/2 years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '7/2', ns.to_s
+    assert_equal '7/2', ns.text
     assert_equal 2, ns.pos
     assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and ⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '⅐', ns.to_s
+    assert_equal '⅐', ns.text
     assert_equal 2, ns.pos
     assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '7⅐', ns.to_s
+    assert_equal '7⅐', ns.text
     assert_equal 2, ns.pos
     assert_equal 3, ns.bound
     scanner = StrScanner.new "Fourscore and 7 ⅐ years ago "
     ns = NumberSeeker.seek scanner
     assert_not_nil ns
-    assert_equal '7 ⅐', ns.to_s
+    assert_equal '7 ⅐', ns.text
     assert_equal 2, ns.pos
     assert_equal 4, ns.bound
   end
@@ -74,7 +75,7 @@ class SeekerTest < ActiveSupport::TestCase
     while ns = NullSeeker.match(scanner)
       assert_equal pos, scanner.pos
       pos += 1
-      assert_equal ns.head_stream.to_s, scanner.to_s
+      assert_equal ns.head_stream.text, scanner.text
       results << ns
       break unless (scanner = ns.tail_stream).more?
       assert_equal (ns.pos+1), ns.bound
@@ -113,6 +114,11 @@ class SeekerTest < ActiveSupport::TestCase
 
   test 'match an amount' do
     lex = Lexaur.from_tags
+
+    scanner = StrScanner.new "1¾ teaspoons (10g) baking soda"
+    ts = AmountSeeker.seek scanner, lexaur: lex
+    assert ts
+
     scanner = StrScanner.new('fourscore and 1/2 cup ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
     assert ts
@@ -121,7 +127,7 @@ class SeekerTest < ActiveSupport::TestCase
 
     scanner = StrScanner.new('fourscore and cup ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
-    assert_equal 'cup', ts.unit.to_s
+    assert_equal 'cup', ts.unit.text
 
     scanner = StrScanner.new('fourscore and 1/2 ago')
     ts = AmountSeeker.seek scanner, lexaur: lex
@@ -281,17 +287,17 @@ class SeekerTest < ActiveSupport::TestCase
     assert_nil ParentheticalSeeker.match(scanner)
     scanner = scanner.rest
     after = ParentheticalSeeker.match(scanner) do |inside|
-      assert_equal 'a parenthetical thought', inside.to_s
+      assert_equal 'a parenthetical thought', inside.text
     end
-    assert_equal 'and the rest of it', after.tail_stream.to_s
+    assert_equal 'and the rest of it', after.tail_stream.text
 
     scanner = StrScanner.new "Here's ( a (doubly) parenthetical thought) and the rest of it "
     assert_nil ParentheticalSeeker.match(scanner)
     scanner = scanner.rest
     after = ParentheticalSeeker.match(scanner) do |inside|
-      assert_equal 'a ( doubly ) parenthetical thought', inside.to_s
+      assert_equal 'a ( doubly ) parenthetical thought', inside.text
     end
-    assert_equal 'and the rest of it', after.tail_stream.to_s
+    assert_equal 'and the rest of it', after.tail_stream.text
   end
 
 end

@@ -175,9 +175,11 @@ class Scanner < Object
   end
 
   # Provide a string representing the content of the stream from its current position, terminating at the bound
-  def to_s limit = nil
+  def to_s limit = nil, nltr: false, trunc: nil
     peek ((limit || @bound) - @pos)
   end
+
+  alias_method :text, :to_s
 
   def range
     @pos...@bound
@@ -322,7 +324,7 @@ class StrScanner < Scanner
     return result + [ candidate ]
   end
 
-  def to_s limit_or_range = @bound
+  def to_s limit_or_range = @bound, nltr: false, trunc: nil
     range = limit_or_range.is_a?(Range) ? limit_or_range : @pos...limit_or_range
     @tokens[range].join(' ')
   end
@@ -392,7 +394,7 @@ class NokoScanner < Scanner
   # Return the stream of tokens as an array of strings
   def strings
     tokens.collect { |token| token.is_a?(NokoScanner) ? token.strings : token }.flatten
-  end
+  end       
 
   def peek ntokens = 1
     if @pos < @bound # @length

@@ -275,7 +275,7 @@ The dependencies are as follows:
         end
       else
         go input: elmt, token: tokens.first
-        parsed.enclose_all parser: parser
+        parsed&.enclose_all parser: parser
       end
     end
     nkdoc.to_s
