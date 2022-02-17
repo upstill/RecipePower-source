@@ -62,10 +62,11 @@ module GrammarMods
               when :unordered_list
                 # params:
                 # list_class: css class of the 'ul' tag for an ingredient list
-                # line_class: css class of the 'li' tags for ingredient lines
                 list_selector = params[:list_selector] || selector_for('ul', css_class: params[:list_class])
-                line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
                 grammar_mods[:rp_inglist] = { :in_css_match => list_selector } # { :or => [ { :in_css_match => list_selector } ] }
+
+                # line_class: css class of the 'li' tags for ingredient lines
+                line_selector = params[:line_selector] || selector_for('li', css_class: params[:line_class])
                 grammar_mods[:rp_ingline] = { :in_css_match => line_selector }
               when :inline # Process an ingredient list that's more or less raw text, using only ',', 'and' and 'or' to delimit entries
                 grammar_mods[:rp_inglist] = {
