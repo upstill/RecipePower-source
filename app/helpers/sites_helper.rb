@@ -67,4 +67,34 @@ module SitesHelper
     format_table_tree set.flatten(1)
 
   end
+
+  # Build a section consisting of a series of elements enclosed and indented
+  def site_grammar_mod_section site_builder, attribute_name
+    site = site_builder.object
+  end
+
+  def site_grammar_mod_fields site_builder, section_name = nil
+    site = site_builder.object
+    fields =
+    site.grammar_fields.each_dependent section_name do |attribute_name, data|
+      next site_grammar_mod_section(site_builder, attribute_name) if data[:type] == :section
+      label = site_builder.label attribute_name, data[:label]
+      # Put a :select popup on the same line as the label
+      label = safe_join [
+                            label,
+                            ':  '.html_safe,
+                            site_builder.select(attribute_name, options_for_select(data[:choices], data[:default]))
+                        ] if data[:type] == :select
+      content_tag( :div,
+                   label,
+                  class: 'label-enclosure',
+                  style: "margin-top:.5em") +
+          case data[:type]
+          when :text
+            site_builder.text_field attribute_name
+          end
+    end
+    result = safe_join fields.flatten
+    result
+  end
 end
