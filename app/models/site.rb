@@ -1,6 +1,191 @@
 # encoding: UTF-8
 require './lib/uri_utils.rb'
 
+module DependentHash
+
+  # Traverse the table
+  def probe depdcs = self, recur: true, &block
+    case depdcs
+    when Symbol
+      block.call depdcs, nil
+    when Hash
+      depdcs.each do |key, value|
+        block.call key, value
+        probe value, recur: true, &block if value && recur
+      end
+    when Array
+      depdcs.each { |member| probe member, recur: recur, &block }
+    end
+  end
+
+  def declaration_for attr_name
+    self[attr_name] || probe() { |key, value| return value if key == attr_name }
+  end
+
+  # Traverse to find all attributes which depend on a given attribute.
+  # If attr_name is not given, find all attributes which depend on one of those at the top level
+  def dependents_of attr_name=nil, indirect: true
+    results = []
+    to_probe = attr_name ?
+                   [ declaration_for(attr_name) ] :
+                   values
+    to_probe.each do |valhash|
+      probe(valhash, recur: indirect) do |key, value|
+        results << key
+      end
+      return results unless indirect 
+    end
+    results.uniq
+  end
+
+end
+
+class GrammarFields < Object
+  attr_accessor :site
+  delegate :grammar_mods, to: :site
+
+  @@ATTRIBUTE_NAMES = [
+      :title_selector,  # Finds the title within a recipe
+      :gm_bundles,
+      :gm_inglist,
+      :list_class, :line_class, # For unordered lists
+      :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
+      :paragraph_selector,
+      :instructions_selector
+  ]
+
+  # Declaration of what grammar_mods entities are exposed by what choices
+  @@ATTRIBUTE_DEPENDENCIES = {
+      :gm_bundles => { :no_bundle => [ :gm_inglist, :instructions_selector ] },
+      :gm_inglist => {
+          :unordered_list => [ :list_class, :line_class ],
+          :no_inglist => [ :inglist_selector, :ingline_selector ],
+          :paragraph => [ :paragraph_selector ]
+      }
+  }
+  @@ATTRIBUTE_DEPENDENCIES.extend DependentHash
+
+  def self.attribute_names
+    @@ATTRIBUTE_NAMES
+  end
+
+  def declaration_for section_name
+    @@ATTRIBUTE_DEPENDENCIES.declaration_for section_name
+  end
+
+  def dependents_of section_name = nil
+    if section_name.nil?
+      # Nil section name refers to all attributes that don't have a dependency
+      @@ATTRIBUTE_NAMES - @@ATTRIBUTE_DEPENDENCIES.dependents_of
+    else
+      @@ATTRIBUTE_DEPENDENCIES.dependents_of section_name, indirect: false
+    end
+  end
+
+  # For each item in the grammar_mods that's under our control, call the provided block
+  # If section_name is given, collect items that are under that section
+  def each_dependent section_name = nil
+     # These are all the top-level attributes. When such a one has dependents, build a section for it
+    dependents_of(section_name).collect do |attribute_name|
+      yield attribute_name, declaration_for(attribute_name), rendering_data_for(attribute_name)
+    end
+  end
+
+  def initialize site
+    @site = site
+  end
+
+  def rendering_data_for attribute_name
+    case attribute_name.to_s
+    when /(\w*)_(selector|class)$/
+      what = $1.capitalize
+      $2.pluralize.match /(#{$2})(.*)$/
+      { label: "#{what} #{$1.capitalize}(#{$2})", :type => :text }
+    when 'gm_bundles'
+      { label: 'Style', :type => :select, choices: [ [ 'None', :no_bundle], ['Wordpress', :wordpress] ], default: gm_bundles }
+    when 'gm_inglist'
+      { label: 'Ingredient-list Style', :type => :select, choices: [ ['Embedded in paragraphs', :inline], ['ul/li list',  :unordered_list], ['Laid out in <p> paragraphs', :paragraph], ['Give selectors directly', :no_inglist ] ], default: gm_inglist }
+    end
+  end
+
+  # Virtual getters and setters
+  def method_missing name, *args
+    return unless name.to_s.match /(\w*)(=)?$/
+    namestr, assign = $1, $2
+    case namestr
+    when /(\w*)_selector$/
+      token = ('rp_'+$1).to_sym
+      if assign
+        set_grammar_mods_entry args.first, token, :in_css_match
+      else
+        get_grammar_mods_entry token, :in_css_match
+      end
+    when 'gm_bundles' # grammar mods refer to either a hard value (i.e., :gm_bundles => :wordpress)
+      # or a hash with a :flavor key ( :gm_inglist => { :flavor =>:unordered_list, :list_class => str, :line_class => str})
+      if assign
+        grammar_mods[:gm_bundles] = args.first.to_sym
+      else
+        (grammar_mods[:gm_bundles] || :no_bundle).to_s
+      end
+    when 'gm_inglist'
+      entry = grammar_mods[namestr.to_sym]
+      (entry&.is_a?(Hash) ? entry[:flavor] : entry) || :unordered_list
+    when /^(list|line)_class$/ # Specify how ingredient lists and lines will be specified
+      list_or_line = $1
+      entry = grammar_mods[:gm_inglist]
+      (entry&.is_a?(Hash) && entry[namestr.to_sym]) || ''
+    else
+      x=2
+    end
+  end
+
+  # Get the entry in the grammar modifications.
+  # We have to preserve the distinction between a nil entry (which modifies by eliminating the grammr entry)
+  # and an entry that doesn't exist (which leaves the grammar unaffected)
+  def get_grammar_mods_entry *tokens
+    def plumb hsh, *tokens
+      tokens.each do |token|
+        if hsh[token]
+          hsh = hsh[token]
+        else
+          yield if block_given? && !hsh.has_key?(token)
+          return nil
+        end
+      end
+      hsh
+    end
+    plumb(grammar_mods, *tokens) {
+      # If the grammar entry wasn't ACTUALLY nil, fall back on the standard grammar
+      return plumb(Parser.initialized_grammar, *tokens)
+    }
+  end
+
+  def set_grammar_mods_entry newval, *tokens
+    hsh = grammar_mods # Start at the top level
+    tokens[0...-1].each do |token|
+      if hsh[token]
+        hsh = hsh[token]
+      else
+        hsh = (hsh[token] = {})
+      end
+    end
+    token = tokens.last
+    case newval
+    when String # Blank string sets grammar mod to nil, which cancels the entry in the grammar
+      hsh[token] = newval.strip.if_present
+    when TrueClass, FalseClass
+      hsh[token] = newval
+    when NilClass
+      hsh.delete token
+    end
+  end
+
+  # Is this a grammar_fields "attribute"?
+  def handles? name
+    return @@ATTRIBUTE_NAMES.include?(name.to_s.sub(/=$/,'').to_sym)
+  end
+end
+
 class Site < ApplicationRecord
   include Taggable # Can be tagged using the Tagging model
   include Collectible
@@ -21,15 +206,10 @@ class Site < ApplicationRecord
   @@IPURL = @@IPSITE = nil
 
   def self.mass_assignable_attributes
-    super + [:description, :trimmers,
+    super + GrammarFields.attribute_names + [:description, :trimmers,
              :selector_string, # Defines a Finder for Content
              :trimmers_str, # Enumerates selectors for content to cut from page
              :rcplist_selector, # Defines the beginning of a recipe on the page
-             :inglist_selector, :ingline_selector, # Locate ingredients in the recipe
-             :title_selector, # Finds the title within a recipe
-             :instructions_selector,
-             :ingredient_lines_with_css
-    # :recipe_selector
     ]
   end
 
@@ -47,9 +227,14 @@ class Site < ApplicationRecord
     self.trimmers = str.split(/\n+/).map &:strip
   end
 
+  ## Define the virtual attribute :grammar_fields for providing an interface to grammar_mods
+  def grammar_fields
+    @grammar_fields ||= GrammarFields.new(self)
+  end
+
   # Manage the :in_css_match and :inline attributes for :rp_ingred_line grammar entry
   def ingredient_lines_with_css
-    get_grammar_mods_entry( nil, :rp_inglist, :inline) == true ? "1" : "0"
+    grammar_fields.get_grammar_mods_entry( nil, :rp_inglist, :inline) == true ? "1" : "0"
 
     "1"
     "0"
@@ -58,30 +243,25 @@ class Site < ApplicationRecord
   def ingredient_lines_with_css= bool
     case bool
     when "0" # Turned off:
-      set_grammar_mods_entry nil, :rp_inglist, :inline
+      grammar_fields.set_grammar_mods_entry nil, :rp_inglist, :inline
     when "1" # Turned on:
-      set_grammar_mods_entry true, :rp_inglist, :inline
+      grammar_fields.set_grammar_mods_entry true, :rp_inglist, :inline
     end
   end
 
   ## Define the virtual attribute :trimmers_str for fetching and assigning trimmers as a string
   def rcplist_selector
-    get_grammar_mods_entry :rp_recipelist, :match, :at_css_match
+    grammar_fields.get_grammar_mods_entry :rp_recipelist, :match, :at_css_match
   end
 
   def rcplist_selector= str
     # We don't care what kind of whitespace or how long a sequence separates the selectors
-    set_grammar_mods_entry str, :rp_recipelist, :match, :at_css_match
+    grammar_fields.set_grammar_mods_entry str, :rp_recipelist, :match, :at_css_match
   end
 
   def method_missing name, *args
-    if name.to_s.match /(\w*)_selector(=)?$/
-      token = ('rp_'+$1).to_sym
-      if $2 == '='
-        set_grammar_mods_entry args.first, token, :in_css_match
-      else
-        get_grammar_mods_entry token, :in_css_match
-      end
+    if grammar_fields.handles? name
+      grammar_fields.send name, *args
     else
       super if defined?(super)
     end
@@ -104,6 +284,8 @@ class Site < ApplicationRecord
 
   # For reassigning the kind of the page_ref
   accepts_nested_attributes_for :page_ref
+
+  # accepts_nested_attributes_for :grammar_fields
 
   # attr_accessible :sample, :root
 
@@ -435,46 +617,5 @@ public
   end
 
   private
-
-  # Get the entry in the grammar modifications.
-  # We have to preserve the distinction between a nil entry (which modifies by eliminating the grammr entry)
-  # and an entry that doesn't exist (which leaves the grammar unaffected)
-  def get_grammar_mods_entry *tokens
-    def plumb hsh, *tokens
-      tokens.each do |token|
-        if hsh[token]
-          hsh = hsh[token]
-        else
-          yield if block_given? && !hsh.has_key?(token)
-          return nil
-        end
-      end
-      hsh
-    end
-    plumb(grammar_mods, *tokens) {
-      # If the grammar entry wasn't ACTUALLY nil, fall back on the standard grammar
-      return plumb(Parser.initialized_grammar, *tokens)
-    }
-  end
-
-  def set_grammar_mods_entry newval, *tokens
-    hsh = grammar_mods # Start at the top level
-    tokens[0...-1].each do |token|
-      if hsh[token]
-        hsh = hsh[token]
-      else
-        hsh = (hsh[token] = {})
-      end
-    end
-    token = tokens.last
-    case newval
-    when String # Blank string sets grammar mod to nil, which cancels the entry in the grammar
-      hsh[token] = newval.strip.if_present
-    when TrueClass, FalseClass
-      hsh[token] = newval
-    when NilClass
-      hsh.delete token
-    end
-  end
 
 end

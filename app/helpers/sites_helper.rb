@@ -68,33 +68,57 @@ module SitesHelper
 
   end
 
-  # Build a section consisting of a series of elements enclosed and indented
-  def site_grammar_mod_section site_builder, attribute_name
+  # Build a section consisting of a series of elements enclosed and indented.
+  # The attribute name refers to both the section and the first item, whose value will dictate what elements
+  # are available
+  def site_grammar_mod_selector_section site_builder, attribute_name, data, parent_section: nil
     site = site_builder.object
+    # Render all dependent fields, showing or hiding them according to to the value of the field
+    which_viz = site.grammar_fields.send(attribute_name)&.to_sym
+    fields = site.grammar_fields.each_dependent(attribute_name) do |option, declaration|
+      content_tag :div,
+                  site_grammar_mod_fields(site_builder, section_name: option),
+                  class: "#{attribute_name} #{option}",
+                  style: 'display: ' + (which_viz == option ? 'block' : 'none') + ';'
+    end
+
+    content = site_grammar_mod_field(site_builder, attribute_name, data) +
+    content_tag( :div, safe_join(fields.compact), class: "col-md-12") # #{parent_section} #{attribute_name}
   end
 
-  def site_grammar_mod_fields site_builder, section_name = nil
+  def site_grammar_mod_fields site_builder, section_name: nil
     site = site_builder.object
+    selector = site.grammar_fields.send(section_name)&.to_sym if site.grammar_fields.handles? section_name
     fields =
-    site.grammar_fields.each_dependent section_name do |attribute_name, data|
-      next site_grammar_mod_section(site_builder, attribute_name) if data[:type] == :section
-      label = site_builder.label attribute_name, data[:label]
-      # Put a :select popup on the same line as the label
-      label = safe_join [
-                            label,
-                            ':  '.html_safe,
-                            site_builder.select(attribute_name, options_for_select(data[:choices], data[:default]))
-                        ] if data[:type] == :select
-      content_tag( :div,
-                   label,
-                  class: 'label-enclosure',
-                  style: "margin-top:.5em") +
-          case data[:type]
-          when :text
-            site_builder.text_field attribute_name
+        site.grammar_fields.each_dependent section_name do |option, declaration, rendering_data|
+          next unless rendering_data
+          if rendering_data[:type] == :select
+            site_grammar_mod_selector_section site_builder, option, rendering_data, parent_section: section_name
+          else
+            site_grammar_mod_field site_builder, option, rendering_data
           end
-    end
-    result = safe_join fields.flatten
+        end
+    result = safe_join fields.compact
     result
+  end
+
+  def site_grammar_mod_field site_builder, attribute_name, data
+    label = site_builder.label attribute_name, data[:label]
+    # Put a :select popup on the same line as the label
+    label = safe_join [
+                          label,
+                          ':  '.html_safe,
+                          site_builder.select(attribute_name,
+                                              options_for_select(data[:choices], data[:default]), {},
+                                              class: 'governor', data: {governs: attribute_name})
+                      ] if data[:type] == :select
+    content_tag( :div,
+                 label,
+                 class: 'label-enclosure',
+                 style: "margin-top:.5em") +
+        case data[:type]
+        when :text
+          site_builder.text_field attribute_name
+        end
   end
 end
