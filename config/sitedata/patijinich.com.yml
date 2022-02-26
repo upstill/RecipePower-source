@@ -1,0 +1,20 @@
+---
+:root: patijinich.com
+:selector: div.wprm-recipe
+:trimmers:
+- div.single-recipe__header__right__left
+- div.single-recipe__header__right__right
+:grammar_mods:
+  :rp_title:
+    :in_css_match: h1,h2,h3
+  :gm_bundles: :wordpress
+  :rp_inglist:
+    :in_css_match:
+  :rp_ingline:
+    :in_css_match:
+  :rp_paragraph:
+    :in_css_match:
+  :rp_instructions:
+    :in_css_match:
+:sample_url: https://patijinich.com/
+:sample_title: ''

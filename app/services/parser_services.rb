@@ -20,6 +20,32 @@ class ParserServices
     self.grammar_mods = grammar_mods
   end
 
+  # Simplified attempt to parse a string, with no grammar mods or entity, for use in the CLI
+  def self.go string, tags: {}, token: :rp_ingline
+    lexaur = Lexaur.from_tags
+    # Ensure the presence of all given tags
+    tags.each do |tagtype, tagnames|
+      typenum = Tag.typenum tagtype.to_s.singularize.capitalize.to_sym
+      [tagnames].flatten.each do |tagname|
+        if tag = Tag.find_by(name: tagname, tagtype: typenum)
+          puts "Tag '#{tag.name}' (#{tag.typename}##{tag.id}) already exists"
+          next
+        elsif (tags = Tag.strmatch(tagname, tagtype: typenum)).exists?
+          tagnames = strjoin tags.pluck(:name).collect { |name| "'#{name}'"}
+          puts "#{tags.count} #{Tag.typename typenum}/(#{typenum}) tags found that match #{tagname}: #{tagnames}"
+        end
+        puts "Asserting '#{tagname}' as tag of type #{Tag.typename typenum}/#{typenum}"
+        tag = Tag.assert tagname, typenum
+        lexaur.take tag.name, tag.id
+        found = nil
+        scanner = StrScanner.new tag.name
+        lexaur.chunk(scanner) { |data| found ||= data }
+        puts "Tag '#{tag.name}' is not retrievable through Lexaur" unless found&.include?(tag.id)
+      end
+    end
+    self.new(input: string, token: token, lexaur: lexaur).go report_on: true, as_stream: true
+  end
+
   # Return an array of CSS selectors to be applied to parsing content from the given site.
   # These are used to check completion when accessing a dynamic site, and all must
   # be matched before giving up.
@@ -35,24 +61,12 @@ class ParserServices
     selectors.compact
   end
 
-=begin
-Here is where all dependencies in the parser are expressed: dependent variables are cleared
-when the entities on which they depend are expressed.
-The dependencies are as follows:
-@parsed, @scanned
-  @token
-  @parser
-    @input
-      @entity
-    @grammar_mods
-      @entity
-    @lexaur
-...therefore, when any of them are set, their dependents must be nulled out (recursively)
-=end
-
   # Apply the parser to a NokoScanner
   def parser
     @parser ||= Parser.new nokoscan, @lexaur, @grammar_mods
+    puts "Activating parser with report #{@report_on ? 'on' : 'off'}"
+    @parser.report_on = @report_on # Optionally turn on reporting
+    @parser
   end
 
   def parser=p
@@ -144,27 +158,6 @@ The dependencies are as follows:
     { on: str_on, off: str_off, net: str_pct }
   end
 
-=begin
-  # Divide a line by commas and 'and', parsing the sections into instances of the token
-  def chunk_line token: :rp_ingline
-    nks = nokoscan # Save for later
-    results = nks.split(',').collect { |chunk| parse input: chunk, token: token }
-    # If the last clause contains multiple 'and' tokens, split across each one in turn
-    turns = results.last.head_stream.split('and').delete_if &(:blank?)
-    pairs = []
-    turns[0...-1].each_index do |i|
-      pairs.push [ parse(input: turns[0].encompass(turns[i]), token: token),
-                   parse(input: turns[(i+1)].encompass(turns[-1]), token: token) ]
-    end
-    if pairs.first&.all? &:'success?'
-      results.pop
-      results += pairs.first
-    end
-    self.input = nks
-    @parsed = Seeker.new nks, results.last.tail_stream, token, results
-  end
-=end
-
   # Extract information from an entity (Recipe or RecipePage) or presented input
   # Options:
   # :input -- HTML to be parsed
@@ -174,6 +167,7 @@ The dependencies are as follows:
   def go options = {}
     self.input = options[:input] if options.key?(:input)
     self.token = options[:token] if options.key?(:token)
+    @report_on = options[:report_on]
 
     # There must be EITHER input or an entity specified
     if input.nil? && entity.nil?
@@ -226,8 +220,9 @@ The dependencies are as follows:
         puts "+++++++++ Final parsing result for :#{token}:"
         report_results @parsed
       end
-      @parsed
     end
+    
+    @parsed
   end
 
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset

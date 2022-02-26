@@ -221,7 +221,8 @@ class ParseTester < ActiveSupport::TestCase
     assert_not_nil (@parser = ps.parser), "No parser from ParserServices"
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
 
-    assert ps.go(seeking: [token], as_stream: as_stream), "Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
+    parse_result = ps.go seeking: [token], as_stream: as_stream
+    assert parse_result&.success?,"Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
     assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
 
     if Rails.env.test?

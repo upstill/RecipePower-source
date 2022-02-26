@@ -396,7 +396,7 @@ class IngredientListSeeker < Seeker
     ils = []
     while stream.more?
       if stream.peek == "\n" # Only seek at line boundaries
-        if is = IngredientSpecSeeker.match(stream.rest)
+        if is = IngredientSpecSeeker.match(stream.rest, opts.slice(:report_on))
           ils << is
         end
       end
@@ -577,6 +577,7 @@ class TagsSeeker < Seeker
   end
 
   def self.match stream, opts={}
+    puts "TagsSeeker seeking tags of type '#{opts[:types]}' on '#{stream.to_s.truncate 100}'" if opts[:report_on]
     children = []
     rptype = { 'Ingredient' => :rp_ingredient_tag, 'Condition' => :rp_condition_tag }[Tag.typename opts[:types]]
     scope = opts[:types] ? Tag.of_type(Tag.typenum opts[:types]) : Tag.all
@@ -584,13 +585,24 @@ class TagsSeeker < Seeker
     opts[:lexaur].distribute(stream) do |data, stream_start, stream_end, op|
       operand = op if op != ','
       # The Lexaur provides the data at sequence end, and the post-consumption stream
+      if data.present? && opts[:report_on]
+        tagstrs = strjoin scope.
+            where(id: data).
+            pluck( :id, :name).
+            collect { |idname| "'#{idname.last}'/#{idname.first}'" }
+        puts "Lexaur found #{tagstrs}."
+      end
       if tagdata = scope.limit(1).where(id: data).pluck( :id, :name).first
-        children << TagSeeker.new(stream_start, stream_start.pos...stream_end.pos, [:id, :name].zip(tagdata).to_h, rptype)
+        ts = TagSeeker.new(stream_start, stream_start.pos...stream_end.pos, [:id, :name].zip(tagdata).to_h, rptype)
+        puts "TagSeeker identified '#{ts}'" if opts[:report_on]
+        children << ts
       end
     end
     if children.present?
       children = children.sort_by &:pos
       self.new stream, opts[:token], children, operand: operand
+    elsif opts[:report_on]
+      puts "TagsSeeker failed to find any children on '#{stream.to_s.truncate 100}'"
     end
   end
 
@@ -637,19 +649,19 @@ class AmountSeeker < Seeker
     stream = stream.rest if stream.peek&.match /about/i
     pos = stream.pos
     unit = nil
-    num = NumberSeeker.match(stream) { |remainder|
+    num = NumberSeeker.match(stream, opts.slice(:report_on)) { |remainder|
       # A unit may follow the number within the same token
-      if unit = TagSeeker.match(StrScanner.new(remainder), opts.slice(:lexaur).merge(types: 5))
+      if unit = TagSeeker.match(StrScanner.new(remainder), opts.slice(:lexaur, :report_on).merge(types: 5))
         unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
       end
     }
     if num
-      unit ||= TagSeeker.match num.tail_stream, opts.slice(:lexaur).merge(types: 5)
+      unit ||= TagSeeker.match num.tail_stream, opts.slice(:lexaur, :report_on).merge(types: 5)
       return if opts[:full_only] && !unit
     elsif stream.peek&.match(/(^\d*\/{1}\d*$|^\d*[¼½¾⅐⅑⅒⅓⅔⅕⅖⅗⅘⅙⅚⅛⅜⅝⅞]?)-?(\w*)/) &&
         (($1.present? && $2.present?) || !opts[:full_only])
       num = $1.if_present || '1'
-      unit = TagSeeker.match StrScanner.new($2), opts.slice(:lexaur).merge(types: 5)
+      unit = TagSeeker.match StrScanner.new($2), opts.slice(:lexaur, :report_on).merge(types: 5)
       return unless unit
       unit.stream, unit.pos, unit.bound = stream, stream.pos, stream.pos+1
     else
@@ -725,7 +737,7 @@ class IngredientSpecSeeker < Seeker
   def self.match stream, opts={}
     original_stream = stream.clone
     if amount = AmountSeeker.match(stream, opts)
-      puts "Found amount #{amount.num} #{amount.unit}" if Rails.env.test?
+      puts "Found amount #{amount.num} #{amount.unit}" if opts[:report_on]
       stream = amount.tail_stream
     end
     if condits = ConditionsSeeker.match(stream, opts)

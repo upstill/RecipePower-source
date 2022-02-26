@@ -35,22 +35,18 @@ module GrammarMods
           # Copy actual grammar entries
           mods_plus.keys.find_all { |key| key.to_s.match /^rp_/ }.each { |key| grammar_mods[key] = mods_plus[key] }
           # Expand :gm_bundle meta-mod(s)
-          if bundles = mods_plus.delete(:gm_bundles)
-            [bundles].flatten.each do |bundle_spec|
-              case bundle_spec[:name]
-              when :wordpress
-                grammar_mods[:rp_instructions] = {:in_css_match => "div.wprm-recipe-instruction-group"} 
-                grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}
-                grammar_mods[:rp_cook_time] = {:in_css_match => 'div.wprm-recipe-cook-time-container'}
-                grammar_mods[:rp_total_time] = {:in_css_match => 'div.wprm-recipe-total-time-container'}
-                grammar_mods[:rp_yields] = {:in_css_match => 'div.wprm-recipe-servings-container'}
-                mods_plus[:gm_inglist] = {
-                    :flavor => :unordered_list,
-                    :list_class => "wprm-recipe-ingredients",
-                    :line_class => "wprm-recipe-ingredient"
-                }
-              end
-            end
+          case mods_plus.delete(:gm_bundles)
+          when :wordpress
+            grammar_mods[:rp_instructions] = {:in_css_match => "div.wprm-recipe-instruction-group"}
+            grammar_mods[:rp_prep_time] = {:in_css_match => 'div.wprm-recipe-prep-time-container'}
+            grammar_mods[:rp_cook_time] = {:in_css_match => 'div.wprm-recipe-cook-time-container'}
+            grammar_mods[:rp_total_time] = {:in_css_match => 'div.wprm-recipe-total-time-container'}
+            grammar_mods[:rp_yields] = {:in_css_match => 'div.wprm-recipe-servings-container'}
+            mods_plus[:gm_inglist] = {
+                :flavor => :unordered_list,
+                :list_class => "wprm-recipe-ingredients",
+                :line_class => "wprm-recipe-ingredient"
+            }
           end
           # Apply meta-mods
           mods_plus.keys.find_all { |key| key.to_s.match /^gm_/ }.each do |key|

@@ -142,7 +142,7 @@ class Parser
     if gramerrs.present?
       raise 'Provided grammar has errors: ', *gramerrs
     end
-    if Rails.env.test?
+    if report_on
       puts ">>>>>>>>>>> Freezing grammar:"
       @grammar.keys.each { |token| puts ":#{token} =>", indent_lines(@grammar[token]) }
     end
@@ -183,7 +183,7 @@ class Parser
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
   def match token, stream: @stream, as_stream: false, singular: false
-    puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if Rails.env.test?
+    puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if report_on
     safe_stream = stream.clone
     matched = nil
     if (as_stream || valid_to_match?(token, safe_stream)) && (ge = grammar[token])
@@ -330,6 +330,15 @@ class Parser
       atomic_tokens[key] = true if (grammar[key].is_a?(Hash) && (grammar[key][:tag] || grammar[key][:tags])) || [ :rp_title, :rp_ing_comment ].include?(key)
     end if grammar
     atomic_tokens
+  end
+
+  # Maintain instance variable controlling parse logging outside of testing
+  def report_on
+    @report_on || Rails.env.test?
+  end
+
+  def report_on=bool
+    @report_on = bool
   end
 
   private
@@ -490,7 +499,7 @@ class Parser
         end
         children.keep_if &:success?
       else
-        while scanner.more? do # TagSeeker.match(scanner, opts.slice( :lexaur, :types))
+        while scanner.more? do
           child = match_specification scanner, spec
           break if !child.success?
           children << child
@@ -535,12 +544,12 @@ class Parser
       # If there's a parent node tagged with the appropriate grammar entry, we just use that
       hash = @grammar[spec]
       to_return = nil
-      if Rails.env.test?
+      if report_on
         @break_level ||= 3
         str = scanner.to_s trunc: 100, nltr: true
         report_enter "Seeking :#{spec} on '#{str}'"
         to_return = match_specification scanner, hash, spec, context
-        report_exit (to_return.success? ? "Found '#{to_return.to_s trunc: 200}' for :#{to_return.token}" : "Failed to find :#{spec} on '#{str}'") if Rails.env.test?
+        report_exit (to_return.success? ? "Found '#{to_return.to_s trunc: 200}' for :#{to_return.token}" : "Failed to find :#{spec} on '#{str}'") if report_on
       else
         to_return = match_specification scanner, hash, spec, context
       end
@@ -548,14 +557,14 @@ class Parser
     when Hash
       match_hash scanner, spec, token, context
     when String
-      StringSeeker.match scanner, string: spec, token: token
+      StringSeeker.match scanner, string: spec, token: token, report_on: @report_on
     when Array
       # The context is distributed to each member of the list
       match_list scanner, spec, token, context
     when Class # The match will be performed by a subclass of Seeker
       spec.match scanner, context.merge(token: token, lexaur: lexaur, parser: self)
     when Regexp
-      RegexpSeeker.match scanner, regexp: spec, token: token
+      RegexpSeeker.match scanner, regexp: spec, token: token, report_on: @report_on
     end
     # Return an empty seeker if no match was found. (Some Seekers may return nil)
     found || Seeker.failed(scanner, context.merge(token: token)) # Leave an empty result for optional if not found
@@ -694,7 +703,7 @@ class Parser
       # TagsSeeker parses a list of the form "tag1, tag2 and tag3" into a set of tags
       klass = spec[:tag] ? TagSeeker : TagsSeeker
       # Important: the :repeating option will have been applied at a higher level
-      return klass.match(scanner, lexaur: lexaur, token: token, types: to_match) ||
+      return klass.match(scanner, lexaur: lexaur, token: token, types: to_match, report_on: @report_on) ||
           Seeker.failed(scanner, spec.merge(token: token))
     elsif to_match = spec[:regexp]
       to_match = Regexp.new to_match
