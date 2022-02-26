@@ -277,6 +277,15 @@ class Scanner < Object
     @pos == 0 || toline(pos:@pos-1)&.pos == @pos
   end
 
+  # Methods defined by NokoScanner
+  def enclosing_classes
+    []
+  end
+
+  def method_missing name, *args
+    x=2
+  end
+
 end
 
 # Scan an input (space-separated) stream. When the stream is exhausted, #more? returns false

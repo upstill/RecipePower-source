@@ -10,23 +10,35 @@ class PatijinichDotComTest < ActiveSupport::TestCase
 
   # Set up the parser, trimmers, selectors for the woks_of_life site
   def setup
+    @grammar_mods = {
+        :rp_title => {
+            :in_css_match => "h1,h2,h3"
+        },
+        :gm_bundles => :wordpress,
+    }
+
+    @trimmers = ["div.single-recipe__header__right__left", "div.single-recipe__header__right__right"]
+    @selector = "div.wprm-recipe"
+
     @ingredients = %w{ olive\ oil white\ onion raw\ pine\ nuts garlic\ clove ripe\ tomatoes
     ancho\ chiles freshly\ squeezed\ orange\ juice vegetable\ broth chicken\ broth kosher\ salt sea\ salt
     brown\ sugar white\ button\ mushrooms baby\ bella\ mushrooms unsalted\ butter asparagus fresh\ thyme
     orange\ zest black\ pepper corn\ tortillas goat\ cheese chives pine\ nuts } # All ingredients found on the page
     @units =  %w{ tablespoon tablespoons teaspoon teaspoons ounces cup cups pound } # All units
     @conditions = %w{ chopped packed grated  } # All conditions
+    @sample_url = 'https://patijinich.com/asparagus-mushroom-and-goat-cheese-enchiladas-with-pine-nut-mole/'
+    @sample_title = 'Asparagus Mushroom & Goat Cheese Enchiladas with Pine Nut Mole Sauce'
+
+    @ingredients = %w{  sweet\ potatoes lard vegetable\ shortening kosher\ salt coarse\ sea\ salt
+      baking\ powder brown\ sugar corn\ masa\ flour masa\ harina chicken\ broth vegetable\ broth
+      dried\ corn\ husks refried\ beans Mexican\ crema queso\ fresco
+    }
+    @units = %w{ pounds cup teaspoon tablespoon cups }
+    @conditions = %w{ }
     # Grammar mods, css_selector and trimmers that apply to recipes
-		@grammar_mods = {
-			:rp_title => {
-				:in_css_match => "h1,h2,h3"
-			},
-			:gm_bundles => :wordpress,
-		}
-		@trimmers = ["div.single-recipe__header__right__left", "div.single-recipe__header__right__right"]
-		@selector = "div.wprm-recipe"
-		@sample_url = 'https://patijinich.com/asparagus-mushroom-and-goat-cheese-enchiladas-with-pine-nut-mole/'
-		@sample_title = 'Asparagus Mushroom & Goat Cheese Enchiladas with Pine Nut Mole Sauce'
+
+    @sample_url = 'https://patijinich.com/sweet-potato-and-black-bean-tamales/'
+    @sample_title = 'Sweet Potato and Black Bean Tamales'
 
     super
   end
@@ -40,12 +52,11 @@ class PatijinichDotComTest < ActiveSupport::TestCase
 =end
   end
 
-  test 'ingredient list' do
-    html = 'grated'
-    pt_apply :rp_presteps, html: html, :conditions => 'grated'
+  test 'ingredient line' do
+    pt_apply :rp_presteps, string: 'grated', :conditions => 'grated'
 
-    html = '1 tablespoon grated orange zest'
-    pt_apply :rp_ingline, html: html, :ingredients => 'orange zest', :units => 'tablespoon', :conditions => 'grated'
+    string = '1 tablespoon grated orange zest'
+    pt_apply :rp_ingline, string: string, :ingredients => 'orange zest', :units => 'tablespoon', :conditions => 'grated'
     # html = '<li class="ingredient-group"><strong>Crust</strong><ul class="ingredients"><li class="ingredient" itemprop="ingredients">1 1/2 cups all purpose flour</li><li class="ingredient" itemprop="ingredients">3 tablespoons sugar</li><li class="ingredient" itemprop="ingredients">1/4 teaspoon salt</li><li class="ingredient" itemprop="ingredients">1/2 cup (1 stick) chilled unsalted butter, cut into 1/2-inch cubes</li><li class="ingredient" itemprop="ingredients">2 tablespoons chilled whipping cream</li><li class="ingredient" itemprop="ingredients">1 large egg yolk</li></ul></li>'
     # pt_apply :rp_inglist, html: html, ingredients: @ingredients, units: @units, conditions: @conditions
   end

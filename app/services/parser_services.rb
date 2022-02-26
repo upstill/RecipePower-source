@@ -7,9 +7,9 @@ class ParserServices
               :grammar_mods, # Modifications to be used on the parser beforehand
               :input,
               :match_benchmarks, # Retains the benchmarks for the last parse
-              :nokoscan # The scanner associated with the current input
+              :scanner # The scanner associated with the current input
 
-  delegate :nkdoc, to: :nokoscan
+  delegate :nkdoc, to: :scanner # ...assuming it's a NokoScanner
   delegate :'success?', :find, :hard_fail?, :find_value, :value_for, :xbounds, to: :parsed
 
   def initialize entity: nil, token: nil, input: nil, lexaur: nil, grammar_mods: nil
@@ -43,7 +43,7 @@ class ParserServices
         puts "Tag '#{tag.name}' is not retrievable through Lexaur" unless found&.include?(tag.id)
       end
     end
-    self.new(input: string, token: token, lexaur: lexaur).go report_on: true, as_stream: true
+    self.new(input: string, token: token, lexaur: lexaur).go report_on: true
   end
 
   # Return an array of CSS selectors to be applied to parsing content from the given site.
@@ -63,7 +63,7 @@ class ParserServices
 
   # Apply the parser to a NokoScanner
   def parser
-    @parser ||= Parser.new nokoscan, @lexaur, @grammar_mods
+    @parser ||= Parser.new scanner, @lexaur, @grammar_mods
     puts "Activating parser with report #{@report_on ? 'on' : 'off'}"
     @parser.report_on = @report_on # Optionally turn on reporting
     @parser
@@ -88,9 +88,9 @@ class ParserServices
     @input || @entity.content
   end
   
-  # Setting @input invalidates @nokoscan
+  # Setting @input invalidates @scanner
   def input=ct
-    @nokoscan = nil if ct.nil? || ct != @input
+    @scanner = nil if ct.nil? || ct != @input
     @input = ct
   end
 
@@ -122,10 +122,10 @@ class ParserServices
 
   # The NokoScanner is derived from the designated input or, if no input, the entity's content
   # per NokoScanner initialization, @input may be any of a string, scanner, tokens or Nokogiri document
-  def nokoscan
-    @nokoscan ||=
+  def scanner
+    @scanner ||=
         case @input
-        when NokoScanner
+        when NokoScanner, StrScanner
           @input
         when nil # Fall back on the entity's input
           NokoScanner.new @entity&.content
@@ -162,7 +162,6 @@ class ParserServices
   # Options:
   # :input -- HTML to be parsed
   # :token -- token denoting what we're seeking (:rp_recipe, :rp_recipe_list, or any other token in the grammar)
-  # :as_stream -- flag to parser#match to parse the input as though CSS selectors and line constraints have already been matched
   # :annotate -- Once the input is parsed, annotate the results with HTML entities
   def go options = {}
     self.input = options[:input] if options.key?(:input)
@@ -183,8 +182,8 @@ class ParserServices
 
     # Recipe parsing includes a Patternista scan of the document and integration of the results
     @parsed = (token == :rp_recipe) ?
-                  parse_recipe( options.slice(:as_stream, :annotate)) :
-                  parser.match( token, stream: nokoscan, as_stream: options.delete(:as_stream))
+                  parse_recipe( annotate: options[:annotate] ) :
+                  parser.match( token, stream: scanner)
 
     # A little sugar: check ingredient line comments for stray ingredient specs
     if @parsed
@@ -228,7 +227,7 @@ class ParserServices
   def annotate_selection token, anchor_path, anchor_offset, focus_path, focus_offset
     # Do QA on the parameters
     if anchor_path.present? && focus_path.present? && anchor_offset.to_i && focus_offset.to_i
-      newnode = nokoscan.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: parser.tag_for_token(token)
+      newnode = scanner.tokens.enclose_selection anchor_path, anchor_offset.to_i, focus_path, focus_offset.to_i, rp_elmt_class: token, tag: parser.tag_for_token(token)
       csspath = newnode.css_path
       xpath = Nokogiri::CSS.xpath_for(csspath[4..-1]).first.sub(/^\/*/, '') # Elide the '? > ' at the beginning of the css path and the '/' at beginning of the xpath
       # Test the revised document: it should not change when converted to html and back into Nokogiri
@@ -249,7 +248,7 @@ class ParserServices
   def parse_on_path path
     elmt = extract_via_path path
     #@nkdoc = elmt.ancestors.last
-    # nokoscan = NokoScanner.new elmt
+    # scanner = NokoScanner.new elmt
     if (tokens = nknode_rp_classes(elmt)).present?
       # For direct Tag terminals, short-circuit the parsing process with a tag lookup
       if tagtype = tokens.map { |token| Parser.tagtype(token) }.compact.first # This token calls for a tag
@@ -341,18 +340,17 @@ class ParserServices
 
   # Special handling for recipes: try a straight parse, then a scan to get other attributes.
   # Merge the results into a single Seeker with appropriate children
-  def parse_recipe scanner=nokoscan, options={}
-    scanner, options = nokoscan, scanner if scanner.is_a?(Hash)
+  def parse_recipe annotate: nil
 
     # First, use the grammar directly
-    @parsed = parser.match :rp_recipe, stream: scanner, as_stream: options.delete(:as_stream)
+    @parsed = parser.match :rp_recipe, stream: scanner
 
     # Natural parsing of the recipe failed, so extract a title and subsequent material,
     # up to the next title, if any
     if !@parsed
       rlist = go options.merge(token: :rp_recipelist) # Parse the same content for a recipe list
-      return @parsed = Seeker.failed(nokoscan, token: :rp_recipe) unless (rlist&.success? && rp = rlist.find(:rp_recipe).first)
-      @parsed = parser.match(:rp_recipe, stream: rp.result_stream, as_stream: options.delete(:as_stream))&.if_succeeded || rp
+      return @parsed = Seeker.failed(scanner, token: :rp_recipe) unless (rlist&.success? && rp = rlist.find(:rp_recipe).first)
+      @parsed = parser.match(:rp_recipe, stream: rp.result_stream)&.if_succeeded || rp
     end
     if Rails.env.test?
       # Report the parsing results
@@ -397,7 +395,7 @@ class ParserServices
     # NB we only scan the first recipe found.
     recipe_seeker = @parsed.find(:rp_recipe).first
     scanned_seekers, pred = [], nil
-    parsed_seekers = (recipe_seeker.find(:rp_title) + recipe_seeker.find(:rp_inglist)).sort_by &:pos
+    parsed_seekers = (recipe_seeker.find(:rp_title) + recipe_seeker.find(:rp_inglist) + recipe_seeker.find(:rp_instructions)).sort_by &:pos
     parsed_seekers.each do |parsed_seeker|
       scanned_seekers += parser.scan(@parsed.result_stream.between pred&.result_stream, parsed_seeker.result_stream)
       # scanned_seekers << parsed_seeker
@@ -632,7 +630,7 @@ class ParserServices
     while (max = bc.max) && (max.count > 2) do
       puts "#{max.count} at '#{max.object.to_s.truncate 200}'"
       # Declare a result for the found collection, including all text elements under it
-      range = nokoscan.token_range_for_subtree max.object
+      range = scanner.token_range_for_subtree max.object
       children = ingspecs.select { |line| range.include?(line.pos) && range.include?(line.bound) }
       inglines = []
       children.each_index { |ix|
@@ -651,18 +649,17 @@ class ParserServices
             intervening.first
           end
           next_spec = parser.seek intervening, :rp_ingspec
-          # next_spec = parser.match :rp_ingspec, stream: intervening, as_stream: true, singular: true
         end
-        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), as_stream: true, singular: true) || child
+        extracted = parser.match(:rp_ingline, stream: child.head_stream.except(succ&.head_stream), singular: true) || child
         ps = if comment = extracted.find(:rp_ing_comment).first
                parser.scan comment.head_stream.except(succ&.head_stream)
              end
         inglines << extracted
-        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), as_stream: true, singular: true) do
+        while extracted = parser.match(:rp_ingline, stream: extracted.tail_stream.except(succ&.head_stream), singular: true) do
           inglines << extracted
         end
       }
-      inglists << Seeker.new(nokoscan, children: inglines, range: range, token: :rp_inglist)
+      inglists << Seeker.new(scanner, children: inglines, range: range, token: :rp_inglist)
       # Remove this tree from consideration for higher-level inglists
       max.object.ancestors.each { |anc| bc[anc] -= 1 }
       bc.delete max.object

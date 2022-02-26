@@ -164,9 +164,13 @@ class Parser
   end
 
   def stream=noko_scanner_or_nkdoc_or_nktokens
-    @stream = noko_scanner_or_nkdoc_or_nktokens.is_a?(NokoScanner) ?
-                      noko_scanner_or_nkdoc_or_nktokens :
-                      NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
+    @stream =
+        case noko_scanner_or_nkdoc_or_nktokens
+        when NokoScanner, StrScanner
+          noko_scanner_or_nkdoc_or_nktokens
+        else
+          NokoScanner.new(noko_scanner_or_nkdoc_or_nktokens)
+        end
   end
 
   def scan stream=@stream
@@ -182,21 +186,15 @@ class Parser
   end
 
   # Match the spec (which may be a symbol referring to a grammar entry), to the current location in the stream
-  def match token, stream: @stream, as_stream: false, singular: false
+  def match token, stream: @stream, singular: false
     puts ">>>>>>>>>>> Entering Parse for :#{token} on '#{stream.to_s(trunc: 100, nltr: true)}'" if report_on
     safe_stream = stream.clone
     matched = nil
-    if (as_stream || valid_to_match?(token, safe_stream)) && (ge = grammar[token])
+    if (valid_to_match?(token, safe_stream)) && (ge = grammar[token])
       if ge.is_a?(Hash)
-        if as_stream
-          if (ge[:atline] || ge[:inline]) && !safe_stream.atline?
-            return nil # Seeker.failed safe_stream, token: token
-          end
-          ge = ge.except :at_css_match, :in_css_match, :after_css_match, :atline, :inline
-        end
         ge = ge.except :match_all if singular
+        token = ge.delete(:token) || token
       end
-      token = ge.delete(:token) || token
       if @benchmarks
         @cache_tries = @cache_hits = @cache_misses = 0
         cache_on = true
@@ -263,7 +261,7 @@ class Parser
       stream, spec = @stream, stream
     end
     while stream.more?
-      mtch = (block_given? ? yield(stream) : match(spec, stream: stream, as_stream: true))
+      mtch = (block_given? ? yield(stream) : match(spec, stream: stream))
       if mtch
         return mtch if mtch.success?
         stream = mtch.next
@@ -858,7 +856,6 @@ class ParserEvaluator
     # If stack is not nil, it is an array used to avoid circular recursion.
     def refers_to? supe, sub, stack=nil
       return unless (inclusions = @grammar_inclusions[supe])
-      puts "Can :#{supe} include :#{sub}?"
       inclusions.include?(sub) ||
           stack && (stack.include?(sub) || inclusions.find { |inner| refers_to? inner, sub, stack+[sub] })
     end

@@ -105,9 +105,8 @@ class ParseTester < ActiveSupport::TestCase
     filename = args.delete :filename # Parse a local file
     url = args.delete :url # Create the target (an database object) using the url
     html = args.delete :html # Parse an html string
+    string = args.delete :string # Parse a generic string
     remainder = args.delete(:remainder) || ''
-    as_stream = args.delete :as_stream
-    as_stream = true if as_stream.nil? # The default is that a stream is parsed without regard to CSS
     @fail = args.delete :fail # Flag: expect the parse to fail
     @expected_tokens = args.delete :expected_tokens # Specifies tokens that should be successfully found
     @expected_attributes = [args.delete(:expected_attributes)].flatten.compact # Specifies tokens that should be successfully found
@@ -122,7 +121,7 @@ class ParseTester < ActiveSupport::TestCase
 
     @last_target = target
     # Clear all instance variables that are provided by the parse
-    @nokoscan = @seeker = @page_ref = @recipe = @content = nil
+    @scanner = @seeker = @page_ref = @recipe = @content = nil
     @token = case target
              when :recipe
                :rp_recipe
@@ -133,9 +132,12 @@ class ParseTester < ActiveSupport::TestCase
              end
     case
     when filename.present?
-      apply_to_string File.read(filename), token: @token, required_tags: required_tags, as_stream: as_stream
+      # Assume that the contents of a file are HTML
+      apply_to_string html: File.read(filename), token: @token, required_tags: required_tags
     when html.present?
-      apply_to_string html, token: @token, required_tags: required_tags, remainder: remainder, as_stream: as_stream
+      apply_to_string html: html, token: @token, required_tags: required_tags, remainder: remainder
+    when string.present?
+      apply_to_string string: string, token: @token, required_tags: required_tags, remainder: remainder
     when url.present?
       do_recipe url,
                 required_tags: required_tags,
@@ -146,8 +148,10 @@ class ParseTester < ActiveSupport::TestCase
     if @seeker # Parsed html string or file directly
       # Verify the successful match on all the tokens in the @expected_tokens array
       check_content @seeker, @expected_tokens
-      @seeker.enclose_all parser: @parser
-      check_content @seeker.stream.nkdoc, @expected_tokens
+      if html
+        @seeker.enclose_all parser: @parser if html
+      end
+      check_content @seeker.stream, @expected_tokens
       @seeker.success?
     end
   end
@@ -168,7 +172,7 @@ class ParseTester < ActiveSupport::TestCase
       nkd = Nokogiri::HTML.fragment @recipe_page.content
     else
       default_counts = {token => 1} # Expect one instance of the token by default
-      nkd = @nokoscan.nkdoc
+      nkd = @scanner.nkdoc
     end
     default_counts.merge(counts).each do |key, value|
       nfound = nkd.css(".#{key}").count
@@ -210,10 +214,12 @@ class ParseTester < ActiveSupport::TestCase
     site.bkg_land # Now the site should be prepared to trim recipes
   end
 
-  def apply_to_string html, token: :rp_recipe, required_tags: {}, remainder: '', as_stream: true
+  def apply_to_string html: html, string: string, token: :rp_recipe, required_tags: {}, remainder: ''
 
-    @nokoscan = NokoScanner.new html
-    ps = ParserServices.new input: @nokoscan,
+    # One of html or string must be specified
+    @scanner = html.present? ? NokoScanner.new(html) : StrScanner.new(string)
+    strtrunc = (html.if_present || string).truncate 100
+    ps = ParserServices.new input: @scanner,
                             token: token,
                             lexaur: @lexaur,
                             grammar_mods: @grammar_mods
@@ -221,9 +227,9 @@ class ParseTester < ActiveSupport::TestCase
     assert_not_nil (@parser = ps.parser), "No parser from ParserServices"
     assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
 
-    parse_result = ps.go seeking: [token], as_stream: as_stream
-    assert parse_result&.success?,"Parsing Violation! Couldn't parse for :#{token} in '#{html.truncate 100}'" # No point proceeding if the parse fails
-    assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{html.truncate 100}'"
+    parse_result = ps.go seeking: [token]
+    assert parse_result&.success?,"Parsing Violation! Couldn't parse for :#{token} in '#{strtrunc}'" # No point proceeding if the parse fails
+    assert_not_nil (@seeker = ps.parsed), "No seeker results from parsing '#{strtrunc}'"
 
     if Rails.env.test?
       @benchmark = ps.match_benchmarks # State of benchmarks after the last run
@@ -232,27 +238,20 @@ class ParseTester < ActiveSupport::TestCase
       [:on, :off, :net].each { |key| puts report[key]}
     end
 
-=begin
-    @nokoscan = NokoScanner.new html
-    @parser = Parser.new @nokoscan, @lexaur, @grammar_mods
-    assert_not_nil @parser.grammar[token], "Can't parse for :#{token}: not found in grammar!"
-    assert_not_nil (@seeker = @parser.match token ), "No seeker results from parsing '#{html.truncate 100}'"
-=end
-
     missing = {}
     if @seeker
       if @fail # The parse is expected to fail
-        refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{html.truncate 200}'"
+        refute @seeker&.success?, "Expected to but didn't fail parsing :#{token} on '#{strtrunc}'"
         return
       else
-        assert @seeker.success?, "Failed to parse out :#{token} on '#{html.truncate 200}'"
+        assert @seeker.success?, "Failed to parse out :#{token} on '#{strtrunc}'"
         unparsed = @seeker.tail_stream.to_s.strip # Unconsumed content from the stream
-        assert_equal remainder, unparsed, "Stream '#{html.truncate 200}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
+        assert_equal remainder, unparsed, "Stream '#{strtrunc}' has data remaining: '#{unparsed.truncate(100)}' after parsing for :#{token}" # Should have used up the tokens
       end
 
       ge = @parser.grammar[token]
       assert_equal (ge[:token] if ge.is_a?(Hash)) || token, @seeker.token
-      @seeker.enclose_all parser: @parser
+      @seeker.enclose_all parser: @parser if html # Only if the parsed string was HTML
       check_required_tags(required_tags) do |tagtype, css_class, tagset|
         missing[tagtype] = tagset - find_values(css_class)
       end
@@ -370,6 +369,7 @@ class ParseTester < ActiveSupport::TestCase
     case content
     when Seeker
       [expected_tokens].flatten.each { |token| assert content.find(token).present?, "Failure! Couldn't parse out :#{token}." } if expected_tokens
+      return
     when String
       assert_not_empty content, "Recipe has no parsed content"
       nkdoc = Nokogiri::HTML.fragment content
